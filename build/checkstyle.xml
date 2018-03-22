@@ -1,0 +1,327 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+<module name="Checker">
+    <!--<property name="fileExtensions" value="java, xml, properties"/>-->
+    <property name="severity" value="warning" default="warning"/>
+
+    <module name="SuppressionFilter">
+        <property name="file" value="${checkstyle.config.path}/suppressions.xml"/>
+    </module>
+
+    <!-- Checks for whitespace                               -->
+    <!-- See http://checkstyle.sf.net/config_whitespace.html -->
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+        <property name="severity" value="error"/>
+    </module>
+
+    <module name="TreeWalker">
+        <!-- Checks for Javadoc comments.                     -->
+        <!-- See http://checkstyle.sf.net/config_javadoc.html -->
+        <!--<module name="JavadocMethod">-->
+            <!--<property name="id" value="JavadocMethodCode"/>-->
+            <!--<property name="scope" value="public"/>-->
+            <!--<property name="tokens" value="METHOD_DEF"/>-->
+            <!--<property name="allowMissingPropertyJavadoc" value="true"/>-->
+            <!--<property name="allowMissingParamTags" value="true"/>-->
+            <!--<property name="allowMissingReturnTag" value="true"/>-->
+        <!--</module>-->
+        <!--<module name="JavadocType">-->
+            <!--<property name="scope" value="public"/>-->
+        <!--</module>-->
+        <!--<module name="JavadocStyle">-->
+            <!--<property name="scope" value="public"/>-->
+            <!--<property name="checkFirstSentence" value="false"/>-->
+        <!--</module>-->
+
+        <!-- Checks for Naming Conventions.                  -->
+        <!-- See http://checkstyle.sf.net/config_naming.html -->
+        <module name="ConstantName">
+            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>
+        </module>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName"/>
+        <module name="MemberName"/>
+        <module name="MethodName"/>
+        <module name="PackageName"/>
+        <module name="ParameterName"/>
+        <module name="StaticVariableName"/>
+        <module name="TypeName"/>
+
+        <!-- Checks for whitespace. -->
+        <module name="GenericWhitespace"/>
+        <module name="MethodParamPad"/>
+        <module name="NoWhitespaceBefore"/>
+        <module name="ParenPad"/>
+        <module name="TypecastParenPad"/>
+        <module name="WhitespaceAfter"/>
+
+        <!-- Checks for imports                              -->
+        <!-- See http://checkstyle.sf.net/config_import.html -->
+        <!--<module name="AvoidStarImport"/>-->
+        <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+
+        <!-- Checks for Size Violations.                    -->
+        <!-- See http://checkstyle.sf.net/config_sizes.html -->
+        <module name="LineLength">
+            <property name="max" value="180"/>
+        </module>
+        <module name="MethodLength"/>
+        <module name="ParameterNumber"/>
+
+        <!-- Modifier Checks                                    -->
+        <!-- See http://checkstyle.sf.net/config_modifier.html -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Checks for blocks. You know, those {}'s         -->
+        <!-- See http://checkstyle.sf.net/config_blocks.html -->
+        <module name="AvoidNestedBlocks"/>
+        <module name="LeftCurly">
+            <!--<property name="option" value="nl"/>-->
+            <!--<property name="tokens" value="INTERFACE_DEF, CLASS_DEF, ANNOTATION_DEF, ENUM_DEF, CTOR_DEF, METHOD_DEF"/>-->
+        </module>
+        <module name="NeedBraces"/>
+        <module name="RightCurly"/>
+
+        <!-- Checks for common coding problems               -->
+        <!-- See http://checkstyle.sf.net/config_coding.html -->
+        <module name="EmptyStatement"/>
+        <module name="EqualsHashCode"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="IllegalInstantiation"/>
+        <module name="InnerAssignment"/>
+        <module name="OneStatementPerLine"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+
+        <!-- Checks for class design                         -->
+        <!-- See http://checkstyle.sf.net/config_design.html -->
+        <module name="FinalClass"/>
+        <module name="InterfaceIsType"/>
+        <module name="VisibilityModifier">
+            <property name="id" value="VisibilityModifierCode"/>
+        </module>
+
+        <!-- Miscellaneous other checks.                   -->
+        <!-- See http://checkstyle.sf.net/config_misc.html -->
+        <module name="ArrayTypeStyle"/>
+        <module name="UpperEll"/>
+    </module>
+</module>
+
+        <!--<?xml version="1.0"?>-->
+        <!--<!DOCTYPE module PUBLIC-->
+                <!--"-//Puppy Crawl//DTD Check Configuration 1.3//EN"-->
+                <!--"">http://www.puppycrawl.com/dtds/configuration_1_3.dtd">-->
+<!--<module name="Checker">-->
+<!--&lt;!&ndash;<property name="fileExtensions" value="java, xml, properties"/>&ndash;&gt;-->
+
+<!--<module name="SuppressionFilter">-->
+    <!--<property name="file" value="${checkstyle.config.path}/suppressions.xml"/>-->
+<!--</module>-->
+
+<!--&lt;!&ndash; Checks for whitespace                               &ndash;&gt;-->
+<!--&lt;!&ndash; See http://checkstyle.sf.net/config_whitespace.html &ndash;&gt;-->
+<!--<module name="FileTabCharacter">-->
+    <!--<property name="eachLine" value="true"/>-->
+<!--</module>-->
+
+<!--&lt;!&ndash; See http://checkstyle.sf.net/config_misc.html &ndash;&gt;-->
+<!--<module name="NewlineAtEndOfFile">-->
+    <!--<property name="fileExtensions" value="java, xml, properties"/>-->
+<!--</module>-->
+
+<!--&lt;!&ndash; See http://checkstyle.sf.net/config_misc.html &ndash;&gt;-->
+<!--<module name="UniqueProperties">-->
+    <!--<property name="fileExtensions" value="properties"/>-->
+<!--</module>-->
+
+<!--<module name="TreeWalker">-->
+    <!--&lt;!&ndash; Annotation checks &ndash;&gt;-->
+    <!--&lt;!&ndash; http://checkstyle.sourceforge.net/config_annotation.html &ndash;&gt;-->
+    <!--&lt;!&ndash;<module name="AnnotationLocation" />&ndash;&gt; &lt;!&ndash; TODO: decide &ndash;&gt;-->
+
+    <!--&lt;!&ndash; Blocks. You know, those {}'s &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_blocks.html &ndash;&gt;-->
+    <!--<module name="AvoidNestedBlocks"/>-->
+    <!--<module name="EmptyCatchBlock">-->
+        <!--<property name="commentFormat" value="\\S+"/>-->
+    <!--</module>-->
+    <!--<module name="LeftCurly">-->
+        <!--<property name="option" value="nl"/>-->
+        <!--<property name="tokens" value="INTERFACE_DEF, CLASS_DEF, ANNOTATION_DEF, ENUM_DEF, CTOR_DEF, METHOD_DEF"/>-->
+    <!--</module>-->
+    <!--<module name="NeedBraces"/>-->
+    <!--<module name="RightCurly"/>-->
+
+    <!--&lt;!&ndash; Class design &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_design.html &ndash;&gt;-->
+    <!--<module name="FinalClass"/>-->
+    <!--<module name="InnerTypeLast"/>-->
+    <!--<module name="InterfaceIsType"/>-->
+    <!--<module name="MutableException"/>-->
+    <!--<module name="OneTopLevelClass"/>-->
+    <!--<module name="VisibilityModifier">-->
+        <!--<property name="orderId" value="VisibilityModifierCode"/>-->
+    <!--</module>-->
+
+    <!--&lt;!&ndash; Common coding problems &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_coding.html &ndash;&gt;-->
+    <!--<module name="DeclarationOrder"/>-->
+    <!--<module name="EmptyStatement"/>-->
+    <!--<module name="EqualsHashCode"/>-->
+    <!--<module name="HiddenField">-->
+        <!--<property name="ignoreConstructorParameter" value="true"/>-->
+        <!--<property name="ignoreSetter" value="true"/>-->
+    <!--</module>-->
+    <!--&lt;!&ndash;<module name="IllegalCatch"/>&ndash;&gt; &lt;!&ndash; TODO: transaction management?? &ndash;&gt;-->
+    <!--<module name="IllegalThrows"/>-->
+    <!--<module name="IllegalInstantiation">-->
+        <!--<property name="classes" value="java.lang.Boolean"/>-->
+    <!--</module>-->
+    <!--<module name="IllegalType">-->
+        <!--<property name="memberModifiers" value="LITERAL_PUBLIC, LITERAL_PROTECTED, LITERAL_STATIC"/>-->
+    <!--</module>-->
+    <!--<module name="MagicNumber">-->
+        <!--<property name="orderId" value="MagicNumberCode"/>-->
+        <!--<property name="ignoreAnnotation" value="true"/>-->
+    <!--</module>-->
+    <!--<module name="SimplifyBooleanExpression"/>-->
+    <!--<module name="SimplifyBooleanReturn"/>-->
+    <!--<module name="MissingSwitchDefault"/>-->
+    <!--<module name="DefaultComesLast"/>-->
+    <!--&lt;!&ndash;<module name="ModifiedControlVariable">  TODO: decide &ndash;&gt;-->
+    <!--&lt;!&ndash;<property name="skipEnhancedForLoopVariable" value="true"/>&ndash;&gt;-->
+    <!--&lt;!&ndash;</module>&ndash;&gt;-->
+    <!--&lt;!&ndash;<module name="MultipleStringLiterals">&ndash;&gt;-->
+    <!--&lt;!&ndash;<property name="ignoreStringsRegexp" value='^(("")|(", ")|(\()|(\))|(\|))$'/>&ndash;&gt;-->
+    <!--&lt;!&ndash;</module>&ndash;&gt;-->
+    <!--<module name="MultipleVariableDeclarations"/>-->
+    <!--&lt;!&ndash;<module name="OneStatementPerLine"/>&ndash;&gt; &lt;!&ndash; doesn't allow multiple resources in try-with-resources statement &ndash;&gt;-->
+    <!--<module name="PackageDeclaration"/>-->
+    <!--<module name="ParameterAssignment"/>-->
+    <!--<module name="ReturnCount">-->
+        <!--<property name="max" value="0"/>-->
+        <!--<property name="tokens" value="CTOR_DEF"/>-->
+    <!--</module>-->
+    <!--<module name="ReturnCount">-->
+        <!--<property name="max" value="1"/>-->
+        <!--<property name="tokens" value="LAMBDA"/>-->
+    <!--</module>-->
+    <!--<module name="SimplifyBooleanExpression"/>-->
+    <!--<module name="SimplifyBooleanReturn"/>-->
+    <!--<module name="StringLiteralEquality"/>-->
+    <!--<module name="UnnecessaryParentheses"/>-->
+
+    <!--&lt;!&ndash; Imports &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_import.html &ndash;&gt;-->
+    <!--<module name="AvoidStarImport">-->
+        <!--<property name="excludes" value="java.io,java.net,java.util,javax.persistence"/>-->
+        <!--<property name="allowClassImports" value="false"/>-->
+        <!--<property name="allowStaticMemberImports" value="true"/>-->
+    <!--</module>-->
+    <!--<module name="IllegalImport"/> &lt;!&ndash; defaults to sun.* packages &ndash;&gt;-->
+    <!--<module name="RedundantImport"/>-->
+    <!--<module name="UnusedImports"/>-->
+    <!--&lt;!&ndash;<module name="ImportControl"/>&ndash;&gt;  &lt;!&ndash; TODO: check if can be used to enforce not importing of exception names &ndash;&gt;-->
+
+    <!--&lt;!&ndash; Metrics &ndash;&gt;-->
+    <!--&lt;!&ndash; http://checkstyle.sourceforge.net/config_metrics.html &ndash;&gt;-->
+    <!--<module name="CyclomaticComplexity">-->
+        <!--<property name="max" value="15"/>-->
+        <!--<property name="switchBlockAsSingleDecisionPoint" value="true"/>-->
+    <!--</module>-->
+    <!--<module name="NPathComplexity">-->
+        <!--<property name="max" value="1024"/>-->
+    <!--</module>-->
+
+    <!--&lt;!&ndash; Miscellaneous &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_misc.html &ndash;&gt;-->
+    <!--<module name="ArrayTypeStyle"/>-->
+    <!--<module name="CommentsIndentation"/>-->
+    <!--&lt;!&ndash;<module name="FinalParameters"/>&ndash;&gt; &lt;!&ndash; TODO: decide &ndash;&gt;-->
+    <!--<module name="OuterTypeFilename"/>-->
+    <!--<module name="TodoComment">-->
+        <!--<property name="severity" value="info"/>-->
+        <!--<property name="format" value="(TODO)|(FIXME)"/>-->
+    <!--</module>-->
+    <!--<module name="UpperEll"/>-->
+
+    <!--&lt;!&ndash; Modifier Checks &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_modifier.html &ndash;&gt;-->
+    <!--<module name="ModifierOrder"/>-->
+    <!--<module name="RedundantModifier"/>-->
+
+    <!--&lt;!&ndash; Naming Conventions &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_naming.html &ndash;&gt;-->
+    <!--<module name="ConstantName">-->
+        <!--<property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>-->
+    <!--</module>-->
+    <!--<module name="LocalFinalVariableName"/>-->
+    <!--<module name="LocalVariableName"/>-->
+    <!--<module name="MemberName"/>-->
+    <!--<module name="MethodName"/>-->
+    <!--<module name="PackageName"/>-->
+    <!--<module name="ParameterName"/>-->
+    <!--<module name="StaticVariableName"/>-->
+    <!--<module name="TypeName"/>-->
+
+    <!--&lt;!&ndash; Size Violations &ndash;&gt;-->
+    <!--&lt;!&ndash; See http://checkstyle.sf.net/config_sizes.html &ndash;&gt;-->
+    <!--<module name="LineLength">-->
+        <!--<property name="max" value="240"/>-->
+    <!--</module>-->
+    <!--<module name="MethodLength">-->
+        <!--<property name="tokens" value="CTOR_DEF"/>-->
+        <!--<property name="max" value="30"/>-->
+    <!--</module>-->
+    <!--<module name="MethodLength">-->
+        <!--<property name="tokens" value="METHOD_DEF"/>-->
+        <!--<property name="max" value="150"/>-->
+        <!--<property name="countEmpty" value="false"/>-->
+    <!--</module>-->
+    <!--<module name="OuterTypeNumber"/>-->
+    <!--<module name="ParameterNumber">-->
+        <!--<property name="ignoreOverriddenMethods" value="true"/>-->
+        <!--<property name="tokens" value="METHOD_DEF"/>-->
+        <!--<property name="max" value="7"/>-->
+    <!--</module>-->
+
+    <!--&lt;!&ndash; Whitespace &ndash;&gt;-->
+    <!--&lt;!&ndash; http://checkstyle.sourceforge.net/config_whitespace.html &ndash;&gt;-->
+    <!--<module name="EmptyLineSeparator">-->
+        <!--<property name="tokens" value="PACKAGE_DEF, IMPORT, CLASS_DEF, INTERFACE_DEF, ENUM_DEF, STATIC_INIT, INSTANCE_INIT, METHOD_DEF, CTOR_DEF"/>-->
+        <!--<property name="allowMultipleEmptyLines" value="false"/>-->
+        <!--<property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>-->
+    <!--</module>-->
+    <!--<module name="GenericWhitespace"/>-->
+    <!--<module name="NoLineWrap"/> &lt;!&ndash; default: PACKAGE_DEF, IMPORT. &ndash;&gt;-->
+    <!--<module name="NoWhitespaceBefore"/>-->
+    <!--<module name="SingleSpaceSeparator">-->
+        <!--<property name="validateComments" value="true"/>-->
+    <!--</module>-->
+    <!--<module name="TypecastParenPad"/>-->
+    <!--<module name="WhitespaceAfter"/>-->
+    <!--<module name="WhitespaceAround"/> &lt;!&ndash; TODO: decide &ndash;&gt;-->
+    <!--<module name="ParenPad">-->
+        <!--&lt;!&ndash; Whitespace forbiden around '(' and ')' &ndash;&gt;-->
+        <!--<property name="option" value="nospace"/>-->
+    <!--</module>-->
+<!--</module>-->
+<!--</module>-->
+
+        <!--<?xml version="1.0"?>-->
+        <!--<!DOCTYPE suppressions PUBLIC-->
+                <!--"-//Puppy Crawl//DTD Suppressions 1.1//EN"-->
+                <!--"">http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">-->
+<!--<suppressions>-->
+<!--<suppress files=".*[\\/]src[\\/]test[\\/]java[\\/].*" orderId="VisibilityModifierCode"/>-->
+<!--<suppress files=".*[\\/]src[\\/]test[\\/]java[\\/].*" orderId="MagicNumberCode"/>-->
+<!--<suppress files=".*[\\/]src[\\/]main[\\/]java[\\/].*Request" orderId="VisibilityModifierCode"/>-->
+<!--<suppress files=".*[\\/]src[\\/]main[\\/]java[\\/].*ResponseFactory" orderId="VisibilityModifierCode"/>-->
+<!--</suppressions>-->

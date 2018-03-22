@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+        "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+<suppressions>
+    <suppress files=".*[\\/]src[\\/]test[\\/]java[\\/].*" id="JavadocMethodCode" />
+    <suppress files=".*[\\/]src[\\/]test[\\/]java[\\/].*" id="VisibilityModifierCode" />
+    <suppress files=".*[\\/]src[\\/]main[\\/]java[\\/].*Controller" id="JavadocMethodCode" />
+    <suppress files=".*[\\/]src[\\/]main[\\/]java[\\/].*Request" id="VisibilityModifierCode" />
+    <suppress files=".*[\\/]src[\\/]main[\\/]java[\\/].*ResponseFactory" id="JavadocMethodCode" />
+    <suppress files=".*[\\/]src[\\/]main[\\/]java[\\/].*ResponseFactory" id="VisibilityModifierCode" />
+</suppressions>
