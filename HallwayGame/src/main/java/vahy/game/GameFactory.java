@@ -1,6 +1,11 @@
 package vahy.game;
 
-import vahy.game.cell.*;
+import vahy.game.cell.Cell;
+import vahy.game.cell.CellPosition;
+import vahy.game.cell.CellType;
+import vahy.game.cell.CommonCell;
+import vahy.game.cell.GoalCell;
+import vahy.game.cell.TrapCell;
 import vahy.game.config.IGameConfig;
 
 import java.util.ArrayList;
