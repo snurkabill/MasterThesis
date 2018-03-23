@@ -1,24 +1,29 @@
 package vahy.game.config;
 
-public class DefaultGameConfig implements IGameConfig{
+public class DefaultGameConfig implements IGameConfig {
+
+    private final double goalReward = 100;
+    private final double stepPenalty = -1;
+    private final double trapProbability = 0.1;
+    private final double noisyMoveProbability = 0.1;
 
     @Override
     public double getDefaultGoalReward() {
-        return 1;
+        return goalReward;
     }
 
     @Override
     public double getDefaultStepPenalty() {
-        return -1;
+        return stepPenalty;
     }
 
     @Override
     public double getDefaultTrapProbability() {
-        return 0.1;
+        return trapProbability;
     }
 
     @Override
     public double getDefaultMissMoveProbability() {
-        return 0.0;
+        return noisyMoveProbability;
     }
 }

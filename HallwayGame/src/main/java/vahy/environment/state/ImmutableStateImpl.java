@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class ImmutableStateImpl implements IState {
 
-    private final StaticStatePart staticStatePart;
+    private final StaticGamePart staticGamePart;
     private final double[][] rewards;
     private final int rewardsLeft;
 
@@ -20,12 +20,12 @@ public class ImmutableStateImpl implements IState {
     private final AgentHeading agentHeading;
 
     public ImmutableStateImpl(
-            StaticStatePart staticStatePart,
+            StaticGamePart staticGamePart,
             double[][] rewards,
             int agentXCoordination,
             int agentYCoordination,
             AgentHeading agentHeading) {
-        this(staticStatePart,
+        this(staticGamePart,
                 rewards,
                 agentXCoordination,
                 agentYCoordination,
@@ -41,23 +41,23 @@ public class ImmutableStateImpl implements IState {
     }
 
     private ImmutableStateImpl(
-            StaticStatePart staticStatePart,
+            StaticGamePart staticGamePart,
             double[][] rewards,
             int agentXCoordination,
             int agentYCoordination,
             AgentHeading agentHeading,
             int rewardsLeft) {
-        this.staticStatePart = staticStatePart;
+        this.staticGamePart = staticGamePart;
         this.rewards = rewards;
         this.agentXCoordination = agentXCoordination;
         this.agentYCoordination = agentYCoordination;
         this.agentHeading = agentHeading;
         this.rewardsLeft = rewardsLeft;
-        this.isAgentKilled = isAgentKilled(staticStatePart.getTrapProbabilities()[agentXCoordination][agentYCoordination], staticStatePart.getRandom());
+        this.isAgentKilled = isAgentKilled(staticGamePart.getTrapProbabilities()[agentXCoordination][agentYCoordination], staticGamePart.getRandom());
     }
 
     private boolean isAgentKilled(double trapProbability, Random random) {
-        return random.nextDouble() < trapProbability;
+        return random.nextDouble() <= trapProbability;
     }
 
     @Override
@@ -76,13 +76,13 @@ public class ImmutableStateImpl implements IState {
         }
         if(actionType == ActionType.FORWARD) {
             ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardAction();
-            double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticStatePart.getDefaultStepPenalty();
+            double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
             double[][] newRewards = ArrayUtils.cloneArray(rewards);
             if(rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0) {
                 newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
             }
             IState state = new ImmutableStateImpl(
-                    staticStatePart,
+                    staticGamePart,
                     newRewards,
                     agentCoordinates.getFirst(),
                     agentCoordinates.getSecond(),
@@ -91,25 +91,38 @@ public class ImmutableStateImpl implements IState {
             return new RewardStateReturn(reward, state);
         } else {
             IState state = new ImmutableStateImpl(
-                    staticStatePart,
+                    staticGamePart,
                     ArrayUtils.cloneArray(rewards),
                     agentXCoordination,
                     agentYCoordination,
                     agentHeading.turn(actionType),
                     rewardsLeft);
-            return new RewardStateReturn(-staticStatePart.getDefaultStepPenalty(), state);
+            return new RewardStateReturn(-staticGamePart.getDefaultStepPenalty(), state);
         }
     }
 
     @Override
     public IState deepCopy() {
         return new ImmutableStateImpl(
-                staticStatePart,
+                staticGamePart,
                 ArrayUtils.cloneArray(rewards),
                 agentXCoordination,
                 agentYCoordination,
                 agentHeading,
                 rewardsLeft);
+    }
+
+    private int generateNoisyMove(int coordinate, Random random, double noisyProbability) {
+        if(noisyProbability > 0.0) {
+            boolean addNoise = random.nextDouble() <= noisyProbability;
+            return addNoise
+                    ? random.nextBoolean()
+                        ? coordinate - 1
+                        : coordinate + 1
+                    : coordinate;
+        } else {
+            return coordinate;
+        }
     }
 
     private ImmutableTuple<Integer, Integer> makeForwardAction() {
@@ -118,32 +131,38 @@ public class ImmutableStateImpl implements IState {
         switch (agentHeading) {
             case NORTH:
                 x = agentXCoordination - 1;
-                if(x < 0) {
-                    throw new IllegalStateException("Agent's coordinate X cannot be negative");
-                }
+                y = generateNoisyMove(y, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
                 break;
             case SOUTH:
                 x = agentXCoordination + 1;
-                if(x >= staticStatePart.getWalls().length) {
-                    throw new IllegalStateException("Agent's coordinate X cannot be bigger or equal to maze size");
-                }
+                y = generateNoisyMove(y, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
                 break;
             case EAST:
+                x = generateNoisyMove(x, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
                 y = agentYCoordination - 1;
-                if(y < 0) {
-                    throw new IllegalStateException("Agent's coordinate Y cannot be negative");
-                }
                 break;
             case WEST:
+                x = generateNoisyMove(x, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
                 y = agentYCoordination + 1;
-                if(y >= staticStatePart.getWalls()[agentXCoordination].length) {
-                    throw new IllegalStateException("Agent's coordinate Y cannot be bigger or equal to maze size");
-                }
                 break;
             default:
                 throw new IllegalArgumentException("Unknown enum value: [" + agentHeading + "]");
         }
-        if(!staticStatePart.getWalls()[x][y]) {
+
+        if(x < 0) {
+            throw new IllegalStateException("Agent's coordinate X cannot be negative");
+        }
+        if(x >= staticGamePart.getWalls().length) {
+            throw new IllegalStateException("Agent's coordinate X cannot be bigger or equal to maze size");
+        }
+        if(y < 0) {
+            throw new IllegalStateException("Agent's coordinate Y cannot be negative");
+        }
+        if(y >= staticGamePart.getWalls()[agentXCoordination].length) {
+            throw new IllegalStateException("Agent's coordinate Y cannot be bigger or equal to maze size");
+        }
+
+        if(!staticGamePart.getWalls()[x][y]) {
             return new ImmutableTuple<>(x, y);
         } else {
             return new ImmutableTuple<>(agentXCoordination, agentYCoordination);
