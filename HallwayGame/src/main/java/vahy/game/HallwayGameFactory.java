@@ -6,21 +6,21 @@ import vahy.game.cell.CellType;
 import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
-import vahy.game.config.IGameConfig;
+import vahy.environment.config.IGameConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GameFactory {
+public class HallwayGameFactory {
 
     private IGameConfig gameConfig;
 
-    public GameFactory(IGameConfig gameConfig) {
+    public HallwayGameFactory(IGameConfig gameConfig) {
         this.gameConfig = gameConfig;
     }
 
-    public Game createGame(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
-        return new Game(deserialize(gameStringRepresentation));
+    public HallwayGame createGame(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
+        return new HallwayGame(deserialize(gameStringRepresentation));
     }
 
     private List<List<Cell>> deserialize(String stringRepresentation) throws NotValidGameStringRepresentationException {

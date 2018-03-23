@@ -1,4 +1,4 @@
-package vahy.game.config;
+package vahy.environment.config;
 
 public class DefaultGameConfig implements IGameConfig {
 

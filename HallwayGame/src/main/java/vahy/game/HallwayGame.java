@@ -4,11 +4,11 @@ import vahy.game.cell.Cell;
 
 import java.util.List;
 
-public class Game {
+public class HallwayGame {
 
     private final List<List<Cell>> cellField;
 
-    public Game(List<List<Cell>> cellField) {
+    public HallwayGame(List<List<Cell>> cellField) {
         this.cellField = cellField;
     }
 

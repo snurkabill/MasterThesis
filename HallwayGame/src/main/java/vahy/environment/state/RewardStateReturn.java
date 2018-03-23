@@ -2,6 +2,8 @@ package vahy.environment.state;
 
 public class RewardStateReturn {
 
+    // exists because generics are fakin slow and we are going to create lot of these.
+
     private final double reward;
     private final IState state;
 
