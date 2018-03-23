@@ -2,14 +2,14 @@ package vahy.game.cell;
 
 public class GoalCell extends CommonCell {
 
-    private final int reward;
+    private final double reward;
 
-    public GoalCell(CellPosition cellPosition, int reward) {
+    public GoalCell(CellPosition cellPosition, double reward) {
         super(CellType.GOAL, cellPosition);
         this.reward = reward;
     }
 
-    public int getReward() {
+    public double getReward() {
         return reward;
     }
 }

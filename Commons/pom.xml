@@ -4,7 +4,7 @@
          xsi:schemaLocation = "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>master-thesis-hallway-game</artifactId>
+    <artifactId>master-thesis-commons</artifactId>
     <packaging>jar</packaging>
     <version>1.0-SNAPSHOT</version>
 
@@ -14,13 +14,5 @@
         <version>1.0-SNAPSHOT</version>
         <relativePath>../Parent/pom.xml</relativePath>
     </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>vahy</groupId>
-            <artifactId>master-thesis-commons</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
 
 </project>

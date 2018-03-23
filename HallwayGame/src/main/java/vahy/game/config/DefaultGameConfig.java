@@ -3,12 +3,12 @@ package vahy.game.config;
 public class DefaultGameConfig implements IGameConfig{
 
     @Override
-    public int getDefaultGoalReward() {
+    public double getDefaultGoalReward() {
         return 1;
     }
 
     @Override
-    public int getDefaultStepPenalty() {
+    public double getDefaultStepPenalty() {
         return -1;
     }
 

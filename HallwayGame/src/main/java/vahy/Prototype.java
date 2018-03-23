@@ -24,8 +24,6 @@ public class Prototype {
         Game game = gameFactory.createGame(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
 
         System.out.println("asdf");
-
-
     }
 
 }
