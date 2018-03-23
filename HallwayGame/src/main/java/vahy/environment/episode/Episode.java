@@ -34,6 +34,6 @@ public class Episode {
     }
 
     public double getTotalEpisodicReward() {
-        return rewardHistory.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble).get();
+        return rewardHistory.stream().reduce(0.0, (x, y) -> x + y);
     }
 }
