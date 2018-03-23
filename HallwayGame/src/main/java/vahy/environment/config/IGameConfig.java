@@ -5,5 +5,5 @@ public interface IGameConfig {
     double getDefaultGoalReward();
     double getDefaultStepPenalty();
     double getDefaultTrapProbability();
-    double getDefaultMissMoveProbability();
+    double getDefaultNoisyMoveProbability();
 }

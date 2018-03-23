@@ -23,7 +23,7 @@ public class DefaultGameConfig implements IGameConfig {
     }
 
     @Override
-    public double getDefaultMissMoveProbability() {
+    public double getDefaultNoisyMoveProbability() {
         return noisyMoveProbability;
     }
 }

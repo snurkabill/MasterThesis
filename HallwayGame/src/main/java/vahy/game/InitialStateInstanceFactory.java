@@ -1,26 +1,57 @@
 package vahy.game;
 
+import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.IGameConfig;
+import vahy.environment.state.IState;
+import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.StaticGamePart;
 import vahy.game.cell.Cell;
 import vahy.game.cell.CellPosition;
 import vahy.game.cell.CellType;
 import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
+import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 
-public class HallwayGameFactory {
+public class InitialStateInstanceFactory {
 
-    private IGameConfig gameConfig;
+    private final IGameConfig gameConfig;
+    private final Random random;
 
-    public HallwayGameFactory(IGameConfig gameConfig) {
+    public InitialStateInstanceFactory(IGameConfig gameConfig, Random random) {
         this.gameConfig = gameConfig;
+        this.random = random;
     }
 
-    public HallwayGame createGame(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
-        return new HallwayGame(deserialize(gameStringRepresentation));
+    public IState createInitialState(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
+//        return new HallwayGame(deserialize(gameStringRepresentation));
+        return createImmutableInitialState(deserialize(gameStringRepresentation));
+    }
+
+    private void checkGameShape(List<List<Cell>> gameSetup) {
+        if(gameSetup.stream().collect(Collectors.groupingBy(List::size)).values().size() != 1) {
+            throw new IllegalArgumentException("Game is not in rectangle-like shape.");
+        }
+    }
+
+    private ImmutableTuple<Integer, Integer> generateInitialAgentCoordinates(List<List<Cell>> gameSetup) {
+        List<Cell> startingLocations = gameSetup.stream().flatMap(List::stream).filter(cell -> cell.getCellType() == CellType.STARTING_LOCATION).collect(Collectors.toList());
+        Cell startingLocation = startingLocations.get(random.nextInt(startingLocations.size()));
+        return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
+    }
+
+    private IState createImmutableInitialState(List<List<Cell>> gameSetup) {
+        boolean[][] walls = new boolean[gameSetup.size()][gameSetup.get(0).size()];
+        double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
+        double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
+        StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getDefaultStepPenalty(), gameConfig.getDefaultNoisyMoveProbability());
+        ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
+        return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
     }
 
     private List<List<Cell>> deserialize(String stringRepresentation) throws NotValidGameStringRepresentationException {
@@ -35,6 +66,7 @@ public class HallwayGameFactory {
             }
             list.add(innerList);
         }
+        checkGameShape(list);
         return list;
     }
 
