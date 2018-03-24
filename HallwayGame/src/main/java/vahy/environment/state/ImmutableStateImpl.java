@@ -10,6 +10,8 @@ import java.util.Random;
 
 public class ImmutableStateImpl implements IState {
 
+    public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
+
     private final StaticGamePart staticGamePart;
     private final double[][] rewards;
     private final int rewardsLeft;
@@ -58,6 +60,10 @@ public class ImmutableStateImpl implements IState {
 
     private boolean isAgentKilled(double trapProbability, Random random) {
         return random.nextDouble() <= trapProbability;
+    }
+
+    private boolean isAgentStandingOnTrap() {
+        return staticGamePart.getTrapProbabilities()[agentXCoordination][agentYCoordination] != 0.0;
     }
 
     @Override
@@ -110,6 +116,25 @@ public class ImmutableStateImpl implements IState {
                 agentYCoordination,
                 agentHeading,
                 rewardsLeft);
+    }
+
+    @Override
+    public double[] getFeatureVector() {
+        boolean[][] walls = staticGamePart.getWalls();
+        double[][] trapProbabilities = staticGamePart.getTrapProbabilities();
+        double[] vector = new double[walls.length * walls[0].length + ADDITIONAL_DIMENSION_AGENT_ON_TRAP];
+        int dimension = walls[0].length;
+        for (int i = 0; i < walls.length; i++) {
+            for (int j = 0; j < dimension; j++) {
+                vector[i * dimension + j] = walls[i][j] ?
+                        -1.0
+                        : trapProbabilities[i][j] != 0.0 ?
+                            -2.0
+                            : rewards[i][j];
+            }
+        }
+        vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
+        return vector;
     }
 
     private int generateNoisyMove(int coordinate, Random random, double noisyProbability) {

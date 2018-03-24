@@ -33,7 +33,6 @@ public class Prototype {
         Episode episode = new Episode(initialStateInstanceFactory.createInitialState(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())))),
                 new UniformRandomWalkPolicy(random));
 
-
         episode.runEpisode();
 
         System.out.println("TOTAL REWARD: [" + episode.getTotalEpisodicReward() + "]");

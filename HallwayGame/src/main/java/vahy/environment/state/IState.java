@@ -10,5 +10,7 @@ public interface IState {
 
     IState deepCopy();
 
+    double[] getFeatureVector();
+
     boolean isFinalState();
 }

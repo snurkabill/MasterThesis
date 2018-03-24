@@ -11,6 +11,7 @@ import vahy.game.cell.CellType;
 import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
+import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class InitialStateInstanceFactory {
     }
 
     private void checkGameShape(List<List<Cell>> gameSetup) {
-        if(gameSetup.stream().collect(Collectors.groupingBy(List::size)).values().size() != 1) {
+        if(!ArrayUtils.hasRectangleShape(gameSetup)) {
             throw new IllegalArgumentException("Game is not in rectangle-like shape.");
         }
     }
