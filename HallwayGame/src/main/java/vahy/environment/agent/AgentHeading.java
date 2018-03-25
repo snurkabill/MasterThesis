@@ -8,6 +8,7 @@ public enum AgentHeading {
     EAST,
     WEST;
 
+    private int headingRepresentation;
     private AgentHeading right;
     private AgentHeading left;
 
@@ -20,6 +21,11 @@ public enum AgentHeading {
         EAST.left = NORTH;
         WEST.right = NORTH;
         WEST.left = SOUTH;
+
+        NORTH.headingRepresentation = 0;
+        EAST.headingRepresentation = 1;
+        SOUTH.headingRepresentation = 2;
+        WEST.headingRepresentation = 3;
     }
 
     public AgentHeading turn(ActionType actionType) {
@@ -30,5 +36,9 @@ public enum AgentHeading {
         } else {
             throw new IllegalArgumentException("ActionType: [" + actionType + "] cannot be used for turning agent");
         }
+    }
+
+    public int getHeadingRepresentation() {
+        return headingRepresentation;
     }
 }

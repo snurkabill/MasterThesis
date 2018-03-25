@@ -6,6 +6,7 @@ import vahy.environment.state.IState;
 import vahy.environment.state.RewardStateReturn;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Episode {
@@ -22,6 +23,7 @@ public class Episode {
     public void runEpisode() {
         IState state = initialState;
         while(!state.isFinalState()) {
+            System.out.println(Arrays.toString(state.getFeatureVector()));
             ActionType action = policy.getDiscreteAction(state);
             RewardStateReturn rewardStateReturn = state.applyAction(action);
             state = rewardStateReturn.getState();

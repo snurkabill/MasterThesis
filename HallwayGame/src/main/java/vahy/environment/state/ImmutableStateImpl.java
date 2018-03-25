@@ -11,6 +11,11 @@ import java.util.Random;
 public class ImmutableStateImpl implements IState {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
+    public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 1;
+
+    public static final int AGENT_LOCATION_REPRESENTATION = -3;
+    public static final int TRAP_LOCATION_REPRESENTATION = -2;
+    public static final int WALL_LOCATION_REPRESENTATION = -1;
 
     private final StaticGamePart staticGamePart;
     private final double[][] rewards;
@@ -122,18 +127,21 @@ public class ImmutableStateImpl implements IState {
     public double[] getFeatureVector() {
         boolean[][] walls = staticGamePart.getWalls();
         double[][] trapProbabilities = staticGamePart.getTrapProbabilities();
-        double[] vector = new double[walls.length * walls[0].length + ADDITIONAL_DIMENSION_AGENT_ON_TRAP];
+        double[] vector = new double[walls.length * walls[0].length + ADDITIONAL_DIMENSION_AGENT_ON_TRAP + ADDITIONAL_DIMENSION_AGENT_HEADING];
         int dimension = walls[0].length;
         for (int i = 0; i < walls.length; i++) {
             for (int j = 0; j < dimension; j++) {
                 vector[i * dimension + j] = walls[i][j] ?
-                        -1.0
-                        : trapProbabilities[i][j] != 0.0 ?
-                            -2.0
-                            : rewards[i][j];
+                        WALL_LOCATION_REPRESENTATION
+                        : i == agentXCoordination && j == agentYCoordination ?
+                            AGENT_LOCATION_REPRESENTATION
+                            : trapProbabilities[i][j] != 0.0 ?
+                                TRAP_LOCATION_REPRESENTATION
+                                : rewards[i][j];
             }
         }
         vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
+        vector[vector.length - 2] = agentHeading.getHeadingRepresentation();
         return vector;
     }
 
