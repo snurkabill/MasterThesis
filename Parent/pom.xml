@@ -18,6 +18,7 @@
     <modules>
         <module>../Commons</module>
         <module>../HallwayGame</module>
+        <module>../StateSpaceSearch</module>
     </modules>
 
     <properties>
