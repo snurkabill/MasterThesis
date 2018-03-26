@@ -1,4 +1,4 @@
-package vahy.api.search;
+package vahy.api.search.node;
 
 public interface SearchNodeMetadata {
 }
