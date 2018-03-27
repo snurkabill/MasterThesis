@@ -12,16 +12,18 @@ public interface SearchNode<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TState extends State<TAction, ? extends Reward, TObservation>,
-        TSearchNodeMetadata extends SearchNodeMetadata> {
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
+        TState extends State<TAction, TReward, TObservation>> {
 
-    SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> getParent();
+    SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getParent();
 
-    Map<TAction, SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> getChildNodeMap();
+    Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
 
-    void updateChildMap(TAction action, SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> child);
+    void updateChildMap(TAction action, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child);
 
     StateRewardReturn<TReward, State<TAction, TReward, TObservation>> applyAction(TAction action);
+
+    TAction[] getAllPossibleActions();
 
     TSearchNodeMetadata getSearchNodeMetadata();
 

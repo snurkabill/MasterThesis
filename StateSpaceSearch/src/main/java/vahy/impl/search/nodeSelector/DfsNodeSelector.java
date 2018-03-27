@@ -11,12 +11,12 @@ public class DfsNodeSelector<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>>
         extends AbstractExhaustiveNodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
     @Override
-    public void addNode(SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> node) {
+    public void addNode(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node) {
         nodeQueue.addFirst(node);
     }
 }

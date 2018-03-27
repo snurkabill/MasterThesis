@@ -11,8 +11,8 @@ public interface NodeExpander<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>> {
 
-    void expandNode(SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> node);
+    void expandNode(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node);
 }

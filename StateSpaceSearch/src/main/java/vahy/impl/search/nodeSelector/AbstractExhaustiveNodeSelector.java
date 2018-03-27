@@ -15,25 +15,25 @@ public abstract class AbstractExhaustiveNodeSelector<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>>
         implements NodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
-    protected final LinkedList<SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> nodeQueue;
+    protected final LinkedList<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> nodeQueue;
 
     public AbstractExhaustiveNodeSelector() {
         this.nodeQueue = new LinkedList<>(); // using linked implementation here // TODO: generalize
     }
 
     @Override
-    public void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> rootNodes) {
-        for (SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> rootNode : rootNodes) {
+    public void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> rootNodes) {
+        for (SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> rootNode : rootNodes) {
             this.addNode(rootNode);
         }
     }
 
     @Override
-    public SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> selectNextNode() {
+    public SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectNextNode() {
         return nodeQueue.removeFirst();
     }
 

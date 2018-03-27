@@ -13,13 +13,13 @@ public interface NodeSelector<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>> {
 
-    void addNode(SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> node);
+    void addNode(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node);
 
-    void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> rootNodes);
+    void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> nodes);
 
-    SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> selectNextNode();
+    SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectNextNode();
 
 }

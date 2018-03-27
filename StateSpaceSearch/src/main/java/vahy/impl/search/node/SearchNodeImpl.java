@@ -15,27 +15,27 @@ public class SearchNodeImpl<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TState extends State<TAction, TReward, TObservation>,
-        TSearchNodeMetadata extends SearchNodeMetadata>
-        extends AbstractSearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> {
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
+        TState extends State<TAction, TReward, TObservation>>
+        extends AbstractSearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
-    private final Map<TAction, SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> childNodeMap;
+    private final Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
     protected SearchNodeImpl(
             TState wrappedState,
             TSearchNodeMetadata searchNodeMetadata,
-            Map<TAction, SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> childNodeMap) {
+            Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
         super(wrappedState, null, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
     }
 
     @Override
-    public Map<TAction, SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> getChildNodeMap() {
+    public Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap() {
         return childNodeMap;
     }
 
     @Override
-    public void updateChildMap(TAction action, SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> child) {
+    public void updateChildMap(TAction action, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child) {
         childNodeMap.put(action, child);
     }
 

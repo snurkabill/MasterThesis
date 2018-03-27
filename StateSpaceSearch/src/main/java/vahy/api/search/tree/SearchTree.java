@@ -11,10 +11,10 @@ public interface SearchTree<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>> {
 
-    SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> getRoot();
+    SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getRoot();
 
     void updateTree();
 

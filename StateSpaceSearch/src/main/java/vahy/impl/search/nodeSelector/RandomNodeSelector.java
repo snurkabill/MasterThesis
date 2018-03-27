@@ -6,40 +6,35 @@ import vahy.api.model.Reward;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
-import vahy.api.search.nodeSelector.NodeSelector;
+import vahy.utils.ImmutableTuple;
 
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.SplittableRandom;
 
 public class RandomNodeSelector<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>>
-        implements NodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+        extends AbstractPriorityQueueNodeSelector<TAction,TReward,TObservation,TSearchNodeMetadata,TState> {
 
     private final SplittableRandom random;
-    private final LinkedList<SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> nodeList;
 
     public RandomNodeSelector(SplittableRandom random) {
+        super();
         this.random = random;
-        this.nodeList = new LinkedList<>(); // using linked implementation here // TODO: generalize
     }
 
     @Override
-    public void addNode(SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> rootNode) {
-        nodeList.add(rootNode);
+    public void addNode(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> rootNode) {
+        queue.add(new ImmutableTuple<>(random.nextInt(), rootNode));
     }
 
     @Override
-    public void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata>> rootNodes) {
-        nodeList.addAll(rootNodes);
+    public void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> rootNodes) {
+        rootNodes.forEach(this::addNode);
     }
 
-    @Override
-    public SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> selectNextNode() {
-        return nodeList.remove(random.nextInt(nodeList.size()));
-    }
+
 }

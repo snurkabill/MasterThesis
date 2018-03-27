@@ -1,4 +1,4 @@
-package vahy.api.search.treeUpdater;
+package vahy.api.search.update;
 
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
@@ -11,8 +11,8 @@ public interface TreeUpdater<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>> {
 
-    void updateTree(SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> expandedNode);
+    void updateTree(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> expandedNode);
 }

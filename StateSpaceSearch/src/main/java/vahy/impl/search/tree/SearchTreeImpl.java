@@ -9,23 +9,23 @@ import vahy.api.search.node.SearchNodeMetadata;
 import vahy.api.search.nodeExpander.NodeExpander;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.SearchTree;
-import vahy.api.search.treeUpdater.TreeUpdater;
+import vahy.api.search.update.TreeUpdater;
 
 public class SearchTreeImpl<
         TAction extends Action,
         TReward extends Reward,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward>,
         TState extends State<TAction, TReward, TObservation>>
         implements SearchTree<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
-    private final SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> root;
+    private final SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root;
     private final NodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeSelector;
     private final NodeExpander<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeExpander;
     private final TreeUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> treeUpdater;
 
     protected SearchTreeImpl(
-            SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> root,
+            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root,
             NodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeSelector,
             NodeExpander<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeExpander,
             TreeUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> treeUpdater) {
@@ -41,13 +41,13 @@ public class SearchTreeImpl<
 
         // if there is something to update
 
-        SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> selectedNodeForExpansion = nodeSelector.selectNextNode();
+        SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
         nodeExpander.expandNode(selectedNodeForExpansion);
         treeUpdater.updateTree(selectedNodeForExpansion);
     }
 
     @Override
-    public SearchNode<TAction, TReward, TObservation, TState, TSearchNodeMetadata> getRoot() {
+    public SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getRoot() {
         return root;
     }
 
