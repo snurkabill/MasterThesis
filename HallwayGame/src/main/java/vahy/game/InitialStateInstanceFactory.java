@@ -35,16 +35,16 @@ public class InitialStateInstanceFactory {
     }
 
     private void checkGameShape(List<List<Cell>> gameSetup) {
-        if(!ArrayUtils.hasRectangleShape(gameSetup)) {
+        if (!ArrayUtils.hasRectangleShape(gameSetup)) {
             throw new IllegalArgumentException("Game is not in rectangle-like shape.");
         }
     }
 
     private ImmutableTuple<Integer, Integer> generateInitialAgentCoordinates(List<List<Cell>> gameSetup) {
         List<Cell> startingLocations = gameSetup.stream()
-                .flatMap(List::stream)
-                .filter(cell -> cell.getCellType() == CellType.STARTING_LOCATION)
-                .collect(Collectors.toList());
+            .flatMap(List::stream)
+            .filter(cell -> cell.getCellType() == CellType.STARTING_LOCATION)
+            .collect(Collectors.toList());
         Cell startingLocation = startingLocations.get(random.nextInt(startingLocations.size()));
         return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
     }
@@ -54,12 +54,12 @@ public class InitialStateInstanceFactory {
         double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
         double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
         gameSetup.stream()
-                .flatMap(List::stream)
-                .forEach(cell -> {
-                    walls[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.WALL;
-                    rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? gameConfig.getDefaultGoalReward() : 0.0;
-                    trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? gameConfig.getDefaultTrapProbability() : 0.0;
-                });
+            .flatMap(List::stream)
+            .forEach(cell -> {
+                walls[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.WALL;
+                rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? gameConfig.getDefaultGoalReward() : 0.0;
+                trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? gameConfig.getDefaultTrapProbability() : 0.0;
+            });
         StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getDefaultStepPenalty(), gameConfig.getDefaultNoisyMoveProbability());
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
         return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
@@ -84,29 +84,29 @@ public class InitialStateInstanceFactory {
     private int parseIntWithException(String cellRepresentation) throws NotValidGameStringRepresentationException {
         try {
             return Integer.parseInt(cellRepresentation);
-        } catch(NumberFormatException e) {
-            throw new NotValidGameStringRepresentationException("Unable to parse [" + cellRepresentation +"]", e);
+        } catch (NumberFormatException e) {
+            throw new NotValidGameStringRepresentationException("Unable to parse [" + cellRepresentation + "]", e);
         }
     }
 
     private Cell createCell(String cellRepresentation, int xIndex, int yIndex) throws NotValidGameStringRepresentationException {
-        if(cellRepresentation.equals("1")) {
+        if (cellRepresentation.equals("1")) {
             return new CommonCell(CellType.WALL, new CellPosition(xIndex, yIndex));
         }
-        if(cellRepresentation.equals("0")) {
+        if (cellRepresentation.equals("0")) {
             return new CommonCell(CellType.EMPTY, new CellPosition(xIndex, yIndex));
         }
-        if(cellRepresentation.equals("+")) {
+        if (cellRepresentation.equals("+")) {
             return new CommonCell(CellType.STARTING_LOCATION, new CellPosition(xIndex, yIndex));
         }
-        if(cellRepresentation.equals("x")) {
+        if (cellRepresentation.equals("x")) {
             return new TrapCell(new CellPosition(xIndex, yIndex), gameConfig.getDefaultTrapProbability());
         }
-        if(cellRepresentation.equals("g")) {
+        if (cellRepresentation.equals("g")) {
             return new GoalCell(new CellPosition(xIndex, yIndex), gameConfig.getDefaultGoalReward());
         }
         int reward = parseIntWithException(cellRepresentation);
-        if(reward > 1) {
+        if (reward > 1) {
             return new GoalCell(new CellPosition(xIndex, yIndex), reward);
         } else {
             throw new NotValidGameStringRepresentationException("Reward [" + reward + "] is not valid reward");
