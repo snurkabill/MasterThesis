@@ -4,7 +4,7 @@ public interface State<TAction extends Action, TReward extends Reward, TObservat
 
     TAction[] getAllPossibleActions();
 
-    StateRewardReturn<TReward, State<TAction, TReward, TObservation>> applyAction(TAction actionType);
+    StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> applyAction(TAction actionType);
 
     State<TAction, TReward, TObservation> deepCopy();
 

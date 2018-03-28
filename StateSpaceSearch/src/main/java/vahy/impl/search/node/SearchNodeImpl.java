@@ -21,7 +21,7 @@ public class SearchNodeImpl<
 
     private final Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
-    protected SearchNodeImpl(
+    public SearchNodeImpl(
             TState wrappedState,
             TSearchNodeMetadata searchNodeMetadata,
             Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
@@ -40,7 +40,7 @@ public class SearchNodeImpl<
     }
 
     @Override
-    public StateRewardReturn<TReward, State<TAction, TReward, TObservation>> applyAction(TAction action) {
+    public StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> applyAction(TAction action) {
         return getWrappedState().applyAction(action);
     }
 

@@ -1,6 +1,10 @@
 package vahy.api.model;
 
-public interface StateRewardReturn<TReward extends Reward, TState extends State<? extends Action, TReward, ? extends Observation>> {
+public interface StateRewardReturn<
+    TAction extends Action,
+    TReward extends Reward,
+    TObservation extends Observation,
+    TState extends State<TAction, TReward, TObservation>> {
 
     TReward getReward();
 

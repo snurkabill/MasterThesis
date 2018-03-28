@@ -26,7 +26,7 @@ public class AbstractNodeExpander<
         TAction[] allPossibleActions = node.getAllPossibleActions();
         Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap = node.getChildNodeMap();
         for (TAction action : allPossibleActions) {
-            StateRewardReturn<TReward, State<TAction, TReward, TObservation>> stateRewardReturn = node.applyAction(action);
+            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = node.applyAction(action);
 
 
 

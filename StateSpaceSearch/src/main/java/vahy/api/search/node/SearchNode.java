@@ -21,7 +21,7 @@ public interface SearchNode<
 
     void updateChildMap(TAction action, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child);
 
-    StateRewardReturn<TReward, State<TAction, TReward, TObservation>> applyAction(TAction action);
+    StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> applyAction(TAction action);
 
     TAction[] getAllPossibleActions();
 
