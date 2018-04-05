@@ -43,6 +43,7 @@ public class SearchTreeImpl<
         // if there is something to update
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
         nodeExpander.expandNode(selectedNodeForExpansion);
+        nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
         treeUpdater.updateTree(selectedNodeForExpansion);
     }
 
