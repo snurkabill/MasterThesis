@@ -1,7 +1,6 @@
 package vahy.environment.agent.policy.random;
 
 import vahy.environment.ActionType;
-import vahy.environment.state.IState;
 import vahy.utils.EnumUtils;
 
 import java.util.Arrays;

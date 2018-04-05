@@ -2,8 +2,6 @@ package vahy.environment.episode;
 
 import vahy.environment.ActionType;
 import vahy.environment.agent.policy.IOneHotPolicy;
-import vahy.environment.state.IState;
-import vahy.environment.state.RewardStateReturn;
 
 import java.util.ArrayList;
 import java.util.Arrays;

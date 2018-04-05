@@ -1,4 +1,4 @@
-package vahy.api.search.nodeSelector;
+package vahy.api.search.simulation;
 
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
@@ -8,9 +8,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 
-import java.util.Collection;
-
-public interface NodeSelector<
+public interface NodeEvaluationSimulator<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
@@ -18,10 +16,6 @@ public interface NodeSelector<
     TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>,
     TState extends State<TAction, TReward, TObservation>> {
 
-    void addNode(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node);
-
-    void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> nodes);
-
-    SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectNextNode();
+    void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> expandedNode);
 
 }

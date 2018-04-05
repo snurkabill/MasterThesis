@@ -1,4 +1,4 @@
-package vahy.api.search.nodeSelector;
+package vahy.impl.search.nodeSelector.exhaustive;
 
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
@@ -8,20 +8,17 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 
-import java.util.Collection;
-
-public interface NodeSelector<
+public class BfsNodeSelector<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
     TStateActionMetadata extends StateActionMetadata<TReward>,
     TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>,
-    TState extends State<TAction, TReward, TObservation>> {
+    TState extends State<TAction, TReward, TObservation>>
+    extends AbstractExhaustiveNodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> {
 
-    void addNode(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node);
-
-    void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> nodes);
-
-    SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectNextNode();
-
+    @Override
+    public void addNode(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
+        nodeQueue.addLast(node);
+    }
 }

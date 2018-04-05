@@ -2,7 +2,6 @@ package vahy.game;
 
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.IGameConfig;
-import vahy.environment.state.IState;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.environment.state.StaticGamePart;
 import vahy.game.cell.Cell;
