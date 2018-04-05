@@ -18,8 +18,7 @@ public class BaseNodeExpander<
     TReward extends Reward,
     TObservation extends Observation,
     TStateActionMetadata extends StateActionMetadata<TReward>,
-    TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>,
-    TState extends State<TAction, TReward, TObservation>>
+    TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>>
     implements NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> {
 
     private final SearchNodeFactory<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> searchNodeFactory;

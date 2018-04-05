@@ -15,9 +15,8 @@ import java.util.LinkedHashMap;
 public class EmtpySearchNodeMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TSearchNodeMetadata extends EmptySearchNodeMetadata<TAction, TReward>>
-    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, EmptyStateActionMetadata<TReward>, TSearchNodeMetadata, State<TAction, TReward, TObservation>> {
+    TObservation extends Observation>
+    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, EmptyStateActionMetadata<TReward>> {
 
     @Override
     public SearchNodeMetadata<TAction, TReward, EmptyStateActionMetadata<TReward>> createSearchNodeMetadata(StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn) {

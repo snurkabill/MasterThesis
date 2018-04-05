@@ -15,9 +15,8 @@ import java.util.LinkedHashMap;
 public class AlphaGoStateActionMetadataFactoryImpl<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TSearchNodeMetadata extends AlphaGoNodeMetadata<TAction, TReward>>
-    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, TSearchNodeMetadata, State<TAction, TReward, TObservation>> {
+    TObservation extends Observation>
+    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>> {
 
     @Override
     public SearchNodeMetadata<TAction, TReward, AlphaGoStateActionMetadata<TReward>> createSearchNodeMetadata(StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn) {

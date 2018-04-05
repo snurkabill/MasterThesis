@@ -4,5 +4,5 @@ import vahy.environment.ActionType;
 
 public interface IOneHotPolicy {
 
-    ActionType getDiscreteAction(IState gameState);
+    ActionType getDiscreteAction(State gameState);
 }

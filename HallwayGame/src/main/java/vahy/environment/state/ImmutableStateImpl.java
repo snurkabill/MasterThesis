@@ -124,31 +124,32 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
             }
         }
 
-        if (actionType == ActionType.FORWARD) {
-            ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardAction();
-            double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
-            double[][] newRewards = ArrayUtils.cloneArray(rewards);
-            if (rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0) {
-                newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
-            }
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = new ImmutableStateImpl(
-                staticGamePart,
-                newRewards,
-                agentCoordinates.getFirst(),
-                agentCoordinates.getSecond(),
-                agentHeading
-                rewardsLeft);
-            return new RewardStateReturn(reward, state);
-        } else {
-            IState state = new ImmutableStateImpl(
-                staticGamePart,
-                ArrayUtils.cloneArray(rewards),
-                agentXCoordination,
-                agentYCoordination,
-                agentHeading.turn(actionType),
-                rewardsLeft);
-            return new RewardStateReturn(-staticGamePart.getDefaultStepPenalty(), state);
-        }
+//        if (actionType == ActionType.FORWARD) {
+//            ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardAction();
+//            double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
+//            double[][] newRewards = ArrayUtils.cloneArray(rewards);
+//            if (rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0) {
+//                newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
+//            }
+//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = new ImmutableStateImpl(
+//                staticGamePart,
+//                newRewards,
+//                agentCoordinates.getFirst(),
+//                agentCoordinates.getSecond(),
+//                agentHeading
+//                rewardsLeft);
+//            return new RewardStateReturn(reward, state);
+//        } else {
+//            IState state = new ImmutableStateImpl(
+//                staticGamePart,
+//                ArrayUtils.cloneArray(rewards),
+//                agentXCoordination,
+//                agentYCoordination,
+//                agentHeading.turn(actionType),
+//                rewardsLeft);
+//            return new RewardStateReturn(-staticGamePart.getDefaultStepPenalty(), state);
+//        }
+        return null;
     }
 
     @Override
