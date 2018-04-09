@@ -1,5 +1,6 @@
 package vahy.environment.agent.policy.random;
 
+import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.utils.EnumUtils;
 
@@ -13,13 +14,13 @@ public class UniformRandomWalkPolicy extends AbstarctRandomWalkPolicy {
     }
 
     @Override
-    public ActionType getDiscreteAction(IState gameState) {
+    public ActionType getDiscreteAction(State gameState) {
         // ignoring impossible actions here
         return EnumUtils.generateRandomEnumUniformly(ActionType.class, getRandom());
     }
 
     @Override
-    public double[] getActionProbabilityDistribution(IState gameState) {
+    public double[] getActionProbabilityDistribution(State gameState) {
         // ignoring impossible actions here
         double[] probabilities = new double[ActionType.values().length];
         Arrays.fill(probabilities, 1.0 / (double) probabilities.length);

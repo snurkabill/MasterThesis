@@ -12,13 +12,13 @@ public enum ActionType implements Action {
 
     NOISY_RIGHT(false),
     NOISY_LEFT(false),
+    TRAP(false),
     NOISY_RIGHT_TRAP(false),
     NOISY_LEFT_TRAP(false),
     NO_ACTION(false);
 
     public static ActionType[] playerActions = Arrays.stream(ActionType.values()).filter(ActionType::isPlayerAction).toArray(ActionType[]::new);
     public static ActionType[] environmentActions = Arrays.stream(ActionType.values()).filter(actionType -> !actionType.isPlayerAction).toArray(ActionType[]::new);
-
     private final boolean isPlayerAction;
 
     ActionType(boolean isPlayerAction) {

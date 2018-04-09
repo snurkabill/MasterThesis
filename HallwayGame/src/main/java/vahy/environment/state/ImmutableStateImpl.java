@@ -6,12 +6,14 @@ import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
 import vahy.impl.model.DoubleScalarReward;
 import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
 
@@ -37,12 +39,15 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         double[][] rewards,
         int agentXCoordination,
         int agentYCoordination,
-        AgentHeading agentHeading) {
+        AgentHeading agentHeading,
+        boolean isAgentTurn,
+        boolean isAgentKilled) {
         this(staticGamePart,
             rewards,
             agentXCoordination,
             agentYCoordination,
             agentHeading,
+            isAgentTurn,
             Arrays
                 .stream(rewards)
                 .map(doubles -> Arrays
@@ -50,7 +55,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                     .filter(value -> value > 0.0)
                     .count())
                 .mapToInt(Long::intValue)
-                .sum());
+                .sum(),
+            isAgentKilled);
     }
 
     private ImmutableStateImpl(
@@ -60,7 +66,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         int agentYCoordination,
         AgentHeading agentHeading,
         boolean isAgentTurn,
-        int rewardsLeft) {
+        int rewardsLeft,
+        boolean isAgentKilled) {
         this.isAgentTurn = isAgentTurn;
         this.staticGamePart = staticGamePart;
         this.rewards = rewards;
@@ -68,11 +75,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         this.agentYCoordination = agentYCoordination;
         this.agentHeading = agentHeading;
         this.rewardsLeft = rewardsLeft;
-        this.isAgentKilled = isAgentKilled(staticGamePart.getTrapProbabilities()[agentXCoordination][agentYCoordination], staticGamePart.getRandom());
-    }
-
-    private boolean isAgentKilled(double trapProbability, Random random) {
-        return random.nextDouble() <= trapProbability;
+        this.isAgentKilled = isAgentKilled;
     }
 
     private boolean isAgentStandingOnTrap() {
@@ -81,7 +84,36 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
 
     @Override
     public ActionType[] getAllPossibleActions() {
-        return isAgentTurn ? ActionType.playerActions : ActionType.environmentActions;
+        if(isAgentTurn) {
+            return ActionType.playerActions;
+        } else {
+            List<ActionType> possibleActions = new LinkedList<>();
+            possibleActions.add(ActionType.NO_ACTION);
+
+            boolean[][] walls = staticGamePart.getWalls();
+            double[][] traps = staticGamePart.getTrapProbabilities();
+            if(traps[agentXCoordination][agentYCoordination] != 0) {
+                possibleActions.add(ActionType.TRAP);
+            }
+
+            ImmutableTuple<Integer, Integer> rightCoordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
+            if(!walls[rightCoordinates.getFirst()][rightCoordinates.getSecond()]) {
+                possibleActions.add(ActionType.NOISY_RIGHT);
+                if(traps[rightCoordinates.getFirst()][rightCoordinates.getSecond()] != 0) {
+                    possibleActions.add(ActionType.NOISY_RIGHT_TRAP);
+                }
+            }
+
+            ImmutableTuple<Integer, Integer> leftCoordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
+            if(!walls[leftCoordinates.getFirst()][leftCoordinates.getSecond()]) {
+                possibleActions.add(ActionType.NOISY_LEFT);
+                if(traps[leftCoordinates.getFirst()][leftCoordinates.getSecond()] != 0) {
+                    possibleActions.add(ActionType.NOISY_LEFT_TRAP);
+                }
+            }
+            return possibleActions.toArray(new ActionType[0]);
+        }
+
     }
 
     @Override
@@ -89,67 +121,115 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
-
         if(isAgentTurn != actionType.isPlayerAction()) {
             throw new IllegalStateException("Inconsistency between player turn and applying action");
         }
-
         if(isAgentTurn) {
-
             switch (actionType) {
                 case FORWARD:
-                    break;
+                    ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardMove();
+                    double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
+                    double[][] newRewards = ArrayUtils.cloneArray(rewards);
+                    int rewardCount = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0 ? rewardsLeft - 1 : rewardsLeft;
+                    if (rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0) {
+                        newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
+                    }
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                            staticGamePart,
+                            newRewards,
+                            agentCoordinates.getFirst(),
+                            agentCoordinates.getSecond(),
+                            agentHeading,
+                            false,
+                            rewardCount,
+                        isAgentKilled), new DoubleScalarReward(reward));
                 case TURN_RIGHT:
-                    break;
                 case TURN_LEFT:
-                    break;
-
-                    default:
-                        throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+                    AgentHeading newAgentHeading = agentHeading.turn(actionType);
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                            staticGamePart,
+                            ArrayUtils.cloneArray(rewards),
+                            agentXCoordination,
+                            agentYCoordination,
+                            newAgentHeading,
+                            false,
+                            rewardsLeft,
+                            isAgentKilled),
+                        new DoubleScalarReward(staticGamePart.getDefaultStepPenalty()));
+                default:
+                    throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
             }
         } else {
             switch (actionType) {
                 case NO_ACTION:
-                    break;
+                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = new ImmutableStateImpl(
+                        staticGamePart,
+                        ArrayUtils.cloneArray(rewards),
+                        agentXCoordination,
+                        agentYCoordination,
+                        agentHeading,
+                        true,
+                        rewardsLeft,
+                        isAgentKilled);
+                    return new ImmutableStateRewardReturnTuple<>(state, new DoubleScalarReward(0.0));
                 case NOISY_RIGHT:
-                    break;
+                    ImmutableTuple<Integer, Integer> newRightCoordinates = makeRightMove();
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                        staticGamePart,
+                        ArrayUtils.cloneArray(rewards),
+                        newRightCoordinates.getFirst(),
+                        newRightCoordinates.getSecond(),
+                        agentHeading,
+                        true,
+                        rewardsLeft,
+                        isAgentKilled), new DoubleScalarReward(0.0));
                 case NOISY_LEFT:
-                    break;
+                    ImmutableTuple<Integer, Integer> newLeftCoordinates = makeLeftMove();
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                        staticGamePart,
+                        ArrayUtils.cloneArray(rewards),
+                        newLeftCoordinates.getFirst(),
+                        newLeftCoordinates.getSecond(),
+                        agentHeading,
+                        true,
+                        rewardsLeft,
+                        isAgentKilled), new DoubleScalarReward(0.0));
+                case TRAP:
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                        staticGamePart,
+                        ArrayUtils.cloneArray(rewards),
+                        agentXCoordination,
+                        agentYCoordination,
+                        agentHeading,
+                        true,
+                        rewardsLeft,
+                        true), new DoubleScalarReward(0.0));
                 case NOISY_RIGHT_TRAP:
-                    break;
+                    ImmutableTuple<Integer, Integer> newRightTrapCoordinates = makeRightMove();
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                        staticGamePart,
+                        ArrayUtils.cloneArray(rewards),
+                        newRightTrapCoordinates.getFirst(),
+                        newRightTrapCoordinates.getSecond(),
+                        agentHeading,
+                        true,
+                        rewardsLeft,
+                        true), new DoubleScalarReward(0.0));
                 case NOISY_LEFT_TRAP:
-                    break;
+                    ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeRightMove();
+                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                        staticGamePart,
+                        ArrayUtils.cloneArray(rewards),
+                        newLeftTrapCoordinates.getFirst(),
+                        newLeftTrapCoordinates.getSecond(),
+                        agentHeading,
+                        true,
+                        rewardsLeft,
+                        true), new DoubleScalarReward(0.0));
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
             }
         }
-
-//        if (actionType == ActionType.FORWARD) {
-//            ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardAction();
-//            double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
-//            double[][] newRewards = ArrayUtils.cloneArray(rewards);
-//            if (rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0) {
-//                newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
-//            }
-//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = new ImmutableStateImpl(
-//                staticGamePart,
-//                newRewards,
-//                agentCoordinates.getFirst(),
-//                agentCoordinates.getSecond(),
-//                agentHeading
-//                rewardsLeft);
-//            return new RewardStateReturn(reward, state);
-//        } else {
-//            IState state = new ImmutableStateImpl(
-//                staticGamePart,
-//                ArrayUtils.cloneArray(rewards),
-//                agentXCoordination,
-//                agentYCoordination,
-//                agentHeading.turn(actionType),
-//                rewardsLeft);
-//            return new RewardStateReturn(-staticGamePart.getDefaultStepPenalty(), state);
-//        }
-        return null;
     }
 
     @Override
@@ -161,7 +241,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
             agentYCoordination,
             agentHeading,
             isAgentTurn,
-            rewardsLeft);
+            rewardsLeft,
+            isAgentKilled);
     }
 
     @Override
@@ -186,58 +267,94 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         return new DoubleVectorialObservation(vector);
     }
 
-    private int generateNoisyMove(int coordinate, Random random, double noisyProbability) {
-        if (noisyProbability > 0.0) {
-            boolean addNoise = random.nextDouble() <= noisyProbability;
-            return addNoise
-                ? random.nextBoolean()
-                ? coordinate - 1
-                : coordinate + 1
-                : coordinate;
-        } else {
-            return coordinate;
-        }
-    }
-
-    private ImmutableTuple<Integer, Integer> makeForwardAction() {
-        int x = agentXCoordination;
-        int y = agentYCoordination;
+    private ImmutableTuple<Integer, Integer> getForwardCoordinates(int x, int y, AgentHeading agentHeading) {
         switch (agentHeading) {
             case NORTH:
-                x = agentXCoordination - 1;
-                y = generateNoisyMove(y, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
+                x = x - 1;
                 break;
             case SOUTH:
-                x = agentXCoordination + 1;
-                y = generateNoisyMove(y, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
+                x = x + 1;
                 break;
             case EAST:
-                x = generateNoisyMove(x, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
-                y = agentYCoordination - 1;
+                y = y - 1;
                 break;
             case WEST:
-                x = generateNoisyMove(x, staticGamePart.getRandom(), staticGamePart.getNoisyMoveProbability());
-                y = agentYCoordination + 1;
+                y = y + 1;
                 break;
             default:
                 throw new IllegalArgumentException("Unknown enum value: [" + agentHeading + "]");
         }
+        return new ImmutableTuple<>(x, y);
+    }
 
-        if (x < 0) {
+    private ImmutableTuple<Integer, Integer> getRightCoordinates(int x, int y, AgentHeading agentHeading) {
+        switch (agentHeading) {
+            case NORTH:
+                y = y - 1;
+                break;
+            case SOUTH:
+                y = y + 1;
+                break;
+            case EAST:
+                x = x + 1;
+                break;
+            case WEST:
+                x = x - 1;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown enum value: [" + agentHeading + "]");
+        }
+        return new ImmutableTuple<>(x, y);
+    }
+
+    private ImmutableTuple<Integer, Integer> getLeftCoordinates(int x, int y, AgentHeading agentHeading) {
+        switch (agentHeading) {
+            case NORTH:
+                y = y + 1;
+                break;
+            case SOUTH:
+                y = y - 1;
+                break;
+            case EAST:
+                x = x - 1;
+                break;
+            case WEST:
+                x = x + 1;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown enum value: [" + agentHeading + "]");
+        }
+        return new ImmutableTuple<>(x, y);
+    }
+
+    private ImmutableTuple<Integer, Integer> makeForwardMove() {
+        return checkMoveValidity(getForwardCoordinates(agentXCoordination, agentYCoordination, agentHeading));
+    }
+
+    private ImmutableTuple<Integer, Integer> makeRightMove() {
+        return checkMoveValidity(getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading));
+    }
+
+    private ImmutableTuple<Integer, Integer> makeLeftMove() {
+        return checkMoveValidity(getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading));
+    }
+
+    private ImmutableTuple<Integer, Integer> checkMoveValidity(ImmutableTuple<Integer, Integer> coordinates) {
+        if (coordinates.getFirst() < 0) {
             throw new IllegalStateException("Agent's coordinate X cannot be negative");
         }
-        if (x >= staticGamePart.getWalls().length) {
+        if (coordinates.getFirst() >= staticGamePart.getWalls().length) {
             throw new IllegalStateException("Agent's coordinate X cannot be bigger or equal to maze size");
         }
-        if (y < 0) {
+        if (coordinates.getSecond() < 0) {
             throw new IllegalStateException("Agent's coordinate Y cannot be negative");
         }
-        if (y >= staticGamePart.getWalls()[agentXCoordination].length) {
+        if (coordinates.getSecond() >= staticGamePart.getWalls()[agentXCoordination].length) {
             throw new IllegalStateException("Agent's coordinate Y cannot be bigger or equal to maze size");
         }
 
-        if (!staticGamePart.getWalls()[x][y]) {
-            return new ImmutableTuple<>(x, y);
+        if (!staticGamePart.getWalls()[coordinates.getFirst()][coordinates.getSecond()]) {
+            return coordinates;
         } else {
             return new ImmutableTuple<>(agentXCoordination, agentYCoordination);
         }

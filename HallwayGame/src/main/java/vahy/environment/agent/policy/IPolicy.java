@@ -1,7 +1,9 @@
 package vahy.environment.agent.policy;
 
+import vahy.api.model.State;
+
 public interface IPolicy {
 
-    double[] getActionProbabilityDistribution(IState gameState);
+    double[] getActionProbabilityDistribution(State gameState);
 
 }

@@ -1,5 +1,6 @@
 package vahy.game;
 
+import vahy.api.model.State;
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.IGameConfig;
 import vahy.environment.state.ImmutableStateImpl;
@@ -28,7 +29,7 @@ public class InitialStateInstanceFactory {
         this.random = random;
     }
 
-    public IState createInitialState(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
+    public State createInitialState(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
 //        return new HallwayGame(deserialize(gameStringRepresentation));
         return createImmutableInitialState(deserialize(gameStringRepresentation));
     }
@@ -48,7 +49,7 @@ public class InitialStateInstanceFactory {
         return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
     }
 
-    private IState createImmutableInitialState(List<List<Cell>> gameSetup) {
+    private State createImmutableInitialState(List<List<Cell>> gameSetup) {
         boolean[][] walls = new boolean[gameSetup.size()][gameSetup.get(0).size()];
         double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
         double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
@@ -61,7 +62,7 @@ public class InitialStateInstanceFactory {
             });
         StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getDefaultStepPenalty(), gameConfig.getDefaultNoisyMoveProbability());
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
-        return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
+        return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH, true, false);
     }
 
     private List<List<Cell>> deserialize(String stringRepresentation) throws NotValidGameStringRepresentationException {
