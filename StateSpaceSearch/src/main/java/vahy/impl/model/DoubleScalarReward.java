@@ -6,7 +6,7 @@ public class DoubleScalarReward implements Reward {
 
     private final Double value;
 
-    public DoubleScalarReward (Double value) {
+    public DoubleScalarReward(Double value) {
         this.value = value;
     }
 
