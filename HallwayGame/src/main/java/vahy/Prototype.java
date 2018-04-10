@@ -2,7 +2,7 @@ package vahy;
 
 import vahy.environment.agent.policy.random.UniformRandomWalkPolicy;
 import vahy.environment.config.DefaultGameConfig;
-import vahy.environment.episode.Episode;
+import vahy.environment.episode.EpisodeAggregator;
 import vahy.game.InitialStateInstanceFactory;
 import vahy.game.NotValidGameStringRepresentationException;
 
@@ -21,13 +21,16 @@ public class Prototype {
         URL url = classLoader.getResource("examples/hallway0.txt");
         File file = new File(url.getFile());
 
-        SplittableRandom random = new SplittableRandom(1);
+        SplittableRandom random = new SplittableRandom(2);
 
         InitialStateInstanceFactory initialStateInstanceFactory = new InitialStateInstanceFactory(new DefaultGameConfig(), random);
-        Episode episode = new Episode(initialStateInstanceFactory.createInitialState(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())))),
-                new UniformRandomWalkPolicy(random));
+//        Episode episode = new Episode(initialStateInstanceFactory.createInitialState(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath())))),
+//                new UniformRandomWalkPolicy(random));
+//
+//        episode.runEpisode();
 
-        episode.runEpisode();
+        EpisodeAggregator episodeAggregator = new EpisodeAggregator(100, 100, new UniformRandomWalkPolicy(random), initialStateInstanceFactory);
+        episodeAggregator.runSimulation(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
 
         System.out.println("asdf");
     }
