@@ -1,6 +1,6 @@
 package vahy.environment.config;
 
-public class DefaultGameConfig implements IGameConfig {
+public class DefaultGameConfig implements GameConfig {
 
     private final double goalReward = 100;
     private final double stepPenalty = 1;
@@ -8,22 +8,22 @@ public class DefaultGameConfig implements IGameConfig {
     private final double noisyMoveProbability = 0.1;
 
     @Override
-    public double getDefaultGoalReward() {
+    public double getGoalReward() {
         return goalReward;
     }
 
     @Override
-    public double getDefaultStepPenalty() {
+    public double getStepPenalty() {
         return stepPenalty;
     }
 
     @Override
-    public double getDefaultTrapProbability() {
+    public double getTrapProbability() {
         return trapProbability;
     }
 
     @Override
-    public double getDefaultNoisyMoveProbability() {
+    public double getNoisyMoveProbability() {
         return noisyMoveProbability;
     }
 }

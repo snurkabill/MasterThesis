@@ -1,6 +1,6 @@
 package vahy.game;
 
-import vahy.environment.config.IGameConfig;
+import vahy.environment.config.GameConfig;
 import vahy.game.cell.Cell;
 import vahy.game.cell.CellPosition;
 import vahy.game.cell.CellType;
@@ -13,9 +13,9 @@ import java.util.List;
 
 public class HallwayGameFactory {
 
-    private IGameConfig gameConfig;
+    private GameConfig gameConfig;
 
-    public HallwayGameFactory(IGameConfig gameConfig) {
+    public HallwayGameFactory(GameConfig gameConfig) {
         this.gameConfig = gameConfig;
     }
 
@@ -57,10 +57,10 @@ public class HallwayGameFactory {
             return new CommonCell(CellType.STARTING_LOCATION, new CellPosition(xIndex, yIndex));
         }
         if(cellRepresentation.equals("x")) {
-            return new TrapCell(new CellPosition(xIndex, yIndex), gameConfig.getDefaultTrapProbability());
+            return new TrapCell(new CellPosition(xIndex, yIndex), gameConfig.getTrapProbability());
         }
         if(cellRepresentation.equals("g")) {
-            return new GoalCell(new CellPosition(xIndex, yIndex), gameConfig.getDefaultGoalReward());
+            return new GoalCell(new CellPosition(xIndex, yIndex), gameConfig.getGoalReward());
         }
         int reward = parseIntWithException(cellRepresentation);
         if(reward > 1) {

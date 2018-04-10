@@ -1,7 +1,7 @@
 package vahy.game;
 
 import vahy.environment.agent.AgentHeading;
-import vahy.environment.config.IGameConfig;
+import vahy.environment.config.GameConfig;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.environment.state.StaticGamePart;
 import vahy.game.cell.Cell;
@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 
 public class InitialStateInstanceFactory {
 
-    private final IGameConfig gameConfig;
+    private final GameConfig gameConfig;
     private final SplittableRandom random;
 
-    public InitialStateInstanceFactory(IGameConfig gameConfig, SplittableRandom random) {
+    public InitialStateInstanceFactory(GameConfig gameConfig, SplittableRandom random) {
         this.gameConfig = gameConfig;
         this.random = random;
     }
@@ -56,10 +56,10 @@ public class InitialStateInstanceFactory {
             .flatMap(List::stream)
             .forEach(cell -> {
                 walls[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.WALL;
-                rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? gameConfig.getDefaultGoalReward() : 0.0;
-                trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? gameConfig.getDefaultTrapProbability() : 0.0;
+                rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? gameConfig.getGoalReward() : 0.0;
+                trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? gameConfig.getTrapProbability() : 0.0;
             });
-        StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getDefaultStepPenalty(), gameConfig.getDefaultNoisyMoveProbability());
+        StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getStepPenalty(), gameConfig.getNoisyMoveProbability());
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
         return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
     }
@@ -99,10 +99,10 @@ public class InitialStateInstanceFactory {
             return new CommonCell(CellType.STARTING_LOCATION, new CellPosition(xIndex, yIndex));
         }
         if (cellRepresentation.equals("x")) {
-            return new TrapCell(new CellPosition(xIndex, yIndex), gameConfig.getDefaultTrapProbability());
+            return new TrapCell(new CellPosition(xIndex, yIndex), gameConfig.getTrapProbability());
         }
         if (cellRepresentation.equals("g")) {
-            return new GoalCell(new CellPosition(xIndex, yIndex), gameConfig.getDefaultGoalReward());
+            return new GoalCell(new CellPosition(xIndex, yIndex), gameConfig.getGoalReward());
         }
         int reward = parseIntWithException(cellRepresentation);
         if (reward > 1) {
