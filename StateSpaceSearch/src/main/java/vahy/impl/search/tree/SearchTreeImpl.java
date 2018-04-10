@@ -26,7 +26,7 @@ public class SearchTreeImpl<
     private final NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeExpander;
     private final TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> treeUpdater;
 
-    protected SearchTreeImpl(
+    public SearchTreeImpl(
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root,
         NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeSelector,
         NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeExpander,
