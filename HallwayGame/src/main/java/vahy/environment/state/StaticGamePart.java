@@ -2,17 +2,17 @@ package vahy.environment.state;
 
 import vahy.utils.ArrayUtils;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 
 public class StaticGamePart {
 
-    private final Random random;
+    private final SplittableRandom random;
     private final double[][] trapProbabilities;
     private final boolean[][] walls;
     private final double defaultStepPenalty;
     private final double noisyMoveProbability;
 
-    public StaticGamePart(Random random, double[][] trapProbabilities, boolean[][] walls, double defaultStepPenalty, double noisyMoveProbability) {
+    public StaticGamePart(SplittableRandom random, double[][] trapProbabilities, boolean[][] walls, double defaultStepPenalty, double noisyMoveProbability) {
         checkInputArguments(trapProbabilities, walls);
         this.random = random;
         this.trapProbabilities = trapProbabilities;
@@ -40,7 +40,7 @@ public class StaticGamePart {
         }
     }
 
-    public Random getRandom() {
+    public SplittableRandom getRandom() {
         return random;
     }
 

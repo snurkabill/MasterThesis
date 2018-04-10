@@ -1,6 +1,5 @@
 package vahy.game;
 
-import vahy.api.model.State;
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.IGameConfig;
 import vahy.environment.state.ImmutableStateImpl;
@@ -16,20 +15,20 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class InitialStateInstanceFactory {
 
     private final IGameConfig gameConfig;
-    private final Random random;
+    private final SplittableRandom random;
 
-    public InitialStateInstanceFactory(IGameConfig gameConfig, Random random) {
+    public InitialStateInstanceFactory(IGameConfig gameConfig, SplittableRandom random) {
         this.gameConfig = gameConfig;
         this.random = random;
     }
 
-    public State createInitialState(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
+    public ImmutableStateImpl createInitialState(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
 //        return new HallwayGame(deserialize(gameStringRepresentation));
         return createImmutableInitialState(deserialize(gameStringRepresentation));
     }
@@ -49,7 +48,7 @@ public class InitialStateInstanceFactory {
         return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
     }
 
-    private State createImmutableInitialState(List<List<Cell>> gameSetup) {
+    private ImmutableStateImpl createImmutableInitialState(List<List<Cell>> gameSetup) {
         boolean[][] walls = new boolean[gameSetup.size()][gameSetup.get(0).size()];
         double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
         double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
@@ -62,7 +61,7 @@ public class InitialStateInstanceFactory {
             });
         StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getDefaultStepPenalty(), gameConfig.getDefaultNoisyMoveProbability());
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
-        return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH, true, false);
+        return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
     }
 
     private List<List<Cell>> deserialize(String stringRepresentation) throws NotValidGameStringRepresentationException {

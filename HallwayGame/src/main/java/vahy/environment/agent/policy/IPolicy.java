@@ -1,9 +1,9 @@
 package vahy.environment.agent.policy;
 
-import vahy.api.model.State;
+import vahy.environment.state.ImmutableStateImpl;
 
 public interface IPolicy {
 
-    double[] getActionProbabilityDistribution(State gameState);
+    double[] getActionProbabilityDistribution(ImmutableStateImpl gameState);
 
 }

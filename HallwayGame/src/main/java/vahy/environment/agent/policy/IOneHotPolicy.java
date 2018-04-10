@@ -1,9 +1,9 @@
 package vahy.environment.agent.policy;
 
-import vahy.api.model.State;
 import vahy.environment.ActionType;
+import vahy.environment.state.ImmutableStateImpl;
 
 public interface IOneHotPolicy {
 
-    ActionType getDiscreteAction(State gameState);
+    ActionType getDiscreteAction(ImmutableStateImpl gameState);
 }
