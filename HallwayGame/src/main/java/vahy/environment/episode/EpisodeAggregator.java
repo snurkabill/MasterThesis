@@ -1,5 +1,7 @@
 package vahy.environment.episode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.chart.ChartBuilder;
 import vahy.environment.agent.policy.IOneHotPolicy;
 import vahy.game.InitialStateInstanceFactory;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class EpisodeAggregator {
+
+    private static final Logger logger = LoggerFactory.getLogger(EpisodeAggregator.class);
 
     private final int uniqueEpisodeCount;
     private final int episodeIterationCount;
@@ -31,12 +35,14 @@ public class EpisodeAggregator {
     }
 
     public void runSimulation(String stringGameRepresentation) throws NotValidGameStringRepresentationException {
-
+        logger.info("Running simulation");
         List<List<Double>> rewardHistory = new ArrayList<>();
         for (int i = 0; i < uniqueEpisodeCount; i++) {
+            logger.info("Running {}th unique episode", i);
             Episode episode = new Episode(initialStateInstanceFactory.createInitialState(stringGameRepresentation), playerPolicy);
             for (int j = 0; j < episodeIterationCount; j++) {
-                 rewardHistory.add(episode.runEpisode().stream().map(x -> x.getReward().getValue()).collect(Collectors.toList()));
+                System.out.println("Running [" + i +"] a [" + j +  "] episode");
+                rewardHistory.add(episode.runEpisode().stream().map(x -> x.getReward().getValue()).collect(Collectors.toList()));
             }
         }
 
