@@ -19,5 +19,6 @@ public interface SearchNodeFactory<
 
     SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> createNode(
         StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
-        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent);
+        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent,
+        TAction action);
 }

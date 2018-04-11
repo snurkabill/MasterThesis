@@ -9,8 +9,9 @@ import java.util.Map;
 
 public class AbstractSearchNodeMetadata<TAction extends Action, TReward extends Reward, TStateActionMetadata extends StateActionMetadata<TReward>> implements SearchNodeMetadata<TAction, TReward, TStateActionMetadata> {
 
-    private final TReward cumulativeReward;
     private final Map<TAction, TStateActionMetadata> stateActionMetadataMap;
+    private final TReward cumulativeReward;
+    private TReward estimatedTotalReward;
 
     public AbstractSearchNodeMetadata(TReward cumulativeReward, Map<TAction, TStateActionMetadata> stateActionMetadataMap) {
         this.cumulativeReward = cumulativeReward;
@@ -25,5 +26,15 @@ public class AbstractSearchNodeMetadata<TAction extends Action, TReward extends 
     @Override
     public TReward getCumulativeReward() {
         return cumulativeReward;
+    }
+
+    @Override
+    public TReward getEstimatedTotalReward() {
+        return estimatedTotalReward;
+    }
+
+    @Override
+    public void setEstimatedTotalReward(TReward estimatedTotalReward) {
+        this.estimatedTotalReward = estimatedTotalReward;
     }
 }

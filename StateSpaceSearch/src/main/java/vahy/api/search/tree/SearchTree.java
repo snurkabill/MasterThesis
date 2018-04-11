@@ -18,6 +18,6 @@ public interface SearchTree<
 
     SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> getRoot();
 
-    void updateTree();
+    boolean updateTree();
 
 }

@@ -6,4 +6,8 @@ public interface StateActionMetadata<TReward extends Reward> {
 
     TReward getGainedReward();
 
+    TReward getEstimatedTotalReward();
+
+    void setEstimatedTotalReward(TReward estimatedTotalReward);
+
 }

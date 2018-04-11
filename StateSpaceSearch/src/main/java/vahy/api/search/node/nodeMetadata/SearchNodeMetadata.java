@@ -11,4 +11,8 @@ public interface SearchNodeMetadata<TAction extends Action, TReward extends Rewa
 
     TReward getCumulativeReward();
 
+    TReward getEstimatedTotalReward();
+
+    void setEstimatedTotalReward(TReward reward);
+
 }

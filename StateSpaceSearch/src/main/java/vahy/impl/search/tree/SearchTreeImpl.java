@@ -9,6 +9,7 @@ import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.nodeExpander.NodeExpander;
 import vahy.api.search.nodeSelector.NodeSelector;
+import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.tree.SearchTree;
 import vahy.api.search.update.TreeUpdater;
 
@@ -25,26 +26,35 @@ public class SearchTreeImpl<
     private final NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeSelector;
     private final NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeExpander;
     private final TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> treeUpdater;
+    private final NodeEvaluationSimulator<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeEvaluationSimulator;
 
     public SearchTreeImpl(
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root,
         NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeSelector,
         NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeExpander,
-        TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> treeUpdater) {
+        TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> treeUpdater,
+        NodeEvaluationSimulator<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeEvaluationSimulator) {
         this.root = root;
         this.nodeSelector = nodeSelector;
         this.nodeExpander = nodeExpander;
         this.treeUpdater = treeUpdater;
+        this.nodeEvaluationSimulator = nodeEvaluationSimulator;
         this.nodeSelector.addNode(root);
     }
 
     @Override
-    public void updateTree() {
-        // if there is something to update
+    public boolean updateTree() {
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
-        nodeExpander.expandNode(selectedNodeForExpansion);
-        nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
+        if(selectedNodeForExpansion == null) {
+            return false;
+        }
+        if(!selectedNodeForExpansion.isFinalNode()) {
+            nodeExpander.expandNode(selectedNodeForExpansion);
+            nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
+        }
+        nodeEvaluationSimulator.calculateMetadataEstimation(selectedNodeForExpansion);
         treeUpdater.updateTree(selectedNodeForExpansion);
+        return true;
     }
 
     @Override

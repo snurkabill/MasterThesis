@@ -32,7 +32,7 @@ public interface SearchNode<
 
     TSearchNodeMetadata getSearchNodeMetadata();
 
-    TState getWrappedState();
+    State<TAction, TReward, TObservation> getWrappedState();
 
     boolean isFinalNode();
 

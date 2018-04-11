@@ -12,7 +12,7 @@ import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.impl.search.node.SearchNodeImpl;
 
 import java.util.LinkedHashMap;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class SearchNodeBaseFactoryImpl<
     TAction extends Action,
@@ -23,19 +23,28 @@ public class SearchNodeBaseFactoryImpl<
     TState extends State<TAction, TReward, TObservation>>
     implements SearchNodeFactory<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> {
 
-    private final Function<StateRewardReturn<TAction, TReward, TObservation, TState>, TSearchNodeMetadata> searchNodeMetadataFactory;
+    private final BiFunction<
+        StateRewardReturn<TAction, TReward, TObservation, TState>,
+        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>,
+        TSearchNodeMetadata> searchNodeMetadataFactory;
 
-    public SearchNodeBaseFactoryImpl(Function<StateRewardReturn<TAction, TReward, TObservation, TState>, TSearchNodeMetadata> searchNodeMetadataFactory) {
+    public SearchNodeBaseFactoryImpl(BiFunction<
+        StateRewardReturn<TAction, TReward, TObservation, TState>,
+        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>,
+        TSearchNodeMetadata> searchNodeMetadataFactory) {
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
     }
 
     @Override
     public SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> createNode(
         StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
-        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent) {
+        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent,
+        TAction action) {
         return new SearchNodeImpl<>(
             stateRewardReturn.getState(),
-            searchNodeMetadataFactory.apply(stateRewardReturn),
-            new LinkedHashMap<>());
+            searchNodeMetadataFactory.apply(stateRewardReturn, parent),
+            new LinkedHashMap<>(),
+            parent,
+            action);
     }
 }

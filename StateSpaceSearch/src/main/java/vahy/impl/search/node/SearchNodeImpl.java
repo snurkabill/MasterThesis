@@ -27,7 +27,16 @@ public class SearchNodeImpl<
         TState wrappedState,
         TSearchNodeMetadata searchNodeMetadata,
         Map<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> childNodeMap) {
-        super(wrappedState, null, null, searchNodeMetadata);
+        this(wrappedState, searchNodeMetadata, childNodeMap, null, null);
+    }
+
+    public SearchNodeImpl(
+        TState wrappedState,
+        TSearchNodeMetadata searchNodeMetadata,
+        Map<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> childNodeMap,
+        SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent,
+        TAction appliedAction) {
+        super(wrappedState, parent, appliedAction, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
     }
 

@@ -6,6 +6,7 @@ import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 public class AbstractStateActionMetadata<TReward extends Reward> implements StateActionMetadata<TReward> {
 
     private final TReward gainedReward;
+    private TReward estimatedTotalReward;
 
     public AbstractStateActionMetadata(TReward gainedReward) {
         this.gainedReward = gainedReward;
@@ -14,5 +15,15 @@ public class AbstractStateActionMetadata<TReward extends Reward> implements Stat
     @Override
     public TReward getGainedReward() {
         return gainedReward;
+    }
+
+    @Override
+    public TReward getEstimatedTotalReward() {
+        return estimatedTotalReward;
+    }
+
+    @Override
+    public void setEstimatedTotalReward(TReward estimatedTotalReward) {
+        this.estimatedTotalReward = estimatedTotalReward;
     }
 }

@@ -3,15 +3,16 @@ package vahy.impl.search.nodeExpander;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
+import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.nodeExpander.NodeExpander;
-import vahy.api.search.simulation.NodeEvaluationSimulator;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class BaseNodeExpander<
     TAction extends Action,
@@ -22,13 +23,13 @@ public class BaseNodeExpander<
     implements NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> {
 
     private final SearchNodeFactory<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> searchNodeFactory;
-    private final NodeEvaluationSimulator<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> nodeEvaluationSimulator;
+    private final Function<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>, TStateActionMetadata> stateActionMetadataFactory;
 
     public BaseNodeExpander(
         SearchNodeFactory<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> searchNodeFactory,
-        NodeEvaluationSimulator<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> nodeEvaluationSimulator) {
+        Function<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>, TStateActionMetadata> stateActionMetadataFactory) {
         this.searchNodeFactory = searchNodeFactory;
-        this.nodeEvaluationSimulator = nodeEvaluationSimulator;
+        this.stateActionMetadataFactory = stateActionMetadataFactory;
     }
 
     @Override
@@ -38,9 +39,11 @@ public class BaseNodeExpander<
         }
         TAction[] allPossibleActions = node.getAllPossibleActions();
         Map<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>>> childNodeMap = node.getChildNodeMap();
+        Map<TAction, TStateActionMetadata> stateActionMetadataMap = node.getSearchNodeMetadata().getStateActionMetadataMap();
         for (TAction action : allPossibleActions) {
-            childNodeMap.put(action, searchNodeFactory.createNode(node.applyAction(action), node));
+            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = node.applyAction(action);
+            childNodeMap.put(action, searchNodeFactory.createNode(stateRewardReturn, node, action));
+            stateActionMetadataMap.put(action, stateActionMetadataFactory.apply(stateRewardReturn));
         }
-        nodeEvaluationSimulator.calculateMetadataEstimation(node);
     }
 }
