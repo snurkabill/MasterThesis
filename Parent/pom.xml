@@ -31,23 +31,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <checkstyle.config.path>${project.basedir}/../build</checkstyle.config.path>
 
-        <log4j.version>1.2.17</log4j.version>
+        <logback.version>1.1.11</logback.version>
         <slf4j.version>1.7.12</slf4j.version>
     </properties>
 
     <dependencies>
         <!-- Logging -->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -58,7 +47,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
+            <version>${logback.version}</version>
         </dependency>
     </dependencies>
 
