@@ -17,6 +17,7 @@ import java.util.SplittableRandom;
 public class Prototype {
 
     public static void main(String[] args) throws IOException, NotValidGameStringRepresentationException {
+
         ClassLoader classLoader = Prototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo.txt");
         URL url = classLoader.getResource("examples/hallway0.txt");
