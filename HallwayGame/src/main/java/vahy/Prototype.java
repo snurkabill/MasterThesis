@@ -2,7 +2,7 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.agent.policy.random.UniformRandomWalkPolicy;
+import vahy.environment.agent.policy.exhaustive.BfsPolicy;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.episode.EpisodeAggregator;
@@ -23,8 +23,8 @@ public class Prototype {
     public static void main(String[] args) throws IOException, NotValidGameStringRepresentationException {
         ClassLoader classLoader = Prototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
-//        URL url = classLoader.getResource("examples/hallway_demo2.txt");
-        URL url = classLoader.getResource("examples/hallway0.txt");
+        URL url = classLoader.getResource("examples/hallway_demo2.txt");
+//        URL url = classLoader.getResource("examples/hallway0.txt");
         File file = new File(url.getFile());
         SplittableRandom random = new SplittableRandom(2);
         GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.05).stepPenalty(1).trapProbability(0.0).buildConfig();
@@ -32,8 +32,8 @@ public class Prototype {
         EpisodeAggregator episodeAggregator = new EpisodeAggregator(
             1,
             100,
-            new UniformRandomWalkPolicy(random),
-//            new ExhaustivePolicy(random),
+//            new UniformRandomWalkPolicy(random),
+            new BfsPolicy(random, 0.99, 100),
             initialStateInstanceFactory);
         episodeAggregator.runSimulation(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
     }

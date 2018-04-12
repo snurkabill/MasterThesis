@@ -14,7 +14,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.empty.EmptySearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
 import vahy.impl.search.nodeExpander.BaseNodeExpander;
-import vahy.impl.search.nodeSelector.exhaustive.BfsNodeSelector;
+import vahy.impl.search.nodeSelector.exhaustive.AbstractExhaustiveNodeSelector;
 import vahy.impl.search.simulation.CumulativeRewardSimulator;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.search.update.ArgmaxDiscountEstimatedRewardTransitionUpdater;
@@ -24,6 +24,7 @@ import vahy.utils.StreamUtils;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public abstract class ExhaustivePolicy implements IOneHotPolicy {
 
@@ -38,34 +39,51 @@ public abstract class ExhaustivePolicy implements IOneHotPolicy {
         EmptyStateActionMetadata<DoubleScalarReward>,
         EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchNodeFactory;
+    private final Supplier<AbstractExhaustiveNodeSelector<
+                ActionType,
+                DoubleScalarReward,
+                DoubleVectorialObservation,
+                EmptyStateActionMetadata<DoubleScalarReward>,
+                EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
+                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> nodeSelectorSupplier;
+    private final int uprateTreeCount;
 
-
-    public ExhaustivePolicy(SplittableRandom random) {
+    public ExhaustivePolicy(
+        SplittableRandom random,
+        double discountFactor,
+        int uprateTreeCount,
+        Supplier<AbstractExhaustiveNodeSelector<
+            ActionType,
+            DoubleScalarReward,
+            DoubleVectorialObservation,
+            EmptyStateActionMetadata<DoubleScalarReward>,
+            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> nodeSelectorSupplier) {
         this.random = random;
+        this.discountFactor = discountFactor;
+        this.nodeSelectorSupplier = nodeSelectorSupplier;
+        this.uprateTreeCount = uprateTreeCount;
         this.searchNodeFactory = new SearchNodeBaseFactoryImpl<>(
             (stateRewardReturn, parent) -> {
                 Double cumulativeReward = parent != null ? parent.getSearchNodeMetadata().getCumulativeReward().getValue() : 0.0;
                 return new EmptySearchNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
             }
         );
-        discountFactor = 0.99;
     }
 
     @Override
     public ActionType getDiscreteAction(ImmutableStateImpl gameState) {
         SearchTreeImpl<ActionType, DoubleScalarReward, DoubleVectorialObservation, EmptyStateActionMetadata<DoubleScalarReward>, EmptySearchNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchTree = new SearchTreeImpl<>(
                 searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarReward(0.0)), null, null),
-                new BfsNodeSelector<>(),
+                nodeSelectorSupplier.get(),
                 new BaseNodeExpander<>(searchNodeFactory, stateRewardReturn -> new EmptyStateActionMetadata<>(stateRewardReturn.getReward())),
                 new TraversingTreeUpdater<>(new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor)),
                 new CumulativeRewardSimulator<>()
             );
-
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < uprateTreeCount; i++) {
             logger.debug("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
-
         return searchTree
             .getRoot()
             .getSearchNodeMetadata()
