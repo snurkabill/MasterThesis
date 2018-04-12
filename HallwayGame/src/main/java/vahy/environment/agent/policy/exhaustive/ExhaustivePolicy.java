@@ -19,6 +19,7 @@ import vahy.impl.search.simulation.CumulativeRewardSimulator;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.search.update.ArgmaxDiscountEstimatedRewardTransitionUpdater;
 import vahy.impl.search.update.TraversingTreeUpdater;
+import vahy.timer.SimpleTimer;
 import vahy.utils.StreamUtils;
 
 import java.util.Comparator;
@@ -47,6 +48,7 @@ public abstract class ExhaustivePolicy implements IOneHotPolicy {
                 EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
                 State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> nodeSelectorSupplier;
     private final int uprateTreeCount;
+    private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
     public ExhaustivePolicy(
         SplittableRandom random,
@@ -80,10 +82,22 @@ public abstract class ExhaustivePolicy implements IOneHotPolicy {
                 new TraversingTreeUpdater<>(new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor)),
                 new CumulativeRewardSimulator<>()
             );
+
+        timer.startTimer();
         for (int i = 0; i < uprateTreeCount; i++) {
             logger.debug("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
+        timer.stopTimer();
+
+        logger.info("Finished updating search tree with total expanded node count: [{}], total created node count: [{}],  max branch factor: [{}], average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
+            searchTree.getTotalNodesExpanded(),
+            searchTree.getTotalNodesCreated(),
+            searchTree.getMaxBranchingFactor(),
+            searchTree.calculateAverageBranchingFactor(),
+            timer.secondsSpent(),
+            timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
+
         return searchTree
             .getRoot()
             .getSearchNodeMetadata()
