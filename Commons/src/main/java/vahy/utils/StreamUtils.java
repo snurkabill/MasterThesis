@@ -1,9 +1,13 @@
 package vahy.utils;
 
+import vahy.collectors.RandomizedMaxCollector;
+
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.SplittableRandom;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -12,11 +16,11 @@ public class StreamUtils {
 
 
     // From SO: https://stackoverflow.com/a/23529010/1815451
-    public static<A, B, C> Stream<C> zip(Stream<? extends A> a,
+    public static<elementType, B, C> Stream<C> zip(Stream<? extends elementType> a,
                                          Stream<? extends B> b,
-                                         BiFunction<? super A, ? super B, ? extends C> zipper) {
+                                         BiFunction<? super elementType, ? super B, ? extends C> zipper) {
         Objects.requireNonNull(zipper);
-        Spliterator<? extends A> aSpliterator = Objects.requireNonNull(a).spliterator();
+        Spliterator<? extends elementType> aSpliterator = Objects.requireNonNull(a).spliterator();
         Spliterator<? extends B> bSpliterator = Objects.requireNonNull(b).spliterator();
 
         // Zipping looses DISTINCT and SORTED characteristics
@@ -27,7 +31,7 @@ public class StreamUtils {
             ? Math.min(aSpliterator.getExactSizeIfKnown(), bSpliterator.getExactSizeIfKnown())
             : -1;
 
-        Iterator<A> aIterator = Spliterators.iterator(aSpliterator);
+        Iterator<elementType> aIterator = Spliterators.iterator(aSpliterator);
         Iterator<B> bIterator = Spliterators.iterator(bSpliterator);
         Iterator<C> cIterator = new Iterator<>() {
             @Override
@@ -46,4 +50,10 @@ public class StreamUtils {
             ? StreamSupport.stream(split, true)
             : StreamSupport.stream(split, false);
     }
+
+    public static<elementType> RandomizedMaxCollector<elementType> toRandomizedMaxCollector(Comparator<elementType> comparator, SplittableRandom random) {
+        return new RandomizedMaxCollector<>(comparator, random);
+    }
+
+
 }
