@@ -1,5 +1,7 @@
 package vahy.environment.agent.policy.exhaustive;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.State;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.environment.ActionType;
@@ -17,12 +19,18 @@ import vahy.impl.search.simulation.CumulativeRewardSimulator;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.search.update.ArgmaxDiscountEstimatedRewardTransitionUpdater;
 import vahy.impl.search.update.TraversingTreeUpdater;
+import vahy.utils.StreamUtils;
 
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.SplittableRandom;
 
-public class BfsPolicy implements IOneHotPolicy {
+public abstract class ExhaustivePolicy implements IOneHotPolicy {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExhaustivePolicy.class);
+
+    private final SplittableRandom random;
+    private final double discountFactor;
     private final SearchNodeFactory<
         ActionType,
         DoubleScalarReward,
@@ -31,13 +39,16 @@ public class BfsPolicy implements IOneHotPolicy {
         EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchNodeFactory;
 
-    public BfsPolicy() {
+
+    public ExhaustivePolicy(SplittableRandom random) {
+        this.random = random;
         this.searchNodeFactory = new SearchNodeBaseFactoryImpl<>(
             (stateRewardReturn, parent) -> {
                 Double cumulativeReward = parent != null ? parent.getSearchNodeMetadata().getCumulativeReward().getValue() : 0.0;
                 return new EmptySearchNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
             }
         );
+        discountFactor = 0.99;
     }
 
     @Override
@@ -46,12 +57,12 @@ public class BfsPolicy implements IOneHotPolicy {
                 searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarReward(0.0)), null, null),
                 new BfsNodeSelector<>(),
                 new BaseNodeExpander<>(searchNodeFactory, stateRewardReturn -> new EmptyStateActionMetadata<>(stateRewardReturn.getReward())),
-                new TraversingTreeUpdater<>(new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(0.9)),
+                new TraversingTreeUpdater<>(new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor)),
                 new CumulativeRewardSimulator<>()
             );
 
-        for (int i = 0; i < 100; i++) {
-            //System.out.println("update " + i);
+        for (int i = 0; i < 1000; i++) {
+            logger.debug("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
 
@@ -61,8 +72,7 @@ public class BfsPolicy implements IOneHotPolicy {
             .getStateActionMetadataMap()
             .entrySet()
             .stream()
-            .max(Comparator.comparing(o -> o.getValue().getEstimatedTotalReward()))
-            .get()
+            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(o -> o.getValue().getEstimatedTotalReward()), random))
             .getKey();
     }
 }

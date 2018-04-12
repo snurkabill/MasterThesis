@@ -9,6 +9,7 @@ import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
@@ -21,7 +22,7 @@ public class ChartBuilder {
     private static final int CHART_SIZE_X = 1280;
     private static final int CHART_SIZE_Y = 720;
 
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger("ReportMaker");
+    private static final Logger LOGGER = LoggerFactory.getLogger("ReportMaker");
 
     public static void chart(final File target, final List<List<Double>> timeSeries, final String chartName) {
         LOGGER.info("Preparing data for report");
