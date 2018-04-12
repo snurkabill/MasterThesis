@@ -31,6 +31,10 @@ public class SearchTreeImpl<
     private final TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> treeUpdater;
     private final NodeEvaluationSimulator<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeEvaluationSimulator;
 
+    private int totalNodesExpanded = 0;
+    private int totalNodesCreated = 0; // should be 1 for root
+    private int maxBranchingFactor = 0;
+
     public SearchTreeImpl(
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root,
         NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeSelector,
@@ -48,12 +52,18 @@ public class SearchTreeImpl<
     @Override
     public boolean updateTree() {
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
+        totalNodesExpanded++;
         if(selectedNodeForExpansion == null) {
             return false;
         }
         if(!selectedNodeForExpansion.isFinalNode()) {
             logger.debug("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
             nodeExpander.expandNode(selectedNodeForExpansion);
+            int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
+            if(branchingNodesCount > maxBranchingFactor) {
+                maxBranchingFactor = branchingNodesCount;
+            }
+            totalNodesCreated += branchingNodesCount;
             nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
         }
         nodeEvaluationSimulator.calculateMetadataEstimation(selectedNodeForExpansion);
@@ -66,4 +76,19 @@ public class SearchTreeImpl<
         return root;
     }
 
+    public int getTotalNodesExpanded() {
+        return totalNodesExpanded;
+    }
+
+    public int getTotalNodesCreated() {
+        return totalNodesCreated;
+    }
+
+    public int getMaxBranchingFactor() {
+        return maxBranchingFactor;
+    }
+
+    public double calculateAverageBranchingFactor() {
+        return totalNodesCreated / (double) totalNodesExpanded;
+    }
 }
