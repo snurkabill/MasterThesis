@@ -8,10 +8,12 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.impl.search.node.nodeMetadata.alphago.AlphaGoNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.alphago.AlphaGoStateActionMetadata;
+import vahy.utils.StreamUtils;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class AlphaGoNodeSelector<
@@ -23,9 +25,11 @@ public class AlphaGoNodeSelector<
 
     private SearchNode<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, TState> root;
     private final double cpuctParameter;
+    private final SplittableRandom random;
 
-    public AlphaGoNodeSelector(double cpuctParameter) {
+    public AlphaGoNodeSelector(double cpuctParameter, SplittableRandom random) {
         this.cpuctParameter = cpuctParameter;
+        this.random = random;
     }
 
     @Override
@@ -61,8 +65,7 @@ public class AlphaGoNodeSelector<
                         }))
                 .entrySet()
                 .stream()
-                .max(Comparator.comparing(Map.Entry::getValue))
-                .get()
+                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(Map.Entry::getValue), random))
                 .getKey();
             node = node.getChildNodeMap().get(bestAction);
         }

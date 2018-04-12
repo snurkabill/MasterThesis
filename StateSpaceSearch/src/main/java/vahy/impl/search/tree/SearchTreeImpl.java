@@ -1,5 +1,7 @@
 package vahy.impl.search.tree;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
@@ -22,6 +24,7 @@ public class SearchTreeImpl<
     TState extends State<TAction, TReward, TObservation>>
     implements SearchTree<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> {
 
+    private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
     private final SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root;
     private final NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeSelector;
     private final NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeExpander;
@@ -49,6 +52,7 @@ public class SearchTreeImpl<
             return false;
         }
         if(!selectedNodeForExpansion.isFinalNode()) {
+            logger.debug("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
             nodeExpander.expandNode(selectedNodeForExpansion);
             nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
         }

@@ -1,5 +1,7 @@
 package vahy.impl.search.nodeSelector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
@@ -24,6 +26,7 @@ public abstract class AbstractPriorityQueueNodeSelector<
     TPriority extends Comparable<TPriority>>
     implements NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> {
 
+    private static final Logger logger = LoggerFactory.getLogger(AbstractPriorityQueueNodeSelector.class);
     protected final Queue<ImmutableTuple<TPriority, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>>> queue;
 
     public AbstractPriorityQueueNodeSelector() {
@@ -32,6 +35,7 @@ public abstract class AbstractPriorityQueueNodeSelector<
 
     @Override
     public SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectNextNode() {
+        logger.trace("Selecting next node. Queue size: [{}]", queue.size());
         return queue.poll().getSecond();
     }
 }

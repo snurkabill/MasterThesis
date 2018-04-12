@@ -20,7 +20,7 @@ public class DoubleScalarReward implements Reward {
             return 0;
         }
         if(!(o instanceof DoubleScalarReward)) {
-            throw new IllegalArgumentException("Trying to compare non-comparable implementations");
+            throw new IllegalArgumentException("Trying to compare non-comparable implementations. Base class: [" + DoubleScalarReward.class.getName() + "] comparing: [" + o + "]");
         }
         DoubleScalarReward other = (DoubleScalarReward) o;
         return this.value.compareTo(other.value);
