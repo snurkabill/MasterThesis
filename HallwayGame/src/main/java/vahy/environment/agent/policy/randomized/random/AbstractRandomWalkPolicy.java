@@ -1,4 +1,4 @@
-package vahy.environment.agent.policy.random;
+package vahy.environment.agent.policy.randomized.random;
 
 import vahy.environment.agent.policy.IOneHotPolicy;
 import vahy.environment.agent.policy.IPolicy;

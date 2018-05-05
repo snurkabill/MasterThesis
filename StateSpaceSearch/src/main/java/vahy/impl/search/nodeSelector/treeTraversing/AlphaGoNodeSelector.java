@@ -1,4 +1,4 @@
-package vahy.impl.search.nodeSelector.alphago;
+package vahy.impl.search.nodeSelector.treeTraversing;
 
 import vahy.api.model.Action;
 import vahy.api.model.Observation;

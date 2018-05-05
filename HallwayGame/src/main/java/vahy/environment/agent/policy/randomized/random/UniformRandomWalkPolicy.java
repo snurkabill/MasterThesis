@@ -1,4 +1,4 @@
-package vahy.environment.agent.policy.random;
+package vahy.environment.agent.policy.randomized.random;
 
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;

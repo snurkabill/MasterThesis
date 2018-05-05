@@ -9,6 +9,8 @@ import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
 
+import java.util.Map;
+
 public class CumulativeRewardSimulator<
     TAction extends Action,
     TReward extends Reward,
@@ -19,7 +21,13 @@ public class CumulativeRewardSimulator<
 
     @Override
     public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> expandedNode) {
-        expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(expandedNode.getSearchNodeMetadata().getCumulativeReward());
+        if(expandedNode.getSearchNodeMetadata().getEstimatedTotalReward() == null) {
+            expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(expandedNode.getSearchNodeMetadata().getCumulativeReward());
+        }
+        for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
+            entry.getValue().getSearchNodeMetadata().setEstimatedTotalReward(entry.getValue().getSearchNodeMetadata().getCumulativeReward());
+            expandedNode.getSearchNodeMetadata().getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(entry.getValue().getSearchNodeMetadata().getCumulativeReward());
+        }
     }
 
 }
