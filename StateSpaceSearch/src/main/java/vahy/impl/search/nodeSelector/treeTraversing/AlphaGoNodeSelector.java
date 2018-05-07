@@ -44,6 +44,11 @@ public class AlphaGoNodeSelector<
     }
 
     @Override
+    public void setNewRoot(SearchNode<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, TState> root) {
+        this.root = root;
+    }
+
+    @Override
     public SearchNode<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, TState> selectNextNode() {
         if(root == null) {
             throw new IllegalStateException("Root was not initialized");

@@ -4,13 +4,12 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
-import vahy.impl.model.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
-import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -81,44 +80,68 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         this.hasAgentMoved = hasAgentMoved;
     }
 
-    private ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities() {
+    public ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities() {
         List<ActionType> possibleActions = new LinkedList<>();
         List<Double> actionProbabilities = new LinkedList<>();
+        if(isAgentTurn) {
+            return new ImmutableTuple<>(possibleActions, actionProbabilities);
+        }
         double sum = 0.0;
 
         boolean[][] walls = staticGamePart.getWalls();
         double[][] traps = staticGamePart.getTrapProbabilities();
-        if(traps[agentXCoordination][agentYCoordination] != 0) {
-            possibleActions.add(ActionType.TRAP);
-            actionProbabilities.add(traps[agentXCoordination][agentYCoordination]);
-            sum += traps[agentXCoordination][agentYCoordination];
-        }
 
         if(hasAgentMoved) {
             ImmutableTuple<Integer, Integer> coordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
-                possibleActions.add(ActionType.NOISY_RIGHT);
-                actionProbabilities.add(staticGamePart.getNoisyMoveProbability() / 2.0);
-                sum += staticGamePart.getNoisyMoveProbability() / 2.0;
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
+                    possibleActions.add(ActionType.NOISY_RIGHT);
+                    double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
+                    actionProbabilities.add(noisyRightProb);
+                    sum += noisyRightProb;
                     possibleActions.add(ActionType.NOISY_RIGHT_TRAP);
-                    actionProbabilities.add((staticGamePart.getNoisyMoveProbability() / 2.0) * traps[coordinates.getFirst()][coordinates.getSecond()]);
-                    sum += (staticGamePart.getNoisyMoveProbability() / 2.0) * traps[coordinates.getFirst()][coordinates.getSecond()];
+                    double noisyRightTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
+                    actionProbabilities.add(noisyRightTrapProb);
+                    sum += noisyRightTrapProb;
+                } else {
+                    possibleActions.add(ActionType.NOISY_RIGHT);
+                    double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0;
+                    actionProbabilities.add(noisyRightProb);
+                    sum += noisyRightProb;
                 }
             }
-
             coordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
-                possibleActions.add(ActionType.NOISY_LEFT);
-                actionProbabilities.add(staticGamePart.getNoisyMoveProbability() / 2.0);
-                sum += staticGamePart.getNoisyMoveProbability() / 2.0;
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
+                    possibleActions.add(ActionType.NOISY_LEFT);
+                    double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
+                    actionProbabilities.add(noisyLeftProb);
+                    sum += noisyLeftProb;
                     possibleActions.add(ActionType.NOISY_LEFT_TRAP);
-                    actionProbabilities.add((staticGamePart.getNoisyMoveProbability() / 2.0) * traps[coordinates.getFirst()][coordinates.getSecond()]);
-                    sum += (staticGamePart.getNoisyMoveProbability() / 2.0) * traps[coordinates.getFirst()][coordinates.getSecond()];
+                    double noisyLeftTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
+                    actionProbabilities.add(noisyLeftTrapProb);
+                    sum += noisyLeftTrapProb;
+                } else {
+                    possibleActions.add(ActionType.NOISY_LEFT);
+                    double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0;
+                    actionProbabilities.add(noisyLeftProb);
+                    sum += noisyLeftProb;
                 }
             }
+            if(traps[agentXCoordination][agentYCoordination] != 0) {
+                possibleActions.add(ActionType.TRAP);
+                double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability()) * traps[agentXCoordination][agentYCoordination];
+                actionProbabilities.add(straightTrapProb);
+                sum += straightTrapProb;
+            }
+        } else {
+            if(traps[agentXCoordination][agentYCoordination] != 0) {
+                possibleActions.add(ActionType.TRAP);
+                actionProbabilities.add(traps[agentXCoordination][agentYCoordination]);
+                sum += traps[agentXCoordination][agentYCoordination];
+            }
         }
+
         if(sum > 1) {
             throw new IllegalStateException("Sum of probabilities should be less than one");
         }
@@ -135,16 +158,6 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
             return environmentActionsWithProbabilities().getFirst().toArray(new ActionType[0]);
         }
     }
-
-    public StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> applyEnvironmentAction() {
-        if(isAgentTurn) {
-            throw new IllegalStateException("Environment action cannot be applied when it is agent's turn");
-        }
-        ImmutableTuple<List<ActionType>, List<Double>> actions = environmentActionsWithProbabilities();
-        ActionType pickedAction = actions.getFirst().get(RandomDistributionUtils.getRandomIndexFromDistribution(actions.getSecond(), staticGamePart.getRandom()));
-        return applyAction(pickedAction);
-    }
-
 
     @Override
     public StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> applyAction(ActionType actionType) {
@@ -256,7 +269,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         false), new DoubleScalarReward(0.0));
                 case NOISY_LEFT_TRAP:
-                    ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeRightMove();
+                    ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeLeftMove();
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
@@ -416,5 +429,37 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
 
     public boolean isAgentTurn() {
         return isAgentTurn;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ImmutableStateImpl)) return false;
+
+        ImmutableStateImpl that = (ImmutableStateImpl) o;
+
+        if (rewardsLeft != that.rewardsLeft) return false;
+        if (isAgentKilled != that.isAgentKilled) return false;
+        if (agentXCoordination != that.agentXCoordination) return false;
+        if (agentYCoordination != that.agentYCoordination) return false;
+        if (isAgentTurn() != that.isAgentTurn()) return false;
+        if (hasAgentMoved != that.hasAgentMoved) return false;
+        if (!staticGamePart.equals(that.staticGamePart)) return false;
+        if (!Arrays.deepEquals(rewards, that.rewards)) return false;
+        return agentHeading == that.agentHeading;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = staticGamePart.hashCode();
+        result = 31 * result + Arrays.deepHashCode(rewards);
+        result = 31 * result + rewardsLeft;
+        result = 31 * result + (isAgentKilled ? 1 : 0);
+        result = 31 * result + agentXCoordination;
+        result = 31 * result + agentYCoordination;
+        result = 31 * result + agentHeading.hashCode();
+        result = 31 * result + (isAgentTurn() ? 1 : 0);
+        result = 31 * result + (hasAgentMoved ? 1 : 0);
+        return result;
     }
 }

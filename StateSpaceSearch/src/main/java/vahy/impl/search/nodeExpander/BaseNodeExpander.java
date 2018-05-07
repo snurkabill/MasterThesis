@@ -48,7 +48,7 @@ public class BaseNodeExpander<
         Map<TAction, TStateActionMetadata> stateActionMetadataMap = node.getSearchNodeMetadata().getStateActionMetadataMap();
         for (TAction action : allPossibleActions) {
             StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = node.applyAction(action);
-            logger.debug("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward());
+            logger.debug("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             childNodeMap.put(action, searchNodeFactory.createNode(stateRewardReturn, node, action));
             stateActionMetadataMap.put(action, stateActionMetadataFactory.apply(stateRewardReturn));
         }

@@ -14,7 +14,7 @@ public interface SearchTree<
     TObservation extends Observation,
     TStateActionMetadata extends StateActionMetadata<TReward>,
     TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>,
-    TState extends State<TAction, TReward, TObservation>> {
+    TState extends State<TAction, TReward, TObservation>> extends State<TAction, TReward, TObservation>  {
 
     SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> getRoot();
 

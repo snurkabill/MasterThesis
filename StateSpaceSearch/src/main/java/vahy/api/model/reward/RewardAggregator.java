@@ -1,6 +1,7 @@
 package vahy.api.model.reward;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 public interface RewardAggregator<TReward extends Reward> {
 
@@ -10,8 +11,11 @@ public interface RewardAggregator<TReward extends Reward> {
 
     TReward aggregate(List<TReward> rewardList);
 
-    TReward expectedReward(TReward[] rewardArray);
+    TReward aggregate(Stream<TReward> rewardList);
 
-    TReward expectedReward(List<TReward> rewardList);
+    TReward averageReward(TReward[] rewardArray);
 
+    TReward averageReward(List<TReward> rewardList);
+
+    TReward averageReward(Stream<TReward> rewardStream);
 }

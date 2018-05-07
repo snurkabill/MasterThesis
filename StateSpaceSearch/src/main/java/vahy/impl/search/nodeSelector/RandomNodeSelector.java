@@ -37,5 +37,10 @@ public class RandomNodeSelector<
         rootNodes.forEach(this::addNode);
     }
 
+    @Override
+    public void setNewRoot(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root) {
+        // TODO: implement me
+    }
+
 
 }

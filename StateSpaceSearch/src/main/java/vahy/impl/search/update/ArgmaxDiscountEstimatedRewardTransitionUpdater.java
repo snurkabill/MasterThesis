@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.update.NodeTransitionUpdater;
-import vahy.impl.model.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleScalarReward;
 
 import java.util.Objects;
 

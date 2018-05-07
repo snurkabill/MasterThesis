@@ -1,9 +1,13 @@
 package vahy.environment.agent.policy.exhaustive;
 
+import vahy.api.model.State;
+import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.environment.agent.policy.AbstractTreeSearchPolicy;
-import vahy.impl.model.DoubleScalarReward;
+import vahy.environment.state.ImmutableStateImpl;
+import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.empty.EmptySearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
@@ -17,11 +21,19 @@ public class BfsPolicy extends AbstractTreeSearchPolicy<EmptyStateActionMetadata
     public BfsPolicy(
         SplittableRandom random,
         int uprateTreeCount,
+        ImmutableStateImpl gameState,
         NodeTransitionUpdater<
                     ActionType,
                     DoubleScalarReward,
                     EmptyStateActionMetadata<DoubleScalarReward>,
-                    EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> nodeTransitionUpdater) {
+                    EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> nodeTransitionUpdater,
+        NodeEvaluationSimulator<
+                    ActionType,
+                    DoubleScalarReward,
+                    DoubleVectorialObservation,
+                    EmptyStateActionMetadata<DoubleScalarReward>,
+                    EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
+                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
         super(random,
             uprateTreeCount,
             new SearchNodeBaseFactoryImpl<>(
@@ -31,6 +43,8 @@ public class BfsPolicy extends AbstractTreeSearchPolicy<EmptyStateActionMetadata
                     }
                 ),
             BfsNodeSelector::new,
-            stateRewardReturn -> new EmptyStateActionMetadata<>(stateRewardReturn.getReward()), nodeTransitionUpdater);
+            stateRewardReturn -> new EmptyStateActionMetadata<>(stateRewardReturn.getReward()), nodeTransitionUpdater,
+            gameState,
+            rewardSimulator);
     }
 }

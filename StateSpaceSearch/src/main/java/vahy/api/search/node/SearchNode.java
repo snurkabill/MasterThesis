@@ -40,5 +40,7 @@ public interface SearchNode<
 
     boolean isLeaf();
 
+    void makeRoot();
+
     // TODO: add getting (avg?) reward
 }

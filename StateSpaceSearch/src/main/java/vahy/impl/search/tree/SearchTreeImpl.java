@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
+import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
@@ -14,6 +15,7 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.tree.SearchTree;
 import vahy.api.search.update.TreeUpdater;
+import vahy.impl.model.ImmutableStateRewardReturnTuple;
 
 public class SearchTreeImpl<
     TAction extends Action,
@@ -25,7 +27,7 @@ public class SearchTreeImpl<
     implements SearchTree<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
-    private final SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root;
+    private SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root;
     private final NodeSelector<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeSelector;
     private final NodeExpander<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeExpander;
     private final TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> treeUpdater;
@@ -46,7 +48,7 @@ public class SearchTreeImpl<
         this.nodeExpander = nodeExpander;
         this.treeUpdater = treeUpdater;
         this.nodeEvaluationSimulator = nodeEvaluationSimulator;
-        this.nodeSelector.addNode(root);
+        this.nodeSelector.setNewRoot(root);
     }
 
     @Override
@@ -69,6 +71,35 @@ public class SearchTreeImpl<
         nodeEvaluationSimulator.calculateMetadataEstimation(selectedNodeForExpansion);
         treeUpdater.updateTree(selectedNodeForExpansion);
         return true;
+    }
+
+    @Override
+    public TAction[] getAllPossibleActions() {
+        return this.root.getWrappedState().getAllPossibleActions();
+    }
+
+    @Override
+    public StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> applyAction(TAction action) {
+        TReward reward = root.getSearchNodeMetadata().getStateActionMetadataMap().get(action).getGainedReward();
+        root = root.getChildNodeMap().get(action);
+        root.makeRoot();
+        nodeSelector.setNewRoot(root);
+        return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
+    }
+
+    @Override
+    public State<TAction, TReward, TObservation> deepCopy() {
+        throw new UnsupportedOperationException("Deep copy on search tree is not yet defined nad maybe won't be since it's not really needed");
+    }
+
+    @Override
+    public TObservation getObservation() {
+        return root.getWrappedState().getObservation();
+    }
+
+    @Override
+    public boolean isFinalState() {
+        return root.isFinalNode();
     }
 
     @Override

@@ -30,4 +30,9 @@ public class AStarNodeSelector<
     public void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> rootNodes) {
         rootNodes.forEach(this::addNode);
     }
+
+    @Override
+    public void setNewRoot(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root) {
+        // TODO: Implement me
+    }
 }

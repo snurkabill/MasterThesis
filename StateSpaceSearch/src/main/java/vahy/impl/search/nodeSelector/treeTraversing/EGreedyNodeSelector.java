@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class EGreedy<
+public class EGreedyNodeSelector<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
@@ -27,20 +27,22 @@ public class EGreedy<
     private final double epsilon;
     private final SplittableRandom random;
 
-    public EGreedy(double epsilon, SplittableRandom random) {
+    public EGreedyNodeSelector(double epsilon, SplittableRandom random) {
         this.epsilon = epsilon;
         this.random = random;
     }
 
     @Override
     public void addNode(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
-        if(root == null && node.isRoot()) {
-            root = node;
-        }
     }
 
     @Override
     public void addNodes(Collection<SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> searchNodes) {
+    }
+
+    @Override
+    public void setNewRoot(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root) {
+        this.root = root;
     }
 
     @Override

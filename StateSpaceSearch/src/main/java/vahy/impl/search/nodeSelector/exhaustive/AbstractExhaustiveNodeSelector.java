@@ -43,4 +43,8 @@ public abstract class AbstractExhaustiveNodeSelector<
         return nodeQueue.removeFirst();
     }
 
+    @Override
+    public void setNewRoot(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root) {
+        addNode(root);
+    }
 }

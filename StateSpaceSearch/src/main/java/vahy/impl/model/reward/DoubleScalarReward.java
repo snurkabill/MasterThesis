@@ -1,4 +1,4 @@
-package vahy.impl.model;
+package vahy.impl.model.reward;
 
 import vahy.api.model.reward.Reward;
 
@@ -25,4 +25,10 @@ public class DoubleScalarReward implements Reward {
         DoubleScalarReward other = (DoubleScalarReward) o;
         return this.value.compareTo(other.value);
     }
+
+    @Override
+    public String toPrettyString() {
+        return value.toString();
+    }
+
 }

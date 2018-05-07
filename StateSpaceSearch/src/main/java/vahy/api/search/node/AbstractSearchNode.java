@@ -18,8 +18,8 @@ public abstract class AbstractSearchNode<
 
     private final TState wrappedState;
     private final TSearchNodeMetadata searchNodeMetadata;
-    private final SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent;
-    private final TAction appliedParentAction;
+    private SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent;
+    private TAction appliedParentAction;
 
     protected AbstractSearchNode(
         TState wrappedState,
@@ -65,5 +65,11 @@ public abstract class AbstractSearchNode<
     @Override
     public boolean isRoot() {
         return parent == null;
+    }
+
+    @Override
+    public void makeRoot() {
+        parent = null;
+        appliedParentAction = null;
     }
 }
