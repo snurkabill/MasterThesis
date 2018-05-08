@@ -323,8 +323,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                     : rewards[i][j];
             }
         }
-        vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
         vector[vector.length - 2] = agentHeading.getHeadingRepresentation();
+        vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
         return new DoubleVectorialObservation(vector);
     }
 
@@ -421,11 +421,9 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         }
     }
 
-
     private boolean isAgentStandingOnTrap() {
         return staticGamePart.getTrapProbabilities()[agentXCoordination][agentYCoordination] != 0.0;
     }
-
 
     public boolean isAgentTurn() {
         return isAgentTurn;

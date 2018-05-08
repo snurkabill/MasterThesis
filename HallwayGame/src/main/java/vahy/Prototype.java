@@ -36,8 +36,8 @@ public class Prototype {
     public static void main(String[] args) throws IOException, NotValidGameStringRepresentationException {
         ClassLoader classLoader = Prototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
-//        URL url = classLoader.getResource("examples/hallway_demo2.txt");
-         URL url = classLoader.getResource("examples/hallway_demo3.txt");
+        URL url = classLoader.getResource("examples/hallway_demo2.txt");
+//         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
 //        URL url = classLoader.getResource("examples/hallway0.txt");
