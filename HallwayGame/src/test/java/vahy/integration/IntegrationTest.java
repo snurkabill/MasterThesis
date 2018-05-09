@@ -18,8 +18,8 @@ import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
-import vahy.impl.search.node.nodeMetadata.empty.EmptySearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
+import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
+import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
 import vahy.utils.ImmutableTuple;
@@ -48,18 +48,18 @@ public class IntegrationTest {
         double discountFactor = 0.9;
 
         NodeTransitionUpdater<
-                    ActionType,
-                    DoubleScalarReward,
-                    EmptyStateActionMetadata<DoubleScalarReward>,
-                    EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
+            ActionType,
+            DoubleScalarReward,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
         NodeEvaluationSimulator<
-                    ActionType,
-                    DoubleScalarReward,
-                    DoubleVectorialObservation,
-                    EmptyStateActionMetadata<DoubleScalarReward>,
-                    EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
-                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
+            ActionType,
+            DoubleScalarReward,
+            DoubleVectorialObservation,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
 
         EpisodeAggregator episodeAggregator = new EpisodeAggregator(
             1,
