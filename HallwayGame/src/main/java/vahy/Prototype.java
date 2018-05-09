@@ -18,8 +18,8 @@ import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
-import vahy.impl.search.node.nodeMetadata.empty.EmptySearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
+import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
+import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
 import vahy.utils.ImmutableTuple;
@@ -42,10 +42,10 @@ public class Prototype {
         ClassLoader classLoader = Prototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
 //        URL url = classLoader.getResource("examples/hallway_demo2.txt");
-         URL url = classLoader.getResource("examples/hallway_demo3.txt");
+//         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
-//        URL url = classLoader.getResource("examples/hallway0.txt");
+        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 
         File file = new File(url.getFile());
@@ -57,6 +57,28 @@ public class Prototype {
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
         double discountFactor = 0.9;
 
+//        NodeTransitionUpdater<
+//            ActionType,
+//            DoubleScalarReward,
+//            EmptyStateActionMetadata<DoubleScalarReward>,
+//            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor);
+
+
+
+        NodeTransitionUpdater<
+            ActionType,
+            DoubleScalarReward,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
+
+//
+//        NodeTransitionUpdater<
+//            ActionType,
+//            DoubleScalarReward,
+//            Ucb1StateActionMetadata<DoubleScalarReward>,
+//            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
+
+
 
 //        NodeEvaluationSimulator<
 //            ActionType,
@@ -66,30 +88,31 @@ public class Prototype {
 //            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
 //            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new CumulativeRewardSimulator<>();
 
-//        NodeTransitionUpdater<
-//            ActionType,
-//            DoubleScalarReward,
-//            EmptyStateActionMetadata<DoubleScalarReward>,
-//            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor);
-
-        NodeTransitionUpdater<
-            ActionType,
-            DoubleScalarReward,
-            EmptyStateActionMetadata<DoubleScalarReward>,
-            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,
             DoubleVectorialObservation,
-            EmptyStateActionMetadata<DoubleScalarReward>,
-            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
+
+//        NodeEvaluationSimulator<
+//            ActionType,
+//            DoubleScalarReward,
+//            DoubleVectorialObservation,
+//            Ucb1StateActionMetadata<DoubleScalarReward>,
+//            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
+
+
 
         EpisodeAggregator episodeAggregator = new EpisodeAggregator(
             1,
             10,
 //             new UniformRandomWalkPolicy(random),
+
+
 //            immutableState -> new ImmutableTuple<>(
 //                new BfsPolicy(
 //                    random,
@@ -98,17 +121,47 @@ public class Prototype {
 //                    transitionUpdater,
 //                    rewardSimulator),
 //                immutableState),
-//            new EnvironmentPolicy(random),
+
+
             immutableState -> new ImmutableTuple<>(
                 new EGreedyPolicy(
                     random,
-                    50,
-                    0.1,
+                    100,
+                    0.05,
                     immutableState,
                     transitionUpdater,
                     rewardSimulator),
                 immutableState),
-                new EnvironmentPolicy(random),
+
+//            immutableState -> new ImmutableTuple<
+//                AbstractTreeSearchPolicy<
+//                    AbstractStateActionMetadata<DoubleScalarReward>,
+//                    AbstractSearchNodeMetadata<ActionType,DoubleScalarReward,AbstractStateActionMetadata<DoubleScalarReward>>>,
+//                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>(
+//                new Ucb1Policy(
+//                    random,
+//                    100,
+//                    immutableState,
+//                    transitionUpdater,
+//                    rewardSimulator),
+//                immutableState),
+
+
+//            immutableState -> new ImmutableTuple<
+//                AbstractTreeSearchPolicy<
+//                    Ucb1StateActionMetadata<DoubleScalarReward>,
+//                    Ucb1SearchNodeMetadata<ActionType,DoubleScalarReward>>,
+//                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>(
+//                new Ucb1Policy(
+//                    random,
+//                    50,
+//                    immutableState,
+//                    transitionUpdater,
+//                    rewardSimulator),
+//                immutableState),
+
+
+            new EnvironmentPolicy(random),
             initialStateInstanceFactory);
         List<List<Double>> rewardHistory = episodeAggregator.runSimulation(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
         printChart(rewardHistory);

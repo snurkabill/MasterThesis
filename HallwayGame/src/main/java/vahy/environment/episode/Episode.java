@@ -7,10 +7,10 @@ import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.policy.AbstractTreeSearchPolicy;
 import vahy.environment.agent.policy.IOneHotPolicy;
-import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.DoubleVectorialObservation;
-import vahy.impl.search.node.nodeMetadata.empty.EmptySearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
+import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
+import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,12 +19,12 @@ public class Episode {
 
     private static final Logger logger = LoggerFactory.getLogger(Episode.class);
     private final State<ActionType, DoubleScalarReward, DoubleVectorialObservation> initialState;
-    private final AbstractTreeSearchPolicy<EmptyStateActionMetadata<DoubleScalarReward>, EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> playerPolicy;
+    private final AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> playerPolicy;
     private final IOneHotPolicy opponentPolicy;
 
     public Episode(
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation> initialState,
-        AbstractTreeSearchPolicy<EmptyStateActionMetadata<DoubleScalarReward>, EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> playerPolicy,
+        AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> playerPolicy,
         IOneHotPolicy opponentPolicy) {
         this.initialState = initialState;
         this.playerPolicy = playerPolicy;

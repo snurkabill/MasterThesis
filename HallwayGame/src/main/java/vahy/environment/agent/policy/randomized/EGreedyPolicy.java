@@ -9,6 +9,8 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
+import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
+import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.node.nodeMetadata.empty.EmptySearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
 import vahy.impl.search.nodeSelector.treeTraversing.EGreedyNodeSelector;
@@ -16,8 +18,7 @@ import vahy.impl.search.nodeSelector.treeTraversing.EGreedyNodeSelector;
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
-public class EGreedyPolicy extends AbstractTreeSearchPolicy<EmptyStateActionMetadata<DoubleScalarReward>, EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> {
-
+public class EGreedyPolicy extends AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> {
 
     public EGreedyPolicy(
         SplittableRandom random,
@@ -27,14 +28,14 @@ public class EGreedyPolicy extends AbstractTreeSearchPolicy<EmptyStateActionMeta
         NodeTransitionUpdater<
             ActionType,
             DoubleScalarReward,
-            EmptyStateActionMetadata<DoubleScalarReward>,
-            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> nodeTransitionUpdater,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,
             DoubleVectorialObservation,
-            EmptyStateActionMetadata<DoubleScalarReward>,
-            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
         super(random,
             uprateTreeCount,
