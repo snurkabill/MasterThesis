@@ -34,33 +34,7 @@ public abstract class AbstractTreeSearchPolicy<
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
 
     private final SplittableRandom random;
-//    private final SearchNodeFactory<
-//        ActionType,
-//        DoubleScalarReward,
-//        DoubleVectorialObservation,
-//        TStateActionMetadata,
-//        TSearchNodeMetadata,
-//        State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchNodeFactory;
-//    private final Supplier<NodeSelector<
-//            ActionType,
-//            DoubleScalarReward,
-//            DoubleVectorialObservation,
-//            TStateActionMetadata,
-//            TSearchNodeMetadata,
-//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> nodeSelectorSupplier;
-//    private final Function<StateRewardReturn<
-//                ActionType,
-//                DoubleScalarReward,
-//                DoubleVectorialObservation,
-//                State<
-//                    ActionType,
-//                    DoubleScalarReward,
-//                    DoubleVectorialObservation>>,
-//                TStateActionMetadata> stateActionMetadataFactory;
-//    private final NodeTransitionUpdater<ActionType, DoubleScalarReward, TStateActionMetadata, TSearchNodeMetadata> nodeTransitionUpdater;
-
     private final SearchTreeImpl<ActionType, DoubleScalarReward, DoubleVectorialObservation, TStateActionMetadata, TSearchNodeMetadata, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchTree;
-
     private final int uprateTreeCount;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
@@ -88,11 +62,7 @@ public abstract class AbstractTreeSearchPolicy<
         ImmutableStateImpl gameState,
         NodeEvaluationSimulator<ActionType, DoubleScalarReward, DoubleVectorialObservation, TStateActionMetadata, TSearchNodeMetadata, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
         this.random = random;
-//        this.searchNodeFactory = searchNodeFactory;
-//        this.nodeSelectorSupplier = nodeSelectorSupplier;
         this.uprateTreeCount = uprateTreeCount;
-//        this.stateActionMetadataFactory = stateActionMetadataFactory;
-//        this.nodeTransitionUpdater = nodeTransitionUpdater;
         this.searchTree =
             new SearchTreeImpl<>(
                 searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarReward(0.0)), null, null),

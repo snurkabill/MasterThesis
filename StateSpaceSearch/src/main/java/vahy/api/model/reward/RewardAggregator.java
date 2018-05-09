@@ -13,6 +13,14 @@ public interface RewardAggregator<TReward extends Reward> {
 
     TReward aggregate(Stream<TReward> rewardList);
 
+    TReward aggregateDiscount(TReward first, TReward second, double discountFactor);
+
+    TReward aggregateDiscount(TReward[] rewardArray, double discountFactor);
+
+    TReward aggregateDiscount(List<TReward> rewardList, double discountFactor);
+
+    TReward aggregateDiscount(Stream<TReward> rewardList, double discountFactor);
+
     TReward averageReward(TReward[] rewardArray);
 
     TReward averageReward(List<TReward> rewardList);

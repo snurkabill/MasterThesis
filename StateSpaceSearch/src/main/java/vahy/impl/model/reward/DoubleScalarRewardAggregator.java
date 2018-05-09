@@ -5,6 +5,7 @@ import vahy.api.model.reward.RewardAggregator;
 
 import java.util.List;
 import java.util.function.BinaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScalarReward>  {
@@ -33,8 +34,38 @@ public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScal
     }
 
     @Override
-    public DoubleScalarReward aggregate(Stream<DoubleScalarReward> rewardList) {
-        return rewardList.reduce(this::aggregate).orElse(new DoubleScalarReward(0.0));
+    public DoubleScalarReward aggregate(Stream<DoubleScalarReward> rewards) {
+        return rewards.reduce(this::aggregate).orElse(new DoubleScalarReward(0.0));
+    }
+
+    @Override
+    public DoubleScalarReward aggregateDiscount(DoubleScalarReward first, DoubleScalarReward second, double discountFactor) {
+        return new DoubleScalarReward(first.getValue() + discountFactor * second.getValue());
+    }
+
+    @Override
+    public DoubleScalarReward aggregateDiscount(DoubleScalarReward[] rewardArray, double discountFactor) {
+        double discountedSum = 0.0;
+        for (int i = 0; i < rewardArray.length; i++) {
+            discountedSum += Math.pow(discountFactor, i) * rewardArray[i].getValue();
+        }
+        return new DoubleScalarReward(discountedSum);
+    }
+
+    @Override
+    public DoubleScalarReward aggregateDiscount(List<DoubleScalarReward> doubleScalarRewards, double discountFactor) {
+        double sum = 0.0;
+        int iteration = 0;
+        for (DoubleScalarReward entry : doubleScalarRewards) {
+            sum += Math.pow(discountFactor, iteration) * entry.getValue();
+            iteration++;
+        }
+        return new DoubleScalarReward(sum);
+    }
+
+    @Override
+    public DoubleScalarReward aggregateDiscount(Stream<DoubleScalarReward> rewards, double discountFactor) {
+        return aggregateDiscount(rewards.collect(Collectors.toList()), discountFactor);
     }
 
     @Override

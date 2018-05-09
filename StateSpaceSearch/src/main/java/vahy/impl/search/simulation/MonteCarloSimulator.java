@@ -49,70 +49,40 @@ public class MonteCarloSimulator<
         }
         TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
-            TReward expectedReward = calcExpectedReward(entry.getValue());
+            TReward expectedReward = calcExpectedReward(expandedNode, entry.getKey());
             searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(expectedReward);
         }
         expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(
-            rewardAggregator.aggregate(
-                rewardAggregator.averageReward(searchNodeMetadata
+            rewardAggregator.averageReward(searchNodeMetadata
                     .getStateActionMetadataMap()
                     .values()
                     .stream()
-                    .map(StateActionMetadata::getEstimatedTotalReward)),
-                rewardAggregator.averageReward(searchNodeMetadata
-                    .getStateActionMetadataMap()
-                    .values()
-                    .stream()
-                    .map(StateActionMetadata::getGainedReward)))
-            );
+                    .map(StateActionMetadata::getEstimatedTotalReward)
+            )
+        );
     }
 
-//    @Override
-//    public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, State<TAction, TReward, TObservation>> expandedNode) {
-//        TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
-////        expandedNode
-////            .getChildNodeMap()
-////            .entrySet()
-////            .stream()
-////            .map(entry -> calcExpectedReward(entry.getValue()))
-////            .max(Comparable::compareTo)
-////            .ifPresent(tReward -> searchNodeMetadata.setCumulativeReward());
-////
-//
-//        for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, State<TAction, TReward, TObservation>>> entry : expandedNode.getChildNodeMap().entrySet()) {
-//            TReward averageReward = calcExpectedReward(entry.getValue());
-//
-//            searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).getGainedReward();
-//
-//        }
-//    }
-
-    private TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
+    private TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node, TAction firstAction) {
         List<TReward> aggregatedRewardsList = new ArrayList<>();
         for (int i = 0; i < simulationCount; i++) {
-            aggregatedRewardsList.add(runRandomWalkSimulation(node));
+            aggregatedRewardsList.add(runRandomWalkSimulation(node, firstAction));
         }
         return rewardAggregator.averageReward(aggregatedRewardsList);
     }
 
-    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
-        State<TAction, TReward, TObservation> wrappedState = node.getWrappedState();
+    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node, TAction firstAction) {
+        StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = node.getWrappedState().applyAction(firstAction);
+        State<TAction, TReward, TObservation> wrappedState = stateRewardReturn.getState();
         List<TReward> gainedRewards = new ArrayList<>();
-
+        gainedRewards.add(stateRewardReturn.getReward());
         while(!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
-            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
+            stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
+
         }
-        return rewardAggregator.aggregate(gainedRewards);
+         return rewardAggregator.aggregateDiscount(gainedRewards, discountFactor);
     }
-//
-//    private StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> doNextStep(State<TAction, TReward, TObservation> wrappedState) {
-//
-//    }
-
-
-
 }

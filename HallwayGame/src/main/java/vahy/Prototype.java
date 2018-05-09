@@ -3,6 +3,7 @@ package vahy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.State;
+import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
@@ -36,8 +37,8 @@ public class Prototype {
     public static void main(String[] args) throws IOException, NotValidGameStringRepresentationException {
         ClassLoader classLoader = Prototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
-        URL url = classLoader.getResource("examples/hallway_demo2.txt");
-//         URL url = classLoader.getResource("examples/hallway_demo3.txt");
+//        URL url = classLoader.getResource("examples/hallway_demo2.txt");
+         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
 //        URL url = classLoader.getResource("examples/hallway0.txt");
@@ -48,12 +49,10 @@ public class Prototype {
         GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.0).stepPenalty(1).trapProbability(1).buildConfig();
         InitialStateInstanceFactory initialStateInstanceFactory = new InitialStateInstanceFactory(gameConfig, random);
 
+
+        RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
         double discountFactor = 0.9;
-//        NodeTransitionUpdater<
-//            ActionType,
-//            DoubleScalarReward,
-//            EmptyStateActionMetadata<DoubleScalarReward>,
-//            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(0.9);
+
 
 //        NodeEvaluationSimulator<
 //            ActionType,
@@ -63,30 +62,44 @@ public class Prototype {
 //            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
 //            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new CumulativeRewardSimulator<>();
 
+//        NodeTransitionUpdater<
+//            ActionType,
+//            DoubleScalarReward,
+//            EmptyStateActionMetadata<DoubleScalarReward>,
+//            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor);
+
+        NodeTransitionUpdater<
+            ActionType,
+            DoubleScalarReward,
+            EmptyStateActionMetadata<DoubleScalarReward>,
+            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
+
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,
             DoubleVectorialObservation,
             EmptyStateActionMetadata<DoubleScalarReward>,
             EmptySearchNodeMetadata<ActionType, DoubleScalarReward>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, new DoubleScalarRewardAggregator());
-
-        NodeTransitionUpdater<
-            ActionType,
-            DoubleScalarReward,
-            EmptyStateActionMetadata<DoubleScalarReward>,
-            EmptySearchNodeMetadata<ActionType, DoubleScalarReward>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor);
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
 
         EpisodeAggregator episodeAggregator = new EpisodeAggregator(
             1,
             10,
 //             new UniformRandomWalkPolicy(random),
-//            immutableState -> new ImmutableTuple<>(new BfsPolicy(random, 10000, immutableState, transitionUpdater), immutableState),
+//            immutableState -> new ImmutableTuple<>(
+//                new BfsPolicy(
+//                    random,
+//                    100,
+//                    immutableState,
+//                    transitionUpdater,
+//                    rewardSimulator),
+//                immutableState),
+//            new EnvironmentPolicy(random),
             immutableState -> new ImmutableTuple<>(
                 new EGreedyPolicy(
                     random,
-                    10,
-                    0.5,
+                    50,
+                    0.1,
                     immutableState,
                     transitionUpdater,
                     rewardSimulator),

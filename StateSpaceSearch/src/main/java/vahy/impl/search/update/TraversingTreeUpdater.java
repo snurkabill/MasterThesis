@@ -34,7 +34,7 @@ public class TraversingTreeUpdater<
         while (!expandedNode.isRoot()) {
             SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent = expandedNode.getParent();
             TReward previousEstimate = parent.getSearchNodeMetadata().getEstimatedTotalReward();
-            nodeTransitionUpdater.applyUpdate(parent.getSearchNodeMetadata(), expandedNode.getSearchNodeMetadata(), expandedNode.getAppliedParentAction()); // TODO: when updating make no sense anymore, break
+            nodeTransitionUpdater.applyUpdate(parent.getSearchNodeMetadata(), expandedNode.getSearchNodeMetadata(), expandedNode.getAppliedParentAction());
             if(parent.getSearchNodeMetadata().getEstimatedTotalReward().compareTo(previousEstimate) == 0) {
                 break;
             }
