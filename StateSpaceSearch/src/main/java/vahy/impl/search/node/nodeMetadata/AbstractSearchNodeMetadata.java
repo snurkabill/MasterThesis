@@ -7,7 +7,7 @@ import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 
 import java.util.Map;
 
-public class AbstractSearchNodeMetadata<TAction extends Action, TReward extends Reward, TStateActionMetadata extends StateActionMetadata<TReward>> implements SearchNodeMetadata<TAction, TReward, TStateActionMetadata> {
+public abstract class AbstractSearchNodeMetadata<TAction extends Action, TReward extends Reward, TStateActionMetadata extends StateActionMetadata<TReward>> implements SearchNodeMetadata<TAction, TReward, TStateActionMetadata> {
 
     private final Map<TAction, TStateActionMetadata> stateActionMetadataMap;
     private final TReward cumulativeReward;
