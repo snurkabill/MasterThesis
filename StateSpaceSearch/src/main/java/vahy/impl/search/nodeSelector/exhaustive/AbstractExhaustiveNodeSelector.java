@@ -45,6 +45,16 @@ public abstract class AbstractExhaustiveNodeSelector<
 
     @Override
     public void setNewRoot(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> root) {
-        addNode(root);
+        nodeQueue.clear();
+        LinkedList<SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> bfsQueue = new LinkedList<>();
+        bfsQueue.addLast(root);
+        while(!bfsQueue.isEmpty()) {
+            SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> someNode = bfsQueue.removeFirst();
+            if(someNode.isLeaf()) {
+                nodeQueue.add(someNode);
+            } else {
+                bfsQueue.addAll(someNode.getChildNodeMap().values());
+            }
+        }
     }
 }
