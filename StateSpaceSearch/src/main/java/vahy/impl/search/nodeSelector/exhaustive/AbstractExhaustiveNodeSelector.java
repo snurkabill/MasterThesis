@@ -50,7 +50,7 @@ public abstract class AbstractExhaustiveNodeSelector<
         bfsQueue.addLast(root);
         while(!bfsQueue.isEmpty()) {
             SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> someNode = bfsQueue.removeFirst();
-            if(someNode.isLeaf()) {
+            if(someNode.isLeaf( )) {
                 nodeQueue.add(someNode);
             } else {
                 bfsQueue.addAll(someNode.getChildNodeMap().values());
