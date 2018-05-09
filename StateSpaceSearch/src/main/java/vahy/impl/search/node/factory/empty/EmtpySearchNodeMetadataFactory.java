@@ -1,4 +1,4 @@
-package vahy.impl.search.node.factory;
+package vahy.impl.search.node.factory.empty;
 
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
