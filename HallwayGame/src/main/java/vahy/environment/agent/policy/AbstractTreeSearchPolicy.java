@@ -107,13 +107,19 @@ public abstract class AbstractTreeSearchPolicy<
         }
         timer.stopTimer();
 
-        logger.info("Finished updating search tree with total expanded node count: [{}], total created node count: [{}],  max branch factor: [{}], average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
-            searchTree.getTotalNodesExpanded(),
-            searchTree.getTotalNodesCreated(),
-            searchTree.getMaxBranchingFactor(),
-            searchTree.calculateAverageBranchingFactor(),
-            timer.secondsSpent(),
-            timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
+        if(searchTree.getTotalNodesExpanded() == 0) {
+            logger.info("Finished updating search tree. No node was expanded - there is likely strong existing path to final state");
+        } else {
+            logger.info("Finished updating search tree with total expanded node count: [{}], total created node count: [{}],  max branch factor: [{}], average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
+                searchTree.getTotalNodesExpanded(),
+                searchTree.getTotalNodesCreated(),
+                searchTree.getMaxBranchingFactor(),
+                searchTree.calculateAverageBranchingFactor(),
+                timer.secondsSpent(),
+                timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
+        }
+
+
 
         logger.trace("Action estimatedRewards: [{}]", searchTree
             .getRoot()
