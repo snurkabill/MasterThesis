@@ -5,12 +5,10 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
-import vahy.environment.agent.policy.AbstractTreeSearchPolicy;
 import vahy.environment.agent.policy.IPolicy;
+import vahy.environment.agent.policy.IStatefulPolicy;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,12 +17,12 @@ public class Episode {
 
     private static final Logger logger = LoggerFactory.getLogger(Episode.class);
     private final State<ActionType, DoubleScalarReward, DoubleVectorialObservation> initialState;
-    private final AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> playerPolicy;
+    private final IStatefulPolicy playerPolicy;
     private final IPolicy opponentPolicy;
 
     public Episode(
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation> initialState,
-        AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> playerPolicy,
+        IStatefulPolicy playerPolicy,
         IPolicy opponentPolicy) {
         this.initialState = initialState;
         this.playerPolicy = playerPolicy;
