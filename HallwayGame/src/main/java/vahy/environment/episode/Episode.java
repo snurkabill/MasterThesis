@@ -6,7 +6,7 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.policy.AbstractTreeSearchPolicy;
-import vahy.environment.agent.policy.IOneHotPolicy;
+import vahy.environment.agent.policy.IPolicy;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
@@ -20,12 +20,12 @@ public class Episode {
     private static final Logger logger = LoggerFactory.getLogger(Episode.class);
     private final State<ActionType, DoubleScalarReward, DoubleVectorialObservation> initialState;
     private final AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> playerPolicy;
-    private final IOneHotPolicy opponentPolicy;
+    private final IPolicy opponentPolicy;
 
     public Episode(
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation> initialState,
         AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> playerPolicy,
-        IOneHotPolicy opponentPolicy) {
+        IPolicy opponentPolicy) {
         this.initialState = initialState;
         this.playerPolicy = playerPolicy;
         this.opponentPolicy = opponentPolicy;
@@ -37,7 +37,7 @@ public class Episode {
         int playerActionCount = 0;
         while(!state.isFinalState()) {
             ActionType action = playerPolicy.getDiscreteAction(state);
-            playerPolicy.applyAction(action);
+            playerPolicy.updateState(action);
             playerActionCount++;
             StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = state.applyAction(action);
             logger.info("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().getValue());
@@ -46,7 +46,7 @@ public class Episode {
             if(!state.isFinalState()) {
                 action = opponentPolicy.getDiscreteAction(state);
                 stateRewardReturn = state.applyAction(action);
-                playerPolicy.applyAction(action);
+                playerPolicy.updateState(action);
                 logger.info("Environment's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().getValue());
                 stepHistory.add(stateRewardReturn);
                 state = stateRewardReturn.getState();

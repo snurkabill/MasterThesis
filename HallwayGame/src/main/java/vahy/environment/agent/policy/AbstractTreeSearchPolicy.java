@@ -29,7 +29,7 @@ import java.util.function.Supplier;
 public abstract class AbstractTreeSearchPolicy<
     TStateActionMetadata extends StateActionMetadata<DoubleScalarReward>,
     TSearchNodeMetadata extends SearchNodeMetadata<ActionType, DoubleScalarReward, TStateActionMetadata>>
-    implements IOneHotPolicy {
+    implements IStatefulPolicy {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
 
@@ -71,15 +71,32 @@ public abstract class AbstractTreeSearchPolicy<
                 new TraversingTreeUpdater<>(nodeTransitionUpdater),
                 rewardSimulator
             );
-
     }
 
-    public void applyAction(ActionType action) {
+    @Override
+    public void updateState(ActionType action) {
         this.searchTree.applyAction(action);
     }
 
     @Override
     public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+        expandSearchTree(gameState);
+        return searchTree
+            .getRoot()
+            .getSearchNodeMetadata()
+            .getStateActionMetadataMap()
+            .entrySet()
+            .stream()
+            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(o -> o.getValue().getEstimatedTotalReward()), random))
+            .getKey();
+    }
+
+    @Override
+    public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+        throw new UnsupportedOperationException("I will implement this when it will be needed.");
+    }
+
+    private void expandSearchTree(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         if(!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree Policy has invalid state or argument itself is invalid. Possibly missing equals method");
         }
@@ -106,17 +123,5 @@ public abstract class AbstractTreeSearchPolicy<
             .stream()
             .map(x ->  String.valueOf(x.getValue().getEstimatedTotalReward().getValue().doubleValue()))
             .reduce((x, y) -> x + ", " + y));
-
-        ActionType action = searchTree
-            .getRoot()
-            .getSearchNodeMetadata()
-            .getStateActionMetadataMap()
-            .entrySet()
-            .stream()
-            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(o -> o.getValue().getEstimatedTotalReward()), random))
-            .getKey();
-
-        return action;
     }
-
 }

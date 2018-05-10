@@ -9,4 +9,6 @@ public interface IPolicy {
 
     double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
 
+    ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
+
 }

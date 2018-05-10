@@ -56,6 +56,9 @@ public class Prototype {
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
         double discountFactor = 0.9;
+        int uniqueEpisodeCount = 1;
+        int episodeCount = 10;
+        int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
 //        NodeTransitionUpdater<
 //            ActionType,
@@ -95,7 +98,7 @@ public class Prototype {
             DoubleVectorialObservation,
             AbstractStateActionMetadata<DoubleScalarReward>,
             AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(1000, discountFactor, random, rewardAggregator);
 
 //        NodeEvaluationSimulator<
 //            ActionType,
@@ -108,8 +111,8 @@ public class Prototype {
 
 
         EpisodeAggregator episodeAggregator = new EpisodeAggregator(
-            1,
-            10,
+            uniqueEpisodeCount,
+            episodeCount,
 //             new UniformRandomWalkPolicy(random),
 
 
@@ -126,8 +129,8 @@ public class Prototype {
             immutableState -> new ImmutableTuple<>(
                 new EGreedyPolicy(
                     random,
-                    100,
-                    0.05,
+                    1,
+                    0.5,
                     immutableState,
                     transitionUpdater,
                     rewardSimulator),
@@ -165,6 +168,8 @@ public class Prototype {
             initialStateInstanceFactory);
         List<List<Double>> rewardHistory = episodeAggregator.runSimulation(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
         printChart(rewardHistory);
+        logger.info("Total reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get());
+        logger.info("Average reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get() / totalEpisodes);
     }
 
     public static void printChart(List<List<Double>> rewardHistory) {

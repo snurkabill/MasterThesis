@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.environment.agent.policy.AbstractTreeSearchPolicy;
-import vahy.environment.agent.policy.IOneHotPolicy;
+import vahy.environment.agent.policy.IPolicy;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.InitialStateInstanceFactory;
 import vahy.game.NotValidGameStringRepresentationException;
@@ -27,14 +27,14 @@ public class EpisodeAggregator {
     private final int uniqueEpisodeCount;
     private final int episodeIterationCount;
     private final Function<ImmutableStateImpl, ImmutableTuple<AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> playerPolicySupplier;
-    private final IOneHotPolicy opponentPolicy;
+    private final IPolicy opponentPolicy;
     private final InitialStateInstanceFactory initialStateInstanceFactory;
 
     public EpisodeAggregator(
         int uniqueEpisodeCount,
         int episodeIterationCount,
         Function<ImmutableStateImpl, ImmutableTuple<AbstractTreeSearchPolicy<AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> playerPolicySupplier,
-        IOneHotPolicy opponentPolicy,
+        IPolicy opponentPolicy,
         InitialStateInstanceFactory initialStateInstanceFactory)
     {
         this.uniqueEpisodeCount = uniqueEpisodeCount;

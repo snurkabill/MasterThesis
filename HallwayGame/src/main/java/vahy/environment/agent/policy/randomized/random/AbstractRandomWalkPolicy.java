@@ -1,11 +1,10 @@
 package vahy.environment.agent.policy.randomized.random;
 
-import vahy.environment.agent.policy.IOneHotPolicy;
 import vahy.environment.agent.policy.IPolicy;
 
 import java.util.SplittableRandom;
 
-public abstract class AbstractRandomWalkPolicy implements IPolicy, IOneHotPolicy {
+public abstract class AbstractRandomWalkPolicy implements IPolicy {
 
     private final SplittableRandom random;
 
