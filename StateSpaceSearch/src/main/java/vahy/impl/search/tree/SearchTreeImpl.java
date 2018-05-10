@@ -54,7 +54,6 @@ public class SearchTreeImpl<
     @Override
     public boolean updateTree() {
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
-        totalNodesExpanded++;
         if(selectedNodeForExpansion == null) {
             return false;
         }
@@ -88,6 +87,7 @@ public class SearchTreeImpl<
         root = root.getChildNodeMap().get(action);
         root.makeRoot();
         nodeSelector.setNewRoot(root);
+        resetTreeStatistics();
         return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
     }
 
@@ -113,11 +113,18 @@ public class SearchTreeImpl<
 
     private void expandNode(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
         nodeExpander.expandNode(selectedNodeForExpansion);
+        totalNodesExpanded++;
         int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
         if(branchingNodesCount > maxBranchingFactor) {
             maxBranchingFactor = branchingNodesCount;
         }
         totalNodesCreated += branchingNodesCount;
+    }
+
+    private void resetTreeStatistics() {
+        totalNodesCreated = 0;
+        totalNodesExpanded = 0;
+        maxBranchingFactor = Integer.MIN_VALUE;
     }
 
     public int getTotalNodesExpanded() {
