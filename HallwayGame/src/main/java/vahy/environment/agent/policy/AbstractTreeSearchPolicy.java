@@ -35,12 +35,12 @@ public abstract class AbstractTreeSearchPolicy<
 
     private final SplittableRandom random;
     private final SearchTreeImpl<ActionType, DoubleScalarReward, DoubleVectorialObservation, TStateActionMetadata, TSearchNodeMetadata, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchTree;
-    private final int uprateTreeCount;
+    private final int updateTreeCount;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
     public AbstractTreeSearchPolicy(
         SplittableRandom random,
-        int uprateTreeCount,
+        int updateTreeCount,
         SearchNodeFactory<
             ActionType,
             DoubleScalarReward,
@@ -62,7 +62,7 @@ public abstract class AbstractTreeSearchPolicy<
         ImmutableStateImpl gameState,
         NodeEvaluationSimulator<ActionType, DoubleScalarReward, DoubleVectorialObservation, TStateActionMetadata, TSearchNodeMetadata, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
         this.random = random;
-        this.uprateTreeCount = uprateTreeCount;
+        this.updateTreeCount = updateTreeCount;
         this.searchTree =
             new SearchTreeImpl<>(
                 searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarReward(0.0)), null, null),
@@ -101,7 +101,7 @@ public abstract class AbstractTreeSearchPolicy<
             throw new IllegalStateException("Tree Policy has invalid state or argument itself is invalid. Possibly missing equals method");
         }
         timer.startTimer();
-        for (int i = 0; i < uprateTreeCount; i++) {
+        for (int i = 0; i < updateTreeCount; i++) {
             logger.debug("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
