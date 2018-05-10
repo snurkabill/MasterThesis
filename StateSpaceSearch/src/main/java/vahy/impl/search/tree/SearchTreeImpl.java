@@ -60,18 +60,15 @@ public class SearchTreeImpl<
         }
         if(!selectedNodeForExpansion.isFinalNode()) {
             logger.debug("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
-            nodeExpander.expandNode(selectedNodeForExpansion);
-            int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
-            if(branchingNodesCount > maxBranchingFactor) {
-                maxBranchingFactor = branchingNodesCount;
-            }
-            totalNodesCreated += branchingNodesCount;
+            expandNode(selectedNodeForExpansion);
             nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
         }
         nodeEvaluationSimulator.calculateMetadataEstimation(selectedNodeForExpansion);
         treeUpdater.updateTree(selectedNodeForExpansion);
         return true;
     }
+
+
 
     @Override
     public TAction[] getAllPossibleActions() {
@@ -80,6 +77,13 @@ public class SearchTreeImpl<
 
     @Override
     public StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> applyAction(TAction action) {
+        if(root.isFinalNode()) {
+            throw new IllegalStateException("Can't apply action [" + action +"] on final state");
+        }
+        if(root.isLeaf()) {
+            logger.debug("Trying to apply action on not expanded tree branch. Forcing expansion.");
+            expandNode(root);
+        }
         TReward reward = root.getSearchNodeMetadata().getStateActionMetadataMap().get(action).getGainedReward();
         root = root.getChildNodeMap().get(action);
         root.makeRoot();
@@ -105,6 +109,15 @@ public class SearchTreeImpl<
     @Override
     public SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> getRoot() {
         return root;
+    }
+
+    private void expandNode(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
+        nodeExpander.expandNode(selectedNodeForExpansion);
+        int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
+        if(branchingNodesCount > maxBranchingFactor) {
+            maxBranchingFactor = branchingNodesCount;
+        }
+        totalNodesCreated += branchingNodesCount;
     }
 
     public int getTotalNodesExpanded() {
