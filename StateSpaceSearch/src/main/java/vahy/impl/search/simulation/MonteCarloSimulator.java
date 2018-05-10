@@ -50,6 +50,7 @@ public class MonteCarloSimulator<
         TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
             TReward expectedReward = calcExpectedReward(expandedNode, entry.getKey());
+            entry.getValue().getSearchNodeMetadata().setEstimatedTotalReward(expectedReward);
             searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(expectedReward);
         }
         expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(
