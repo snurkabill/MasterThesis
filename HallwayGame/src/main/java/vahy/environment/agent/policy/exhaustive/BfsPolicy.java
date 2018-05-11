@@ -27,7 +27,10 @@ public class BfsPolicy extends AbstractTreeSearchPolicy<AbstractStateActionMetad
         NodeTransitionUpdater<
             ActionType,
             DoubleScalarReward,
-            AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> nodeTransitionUpdater,
+            DoubleVectorialObservation,
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,

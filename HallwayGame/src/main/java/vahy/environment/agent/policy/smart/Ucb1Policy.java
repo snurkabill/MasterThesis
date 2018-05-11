@@ -26,8 +26,10 @@ public class Ucb1Policy extends AbstractTreeSearchPolicy<Ucb1StateActionMetadata
         NodeTransitionUpdater<
             ActionType,
             DoubleScalarReward,
+            DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>> nodeTransitionUpdater,
+            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,

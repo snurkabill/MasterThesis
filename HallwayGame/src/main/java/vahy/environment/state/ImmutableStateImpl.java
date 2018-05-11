@@ -328,6 +328,16 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         return new DoubleVectorialObservation(vector);
     }
 
+    @Override
+    public String readableStringRepresentation() {
+        return null;
+    }
+
+    @Override
+    public boolean isOpponentTurn() {
+        return !isAgentTurn();
+    }
+
     private ImmutableTuple<Integer, Integer> getForwardCoordinates(int x, int y, AgentHeading agentHeading) {
         switch (agentHeading) {
             case NORTH:

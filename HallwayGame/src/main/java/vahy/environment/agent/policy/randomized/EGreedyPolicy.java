@@ -28,8 +28,10 @@ public class EGreedyPolicy extends AbstractTreeSearchPolicy<AbstractStateActionM
         NodeTransitionUpdater<
             ActionType,
             DoubleScalarReward,
+            DoubleVectorialObservation,
             AbstractStateActionMetadata<DoubleScalarReward>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> nodeTransitionUpdater,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,

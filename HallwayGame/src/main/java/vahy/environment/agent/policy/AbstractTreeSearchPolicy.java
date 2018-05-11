@@ -56,11 +56,27 @@ public abstract class AbstractTreeSearchPolicy<
             TSearchNodeMetadata,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> nodeSelectorSupplier,
         Function<
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation,
+            StateRewardReturn<
+                ActionType,
+                DoubleScalarReward,
+                DoubleVectorialObservation,
                 State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>,
-            TStateActionMetadata> stateActionMetadataFactory, NodeTransitionUpdater<ActionType, DoubleScalarReward, TStateActionMetadata, TSearchNodeMetadata> nodeTransitionUpdater,
+            TStateActionMetadata> stateActionMetadataFactory,
+        NodeTransitionUpdater<
+            ActionType,
+            DoubleScalarReward,
+            DoubleVectorialObservation,
+            TStateActionMetadata,
+            TSearchNodeMetadata,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
         ImmutableStateImpl gameState,
-        NodeEvaluationSimulator<ActionType, DoubleScalarReward, DoubleVectorialObservation, TStateActionMetadata, TSearchNodeMetadata, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
+        NodeEvaluationSimulator<
+            ActionType,
+            DoubleScalarReward,
+            DoubleVectorialObservation,
+            TStateActionMetadata,
+            TSearchNodeMetadata,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
         this.random = random;
         this.updateTreeCount = updateTreeCount;
         this.searchTree =
@@ -97,7 +113,7 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     private void expandSearchTree(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
-        if(!searchTree.getRoot().getWrappedState().equals(gameState)) {
+        if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree Policy has invalid state or argument itself is invalid. Possibly missing equals method");
         }
         timer.startTimer();
@@ -107,7 +123,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
         timer.stopTimer();
 
-        if(searchTree.getTotalNodesExpanded() == 0) {
+        if (searchTree.getTotalNodesExpanded() == 0) {
             logger.info("Finished updating search tree. No node was expanded - there is likely strong existing path to final state");
         } else {
             logger.info("Finished updating search tree with total expanded node count: [{}], total created node count: [{}],  max branch factor: [{}], average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
@@ -119,15 +135,13 @@ public abstract class AbstractTreeSearchPolicy<
                 timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
         }
 
-
-
         logger.trace("Action estimatedRewards: [{}]", searchTree
             .getRoot()
             .getSearchNodeMetadata()
             .getStateActionMetadataMap()
             .entrySet()
             .stream()
-            .map(x ->  String.valueOf(x.getValue().getEstimatedTotalReward().getValue().doubleValue()))
+            .map(x -> String.valueOf(x.getValue().getEstimatedTotalReward().getValue().doubleValue()))
             .reduce((x, y) -> x + ", " + y));
     }
 }
