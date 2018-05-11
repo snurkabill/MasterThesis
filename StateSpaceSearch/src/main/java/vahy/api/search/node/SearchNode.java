@@ -40,6 +40,8 @@ public interface SearchNode<
 
     boolean isLeaf();
 
+    boolean isOpponentTurn();
+
     void makeRoot();
 
     // TODO: add getting (avg?) reward

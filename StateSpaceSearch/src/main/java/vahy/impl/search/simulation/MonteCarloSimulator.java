@@ -43,8 +43,7 @@ public class MonteCarloSimulator<
     @Override
     public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> expandedNode) {
         if(expandedNode.isFinalNode()) {
-            TAction appliedAction = expandedNode.getAppliedParentAction();
-            expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(expandedNode.getParent().getSearchNodeMetadata().getStateActionMetadataMap().get(appliedAction).getGainedReward());
+            expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(rewardAggregator.emptyReward());
             return;
         }
         TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();

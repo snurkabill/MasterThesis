@@ -11,6 +11,11 @@ import java.util.stream.Stream;
 public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScalarReward>  {
 
     @Override
+    public DoubleScalarReward emptyReward() {
+        return new DoubleScalarReward(0.0);
+    }
+
+    @Override
     public DoubleScalarReward aggregate(DoubleScalarReward first, DoubleScalarReward second) {
         return new DoubleScalarReward(first.getValue() + second.getValue());
     }
@@ -35,7 +40,7 @@ public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScal
 
     @Override
     public DoubleScalarReward aggregate(Stream<DoubleScalarReward> rewards) {
-        return rewards.reduce(this::aggregate).orElse(new DoubleScalarReward(0.0));
+        return rewards.reduce(this::aggregate).orElse(emptyReward());
     }
 
     @Override

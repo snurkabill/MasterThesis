@@ -22,9 +22,9 @@ public class TraversingTreeUpdater<
     implements TreeUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversingTreeUpdater.class);
-    private final NodeTransitionUpdater<TAction, TReward, TStateActionMetadata, TSearchNodeMetadata> nodeTransitionUpdater;
+    private final NodeTransitionUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeTransitionUpdater;
 
-    public TraversingTreeUpdater(NodeTransitionUpdater<TAction, TReward, TStateActionMetadata, TSearchNodeMetadata> nodeTransitionUpdater) {
+    public TraversingTreeUpdater(NodeTransitionUpdater<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> nodeTransitionUpdater) {
         this.nodeTransitionUpdater = nodeTransitionUpdater;
     }
 
@@ -34,7 +34,7 @@ public class TraversingTreeUpdater<
         while (!expandedNode.isRoot()) {
             SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent = expandedNode.getParent();
             TReward previousEstimate = parent.getSearchNodeMetadata().getEstimatedTotalReward();
-            nodeTransitionUpdater.applyUpdate(parent.getSearchNodeMetadata(), expandedNode.getSearchNodeMetadata(), expandedNode.getAppliedParentAction());
+            nodeTransitionUpdater.applyUpdate(parent, expandedNode, expandedNode.getAppliedParentAction());
             if(parent.getSearchNodeMetadata().getEstimatedTotalReward().compareTo(previousEstimate) == 0) {
                 break;
             }

@@ -12,6 +12,10 @@ public interface State<TAction extends Action, TReward extends Reward, TObservat
 
     TObservation getObservation();
 
+    String readableStringRepresentation();
+
+    boolean isOpponentTurn();
+
     boolean isFinalState();
 
 }

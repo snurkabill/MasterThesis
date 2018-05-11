@@ -10,7 +10,7 @@ import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.update.NodeTransitionUpdater;
 
-public class UniformAverageDiscountEstimateRewardTransitionUpdater<
+public class ArgmaxMineUniformlyWeightedOpponentDiscountEstimateRewardTransitionUpdater<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
@@ -22,7 +22,7 @@ public class UniformAverageDiscountEstimateRewardTransitionUpdater<
     private final double discountFactor;
     private final RewardAggregator<TReward> rewardAggregator;
 
-    public UniformAverageDiscountEstimateRewardTransitionUpdater(double discountFactor, RewardAggregator<TReward> rewardAggregator) {
+    public ArgmaxMineUniformlyWeightedOpponentDiscountEstimateRewardTransitionUpdater(double discountFactor, RewardAggregator<TReward> rewardAggregator) {
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
     }
@@ -37,12 +37,21 @@ public class UniformAverageDiscountEstimateRewardTransitionUpdater<
                 child.getSearchNodeMetadata().getEstimatedTotalReward(),
                 discountFactor)
         );
-        parentSearchNodeMetadata.setEstimatedTotalReward(rewardAggregator.averageReward(parentSearchNodeMetadata
-                .getStateActionMetadataMap()
-                .values()
-                .stream()
-                .map(StateActionMetadata::getEstimatedTotalReward)
-            )
+        parentSearchNodeMetadata.setEstimatedTotalReward(
+            parent.isOpponentTurn() ?
+                rewardAggregator.averageReward(parentSearchNodeMetadata
+                    .getStateActionMetadataMap()
+                    .values()
+                    .stream()
+                    .map(StateActionMetadata::getEstimatedTotalReward)
+                )
+                : parentSearchNodeMetadata
+                    .getStateActionMetadataMap()
+                    .values()
+                    .stream()
+                    .map(StateActionMetadata::getEstimatedTotalReward)
+                    .max(Comparable::compareTo)
+                    .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update"))
         );
     }
 }

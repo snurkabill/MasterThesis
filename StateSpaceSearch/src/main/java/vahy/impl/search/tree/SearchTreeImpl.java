@@ -67,8 +67,6 @@ public class SearchTreeImpl<
         return true;
     }
 
-
-
     @Override
     public TAction[] getAllPossibleActions() {
         return this.root.getWrappedState().getAllPossibleActions();
@@ -99,6 +97,11 @@ public class SearchTreeImpl<
     @Override
     public TObservation getObservation() {
         return root.getWrappedState().getObservation();
+    }
+
+    @Override
+    public boolean isOpponentTurn() {
+        return root.isOpponentTurn();
     }
 
     @Override

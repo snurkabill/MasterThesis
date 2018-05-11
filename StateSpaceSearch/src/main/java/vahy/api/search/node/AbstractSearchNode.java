@@ -49,7 +49,7 @@ public abstract class AbstractSearchNode<
 
     @Override
     public TSearchNodeMetadata getSearchNodeMetadata() {
-        return this.searchNodeMetadata;
+        return searchNodeMetadata;
     }
 
     @Override
@@ -65,6 +65,11 @@ public abstract class AbstractSearchNode<
     @Override
     public boolean isRoot() {
         return parent == null;
+    }
+
+    @Override
+    public boolean isOpponentTurn() {
+        return wrappedState.isOpponentTurn();
     }
 
     @Override
