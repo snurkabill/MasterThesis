@@ -52,21 +52,28 @@ public class UCB1NodeSelector<
         }
         SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> node = root;
         while(!node.isLeaf()) {
-            Ucb1SearchNodeMetadata<TAction, TReward> nodeMetadata =  node.getSearchNodeMetadata();
-            nodeMetadata.increaseVisitCounter();
+            Ucb1SearchNodeMetadata<TAction, TReward> nodeMetadata = node.getSearchNodeMetadata();
+            SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> finalNode = node;
             TAction bestAction = node.getSearchNodeMetadata()
                 .getStateActionMetadataMap()
                 .entrySet()
                 .stream()
-                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(o -> calculateUCBValue(nodeMetadata, o.getValue())), random))
+                .collect(StreamUtils.toRandomizedMaxCollector(
+                    Comparator.comparing(
+                        o -> calculateUCBValue(
+                            finalNode.getChildNodeMap().get(o.getKey()).getSearchNodeMetadata(),
+                            nodeMetadata.getVisitCounter(),
+                            o.getValue().getVisitCounter())),
+                    random))
                 .getKey();
+            nodeMetadata.increaseVisitCounter();
             nodeMetadata.getStateActionMetadataMap().get(bestAction).increaseVisitCounter();
             node = node.getChildNodeMap().get(bestAction);
         }
         return node;
     }
 
-    private double calculateUCBValue(Ucb1SearchNodeMetadata<TAction, TReward> searchNodeMetadata, Ucb1StateActionMetadata<TReward> actionMetadata) {
-        return searchNodeMetadata.getEstimatedTotalReward().getValue() + weight * Math.sqrt(Math.log(actionMetadata.getVisitCounter()) / searchNodeMetadata.getVisitCounter());
+    private double calculateUCBValue(Ucb1SearchNodeMetadata<TAction, TReward> childSearchNodeMetadata, int parentVisitCount, int actionVisitCount) {
+        return childSearchNodeMetadata.getEstimatedTotalReward().getValue() + weight * Math.sqrt(Math.log(actionVisitCount) / parentVisitCount);
     }
 }
