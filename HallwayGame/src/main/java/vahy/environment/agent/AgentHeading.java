@@ -9,6 +9,7 @@ public enum AgentHeading {
     WEST;
 
     private int headingRepresentation;
+    private String readableHeadingRepresentation;
     private AgentHeading right;
     private AgentHeading left;
 
@@ -26,6 +27,11 @@ public enum AgentHeading {
         EAST.headingRepresentation = 1;
         SOUTH.headingRepresentation = 2;
         WEST.headingRepresentation = 3;
+
+        NORTH.readableHeadingRepresentation = "↑";
+        EAST.readableHeadingRepresentation = "→";
+        SOUTH.readableHeadingRepresentation = "↓";
+        WEST.readableHeadingRepresentation = "←";
     }
 
     public AgentHeading turn(ActionType actionType) {
@@ -40,5 +46,9 @@ public enum AgentHeading {
 
     public int getHeadingRepresentation() {
         return headingRepresentation;
+    }
+
+    public String getHeadingReadableRepresentation() {
+        return readableHeadingRepresentation;
     }
 }

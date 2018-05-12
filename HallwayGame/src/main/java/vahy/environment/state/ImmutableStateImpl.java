@@ -330,7 +330,27 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
 
     @Override
     public String readableStringRepresentation() {
-        return null;
+        boolean[][] walls = staticGamePart.getWalls();
+        double[][] trapProbabilities = staticGamePart.getTrapProbabilities();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < walls.length; i++) {
+            for (int j = 0; j < walls[0].length; j++) {
+                builder.append(walls[i][j]
+                    ? "W "
+                    : i == agentXCoordination && j == agentYCoordination
+                        ? "A "
+                        : trapProbabilities[i][j] != 0.0
+                            ? "X "
+                            // : String.valueOf(rewards[i][j]));
+                            : rewards[i][j] == 0
+                                ? "  "
+                                : "G ");
+            }
+            builder.append(System.lineSeparator());
+        }
+        builder.append(isAgentStandingOnTrap() ? "T " : "N ");
+        builder.append(agentHeading.getHeadingReadableRepresentation());
+        return builder.toString();
     }
 
     @Override

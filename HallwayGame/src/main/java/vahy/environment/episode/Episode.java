@@ -49,6 +49,7 @@ public class Episode {
                 stepHistory.add(stateRewardReturn);
                 state = stateRewardReturn.getState();
             }
+            logger.info("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
         }
         return stepHistory;
     }

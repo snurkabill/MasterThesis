@@ -100,6 +100,11 @@ public class SearchTreeImpl<
     }
 
     @Override
+    public String readableStringRepresentation() {
+        return root.getWrappedState().readableStringRepresentation();
+    }
+
+    @Override
     public boolean isOpponentTurn() {
         return root.isOpponentTurn();
     }
