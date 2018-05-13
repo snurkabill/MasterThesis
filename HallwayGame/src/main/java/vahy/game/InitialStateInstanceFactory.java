@@ -65,7 +65,7 @@ public class InitialStateInstanceFactory {
     }
 
     private List<List<Cell>> deserialize(String stringRepresentation) throws NotValidGameStringRepresentationException {
-        String[] lines = stringRepresentation.split("\\n");
+        String[] lines = stringRepresentation.replace("\r\n", "\n").replace("\r", "\n").split("\\n");
         List<List<Cell>> list = new ArrayList<>();
         for (int i = 0; i < lines.length; i++) {
             String[] cells = lines[i].split(" ");
