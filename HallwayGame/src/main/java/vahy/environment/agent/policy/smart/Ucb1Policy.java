@@ -12,7 +12,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
-import vahy.impl.search.nodeSelector.treeTraversing.Ucb1EstimateNormalizingNodeSelector;
+import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1EstimateNormalizingNodeSelector;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;

@@ -21,7 +21,7 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
-import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
+import vahy.search.Ucb1WithGivenProbabilitiesTransitionUpdater;
 import vahy.utils.ImmutableTuple;
 
 import java.io.File;
@@ -45,9 +45,9 @@ public class Prototype {
 //         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
-//        URL url = classLoader.getResource("examples/hallway0.txt");
+        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
-        URL url = classLoader.getResource("examples/hallway1-traps.txt");
+//        URL url = classLoader.getResource("examples/hallway1-traps.txt");
 
         File file = new File(url.getFile());
         SplittableRandom random = new SplittableRandom(2);
@@ -56,9 +56,9 @@ public class Prototype {
 
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        double discountFactor = 0.99;
+        double discountFactor = 1;
         int uniqueEpisodeCount = 1;
-        int episodeCount = 10;
+        int episodeCount = 20;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
 //        NodeTransitionUpdater<
@@ -77,6 +77,34 @@ public class Prototype {
 //            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
 //            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new ArgmaxDiscountEstimatedRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
+
+//        NodeTransitionUpdater<
+//            ActionType,
+//            DoubleScalarReward,
+//            DoubleVectorialObservation,
+//            Ucb1StateActionMetadata<DoubleScalarReward>,
+//            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new Ucb1TransitionUpdater<>(discountFactor, rewardAggregator);
+//
+//        NodeTransitionUpdater<
+//            ActionType,
+//            DoubleScalarReward,
+//            DoubleVectorialObservation,
+//            Ucb1StateActionMetadata<DoubleScalarReward>,
+//            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new Ucb1TransitionUpdater<>(discountFactor, rewardAggregator);
+
+        NodeTransitionUpdater<
+            ActionType,
+            DoubleScalarReward,
+            DoubleVectorialObservation,
+            Ucb1StateActionMetadata<DoubleScalarReward>,
+            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new Ucb1WithGivenProbabilitiesTransitionUpdater(discountFactor, rewardAggregator);
+
+
+
+
 //        NodeTransitionUpdater<
 //            ActionType,
 //            DoubleScalarReward,
@@ -85,13 +113,13 @@ public class Prototype {
 //            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
 //            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
-        NodeTransitionUpdater<
-            ActionType,
-            DoubleScalarReward,
-            DoubleVectorialObservation,
-            Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
+//        NodeTransitionUpdater<
+//            ActionType,
+//            DoubleScalarReward,
+//            DoubleVectorialObservation,
+//            Ucb1StateActionMetadata<DoubleScalarReward>,
+//            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
 //        NodeTransitionUpdater<
 //            ActionType,
@@ -109,7 +137,6 @@ public class Prototype {
 //            Ucb1StateActionMetadata<DoubleScalarReward>,
 //            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
 //            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new ArgmaxMineUniformlyWeightedOpponentDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
-
 
 
 //        NodeEvaluationSimulator<
@@ -135,7 +162,7 @@ public class Prototype {
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
             Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(1, discountFactor, random, rewardAggregator);
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(1000, discountFactor, random, rewardAggregator);
 
         EpisodeAggregator episodeAggregator = new EpisodeAggregator(
             uniqueEpisodeCount,
@@ -169,7 +196,7 @@ public class Prototype {
             immutableState -> new ImmutableTuple<>(
                 new Ucb1Policy(
                     random,
-                    100000,
+                    2000,
                     immutableState,
                     transitionUpdater,
                     rewardSimulator),
@@ -215,7 +242,7 @@ public class Prototype {
 
         LinkedList<Double> runningSum = new LinkedList<>();
         for (Double value : average) {
-            if(runningSum.isEmpty()) {
+            if (runningSum.isEmpty()) {
                 runningSum.add(value);
             } else {
                 runningSum.add(runningSum.getLast() + value);
