@@ -1,5 +1,7 @@
-package vahy.impl.search.nodeSelector.treeTraversing;
+package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
@@ -20,6 +22,8 @@ public class Ucb1NodeSelector<
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation>>
     implements NodeSelector<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> {
+
+    private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
     protected SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> root;
     protected final SplittableRandom random;
@@ -64,8 +68,6 @@ public class Ucb1NodeSelector<
                             o.getValue().getVisitCounter())),
                     random))
                 .getKey();
-            nodeMetadata.increaseVisitCounter();
-            nodeMetadata.getStateActionMetadataMap().get(bestAction).increaseVisitCounter();
             node = node.getChildNodeMap().get(bestAction);
         }
         return node;
@@ -80,4 +82,5 @@ public class Ucb1NodeSelector<
     protected double calculateUCBValue(double estimatedValue, int parentVisitCount, int actionVisitCount) {
         return estimatedValue + weight * Math.sqrt(Math.log(parentVisitCount) / actionVisitCount);
     }
+
 }

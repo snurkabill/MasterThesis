@@ -43,8 +43,7 @@ public class MonteCarloSimulator<
     @Override
     public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> expandedNode) {
         if(expandedNode.isFinalNode()) {
-            expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(rewardAggregator.emptyReward());
-            return;
+            throw new IllegalStateException("Final node cannot be evaluated anymore");
         }
         TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
