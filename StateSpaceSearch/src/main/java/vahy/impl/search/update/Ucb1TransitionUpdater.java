@@ -54,10 +54,5 @@ public class Ucb1TransitionUpdater<
 
         double sum = parentCumulativeEstimates + newParentCumulativeEstimate.getValue();
         parentSearchNodeMetadata.setEstimatedTotalReward(new DoubleScalarReward(sum / parentSearchNodeMetadata.getVisitCounter()));
-
-//        DoubleScalarReward cumulativeEstimates = rewardAggregator.aggregateDiscount(parentSearchNodeMetadata.getCumulativeEstimates(), child.getSearchNodeMetadata().getEstimatedTotalReward(), discountFactor);
-//        parentSearchNodeMetadata.setCumulativeEstimates(cumulativeEstimates);
-//        parentSearchNodeMetadata.setEstimatedTotalReward(new DoubleScalarReward(parentSearchNodeMetadata.getCumulativeReward().getValue() / parentSearchNodeMetadata.getVisitCounter()));
-
     }
 }

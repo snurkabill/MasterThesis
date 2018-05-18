@@ -62,8 +62,9 @@ public class Ucb1NodeSelector<
                 .stream()
                 .collect(StreamUtils.toRandomizedMaxCollector(
                     Comparator.comparing(
-                        o -> calculateUCBValue(
+                        o -> calculateUCBValue( // TODO: optimize so calls are done only once
                             finalNode.getChildNodeMap().get(o.getKey()).getSearchNodeMetadata().getEstimatedTotalReward().getValue(),
+                            weight,
                             nodeMetadata.getVisitCounter(),
                             o.getValue().getVisitCounter())),
                     random))
@@ -79,8 +80,8 @@ public class Ucb1NodeSelector<
         }
     }
 
-    protected double calculateUCBValue(double estimatedValue, int parentVisitCount, int actionVisitCount) {
-        return estimatedValue + weight * Math.sqrt(Math.log(parentVisitCount) / actionVisitCount);
+    protected double calculateUCBValue(double estimatedValue, double explorationConstant, int parentVisitCount, int actionVisitCount) {
+        return estimatedValue + explorationConstant * Math.sqrt(Math.log(parentVisitCount) / actionVisitCount);
     }
 
 }
