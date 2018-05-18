@@ -12,7 +12,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
-import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1EstimateNormalizingNodeSelector;
+import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1MinMaxExplorationConstantNodeSelector;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
@@ -46,7 +46,7 @@ public class Ucb1Policy extends AbstractTreeSearchPolicy<Ucb1StateActionMetadata
                 }
             ),
             // () -> new Ucb1NodeSelector<>(random, 1.0),
-             () -> new Ucb1EstimateNormalizingNodeSelector<>(random, 1.0),
+             () -> new Ucb1MinMaxExplorationConstantNodeSelector<>(random, 1.0),
             stateRewardReturn -> new Ucb1StateActionMetadata<>(stateRewardReturn.getReward()), nodeTransitionUpdater,
             gameState,
             rewardSimulator);
