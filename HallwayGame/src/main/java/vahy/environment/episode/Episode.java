@@ -31,6 +31,7 @@ public class Episode {
 
     public List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> runEpisode() {
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = this.initialState;
+        logger.info("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> stepHistory = new LinkedList<>();
         int playerActionCount = 0;
         while(!state.isFinalState()) {

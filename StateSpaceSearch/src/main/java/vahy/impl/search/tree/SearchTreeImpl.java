@@ -61,8 +61,8 @@ public class SearchTreeImpl<
             logger.debug("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
             expandNode(selectedNodeForExpansion);
             nodeSelector.addNodes(selectedNodeForExpansion.getChildNodeMap().values());
+            nodeEvaluationSimulator.calculateMetadataEstimation(selectedNodeForExpansion);
         }
-        nodeEvaluationSimulator.calculateMetadataEstimation(selectedNodeForExpansion);
         treeUpdater.updateTree(selectedNodeForExpansion);
         return true;
     }

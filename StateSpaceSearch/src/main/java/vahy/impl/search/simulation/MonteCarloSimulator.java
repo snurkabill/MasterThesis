@@ -12,6 +12,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
 import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
+import vahy.timer.SimpleTimer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class MonteCarloSimulator<
     private final double discountFactor;
     private final SplittableRandom random;
     private final RewardAggregator<TReward> rewardAggregator;
+    private final SimpleTimer timer = new SimpleTimer();
 
     public MonteCarloSimulator(int simulationCount, double discountFactor, SplittableRandom random, RewardAggregator<TReward> rewardAggregator) {
         this.simulationCount = simulationCount;
@@ -43,14 +45,16 @@ public class MonteCarloSimulator<
     @Override
     public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> expandedNode) {
         if(expandedNode.isFinalNode()) {
-            expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(rewardAggregator.emptyReward());
-            return;
+            throw new IllegalStateException("Final node cannot be evaluated anymore");
         }
         TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
+            timer.startTimer();
             TReward expectedReward = calcExpectedReward(expandedNode, entry.getKey());
             entry.getValue().getSearchNodeMetadata().setEstimatedTotalReward(expectedReward);
             searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(expectedReward);
+            timer.stopTimer();
+            logger.debug("Running [{}] MonteCarlo simulations for action [{}]. Simulations per second: [{}]", simulationCount, entry.getKey(), timer.samplesPerSec(simulationCount));
         }
         expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(
             rewardAggregator.averageReward(searchNodeMetadata
