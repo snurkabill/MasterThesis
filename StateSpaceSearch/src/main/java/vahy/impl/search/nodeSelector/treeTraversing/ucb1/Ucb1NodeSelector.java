@@ -1,5 +1,7 @@
-package vahy.impl.search.nodeSelector.treeTraversing;
+package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
@@ -14,18 +16,20 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class UCB1NodeSelector<
+public class Ucb1NodeSelector<
     TAction extends Action,
     TReward extends DoubleScalarReward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation>>
     implements NodeSelector<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> {
 
-    private SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> root;
-    private final SplittableRandom random;
-    private final double weight;
+    private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
-    public UCB1NodeSelector(SplittableRandom random, double weight) {
+    protected SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> root;
+    protected final SplittableRandom random;
+    protected final double weight;
+
+    public Ucb1NodeSelector(SplittableRandom random, double weight) {
         this.random = random;
         this.weight = weight;
     }
@@ -47,9 +51,7 @@ public class UCB1NodeSelector<
 
     @Override
     public SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> selectNextNode() {
-        if(root == null) {
-            throw new IllegalStateException("Root was not initialized");
-        }
+        checkRoot();
         SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> node = root;
         while(!node.isLeaf()) {
             Ucb1SearchNodeMetadata<TAction, TReward> nodeMetadata = node.getSearchNodeMetadata();
@@ -60,20 +62,26 @@ public class UCB1NodeSelector<
                 .stream()
                 .collect(StreamUtils.toRandomizedMaxCollector(
                     Comparator.comparing(
-                        o -> calculateUCBValue(
-                            finalNode.getChildNodeMap().get(o.getKey()).getSearchNodeMetadata(),
+                        o -> calculateUCBValue( // TODO: optimize so calls are done only once
+                            finalNode.getChildNodeMap().get(o.getKey()).getSearchNodeMetadata().getEstimatedTotalReward().getValue(),
+                            weight,
                             nodeMetadata.getVisitCounter(),
                             o.getValue().getVisitCounter())),
                     random))
                 .getKey();
-            nodeMetadata.increaseVisitCounter();
-            nodeMetadata.getStateActionMetadataMap().get(bestAction).increaseVisitCounter();
             node = node.getChildNodeMap().get(bestAction);
         }
         return node;
     }
 
-    private double calculateUCBValue(Ucb1SearchNodeMetadata<TAction, TReward> childSearchNodeMetadata, int parentVisitCount, int actionVisitCount) {
-        return childSearchNodeMetadata.getEstimatedTotalReward().getValue() + weight * Math.sqrt(Math.log(actionVisitCount) / parentVisitCount);
+    protected void checkRoot() {
+        if(root == null) {
+            throw new IllegalStateException("Root was not initialized");
+        }
     }
+
+    protected double calculateUCBValue(double estimatedValue, double explorationConstant, int parentVisitCount, int actionVisitCount) {
+        return estimatedValue + explorationConstant * Math.sqrt(Math.log(parentVisitCount) / actionVisitCount);
+    }
+
 }
