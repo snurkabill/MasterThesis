@@ -27,16 +27,13 @@ public class AlphaGoSimulator<
 
     @Override
     public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, State<TAction, TReward, TObservation>> expandedNode) {
-        ImmutableTuple<Double, Map<TAction, Double>> evaluationResult = evaluatingFunction.apply(expandedNode.getWrappedState().getObservation());
-        Map<TAction, Double> allActionProbabilities = evaluationResult.getSecond();
+        throw new UnsupportedOperationException("Not finished");
 
-        expandedNode.getSearchNodeMetadata().setWinningProbability(evaluationResult.getFirst());
-        Map<TAction, AlphaGoStateActionMetadata<TReward>> stateActionMetadataMap = expandedNode.getSearchNodeMetadata().getStateActionMetadataMap();
+//        ImmutableTuple<Double, Map<TAction, Double>> evaluationResult = evaluatingFunction.apply(expandedNode.getWrappedState().getObservation());
+//        Map<TAction, Double> allActionProbabilities = evaluationResult.getSecond();
 //
-//        for (Map.Entry<TAction, AlphaGoStateActionMetadata<TReward>> entry : stateActionMetadataMap.entrySet()) {
-//            entry.getValue().
-//        }
-
+//        expandedNode.getSearchNodeMetadata().setWinningProbability(evaluationResult.getFirst());
+//        Map<TAction, AlphaGoStateActionMetadata<TReward>> stateActionMetadataMap = expandedNode.getSearchNodeMetadata().getStateActionMetadataMap();
 
     }
 }
