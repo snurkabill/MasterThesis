@@ -1,6 +1,5 @@
 package vahy.impl.model.reward;
 
-import com.sun.jdi.request.InvalidRequestStateException;
 import vahy.api.model.reward.RewardAggregator;
 
 import java.util.List;
@@ -93,7 +92,7 @@ public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScal
 
     @Override
     public DoubleScalarReward averageReward(Stream<DoubleScalarReward> doubleScalarRewardStream) {
-        return doubleScalarRewardStream.reduce(new BinaryOperator<>() {
+        return doubleScalarRewardStream.reduce(new BinaryOperator<DoubleScalarReward>() {
 
             private int count = 1;
 
@@ -104,7 +103,7 @@ public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScal
                 count++;
                 return new DoubleScalarReward(totalSum / count);
             }
-        }).orElseThrow(() -> new InvalidRequestStateException("Cannot compute average reward from empty stream"));
+        }).orElseThrow(() -> new IllegalStateException("Cannot compute average reward from empty stream"));
     }
 
 }
