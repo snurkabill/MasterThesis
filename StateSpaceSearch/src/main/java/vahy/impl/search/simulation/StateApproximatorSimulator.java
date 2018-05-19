@@ -3,7 +3,6 @@ package vahy.impl.search.simulation;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
@@ -29,9 +28,7 @@ public class StateApproximatorSimulator<
     }
 
     @Override
-    protected TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node, TAction firstAction) {
-        StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = node.getWrappedState().applyAction(firstAction);
-        TReward expectedReturnAfterAction = stateEvaluatingFunction.apply(stateRewardReturn.getState().getObservation());
-        return rewardAggregator.aggregateDiscount(stateRewardReturn.getReward(), expectedReturnAfterAction, discountFactor);
+    protected TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
+        return stateEvaluatingFunction.apply(node.getWrappedState().getObservation());
     }
 }

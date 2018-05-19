@@ -40,7 +40,7 @@ public class SearchNodeBaseFactoryImpl<
         StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
         SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> parent,
         TAction action) {
-        return new SearchNodeImpl<>(
+        return new SearchNodeImpl<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>(
             stateRewardReturn.getState(),
             searchNodeMetadataFactory.apply(stateRewardReturn, parent),
             new LinkedHashMap<>(),
