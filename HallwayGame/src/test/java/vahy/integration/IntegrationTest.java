@@ -3,6 +3,7 @@ package vahy.integration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.Prototype;
+import vahy.api.episode.EpisodeAggregator;
 import vahy.api.model.State;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
@@ -12,9 +13,10 @@ import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.agent.policy.randomized.EGreedyPolicy;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
-import vahy.environment.episode.EpisodeAggregator;
-import vahy.game.InitialStateInstanceFactory;
+import vahy.environment.state.ImmutableStateImpl;
+import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
+import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
@@ -31,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public class IntegrationTest {
 
@@ -42,7 +45,7 @@ public class IntegrationTest {
 
         SplittableRandom random = new SplittableRandom(0);
         GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.0).stepPenalty(1).trapProbability(1).buildConfig();
-        InitialStateInstanceFactory initialStateInstanceFactory = new InitialStateInstanceFactory(gameConfig, random);
+        HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
         double discountFactor = 0.9;
@@ -63,21 +66,22 @@ public class IntegrationTest {
             AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
 
-        EpisodeAggregator episodeAggregator = new EpisodeAggregator(
+        EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
             1,
             10,
+            hallwayGameInitialInstanceSupplier,
             immutableState -> new ImmutableTuple<>(
                 new EGreedyPolicy(
+                    0.1,
                     random,
                     100,
-                    0.1,
-                    immutableState,
+                    (ImmutableStateImpl) immutableState,
                     transitionUpdater,
                     rewardSimulator),
                 immutableState),
-            new EnvironmentPolicy(random),
-            initialStateInstanceFactory);
-        List<List<Double>> rewardHistory = episodeAggregator.runSimulation(new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
+            new EnvironmentPolicy(random)
+        );
+        List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
         Assert.assertTrue(rewardHistory.stream().allMatch(x -> x.size() == 17));
     }
 }

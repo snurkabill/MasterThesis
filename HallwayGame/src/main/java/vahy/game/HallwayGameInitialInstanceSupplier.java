@@ -1,5 +1,7 @@
 package vahy.game;
 
+import vahy.api.episode.InitialStateSupplier;
+import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.ImmutableStateImpl;
@@ -10,6 +12,8 @@ import vahy.game.cell.CellType;
 import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
+import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
 
@@ -18,19 +22,21 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class InitialStateInstanceFactory {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;
+    private final List<List<Cell>> gameMatrix;
 
-    public InitialStateInstanceFactory(GameConfig gameConfig, SplittableRandom random) {
+    public HallwayGameInitialInstanceSupplier(GameConfig gameConfig, SplittableRandom random, String gameStringRepresentation) throws NotValidGameStringRepresentationException {
         this.gameConfig = gameConfig;
         this.random = random;
+        this.gameMatrix = deserialize(gameStringRepresentation);
     }
 
-    public ImmutableStateImpl createInitialState(String gameStringRepresentation) throws NotValidGameStringRepresentationException {
-//        return new HallwayGame(deserialize(gameStringRepresentation));
-        return createImmutableInitialState(deserialize(gameStringRepresentation));
+    @Override
+    public ImmutableStateImpl createInitialState() {
+        return createImmutableInitialState(gameMatrix);
     }
 
     private void checkGameShape(List<List<Cell>> gameSetup) {
@@ -111,4 +117,6 @@ public class InitialStateInstanceFactory {
             throw new NotValidGameStringRepresentationException("Reward [" + reward + "] is not valid reward");
         }
     }
+
+
 }
