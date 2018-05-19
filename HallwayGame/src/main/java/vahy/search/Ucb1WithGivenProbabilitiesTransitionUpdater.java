@@ -3,19 +3,18 @@ package vahy.search;
 import vahy.api.model.State;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
-import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
-import vahy.utils.ImmutableTuple;
 
-import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class Ucb1WithGivenProbabilitiesTransitionUpdater implements NodeTransitionUpdater<
+public class Ucb1WithGivenProbabilitiesTransitionUpdater extends MaximizingRewardGivenProbabilities implements NodeTransitionUpdater<
     ActionType,
     DoubleScalarReward,
     DoubleVectorialObservation,
@@ -42,30 +41,20 @@ public class Ucb1WithGivenProbabilitiesTransitionUpdater implements NodeTransiti
             discountFactor).getValue()));
         double parentCumulativeEstimates = parentSearchNodeMetadata.getEstimatedTotalReward().getValue() * (parentSearchNodeMetadata.getVisitCounter() - 1);
 
-        DoubleScalarReward newParentCumulativeEstimate = resolveReward(parent);
+        DoubleScalarReward newParentCumulativeEstimate = resolveReward(
+            parent.getWrappedState(),
+            parent.getSearchNodeMetadata()
+                .getStateActionMetadataMap()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    o -> (AbstractStateActionMetadata<DoubleScalarReward>) o.getValue()
+                ))
+        );
 
         double sum = parentCumulativeEstimates + newParentCumulativeEstimate.getValue();
         parentSearchNodeMetadata.setEstimatedTotalReward(new DoubleScalarReward(sum / parentSearchNodeMetadata.getVisitCounter()));
-    }
-
-    private DoubleScalarReward resolveReward(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent) {
-        if(parent.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> actionsWithProbabilities = ((ImmutableStateImpl) parent.getWrappedState()).environmentActionsWithProbabilities();
-            double sum = 0.0;
-            for (int i = 0; i < actionsWithProbabilities.getFirst().size(); i++) {
-                sum += parent.getSearchNodeMetadata().getStateActionMetadataMap().get(actionsWithProbabilities.getFirst().get(i)).getEstimatedTotalReward().getValue() *
-                    actionsWithProbabilities.getSecond().get(i);
-            }
-            return new DoubleScalarReward(sum);
-        } else {
-            return parent.getSearchNodeMetadata()
-                .getStateActionMetadataMap()
-                .values()
-                .stream()
-                .map(StateActionMetadata::getEstimatedTotalReward)
-                .max(Comparable::compareTo)
-                .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update"));
-        }
     }
 
 }
