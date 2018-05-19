@@ -19,6 +19,7 @@
         <module>../Commons</module>
         <module>../HallwayGame</module>
         <module>../StateSpaceSearch</module>
+        <module>../ReinforcementLearning</module>
     </modules>
 
     <properties>
