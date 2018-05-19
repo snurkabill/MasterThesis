@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.Observation;
 import vahy.api.model.State;
+import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
@@ -42,9 +43,10 @@ public abstract class AbstractNodeEvaluationSimulator<
         TSearchNodeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
             timer.startTimer();
-            TReward expectedReward = calcExpectedReward(expandedNode, entry.getKey());
+            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = expandedNode.getWrappedState().applyAction(entry.getKey());
+            TReward expectedReward = calcExpectedReward(entry.getValue());
             entry.getValue().getSearchNodeMetadata().setEstimatedTotalReward(expectedReward);
-            searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(expectedReward);
+            searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(rewardAggregator.aggregateDiscount(stateRewardReturn.getReward(), expectedReward, discountFactor));
             timer.stopTimer();
             logger.debug("Expected reward simulation for action [{}] calculated in [{}] seconds", entry.getKey(), timer.secondsSpent());
         }
@@ -58,7 +60,7 @@ public abstract class AbstractNodeEvaluationSimulator<
         );
     }
 
-    protected abstract TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node, TAction firstAction);
+    protected abstract TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node);
 
 
 }

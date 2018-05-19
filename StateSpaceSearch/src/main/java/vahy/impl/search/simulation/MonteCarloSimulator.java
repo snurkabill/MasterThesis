@@ -39,29 +39,26 @@ public class MonteCarloSimulator<
     }
 
     @Override
-    protected TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node, TAction firstAction) {
+    protected TReward calcExpectedReward(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
         List<TReward> aggregatedRewardsList = new ArrayList<>();
         timer.startTimer();
         for (int i = 0; i < simulationCount; i++) {
-            aggregatedRewardsList.add(runRandomWalkSimulation(node, firstAction));
+            aggregatedRewardsList.add(runRandomWalkSimulation(node));
         }
         timer.stopTimer();
-        logger.debug("Running [{}] MonteCarlo simulations for action [{}]. Simulations per second: [{}]", simulationCount, firstAction, timer.samplesPerSec(simulationCount));
+        logger.debug("Running [{}] MonteCarlo simulations. Simulations per second: [{}]", simulationCount, timer.samplesPerSec(simulationCount));
         return rewardAggregator.averageReward(aggregatedRewardsList);
     }
 
-    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node, TAction firstAction) {
-        StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = node.getWrappedState().applyAction(firstAction);
-        State<TAction, TReward, TObservation> wrappedState = stateRewardReturn.getState();
+    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
         List<TReward> gainedRewards = new ArrayList<>();
-        gainedRewards.add(stateRewardReturn.getReward());
+        State<TAction, TReward, TObservation> wrappedState = node.getWrappedState();
         while(!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
-            stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
+            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
-
         }
          return rewardAggregator.aggregateDiscount(gainedRewards, discountFactor);
     }
