@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.episode.EpisodeAggregator;
 import vahy.api.model.State;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.api.policy.Policy;
+import vahy.api.policy.PolicySupplier;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.chart.ChartBuilder;
@@ -32,7 +32,6 @@ import vahy.impl.search.simulation.MonteCarloSimulator;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
 import vahy.search.AbstractMetadataWithGivenProbabilitiesTransitionUpdater;
 import vahy.search.Ucb1WithGivenProbabilitiesTransitionUpdater;
-import vahy.utils.ImmutableTuple;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +42,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Prototype {
@@ -82,50 +80,39 @@ public class Prototype {
         logger.info("Average reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get() / totalEpisodes);
     }
 
-    public static Function<
-        State<ActionType, DoubleScalarReward, DoubleVectorialObservation>,
-        ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideRandomWalkPolicy(SplittableRandom random) {
-        return immutableState -> new ImmutableTuple<>(
-            new UniformRandomWalkPolicy<>(random),
-            immutableState);
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideRandomWalkPolicy(SplittableRandom random) {
+        return immutableState -> new UniformRandomWalkPolicy<>(random);
     }
 
-    public static Function<State<ActionType, DoubleScalarReward, DoubleVectorialObservation>, ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideBfsPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
-        return immutableState -> new ImmutableTuple<>(
-            new BfsPolicy(
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideBfsPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+        return immutableState -> new BfsPolicy(
                 random,
                 uprateTreeCount,
                 (ImmutableStateImpl) immutableState,
                 provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
 //                new CumulativeRewardSimulator<>()
-                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator)),
-            immutableState);
+                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static Function<State<ActionType, DoubleScalarReward, DoubleVectorialObservation>, ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideUcb1Policy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
-        return immutableState -> new ImmutableTuple<>(
-            new Ucb1Policy(
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideUcb1Policy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+        return immutableState -> new Ucb1Policy(
                 random,
                 uprateTreeCount,
                 (ImmutableStateImpl) immutableState,
 //                provideNodeTransitionUpdaterForUcb1Metadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForUcb1WithGivenProbabilities(discountFactor, rewardAggregator),
-                provideMcEstimatorForUcb1Metadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator)),
-            immutableState);
+                provideMcEstimatorForUcb1Metadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static Function<State<ActionType, DoubleScalarReward, DoubleVectorialObservation>, ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideEGreedyPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
-        return immutableState -> new ImmutableTuple<>(
-            new EGreedyPolicy(
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideEGreedyPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+        return immutableState -> new EGreedyPolicy(
                 0.3,
                 random,
                 uprateTreeCount,
                 (ImmutableStateImpl) immutableState,
 //                provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator),
-                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator)),
-            immutableState);
+                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
     public static NodeTransitionUpdater<

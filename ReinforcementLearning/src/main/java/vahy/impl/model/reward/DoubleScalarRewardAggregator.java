@@ -106,4 +106,8 @@ public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScal
         }).orElseThrow(() -> new IllegalStateException("Cannot compute average reward from empty stream"));
     }
 
+    @Override
+    public DoubleScalarReward averageReward(DoubleScalarReward runningAverage, int countOfAlreadyAveragedRewards, DoubleScalarReward newReward) {
+        return new DoubleScalarReward((runningAverage.getValue() * countOfAlreadyAveragedRewards + newReward.getValue()) / (countOfAlreadyAveragedRewards + 1));
+    }
 }
