@@ -27,6 +27,19 @@ public class DoubleScalarReward implements Reward {
     }
 
     @Override
+    public Reward fromNumericVector(double[] vector) {
+        if(vector.length != 1) {
+            throw new IllegalArgumentException("Expected vector with length 1. Actual lenght: [" + vector.length + "]");
+        }
+        return new DoubleScalarReward(vector[0]);
+    }
+
+    @Override
+    public int componentCount() {
+        return 1;
+    }
+
+    @Override
     public String toPrettyString() {
         return value.toString();
     }
