@@ -21,11 +21,6 @@ public class MaximizingRewardGivenProbabilitiesTest {
 
     @Test
     public void DummyTest() {
-        MaximizingRewardGivenProbabilitiesUnderTest maximizingRewardGivenProbabilitiesUnderTest = new MaximizingRewardGivenProbabilitiesUnderTest();
-
-        maximizingRewardGivenProbabilitiesUnderTest.resolveReward();
-
-
 
     }
 

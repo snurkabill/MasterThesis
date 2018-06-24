@@ -181,8 +181,8 @@ public class Prototype {
 //        URL url = classLoader.getResource("examples/hallway_demo2.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
-//         URL url = classLoader.getResource("examples/hallway_demo5.txt");
-        URL url = classLoader.getResource("examples/hallway0.txt");
+         URL url = classLoader.getResource("examples/hallway_demo5.txt");
+//        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
 
