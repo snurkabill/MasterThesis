@@ -11,4 +11,5 @@ public interface StateRewardReturn<
     TReward getReward();
 
     TState getState();
+
 }

@@ -10,5 +10,12 @@ import java.util.List;
 
 public interface Episode<TAction extends Action, TReward extends Reward, TObservation extends Observation> {
 
-    List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> runEpisode();
+    void runEpisode();
+
+    boolean isEpisodeAlreadySimulated();
+
+    List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> getEpisodeStepHistoryList();
+
+    State<TAction, TReward, TObservation> getFinalState();
+
 }

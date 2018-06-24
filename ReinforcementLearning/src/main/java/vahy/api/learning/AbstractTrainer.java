@@ -1,11 +1,9 @@
 package vahy.api.learning;
 
-public class AbstractTrainer {
+import java.util.function.IntSupplier;
 
-    
+public abstract class AbstractTrainer {
 
-    public void trainPolicy() {
-
-    }
+    public abstract void trainPolicy(IntSupplier episodeCount);
 
 }
