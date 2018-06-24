@@ -51,7 +51,8 @@ public class EpisodeAggregatorImpl<TAction extends Action, TReward extends Rewar
                 Policy<TAction, TReward, TObservation> policy = playerPolicySupplier.initializePolicy(initialGameState);
                 Episode<TAction, TReward, TObservation> episode = new EpisodeImpl<>(initialGameState, policy, opponentPolicy);
                 System.out.println("Running [" + i +"] a [" + j +  "] episode");
-                rewardHistory.add(episode.runEpisode().stream().map(StateRewardReturn::getReward).collect(Collectors.toList()));
+                episode.runEpisode();
+                rewardHistory.add(episode.getEpisodeStepHistoryList().stream().map(StateRewardReturn::getReward).collect(Collectors.toList()));
             }
         }
         return rewardHistory;

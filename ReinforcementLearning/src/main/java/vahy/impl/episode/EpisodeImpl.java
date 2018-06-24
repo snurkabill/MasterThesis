@@ -10,6 +10,7 @@ import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,10 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
     private final Policy<TAction, TReward, TObservation> playerPolicy;
     private final Policy<TAction, TReward, TObservation> opponentPolicy;
 
+    private List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeHistoryList = new ArrayList<>();
+
+    private boolean episodeAlreadySimulated = false;
+
     public EpisodeImpl(
         State<TAction, TReward, TObservation> initialState,
         Policy<TAction, TReward, TObservation> playerPolicy,
@@ -30,7 +35,10 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
         this.opponentPolicy = opponentPolicy;
     }
 
-    public List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> runEpisode() {
+    public void runEpisode() {
+        if(episodeAlreadySimulated) {
+            throw new IllegalStateException("Episode was already simulated");
+        }
         State<TAction, TReward, TObservation> state = this.initialState;
         logger.info("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> stepHistory = new LinkedList<>();
@@ -53,6 +61,23 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
             }
             logger.info("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
         }
-        return stepHistory;
+        episodeHistoryList = stepHistory;
+        episodeAlreadySimulated = true;
     }
+
+    @Override
+    public boolean isEpisodeAlreadySimulated() {
+        return episodeAlreadySimulated;
+    }
+
+    @Override
+    public List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> getEpisodeStepHistoryList() {
+        return this.episodeHistoryList;
+    }
+
+    @Override
+    public State<TAction, TReward, TObservation> getFinalState() {
+        return this.episodeHistoryList.get(episodeHistoryList.size() - 1).getState();
+    }
+
 }
