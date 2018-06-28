@@ -1,8 +1,9 @@
 package vahy.impl.model.reward;
 
 import vahy.api.model.reward.Reward;
+import vahy.api.model.reward.VectorialReward;
 
-public class DoubleScalarReward implements Reward {
+public class DoubleScalarReward implements VectorialReward {
 
     private final Double value;
 
@@ -36,4 +37,8 @@ public class DoubleScalarReward implements Reward {
         return value.toString();
     }
 
+    @Override
+    public double[] getAsVector() {
+        return new double[] {value};
+    }
 }
