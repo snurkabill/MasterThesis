@@ -13,15 +13,15 @@ import vahy.impl.episode.EpisodeImpl;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MonteCarloGameSampler<TAction extends Action, TReward extends Reward, TObservation extends Observation> {
+public class RolloutGameSampler<TAction extends Action, TReward extends Reward, TObservation extends Observation> {
 
     private final InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier;
     private final PolicySupplier<TAction, TReward, TObservation> playerPolicySupplier;
     private final PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier;
 
-    public MonteCarloGameSampler(InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier,
-                                 PolicySupplier<TAction, TReward, TObservation> playerPolicySupplier,
-                                 PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier) {
+    public RolloutGameSampler(InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier,
+                              PolicySupplier<TAction, TReward, TObservation> playerPolicySupplier,
+                              PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier) {
         this.initialStateSupplier = initialStateSupplier;
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
