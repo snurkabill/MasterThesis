@@ -1,7 +1,7 @@
 package vahy.api.episode;
 
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 

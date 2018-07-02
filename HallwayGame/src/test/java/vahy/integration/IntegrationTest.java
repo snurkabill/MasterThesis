@@ -17,7 +17,7 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;

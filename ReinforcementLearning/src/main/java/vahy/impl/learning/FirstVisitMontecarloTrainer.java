@@ -3,10 +3,9 @@ package vahy.impl.learning;
 import vahy.api.episode.Episode;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.learning.AbstractMonteCarloTrainer;
-import vahy.api.learning.model.SupervisedTrainableStateValueModel;
 import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
@@ -24,10 +23,9 @@ public class FirstVisitMontecarloTrainer<TAction extends Action, TReward extends
     public FirstVisitMontecarloTrainer(InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier,
                                        TrainablePolicySupplier<TAction, TReward, TObservation> trainablePolicySupplier,
                                        PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier,
-                                       SupervisedTrainableStateValueModel<TReward, TObservation> trainableStateValueModel,
                                        RewardAggregator<TReward> rewardAggregator,
                                        double discountFactor) {
-        super(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier, trainableStateValueModel, rewardAggregator);
+        super(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier, rewardAggregator);
         this.discountFactor = discountFactor;
     }
 

@@ -1,7 +1,7 @@
 package vahy.impl.policy.random;
 
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 
@@ -49,7 +49,7 @@ public class UniformRandomWalkPolicy<TAction extends Action, TReward extends Rew
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<TAction> opponentAction) {
+    public void updateStateOnOpponentActions(List<TAction> opponentActionList) {
         // this is it
     }
 }

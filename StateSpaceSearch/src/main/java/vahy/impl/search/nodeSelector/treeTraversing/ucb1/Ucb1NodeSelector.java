@@ -3,7 +3,7 @@ package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.NodeSelector;

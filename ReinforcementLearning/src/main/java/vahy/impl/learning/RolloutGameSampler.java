@@ -3,7 +3,7 @@ package vahy.impl.learning;
 import vahy.api.episode.Episode;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;

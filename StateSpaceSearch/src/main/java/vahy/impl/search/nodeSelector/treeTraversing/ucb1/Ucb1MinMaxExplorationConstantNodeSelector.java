@@ -1,7 +1,7 @@
 package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
 
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleScalarReward;

@@ -2,8 +2,9 @@ package vahy.impl.learning.model;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.api.model.reward.RewardFactory;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardFactory;
 import vahy.utils.ImmutableTuple;
@@ -57,20 +58,21 @@ public class NaiveLinearModelTest {
 
     private void runFit(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> data) {
         RewardFactory<DoubleScalarReward> rewardFactory = new DoubleScalarRewardFactory();
-        NaiveLinearModel<DoubleScalarReward, DoubleVectorialObservation> naiveLinearModel = new NaiveLinearModel<>(2, 1, rewardFactory, 0.1);
+        SupervisedTrainableModel linearModel = new LinearModelNaiveImpl(2, 1, 0.1);
+        ModelReinforcementAdapter<DoubleScalarReward> naiveLinearModel = new ModelReinforcementAdapter<DoubleScalarReward>(linearModel,  rewardFactory);
         boolean atLeastOneFail = false;
         for (ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward> entry : data) {
-            double predicted = naiveLinearModel.approximate(Collections.singletonList(entry.getFirst())).getValue();
+            double predicted = naiveLinearModel.approximateReward(entry.getFirst()).getValue();
             double expected = entry.getSecond().getValue();
             double roundedPrediction = Math.round(predicted);
             atLeastOneFail = atLeastOneFail || (Math.abs(expected - roundedPrediction) > LEARNING_TOLERANCE);
         }
         Assert.assertTrue(atLeastOneFail);
         for (int i = 0; i < 100; i++) {
-            naiveLinearModel.fit(data.stream().map(x -> Collections.singletonList(x.getFirst())).collect(Collectors.toList()), data.stream().map(ImmutableTuple::getSecond).collect(Collectors.toList()));
+            naiveLinearModel.fit(data.stream().map(ImmutableTuple::getFirst).collect(Collectors.toList()), data.stream().map(ImmutableTuple::getSecond).collect(Collectors.toList()));
         }
         for (ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward> entry : data) {
-            double predicted = naiveLinearModel.approximate(Collections.singletonList(entry.getFirst())).getValue();
+            double predicted = naiveLinearModel.approximateReward(entry.getFirst()).getValue();
             double expected = entry.getSecond().getValue();
             double roundedPrediction = Math.round(predicted);
             Assert.assertEquals(roundedPrediction, expected, LEARNING_TOLERANCE);

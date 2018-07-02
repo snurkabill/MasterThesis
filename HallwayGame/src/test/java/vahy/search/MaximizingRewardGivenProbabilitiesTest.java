@@ -3,7 +3,7 @@ package vahy.search;
 import org.testng.annotations.Test;
 import vahy.api.model.State;
 import vahy.environment.ActionType;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 

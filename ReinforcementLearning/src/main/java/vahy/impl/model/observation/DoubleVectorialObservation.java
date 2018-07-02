@@ -1,6 +1,6 @@
-package vahy.impl.model;
+package vahy.impl.model.observation;
 
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 
 public class DoubleVectorialObservation implements Observation {
 

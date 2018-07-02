@@ -4,7 +4,7 @@ import vahy.api.episode.Episode;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 import vahy.api.model.reward.RewardAggregator;
@@ -40,11 +40,10 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
         for (Episode<TAction, TReward, TObservation> entry : episodeHistoryList) {
             addVisitedRewards(calculatedVisitedRewards(entry));
         }
-        List<List<TObservation>> observationList = new ArrayList<>();
+        List<TObservation> observationList = new ArrayList<>();
         List<TReward> averagedRewardList = new ArrayList<>();
         for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry : visitAverageRewardMap.entrySet()) {
-            observationList.add(new ArrayList<>());
-            observationList.get(observationList.size() - 1).add(entry.getKey().getObservation());
+            observationList.add(entry.getKey().getObservation());
             averagedRewardList.add(entry.getValue().getSecond());
         }
         trainablePolicySupplier.getTrainableStateValueEvaluator().fit(observationList, averagedRewardList);

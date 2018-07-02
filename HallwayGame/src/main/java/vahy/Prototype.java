@@ -20,7 +20,7 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.policy.random.UniformRandomWalkPolicy;
@@ -113,6 +113,19 @@ public class Prototype {
 //                provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator),
                 provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
+    }
+
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideTrainedLinearModel(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+
+        NodeTransitionUpdater<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater = provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator);
+        NodeEvaluationSimulator<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeEvaluationSimulator = provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator);
+        return immutableState -> new EGreedyPolicy(
+            0.3,
+            random,
+            uprateTreeCount,
+            (ImmutableStateImpl) immutableState,
+            nodeTransitionUpdater,
+            nodeEvaluationSimulator);
     }
 
     public static NodeTransitionUpdater<

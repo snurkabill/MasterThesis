@@ -5,7 +5,7 @@ import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
