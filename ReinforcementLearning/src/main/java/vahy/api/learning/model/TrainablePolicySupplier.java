@@ -11,6 +11,6 @@ public interface TrainablePolicySupplier<
     TObservation extends Observation>
     extends PolicySupplier<TAction, TReward, TObservation> {
 
-    SupervisedTrainableValueModel<TReward, TObservation> getTrainableStateValueEvaluator();
+    SupervisedTrainableModel getTrainableStateEvaluator();
 
 }
