@@ -1,5 +1,7 @@
 package vahy.api.learning;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.Episode;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.learning.model.TrainablePolicySupplier;
@@ -21,6 +23,8 @@ import java.util.function.IntSupplier;
 
 public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractTrainer { // TODO: make observation and reward more abstract
 
+    private static final Logger logger = LoggerFactory.getLogger(AbstractMonteCarloTrainer.class.getName());
+
     private final RolloutGameSampler<TAction, TReward, TObservation> rolloutGameSampler;
     private final TrainablePolicySupplier<TAction, TReward, TObservation> trainablePolicySupplier;
     private final Map<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> visitAverageRewardMap = new LinkedHashMap<>();
@@ -37,10 +41,12 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
 
     @Override
     public void trainPolicy(IntSupplier episodeCount) {
+        logger.info("Starting MonteCarlo training on [{}] episodeCount", episodeCount);
         List<Episode<TAction, TReward, TObservation>> episodeHistoryList = rolloutGameSampler.sampleEpisodes(episodeCount.getAsInt());
         for (Episode<TAction, TReward, TObservation> entry : episodeHistoryList) {
             addVisitedRewards(calculatedVisitedRewards(entry));
         }
+        logger.debug("Sampled all episodes");
         List<ImmutableTuple<TObservation, TReward>> observationRewardList = new ArrayList<>();
         for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry : visitAverageRewardMap.entrySet()) {
             observationRewardList.add(new ImmutableTuple<>(entry.getKey().getObservation(), entry.getValue().getSecond()));
@@ -51,6 +57,7 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
 //            inputs[i] = observationList.get(i).getObservedVector();
 //            targets[i] = averagedRewardList.get(i).getAsVector();
 //        }
+
         trainablePolicySupplier.train(observationRewardList);
     }
 

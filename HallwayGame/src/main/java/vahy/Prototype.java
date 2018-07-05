@@ -21,8 +21,9 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarRewardDouble;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.model.reward.DoubleScalarRewardDouble;
+import vahy.impl.model.reward.DoubleScalarRewardFactory;
 import vahy.impl.policy.random.UniformRandomWalkPolicy;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
@@ -61,16 +62,29 @@ public class Prototype {
         int updateTreeCount = 10000;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
+        //            provideRandomWalkPolicy(random),
+        //            provideBfsPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
+        //            provideEGreedyPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
+        //            provideUcb1Policy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
+//        PolicySupplier<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> policySupplier = provideEGreedyPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount);
+
+        PolicySupplier<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> policySupplier = TrainedPolicyPrototype.trainPolicy(
+            hallwayGameInitialInstanceSupplier,
+            initialState -> new EnvironmentPolicy(random),
+            new DoubleScalarRewardFactory(),
+            rewardAggregator,
+            discountFactor,
+            hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+            1,
+            0.1,
+            random,
+            updateTreeCount);
+
         EpisodeAggregator<DoubleScalarRewardDouble> episodeAggregator = new EpisodeAggregatorImpl<>(
             uniqueEpisodeCount,
             episodeCount,
             hallwayGameInitialInstanceSupplier,
-
-//            provideRandomWalkPolicy(random),
-//            provideBfsPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
-            provideEGreedyPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
-//            provideUcb1Policy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
-
+            policySupplier,
             new EnvironmentPolicy(random)
             );
 

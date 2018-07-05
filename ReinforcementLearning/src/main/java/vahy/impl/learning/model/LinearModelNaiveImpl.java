@@ -40,6 +40,7 @@ public class LinearModelNaiveImpl implements SupervisedTrainableModel {
 
     @Override
     public double[] predict(double[] input) {
+        logger.trace("Predicting input in naive linear model");
         if(input.length != this.inputDimension) {
             throw new IllegalArgumentException("Expected input length: [" + inputDimension + "]. Actual length: [" + input.length + "]");
         }
@@ -66,6 +67,7 @@ public class LinearModelNaiveImpl implements SupervisedTrainableModel {
 
     @Override
     public void fit(double[][] input, double[][] target) {
+        logger.debug("Fitting model [{}] with data [{}] data samples", this.toString(), input.length);
         for (int i = 0; i < input.length; i++) {
             double[] predicted= predict(input[i]);
             double[] expected = target[i];
