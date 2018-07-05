@@ -9,7 +9,7 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleScalarRewardDouble;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
@@ -24,7 +24,7 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
-public class BfsPolicy extends AbstractTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> {
+public class BfsPolicy extends AbstractTreeSearchPolicy<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarRewardDouble>, AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>> {
 
     public BfsPolicy(
         SplittableRandom random,
@@ -32,61 +32,61 @@ public class BfsPolicy extends AbstractTreeSearchPolicy<ActionType, DoubleScalar
         ImmutableStateImpl gameState,
         NodeTransitionUpdater<
             ActionType,
-            DoubleScalarReward,
+            DoubleScalarRewardDouble,
             DoubleVectorialObservation,
-            AbstractStateActionMetadata<DoubleScalarReward>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
+            AbstractStateActionMetadata<DoubleScalarRewardDouble>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+            State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
-            DoubleScalarReward,
+            DoubleScalarRewardDouble,
             DoubleVectorialObservation,
-            AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
+            AbstractStateActionMetadata<DoubleScalarRewardDouble>, AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+            State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> rewardSimulator) {
         super(random, uprateTreeCount, createSearchTree(gameState, nodeTransitionUpdater, rewardSimulator));
     }
 
     private static SearchTreeImpl<
         ActionType,
-        DoubleScalarReward,
+        DoubleScalarRewardDouble,
         DoubleVectorialObservation,
-        AbstractStateActionMetadata<DoubleScalarReward>,
-        AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-        State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> createSearchTree(
+        AbstractStateActionMetadata<DoubleScalarRewardDouble>,
+        AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+        State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> createSearchTree(
             ImmutableStateImpl gameState,
             NodeTransitionUpdater<
                 ActionType,
-                DoubleScalarReward,
+                DoubleScalarRewardDouble,
                 DoubleVectorialObservation,
-                AbstractStateActionMetadata<DoubleScalarReward>,
-                AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
+                AbstractStateActionMetadata<DoubleScalarRewardDouble>,
+                AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+                State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> nodeTransitionUpdater,
             NodeEvaluationSimulator<
                 ActionType,
-                DoubleScalarReward,
+                DoubleScalarRewardDouble,
                 DoubleVectorialObservation,
-                AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
+                AbstractStateActionMetadata<DoubleScalarRewardDouble>, AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+                State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> rewardSimulator) {
 
         SearchNodeFactory<
             ActionType,
-            DoubleScalarReward,
+            DoubleScalarRewardDouble,
             DoubleVectorialObservation,
-            AbstractStateActionMetadata<DoubleScalarReward>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchNodeFactory = new SearchNodeBaseFactoryImpl<>(
+            AbstractStateActionMetadata<DoubleScalarRewardDouble>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+            State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> searchNodeFactory = new SearchNodeBaseFactoryImpl<>(
                 (stateRewardReturn, parent) -> {
                     Double cumulativeReward = parent != null ? parent.getSearchNodeMetadata().getCumulativeReward().getValue() : 0.0;
-                    return new EmptySearchNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
+                    return new EmptySearchNodeMetadata<>(new DoubleScalarRewardDouble(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
                 });
 
         SearchNode<
             ActionType,
-            DoubleScalarReward,
+            DoubleScalarRewardDouble,
             DoubleVectorialObservation,
-            AbstractStateActionMetadata<DoubleScalarReward>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> root = searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarReward(0.0)), null, null);
+            AbstractStateActionMetadata<DoubleScalarRewardDouble>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
+            State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> root = searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarRewardDouble(0.0)), null, null);
 
         return new SearchTreeImpl<>(
             root,

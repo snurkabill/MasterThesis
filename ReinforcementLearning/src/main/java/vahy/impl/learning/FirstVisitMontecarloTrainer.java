@@ -7,8 +7,8 @@ import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
+import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.api.model.reward.VectorialReward;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 
@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FirstVisitMontecarloTrainer<TAction extends Action, TReward extends VectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractMonteCarloTrainer<TAction, TReward, TObservation> {
+public class FirstVisitMontecarloTrainer<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractMonteCarloTrainer<TAction, TReward, TObservation> {
 
     private final double discountFactor;
 

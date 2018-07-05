@@ -1,6 +1,6 @@
 package vahy.api.model.reward;
 
-public interface VectorialReward extends Reward {
+public interface DoubleVectorialReward extends Reward {
 
     double[] getAsVector();
 }

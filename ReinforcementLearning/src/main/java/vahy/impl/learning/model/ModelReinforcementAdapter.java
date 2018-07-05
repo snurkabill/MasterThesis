@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory;
 import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.api.learning.model.SupervisedTrainableValueModel;
 import vahy.api.model.reward.RewardFactory;
-import vahy.api.model.reward.VectorialReward;
+import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 
 import java.util.List;
 
-public class ModelReinforcementAdapter<TReward extends VectorialReward> implements SupervisedTrainableValueModel<TReward, DoubleVectorialObservation> {
+public class ModelReinforcementAdapter<TReward extends DoubleVectorialReward> implements SupervisedTrainableValueModel<TReward, DoubleVectorialObservation> {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelReinforcementAdapter.class);
 

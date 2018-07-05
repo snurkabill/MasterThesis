@@ -5,11 +5,12 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.api.model.reward.VectorialReward;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.learning.RolloutGameSampler;
 import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.utils.ImmutableTuple;
 import vahy.utils.MutableTuple;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntSupplier;
 
-public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward extends VectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractTrainer { // TODO: make observation and reward more abstract
+public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractTrainer { // TODO: make observation and reward more abstract
 
     private final RolloutGameSampler<TAction, TReward, TObservation> rolloutGameSampler;
     private final TrainablePolicySupplier<TAction, TReward, TObservation> trainablePolicySupplier;
@@ -40,19 +41,17 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
         for (Episode<TAction, TReward, TObservation> entry : episodeHistoryList) {
             addVisitedRewards(calculatedVisitedRewards(entry));
         }
-        List<TObservation> observationList = new ArrayList<>();
-        List<TReward> averagedRewardList = new ArrayList<>();
+        List<ImmutableTuple<TObservation, TReward>> observationRewardList = new ArrayList<>();
         for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry : visitAverageRewardMap.entrySet()) {
-            observationList.add(entry.getKey().getObservation());
-            averagedRewardList.add(entry.getValue().getSecond());
+            observationRewardList.add(new ImmutableTuple<>(entry.getKey().getObservation(), entry.getValue().getSecond()));
         }
-        double[][] inputs = new double[observationList.size()][];
-        double[][] targets = new double[averagedRewardList.size()][];
-        for (int i = 0; i < observationList.size(); i++) {
-            inputs[i] = observationList.get(i).getObservedVector();
-            targets[i] = averagedRewardList.get(i).getAsVector();
-        }
-        trainablePolicySupplier.getTrainableStateEvaluator().fit(inputs, targets);
+//        double[][] inputs = new double[observationList.size()][];
+//        double[][] targets = new double[averagedRewardList.size()][];
+//        for (int i = 0; i < observationList.size(); i++) {
+//            inputs[i] = observationList.get(i).getObservedVector();
+//            targets[i] = averagedRewardList.get(i).getAsVector();
+//        }
+        trainablePolicySupplier.train(observationRewardList);
     }
 
     protected abstract Map<State<TAction, TReward, TObservation>, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation> episode);

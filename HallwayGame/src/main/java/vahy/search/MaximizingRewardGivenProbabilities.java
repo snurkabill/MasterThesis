@@ -5,7 +5,7 @@ import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleScalarRewardDouble;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.utils.ImmutableTuple;
 
@@ -14,7 +14,7 @@ import java.util.Map;
 
 public abstract class MaximizingRewardGivenProbabilities {
 
-    protected DoubleScalarReward resolveReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state, Map<ActionType, AbstractStateActionMetadata<DoubleScalarReward>> stateActionMap) {
+    protected DoubleScalarRewardDouble resolveReward(State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> state, Map<ActionType, AbstractStateActionMetadata<DoubleScalarRewardDouble>> stateActionMap) {
         if(state.isOpponentTurn()) {
             ImmutableTuple<List<ActionType>, List<Double>> actionsWithProbabilities = ((ImmutableStateImpl) state).environmentActionsWithProbabilities();
             double sum = 0.0;
@@ -22,7 +22,7 @@ public abstract class MaximizingRewardGivenProbabilities {
                 sum += stateActionMap.get(actionsWithProbabilities.getFirst().get(i)).getEstimatedTotalReward().getValue() *
                     actionsWithProbabilities.getSecond().get(i);
             }
-            return new DoubleScalarReward(sum);
+            return new DoubleScalarRewardDouble(sum);
         } else {
             return stateActionMap
                 .values()

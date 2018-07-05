@@ -16,13 +16,13 @@ public class UniformRandomWalkPolicy<TAction extends Action, TReward extends Rew
     }
 
 //    @Override
-//    public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+//    public ActionType getDiscreteAction(State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> gameState) {
 //        ActionType[] actions = gameState.getAllPossibleActions();
 //        return actions[getRandom().nextInt(actions.length)];
 //    }
 //
 //    @Override
-//    public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+//    public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> gameState) {
 //        // ignoring impossible actions here
 //        double[] probabilities = new double[ActionType.values().length];
 //        Arrays.fill(probabilities, 1.0 / (double) probabilities.length);

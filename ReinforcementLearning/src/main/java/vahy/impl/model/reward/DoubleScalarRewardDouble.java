@@ -1,13 +1,13 @@
 package vahy.impl.model.reward;
 
+import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.Reward;
-import vahy.api.model.reward.VectorialReward;
 
-public class DoubleScalarReward implements VectorialReward {
+public class DoubleScalarRewardDouble implements DoubleVectorialReward {
 
     private final Double value;
 
-    public DoubleScalarReward(Double value) {
+    public DoubleScalarRewardDouble(Double value) {
         this.value = value;
     }
 
@@ -20,10 +20,10 @@ public class DoubleScalarReward implements VectorialReward {
         if(this == o) {
             return 0;
         }
-        if(!(o instanceof DoubleScalarReward)) {
-            throw new IllegalArgumentException("Trying to compare non-comparable implementations. Base class: [" + DoubleScalarReward.class.getName() + "] comparing: [" + o + "]");
+        if(!(o instanceof DoubleScalarRewardDouble)) {
+            throw new IllegalArgumentException("Trying to compare non-comparable implementations. Base class: [" + DoubleScalarRewardDouble.class.getName() + "] comparing: [" + o + "]");
         }
-        DoubleScalarReward other = (DoubleScalarReward) o;
+        DoubleScalarRewardDouble other = (DoubleScalarRewardDouble) o;
         return this.value.compareTo(other.value);
     }
 

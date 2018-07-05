@@ -4,7 +4,7 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleScalarRewardDouble;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.utils.ArrayUtils;
@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
+public class ImmutableStateImpl implements State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 1;
@@ -160,7 +160,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
     }
 
     @Override
-    public StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> applyAction(ActionType actionType) {
+    public StateRewardReturn<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation, State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> applyAction(ActionType actionType) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -188,7 +188,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                             rewardCount,
                             isAgentKilled,
                             agentCoordinates.getFirst() != agentXCoordination || agentCoordinates.getSecond() != agentYCoordination),
-                        new DoubleScalarReward(reward));
+                        new DoubleScalarRewardDouble(reward));
                 case TURN_RIGHT:
                 case TURN_LEFT:
                     AgentHeading newAgentHeading = agentHeading.turn(actionType);
@@ -203,14 +203,14 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                             rewardsLeft,
                             isAgentKilled,
                             false),
-                        new DoubleScalarReward(-staticGamePart.getDefaultStepPenalty()));
+                        new DoubleScalarRewardDouble(-staticGamePart.getDefaultStepPenalty()));
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
             }
         } else {
             switch (actionType) {
                 case NO_ACTION:
-                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = new ImmutableStateImpl(
+                    State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> state = new ImmutableStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         agentXCoordination,
@@ -220,7 +220,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         rewardsLeft,
                         isAgentKilled,
                         false);
-                    return new ImmutableStateRewardReturnTuple<>(state, new DoubleScalarReward(0.0));
+                    return new ImmutableStateRewardReturnTuple<>(state, new DoubleScalarRewardDouble(0.0));
                 case NOISY_RIGHT:
                     ImmutableTuple<Integer, Integer> newRightCoordinates = makeRightMove();
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
@@ -232,7 +232,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         isAgentKilled,
-                        false), new DoubleScalarReward(0.0));
+                        false), new DoubleScalarRewardDouble(0.0));
                 case NOISY_LEFT:
                     ImmutableTuple<Integer, Integer> newLeftCoordinates = makeLeftMove();
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
@@ -244,7 +244,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         isAgentKilled,
-                        false), new DoubleScalarReward(0.0));
+                        false), new DoubleScalarRewardDouble(0.0));
                 case TRAP:
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
                         staticGamePart,
@@ -255,7 +255,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         true,
-                        false), new DoubleScalarReward(0.0));
+                        false), new DoubleScalarRewardDouble(0.0));
                 case NOISY_RIGHT_TRAP:
                     ImmutableTuple<Integer, Integer> newRightTrapCoordinates = makeRightMove();
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
@@ -267,7 +267,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         true,
-                        false), new DoubleScalarReward(0.0));
+                        false), new DoubleScalarRewardDouble(0.0));
                 case NOISY_LEFT_TRAP:
                     ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeLeftMove();
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
@@ -279,7 +279,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         true,
-                        false), new DoubleScalarReward(0.0));
+                        false), new DoubleScalarRewardDouble(0.0));
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
             }
@@ -287,7 +287,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
     }
 
     @Override
-    public State<ActionType, DoubleScalarReward, DoubleVectorialObservation> deepCopy() {
+    public State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation> deepCopy() {
         return new ImmutableStateImpl(
             staticGamePart,
             ArrayUtils.cloneArray(rewards),
