@@ -18,7 +18,7 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarRewardDouble;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
@@ -46,26 +46,26 @@ public class IntegrationTest {
         GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.0).stepPenalty(1).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
 
-        RewardAggregator<DoubleScalarRewardDouble> rewardAggregator = new DoubleScalarRewardAggregator();
+        RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
         double discountFactor = 0.9;
 
         NodeTransitionUpdater<
             ActionType,
-            DoubleScalarRewardDouble,
+            DoubleScalarReward,
             DoubleVectorialObservation,
-            AbstractStateActionMetadata<DoubleScalarRewardDouble>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
-            State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
         NodeEvaluationSimulator<
             ActionType,
-            DoubleScalarRewardDouble,
+            DoubleScalarReward,
             DoubleVectorialObservation,
-            AbstractStateActionMetadata<DoubleScalarRewardDouble>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarRewardDouble, AbstractStateActionMetadata<DoubleScalarRewardDouble>>,
-            State<ActionType, DoubleScalarRewardDouble, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
+            AbstractStateActionMetadata<DoubleScalarReward>,
+            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
 
-        EpisodeAggregator<DoubleScalarRewardDouble> episodeAggregator = new EpisodeAggregatorImpl<>(
+        EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
             1,
             10,
             hallwayGameInitialInstanceSupplier,
@@ -79,7 +79,7 @@ public class IntegrationTest {
                     rewardSimulator),
             new EnvironmentPolicy(random)
         );
-        List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarRewardDouble::getValue).collect(Collectors.toList())).collect(Collectors.toList());
+        List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
         Assert.assertTrue(rewardHistory.stream().allMatch(x -> x.size() == 17));
     }
 }

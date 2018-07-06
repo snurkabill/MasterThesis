@@ -7,107 +7,107 @@ import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScalarRewardDouble>  {
+public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleScalarReward>  {
 
     @Override
-    public DoubleScalarRewardDouble emptyReward() {
-        return new DoubleScalarRewardDouble(0.0);
+    public DoubleScalarReward emptyReward() {
+        return new DoubleScalarReward(0.0);
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregate(DoubleScalarRewardDouble first, DoubleScalarRewardDouble second) {
-        return new DoubleScalarRewardDouble(first.getValue() + second.getValue());
+    public DoubleScalarReward aggregate(DoubleScalarReward first, DoubleScalarReward second) {
+        return new DoubleScalarReward(first.getValue() + second.getValue());
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregate(DoubleScalarRewardDouble[] rewardArray) {
+    public DoubleScalarReward aggregate(DoubleScalarReward[] rewardArray) {
         double sum = 0.0;
         for (int i = 0; i < rewardArray.length; i++) {
             sum += rewardArray[i].getValue();
         }
-        return new DoubleScalarRewardDouble(sum);
+        return new DoubleScalarReward(sum);
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregate(List<DoubleScalarRewardDouble> doubleScalarRewards) {
+    public DoubleScalarReward aggregate(List<DoubleScalarReward> doubleScalarRewards) {
         double sum = 0.0;
-        for (DoubleScalarRewardDouble entry : doubleScalarRewards) {
+        for (DoubleScalarReward entry : doubleScalarRewards) {
             sum += entry.getValue();
         }
-        return new DoubleScalarRewardDouble(sum);
+        return new DoubleScalarReward(sum);
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregate(Stream<DoubleScalarRewardDouble> rewards) {
+    public DoubleScalarReward aggregate(Stream<DoubleScalarReward> rewards) {
         return rewards.reduce(this::aggregate).orElse(emptyReward());
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregateDiscount(DoubleScalarRewardDouble first, DoubleScalarRewardDouble second, double discountFactor) {
-        return new DoubleScalarRewardDouble(first.getValue() + discountFactor * second.getValue());
+    public DoubleScalarReward aggregateDiscount(DoubleScalarReward first, DoubleScalarReward second, double discountFactor) {
+        return new DoubleScalarReward(first.getValue() + discountFactor * second.getValue());
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregateDiscount(DoubleScalarRewardDouble[] rewardArray, double discountFactor) {
+    public DoubleScalarReward aggregateDiscount(DoubleScalarReward[] rewardArray, double discountFactor) {
         double discountedSum = 0.0;
         for (int i = 0; i < rewardArray.length; i++) {
             discountedSum += Math.pow(discountFactor, i) * rewardArray[i].getValue();
         }
-        return new DoubleScalarRewardDouble(discountedSum);
+        return new DoubleScalarReward(discountedSum);
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregateDiscount(List<DoubleScalarRewardDouble> doubleScalarRewards, double discountFactor) {
+    public DoubleScalarReward aggregateDiscount(List<DoubleScalarReward> doubleScalarRewards, double discountFactor) {
         double sum = 0.0;
         int iteration = 0;
-        for (DoubleScalarRewardDouble entry : doubleScalarRewards) {
+        for (DoubleScalarReward entry : doubleScalarRewards) {
             sum += Math.pow(discountFactor, iteration) * entry.getValue();
             iteration++;
         }
-        return new DoubleScalarRewardDouble(sum);
+        return new DoubleScalarReward(sum);
     }
 
     @Override
-    public DoubleScalarRewardDouble aggregateDiscount(Stream<DoubleScalarRewardDouble> rewards, double discountFactor) {
+    public DoubleScalarReward aggregateDiscount(Stream<DoubleScalarReward> rewards, double discountFactor) {
         return aggregateDiscount(rewards.collect(Collectors.toList()), discountFactor);
     }
 
     @Override
-    public DoubleScalarRewardDouble averageReward(DoubleScalarRewardDouble[] rewardArray) {
+    public DoubleScalarReward averageReward(DoubleScalarReward[] rewardArray) {
         double sum = 0.0;
         for (int i = 0; i < rewardArray.length; i++) {
             sum += rewardArray[i].getValue();
         }
-        return new DoubleScalarRewardDouble(sum / rewardArray.length);
+        return new DoubleScalarReward(sum / rewardArray.length);
     }
 
     @Override
-    public DoubleScalarRewardDouble averageReward(List<DoubleScalarRewardDouble> doubleScalarRewards) {
+    public DoubleScalarReward averageReward(List<DoubleScalarReward> doubleScalarRewards) {
         double sum = 0.0;
-        for (DoubleScalarRewardDouble entry : doubleScalarRewards) {
+        for (DoubleScalarReward entry : doubleScalarRewards) {
             sum += entry.getValue();
         }
-        return new DoubleScalarRewardDouble(sum / doubleScalarRewards.size());
+        return new DoubleScalarReward(sum / doubleScalarRewards.size());
     }
 
     @Override
-    public DoubleScalarRewardDouble averageReward(Stream<DoubleScalarRewardDouble> doubleScalarRewardStream) {
-        return doubleScalarRewardStream.reduce(new BinaryOperator<DoubleScalarRewardDouble>() {
+    public DoubleScalarReward averageReward(Stream<DoubleScalarReward> doubleScalarRewardStream) {
+        return doubleScalarRewardStream.reduce(new BinaryOperator<DoubleScalarReward>() {
 
             private int count = 1;
 
             @Override
-            public DoubleScalarRewardDouble apply(DoubleScalarRewardDouble doubleScalarReward, DoubleScalarRewardDouble doubleScalarReward2) {
+            public DoubleScalarReward apply(DoubleScalarReward doubleScalarReward, DoubleScalarReward doubleScalarReward2) {
                 double totalSum = doubleScalarReward.getValue() * count;
                 totalSum += doubleScalarReward2.getValue();
                 count++;
-                return new DoubleScalarRewardDouble(totalSum / count);
+                return new DoubleScalarReward(totalSum / count);
             }
         }).orElseThrow(() -> new IllegalStateException("Cannot compute average reward from empty stream"));
     }
 
     @Override
-    public DoubleScalarRewardDouble averageReward(DoubleScalarRewardDouble runningAverage, int countOfAlreadyAveragedRewards, DoubleScalarRewardDouble newReward) {
-        return new DoubleScalarRewardDouble((runningAverage.getValue() * countOfAlreadyAveragedRewards + newReward.getValue()) / (countOfAlreadyAveragedRewards + 1));
+    public DoubleScalarReward averageReward(DoubleScalarReward runningAverage, int countOfAlreadyAveragedRewards, DoubleScalarReward newReward) {
+        return new DoubleScalarReward((runningAverage.getValue() * countOfAlreadyAveragedRewards + newReward.getValue()) / (countOfAlreadyAveragedRewards + 1));
     }
 }

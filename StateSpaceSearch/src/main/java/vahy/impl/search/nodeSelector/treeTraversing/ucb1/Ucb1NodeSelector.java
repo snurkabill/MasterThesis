@@ -7,7 +7,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.NodeSelector;
-import vahy.impl.model.reward.DoubleScalarRewardDouble;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
 import vahy.utils.StreamUtils;
@@ -18,7 +18,7 @@ import java.util.SplittableRandom;
 
 public class Ucb1NodeSelector<
     TAction extends Action,
-    TReward extends DoubleScalarRewardDouble,
+    TReward extends DoubleScalarReward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation>>
     implements NodeSelector<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> {

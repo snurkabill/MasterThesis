@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.api.model.reward.RewardFactory;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarRewardDouble;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardFactory;
 import vahy.utils.ImmutableTuple;
 
@@ -18,27 +18,27 @@ public class NaiveLinearModelTest {
 
     private static final double LEARNING_TOLERANCE = Math.pow(10, -10);
 
-    private List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> getAndDatasetBase() {
-        List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> data = new ArrayList<>();
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 0.0}), new DoubleScalarRewardDouble(0.0)));
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 0.0}), new DoubleScalarRewardDouble(0.0)));
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 1.0}), new DoubleScalarRewardDouble(0.0)));
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 1.0}), new DoubleScalarRewardDouble(1.0)));
+    private List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> getAndDatasetBase() {
+        List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> data = new ArrayList<>();
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 0.0}), new DoubleScalarReward(0.0)));
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 0.0}), new DoubleScalarReward(0.0)));
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 1.0}), new DoubleScalarReward(0.0)));
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 1.0}), new DoubleScalarReward(1.0)));
         return data;
     }
 
-    private List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> getOrDatasetBase() {
-        List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> data = new ArrayList<>();
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 0.0}), new DoubleScalarRewardDouble(0.0)));
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 0.0}), new DoubleScalarRewardDouble(1.0)));
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 1.0}), new DoubleScalarRewardDouble(1.0)));
-        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 1.0}), new DoubleScalarRewardDouble(1.0)));
+    private List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> getOrDatasetBase() {
+        List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> data = new ArrayList<>();
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 0.0}), new DoubleScalarReward(0.0)));
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 0.0}), new DoubleScalarReward(1.0)));
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {0.0, 1.0}), new DoubleScalarReward(1.0)));
+        data.add(new ImmutableTuple<>(new DoubleVectorialObservation(new double[] {1.0, 1.0}), new DoubleScalarReward(1.0)));
         return data;
     }
 
-    private List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> copyAndShuffleDataset(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> originData,
-                                                                                                             int copyCount) {
-        List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> dataCopy = new ArrayList<>();
+    private List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> copyAndShuffleDataset(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> originData,
+                                                                                                       int copyCount) {
+        List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> dataCopy = new ArrayList<>();
         for (int i = 0; i < copyCount; i++) {
             dataCopy.addAll(originData);
         }
@@ -56,12 +56,12 @@ public class NaiveLinearModelTest {
         runFit(copyAndShuffleDataset(getOrDatasetBase(), 100));
     }
 
-    private void runFit(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble>> data) {
-        RewardFactory<DoubleScalarRewardDouble> rewardFactory = new DoubleScalarRewardFactory();
+    private void runFit(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> data) {
+        RewardFactory<DoubleScalarReward> rewardFactory = new DoubleScalarRewardFactory();
         SupervisedTrainableModel linearModel = new LinearModelNaiveImpl(2, 1, 0.1);
-        ModelReinforcementAdapter<DoubleScalarRewardDouble> naiveLinearModel = new ModelReinforcementAdapter<DoubleScalarRewardDouble>(linearModel,  rewardFactory);
+        ModelReinforcementAdapter<DoubleScalarReward> naiveLinearModel = new ModelReinforcementAdapter<DoubleScalarReward>(linearModel,  rewardFactory);
         boolean atLeastOneFail = false;
-        for (ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble> entry : data) {
+        for (ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward> entry : data) {
             double predicted = naiveLinearModel.approximateReward(entry.getFirst()).getValue();
             double expected = entry.getSecond().getValue();
             double roundedPrediction = Math.round(predicted);
@@ -71,7 +71,7 @@ public class NaiveLinearModelTest {
         for (int i = 0; i < 100; i++) {
             naiveLinearModel.fit(data.stream().map(ImmutableTuple::getFirst).collect(Collectors.toList()), data.stream().map(ImmutableTuple::getSecond).collect(Collectors.toList()));
         }
-        for (ImmutableTuple<DoubleVectorialObservation, DoubleScalarRewardDouble> entry : data) {
+        for (ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward> entry : data) {
             double predicted = naiveLinearModel.approximateReward(entry.getFirst()).getValue();
             double expected = entry.getSecond().getValue();
             double roundedPrediction = Math.round(predicted);

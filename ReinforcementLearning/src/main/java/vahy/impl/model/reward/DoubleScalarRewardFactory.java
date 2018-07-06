@@ -2,13 +2,13 @@ package vahy.impl.model.reward;
 
 import vahy.api.model.reward.RewardFactory;
 
-public class DoubleScalarRewardFactory implements RewardFactory<DoubleScalarRewardDouble> {
+public class DoubleScalarRewardFactory implements RewardFactory<DoubleScalarReward> {
 
     @Override
-    public DoubleScalarRewardDouble fromNumericVector(double[] vector) {
+    public DoubleScalarReward fromNumericVector(double[] vector) {
         if(vector.length != 1) {
             throw new IllegalArgumentException("Expected vactor of length 1. Got instead: [" + vector.length + "]");
         }
-        return new DoubleScalarRewardDouble(vector[0]);
+        return new DoubleScalarReward(vector[0]);
     }
 }

@@ -2,25 +2,26 @@ package vahy.impl.learning;
 
 import vahy.api.episode.Episode;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
-import vahy.api.model.reward.Reward;
+import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.EpisodeImpl;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class RolloutGameSampler<TAction extends Action, TReward extends Reward, TObservation extends Observation> {
+public class RolloutGameSampler<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> {
 
     private final InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier;
-    private final PolicySupplier<TAction, TReward, TObservation> playerPolicySupplier;
+    private final TrainablePolicySupplier<TAction, TReward, TObservation> playerPolicySupplier;
     private final PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier;
 
     public RolloutGameSampler(InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier,
-                              PolicySupplier<TAction, TReward, TObservation> playerPolicySupplier,
+                              TrainablePolicySupplier<TAction, TReward, TObservation> playerPolicySupplier,
                               PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier) {
         this.initialStateSupplier = initialStateSupplier;
         this.playerPolicySupplier = playerPolicySupplier;
@@ -32,7 +33,7 @@ public class RolloutGameSampler<TAction extends Action, TReward extends Reward, 
         for (int j = 0; j < episodeBatchSize; j++) {
             episodeHistoryList.clear();
             State<TAction, TReward, TObservation> initialGameState = initialStateSupplier.createInitialState();
-            Policy<TAction, TReward, TObservation> policy = playerPolicySupplier.initializePolicy(initialGameState);
+            Policy<TAction, TReward, TObservation> policy = playerPolicySupplier.initializePolicyWithExploration(initialGameState);
             Policy<TAction, TReward, TObservation> opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
             Episode<TAction, TReward, TObservation> episode = new EpisodeImpl<>(initialGameState, policy, opponentPolicy);
             episode.runEpisode();
