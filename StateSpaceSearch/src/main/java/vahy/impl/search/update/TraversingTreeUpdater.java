@@ -41,6 +41,6 @@ public class TraversingTreeUpdater<
             expandedNode = parent;
             i++;
         }
-        logger.debug("Traversing updated traversed [{}] tree levels", i);
+        logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 }

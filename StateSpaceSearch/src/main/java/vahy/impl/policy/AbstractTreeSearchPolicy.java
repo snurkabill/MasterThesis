@@ -70,7 +70,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
         timer.startTimer();
         for (int i = 0; i < updateTreeCount; i++) {
-            logger.debug("Performing tree update for [{}]th iteration", i);
+            logger.trace("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
         timer.stopTimer();
