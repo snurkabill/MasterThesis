@@ -40,7 +40,7 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
             throw new IllegalStateException("Episode was already simulated");
         }
         State<TAction, TReward, TObservation> state = this.initialState;
-        logger.info("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
+        logger.debug("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> stepHistory = new LinkedList<>();
         int playerActionCount = 0;
         while(!state.isFinalState()) {

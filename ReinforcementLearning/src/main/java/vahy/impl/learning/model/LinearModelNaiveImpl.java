@@ -69,7 +69,7 @@ public class LinearModelNaiveImpl implements SupervisedTrainableModel {
     public void fit(double[][] input, double[][] target) {
         logger.debug("Fitting model [{}] with data [{}] data samples", this.toString(), input.length);
         for (int i = 0; i < input.length; i++) {
-            double[] predicted= predict(input[i]);
+            double[] predicted = predict(input[i]);
             double[] expected = target[i];
             if(input[0].length != weightMatrix[0].length) {
                 throw new IllegalStateException("SafetyCheck - input size is different than weightInputSize");

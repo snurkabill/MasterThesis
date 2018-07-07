@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.IntSupplier;
 
 public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractTrainer { // TODO: make observation and reward more abstract
 
@@ -40,9 +39,9 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
     }
 
     @Override
-    public void trainPolicy(IntSupplier episodeCount) {
+    public void trainPolicy(int episodeCount) {
         logger.info("Starting MonteCarlo training on [{}] episodeCount", episodeCount);
-        List<Episode<TAction, TReward, TObservation>> episodeHistoryList = rolloutGameSampler.sampleEpisodes(episodeCount.getAsInt());
+        List<Episode<TAction, TReward, TObservation>> episodeHistoryList = rolloutGameSampler.sampleEpisodes(episodeCount);
         for (Episode<TAction, TReward, TObservation> entry : episodeHistoryList) {
             addVisitedRewards(calculatedVisitedRewards(entry));
         }
@@ -51,13 +50,6 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
         for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry : visitAverageRewardMap.entrySet()) {
             observationRewardList.add(new ImmutableTuple<>(entry.getKey().getObservation(), entry.getValue().getSecond()));
         }
-//        double[][] inputs = new double[observationList.size()][];
-//        double[][] targets = new double[averagedRewardList.size()][];
-//        for (int i = 0; i < observationList.size(); i++) {
-//            inputs[i] = observationList.get(i).getObservedVector();
-//            targets[i] = averagedRewardList.get(i).getAsVector();
-//        }
-
         trainablePolicySupplier.train(observationRewardList);
     }
 
@@ -65,14 +57,36 @@ public abstract class AbstractMonteCarloTrainer<TAction extends Action, TReward 
 
     protected void addVisitedRewards(Map<State<TAction, TReward, TObservation>, TReward> sampledStateVisitMap) {
         for (Map.Entry<State<TAction, TReward, TObservation>, TReward> entry : sampledStateVisitMap.entrySet()) {
-            if(visitAverageRewardMap.containsKey(entry.getKey())) {
-                MutableTuple<Integer, TReward> integerTRewardMutableTuple = visitAverageRewardMap.get(entry.getKey());
-                TReward averagedReward = rewardAggregator.averageReward(integerTRewardMutableTuple.getSecond(), integerTRewardMutableTuple.getFirst(), entry.getValue());
-                integerTRewardMutableTuple.setFirst(integerTRewardMutableTuple.getFirst() + 1);
-                integerTRewardMutableTuple.setSecond(averagedReward);
+            if(!entry.getKey().isOpponentTurn()) {
+                if(visitAverageRewardMap.containsKey(entry.getKey())) {
+                    MutableTuple<Integer, TReward> integerTRewardMutableTuple = visitAverageRewardMap.get(entry.getKey());
+                    TReward averagedReward = rewardAggregator.averageReward(integerTRewardMutableTuple.getSecond(), integerTRewardMutableTuple.getFirst(), entry.getValue());
+                    integerTRewardMutableTuple.setFirst(integerTRewardMutableTuple.getFirst() + 1);
+                    integerTRewardMutableTuple.setSecond(averagedReward);
+                } else {
+                    visitAverageRewardMap.put(entry.getKey(), new MutableTuple<>(1, entry.getValue()));
+                }
             } else {
-                visitAverageRewardMap.put(entry.getKey(), new MutableTuple<>(1, entry.getValue()));
+                throw new IllegalStateException("Paranoia exception. Opponent states should have been already filtered out");
             }
         }
+
+//        for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry1 : visitAverageRewardMap.entrySet()) {
+//            for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry2 : visitAverageRewardMap.entrySet()) {
+//                double[] observation1 = entry1.getKey().getObservation().getObservedVector();
+//                double[] observation2 = entry2.getKey().getObservation().getObservedVector();
+//                int hash1 = entry1.getKey().hashCode();
+//                int hash2 = entry2.getKey().hashCode();
+//                if(Arrays.equals(observation1, observation2)) {
+//                    if(hash1 != hash2) {
+//                        System.out.println("asdf");
+//                        System.out.println(entry1.hashCode());
+//                        System.out.println(entry2.hashCode());
+//                    }
+//
+//                }
+//            }
+//        }
+
     }
 }
