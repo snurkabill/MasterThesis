@@ -51,15 +51,15 @@ public class Prototype {
 
     public static void main(String[] args) throws IOException, NotValidGameStringRepresentationException {
         SplittableRandom random = new SplittableRandom(2);
-        GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.1).stepPenalty(1).trapProbability(1).buildConfig();
+        GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.1).stepPenalty(1).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        double discountFactor = 1;
+        double discountFactor = 0.999;
         int uniqueEpisodeCount = 1;
-        int episodeCount = 20;
+        int episodeCount = 10;
         int monteCarloSimulationCount = 100;
-        int updateTreeCount = 10000;
+        int updateTreeCount = 100;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
         //            provideRandomWalkPolicy(random),
@@ -76,10 +76,16 @@ public class Prototype {
             discountFactor,
             hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
             1,
-            0.1,
+            0.000001,
             random,
             updateTreeCount,
-            0.25);
+            0.5,
+            300,
+            100
+            );
+
+
+        logger.info("Policy test starts");
 
         EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
             uniqueEpisodeCount,

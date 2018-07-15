@@ -6,7 +6,7 @@ import vahy.api.learning.AbstractMonteCarloTrainer;
 import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
@@ -34,13 +34,13 @@ public class EveryVisitMontecarloTrainer<TAction extends Action, TReward extends
     @Override
     protected Map<State<TAction, TReward, TObservation>, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation> episode) {
         Map<State<TAction, TReward, TObservation>, List<TReward>> everyVisitMap = new LinkedHashMap<>();
-        List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeStepHistoryList = episode.getEpisodeStepHistoryList();
-        for (int i = 0; i < episode.getEpisodeStepHistoryList().size(); i++) {
-            TReward aggregated = rewardAggregator.aggregateDiscount(episodeStepHistoryList.stream().skip(i).map(StateRewardReturn::getReward), discountFactor);
-            if(!everyVisitMap.containsKey(episode.getEpisodeStepHistoryList().get(i).getState())) {
-                everyVisitMap.put(episode.getEpisodeStepHistoryList().get(i).getState(), Collections.singletonList(aggregated));
+        List<StateActionReward<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeHistory = episode.getEpisodeStateActionRewardList();
+        for (int i = 0; i < episodeHistory.size(); i++) {
+            TReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(StateActionReward::getReward), discountFactor);
+            if(!everyVisitMap.containsKey(episodeHistory.get(i).getState())) {
+                everyVisitMap.put(episodeHistory.get(i).getState(), Collections.singletonList(aggregated));
             } else {
-                List<TReward> rewardList = everyVisitMap.get(episode.getEpisodeStepHistoryList().get(i).getState());
+                List<TReward> rewardList = everyVisitMap.get(episodeHistory.get(i).getState());
                 rewardList.add(aggregated);
             }
         }

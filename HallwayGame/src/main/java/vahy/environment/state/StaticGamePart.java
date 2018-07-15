@@ -2,6 +2,7 @@ package vahy.environment.state;
 
 import vahy.utils.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.SplittableRandom;
 
 public class StaticGamePart {
@@ -58,5 +59,33 @@ public class StaticGamePart {
 
     public double getNoisyMoveProbability() {
         return noisyMoveProbability;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof StaticGamePart)) return false;
+
+        StaticGamePart that = (StaticGamePart) o;
+
+        if (Double.compare(that.getDefaultStepPenalty(), getDefaultStepPenalty()) != 0) return false;
+        if (Double.compare(that.getNoisyMoveProbability(), getNoisyMoveProbability()) != 0) return false;
+        if (!getRandom().equals(that.getRandom())) return false;
+        if (!Arrays.deepEquals(getTrapProbabilities(), that.getTrapProbabilities())) return false;
+        return Arrays.deepEquals(getWalls(), that.getWalls());
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = getRandom().hashCode();
+        result = 31 * result + Arrays.deepHashCode(getTrapProbabilities());
+        result = 31 * result + Arrays.deepHashCode(getWalls());
+        temp = Double.doubleToLongBits(getDefaultStepPenalty());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        temp = Double.doubleToLongBits(getNoisyMoveProbability());
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 }

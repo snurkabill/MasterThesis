@@ -25,7 +25,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
 import vahy.impl.search.nodeExpander.BaseNodeExpander;
-import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1MinMaxExplorationConstantNodeSelector;
+import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1ExpectedRewardNormalizingNodeSelector;
 import vahy.impl.search.simulation.StateApproximatorSimulator;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.search.update.TraversingTreeUpdater;
@@ -48,7 +48,9 @@ public class TrainedPolicyPrototype {
                                                                                                          double learningRate,
                                                                                                          SplittableRandom random,
                                                                                                          int updateTreeCount,
-                                                                                                         double explorationConstant) {
+                                                                                                         double explorationConstant,
+                                                                                                         int trainingEpochCount,
+                                                                                                         int sampleEpisodeCount) {
         TrainableRewardApproximator<DoubleScalarReward, DoubleVectorialObservation> trainableRewardApproximator = new TrainableRewardApproximatorImpl<>(
             new LinearModelNaiveImpl(observatonVectorSize, rewardVectorSize, learningRate),
             rewardFactory
@@ -104,7 +106,8 @@ public class TrainedPolicyPrototype {
                     Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
                     State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchTree = new SearchTreeImpl<>(
                     root,
-                    new Ucb1MinMaxExplorationConstantNodeSelector<>(random, dummyConstant),
+//                    new Ucb1MinMaxExplorationConstantNodeSelector<>(random, dummyConstant),
+                    new Ucb1ExpectedRewardNormalizingNodeSelector<>(random, dummyConstant),
                     nodeExpander,
                     new TraversingTreeUpdater<>(transitionUpdater),
                     new StateApproximatorSimulator<>(rewardAggregator, getTrainableRewardApproximator(), discountFactor)
@@ -113,7 +116,8 @@ public class TrainedPolicyPrototype {
                     random,
                     updateTreeCount,
                     searchTree
-                ) { };
+                ) {
+                };
             }
 
             @Override
@@ -140,7 +144,7 @@ public class TrainedPolicyPrototype {
 
                     @Override
                     public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
-                        return random.nextDouble() < explorationConstant ?  randomPolicy.getDiscreteAction(gameState) : innerPolicy.getDiscreteAction(gameState);
+                        return random.nextDouble() < explorationConstant ? randomPolicy.getDiscreteAction(gameState) : innerPolicy.getDiscreteAction(gameState);
                     }
 
                     @Override
@@ -158,8 +162,8 @@ public class TrainedPolicyPrototype {
             rewardAggregator,
             discountFactor
         );
-        for (int i = 0; i < 20; i++) {
-            trainer.trainPolicy(() -> 1);
+        for (int i = 0; i < trainingEpochCount; i++) {
+            trainer.trainPolicy(sampleEpisodeCount);
         }
         return trainablePolicySupplier;
     }
