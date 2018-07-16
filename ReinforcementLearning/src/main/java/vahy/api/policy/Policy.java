@@ -1,7 +1,7 @@
 package vahy.api.policy;
 
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 
@@ -13,5 +13,5 @@ public interface Policy<TAction extends Action, TReward extends Reward, TObserva
 
     TAction getDiscreteAction(State<TAction, TReward, TObservation> gameState);
 
-    void updateStateOnOpponentActions(List<TAction> opponentAction);
+    void updateStateOnOpponentActions(List<TAction> opponentActionList);
 }

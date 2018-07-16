@@ -12,7 +12,7 @@ import vahy.game.cell.CellType;
 import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;

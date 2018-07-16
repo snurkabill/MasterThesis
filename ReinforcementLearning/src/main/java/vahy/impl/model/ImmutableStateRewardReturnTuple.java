@@ -1,7 +1,7 @@
 package vahy.impl.model;
 
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
@@ -27,5 +27,15 @@ public class ImmutableStateRewardReturnTuple<
     @Override
     public TState getState() {
         return super.getFirst();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }

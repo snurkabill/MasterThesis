@@ -3,7 +3,7 @@ package vahy.impl.search.update;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
@@ -41,6 +41,6 @@ public class TraversingTreeUpdater<
             expandedNode = parent;
             i++;
         }
-        logger.debug("Traversing updated traversed [{}] tree levels", i);
+        logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 }

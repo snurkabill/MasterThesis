@@ -4,7 +4,7 @@ import vahy.api.model.State;
 import vahy.api.policy.Policy;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
@@ -35,7 +35,7 @@ public class EnvironmentPolicy implements Policy<ActionType, DoubleScalarReward,
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<ActionType> opponentAction) {
+    public void updateStateOnOpponentActions(List<ActionType> opponentActionList) {
         // this is it
     }
 }

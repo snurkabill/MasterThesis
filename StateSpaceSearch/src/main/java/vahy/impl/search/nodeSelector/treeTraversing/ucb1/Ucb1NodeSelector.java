@@ -3,7 +3,7 @@ package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.NodeSelector;
@@ -27,7 +27,7 @@ public class Ucb1NodeSelector<
 
     protected SearchNode<TAction, TReward, TObservation, Ucb1StateActionMetadata<TReward>, Ucb1SearchNodeMetadata<TAction, TReward>, TState> root;
     protected final SplittableRandom random;
-    protected final double weight;
+    protected final double weight; // TODO: get rid of weight here. There are Ucb1 heuristics with changing exploration constant
 
     public Ucb1NodeSelector(SplittableRandom random, double weight) {
         this.random = random;
@@ -82,6 +82,7 @@ public class Ucb1NodeSelector<
 
     protected double calculateUCBValue(double estimatedValue, double explorationConstant, int parentVisitCount, int actionVisitCount) {
         return estimatedValue + explorationConstant * Math.sqrt(Math.log(parentVisitCount) / actionVisitCount);
+
     }
 
 }

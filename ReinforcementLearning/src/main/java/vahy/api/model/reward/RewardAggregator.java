@@ -28,4 +28,6 @@ public interface RewardAggregator<TReward extends Reward> {
     TReward averageReward(List<TReward> rewardList);
 
     TReward averageReward(Stream<TReward> rewardStream);
+
+    TReward averageReward(TReward runningAverage, int countOfAlreadyAveragedRewards, TReward newReward);
 }

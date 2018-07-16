@@ -1,5 +1,6 @@
 package vahy.api.model;
 
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 
 public interface State<TAction extends Action, TReward extends Reward, TObservation extends Observation> {

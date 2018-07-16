@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.episode.EpisodeAggregator;
 import vahy.api.model.State;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.api.policy.Policy;
+import vahy.api.policy.PolicySupplier;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.chart.ChartBuilder;
@@ -20,9 +20,10 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.model.reward.DoubleScalarRewardFactory;
 import vahy.impl.policy.random.UniformRandomWalkPolicy;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
@@ -32,7 +33,6 @@ import vahy.impl.search.simulation.MonteCarloSimulator;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
 import vahy.search.AbstractMetadataWithGivenProbabilitiesTransitionUpdater;
 import vahy.search.Ucb1WithGivenProbabilitiesTransitionUpdater;
-import vahy.utils.ImmutableTuple;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Prototype {
@@ -52,27 +51,47 @@ public class Prototype {
 
     public static void main(String[] args) throws IOException, NotValidGameStringRepresentationException {
         SplittableRandom random = new SplittableRandom(2);
-        GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.1).stepPenalty(1).trapProbability(1).buildConfig();
+        GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.1).stepPenalty(1).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        double discountFactor = 1;
+        double discountFactor = 0.999;
         int uniqueEpisodeCount = 1;
-        int episodeCount = 20;
+        int episodeCount = 10;
         int monteCarloSimulationCount = 100;
-        int updateTreeCount = 10000;
+        int updateTreeCount = 100;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
+
+        //            provideRandomWalkPolicy(random),
+        //            provideBfsPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
+        //            provideEGreedyPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
+        //            provideUcb1Policy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
+//        PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> policySupplier = provideEGreedyPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount);
+
+        PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> policySupplier = TrainedPolicyPrototype.trainPolicy(
+            hallwayGameInitialInstanceSupplier,
+            initialState -> new EnvironmentPolicy(random),
+            new DoubleScalarRewardFactory(),
+            rewardAggregator,
+            discountFactor,
+            hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+            1,
+            0.000001,
+            random,
+            updateTreeCount,
+            0.5,
+            300,
+            100
+            );
+
+
+        logger.info("Policy test starts");
 
         EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
             uniqueEpisodeCount,
             episodeCount,
             hallwayGameInitialInstanceSupplier,
-
-//            provideRandomWalkPolicy(random),
-//            provideBfsPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
-            provideEGreedyPolicy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
-//            provideUcb1Policy(random, rewardAggregator, discountFactor, monteCarloSimulationCount, updateTreeCount),
-
+            policySupplier,
             new EnvironmentPolicy(random)
             );
 
@@ -82,50 +101,52 @@ public class Prototype {
         logger.info("Average reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get() / totalEpisodes);
     }
 
-    public static Function<
-        State<ActionType, DoubleScalarReward, DoubleVectorialObservation>,
-        ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>,
-            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideRandomWalkPolicy(SplittableRandom random) {
-        return immutableState -> new ImmutableTuple<>(
-            new UniformRandomWalkPolicy<>(random),
-            immutableState);
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideRandomWalkPolicy(SplittableRandom random) {
+        return immutableState -> new UniformRandomWalkPolicy<>(random);
     }
 
-    public static Function<State<ActionType, DoubleScalarReward, DoubleVectorialObservation>, ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideBfsPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
-        return immutableState -> new ImmutableTuple<>(
-            new BfsPolicy(
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideBfsPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+        return immutableState -> new BfsPolicy(
                 random,
                 uprateTreeCount,
                 (ImmutableStateImpl) immutableState,
                 provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
 //                new CumulativeRewardSimulator<>()
-                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator)),
-            immutableState);
+                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static Function<State<ActionType, DoubleScalarReward, DoubleVectorialObservation>, ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideUcb1Policy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
-        return immutableState -> new ImmutableTuple<>(
-            new Ucb1Policy(
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideUcb1Policy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+        return immutableState -> new Ucb1Policy(
                 random,
                 uprateTreeCount,
                 (ImmutableStateImpl) immutableState,
 //                provideNodeTransitionUpdaterForUcb1Metadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForUcb1WithGivenProbabilities(discountFactor, rewardAggregator),
-                provideMcEstimatorForUcb1Metadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator)),
-            immutableState);
+                provideMcEstimatorForUcb1Metadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static Function<State<ActionType, DoubleScalarReward, DoubleVectorialObservation>, ImmutableTuple<Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> provideEGreedyPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
-        return immutableState -> new ImmutableTuple<>(
-            new EGreedyPolicy(
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideEGreedyPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+        return immutableState -> new EGreedyPolicy(
                 0.3,
                 random,
                 uprateTreeCount,
                 (ImmutableStateImpl) immutableState,
 //                provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator),
-                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator)),
-            immutableState);
+                provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
+    }
+
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideTrainedLinearModel(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+
+        NodeTransitionUpdater<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater = provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator);
+        NodeEvaluationSimulator<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeEvaluationSimulator = provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator);
+        return immutableState -> new EGreedyPolicy(
+            0.3,
+            random,
+            uprateTreeCount,
+            (ImmutableStateImpl) immutableState,
+            nodeTransitionUpdater,
+            nodeEvaluationSimulator);
     }
 
     public static NodeTransitionUpdater<
@@ -194,8 +215,8 @@ public class Prototype {
 //        URL url = classLoader.getResource("examples/hallway_demo2.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
-//         URL url = classLoader.getResource("examples/hallway_demo5.txt");
-        URL url = classLoader.getResource("examples/hallway0.txt");
+         URL url = classLoader.getResource("examples/hallway_demo5.txt");
+//        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
 

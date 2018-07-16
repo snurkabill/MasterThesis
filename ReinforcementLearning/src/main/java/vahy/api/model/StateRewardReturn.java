@@ -1,5 +1,6 @@
 package vahy.api.model;
 
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 
 public interface StateRewardReturn<
@@ -11,4 +12,5 @@ public interface StateRewardReturn<
     TReward getReward();
 
     TState getState();
+
 }

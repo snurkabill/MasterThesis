@@ -3,7 +3,7 @@ package vahy.impl.search.simulation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.Reward;
@@ -53,13 +53,13 @@ public class MonteCarloSimulator<
     private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> node) {
         List<TReward> gainedRewards = new ArrayList<>();
         State<TAction, TReward, TObservation> wrappedState = node.getWrappedState();
-        while(!wrappedState.isFinalState()) {
+        while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
             StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }
-         return rewardAggregator.aggregateDiscount(gainedRewards, discountFactor);
+        return rewardAggregator.aggregateDiscount(gainedRewards, discountFactor);
     }
 }

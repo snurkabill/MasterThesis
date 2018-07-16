@@ -1,7 +1,7 @@
 package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
 
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleScalarReward;
@@ -20,7 +20,8 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
     TReward extends DoubleScalarReward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation>>
-    extends Ucb1NodeSelector<TAction, TReward, TObservation, TState>{
+    extends Ucb1NodeSelector<TAction, TReward, TObservation, TState>
+{
 
     public Ucb1MinMaxExplorationConstantNodeSelector(SplittableRandom random, double weight) {
         super(random, weight);

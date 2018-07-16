@@ -17,14 +17,13 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
-import vahy.impl.model.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
-import vahy.utils.ImmutableTuple;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,7 +69,7 @@ public class IntegrationTest {
             1,
             10,
             hallwayGameInitialInstanceSupplier,
-            immutableState -> new ImmutableTuple<>(
+            immutableState ->
                 new EGreedyPolicy(
                     0.1,
                     random,
@@ -78,7 +77,6 @@ public class IntegrationTest {
                     (ImmutableStateImpl) immutableState,
                     transitionUpdater,
                     rewardSimulator),
-                immutableState),
             new EnvironmentPolicy(random)
         );
         List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());

@@ -3,7 +3,7 @@ package vahy.impl.policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.Observation;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
@@ -40,8 +40,8 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<TAction> opponentAction) {
-        for (TAction action : opponentAction) {
+    public void updateStateOnOpponentActions(List<TAction> opponentActionList) {
+        for (TAction action : opponentActionList) {
             searchTree.applyAction(action);
         }
     }
@@ -70,7 +70,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
         timer.startTimer();
         for (int i = 0; i < updateTreeCount; i++) {
-            logger.debug("Performing tree update for [{}]th iteration", i);
+            logger.trace("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
         timer.stopTimer();
