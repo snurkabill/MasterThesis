@@ -36,12 +36,14 @@ public class EveryVisitMontecarloTrainer<TAction extends Action, TReward extends
         Map<State<TAction, TReward, TObservation>, List<TReward>> everyVisitMap = new LinkedHashMap<>();
         List<StateActionReward<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeHistory = episode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
-            TReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(StateActionReward::getReward), discountFactor);
-            if(!everyVisitMap.containsKey(episodeHistory.get(i).getState())) {
-                everyVisitMap.put(episodeHistory.get(i).getState(), Collections.singletonList(aggregated));
-            } else {
-                List<TReward> rewardList = everyVisitMap.get(episodeHistory.get(i).getState());
-                rewardList.add(aggregated);
+            if(!episodeHistory.get(i).getState().isOpponentTurn()) {
+                TReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(StateActionReward::getReward), discountFactor);
+                if (!everyVisitMap.containsKey(episodeHistory.get(i).getState())) {
+                    everyVisitMap.put(episodeHistory.get(i).getState(), Collections.singletonList(aggregated));
+                } else {
+                    List<TReward> rewardList = everyVisitMap.get(episodeHistory.get(i).getState());
+                    rewardList.add(aggregated);
+                }
             }
         }
         return everyVisitMap

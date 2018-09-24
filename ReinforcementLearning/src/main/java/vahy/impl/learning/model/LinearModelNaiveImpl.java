@@ -8,11 +8,11 @@ public class LinearModelNaiveImpl implements SupervisedTrainableModel {
 
     private static final Logger logger = LoggerFactory.getLogger(LinearModelNaiveImpl.class);
 
-    private final int inputDimension;
-    private final int outputDimension;
-    private final double weightMatrix[][];
-    private final double biasArray[];
-    private final double learningRate;
+    protected final int inputDimension;
+    protected final int outputDimension;
+    protected final double weightMatrix[][];
+    protected final double biasArray[];
+    protected final double learningRate;
 
     public LinearModelNaiveImpl(int inputDimension,
                                 int outputDimension,
@@ -45,6 +45,11 @@ public class LinearModelNaiveImpl implements SupervisedTrainableModel {
             throw new IllegalArgumentException("Expected input length: [" + inputDimension + "]. Actual length: [" + input.length + "]");
         }
         double[] output = new double[outputDimension];
+        calculateOutputPotentials(input, output);
+        return output;
+    }
+
+    protected void calculateOutputPotentials(double[] input, double[] output) {
         for (int i = 0; i < biasArray.length; i++) {
             double sum = 0.0;
             for (int j = 0; j < weightMatrix[0].length; j++) {
@@ -53,7 +58,6 @@ public class LinearModelNaiveImpl implements SupervisedTrainableModel {
             sum += biasArray[i];
             output[i] = sum;
         }
-        return output;
     }
 
     @Override

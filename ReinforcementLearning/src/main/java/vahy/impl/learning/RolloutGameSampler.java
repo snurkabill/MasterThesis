@@ -31,7 +31,7 @@ public class RolloutGameSampler<TAction extends Action, TReward extends DoubleVe
     public List<Episode<TAction, TReward, TObservation>> sampleEpisodes(int episodeBatchSize) {
         List<Episode<TAction, TReward, TObservation>> episodeHistoryList = new ArrayList<>();
         for (int j = 0; j < episodeBatchSize; j++) {
-            episodeHistoryList.clear();
+            episodeHistoryList.clear(); // TODO: this is shit
             State<TAction, TReward, TObservation> initialGameState = initialStateSupplier.createInitialState();
             Policy<TAction, TReward, TObservation> policy = playerPolicySupplier.initializePolicyWithExploration(initialGameState);
             Policy<TAction, TReward, TObservation> opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
