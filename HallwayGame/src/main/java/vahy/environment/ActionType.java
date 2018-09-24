@@ -28,4 +28,22 @@ public enum ActionType implements Action {
     public boolean isPlayerAction() {
         return isPlayerAction;
     }
+
+    public int getActionIndexAsPlayerAction() {
+        for (int i = 0; i < playerActions.length; i++) {
+            if(this.equals(playerActions[i])) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("Not expected state");
+    }
+
+    public int getActionIndexAsEnvironmentAction() {
+        for (int i = 0; i < environmentActions.length; i++) {
+            if(this.equals(environmentActions[i])) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("Not expected state");
+    }
 }

@@ -1,8 +1,11 @@
-package vahy.AlphaGo;
+package vahy.AlphaGo.tree;
 
+import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.utils.ImmutableTuple;
 
+import java.util.List;
 import java.util.function.Function;
 
 public class AlphaGoNodeEvaluator {
@@ -19,8 +22,18 @@ public class AlphaGoNodeEvaluator {
         }
         double[] prediction = evaluationFunction.apply(node.getWrappedState().getObservation());
         node.setEstimatedReward(new DoubleScalarReward(prediction[0]));
-        double[] nodePriorProbabilities = node.getPriorProbabilities();
-        System.arraycopy(prediction, 1, nodePriorProbabilities, 0, nodePriorProbabilities.length);
+        if(node.getWrappedState().isAgentTurn()) {
+            ActionType[] playerActions = ActionType.playerActions;
+            for (int i = 0; i < playerActions.length; i++) {
+                node.getChildMap().get(playerActions[i]).setPriorProbability(prediction[i + 1]);
+            }
+        } else {
+            ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
+
+            for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
+                node.getChildMap().get(environmentActionsWithProbabilities.getFirst().get(i)).setPriorProbability(environmentActionsWithProbabilities.getSecond().get(i));
+            }
+        }
         node.setEvaluated();
     }
 

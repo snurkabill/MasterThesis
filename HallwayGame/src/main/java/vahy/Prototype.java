@@ -81,7 +81,7 @@ public class Prototype {
             updateTreeCount,
             0.5,
             300,
-            100
+            1
             );
 
 
