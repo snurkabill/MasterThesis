@@ -1,7 +1,10 @@
 package vahy.AlphaGo.tree;
 
 import vahy.environment.ActionType;
+import vahy.utils.ImmutableTuple;
+import vahy.utils.StreamUtils;
 
+import java.util.Comparator;
 import java.util.Map;
 import java.util.SplittableRandom;
 
@@ -34,28 +37,35 @@ public class AlphaGoNodeSelector {
         while(!node.isLeaf()) {
             int totalNodeVisitCount = node.getTotalVisitCounter();
 
-            double sum = node.getChildMap()
+            double max = node.getChildMap()
                 .entrySet()
                 .stream()
                 .mapToDouble(x -> x.getValue().getMeanActionValue())
-                .map(Math::abs)
+              //   .map(Math::abs)
                 .max().orElseThrow(() -> new IllegalStateException("Maximum Does not exists"));
 
-            if(sum == 0) {
-                sum = 1;
-            }
+            double min = node.getChildMap()
+                .entrySet()
+                .stream()
+                .mapToDouble(x -> x.getValue().getMeanActionValue())
+                // .map(Math::abs)
+                .min().orElseThrow(() -> new IllegalStateException("Minimum Does not exists"));
 
-//            ActionType bestAction = node.getChildMap()
-//                .entrySet()
-//                .stream()
-//                .map(x -> {
-//                    ActionType action = x.getKey();
-//                    double actionValue = x.getValue().getMeanActionValue() / sum + calculateUValue(x.getValue().getPriorProbability(), x.getValue().getVisitCount(), totalNodeVisitCount);
-//                    return new ImmutableTuple<>(action, actionValue);
-//                })
-//                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
-//                .getFirst();
-//
+
+            final double finalMax = max;
+            final double finalMin = min;
+
+            ActionType bestAction = node.getChildMap()
+                .entrySet()
+                .stream()
+                .map(x -> {
+                    ActionType action = x.getKey();
+                    double actionValue = (x.getValue().getMeanActionValue() - finalMin) / (Math.abs(finalMax - finalMin) < 0.00000001 ? finalMax : (finalMax - finalMin)) + calculateUValue(x.getValue().getPriorProbability(), x.getValue().getVisitCount(), totalNodeVisitCount);
+                    return new ImmutableTuple<>(action, actionValue);
+                })
+                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
+                .getFirst();
+
 
 
             double[] meanActionValues = new double[node.getChildMap().size()];
@@ -66,21 +76,22 @@ public class AlphaGoNodeSelector {
             int i = 0;
             for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getChildMap().entrySet()) {
                 actions[i] = entry.getKey();
-                meanActionValues[i] = entry.getValue().getMeanActionValue() / sum ;
+                meanActionValues[i] = (entry.getValue().getMeanActionValue() - finalMin) / (Math.abs(finalMax - finalMin) < 0.00000001 ? finalMax : (finalMax - finalMin));
                 uValues[i] = calculateUValue(entry.getValue().getPriorProbability(), entry.getValue().getVisitCount(), totalNodeVisitCount);
                 i++;
             }
 
 
-            double max = Double.NEGATIVE_INFINITY;
+            double maxBound = Double.NEGATIVE_INFINITY;
             int bestIndex = -1;
             for (int j = 0; j < meanActionValues.length; j++) {
-                if(max < uValues[j] + meanActionValues[j]) {
-                    max = uValues[j] + meanActionValues[j];
+                if(maxBound < uValues[j] + meanActionValues[j]) {
+                    maxBound = uValues[j] + meanActionValues[j];
                     bestIndex = j;
                 }
             }
-            node = node.getChildMap().get(actions[bestIndex]).getChild();
+
+            node = node.getChildMap().get(bestAction).getChild();
         }
         return node;
     }

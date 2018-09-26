@@ -8,8 +8,8 @@ import vahy.AlphaGo.policy.AlphaGoTrainablePolicySupplier;
 import vahy.AlphaGo.reinforcement.AlphaGoEpisodeAggregator;
 import vahy.AlphaGo.reinforcement.AlphaGoTrainableApproximator;
 import vahy.AlphaGo.reinforcement.learn.AlphaGoAbstractMonteCarloTrainer;
+import vahy.AlphaGo.reinforcement.learn.AlphaGoDl4jModel;
 import vahy.AlphaGo.reinforcement.learn.AlphaGoFirstVisitMonteCarloTrainer;
-import vahy.AlphaGo.reinforcement.learn.AlphaGoLinearNaiveModel;
 import vahy.environment.ActionType;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
@@ -33,31 +33,53 @@ public class AlphaGoPrototype {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
 
-        SplittableRandom random = new SplittableRandom(3);
-        GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.1).stepPenalty(1).trapProbability(1).buildConfig();
+        long seed = 3;
+        SplittableRandom random = new SplittableRandom(seed);
+        GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.1).stepPenalty(10).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
-        double discountFactor = 0.999;
+        double discountFactor = 1;
         double explorationConstant = 0.5;
-        double learningRate = 0.000001;
+        double temperature = 0.5;
+        double learningRate = 0.001;
         double cpuctParameter = 1;
-        int treeUpdateCount = 200;
-        int trainingEpochCount = 200;
-        int sampleEpisodeCount = 10;
+        int treeUpdateCount = 100;
+        int trainingEpochCount = 100;
+        int sampleEpisodeCount = 20;
+
+//        double discountFactor = 0.999;
+//        double explorationConstant = 0.5;
+//        double temperature = 3;
+//        double learningRate = 0.001;
+//        double cpuctParameter = 1;
+//        int treeUpdateCount = 1000;
+//        int trainingEpochCount = 10;
+//        int sampleEpisodeCount = 10;
 
         int uniqueEpisodeCount = 1;
         int episodeCount = 10;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
-        AlphaGoTrainableApproximator trainableApproximator = new AlphaGoTrainableApproximator(new AlphaGoLinearNaiveModel(
-            hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-            1 + ActionType.playerActions.length,
-            learningRate
-        ));
+        AlphaGoTrainableApproximator trainableApproximator = new AlphaGoTrainableApproximator(
+//            new AlphaGoLinearNaiveModel(
+//                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+//                1 + ActionType.playerActions.length,
+//                learningRate
+//            )
+
+            new AlphaGoDl4jModel(
+                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+                1 + ActionType.playerActions.length,
+                null,
+                seed,
+                learningRate
+            )
+        );
 
         AlphaGoTrainablePolicySupplier alphaGoTrainablePolicySupplier = new AlphaGoTrainablePolicySupplier(
             random,
             explorationConstant,
+            temperature,
             discountFactor,
             trainableApproximator,
             cpuctParameter,
@@ -78,6 +100,7 @@ public class AlphaGoPrototype {
             new AlphaGoEnvironmentPolicySupplier(random),
             new DoubleScalarRewardAggregator(),
             discountFactor);
+
 
         for (int i = 0; i < trainingEpochCount; i++) {
             trainer.trainPolicy(sampleEpisodeCount);

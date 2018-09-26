@@ -49,12 +49,17 @@ public abstract class AlphaGoAbstractMonteCarloTrainer {
             double[] outputVector = new double[probabilities.length + 1];
             outputVector[0] = entry.getValue().getSecond().getFirst().getValue();
             for (int i = 0; i < probabilities.length; i++) {
-//                outputVector[i + 1] = probabilities[i];
-                outputVector[i + 1] = 0.33333333d;
+                outputVector[i + 1] = probabilities[i];
+//                outputVector[i + 1] = 0.33333333d;
             }
             observationRewardList.add(new ImmutableTuple<>(entry.getKey(), outputVector));
         }
         trainablePolicySupplier.train(observationRewardList);
+        double[] asdf1 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(0).getFirst());
+        double[] asdf2 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(1).getFirst());
+        double[] asdf3 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(2).getFirst());
+        double[] asdf4 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(3).getFirst());
+        logger.debug("training iteration finished");
     }
 
     protected abstract Map<DoubleVectorialObservation, ImmutableTuple<DoubleScalarReward, double[]>> calculatedVisitedRewards(AlphaGoEpisode episode);

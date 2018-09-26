@@ -12,13 +12,15 @@ public class AlphaGoTrainablePolicySupplier extends AlphaGoPolicySupplier {
 
     private final SplittableRandom random;
     private final double explorationConstant;
+    private final double temperature;
 
     private AlphaGoTrainableApproximator trainableRewardApproximator;
 
-    public AlphaGoTrainablePolicySupplier(SplittableRandom random, double explorationConstant, double discountFactor, AlphaGoTrainableApproximator trainableRewardApproximator, double cpuctParameter, int treeUpdateCount) {
+    public AlphaGoTrainablePolicySupplier(SplittableRandom random, double explorationConstant, double temperature, double discountFactor, AlphaGoTrainableApproximator trainableRewardApproximator, double cpuctParameter, int treeUpdateCount) {
         super(cpuctParameter, treeUpdateCount, discountFactor, random, trainableRewardApproximator);
         this.random = random;
         this.explorationConstant = explorationConstant;
+        this.temperature = temperature;
         this.trainableRewardApproximator = trainableRewardApproximator;
     }
 
@@ -33,7 +35,7 @@ public class AlphaGoTrainablePolicySupplier extends AlphaGoPolicySupplier {
     }
 
     public AlphaGoPolicyImplWithExploration initializePolicyWithExploration(ImmutableStateImpl initialState) {
-        return new AlphaGoPolicyImplWithExploration(random, createPolicy(initialState), explorationConstant);
+        return new AlphaGoPolicyImplWithExploration(random, createPolicy(initialState), explorationConstant, temperature);
     }
 
     public void train(List<ImmutableTuple<DoubleVectorialObservation, double[]>> trainData) {
