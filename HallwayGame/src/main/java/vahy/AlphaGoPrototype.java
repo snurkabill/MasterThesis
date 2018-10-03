@@ -33,29 +33,53 @@ public class AlphaGoPrototype {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
 
-        long seed = 3;
+        long seed = 0;
         SplittableRandom random = new SplittableRandom(seed);
-        GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.1).stepPenalty(10).trapProbability(1).buildConfig();
+        GameConfig gameConfig = new ConfigBuilder().reward(100).noisyMoveProbability(0.1).stepPenalty(1).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
-        double discountFactor = 1;
+
+
+
+//        double discountFactor = 1;
+//        double explorationConstant = 0.5;
+//        double temperature = 0.5;
+//        double learningRate = 0.0001;
+//        double cpuctParameter = 1;
+//        int treeUpdateCount = 100;
+//        int trainingEpochCount = 20;
+//        int sampleEpisodeCount = 10;
+
+
+
+//        double discountFactor = 1;
+//        double explorationConstant = 0.5;
+//        double temperature = 0.5;
+//        double learningRate = 0.0001;
+//        double cpuctParameter = 1;
+//        int treeUpdateCount = 1000;
+//        int trainingEpochCount = 20;
+//        int sampleEpisodeCount = 10;
+
+
+        double discountFactor = 0.999;
         double explorationConstant = 0.5;
-        double temperature = 0.5;
+        double temperature = 1;
         double learningRate = 0.001;
         double cpuctParameter = 1;
         int treeUpdateCount = 100;
+        int stageCountCount = 10;
         int trainingEpochCount = 100;
-        int sampleEpisodeCount = 20;
+        int sampleEpisodeCount = 10;
 
-//        double discountFactor = 0.999;
-//        double explorationConstant = 0.5;
-//        double temperature = 3;
-//        double learningRate = 0.001;
-//        double cpuctParameter = 1;
-//        int treeUpdateCount = 1000;
-//        int trainingEpochCount = 10;
-//        int sampleEpisodeCount = 10;
 
+
+
+        // risk optimization
+        boolean optimizeFlowInSearchTree = true;
+        double totalRiskAllowed = 0.0;
+
+        // simmulation after training
         int uniqueEpisodeCount = 1;
         int episodeCount = 10;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
@@ -72,7 +96,8 @@ public class AlphaGoPrototype {
                 1 + ActionType.playerActions.length,
                 null,
                 seed,
-                learningRate
+                learningRate,
+                trainingEpochCount
             )
         );
 
@@ -80,19 +105,20 @@ public class AlphaGoPrototype {
             random,
             explorationConstant,
             temperature,
-            discountFactor,
+            totalRiskAllowed,
             trainableApproximator,
             cpuctParameter,
-            treeUpdateCount
+            treeUpdateCount,
+            optimizeFlowInSearchTree
         );
 
         AlphaGoPolicySupplier alphaGoPolicySupplier = new AlphaGoPolicySupplier(
             cpuctParameter,
             treeUpdateCount,
-            discountFactor,
+            totalRiskAllowed,
             random,
-            trainableApproximator
-        );
+            trainableApproximator,
+            false);
 
         AlphaGoAbstractMonteCarloTrainer trainer = new AlphaGoFirstVisitMonteCarloTrainer(
             hallwayGameInitialInstanceSupplier,
@@ -102,7 +128,7 @@ public class AlphaGoPrototype {
             discountFactor);
 
 
-        for (int i = 0; i < trainingEpochCount; i++) {
+        for (int i = 0; i < stageCountCount; i++) {
             trainer.trainPolicy(sampleEpisodeCount);
         }
 
@@ -127,13 +153,17 @@ public class AlphaGoPrototype {
     public static HallwayGameInitialInstanceSupplier getHallwayGameInitialInstanceSupplier(SplittableRandom random, GameConfig gameConfig) throws NotValidGameStringRepresentationException, IOException {
         ClassLoader classLoader = AlphaGoPrototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
-        URL url = classLoader.getResource("examples/hallway_demo2.txt");
+//        URL url = classLoader.getResource("examples/hallway_demo2.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
+         URL url = classLoader.getResource("examples/hallway_demo6.txt");
+
 //        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
+//        URL url = classLoader.getResource("examples/hallway0123.txt");
+//        URL url = classLoader.getResource("examples/hallway0124.txt");
 
         File file = new File(url.getFile());
         return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));

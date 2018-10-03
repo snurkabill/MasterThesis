@@ -7,6 +7,7 @@ import vahy.AlphaGo.tree.AlphaGoNodeSelector;
 import vahy.AlphaGo.tree.AlphaGoSearchNode;
 import vahy.AlphaGo.tree.AlphaGoSearchTree;
 import vahy.AlphaGo.tree.AlphaGoTreeUpdater;
+import vahy.AlphaGo.tree.OptimalFlowCalculator;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
 
@@ -16,16 +17,18 @@ public class AlphaGoPolicySupplier {
 
     private final double cpuctParameter;
     private final int treeUpdateCount;
-    private final double discountFactor;
+    private final double totalRiskAllowed;
     private final SplittableRandom random;
     private final AlphaGoTrainableApproximator trainableApproximator;
+    private final boolean optimizeFlowInSearchTree;
 
-    public AlphaGoPolicySupplier(double cpuctParameter, int treeUpdateCount, double discountFactor, SplittableRandom random, AlphaGoTrainableApproximator trainableApproximator) {
+    public AlphaGoPolicySupplier(double cpuctParameter, int treeUpdateCount, double totalRiskAllowed, SplittableRandom random, AlphaGoTrainableApproximator trainableApproximator, boolean optimizeFlowInSearchTree) {
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateCount = treeUpdateCount;
-        this.discountFactor = discountFactor;
+        this.totalRiskAllowed = totalRiskAllowed;
         this.random = random;
         this.trainableApproximator = trainableApproximator;
+        this.optimizeFlowInSearchTree = optimizeFlowInSearchTree;
     }
 
     public AlphaGoPolicyImpl initializePolicy(ImmutableStateImpl initialState) {
@@ -41,8 +44,10 @@ public class AlphaGoPolicySupplier {
                 new AlphaGoNodeSelector(cpuctParameter, random),
                 new AlphaGoNodeExpander(),
                 new AlphaGoTreeUpdater(),
-                new AlphaGoNodeEvaluator(trainableApproximator)),
-            treeUpdateCount);
+                new AlphaGoNodeEvaluator(trainableApproximator),
+                new OptimalFlowCalculator(totalRiskAllowed)),
+            treeUpdateCount,
+            optimizeFlowInSearchTree);
     }
 
 }

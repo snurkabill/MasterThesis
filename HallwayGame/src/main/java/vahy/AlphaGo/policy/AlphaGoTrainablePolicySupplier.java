@@ -16,8 +16,8 @@ public class AlphaGoTrainablePolicySupplier extends AlphaGoPolicySupplier {
 
     private AlphaGoTrainableApproximator trainableRewardApproximator;
 
-    public AlphaGoTrainablePolicySupplier(SplittableRandom random, double explorationConstant, double temperature, double discountFactor, AlphaGoTrainableApproximator trainableRewardApproximator, double cpuctParameter, int treeUpdateCount) {
-        super(cpuctParameter, treeUpdateCount, discountFactor, random, trainableRewardApproximator);
+    public AlphaGoTrainablePolicySupplier(SplittableRandom random, double explorationConstant, double temperature, double totalRiskAllowed, AlphaGoTrainableApproximator trainableRewardApproximator, double cpuctParameter, int treeUpdateCount, boolean optimizeFlowInSearchTree) {
+        super(cpuctParameter, treeUpdateCount, totalRiskAllowed, random, trainableRewardApproximator, optimizeFlowInSearchTree);
         this.random = random;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;

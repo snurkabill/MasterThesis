@@ -22,14 +22,16 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoPolicyImpl.class);
 
     private final SplittableRandom random;
+    private final boolean optimizeFlowInTree;
     private final AlphaGoSearchTree searchTree;
     private final int updateTreeCount;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    public AlphaGoPolicyImpl(SplittableRandom random, AlphaGoSearchTree searchTree, int updateTreeCount) {
+    public AlphaGoPolicyImpl(SplittableRandom random, AlphaGoSearchTree searchTree, int updateTreeCount, boolean optimizeFlowInTree) {
         this.random = random;
         this.searchTree = searchTree;
         this.updateTreeCount = updateTreeCount;
+        this.optimizeFlowInTree = optimizeFlowInTree;
     }
 
     public SplittableRandom getRandom() {
@@ -39,19 +41,37 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
     @Override
     public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         checkStateRoot(gameState);
-        List<ImmutableTuple<ActionType, Integer>> actionIntegerList = this.searchTree
-            .getRoot()
-            .getChildMap()
-            .entrySet()
-            .stream()
-            .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))
-            .collect(Collectors.toList());
-        int sum = actionIntegerList.stream().mapToInt(ImmutableTuple::getSecond).sum();
         ActionType[] allDoableActions = gameState.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
         double[] vector = new double[allDoableActions.length];
-        for (ImmutableTuple<ActionType, Integer> entry : actionIntegerList) {
-            int actionIndex = gameState.isOpponentTurn() ? entry.getFirst().getActionIndexAsEnvironmentAction() : entry.getFirst().getActionIndexAsPlayerAction();
-            vector[actionIndex] = entry.getSecond() / (double) sum;
+        if(optimizeFlowInTree && !searchTree.isOpponentTurn()) {
+
+            searchTree.optimizeFlow();
+
+            // LALALA code duplication!
+            List<ImmutableTuple<ActionType, Double>> actionDoubleList = this.searchTree
+                .getRoot()
+                .getChildMap()
+                .entrySet()
+                .stream()
+                .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getChild().getNodeProbabilityFlow().getSolution()))
+                .collect(Collectors.toList());
+            for (ImmutableTuple<ActionType, Double> entry : actionDoubleList) {
+                int actionIndex = entry.getFirst().getActionIndexAsPlayerAction();
+                vector[actionIndex] = entry.getSecond();
+            }
+        } else {
+            List<ImmutableTuple<ActionType, Integer>> actionIntegerList = this.searchTree
+                .getRoot()
+                .getChildMap()
+                .entrySet()
+                .stream()
+                .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))
+                .collect(Collectors.toList());
+            int sum = actionIntegerList.stream().mapToInt(ImmutableTuple::getSecond).sum();
+            for (ImmutableTuple<ActionType, Integer> entry : actionIntegerList) {
+                int actionIndex = gameState.isOpponentTurn() ? entry.getFirst().getActionIndexAsEnvironmentAction() : entry.getFirst().getActionIndexAsPlayerAction();
+                vector[actionIndex] = entry.getSecond() / (double) sum;
+            }
         }
         return vector;
     }
@@ -78,7 +98,7 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
     @Override
     public DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         checkStateRoot(gameState);
-        return this.searchTree.getRoot().getEstimatedReward();
+        return searchTree.getRootEstimatedReward();
     }
 
     @Override

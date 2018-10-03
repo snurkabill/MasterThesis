@@ -9,6 +9,7 @@ public enum AgentHeading {
     WEST;
 
     private int headingRepresentation;
+    private int[] headingRepresentationAsArray;
     private String readableHeadingRepresentation;
     private AgentHeading right;
     private AgentHeading left;
@@ -28,6 +29,11 @@ public enum AgentHeading {
         SOUTH.headingRepresentation = 2;
         WEST.headingRepresentation = 3;
 
+        NORTH.headingRepresentationAsArray = new int[] {1, 0, 0, 0};
+        EAST.headingRepresentationAsArray = new int[] {0, 1, 0, 0};
+        SOUTH.headingRepresentationAsArray = new int[] {0, 0, 1, 0};
+        WEST.headingRepresentationAsArray = new int[] {0, 0, 0, 1};
+
         NORTH.readableHeadingRepresentation = "↑";
         EAST.readableHeadingRepresentation = "←";
         SOUTH.readableHeadingRepresentation = "↓";
@@ -46,6 +52,10 @@ public enum AgentHeading {
 
     public int getHeadingRepresentation() {
         return headingRepresentation;
+    }
+
+    public int[] getHeadingRepresentationAsArray() {
+        return headingRepresentationAsArray;
     }
 
     public String getHeadingReadableRepresentation() {

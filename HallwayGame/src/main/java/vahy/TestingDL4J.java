@@ -13,15 +13,15 @@ public class TestingDL4J {
     public static void main(String[] args) {
 
 
-//        double[] vector1 = new double[] {0.0};
-//        double[] vector2 = new double[] {3.0};
-//        double[] vector3 = new double[] {1.0};
-//        double[] vector4 = new double[] {2.0};
+        double[] vector1 = new double[] {0};
+        double[] vector2 = new double[] {1};
+        double[] vector3 = new double[] {2};
+        double[] vector4 = new double[] {3};
 
-        double[] vector1 = new double[] {1.0, 0.0, 0.0, 0.0};
-        double[] vector2 = new double[] {0.0, 1.0, 0.0, 0.0};
-        double[] vector3 = new double[] {0.0, 0.0, 1.0, 0.0};
-        double[] vector4 = new double[] {0.0, 0.0, 0.0, 1.0};
+//        double[] vector1 = new double[] {1.0, 0.0, 0.0, 0.0};
+//        double[] vector2 = new double[] {0.0, 1.0, 0.0, 0.0};
+//        double[] vector3 = new double[] {0.0, 0.0, 1.0, 0.0};
+//        double[] vector4 = new double[] {0.0, 0.0, 0.0, 1.0};
 
         double[] target1 = new double[] {96.0, 0.02, 0.49, 0.49};
         double[] target2 = new double[] {97.0, 0.01, 0.01, 0.98};
@@ -42,12 +42,15 @@ public class TestingDL4J {
         target[3] = target4;
 
 
-        AlphaGoDl4jModel asdf = new AlphaGoDl4jModel(4, 4, null, 0, 0.01);
+        AlphaGoDl4jModel asdf = new AlphaGoDl4jModel(1, 4, null, 0, 0.01, 1000);
 
 
         for (int i = 0; i < 1000; i++) {
             logger.info("TRAINING [{}]", i);
+            long start = System.currentTimeMillis();
             asdf.fit(input, target);
+            long end = System.currentTimeMillis();
+            logger.info("Training took: [{}] ms", end - start);
             for (int j = 0; j < 4; j++) {
                 logger.info(Arrays.stream(asdf.predict(input[j])).mapToObj(Double::toString).reduce((left, right) -> left + ", " + right).get());
             }

@@ -48,6 +48,19 @@
             <version>${nd4j.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.quantego</groupId>
+            <artifactId>clp</artifactId>
+            <version>1.16.11</version>
+        </dependency>
+
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>repo</id>
+            <url>file://${project.basedir}/../thirdPartyLib</url>
+        </repository>
+    </repositories>
 
 </project>

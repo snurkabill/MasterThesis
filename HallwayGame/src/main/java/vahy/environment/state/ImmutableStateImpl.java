@@ -18,7 +18,7 @@ import java.util.List;
 public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
-    public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 1;
+    public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
 
     public static final int AGENT_LOCATION_REPRESENTATION = -3;
     public static final int TRAP_LOCATION_REPRESENTATION = -2;
@@ -305,6 +305,10 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         return isAgentKilled || rewardsLeft == 0;
     }
 
+    public boolean isAgentKilled() {
+        return isAgentKilled;
+    }
+
 
     @Override
     public DoubleVectorialObservation getObservation() {
@@ -323,7 +327,11 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                     : rewards[i][j];
             }
         }
-        vector[vector.length - 2] = agentHeading.getHeadingRepresentation();
+        int[] headingRepresentationAsArray = agentHeading.getHeadingRepresentationAsArray();
+        vector[vector.length - 5] = headingRepresentationAsArray[0];
+        vector[vector.length - 4] = headingRepresentationAsArray[1];
+        vector[vector.length - 3] = headingRepresentationAsArray[2];
+        vector[vector.length - 2] = headingRepresentationAsArray[3];
         vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
         return new DoubleVectorialObservation(vector);
     }

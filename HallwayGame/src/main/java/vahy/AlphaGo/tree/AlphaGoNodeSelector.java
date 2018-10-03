@@ -10,6 +10,7 @@ import java.util.SplittableRandom;
 
 public class AlphaGoNodeSelector {
 
+    public static final double TOLERANCE = 0.0000000001;
     private AlphaGoSearchNode root;
     private final double cpuctParameter;
     private final SplittableRandom random;
@@ -60,8 +61,12 @@ public class AlphaGoNodeSelector {
                 .stream()
                 .map(x -> {
                     ActionType action = x.getKey();
-                    double actionValue = (x.getValue().getMeanActionValue() - finalMin) / (Math.abs(finalMax - finalMin) < 0.00000001 ? finalMax : (finalMax - finalMin)) + calculateUValue(x.getValue().getPriorProbability(), x.getValue().getVisitCount(), totalNodeVisitCount);
-                    return new ImmutableTuple<>(action, actionValue);
+                    double uValue = calculateUValue(x.getValue().getPriorProbability(), x.getValue().getVisitCount(), totalNodeVisitCount);
+                    double qValue = x.getValue().getMeanActionValue() == 0 ? 0 :
+                        (x.getValue().getMeanActionValue() - finalMin) /
+                            (Math.abs(finalMax - finalMin) < TOLERANCE ? finalMax : (finalMax - finalMin));
+
+                    return new ImmutableTuple<>(action, qValue + uValue);
                 })
                 .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
                 .getFirst();

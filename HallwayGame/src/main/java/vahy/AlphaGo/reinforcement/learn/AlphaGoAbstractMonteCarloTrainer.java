@@ -55,10 +55,10 @@ public abstract class AlphaGoAbstractMonteCarloTrainer {
             observationRewardList.add(new ImmutableTuple<>(entry.getKey(), outputVector));
         }
         trainablePolicySupplier.train(observationRewardList);
-        double[] asdf1 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(0).getFirst());
-        double[] asdf2 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(1).getFirst());
-        double[] asdf3 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(2).getFirst());
-        double[] asdf4 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(3).getFirst());
+//        double[] asdf1 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(0).getFirst());
+//        double[] asdf2 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(1).getFirst());
+//        double[] asdf3 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(2).getFirst());
+//        double[] asdf4 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(3).getFirst());
         logger.debug("training iteration finished");
     }
 

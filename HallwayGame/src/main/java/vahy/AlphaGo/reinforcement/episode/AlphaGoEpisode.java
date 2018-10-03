@@ -73,7 +73,8 @@ public class AlphaGoEpisode {
             }
             logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
         }
-        logger.info("Episode actions: [" + episodeHistoryList.stream().map(x -> x.getFirst().getAction()).collect(Collectors.toList()) + "] with total reward: [" + episodeHistoryList.stream().mapToDouble(x -> x.getFirst().getReward().getValue()).sum() + "]");
+        logger.info("Episode actions: [" + episodeHistoryList.stream().map(x -> x.getFirst().getAction()).collect(Collectors.toList()) + "]");
+        logger.info("Total reward: [" + episodeHistoryList.stream().mapToDouble(x -> x.getFirst().getReward().getValue()).sum() + "]");
         episodeAlreadySimulated = true;
     }
 

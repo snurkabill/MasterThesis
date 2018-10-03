@@ -10,6 +10,9 @@ import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.tree.SearchTreeImpl;
 
+import java.util.LinkedList;
+import java.util.Map;
+
 public class AlphaGoSearchTree {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
@@ -24,18 +27,35 @@ public class AlphaGoSearchTree {
     private int totalNodesCreated = 0; // should be 1 for root
     private int maxBranchingFactor = 0;
 
+    private OptimalFlowCalculator flowCalculator;
+    private boolean isFlowOptimized = false;
+    private double optimizedObjectiveValue;
+
     public AlphaGoSearchTree(
         AlphaGoSearchNode root,
         AlphaGoNodeSelector nodeSelector,
         AlphaGoNodeExpander nodeExpander,
         AlphaGoTreeUpdater treeUpdater,
-        AlphaGoNodeEvaluator nodeEvaluationSimulator) {
+        AlphaGoNodeEvaluator nodeEvaluationSimulator,
+        OptimalFlowCalculator flowCalculator) {
         this.root = root;
         this.nodeSelector = nodeSelector;
         this.nodeExpander = nodeExpander;
         this.treeUpdater = treeUpdater;
         this.nodeEvaluationSimulator = nodeEvaluationSimulator;
         this.nodeSelector.setNewRoot(root);
+        this.flowCalculator = flowCalculator;
+    }
+
+    public DoubleScalarReward getRootEstimatedReward() {
+        return root.getEstimatedReward();
+    }
+
+    public DoubleScalarReward getRootEstimatedRewardAfterFlowOptimisation() {
+        if(!isFlowOptimized) {
+            optimizeFlow();
+        }
+        return new DoubleScalarReward(optimizedObjectiveValue);
     }
 
     public boolean updateTree() {
@@ -47,6 +67,7 @@ public class AlphaGoSearchTree {
             logger.debug("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
             expandNode(selectedNodeForExpansion);
             nodeEvaluationSimulator.evaluateNode(selectedNodeForExpansion);
+            isFlowOptimized = false; // possibly needed after select in general
         }
         treeUpdater.updateTree(selectedNodeForExpansion);
         return true;
@@ -66,11 +87,19 @@ public class AlphaGoSearchTree {
         }
         AlphaGoSearchNode child = root.getChildMap().get(action).getChild();
         DoubleScalarReward reward = child.getGainedReward();
+        isFlowOptimized = false;
         root = child;
         root.makeRoot();
         nodeSelector.setNewRoot(root);
         resetTreeStatistics();
         return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
+    }
+
+    public void optimizeFlow() {
+        if(!isFlowOptimized) {
+            optimizedObjectiveValue = flowCalculator.calculateFlow(root);
+            isFlowOptimized = true;
+        }
     }
 
     public DoubleVectorialObservation getObservation() {
@@ -118,6 +147,37 @@ public class AlphaGoSearchTree {
 
     public double calculateAverageBranchingFactor() {
         return totalNodesCreated / (double) totalNodesExpanded;
+    }
+
+    public String toStringForGraphwiz() {
+        LinkedList<AlphaGoSearchNode> queue = new LinkedList<>();
+        queue.addFirst(root);
+
+        StringBuilder string = new StringBuilder();
+        String start = "digraph G {";
+        String end = "}";
+
+        string.append(start);
+        while(!queue.isEmpty()) {
+            AlphaGoSearchNode node = queue.poll();
+
+            for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getChildMap().entrySet()) {
+                AlphaGoSearchNode child = entry.getValue().getChild();
+                queue.addLast(child);
+
+                string.append("\"" + node.toStringForGraphwiz() + "\"");
+                string.append(" -> ");
+                string.append("\"" + child.toStringForGraphwiz() + "\"");
+                string.append(" ");
+                string.append("[ label = \"P(");
+                string.append(entry.getKey());
+                string.append(") = ");
+                string.append(entry.getValue().getPriorProbability());
+                string.append("\" ]; \n");
+            }
+        }
+        string.append(end);
+        return string.toString();
     }
 }
 

@@ -37,9 +37,9 @@ public class AlphaGoLinearNaiveModel extends LinearModelNaiveImpl {
 
             for (int j = 0; j < predicted.length; j++) {
                 double diff =  // predicted[j] - expected[j];
-                    j == 0 ?  // first element is
-                        predicted[j] - expected[j] :
-                        expected[j] / (predicted[j] + Double.MIN_VALUE); //  + (1 - expected[j]) / ((1 - predicted[j]) + Double.MIN_VALUE) ;
+                   // j == 0 ?  // first element is
+                        predicted[j] - expected[j]; // :
+                     //   expected[j] / (predicted[j] + Double.MIN_VALUE); //  + (1 - expected[j]) / ((1 - predicted[j]) + Double.MIN_VALUE) ;
                 for (int k = 0; k < weightMatrix[0].length; k++) {
                     weightMatrix[j][k] = weightMatrix[j][k] - learningRate * diff * input[i][k];
                 }

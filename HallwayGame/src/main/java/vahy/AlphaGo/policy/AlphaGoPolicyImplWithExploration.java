@@ -42,7 +42,8 @@ public class AlphaGoPolicyImplWithExploration implements AlphaGoPolicy {
 
     public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         ActionType discreteAction = innerPolicy.getDiscreteAction(gameState);
-        if(random.nextDouble() < explorationConstant) {
+        double randomDouble = random.nextDouble();
+        if(randomDouble < explorationConstant) {
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
             double[] exponentiation = new double[actionProbabilityDistribution.length];
             for (int i = 0; i < actionProbabilityDistribution.length; i++) {
