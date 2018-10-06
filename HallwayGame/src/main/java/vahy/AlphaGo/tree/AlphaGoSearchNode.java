@@ -5,6 +5,7 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,7 +95,7 @@ public class AlphaGoSearchNode {
     }
 
     public boolean isLeaf() {
-        return isFinalNode() || edgeMetadataMap.isEmpty();
+        return isFinalNode() || childMap.entrySet().stream().noneMatch(x -> x.getValue().isAlreadyEvaluated());
     }
 
     public Map<ActionType, AlphaGoEdgeMetadata> getEdgeMetadataMap() {
@@ -127,6 +128,7 @@ public class AlphaGoSearchNode {
     }
 
     public String toStringForGraphwiz() {
+        DecimalFormat df = new DecimalFormat("#.####");
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("ID: ");
         stringBuilder.append(nodeId);
@@ -135,13 +137,13 @@ public class AlphaGoSearchNode {
         stringBuilder.append("\\nCumulativeRew: ");
         stringBuilder.append(this.cumulativeReward.getValue());
         stringBuilder.append("\\nEstimatedRew: ");
-        stringBuilder.append(estimatedReward != null ? estimatedReward.getValue() : null);
+        stringBuilder.append(estimatedReward != null ? df.format(estimatedReward.getValue()) : null);
         stringBuilder.append("\\nEstimatedRisk: ");
-        stringBuilder.append(getEstimatedRisk());
-        stringBuilder.append("\\nRealRisk: ");
-        stringBuilder.append(realRisk);
+        stringBuilder.append(df.format(getEstimatedRisk()));
+        stringBuilder.append("\\nisLeaf: ");
+        stringBuilder.append(isLeaf());
         stringBuilder.append("\\nNodeProbabilityFlow: ");
-        stringBuilder.append(nodeProbabilityFlow != null ? nodeProbabilityFlow.getSolution() : null);
+        stringBuilder.append(nodeProbabilityFlow != null ? df.format(nodeProbabilityFlow.getSolution()) : null);
         return stringBuilder.toString();
     }
 

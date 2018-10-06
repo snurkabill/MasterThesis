@@ -38,11 +38,13 @@ public class OptimalFlowCalculator {
         while(!queue.isEmpty()) {
             AlphaGoSearchNode node = queue.poll();
             Map<ActionType, CLPVariable> actionChildFlowMap = new HashMap<>();
-            for (Map.Entry<ActionType, AlphaGoSearchNode> entry : node.getChildMap().entrySet()) {
-                queue.addLast(entry.getValue());
-                CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
-                entry.getValue().setNodeProbabilityFlow(childFlow);
-                actionChildFlowMap.put(entry.getKey(), childFlow);
+            if(!node.isLeaf()) {
+                for (Map.Entry<ActionType, AlphaGoSearchNode> entry : node.getChildMap().entrySet()) {
+                    queue.addLast(entry.getValue());
+                    CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
+                    entry.getValue().setNodeProbabilityFlow(childFlow);
+                    actionChildFlowMap.put(entry.getKey(), childFlow);
+                }
             }
             if(node.isLeaf()) {
                 if(node.getWrappedState().isAgentKilled()) {
@@ -51,7 +53,13 @@ public class OptimalFlowCalculator {
                     }
                     totalRiskExpression.add(RISK_COEFFICIENT, node.getNodeProbabilityFlow());
                 }
-                model.setObjectiveCoefficient(node.getNodeProbabilityFlow(), node.getCumulativeReward().getValue());
+                model.setObjectiveCoefficient(
+                    node.getNodeProbabilityFlow(),
+                    (node.getCumulativeReward().getValue() +
+                            (node.getEstimatedReward() != null ? node.getEstimatedReward().getValue() : 0.0)
+                    ) *
+                        (1 - (node.getRealRisk() + node.getEstimatedRisk()))
+                );
             } else {
                 addSummingChildrenToOneExpression(model, node, actionChildFlowMap);
                 if(!node.isAgentTurn()) {

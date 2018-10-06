@@ -10,6 +10,7 @@ import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.tree.SearchTreeImpl;
 
+import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -154,6 +155,7 @@ public class AlphaGoSearchTree {
     }
 
     public String toStringForGraphwiz() {
+        DecimalFormat df = new DecimalFormat("#.####");
         LinkedList<AlphaGoSearchNode> queue = new LinkedList<>();
         queue.addFirst(root);
 
@@ -176,7 +178,7 @@ public class AlphaGoSearchTree {
                 string.append("[ label = \"P(");
                 string.append(entry.getKey());
                 string.append(") = ");
-                string.append(entry.getValue().getPriorProbability());
+                string.append(df.format(entry.getValue().getPriorProbability()));
                 string.append("\" ]; \n");
             }
         }

@@ -11,6 +11,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.nodeExpander.BaseNodeExpander;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class AlphaGoNodeExpander {
 
@@ -20,10 +21,26 @@ public class AlphaGoNodeExpander {
         if(node.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
+        if(node.getChildMap().isEmpty()) {
+            innerExpandNode(node);
+        }
+        for (Map.Entry<ActionType, AlphaGoSearchNode> childEntry : node.getChildMap().entrySet()) {
+            if(!childEntry.getValue().isFinalNode()) {
+                innerExpandNode(childEntry.getValue());
+            }
+        }
 
 //        ActionType[] allActions = node.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
+
+    }
+
+    public void innerExpandNode(AlphaGoSearchNode node) {
         ActionType[] allActions = node.getWrappedState().getAllPossibleActions();
         logger.debug("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
+
+        if(node.getChildMap().size() != 0) {
+            throw new IllegalStateException("Node was already expanded");
+        }
 
         for (ActionType action : allActions) {
             StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation,

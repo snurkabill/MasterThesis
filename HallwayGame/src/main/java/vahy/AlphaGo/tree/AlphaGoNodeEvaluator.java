@@ -6,6 +6,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.ImmutableTuple;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class AlphaGoNodeEvaluator {
@@ -21,6 +22,20 @@ public class AlphaGoNodeEvaluator {
     }
 
     public void evaluateNode(AlphaGoSearchNode node) {
+        if(node.isFinalNode()) {
+            throw new IllegalStateException("Final node cannot be evaluated");
+        }
+        if(!node.isAlreadyEvaluated()) {
+            innerEvaluateNode(node);
+        }
+        for (Map.Entry<ActionType, AlphaGoSearchNode> childEntry : node.getChildMap().entrySet()) {
+            if(!childEntry.getValue().isFinalNode()) {
+                innerEvaluateNode(childEntry.getValue());
+            }
+        }
+    }
+
+    public void innerEvaluateNode(AlphaGoSearchNode node) {
         if(node.isAlreadyEvaluated()) {
             throw new IllegalStateException("Node was already evaluated");
         }

@@ -3,11 +3,10 @@ package vahy.AlphaGo.tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.environment.ActionType;
-import vahy.impl.search.update.TraversingTreeUpdater;
 
 public class AlphaGoTreeUpdater {
 
-    private static final Logger logger = LoggerFactory.getLogger(TraversingTreeUpdater.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlphaGoTreeUpdater.class);
 
 
     public void updateTree(AlphaGoSearchNode expandedNode) {

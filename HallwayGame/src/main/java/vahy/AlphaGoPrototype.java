@@ -67,20 +67,20 @@ public class AlphaGoPrototype {
         double explorationConstant = 0.5;
         double temperature = 2;
         double learningRate = 0.001;
-        double cpuctParameter = 2;
-        int treeUpdateCount = 500;
-        int stageCountCount = 10;
+        double cpuctParameter = 1;
+        int treeUpdateCount = 100;
+        int stageCountCount = 100;
         int trainingEpochCount = 100;
-        int sampleEpisodeCount = 100;
+        int sampleEpisodeCount = 10;
 
 
         // risk optimization
-        boolean optimizeFlowInSearchTree = false;
-        double totalRiskAllowed = 0.0;
+        boolean optimizeFlowInSearchTree = true;
+        double totalRiskAllowed = 0.04;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
-        int episodeCount = 10;
+        int episodeCount = 100;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
         AlphaGoTrainableApproximator trainableApproximator = new AlphaGoTrainableApproximator(
@@ -153,8 +153,6 @@ public class AlphaGoPrototype {
         // printChart(rewardHistory);
         logger.info("Total reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get());
         logger.info("Average reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get() / totalEpisodes);
-
-
     }
 
     public static HallwayGameInitialInstanceSupplier getHallwayGameInitialInstanceSupplier(SplittableRandom random, GameConfig gameConfig) throws NotValidGameStringRepresentationException, IOException {
