@@ -9,7 +9,8 @@ import vahy.AlphaGo.reinforcement.AlphaGoEpisodeAggregator;
 import vahy.AlphaGo.reinforcement.AlphaGoTrainableApproximator;
 import vahy.AlphaGo.reinforcement.learn.AlphaGoAbstractMonteCarloTrainer;
 import vahy.AlphaGo.reinforcement.learn.AlphaGoDl4jModel;
-import vahy.AlphaGo.reinforcement.learn.AlphaGoFirstVisitMonteCarloTrainer;
+import vahy.AlphaGo.reinforcement.learn.AlphaGoEveryVisitMonteCarloTrainer;
+import vahy.AlphaGo.tree.AlphaGoNodeEvaluator;
 import vahy.environment.ActionType;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
@@ -64,19 +65,17 @@ public class AlphaGoPrototype {
 
         double discountFactor = 0.999;
         double explorationConstant = 0.5;
-        double temperature = 1;
+        double temperature = 2;
         double learningRate = 0.001;
-        double cpuctParameter = 1;
-        int treeUpdateCount = 100;
+        double cpuctParameter = 2;
+        int treeUpdateCount = 500;
         int stageCountCount = 10;
         int trainingEpochCount = 100;
-        int sampleEpisodeCount = 10;
-
-
+        int sampleEpisodeCount = 100;
 
 
         // risk optimization
-        boolean optimizeFlowInSearchTree = true;
+        boolean optimizeFlowInSearchTree = false;
         double totalRiskAllowed = 0.0;
 
         // simmulation after training
@@ -93,7 +92,7 @@ public class AlphaGoPrototype {
 
             new AlphaGoDl4jModel(
                 hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-                1 + ActionType.playerActions.length,
+                AlphaGoNodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
                 null,
                 seed,
                 learningRate,
@@ -120,7 +119,15 @@ public class AlphaGoPrototype {
             trainableApproximator,
             false);
 
-        AlphaGoAbstractMonteCarloTrainer trainer = new AlphaGoFirstVisitMonteCarloTrainer(
+//        AlphaGoAbstractMonteCarloTrainer trainer = new AlphaGoFirstVisitMonteCarloTrainer(
+//            hallwayGameInitialInstanceSupplier,
+//            alphaGoTrainablePolicySupplier,
+//            new AlphaGoEnvironmentPolicySupplier(random),
+//            new DoubleScalarRewardAggregator(),
+//            discountFactor);
+
+
+        AlphaGoAbstractMonteCarloTrainer trainer = new AlphaGoEveryVisitMonteCarloTrainer(
             hallwayGameInitialInstanceSupplier,
             alphaGoTrainablePolicySupplier,
             new AlphaGoEnvironmentPolicySupplier(random),

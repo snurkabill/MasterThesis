@@ -6,27 +6,33 @@ import java.util.Arrays;
 
 public enum ActionType implements Action {
 
-    FORWARD(true),
-    TURN_RIGHT(true),
-    TURN_LEFT(true),
+    FORWARD(true, false),
+    TURN_RIGHT(true, false),
+    TURN_LEFT(true, false),
 
-    NOISY_RIGHT(false),
-    NOISY_LEFT(false),
-    TRAP(false),
-    NOISY_RIGHT_TRAP(false),
-    NOISY_LEFT_TRAP(false),
-    NO_ACTION(false);
+    NOISY_RIGHT(false, false),
+    NOISY_LEFT(false, false),
+    TRAP(false, true),
+    NOISY_RIGHT_TRAP(false, true),
+    NOISY_LEFT_TRAP(false, true),
+    NO_ACTION(false, false);
 
     public static ActionType[] playerActions = Arrays.stream(ActionType.values()).filter(ActionType::isPlayerAction).toArray(ActionType[]::new);
     public static ActionType[] environmentActions = Arrays.stream(ActionType.values()).filter(actionType -> !actionType.isPlayerAction).toArray(ActionType[]::new);
     private final boolean isPlayerAction;
+    private final boolean isTrap;
 
-    ActionType(boolean isPlayerAction) {
+    ActionType(boolean isPlayerAction, boolean isTrap) {
         this.isPlayerAction = isPlayerAction;
+        this.isTrap = isTrap;
     }
 
     public boolean isPlayerAction() {
         return isPlayerAction;
+    }
+
+    public boolean isTrap() {
+        return isTrap;
     }
 
     public int getActionIndexAsPlayerAction() {

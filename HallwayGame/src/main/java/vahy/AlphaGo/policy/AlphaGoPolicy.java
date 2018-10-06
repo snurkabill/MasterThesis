@@ -11,4 +11,6 @@ public interface AlphaGoPolicy extends Policy<ActionType, DoubleScalarReward, Do
     double[] getPriorActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
 
     DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
+
+    double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
 }

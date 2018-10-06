@@ -53,7 +53,7 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
                 .getChildMap()
                 .entrySet()
                 .stream()
-                .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getChild().getNodeProbabilityFlow().getSolution()))
+                .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getNodeProbabilityFlow().getSolution()))
                 .collect(Collectors.toList());
             for (ImmutableTuple<ActionType, Double> entry : actionDoubleList) {
                 int actionIndex = entry.getFirst().getActionIndexAsPlayerAction();
@@ -62,7 +62,7 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
         } else {
             List<ImmutableTuple<ActionType, Integer>> actionIntegerList = this.searchTree
                 .getRoot()
-                .getChildMap()
+                .getEdgeMetadataMap()
                 .entrySet()
                 .stream()
                 .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))
@@ -83,7 +83,7 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
         double[] priorProbabilities = new double[allDoableActions.length];
         List<ImmutableTuple<ActionType, Double>> actionDoubleList = this.searchTree
             .getRoot()
-            .getChildMap()
+            .getEdgeMetadataMap()
             .entrySet()
             .stream()
             .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getPriorProbability()))
@@ -102,6 +102,12 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
     }
 
     @Override
+    public double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+        checkStateRoot(gameState);
+        return searchTree.getRootEstimatedRisk();
+    }
+
+    @Override
     public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         expandSearchTree(gameState);
         AlphaGoSearchNode node = searchTree.getRoot();
@@ -117,7 +123,7 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
 //
 //
 ////        searchTree.getRoot()
-////            .getChildMap()
+////            .getEdgeMetadataMap()
 ////            .entrySet()
 ////            .stream()
 ////            .map(x -> {
@@ -130,7 +136,7 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
 //        return ActionType.playerActions[bestAction.getFirst()];
 
         return node
-            .getChildMap()
+            .getEdgeMetadataMap()
             .entrySet()
             .stream()
             .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))

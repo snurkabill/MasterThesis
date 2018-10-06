@@ -19,6 +19,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.util.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.AlphaGo.tree.AlphaGoNodeEvaluator;
 import vahy.api.learning.model.SupervisedTrainableModel;
 
 import java.util.List;
@@ -29,18 +30,18 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoDl4jModel.class);
 
-    public static final String LAST_HIDDEN_LAYER = "lastHiddenLayer";
+    public static final String INPUT_NAME = "INPUT";
+    public static final String FIRST_HIDDEN_NAME = "FIRST_HIDDEN";
+    public static final String SECOND_HIDDEN_NAME = "SECOND_HIDDEN";
+    public static final String THIRD_HIDDEN_NAME = "THIRD_HIDDEN";
+
     public static final String POLICY_NAME = "policy";
     public static final String Q_VALUE_NAME = "QValue";
-    public static final String INPUT_NAME = "input";
+    public static final String RISK_VALUE_NAME = "RiskValue";
 
     public static final int FIRST_HIDDEN_SIZE = 20;
     public static final int SECOND_HIDDEN_SIZE = 20;
     public static final int THIRD_HIDDEN_SIZE = 20;
-
-    public static final String FIRST_HIDDEN_NAME = "FIRST_HIDDEN";
-    public static final String SECOND_HIDDEN_NAME = "SECOND_HIDDEN";
-    public static final String THIRD_HIDDEN_NAME = "THIRD_HIDDEN";
 
     private final int inputDimension;
     private final int outputDimension;
@@ -54,6 +55,7 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
     private final INDArray feedForwardInputArray;
     private final INDArray policyArray;
     private final INDArray qValueArray;
+    private final INDArray riskValueArray;
     private long totalMillisCount;
     private long totalCallsCount;
 
@@ -66,8 +68,9 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
         this.trainingEpochCount = trainingEpochCount;
         this.model = initModel();
         this.feedForwardInputArray = Nd4j.create(new int[] {inputDimension});
-        this.policyArray = Nd4j.create(new int[] {outputDimension - 1});
+        this.policyArray = Nd4j.create(new int[] {outputDimension - AlphaGoNodeEvaluator.POLICY_START_INDEX});
         this.qValueArray = Nd4j.create(new int[] {1});
+        this.riskValueArray = Nd4j.create(new int[] {1});
     }
 
     public ComputationGraph initModel() {
@@ -120,7 +123,7 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
                 .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
                 .nIn(SECOND_HIDDEN_SIZE)
 //                .nIn(inputDimension)
-                .nOut(outputDimension - 1)
+                .nOut(outputDimension - AlphaGoNodeEvaluator.POLICY_START_INDEX)
                 .activation(Activation.SOFTMAX)
                 .weightInit(WeightInit.ZERO)
                 .hasBias(true)
@@ -128,6 +131,7 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
             // LAST_HIDDEN_LAYER
                 SECOND_HIDDEN_NAME)
 //            INPUT_NAME)
+
             .addLayer(
                 Q_VALUE_NAME,
                 new OutputLayer.Builder()
@@ -142,18 +146,25 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
                 // LAST_HIDDEN_LAYER
                 SECOND_HIDDEN_NAME)
 //            INPUT_NAME)
-            .setOutputs(POLICY_NAME, Q_VALUE_NAME)
+
+            .addLayer(
+                RISK_VALUE_NAME,
+                new OutputLayer.Builder()
+                    // .lossFunction(LossFunctions.LossFunction.XENT)
+                    .lossFunction(LossFunctions.LossFunction.MSE)
+                    .activation(Activation.SIGMOID)
+                    .weightInit(WeightInit.ZERO)
+                    .hasBias(true)
+                    .nIn(SECOND_HIDDEN_SIZE)
+//                    .nIn(inputDimension)
+                    .nOut(1)
+                    .build(),
+                // LAST_HIDDEN_LAYER
+                SECOND_HIDDEN_NAME)
+//            INPUT_NAME)
+            .setOutputs(POLICY_NAME, Q_VALUE_NAME, RISK_VALUE_NAME)
             .backprop(true)
             .pretrain(false);
-
-
-//        String prevLayer = INPUT_NAME;
-//
-//        for (int i = 0; i < hiddenLayerSizeList.size(); i++) {
-//            String layerName = i == hiddenLayerSizeList.size() - 1 ? LAST_HIDDEN_LAYER : "Layer" + i;
-//            graph.addLayer(layerName, new DenseLayer.Builder().nIn(i == 0 ? inputDimension : hiddenLayerSizeList.get(i - 1)).nOut(hiddenLayerSizeList.get(i)).hasBias(true).build(), prevLayer);
-//            prevLayer = layerName;
-//        }
 
         ComputationGraphConfiguration conf = graph.build();
         ComputationGraph model = new ComputationGraph(conf);
@@ -167,11 +178,6 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
 
             int cursor = 0;
             int order[] = IntStream.range(0, target.length).toArray();
-
-
-            double[] policyTarget = new double[target[0].length - 1];
-            double[] qTarget = new double[1];
-
 
             @Override
             public MultiDataSet next(int num) {
@@ -214,26 +220,17 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
                 int dataIndex = order[cursor];
                 cursor++;
 
-//                for (int i = 0; i < policyTarget.length; i++) {
-//                    policyTarget[i] = target[dataIndex][i + 1];
-//                }
-//                qTarget[0] = target[dataIndex][0];
-//                return new org.nd4j.linalg.dataset.MultiDataSet(
-//                    new INDArray[] {Nd4j.create(input[dataIndex])},
-//                    new INDArray[] {Nd4j.create(policyTarget), Nd4j.create(qTarget)}
-//                );
-
-
-                for (int i = 0; i < input[0].length; i++) {
+                for (int i = 0; i < inputDimension; i++) {
                     feedForwardInputArray.put(0, i, input[dataIndex][i]);
                 }
-                for (int i = 0; i < policyTarget.length; i++) {
-                    policyArray.put(0, i, target[dataIndex][i + 1]);
+                for (int i = 0; i < outputDimension - AlphaGoNodeEvaluator.POLICY_START_INDEX; i++) {
+                    policyArray.put(0, i, target[dataIndex][i + AlphaGoNodeEvaluator.POLICY_START_INDEX]);
                 }
-                qValueArray.put(0, 0, target[dataIndex][0]);
+                qValueArray.put(0, 0, target[dataIndex][AlphaGoNodeEvaluator.Q_VALUE_INDEX]);
+                riskValueArray.put(0, 0, target[dataIndex][AlphaGoNodeEvaluator.RISK_VALUE_INDEX]);
                 return new org.nd4j.linalg.dataset.MultiDataSet(
                     new INDArray[] {feedForwardInputArray},
-                    new INDArray[] {policyArray, qValueArray}
+                    new INDArray[] {policyArray, qValueArray, riskValueArray}
                 );
             }
         };
@@ -250,9 +247,11 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
         for (int i = 0; i < input.length; i++) {
             feedForwardInputArray.put(0, i, input[i]);
         }
+
         Map<String, INDArray> output =  model.feedForward(feedForwardInputArray, false);
         double[] probabilities = output.get(POLICY_NAME).toDoubleVector();
-        double[] qValue = output.get(Q_VALUE_NAME).toDoubleVector();
+        double[] qValueArray = output.get(Q_VALUE_NAME).toDoubleVector();
+        double[] riskValueArray = output.get(RISK_VALUE_NAME).toDoubleVector();
         long end = System.currentTimeMillis();
         totalMillisCount += end - start;
         totalCallsCount++;
@@ -262,15 +261,19 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
         }
 
 
-        if(qValue.length != 1) {
+        if(qValueArray.length != 1) {
             throw new IllegalStateException("Qvalue Vector cannot have length different from 1");
         }
-        if(probabilities.length + qValue.length != outputDimension) {
+        if(riskValueArray.length != 1) {
+            throw new IllegalStateException("Risk Vector cannot have length different from 1");
+        }
+        if(probabilities.length + qValueArray.length + riskValueArray.length != outputDimension) {
             throw new IllegalStateException("Total output length differs from expected output length");
         }
         double[] outputVector = new double[outputDimension];
-        outputVector[0] = qValue[0];
-        System.arraycopy(probabilities, 0, outputVector, 1, outputVector.length - 1);
+        outputVector[AlphaGoNodeEvaluator.Q_VALUE_INDEX] = qValueArray[0];
+        outputVector[AlphaGoNodeEvaluator.RISK_VALUE_INDEX] = riskValueArray[0];
+        System.arraycopy(probabilities, 0, outputVector, AlphaGoNodeEvaluator.POLICY_START_INDEX, outputVector.length - AlphaGoNodeEvaluator.POLICY_START_INDEX);
         return outputVector;
     }
 
@@ -278,18 +281,23 @@ public class AlphaGoDl4jModel implements SupervisedTrainableModel {
     public double[][] predict(double[][] input) {
         Map<String, INDArray> output =  model.feedForward(Nd4j.create(input), false);
         double[][] probabilities = output.get(POLICY_NAME).toDoubleMatrix();
-        double[][] qValue = output.get(Q_VALUE_NAME).toDoubleMatrix();
-        if(qValue[0].length != 1) {
+        double[][] qValueArray = output.get(Q_VALUE_NAME).toDoubleMatrix();
+        double[][] riskValueArray = output.get(RISK_VALUE_NAME).toDoubleMatrix();
+        if(qValueArray[0].length != AlphaGoNodeEvaluator.POLICY_START_INDEX) {
             throw new IllegalStateException("Qvalue Vector cannot have length different from 1");
         }
-        if(probabilities[0].length + qValue[0].length != outputDimension) {
+        if(riskValueArray[0].length != AlphaGoNodeEvaluator.POLICY_START_INDEX) {
+            throw new IllegalStateException("Risk Vector cannot have length different from 1");
+        }
+        if(probabilities[0].length + qValueArray[0].length + riskValueArray[0].length != outputDimension) {
             throw new IllegalStateException("Total output length differs from expected output length");
         }
         double[][] outputMatrix = new double[input.length][];
         for (int i = 0; i < input.length; i++) {
             outputMatrix[i] = new double[outputDimension];
-            outputMatrix[i][0] = qValue[i][0];
-            System.arraycopy(probabilities[i], 0, outputMatrix[i], 1, probabilities.length - 1);
+            outputMatrix[i][AlphaGoNodeEvaluator.Q_VALUE_INDEX] = qValueArray[i][0];
+            outputMatrix[i][AlphaGoNodeEvaluator.RISK_VALUE_INDEX] = riskValueArray[i][0];
+            System.arraycopy(probabilities[i], 0, outputMatrix[i], AlphaGoNodeEvaluator.POLICY_START_INDEX, probabilities.length - AlphaGoNodeEvaluator.POLICY_START_INDEX);
         }
         return outputMatrix;
     }

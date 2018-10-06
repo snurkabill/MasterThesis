@@ -27,15 +27,16 @@ public class AlphaGoFirstVisitMonteCarloTrainer extends AlphaGoAbstractMonteCarl
     }
 
     @Override
-    protected Map<DoubleVectorialObservation, ImmutableTuple<DoubleScalarReward, double[]>> calculatedVisitedRewards(AlphaGoEpisode episode) {
-        Map<DoubleVectorialObservation, ImmutableTuple<DoubleScalarReward, double[]>> firstVisitSet = new LinkedHashMap<>();
+    protected Map<DoubleVectorialObservation, MutableDataSample> calculatedVisitedRewards(AlphaGoEpisode episode) {
+        Map<DoubleVectorialObservation, MutableDataSample> firstVisitSet = new LinkedHashMap<>();
         List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>, AlphaGoStepRecord>> episodeHistory = episode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getObservation())) {
                     DoubleScalarReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
                     double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
-                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getObservation(), new ImmutableTuple<>(aggregated, sampledProbabilities));
+                    double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getAction().isTrap() ? 1.0 : 0.0;
+                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getObservation(), new MutableDataSample(sampledProbabilities, aggregated, risk));
                 }
             }
         }

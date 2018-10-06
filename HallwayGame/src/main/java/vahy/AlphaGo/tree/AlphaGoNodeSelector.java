@@ -38,14 +38,14 @@ public class AlphaGoNodeSelector {
         while(!node.isLeaf()) {
             int totalNodeVisitCount = node.getTotalVisitCounter();
 
-            double max = node.getChildMap()
+            double max = node.getEdgeMetadataMap()
                 .entrySet()
                 .stream()
                 .mapToDouble(x -> x.getValue().getMeanActionValue())
               //   .map(Math::abs)
                 .max().orElseThrow(() -> new IllegalStateException("Maximum Does not exists"));
 
-            double min = node.getChildMap()
+            double min = node.getEdgeMetadataMap()
                 .entrySet()
                 .stream()
                 .mapToDouble(x -> x.getValue().getMeanActionValue())
@@ -56,7 +56,7 @@ public class AlphaGoNodeSelector {
             final double finalMax = max;
             final double finalMin = min;
 
-            ActionType bestAction = node.getChildMap()
+            ActionType bestAction = node.getEdgeMetadataMap()
                 .entrySet()
                 .stream()
                 .map(x -> {
@@ -73,13 +73,13 @@ public class AlphaGoNodeSelector {
 
 
 
-            double[] meanActionValues = new double[node.getChildMap().size()];
-            double[] uValues = new double[node.getChildMap().size()];
-            ActionType[] actions = new ActionType[node.getChildMap().size()];
+            double[] meanActionValues = new double[node.getEdgeMetadataMap().size()];
+            double[] uValues = new double[node.getEdgeMetadataMap().size()];
+            ActionType[] actions = new ActionType[node.getEdgeMetadataMap().size()];
 
 
             int i = 0;
-            for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getChildMap().entrySet()) {
+            for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
                 actions[i] = entry.getKey();
                 meanActionValues[i] = (entry.getValue().getMeanActionValue() - finalMin) / (Math.abs(finalMax - finalMin) < 0.00000001 ? finalMax : (finalMax - finalMin));
                 uValues[i] = calculateUValue(entry.getValue().getPriorProbability(), entry.getValue().getVisitCount(), totalNodeVisitCount);
@@ -96,7 +96,7 @@ public class AlphaGoNodeSelector {
                 }
             }
 
-            node = node.getChildMap().get(bestAction).getChild();
+            node = node.getChildMap().get(bestAction);
         }
         return node;
     }

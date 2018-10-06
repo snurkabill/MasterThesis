@@ -1,11 +1,9 @@
 package vahy.AlphaGo.policy;
 
 import vahy.api.model.State;
-import vahy.api.policy.Policy;
 import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.policy.random.UniformRandomWalkPolicy;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,13 +13,11 @@ public class AlphaGoPolicyImplWithExploration implements AlphaGoPolicy {
 
     private final SplittableRandom random;
     private final AlphaGoPolicyImpl innerPolicy;
-    private final Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation> randomPolicy;
     private double explorationConstant;
     private double temperature;
 
     public AlphaGoPolicyImplWithExploration(SplittableRandom random, AlphaGoPolicyImpl innerPolicy, double explorationConstant, double temperature) {
         this.random = random;
-        this.randomPolicy = new UniformRandomWalkPolicy<>(random);
         this.innerPolicy = innerPolicy;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
@@ -34,6 +30,11 @@ public class AlphaGoPolicyImplWithExploration implements AlphaGoPolicy {
     @Override
     public DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         return innerPolicy.getEstimatedReward(gameState);
+    }
+
+    @Override
+    public double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+        return innerPolicy.getEstimatedRisk(gameState);
     }
 
     public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {

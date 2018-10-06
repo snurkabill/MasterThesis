@@ -459,7 +459,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         }
     }
 
-    private boolean isAgentStandingOnTrap() {
+    public boolean isAgentStandingOnTrap() {
         return staticGamePart.getTrapProbabilities()[agentXCoordination][agentYCoordination] != 0.0;
     }
 

@@ -52,23 +52,25 @@ public class AlphaGoEpisode {
             double[] actionProbabilities = playerPolicy.getActionProbabilityDistribution(state);
             double[] priorProbabilities = playerPolicy.getPriorActionProbabilityDistribution(state);
             DoubleScalarReward estimatedReward = playerPolicy.getEstimatedReward(state);
+            double estimatedRisk = playerPolicy.getEstimatedRisk(state);
             playerPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
             playerActionCount++;
             StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = state.applyAction(action);
             logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
-            episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new AlphaGoStepRecord(priorProbabilities, actionProbabilities, estimatedReward)));
+            episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new AlphaGoStepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
             state = (ImmutableStateImpl) stateRewardReturn.getState();
             if(!state.isFinalState()) {
                 action = opponentPolicy.getDiscreteAction(state);
                 actionProbabilities = playerPolicy.getActionProbabilityDistribution(state);
                 priorProbabilities = playerPolicy.getPriorActionProbabilityDistribution(state);
                 estimatedReward = playerPolicy.getEstimatedReward(state);
+                estimatedRisk = playerPolicy.getEstimatedRisk(state);
                 stateRewardReturn = state.applyAction(action);
                 playerPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
                 logger.debug("Environment's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
                 episodeStateRewardReturnList.add(stateRewardReturn);
-                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new AlphaGoStepRecord(priorProbabilities, actionProbabilities, estimatedReward)));
+                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new AlphaGoStepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
                 state = (ImmutableStateImpl) stateRewardReturn.getState();
             }
             logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);

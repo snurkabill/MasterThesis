@@ -20,12 +20,15 @@ public class AlphaGoSearchNode {
     private ActionType appliedParentAction;
     private DoubleScalarReward gainedReward;
     private DoubleScalarReward cumulativeReward;
+    private double realRisk;
     private CLPVariable nodeProbabilityFlow;
 
     private int totalVisitCounter;  // sum over all b : N(s, b)
     private DoubleScalarReward estimatedReward; // in article V value
+    private double estimatedRisk; // in article V value
 
-    private final Map<ActionType, AlphaGoEdgeMetadata> childMap = new HashMap<>();
+    private final Map<ActionType, AlphaGoSearchNode> childMap = new HashMap<>();
+    private final Map<ActionType, AlphaGoEdgeMetadata> edgeMetadataMap = new HashMap<>();
 
     private boolean alreadyEvaluated = false;
 
@@ -39,6 +42,7 @@ public class AlphaGoSearchNode {
         } else {
             this.cumulativeReward = new DoubleScalarReward(gainedReward.getValue());
         }
+        this.realRisk = wrappedState.isAgentKilled() ? 1 : 0;
     }
 
     public CLPVariable getNodeProbabilityFlow() {
@@ -90,11 +94,11 @@ public class AlphaGoSearchNode {
     }
 
     public boolean isLeaf() {
-        return isFinalNode() || childMap.isEmpty();
+        return isFinalNode() || edgeMetadataMap.isEmpty();
     }
 
-    public Map<ActionType, AlphaGoEdgeMetadata> getChildMap() {
-        return childMap;
+    public Map<ActionType, AlphaGoEdgeMetadata> getEdgeMetadataMap() {
+        return edgeMetadataMap;
     }
 
     public boolean isFinalNode() {
@@ -132,8 +136,28 @@ public class AlphaGoSearchNode {
         stringBuilder.append(this.cumulativeReward.getValue());
         stringBuilder.append("\\nEstimatedRew: ");
         stringBuilder.append(estimatedReward != null ? estimatedReward.getValue() : null);
+        stringBuilder.append("\\nEstimatedRisk: ");
+        stringBuilder.append(getEstimatedRisk());
+        stringBuilder.append("\\nRealRisk: ");
+        stringBuilder.append(realRisk);
         stringBuilder.append("\\nNodeProbabilityFlow: ");
         stringBuilder.append(nodeProbabilityFlow != null ? nodeProbabilityFlow.getSolution() : null);
         return stringBuilder.toString();
+    }
+
+    public void setEstimatedRisk(double estimatedRisk) {
+        this.estimatedRisk = estimatedRisk;
+    }
+
+    public double getEstimatedRisk() {
+        return estimatedRisk;
+    }
+
+    public Map<ActionType, AlphaGoSearchNode> getChildMap() {
+        return childMap;
+    }
+
+    public double getRealRisk() {
+        return realRisk;
     }
 }

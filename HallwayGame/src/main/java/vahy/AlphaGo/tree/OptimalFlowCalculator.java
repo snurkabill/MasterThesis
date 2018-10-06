@@ -38,10 +38,10 @@ public class OptimalFlowCalculator {
         while(!queue.isEmpty()) {
             AlphaGoSearchNode node = queue.poll();
             Map<ActionType, CLPVariable> actionChildFlowMap = new HashMap<>();
-            for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getChildMap().entrySet()) {
-                queue.addLast(entry.getValue().getChild());
+            for (Map.Entry<ActionType, AlphaGoSearchNode> entry : node.getChildMap().entrySet()) {
+                queue.addLast(entry.getValue());
                 CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
-                entry.getValue().getChild().setNodeProbabilityFlow(childFlow);
+                entry.getValue().setNodeProbabilityFlow(childFlow);
                 actionChildFlowMap.put(entry.getKey(), childFlow);
             }
             if(node.isLeaf()) {
@@ -72,8 +72,8 @@ public class OptimalFlowCalculator {
 
     public void addChildFlowBasedOnFixedProbabilitiesExpression(CLP model, AlphaGoSearchNode node, Map<ActionType, CLPVariable> actionChildFlowMap) {
         for (Map.Entry<ActionType, CLPVariable> entry : actionChildFlowMap.entrySet()) {
-            AlphaGoSearchNode child = node.getChildMap().get(entry.getKey()).getChild();
-            double priorProbability = node.getChildMap().get(entry.getKey()).getPriorProbability();
+            AlphaGoSearchNode child = node.getChildMap().get(entry.getKey());
+            double priorProbability = node.getEdgeMetadataMap().get(entry.getKey()).getPriorProbability();
             CLPExpression fixedProbabilityExpression = model.createExpression();
             fixedProbabilityExpression.add(CHILD_VARIABLE_COEFFICIENT, child.getNodeProbabilityFlow());
             fixedProbabilityExpression.add(PARENT_VARIABLE_COEFFICIENT * priorProbability, node.getNodeProbabilityFlow());

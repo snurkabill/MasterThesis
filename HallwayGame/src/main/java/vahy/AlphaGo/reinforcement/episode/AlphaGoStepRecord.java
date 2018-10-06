@@ -7,11 +7,13 @@ public class AlphaGoStepRecord {
     private final double[] priorProbabilities;
     private final double[] policyProbabilities;
     private final DoubleScalarReward rewardPredicted;
+    private final double risk;
 
-    public AlphaGoStepRecord(double[] priorProbabilities, double[] policyProbabilities, DoubleScalarReward rewardPredicted) {
+    public AlphaGoStepRecord(double[] priorProbabilities, double[] policyProbabilities, DoubleScalarReward rewardPredicted, double risk) {
         this.priorProbabilities = priorProbabilities;
         this.policyProbabilities = policyProbabilities;
         this.rewardPredicted = rewardPredicted;
+        this.risk = risk;
     }
 
     public double[] getPriorProbabilities() {
@@ -24,5 +26,9 @@ public class AlphaGoStepRecord {
 
     public DoubleScalarReward getRewardPredicted() {
         return rewardPredicted;
+    }
+
+    public double getRisk() {
+        return risk;
     }
 }

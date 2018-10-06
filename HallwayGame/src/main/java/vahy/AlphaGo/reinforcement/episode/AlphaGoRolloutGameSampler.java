@@ -1,5 +1,7 @@
 package vahy.AlphaGo.reinforcement.episode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.AlphaGo.policy.AlphaGoEnvironmentPolicySupplier;
 import vahy.AlphaGo.policy.AlphaGoPolicy;
 import vahy.AlphaGo.policy.AlphaGoTrainablePolicySupplier;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AlphaGoRolloutGameSampler {
+
+    private static final Logger logger = LoggerFactory.getLogger(AlphaGoRolloutGameSampler.class.getName());
 
     private final HallwayGameInitialInstanceSupplier initialStateSupplier;
     private final AlphaGoTrainablePolicySupplier playerPolicySupplier;
@@ -26,7 +30,9 @@ public class AlphaGoRolloutGameSampler {
 
     public List<AlphaGoEpisode> sampleEpisodes(int episodeBatchSize) {
         List<AlphaGoEpisode> episodeHistoryList = new ArrayList<>();
+        logger.info("Sampling [{}] episodes started", episodeBatchSize);
         for (int j = 0; j < episodeBatchSize; j++) {
+            logger.info("Running [{}]th episode", j);
             ImmutableStateImpl initialGameState = initialStateSupplier.createInitialState();
             AlphaGoPolicy policy = playerPolicySupplier.initializePolicyWithExploration(initialGameState);
             EnvironmentPolicy opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);

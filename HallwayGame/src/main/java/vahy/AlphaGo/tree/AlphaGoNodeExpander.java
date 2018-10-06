@@ -31,8 +31,8 @@ public class AlphaGoNodeExpander {
             logger.debug("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             AlphaGoSearchNode newNode = new AlphaGoSearchNode((ImmutableStateImpl) stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             AlphaGoEdgeMetadata edgeMetadata = new AlphaGoEdgeMetadata();
-            edgeMetadata.setChild(newNode);
-            node.getChildMap().put(action, edgeMetadata);
+            node.getChildMap().put(action, newNode);
+            node.getEdgeMetadataMap().put(action, edgeMetadata);
         }
     }
 }

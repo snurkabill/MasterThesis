@@ -51,6 +51,10 @@ public class AlphaGoSearchTree {
         return root.getEstimatedReward();
     }
 
+    public double getRootEstimatedRisk() {
+        return root.getEstimatedRisk();
+    }
+
     public DoubleScalarReward getRootEstimatedRewardAfterFlowOptimisation() {
         if(!isFlowOptimized) {
             optimizeFlow();
@@ -85,7 +89,7 @@ public class AlphaGoSearchTree {
             logger.debug("Trying to apply action on not expanded tree branch. Forcing expansion.");
             expandNode(root);
         }
-        AlphaGoSearchNode child = root.getChildMap().get(action).getChild();
+        AlphaGoSearchNode child = root.getChildMap().get(action);
         DoubleScalarReward reward = child.getGainedReward();
         isFlowOptimized = false;
         root = child;
@@ -161,8 +165,8 @@ public class AlphaGoSearchTree {
         while(!queue.isEmpty()) {
             AlphaGoSearchNode node = queue.poll();
 
-            for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getChildMap().entrySet()) {
-                AlphaGoSearchNode child = entry.getValue().getChild();
+            for (Map.Entry<ActionType, AlphaGoEdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
+                AlphaGoSearchNode child = node.getChildMap().get(entry.getKey());
                 queue.addLast(child);
 
                 string.append("\"" + node.toStringForGraphwiz() + "\"");
