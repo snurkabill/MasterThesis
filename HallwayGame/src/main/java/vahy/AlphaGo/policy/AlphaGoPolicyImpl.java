@@ -135,14 +135,32 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
 //
 //        return ActionType.playerActions[bestAction.getFirst()];
 
-        return node
-            .getEdgeMetadataMap()
-            .entrySet()
-            .stream()
-            .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))
-            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
-            .getFirst();
+        if(optimizeFlowInTree) {
+            searchTree.optimizeFlow();
 
+            double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
+
+            ActionType[] playerActions = ActionType.playerActions;
+            double rand = random.nextDouble();
+            double cumulativeSum = 0.0d;
+
+            for (int i = 0; i < actionProbabilityDistribution.length; i++) {
+                cumulativeSum += actionProbabilityDistribution[i];
+                if(rand < cumulativeSum) {
+                    return playerActions[i];
+                }
+            }
+            throw new IllegalStateException("Numerically unstable probability calculation");
+
+        } else {
+            return node
+                .getEdgeMetadataMap()
+                .entrySet()
+                .stream()
+                .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))
+                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
+                .getFirst();
+        }
     }
 
 

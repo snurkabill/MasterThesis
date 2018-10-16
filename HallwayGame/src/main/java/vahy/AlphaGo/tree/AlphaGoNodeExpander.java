@@ -36,7 +36,7 @@ public class AlphaGoNodeExpander {
 
     public void innerExpandNode(AlphaGoSearchNode node) {
         ActionType[] allActions = node.getWrappedState().getAllPossibleActions();
-        logger.debug("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
+        logger.trace("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
 
         if(node.getChildMap().size() != 0) {
             throw new IllegalStateException("Node was already expanded");
@@ -45,7 +45,7 @@ public class AlphaGoNodeExpander {
         for (ActionType action : allActions) {
             StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation,
                                 State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = node.getWrappedState().applyAction(action);
-            logger.debug("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
+            logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             AlphaGoSearchNode newNode = new AlphaGoSearchNode((ImmutableStateImpl) stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             AlphaGoEdgeMetadata edgeMetadata = new AlphaGoEdgeMetadata();
             node.getChildMap().put(action, newNode);

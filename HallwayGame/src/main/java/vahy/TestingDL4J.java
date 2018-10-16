@@ -2,9 +2,11 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.AlphaGo.reinforcement.learn.AlphaGoDl4jModel;
+import vahy.AlphaGo.reinforcement.learn.tf.TFModel;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.SplittableRandom;
 
 public class TestingDL4J {
 
@@ -12,16 +14,17 @@ public class TestingDL4J {
 
     public static void main(String[] args) {
 
+//
+//        double[] vector1 = new double[] {0};
+//        double[] vector2 = new double[] {1};
+//        double[] vector3 = new double[] {2};
+//        double[] vector4 = new double[] {3};
 
-        double[] vector1 = new double[] {0};
-        double[] vector2 = new double[] {1};
-        double[] vector3 = new double[] {2};
-        double[] vector4 = new double[] {3};
+        double[] vector1 = new double[] {1.0, 0.0, 0.0, 0.0};
+        double[] vector2 = new double[] {0.0, 1.0, 0.0, 0.0};
+        double[] vector3 = new double[] {0.0, 0.0, 1.0, 0.0};
+        double[] vector4 = new double[] {0.0, 0.0, 0.0, 1.0};
 
-//        double[] vector1 = new double[] {1.0, 0.0, 0.0, 0.0};
-//        double[] vector2 = new double[] {0.0, 1.0, 0.0, 0.0};
-//        double[] vector3 = new double[] {0.0, 0.0, 1.0, 0.0};
-//        double[] vector4 = new double[] {0.0, 0.0, 0.0, 1.0};
 
         double[] target1 = new double[] {96.0, 0.9, 0.02, 0.49, 0.49};
         double[] target2 = new double[] {97.0, 0.6, 0.01, 0.01, 0.98};
@@ -42,21 +45,32 @@ public class TestingDL4J {
         target[3] = target4;
 
 
-        AlphaGoDl4jModel asdf = new AlphaGoDl4jModel(1, 5, null, 0, 0.01, 1000);
+        File tfGraphFile = new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile());
 
+//        AlphaGoDl4jModel asdf = new AlphaGoDl4jModel(4, 5, null, 0, 0.01, 100);
+        TFModel asdf = new TFModel(4, 5, 100, tfGraphFile, new SplittableRandom());
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
+            for (int j = 0; j < 4; j++) {
+                logger.info(Arrays.stream(asdf.predict(input[j])).mapToObj(Double::toString).reduce((left, right) -> left + ", " + right).get());
+            }
             logger.info("TRAINING [{}]", i);
             long start = System.currentTimeMillis();
             asdf.fit(input, target);
             long end = System.currentTimeMillis();
             logger.info("Training took: [{}] ms", end - start);
+//            start = System.currentTimeMillis();
+//            for (int k = 0; k < 1000; k++) {
+//                for (int j = 0; j < 4; j++) {
+//                    logger.debug(Arrays.stream(asdf.predict(input[j])).mapToObj(Double::toString).reduce((left, right) -> left + ", " + right).get());
+//                }
+//            }
             for (int j = 0; j < 4; j++) {
                 logger.info(Arrays.stream(asdf.predict(input[j])).mapToObj(Double::toString).reduce((left, right) -> left + ", " + right).get());
             }
+            end = System.currentTimeMillis();
+            logger.info("Eval took: [{}] ms", end - start);
+
         }
-
-
-
     }
 }

@@ -9,6 +9,7 @@ public enum ActionType implements Action {
     FORWARD(true, false),
     TURN_RIGHT(true, false),
     TURN_LEFT(true, false),
+//    RESIGN(true, false),
 
     NOISY_RIGHT(false, false),
     NOISY_LEFT(false, false),

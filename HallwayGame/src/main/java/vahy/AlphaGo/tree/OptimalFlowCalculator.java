@@ -21,13 +21,7 @@ public class OptimalFlowCalculator {
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
-    private double totalRiskAllowed;
-
-    public OptimalFlowCalculator(double totalRiskAllowed) {
-        this.totalRiskAllowed = totalRiskAllowed;
-    }
-
-    public double calculateFlow(AlphaGoSearchNode root) {
+    public double calculateFlow(AlphaGoSearchNode root, double totalRiskAllowed) {
         CLP model = new CLP();
         LinkedList<AlphaGoSearchNode> queue = new LinkedList<>();
         queue.addFirst(root);
@@ -57,7 +51,8 @@ public class OptimalFlowCalculator {
                     node.getNodeProbabilityFlow(),
                     (node.getCumulativeReward().getValue() +
                             (node.getEstimatedReward() != null ? node.getEstimatedReward().getValue() : 0.0)
-                    ) *
+                    )
+                        *
                         (1 - (node.getRealRisk() + node.getEstimatedRisk()))
                 );
             } else {
@@ -73,6 +68,9 @@ public class OptimalFlowCalculator {
         CLP.STATUS status = model.maximize();
         if(status != CLP.STATUS.OPTIMAL) {
             //throw new IllegalStateException("Optimal solution was not found");
+            if(root.getNodeProbabilityFlow().getSolution() == 0.0) {
+                System.out.println("fak me");
+            }
             return -100000;
         }
         return model.getObjectiveValue();

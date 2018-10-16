@@ -19,11 +19,8 @@ import java.util.Map;
 
 public class AlphaGoFirstVisitMonteCarloTrainer extends AlphaGoAbstractMonteCarloTrainer {
 
-    private final double discountFactor;
-
     public AlphaGoFirstVisitMonteCarloTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier, AlphaGoTrainablePolicySupplier trainablePolicySupplier, AlphaGoEnvironmentPolicySupplier opponentPolicySupplier, DoubleScalarRewardAggregator rewardAggregator, double discountFactor) {
-        super(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier, rewardAggregator);
-        this.discountFactor = discountFactor;
+        super(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator);
     }
 
     @Override
@@ -33,13 +30,12 @@ public class AlphaGoFirstVisitMonteCarloTrainer extends AlphaGoAbstractMonteCarl
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getObservation())) {
-                    DoubleScalarReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
-                    double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
-                    double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getAction().isTrap() ? 1.0 : 0.0;
-                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getObservation(), new MutableDataSample(sampledProbabilities, aggregated, risk));
+                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getObservation(), createDataSample(episodeHistory, i));
                 }
             }
         }
         return firstVisitSet;
     }
+
+
 }

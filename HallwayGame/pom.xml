@@ -37,6 +37,13 @@
             <version>1.5.0</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.deeplearning4j</groupId>
             <artifactId>deeplearning4j-core</artifactId>

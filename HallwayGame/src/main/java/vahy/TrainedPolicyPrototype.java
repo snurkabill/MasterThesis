@@ -102,8 +102,8 @@ public class TrainedPolicyPrototype {
 //            }
 //
 //            @Override
-//            public void train(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> episodeData) {
-//                getTrainableRewardApproximator().train(episodeData);
+//            public void trainPolicy(List<ImmutableTuple<DoubleVectorialObservation, DoubleScalarReward>> episodeData) {
+//                getTrainableRewardApproximator().trainPolicy(episodeData);
 //            }
 //
 //            @Override

@@ -45,7 +45,8 @@ public class AlphaGoPolicySupplier {
                 new AlphaGoNodeExpander(),
                 new AlphaGoTreeUpdater(),
                 new AlphaGoNodeEvaluator(trainableApproximator),
-                new OptimalFlowCalculator(totalRiskAllowed)),
+                new OptimalFlowCalculator(),
+                totalRiskAllowed),
             treeUpdateCount,
             optimizeFlowInSearchTree);
     }
