@@ -20,6 +20,7 @@ public class AlphaGoSearchTree {
 
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -10);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -10);
+    public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -10);
 
     private AlphaGoSearchNode root;
     private final AlphaGoNodeSelector nodeSelector;
@@ -104,23 +105,54 @@ public class AlphaGoSearchTree {
     }
 
     private void calculateNumericallyStableNewRiskThreshold(ActionType appliedAction) {
-        double totalRiskOfOtherActions = 0.0;
-        for (Map.Entry<ActionType, AlphaGoSearchNode> entry : root.getChildMap().entrySet()) {
-            if(entry.getKey() != appliedAction) {
-                totalRiskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
-            }
-        }
-        double newRisk = calculateNewRiskValue(appliedAction, totalRiskOfOtherActions);
+        double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
+        double riskDiff = calculateNumericallyStableRiskDiff(riskOfOtherActions);
+        double actionProbability = calculateNumericallyStableActionProbability(root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution());
+
+        double newRisk = calculateNewRiskValue(riskDiff, actionProbability);
         if(newRisk < 0.0 || newRisk > 1.0) {
-            throw new IllegalStateException("Risk out of bounds. Old risk [" + totalRiskAllowed + "] New risk calculated: [" + newRisk + "], risk of other actions: [" + totalRiskOfOtherActions + "], dividing probability: [" + root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution() + "]");
+            throw new IllegalStateException(
+                "Risk out of bounds. " +
+                "Old risk [" + totalRiskAllowed + "]. " +
+                "Risk diff numerically stabilised: [" +  riskDiff + "] " +
+                "New risk calculated: [" + newRisk + "], " +
+//                "Risk of other actions: [" + totalRiskOfOtherActions + "], " +
+                "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
+                "Dividing probability: [" + root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution() + "], " +
+                "Numerically stabilised dividing probability: [" + actionProbability + "]");
         }
         totalRiskAllowed = newRisk;
         isFlowOptimized = false;
     }
 
-    private double calculateNewRiskValue(ActionType appliedAction, double totalRiskOfOtherActions) {
-        double riskDiff = calculateNumericallyStableRiskDiff(totalRiskOfOtherActions);
-        double actionProbability = calculateNumericallyStableActionProbability(root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution());
+    private double calculateNumericallyStableRiskOfAnotherActions(ActionType appliedAction) {
+        double riskOfOtherActions = 0.0;
+        for (Map.Entry<ActionType, AlphaGoSearchNode> entry : root.getChildMap().entrySet()) {
+            if(entry.getKey() != appliedAction) {
+                riskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
+            }
+        }
+
+        if(Math.abs(riskOfOtherActions) < NUMERICAL_ACTION_RISK_TOLERANCE) {
+            if (riskOfOtherActions != 0.0) {
+                logger.trace("Rounding risk of other actions to 0. This is done because linear optimization is not numerically stable");
+            }
+            return 0.0;
+        } else if(Math.abs(riskOfOtherActions - 1.0) < NUMERICAL_ACTION_RISK_TOLERANCE) {
+            if(riskOfOtherActions != 1.0) {
+                logger.trace("Rounding risk of other actions to 1. This is done because linear optimization is not numerically stable");
+            }
+            return 1.0;
+        } else if(riskOfOtherActions < 0.0) {
+            throw new IllegalStateException("Risk of other actions cannot be lower than 0. This would cause program failure later in simulation");
+        } else if(riskOfOtherActions > 1.0) {
+            throw new IllegalStateException("Risk of other actions cannot be higher than 1. This would cause program failure later in simulation");
+        }
+        return riskOfOtherActions;
+
+    }
+
+    private double calculateNewRiskValue(double riskDiff, double actionProbability) {
         if(actionProbability == 0.0) {
             logger.trace("Taken action with zero probability according to linear optimization. Setting risk to 1.0, since such action is probably taken due to exploration.");
             return 1.0;
