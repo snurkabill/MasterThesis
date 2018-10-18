@@ -66,21 +66,26 @@ public class AlphaGoPrototype {
 //        int sampleEpisodeCount = 10;
 
 
+        // MCTS
+        double cpuctParameter = 2;
+        int treeUpdateCount = 50;
+
+        // REINFORCEMENT
         double discountFactor = 0.999;
         double explorationConstant = 0.5;
         double temperature = 2;
-        double learningRate = 0.001;
-        double cpuctParameter = 2;
-        int treeUpdateCount = 50;
-        int stageCountCount = 100;
-        int trainingEpochCount = 200;
         int sampleEpisodeCount = 10;
         int replayBufferSize = 100;
+        int stageCountCount = 100;
 
+        // NN
+        int batchSize = 8;
+        double learningRate = 0.001;
+        int trainingEpochCount = 400;
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.02;
+        double totalRiskAllowed = 0.00;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
@@ -107,6 +112,7 @@ public class AlphaGoPrototype {
                 hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
                 AlphaGoNodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
                 trainingEpochCount,
+                batchSize,
                 new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile()),
                 random
             )
