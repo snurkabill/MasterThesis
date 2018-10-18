@@ -24,19 +24,36 @@ public class TFModel implements SupervisedTrainableModel {
     private final int inputDimension;
     private final int outputDimension;
     private final int trainingIterations;
+    private final int batchSize;
     private final SplittableRandom random;
-    private final Graph graph = new Graph();
     private final Session sess;
+    private final double[][] trainInputBatch;
+    private final double[] trainQTargetBatch;
+    private final double[] trainRTargetBatch;
+    private final double[][] trainPolicyTargetBatch;
 
-
-    public TFModel(int inputDimension, int outputDimension, int trainingIterations, File graphFile, SplittableRandom random) {
+    public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, File graphFile, SplittableRandom random) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.trainingIterations = trainingIterations;
+        this.batchSize = batchSize;
         this.random = random;
-        this.sess = new Session(this.graph);
+
+
+        trainInputBatch = new double[batchSize][];
+        trainPolicyTargetBatch = new double[batchSize][];
+        trainQTargetBatch = new double[batchSize];
+        trainRTargetBatch = new double[batchSize];
+
+        for (int i = 0; i < batchSize; i++) {
+            trainInputBatch[i] = new double[inputDimension];
+            trainPolicyTargetBatch[i] = new double[outputDimension - AlphaGoNodeEvaluator.POLICY_START_INDEX];
+        }
+
+        Graph graph = new Graph();
+        this.sess = new Session(graph);
         try {
-            this.graph.importGraphDef(Files.readAllBytes(Paths.get(graphFile.getAbsolutePath())));
+            graph.importGraphDef(Files.readAllBytes(Paths.get(graphFile.getAbsolutePath())));
         } catch (IOException e) {
             throw new IllegalArgumentException("Tf model handling crashed. TODO: quite general exception", e);
         }
@@ -50,45 +67,43 @@ public class TFModel implements SupervisedTrainableModel {
         sess.close();
     }
 
+    private void fillbatch(int batchesDone, int[] order, double[][] input, double[][] target) {
+        for (int i = 0; i < batchSize; i++) {
+            int index = batchesDone * batchSize + i;
+            if(index >= order.length) {
+                break; // leaving part of batch from previous iteration.
+            }
+            System.arraycopy(input[order[index]], 0, trainInputBatch[i], 0, inputDimension);
+            System.arraycopy(target[order[index]], AlphaGoNodeEvaluator.POLICY_START_INDEX, trainPolicyTargetBatch[i], 0, outputDimension - AlphaGoNodeEvaluator.POLICY_START_INDEX);
+            trainQTargetBatch[i] = target[order[index]][AlphaGoNodeEvaluator.Q_VALUE_INDEX];
+            trainRTargetBatch[i] = target[order[index]][AlphaGoNodeEvaluator.RISK_VALUE_INDEX];
+        }
+    }
+
     @Override
     public void fit(double[][] input, double[][] target) {
-
-        double[] qTarget = new double[input.length];
-        double[] rTarget = new double[input.length];
-        double[][] policyTarget = new double[input.length][];
         int[] order = IntStream.range(0, input.length).toArray();
-
-        for (int i = 0; i < target.length; i++) {
-            qTarget[i] = target[i][AlphaGoNodeEvaluator.Q_VALUE_INDEX];
-            rTarget[i] = target[i][AlphaGoNodeEvaluator.RISK_VALUE_INDEX];
-            policyTarget[i] = new double[target[0].length - AlphaGoNodeEvaluator.POLICY_START_INDEX];
-            System.arraycopy(
-                target[i],
-                AlphaGoNodeEvaluator.POLICY_START_INDEX,
-                policyTarget[i],
-                0,
-                target[0].length - AlphaGoNodeEvaluator.POLICY_START_INDEX);
-        }
-        for (int i = 0; i < trainingIterations * target.length; i++) {
-            int index = random.nextInt(input.length);
-            try (
-                Tensor<Double> tfInput = Tensors.create(new double[][] {input[order[index]]});
-                Tensor<Double> tfQTarget = Tensors.create(new double[] {qTarget[order[index]]});
-                Tensor<Double> tfRTarget = Tensors.create(new double[] {rTarget[order[index]]});
-                Tensor<Double> tfPolicyTarget = Tensors.create(new double[][] {policyTarget[order[index]]});
-                )
-            {
-                sess
-                    .runner()
-                    .feed("input_node", tfInput)
-                    .feed("Q_target_node", tfQTarget)
-                    .feed("Risk_target_node", tfRTarget)
-                    .feed("Policy_target_node", tfPolicyTarget)
-                    .addTarget("train_node")
-                    .run();
+        for (int i = 0; i < trainingIterations; i++) {
+            shuffleArray(order, new Random(random.nextInt()));
+            for (int j = 0; j < (target.length / batchSize) + 1; j++) {
+                fillbatch(j, order, input, target);
+                try (
+                    Tensor<Double> tfInput = Tensors.create(this.trainInputBatch);
+                    Tensor<Double> tfQTarget = Tensors.create(this.trainQTargetBatch);
+                    Tensor<Double> tfRTarget = Tensors.create(this.trainRTargetBatch);
+                    Tensor<Double> tfPolicyTarget = Tensors.create(this.trainPolicyTargetBatch);
+                    ) {
+                    sess
+                        .runner()
+                        .feed("input_node", tfInput)
+                        .feed("Q_target_node", tfQTarget)
+                        .feed("Risk_target_node", tfRTarget)
+                        .feed("Policy_target_node", tfPolicyTarget)
+                        .addTarget("train_node")
+                        .run();
+                }
             }
         }
-
     }
 
     public static void shuffleArray(int[] array, Random rng) {
