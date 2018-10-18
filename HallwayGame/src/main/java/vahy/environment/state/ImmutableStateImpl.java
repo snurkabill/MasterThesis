@@ -18,7 +18,7 @@ import java.util.List;
 public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
-    public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 1;
+    public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
 
     public static final int AGENT_LOCATION_REPRESENTATION = -3;
     public static final int TRAP_LOCATION_REPRESENTATION = -2;
@@ -34,6 +34,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
     private final AgentHeading agentHeading;
     private final boolean isAgentTurn;
     private final boolean hasAgentMoved;
+    private final boolean hasAgentResigned;
 
     public ImmutableStateImpl(
         StaticGamePart staticGamePart,
@@ -56,6 +57,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                 .mapToInt(Long::intValue)
                 .sum(),
             false,
+            false,
             false);
     }
 
@@ -68,7 +70,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         boolean isAgentTurn,
         int rewardsLeft,
         boolean isAgentKilled,
-        boolean hasAgentMoved) {
+        boolean hasAgentMoved,
+        boolean hasAgentResigned) {
         this.isAgentTurn = isAgentTurn;
         this.staticGamePart = staticGamePart;
         this.rewards = rewards;
@@ -78,6 +81,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         this.rewardsLeft = rewardsLeft;
         this.isAgentKilled = isAgentKilled;
         this.hasAgentMoved = hasAgentMoved;
+        this.hasAgentResigned = hasAgentResigned;
     }
 
     public ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities() {
@@ -187,7 +191,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                             false,
                             rewardCount,
                             isAgentKilled,
-                            agentCoordinates.getFirst() != agentXCoordination || agentCoordinates.getSecond() != agentYCoordination),
+                            agentCoordinates.getFirst() != agentXCoordination || agentCoordinates.getSecond() != agentYCoordination,
+                            false),
                         new DoubleScalarReward(reward));
                 case TURN_RIGHT:
                 case TURN_LEFT:
@@ -202,8 +207,24 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                             false,
                             rewardsLeft,
                             isAgentKilled,
+                            false,
                             false),
                         new DoubleScalarReward(-staticGamePart.getDefaultStepPenalty()));
+//                case RESIGN:
+//                    return new ImmutableStateRewardReturnTuple<>(
+//                        new ImmutableStateImpl(
+//                            staticGamePart,
+//                            ArrayUtils.cloneArray(rewards),
+//                            agentXCoordination,
+//                            agentYCoordination,
+//                            agentHeading,
+//                            false,
+//                            rewardsLeft,
+//                            isAgentKilled,
+//                            false,
+//                            true),
+//                        new DoubleScalarReward(-staticGamePart.getDefaultStepPenalty())
+//                        );
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
             }
@@ -219,6 +240,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         isAgentKilled,
+                        false,
                         false);
                     return new ImmutableStateRewardReturnTuple<>(state, new DoubleScalarReward(0.0));
                 case NOISY_RIGHT:
@@ -232,6 +254,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         isAgentKilled,
+                        false,
                         false), new DoubleScalarReward(0.0));
                 case NOISY_LEFT:
                     ImmutableTuple<Integer, Integer> newLeftCoordinates = makeLeftMove();
@@ -244,6 +267,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         isAgentKilled,
+                        false,
                         false), new DoubleScalarReward(0.0));
                 case TRAP:
                     return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
@@ -255,6 +279,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         true,
+                        false,
                         false), new DoubleScalarReward(0.0));
                 case NOISY_RIGHT_TRAP:
                     ImmutableTuple<Integer, Integer> newRightTrapCoordinates = makeRightMove();
@@ -267,6 +292,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         true,
+                        false,
                         false), new DoubleScalarReward(0.0));
                 case NOISY_LEFT_TRAP:
                     ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeLeftMove();
@@ -279,6 +305,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                         true,
                         rewardsLeft,
                         true,
+                        false,
                         false), new DoubleScalarReward(0.0));
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
@@ -297,14 +324,22 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
             isAgentTurn,
             rewardsLeft,
             isAgentKilled,
-            hasAgentMoved);
+            hasAgentMoved,
+            hasAgentResigned);
     }
 
     @Override
     public boolean isFinalState() {
-        return isAgentKilled || rewardsLeft == 0;
+        return isAgentKilled || rewardsLeft == 0 || hasAgentResigned;
     }
 
+    public boolean isAgentKilled() {
+        return isAgentKilled;
+    }
+
+    public boolean isHasAgentResigned() {
+        return hasAgentResigned;
+    }
 
     @Override
     public DoubleVectorialObservation getObservation() {
@@ -323,7 +358,11 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
                     : rewards[i][j];
             }
         }
-        vector[vector.length - 2] = agentHeading.getHeadingRepresentation();
+        int[] headingRepresentationAsArray = agentHeading.getHeadingRepresentationAsArray();
+        vector[vector.length - 5] = headingRepresentationAsArray[0];
+        vector[vector.length - 4] = headingRepresentationAsArray[1];
+        vector[vector.length - 3] = headingRepresentationAsArray[2];
+        vector[vector.length - 2] = headingRepresentationAsArray[3];
         vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
         return new DoubleVectorialObservation(vector);
     }
@@ -451,7 +490,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         }
     }
 
-    private boolean isAgentStandingOnTrap() {
+    public boolean isAgentStandingOnTrap() {
         return staticGamePart.getTrapProbabilities()[agentXCoordination][agentYCoordination] != 0.0;
     }
 
@@ -474,7 +513,8 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         if (hasAgentMoved != that.hasAgentMoved) return false;
         if (!staticGamePart.equals(that.staticGamePart)) return false;
         if (!Arrays.deepEquals(rewards, that.rewards)) return false;
-        return agentHeading == that.agentHeading;
+        if (agentHeading != that.agentHeading) return false;
+        return hasAgentResigned == that.hasAgentResigned;
     }
 
     @Override

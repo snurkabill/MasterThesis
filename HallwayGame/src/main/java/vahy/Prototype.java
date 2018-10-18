@@ -59,7 +59,7 @@ public class Prototype {
         int uniqueEpisodeCount = 1;
         int episodeCount = 10;
         int monteCarloSimulationCount = 100;
-        int updateTreeCount = 100;
+        int updateTreeCount = 200;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
         //            provideRandomWalkPolicy(random),
@@ -80,8 +80,8 @@ public class Prototype {
             random,
             updateTreeCount,
             0.5,
-            300,
-            100
+            100,
+            10
             );
 
 
@@ -212,10 +212,10 @@ public class Prototype {
     public static HallwayGameInitialInstanceSupplier getHallwayGameInitialInstanceSupplier(SplittableRandom random, GameConfig gameConfig) throws NotValidGameStringRepresentationException, IOException {
         ClassLoader classLoader = Prototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
-//        URL url = classLoader.getResource("examples/hallway_demo2.txt");
+        URL url = classLoader.getResource("examples/hallway_demo2.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo3.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo4.txt");
-         URL url = classLoader.getResource("examples/hallway_demo5.txt");
+//         URL url = classLoader.getResource("examples/hallway_demo5.txt");
 //        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
