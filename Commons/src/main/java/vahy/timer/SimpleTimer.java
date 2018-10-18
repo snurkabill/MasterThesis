@@ -11,12 +11,12 @@ public class SimpleTimer {
     }
 
     public void startTimer() {
-        startingTime = System.nanoTime();
+        startingTime = System.currentTimeMillis();
         isRunning = true;
     }
 
     public void stopTimer() {
-        totalTime = System.nanoTime() - startingTime;
+        totalTime = System.currentTimeMillis() - startingTime;
         isRunning = false;
     }
 
