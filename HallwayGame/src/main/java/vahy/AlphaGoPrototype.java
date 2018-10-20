@@ -1,5 +1,6 @@
 package vahy;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.AlphaGo.policy.AlphaGoEnvironmentPolicySupplier;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
@@ -33,14 +35,14 @@ public class AlphaGoPrototype {
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoPrototype.class);
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
-
+        cleanUpNativeTempFiles();
         long seed = 0;
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.0)
+            .noisyMoveProbability(0.5)
             .stepPenalty(2)
-            .trapProbability(0.05)
+            .trapProbability(1)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
@@ -68,24 +70,24 @@ public class AlphaGoPrototype {
 
         // MCTS
         double cpuctParameter = 2;
-        int treeUpdateCount = 50;
+        int treeUpdateCount = 500;
 
         // REINFORCEMENT
         double discountFactor = 0.999;
         double explorationConstant = 0.5;
         double temperature = 2;
-        int sampleEpisodeCount = 10;
+        int sampleEpisodeCount = 20;
         int replayBufferSize = 100;
-        int stageCountCount = 100;
+        int stageCountCount = 200;
 
         // NN
-        int batchSize = 8;
+        int batchSize = 1;
         double learningRate = 0.001;
-        int trainingEpochCount = 400;
+        int trainingEpochCount = 200;
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.00;
+        double totalRiskAllowed = 0.0;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
@@ -179,7 +181,10 @@ public class AlphaGoPrototype {
         // printChart(rewardHistory);
         logger.info("Total reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get());
         logger.info("Average reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get() / totalEpisodes);
+
+        cleanUpNativeTempFiles();
     }
+
 
     public static HallwayGameInitialInstanceSupplier getHallwayGameInitialInstanceSupplier(SplittableRandom random, GameConfig gameConfig) throws NotValidGameStringRepresentationException, IOException {
         ClassLoader classLoader = AlphaGoPrototype.class.getClassLoader();
@@ -191,15 +196,36 @@ public class AlphaGoPrototype {
 //         URL url = classLoader.getResource("examples/hallway_demo6.txt");
 
 //        URL url = classLoader.getResource("examples/hallway0.txt");
+//        URL url = classLoader.getResource("examples/hallway1.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
 //        URL url = classLoader.getResource("examples/hallway0123.txt");
 //        URL url = classLoader.getResource("examples/hallway0124.txt");
-        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
+        URL url = classLoader.getResource("examples/hallway0125s.txt");
+//        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal2.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal3.txt");
 
         File file = new File(url.getFile());
         return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
+    }
+
+    private static void cleanUpNativeTempFiles() {
+        String bridJFolderNameStart = "BridJExtractedLibraries";
+        String CLPFolderNameStart = "CLPExtractedLib";
+        String TFFolderNameStart = "tensorflow_native_libraries";
+        String tempPath = System.getProperty("java.io.tmpdir");
+        File file = new File(tempPath);
+        String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
+        if (directories != null) {
+            Arrays.stream(directories).filter(x -> x.startsWith(bridJFolderNameStart) || x.startsWith(CLPFolderNameStart) || x.startsWith(TFFolderNameStart)).forEach(x -> {
+                try {
+                    FileUtils.deleteDirectory(new File(tempPath + "/" + x));
+                } catch (IOException e) {
+                    e.printStackTrace(); // todo: deal with this later
+                }
+            });
+        }
+
     }
 }
