@@ -1,11 +1,14 @@
 package vahy.AlphaGo.reinforcement.learn.tf;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
 import vahy.AlphaGo.tree.AlphaGoNodeEvaluator;
 import vahy.api.learning.model.SupervisedTrainableModel;
+import vahy.timer.SimpleTimer;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +23,7 @@ import java.util.stream.IntStream;
 
 public class TFModel implements SupervisedTrainableModel {
 
+    private static final Logger logger = LoggerFactory.getLogger(TFModel.class.getName());
 
     private final int inputDimension;
     private final int outputDimension;
@@ -31,6 +35,7 @@ public class TFModel implements SupervisedTrainableModel {
     private final double[] trainQTargetBatch;
     private final double[] trainRTargetBatch;
     private final double[][] trainPolicyTargetBatch;
+    private final SimpleTimer timer = new SimpleTimer();
 
     public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, File graphFile, SplittableRandom random) {
         this.inputDimension = inputDimension;
@@ -38,18 +43,14 @@ public class TFModel implements SupervisedTrainableModel {
         this.trainingIterations = trainingIterations;
         this.batchSize = batchSize;
         this.random = random;
-
-
         trainInputBatch = new double[batchSize][];
         trainPolicyTargetBatch = new double[batchSize][];
         trainQTargetBatch = new double[batchSize];
         trainRTargetBatch = new double[batchSize];
-
         for (int i = 0; i < batchSize; i++) {
             trainInputBatch[i] = new double[inputDimension];
             trainPolicyTargetBatch[i] = new double[outputDimension - AlphaGoNodeEvaluator.POLICY_START_INDEX];
         }
-
         Graph graph = new Graph();
         this.sess = new Session(graph);
         try {
@@ -58,16 +59,21 @@ public class TFModel implements SupervisedTrainableModel {
             throw new IllegalArgumentException("Tf model handling crashed. TODO: quite general exception", e);
         }
         this.sess.runner().addTarget("init").run();
-        printVariables(sess);
+        logger.info("Initialized model based on TensorFlow backend.");
+        logger.debug("Model with input dimension: [{}] and output dimension: [{}]. Batch size of model set to: [{}]", inputDimension, outputDimension, batchSize);
+
     }
 
     @Override
     protected void finalize() throws Throwable {
+        logger.trace("Finalizing TF model resources");
         super.finalize();
         sess.close();
+        logger.debug("TF resources closed");
     }
 
     private void fillbatch(int batchesDone, int[] order, double[][] input, double[][] target) {
+        logger.trace("Filling data batch. Already done: [{}]", batchesDone);
         for (int i = 0; i < batchSize; i++) {
             int index = batchesDone * batchSize + i;
             if(index >= order.length) {
@@ -82,6 +88,11 @@ public class TFModel implements SupervisedTrainableModel {
 
     @Override
     public void fit(double[][] input, double[][] target) {
+        if(input.length != target.length) {
+            throw new IllegalArgumentException("Input and target lengths differ");
+        }
+        logger.debug("Partially fitting TF model on [{}] inputs.", input.length);
+        timer.startTimer();
         int[] order = IntStream.range(0, input.length).toArray();
         for (int i = 0; i < trainingIterations; i++) {
             shuffleArray(order, new Random(random.nextInt()));
@@ -104,16 +115,18 @@ public class TFModel implements SupervisedTrainableModel {
                 }
             }
         }
+        timer.stopTimer();
+        logger.debug("Training of [{}] inputs with minibatch size [{}] took [{}] milliseconds. Samples per sec: [{}]",
+            input.length, batchSize, timer.getTotalTimeInMillis(), timer.samplesPerSec(input.length));
     }
 
-    public static void shuffleArray(int[] array, Random rng) {
+    private static void shuffleArray(int[] array, Random rng) {
         for(int i = array.length - 1; i > 0; --i) {
             int j = rng.nextInt(i + 1);
             int temp = array[j];
             array[j] = array[i];
             array[i] = temp;
         }
-
     }
 
     @Override
@@ -169,13 +182,6 @@ public class TFModel implements SupervisedTrainableModel {
         return outputDimension;
     }
 
-    private static void printVariables(Session sess) {
-//        List<Tensor<?>> values = sess.runner().fetch("q_node/BiasAdd:0").run();
-//        System.out.printf("W = %f\tb = %f\n", values.get(0).floatValue(), values.get(1).floatValue());
-//        for (Tensor<?> t : values) {
-//            t.close();
-//        }
-    }
 }
 
 

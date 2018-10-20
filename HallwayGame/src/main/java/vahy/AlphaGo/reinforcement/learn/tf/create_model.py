@@ -4,7 +4,7 @@ import tensorflow as tf
 from tensorflow.python.ops.nn_ops import softmax_cross_entropy_with_logits_v2
 
 # input_count = 1
-input_count = 25
+input_count = 29
 
 hidden_count_1 = 40
 hidden_count_2 = 40

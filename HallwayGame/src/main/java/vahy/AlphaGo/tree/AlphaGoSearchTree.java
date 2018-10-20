@@ -116,7 +116,6 @@ public class AlphaGoSearchTree {
                 "Old risk [" + totalRiskAllowed + "]. " +
                 "Risk diff numerically stabilised: [" +  riskDiff + "] " +
                 "New risk calculated: [" + newRisk + "], " +
-//                "Risk of other actions: [" + totalRiskOfOtherActions + "], " +
                 "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
                 "Dividing probability: [" + root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution() + "], " +
                 "Numerically stabilised dividing probability: [" + actionProbability + "]");

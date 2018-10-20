@@ -111,29 +111,6 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
     public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         expandSearchTree(gameState);
         AlphaGoSearchNode node = searchTree.getRoot();
-//        Double[] values = new Double[ActionType.playerActions.length];
-//        for (int i = 0; i < ActionType.playerActions.length; i++) {
-//            values[i] = node.getMeanActionValues()[i] + 1 * node.getPriorProbabilities()[i] * Math.sqrt(node.getTotalVisitCounter()) / (1.0 + node.getVisitCounts()[i]);
-//        }
-//        ImmutableTuple<Integer, Double> bestAction = IntStream
-//            .range(0, values.length)
-//            .mapToObj(x -> new ImmutableTuple<>(x, values[x]))
-//            .collect(StreamUtils.toRandomizedMaxCollector((o1, o2) -> o1.getSecond() > o2.getSecond() ? 1 : o2.getSecond() > o1.getSecond() ? -1 : 0, random));
-//
-//
-//
-////        searchTree.getRoot()
-////            .getEdgeMetadataMap()
-////            .entrySet()
-////            .stream()
-////            .map(x -> {
-////                double upperBound = x.getValue().getMeanActionValue() +
-////                    1 * x.getValue().getPriorProbability() * Math.sqrt(searchTree.getRoot().getTotalVisitCounter()) / 1.0 + x.getValue().getVisitCount();
-////
-////                new ImmutableTuple<>(x.getKey(), x.getValue().)
-////            })
-//
-//        return ActionType.playerActions[bestAction.getFirst()];
 
         if(optimizeFlowInTree) {
             searchTree.optimizeFlow();
@@ -163,7 +140,6 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
         }
     }
 
-
     public void updateStateOnOpponentActions(List<ActionType> opponentActionList) {
         for (ActionType action : opponentActionList) {
             searchTree.applyAction(action);
@@ -182,7 +158,11 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
         if (searchTree.getTotalNodesExpanded() == 0) {
             logger.debug("Finished updating search tree. No node was expanded - there is likely strong existing path to final state");
         } else {
-            logger.debug("Finished updating search tree with total expanded node count: [{}], total created node count: [{}],  max branch factor: [{}], average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
+            logger.debug(
+                "Finished updating search tree with total expanded node count: [{}], " +
+                    "total created node count: [{}], " +
+                    "max branch factor: [{}], " +
+                    "average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
                 searchTree.getTotalNodesExpanded(),
                 searchTree.getTotalNodesCreated(),
                 searchTree.getMaxBranchingFactor(),
@@ -190,15 +170,6 @@ public class AlphaGoPolicyImpl implements AlphaGoPolicy {
                 timer.secondsSpent(),
                 timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
         }
-
-//        logger.trace("Action estimatedRewards: [{}]", searchTree
-//            .getRoot()
-//            .getSearchNodeMetadata()
-//            .getStateActionMetadataMap()
-//            .entrySet()
-//            .stream()
-//            .map(x -> String.valueOf(x.getValue().getEstimatedTotalReward().getValue().doubleValue()))
-//            .reduce((x, y) -> x + ", " + y));
     }
 
     private void checkStateRoot(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
