@@ -28,9 +28,9 @@
         <!--<maven.compiler.target>1.9</maven.compiler.target>-->
         <!--<maven.compiler.release>9</maven.compiler.release>-->
 
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.release>8</maven.compiler.release>
+        <maven.compiler.source>1.9</maven.compiler.source>
+        <maven.compiler.target>1.9</maven.compiler.target>
+        <maven.compiler.release>9</maven.compiler.release>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -73,49 +73,51 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.7.0</version>
-                    <!--<configuration>-->
-                    <!--<source>1.9</source>-->
-                    <!--<target>1.9</target>-->
-                    <!--</configuration>-->
+                    <version>3.8.0</version>
+                    <configuration>
+                        <source>1.9</source>
+                        <target>1.9</target>
+                        <release>9</release>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>3.1.0</version>
                 </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-toolchains-plugin</artifactId>
-                    <version>1.1</version>
-                </plugin>
+                <!--<plugin>-->
+                    <!--<groupId>org.apache.maven.plugins</groupId>-->
+                    <!--<artifactId>maven-toolchains-plugin</artifactId>-->
+                    <!--<version>1.1</version>-->
+                <!--</plugin>-->
             </plugins>
         </pluginManagement>
 
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-toolchains-plugin</artifactId>
-                <configuration>
-                    <toolchains>
-                        <jdk>
-                            <version>1.9</version>
-                            <vendor>oracle</vendor>
-                        </jdk>
-                    </toolchains>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>toolchain</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-compiler-plugin</artifactId>-->
+            <!--</plugin>-->
+            <!--<plugin>-->
+
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-toolchains-plugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<toolchains>-->
+                        <!--<jdk>-->
+                            <!--<version>1.9</version>-->
+                            <!--<vendor>oracle</vendor>-->
+                        <!--</jdk>-->
+                    <!--</toolchains>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<goals>-->
+                            <!--<goal>toolchain</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
 
 
             <plugin>

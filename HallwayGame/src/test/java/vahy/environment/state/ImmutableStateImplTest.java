@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
+import vahy.utils.EnumUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,7 +77,23 @@ public class ImmutableStateImplTest {
 
     private void assertAgentHeading(ImmutableStateImpl game, AgentHeading expectedAgentHeading) {
         double[] observation = game.getObservation().getObservedVector();
-        Assert.assertEquals(observation[observation.length - 2], expectedAgentHeading.getHeadingRepresentation(), DOUBLE_TOLERANCE);
+        int observationIndex = agentHeadingIndexOnArray(expectedAgentHeading);
+        Assert.assertEquals(observation[observation.length + observationIndex], 1.0, DOUBLE_TOLERANCE);
+    }
+
+    private int agentHeadingIndexOnArray(AgentHeading expectedHeading) {
+        switch(expectedHeading) {
+            case NORTH:
+                return -5;
+            case EAST:
+                return -4;
+            case SOUTH:
+                return -3;
+            case WEST:
+                return -2;
+            default:
+                throw EnumUtils.createExceptionForUnknownEnumValue(expectedHeading);
+        }
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
