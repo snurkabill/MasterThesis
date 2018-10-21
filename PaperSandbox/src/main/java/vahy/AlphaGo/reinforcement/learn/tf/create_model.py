@@ -1,7 +1,4 @@
-import numpy as np
-
 import tensorflow as tf
-from tensorflow.python.ops.nn_ops import softmax_cross_entropy_with_logits_v2
 
 # input_count = 1
 input_count = 29

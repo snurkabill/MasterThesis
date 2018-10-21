@@ -8,7 +8,6 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.tree.SearchTreeImpl;
 
 import java.text.DecimalFormat;
 import java.util.LinkedList;
@@ -16,7 +15,7 @@ import java.util.Map;
 
 public class AlphaGoSearchTree {
 
-    private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlphaGoSearchTree.class);
 
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -10);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -10);

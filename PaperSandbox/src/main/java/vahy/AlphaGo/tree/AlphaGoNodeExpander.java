@@ -8,14 +8,13 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.nodeExpander.BaseNodeExpander;
 
 import java.util.Arrays;
 import java.util.Map;
 
 public class AlphaGoNodeExpander {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseNodeExpander.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlphaGoNodeExpander.class);
 
     public void expandNode(AlphaGoSearchNode node) {
         if(node.isFinalNode()) {

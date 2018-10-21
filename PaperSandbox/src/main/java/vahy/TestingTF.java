@@ -1,10 +1,9 @@
-package vahy.search;
+package vahy;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
-import vahy.TestingDL4J;
 
 import java.io.File;
 import java.io.IOException;

@@ -20,13 +20,10 @@
         <module>../HallwayGame</module>
         <module>../StateSpaceSearch</module>
         <module>../ReinforcementLearning</module>
+        <module>../PaperSandbox</module>
     </modules>
 
     <properties>
-
-        <!--<maven.compiler.source>1.9</maven.compiler.source>-->
-        <!--<maven.compiler.target>1.9</maven.compiler.target>-->
-        <!--<maven.compiler.release>9</maven.compiler.release>-->
 
         <maven.compiler.source>1.9</maven.compiler.source>
         <maven.compiler.target>1.9</maven.compiler.target>
@@ -40,12 +37,10 @@
         <slf4j.version>1.7.12</slf4j.version>
         <testng.version>6.14.3</testng.version>
 
-
     </properties>
 
     <dependencies>
         <!-- Logging -->
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -85,41 +80,10 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.1.0</version>
                 </plugin>
-                <!--<plugin>-->
-                    <!--<groupId>org.apache.maven.plugins</groupId>-->
-                    <!--<artifactId>maven-toolchains-plugin</artifactId>-->
-                    <!--<version>1.1</version>-->
-                <!--</plugin>-->
             </plugins>
         </pluginManagement>
 
         <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-compiler-plugin</artifactId>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-toolchains-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<toolchains>-->
-                        <!--<jdk>-->
-                            <!--<version>1.9</version>-->
-                            <!--<vendor>oracle</vendor>-->
-                        <!--</jdk>-->
-                    <!--</toolchains>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<goals>-->
-                            <!--<goal>toolchain</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
