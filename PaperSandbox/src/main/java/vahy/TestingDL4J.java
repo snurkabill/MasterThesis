@@ -2,7 +2,7 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.AlphaGo.reinforcement.learn.tf.TFModel;
+import vahy.paper.reinforcement.learn.tf.TFModel;
 
 import java.io.File;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ public class TestingDL4J {
 
         File tfGraphFile = new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile());
 
-//        AlphaGoDl4jModel asdf = new AlphaGoDl4jModel(4, 5, null, 0, 0.01, 100);
+//        Dl4jModel asdf = new Dl4jModel(4, 5, null, 0, 0.01, 100);
         TFModel asdf = new TFModel(4, 5, 100, 1, tfGraphFile, new SplittableRandom());
 
         for (int i = 0; i < 100; i++) {
