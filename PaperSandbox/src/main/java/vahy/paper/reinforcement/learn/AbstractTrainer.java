@@ -6,7 +6,7 @@ import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperTrainablePolicySupplier;
 import vahy.paper.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.paper.reinforcement.episode.StepRecord;
-import vahy.paper.tree.NodeEvaluator;
+import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.api.model.State;
 import vahy.api.model.StateActionReward;
 import vahy.environment.ActionType;

@@ -3,6 +3,8 @@ package vahy.paper.policy;
 import vahy.paper.reinforcement.TrainableApproximator;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
+import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
 import vahy.utils.ImmutableTuple;
 
 import java.util.List;
@@ -16,12 +18,19 @@ public class PaperTrainablePolicySupplier extends PolicySupplier {
 
     private TrainableApproximator trainableRewardApproximator;
 
-    public PaperTrainablePolicySupplier(SplittableRandom random, double explorationConstant, double temperature, double totalRiskAllowed, TrainableApproximator trainableRewardApproximator, double cpuctParameter, int treeUpdateCount, boolean optimizeFlowInSearchTree) {
-        super(cpuctParameter, treeUpdateCount, totalRiskAllowed, random, trainableRewardApproximator, optimizeFlowInSearchTree);
+    public PaperTrainablePolicySupplier(SplittableRandom random,
+                                        double explorationConstant,
+                                        double temperature,
+                                        double totalRiskAllowed,
+                                        ApproximatorBasedNodeEvaluator nodeEvaluator,
+                                        TreeUpdateConditionSupplier treeUpdateConditionSupplier,
+                                        double cpuctParameter,
+                                        boolean optimizeFlowInSearchTree) {
+        super(cpuctParameter, totalRiskAllowed, random, nodeEvaluator, treeUpdateConditionSupplier, optimizeFlowInSearchTree);
         this.random = random;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
-        this.trainableRewardApproximator = trainableRewardApproximator;
+        this.trainableRewardApproximator = nodeEvaluator.getTrainableApproximator();
     }
 
     public TrainableApproximator getTrainableRewardApproximator() {

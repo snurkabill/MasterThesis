@@ -8,6 +8,7 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 
 import java.text.DecimalFormat;
 import java.util.LinkedList;
@@ -107,18 +108,7 @@ public class SearchTree {
         double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
         double riskDiff = calculateNumericallyStableRiskDiff(riskOfOtherActions);
         double actionProbability = calculateNumericallyStableActionProbability(root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution());
-
-        double newRisk = calculateNewRiskValue(riskDiff, actionProbability);
-        if(newRisk < 0.0 || newRisk > 1.0) {
-            throw new IllegalStateException(
-                "Risk out of bounds. " +
-                "Old risk [" + totalRiskAllowed + "]. " +
-                "Risk diff numerically stabilised: [" +  riskDiff + "] " +
-                "New risk calculated: [" + newRisk + "], " +
-                "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
-                "Dividing probability: [" + root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution() + "], " +
-                "Numerically stabilised dividing probability: [" + actionProbability + "]");
-        }
+        double newRisk = calculateNewRiskValue(riskDiff, actionProbability, riskOfOtherActions, appliedAction);
         totalRiskAllowed = newRisk;
         isFlowOptimized = false;
     }
@@ -150,12 +140,31 @@ public class SearchTree {
 
     }
 
-    private double calculateNewRiskValue(double riskDiff, double actionProbability) {
+    private double calculateNewRiskValue(double riskDiff, double actionProbability, double riskOfOtherActions, ActionType appliedAction) {
         if(actionProbability == 0.0) {
             logger.trace("Taken action with zero probability according to linear optimization. Setting risk to 1.0, since such action is probably taken due to exploration.");
             return 1.0;
         } else {
-            return riskDiff / actionProbability;
+            double newRisk = riskDiff / actionProbability;
+            if((newRisk < -NUMERICAL_RISK_DIFF_TOLERANCE) || (newRisk - 1.0 > NUMERICAL_RISK_DIFF_TOLERANCE)) {
+                throw new IllegalStateException(
+                    "Risk out of bounds. " +
+                        "Old risk [" + totalRiskAllowed + "]. " +
+                        "Risk diff numerically stabilised: [" +  riskDiff + "] " +
+                        "New risk calculated: [" + newRisk + "], " +
+                        "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
+                        "Dividing probability: [" + root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution() + "], " +
+                        "Numerically stabilised dividing probability: [" + actionProbability + "]");
+            }
+            if(newRisk > 1.0) {
+                logger.trace("Rounding new risk to 1.0.");
+                return 1.0;
+            }
+            if(newRisk < 0.0) {
+                logger.trace("Rounding newRisk to 0.0");
+                return 0.0;
+            }
+            return newRisk;
         }
     }
 

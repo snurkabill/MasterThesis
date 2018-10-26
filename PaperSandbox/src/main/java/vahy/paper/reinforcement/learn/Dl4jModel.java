@@ -19,7 +19,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.nd4j.linalg.util.MathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paper.tree.NodeEvaluator;
+import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.api.learning.model.SupervisedTrainableModel;
 
 import java.util.List;

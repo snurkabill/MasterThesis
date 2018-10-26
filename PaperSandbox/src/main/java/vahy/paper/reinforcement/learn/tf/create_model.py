@@ -1,10 +1,10 @@
 import tensorflow as tf
 
 # input_count = 1
-input_count = 29
+input_count = 6
 
-hidden_count_1 = 40
-hidden_count_2 = 40
+hidden_count_1 = 10
+hidden_count_2 = 10
 hidden_count_3 = 20
 
 action_count = 3
@@ -16,11 +16,11 @@ policy_target = tf.placeholder(tf.double, [None, action_count], name = 'Policy_t
 
 hidden_1 = tf.layers.dense(x, hidden_count_1, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_1")
 hidden_2 = tf.layers.dense(hidden_1, hidden_count_2, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_2")
-hidden_3 = tf.layers.dense(hidden_2, hidden_count_3, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_3")
+# hidden_3 = tf.layers.dense(hidden_2, hidden_count_3, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_3")
 
-policy = tf.layers.dense(hidden_3, action_count, tf.nn.softmax, kernel_initializer = tf.zeros_initializer, name = 'policy_node')
-risk = tf.layers.dense(hidden_3, 1, tf.nn.sigmoid, kernel_initializer = tf.zeros_initializer, name = "risk_node")
-q = tf.layers.dense(hidden_3, 1, kernel_initializer = tf.zeros_initializer, name = "q_node")
+policy = tf.layers.dense(hidden_2, action_count, tf.nn.softmax, kernel_initializer = tf.zeros_initializer, name = 'policy_node')
+risk = tf.layers.dense(hidden_2, 1, tf.nn.sigmoid, kernel_initializer = tf.zeros_initializer, name = "risk_node")
+q = tf.layers.dense(hidden_2, 1, kernel_initializer = tf.zeros_initializer, name = "q_node")
 
 prediction = tf.concat([q, risk, policy], 1, name = "prediction_node_2")
 

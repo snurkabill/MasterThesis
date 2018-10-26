@@ -3,22 +3,27 @@ package vahy;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paper.policy.EnvironmentPolicySupplier;
-import vahy.paper.policy.PolicySupplier;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
-import vahy.paper.reinforcement.EpisodeAggregator;
-import vahy.paper.reinforcement.TrainableApproximator;
-import vahy.paper.reinforcement.learn.AbstractTrainer;
-import vahy.paper.reinforcement.learn.EveryVisitMonteCarloTrainer;
-import vahy.paper.reinforcement.learn.tf.TFModel;
-import vahy.paper.tree.NodeEvaluator;
 import vahy.environment.ActionType;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
-import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.paper.benchmark.Benchmark;
+import vahy.paper.benchmark.BenchmarkingPolicy;
+import vahy.paper.benchmark.PolicyResults;
+import vahy.paper.policy.EnvironmentPolicySupplier;
+import vahy.paper.policy.PaperTrainablePolicySupplier;
+import vahy.paper.policy.PolicySupplier;
+import vahy.paper.reinforcement.TrainableApproximator;
+import vahy.paper.reinforcement.learn.AbstractTrainer;
+import vahy.paper.reinforcement.learn.EveryVisitMonteCarloTrainer;
+import vahy.paper.reinforcement.learn.tf.TFModel;
+import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
+import vahy.paper.tree.nodeEvaluator.MCRolloutBasedNodeEvaluator;
+import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
+import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
+import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplierImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +33,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 
 public class PaperPrototype {
 
@@ -40,8 +44,8 @@ public class PaperPrototype {
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.5)
-            .stepPenalty(2)
+            .noisyMoveProbability(0.1)
+            .stepPenalty(1)
             .trapProbability(1)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
@@ -68,30 +72,33 @@ public class PaperPrototype {
 //        int sampleEpisodeCount = 10;
 
 
-        // MCTS
+        // MCTS - nn based
         double cpuctParameter = 2;
-        int treeUpdateCount = 500;
+        int treeUpdateCount = 100;
+
+        // MCTS - mc rollout based
+        int mcRolloutCount = 10;
 
         // REINFORCEMENT
         double discountFactor = 0.999;
-        double explorationConstant = 0.5;
+        double explorationConstant = 0.3;
         double temperature = 2;
-        int sampleEpisodeCount = 20;
-        int replayBufferSize = 100;
-        int stageCountCount = 200;
+        int sampleEpisodeCount = 10;
+        int replayBufferSize = 50;
+        int stageCountCount = 5;
 
         // NN
-        int batchSize = 1;
+        int batchSize = 8;
         double learningRate = 0.001;
-        int trainingEpochCount = 200;
+        int trainingEpochCount = 100;
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.0;
+        double totalRiskAllowed = 0.10;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
-        int episodeCount = 10000;
+        int episodeCount = 100;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
         TrainableApproximator trainableApproximator = new TrainableApproximator(
@@ -110,6 +117,8 @@ public class PaperPrototype {
 //                trainingEpochCount
 //            )
 
+
+
             new TFModel(
                 hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
                 NodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
@@ -120,24 +129,40 @@ public class PaperPrototype {
             )
         );
 
+
+//        TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSuplierCountBased(treeUpdateCount);
+        TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSupplierImpl(5000, 10000, 100);
+
+        ApproximatorBasedNodeEvaluator nnbasedEvaluator = new ApproximatorBasedNodeEvaluator(trainableApproximator);
+        NodeEvaluator mcBasedEvaluator = new MCRolloutBasedNodeEvaluator(random, mcRolloutCount, discountFactor);
+
         PaperTrainablePolicySupplier paperTrainablePolicySupplier = new PaperTrainablePolicySupplier(
             random,
             explorationConstant,
             temperature,
             totalRiskAllowed,
-            trainableApproximator,
+            nnbasedEvaluator,
+            treeUpdateConditionSupplier,
             cpuctParameter,
-            treeUpdateCount,
             optimizeFlowInSearchTree
         );
 
-        PolicySupplier policySupplier = new PolicySupplier(
+        PolicySupplier nnBasedPolicySupplier = new PolicySupplier(
             cpuctParameter,
-            treeUpdateCount,
             totalRiskAllowed,
             random,
-            trainableApproximator,
+            nnbasedEvaluator,
+            treeUpdateConditionSupplier,
             optimizeFlowInSearchTree);
+
+        PolicySupplier mcBasedPolicySupplier = new PolicySupplier(
+            cpuctParameter,
+            totalRiskAllowed,
+            random,
+            mcBasedEvaluator,
+            treeUpdateConditionSupplier,
+            optimizeFlowInSearchTree);
+
 
 //        AbstractTrainer trainer = new FirstVisitMonteCarloTrainer(
 //            hallwayGameInitialInstanceSupplier,
@@ -164,23 +189,39 @@ public class PaperPrototype {
 
 
         for (int i = 0; i < stageCountCount; i++) {
+            logger.info("Training policy for [{}]th iteration", i);
             trainer.trainPolicy(sampleEpisodeCount);
         }
 
         logger.info("PaperPolicy test starts");
 
-        EpisodeAggregator episodeAggregator = new EpisodeAggregator(
-            uniqueEpisodeCount,
-            episodeCount,
-            hallwayGameInitialInstanceSupplier,
-            policySupplier,
-            new EnvironmentPolicySupplier(random)
-        );
+        String nnBasedPolicyName = "NNBased";
+        String mcBasedPolicyName = "MCBased";
 
-        List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
-        // printChart(rewardHistory);
-        logger.info("Total reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get());
-        logger.info("Average reward: [{}]", rewardHistory.stream().map(x -> x.stream().reduce((aDouble, aDouble2) -> aDouble + aDouble2).get()).reduce((aDouble, aDouble2) -> aDouble + aDouble2).get() / totalEpisodes);
+
+        Benchmark benchmark = new Benchmark(
+            Arrays.asList(new BenchmarkingPolicy(nnBasedPolicyName, nnBasedPolicySupplier), new BenchmarkingPolicy(mcBasedPolicyName, mcBasedPolicySupplier)),
+            new EnvironmentPolicySupplier(random),
+            hallwayGameInitialInstanceSupplier
+            );
+
+        long start = System.currentTimeMillis();
+        List<PolicyResults> policyResultList = benchmark.runBenchmark(uniqueEpisodeCount, episodeCount);
+        long end = System.currentTimeMillis();
+        logger.info("Benchmarking took [{}] milliseconds", end - start);
+
+        PolicyResults nnResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName)).findFirst().get();
+        PolicyResults mcResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedPolicyName)).findFirst().get();
+
+        logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
+        logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+        logger.info("NN Based kill ratio: [{}]", nnResults.getKillRatio());
+        logger.info("NN Based kill counter: [{}]", nnResults.getAgentKillCounter());
+
+        logger.info("MC Based Average reward: [{}]", mcResults.getAverageReward());
+        logger.info("MC Based millis per episode: [{}]", mcResults.getAverageMillisPerEpisode());
+        logger.info("MC Based kill ratio: [{}]", mcResults.getKillRatio());
+        logger.info("MC Based kill counter: [{}]", mcResults.getAgentKillCounter());
 
         cleanUpNativeTempFiles();
     }
@@ -195,13 +236,13 @@ public class PaperPrototype {
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo6.txt");
 
-//        URL url = classLoader.getResource("examples/hallway0.txt");
+        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway1.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
 //        URL url = classLoader.getResource("examples/hallway0123.txt");
 //        URL url = classLoader.getResource("examples/hallway0124.txt");
-        URL url = classLoader.getResource("examples/hallway0125s.txt");
+//        URL url = classLoader.getResource("examples/hallway0125s.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal2.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal3.txt");
@@ -211,6 +252,7 @@ public class PaperPrototype {
     }
 
     private static void cleanUpNativeTempFiles() {
+        System.gc();
         String bridJFolderNameStart = "BridJExtractedLibraries";
         String CLPFolderNameStart = "CLPExtractedLib";
         String TFFolderNameStart = "tensorflow_native_libraries";

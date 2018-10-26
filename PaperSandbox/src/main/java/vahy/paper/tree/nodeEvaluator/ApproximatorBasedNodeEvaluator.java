@@ -1,45 +1,31 @@
-package vahy.paper.tree;
+package vahy.paper.tree.nodeEvaluator;
 
 import vahy.environment.ActionType;
-import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.paper.reinforcement.TrainableApproximator;
+import vahy.paper.tree.SearchNode;
 import vahy.utils.ImmutableTuple;
 
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
-public class NodeEvaluator {
+public class ApproximatorBasedNodeEvaluator extends NodeEvaluator {
 
-    public static final int Q_VALUE_INDEX = 0;
-    public static final int RISK_VALUE_INDEX = 1;
-    public static final int POLICY_START_INDEX = 2;
+    private final TrainableApproximator trainableApproximator;
 
-    private final Function<DoubleVectorialObservation, double[]> evaluationFunction;
-
-    public NodeEvaluator(Function<DoubleVectorialObservation, double[]> evaluationFunction) {
-        this.evaluationFunction = evaluationFunction;
+    public ApproximatorBasedNodeEvaluator(TrainableApproximator trainableApproximator) {
+        this.trainableApproximator = trainableApproximator;
     }
 
-    public void evaluateNode(SearchNode node) {
-        if(node.isFinalNode()) {
-            throw new IllegalStateException("Final node cannot be evaluated");
-        }
-        if(!node.isAlreadyEvaluated()) {
-            innerEvaluateNode(node);
-        }
-        for (Map.Entry<ActionType, SearchNode> childEntry : node.getChildMap().entrySet()) {
-            if(!childEntry.getValue().isFinalNode()) {
-                innerEvaluateNode(childEntry.getValue());
-            }
-        }
+    public TrainableApproximator getTrainableApproximator() {
+        return trainableApproximator;
     }
 
+    @Override
     public void innerEvaluateNode(SearchNode node) {
         if(node.isAlreadyEvaluated()) {
             throw new IllegalStateException("Node was already evaluated");
         }
-        double[] prediction = evaluationFunction.apply(node.getWrappedState().getObservation());
+        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
         node.setEstimatedReward(new DoubleScalarReward(prediction[Q_VALUE_INDEX]));
         node.setEstimatedRisk(prediction[RISK_VALUE_INDEX]);
         if(node.getWrappedState().isAgentTurn()) {
@@ -56,5 +42,4 @@ public class NodeEvaluator {
         }
         node.setEvaluated();
     }
-
 }

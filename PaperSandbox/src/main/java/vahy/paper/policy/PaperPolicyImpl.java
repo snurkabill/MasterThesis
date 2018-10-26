@@ -8,6 +8,7 @@ import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
 import vahy.timer.SimpleTimer;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
@@ -24,13 +25,13 @@ public class PaperPolicyImpl implements PaperPolicy {
     private final SplittableRandom random;
     private final boolean optimizeFlowInTree;
     private final SearchTree searchTree;
-    private final int updateTreeCount;
+    private final TreeUpdateConditionSupplier treeUpdateConditionSupplier;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    public PaperPolicyImpl(SplittableRandom random, SearchTree searchTree, int updateTreeCount, boolean optimizeFlowInTree) {
+    public PaperPolicyImpl(SplittableRandom random, SearchTree searchTree, boolean optimizeFlowInTree, TreeUpdateConditionSupplier treeUpdateConditionSupplier) {
         this.random = random;
         this.searchTree = searchTree;
-        this.updateTreeCount = updateTreeCount;
+        this.treeUpdateConditionSupplier = treeUpdateConditionSupplier;
         this.optimizeFlowInTree = optimizeFlowInTree;
     }
 
@@ -149,10 +150,12 @@ public class PaperPolicyImpl implements PaperPolicy {
     private void expandSearchTree(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         checkStateRoot(gameState);
         timer.startTimer();
-        for (int i = 0; i < updateTreeCount; i++) {
+        treeUpdateConditionSupplier.treeUpdateRequired();
+        for (int i = 0; treeUpdateConditionSupplier.isConditionSatisfied(); i++) {
             logger.trace("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
+        treeUpdateConditionSupplier.treeUpdateFinished();
         timer.stopTimer();
 
         if (searchTree.getTotalNodesExpanded() == 0) {

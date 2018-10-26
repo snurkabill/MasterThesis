@@ -2,18 +2,15 @@ package vahy.paper.reinforcement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.environment.state.ImmutableStateImpl;
+import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperPolicyImpl;
 import vahy.paper.policy.PolicySupplier;
 import vahy.paper.reinforcement.episode.PaperEpisode;
-import vahy.api.model.StateRewardReturn;
-import vahy.environment.state.ImmutableStateImpl;
-import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.impl.model.reward.DoubleScalarReward;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EpisodeAggregator {
 
@@ -39,9 +36,9 @@ public class EpisodeAggregator {
         this.initialStateSupplier = initialStateSupplier;
     }
 
-    public List<List<DoubleScalarReward>> runSimulation(){
+    public List<PaperEpisode> runSimulation() {
         logger.info("Running simulation");
-        List<List<DoubleScalarReward>> rewardHistory = new ArrayList<>();
+        List<PaperEpisode> episodeList = new ArrayList<>();
         for (int i = 0; i < uniqueEpisodeCount; i++) {
             logger.info("Running {}th unique episode", i);
             for (int j = 0; j < episodeIterationCount; j++) {
@@ -49,9 +46,9 @@ public class EpisodeAggregator {
                 PaperPolicyImpl policy = playerPolicySupplier.initializePolicy(initialGameState);
                 PaperEpisode paperEpisode = new PaperEpisode(initialGameState, policy, opponentPolicy.initializePolicy(initialGameState));
                 paperEpisode.runEpisode();
-                rewardHistory.add(paperEpisode.getEpisodeStateRewardReturnList().stream().map(StateRewardReturn::getReward).collect(Collectors.toList()));
+                episodeList.add(paperEpisode);
             }
         }
-        return rewardHistory;
+        return episodeList;
     }
 }

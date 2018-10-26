@@ -28,6 +28,7 @@ public class PaperEpisode {
 
     private List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> episodeStateRewardReturnList = new ArrayList<>();
     private List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>, StepRecord>> episodeHistoryList = new ArrayList<>();
+    private long millisecondDuration;
 
     private boolean episodeAlreadySimulated = false;
 
@@ -47,6 +48,7 @@ public class PaperEpisode {
         ImmutableStateImpl state = this.initialState;
         logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         int playerActionCount = 0;
+        long start = System.currentTimeMillis();
         while(!state.isFinalState()) {
             ActionType action = playerPaperPolicy.getDiscreteAction(state);
             double[] actionProbabilities = playerPaperPolicy.getActionProbabilityDistribution(state);
@@ -73,15 +75,27 @@ public class PaperEpisode {
                 episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
                 state = (ImmutableStateImpl) stateRewardReturn.getState();
             }
+
             logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
         }
+        long end = System.currentTimeMillis();
+        millisecondDuration = end - start;
+        logger.info("Total episode time: [{}]ms", millisecondDuration);
         logger.info("PaperEpisode actions: [" + episodeHistoryList.stream().map(x -> x.getFirst().getAction()).collect(Collectors.toList()) + "]");
         logger.info("Total reward: [" + episodeHistoryList.stream().mapToDouble(x -> x.getFirst().getReward().getValue()).sum() + "]");
         episodeAlreadySimulated = true;
     }
 
+    public long getMillisecondDuration() {
+        return millisecondDuration;
+    }
+
     public boolean isEpisodeAlreadySimulated() {
         return episodeAlreadySimulated;
+    }
+
+    public boolean isAgentKilled() {
+        return ((ImmutableStateImpl) this.getFinalState()).isAgentKilled();
     }
 
     public List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> getEpisodeStateRewardReturnList() {

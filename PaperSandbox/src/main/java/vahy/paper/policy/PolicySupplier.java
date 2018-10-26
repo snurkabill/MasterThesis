@@ -1,33 +1,38 @@
 package vahy.paper.policy;
 
-import vahy.paper.reinforcement.TrainableApproximator;
-import vahy.paper.tree.NodeEvaluator;
+import vahy.environment.state.ImmutableStateImpl;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.paper.tree.NodeExpander;
 import vahy.paper.tree.NodeSelector;
+import vahy.paper.tree.OptimalFlowCalculator;
 import vahy.paper.tree.SearchNode;
 import vahy.paper.tree.SearchTree;
 import vahy.paper.tree.TreeUpdater;
-import vahy.paper.tree.OptimalFlowCalculator;
-import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
+import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
 
 import java.util.SplittableRandom;
 
 public class PolicySupplier {
 
     private final double cpuctParameter;
-    private final int treeUpdateCount;
     private final double totalRiskAllowed;
     private final SplittableRandom random;
-    private final TrainableApproximator trainableApproximator;
+    private final NodeEvaluator nodeEvaluator;
+    private final TreeUpdateConditionSupplier treeUpdateConditionSupplier;
     private final boolean optimizeFlowInSearchTree;
 
-    public PolicySupplier(double cpuctParameter, int treeUpdateCount, double totalRiskAllowed, SplittableRandom random, TrainableApproximator trainableApproximator, boolean optimizeFlowInSearchTree) {
+    public PolicySupplier(double cpuctParameter,
+                          double totalRiskAllowed,
+                          SplittableRandom random,
+                          NodeEvaluator nodeEvaluator,
+                          TreeUpdateConditionSupplier treeUpdateConditionSupplier,
+                          boolean optimizeFlowInSearchTree) {
         this.cpuctParameter = cpuctParameter;
-        this.treeUpdateCount = treeUpdateCount;
+        this.treeUpdateConditionSupplier = treeUpdateConditionSupplier;
         this.totalRiskAllowed = totalRiskAllowed;
         this.random = random;
-        this.trainableApproximator = trainableApproximator;
+        this.nodeEvaluator = nodeEvaluator;
         this.optimizeFlowInSearchTree = optimizeFlowInSearchTree;
     }
 
@@ -44,11 +49,11 @@ public class PolicySupplier {
                 new NodeSelector(cpuctParameter, random),
                 new NodeExpander(),
                 new TreeUpdater(),
-                new NodeEvaluator(trainableApproximator),
+                nodeEvaluator,
                 new OptimalFlowCalculator(),
                 totalRiskAllowed),
-            treeUpdateCount,
-            optimizeFlowInSearchTree);
+            optimizeFlowInSearchTree,
+            treeUpdateConditionSupplier);
     }
 
 }

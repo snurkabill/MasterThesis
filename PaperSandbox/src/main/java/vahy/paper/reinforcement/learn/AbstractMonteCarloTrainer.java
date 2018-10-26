@@ -44,11 +44,8 @@ public abstract class AbstractMonteCarloTrainer extends AbstractTrainer {
             double[] outputVector = createOutputVector(entry.getValue());
             observationRewardList.add(new ImmutableTuple<>(entry.getKey(), outputVector));
         }
+        logger.info("Training policy ok [{}] samples", observationRewardList.size());
         trainPolicy(observationRewardList);
-//        double[] asdf1 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(0).getFirst());
-//        double[] asdf2 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(1).getFirst());
-//        double[] asdf3 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(2).getFirst());
-//        double[] asdf4 = trainablePolicySupplier.getTrainableRewardApproximator().apply(observationRewardList.get(3).getFirst());
         logger.debug("training iteration finished");
     }
 
