@@ -1,4 +1,4 @@
-package vahy.paper.tree;
+package vahy.paper.tree.nodeExpander;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,14 +8,17 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.paper.tree.EdgeMetadata;
+import vahy.paper.tree.SearchNode;
 
 import java.util.Arrays;
 import java.util.Map;
 
-public class NodeExpander {
+public class PaperNodeExpander implements NodeExpander {
 
-    private static final Logger logger = LoggerFactory.getLogger(NodeExpander.class);
+    private static final Logger logger = LoggerFactory.getLogger(PaperNodeExpander.class);
 
+    @Override
     public void expandNode(SearchNode node) {
         if(node.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");

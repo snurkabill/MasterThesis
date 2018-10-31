@@ -1,7 +1,7 @@
 package vahy.paper.reinforcement.learn;
 
 import vahy.paper.policy.EnvironmentPolicySupplier;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
+import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperEpisode;
 import vahy.paper.reinforcement.episode.StepRecord;
 import vahy.api.model.State;
@@ -25,7 +25,7 @@ public class ReplayBufferTrainer extends AbstractTrainer {
     private final LinkedList<List<ImmutableTuple<DoubleVectorialObservation, double[]>>> buffer;
 
     public ReplayBufferTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier,
-                               PaperTrainablePolicySupplier paperTrainablePolicySupplier,
+                               PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier,
                                EnvironmentPolicySupplier opponentPolicySupplier,
                                int bufferSize,
                                DoubleScalarRewardAggregator rewardAggregator,

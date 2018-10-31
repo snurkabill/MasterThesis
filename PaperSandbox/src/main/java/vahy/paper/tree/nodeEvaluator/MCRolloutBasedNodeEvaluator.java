@@ -9,6 +9,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.tree.SearchNode;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,16 +76,8 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
             ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities = state.environmentActionsWithProbabilities();
             List<ActionType> actions = environmentActionsWithProbabilities.getFirst();
             List<Double> probabilities = environmentActionsWithProbabilities.getSecond();
-            double rand = random.nextDouble();
-            double cumulativeSum = 0.0d;
-
-            for (int i = 0; i < probabilities.size(); i++) {
-                cumulativeSum += probabilities.get(i);
-                if(rand < cumulativeSum) {
-                    return actions.get(i);
-                }
-            }
-            throw new IllegalStateException("Numerically unstable probability calculation");
+            int index = RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random);
+            return actions.get(index);
         } else {
             ActionType[] actions = state.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);

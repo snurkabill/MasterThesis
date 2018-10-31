@@ -1,7 +1,7 @@
 package vahy.paper.reinforcement.learn;
 
 import vahy.paper.policy.EnvironmentPolicySupplier;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
+import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperEpisode;
 import vahy.paper.reinforcement.episode.StepRecord;
 import vahy.api.model.State;
@@ -19,7 +19,7 @@ import java.util.Map;
 
 public class FirstVisitMonteCarloTrainer extends AbstractMonteCarloTrainer {
 
-    public FirstVisitMonteCarloTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier, PaperTrainablePolicySupplier paperTrainablePolicySupplier, EnvironmentPolicySupplier opponentPolicySupplier, DoubleScalarRewardAggregator rewardAggregator, double discountFactor) {
+    public FirstVisitMonteCarloTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier, PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier, EnvironmentPolicySupplier opponentPolicySupplier, DoubleScalarRewardAggregator rewardAggregator, double discountFactor) {
         super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator);
     }
 

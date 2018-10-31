@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperPolicy;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
+import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
@@ -17,11 +17,11 @@ public class PaperRolloutGameSampler {
     private static final Logger logger = LoggerFactory.getLogger(PaperRolloutGameSampler.class.getName());
 
     private final HallwayGameInitialInstanceSupplier initialStateSupplier;
-    private final PaperTrainablePolicySupplier playerPolicySupplier;
+    private final PaperTrainablePaperPolicySupplier playerPolicySupplier;
     private final EnvironmentPolicySupplier opponentPolicySupplier;
 
     public PaperRolloutGameSampler(HallwayGameInitialInstanceSupplier initialStateSupplier,
-                                   PaperTrainablePolicySupplier playerPolicySupplier,
+                                   PaperTrainablePaperPolicySupplier playerPolicySupplier,
                                    EnvironmentPolicySupplier opponentPolicySupplier) {
         this.initialStateSupplier = initialStateSupplier;
         this.playerPolicySupplier = playerPolicySupplier;

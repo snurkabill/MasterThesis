@@ -13,17 +13,21 @@ import vahy.paper.benchmark.Benchmark;
 import vahy.paper.benchmark.BenchmarkingPolicy;
 import vahy.paper.benchmark.PolicyResults;
 import vahy.paper.policy.EnvironmentPolicySupplier;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
-import vahy.paper.policy.PolicySupplier;
+import vahy.paper.policy.PaperPolicySupplier;
+import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.TrainableApproximator;
 import vahy.paper.reinforcement.learn.AbstractTrainer;
 import vahy.paper.reinforcement.learn.EveryVisitMonteCarloTrainer;
 import vahy.paper.reinforcement.learn.tf.TFModel;
 import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
+import vahy.paper.tree.nodeEvaluator.EmptyNodeEvaluator;
 import vahy.paper.tree.nodeEvaluator.MCRolloutBasedNodeEvaluator;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
+import vahy.paper.tree.nodeExpander.McRolloutCompetitiveTreeExpander;
+import vahy.paper.tree.nodeExpander.PaperNodeExpander;
 import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
 import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplierImpl;
+import vahy.paper.tree.treeUpdater.PaperTreeUpdater;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,9 +48,9 @@ public class PaperPrototype {
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
-            .stepPenalty(1)
-            .trapProbability(1)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(10)
+            .trapProbability(0.95)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
@@ -74,33 +78,46 @@ public class PaperPrototype {
 
         // MCTS - nn based
         double cpuctParameter = 2;
-        int treeUpdateCount = 100;
+        int treeUpdateCount = 50;
 
         // MCTS - mc rollout based
-        int mcRolloutCount = 10;
+        int mcRolloutCount = 1;
 
         // REINFORCEMENT
-        double discountFactor = 0.999;
+        double discountFactor = 1;
         double explorationConstant = 0.3;
         double temperature = 2;
         int sampleEpisodeCount = 10;
         int replayBufferSize = 50;
-        int stageCountCount = 5;
+        int stageCountCount = 200;
 
         // NN
-        int batchSize = 8;
+        int batchSize = 4;
         double learningRate = 0.001;
-        int trainingEpochCount = 100;
+        int trainingEpochCount = 300;
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.10;
+        double totalRiskAllowed = 0.025;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
-        int episodeCount = 100;
+        int episodeCount = 1000;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
+
+
+
+
+        // TREE UPDATE POLICY
+       // TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSuplierCountBased(treeUpdateCount);
+        TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSupplierImpl(5000, 10000, 100);
+
+
+
+
+
+        // MCTS WITH NN EVAL
         TrainableApproximator trainableApproximator = new TrainableApproximator(
 //            new AlphaGoLinearNaiveModel(
 //                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
@@ -117,10 +134,9 @@ public class PaperPrototype {
 //                trainingEpochCount
 //            )
 
-
-
             new TFModel(
-                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+//                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+                hallwayGameInitialInstanceSupplier.createInitialState().getObservationConsistingOnlyOfCoordinatesAndHeading().getObservedVector().length,
                 NodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
                 trainingEpochCount,
                 batchSize,
@@ -129,39 +145,66 @@ public class PaperPrototype {
             )
         );
 
-
-//        TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSuplierCountBased(treeUpdateCount);
-        TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSupplierImpl(5000, 10000, 100);
-
         ApproximatorBasedNodeEvaluator nnbasedEvaluator = new ApproximatorBasedNodeEvaluator(trainableApproximator);
-        NodeEvaluator mcBasedEvaluator = new MCRolloutBasedNodeEvaluator(random, mcRolloutCount, discountFactor);
-
-        PaperTrainablePolicySupplier paperTrainablePolicySupplier = new PaperTrainablePolicySupplier(
+        PaperNodeExpander paperNodeExpander = new PaperNodeExpander();
+        PaperTreeUpdater paperTreeUpdater = new PaperTreeUpdater();
+        PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier = new PaperTrainablePaperPolicySupplier(
             random,
             explorationConstant,
             temperature,
             totalRiskAllowed,
             nnbasedEvaluator,
+            paperNodeExpander,
+            paperTreeUpdater,
             treeUpdateConditionSupplier,
             cpuctParameter,
             optimizeFlowInSearchTree
         );
 
-        PolicySupplier nnBasedPolicySupplier = new PolicySupplier(
+        PaperPolicySupplier nnBasedPolicySupplier = new PaperPolicySupplier(
             cpuctParameter,
             totalRiskAllowed,
             random,
             nnbasedEvaluator,
+            paperNodeExpander,
+            paperTreeUpdater,
             treeUpdateConditionSupplier,
             optimizeFlowInSearchTree);
 
-        PolicySupplier mcBasedPolicySupplier = new PolicySupplier(
+
+        // MCTS WITH MC EVAL
+        NodeEvaluator mcBasedEvaluator = new MCRolloutBasedNodeEvaluator(random, mcRolloutCount, discountFactor);
+
+        PaperPolicySupplier mcBasedPolicySupplier = new PaperPolicySupplier(
             cpuctParameter,
             totalRiskAllowed,
             random,
             mcBasedEvaluator,
+            new PaperNodeExpander(),
+            new PaperTreeUpdater(),
             treeUpdateConditionSupplier,
             optimizeFlowInSearchTree);
+
+
+
+
+        // MCTS WITH MC EXPAND + EVAL
+
+        PaperPolicySupplier mcBasedExpanderWithEvaluationPolicySupplier = new PaperPolicySupplier(
+            cpuctParameter,
+            totalRiskAllowed,
+            random,
+            new EmptyNodeEvaluator(),
+            new McRolloutCompetitiveTreeExpander(mcRolloutCount, random, discountFactor, new DoubleScalarRewardAggregator()),
+            new PaperTreeUpdater(),
+            treeUpdateConditionSupplier,
+            optimizeFlowInSearchTree);
+
+
+
+
+
+
 
 
 //        AbstractTrainer trainer = new FirstVisitMonteCarloTrainer(
@@ -188,19 +231,24 @@ public class PaperPrototype {
 //            discountFactor);
 
 
-        for (int i = 0; i < stageCountCount; i++) {
-            logger.info("Training policy for [{}]th iteration", i);
-            trainer.trainPolicy(sampleEpisodeCount);
-        }
+//        for (int i = 0; i < stageCountCount; i++) {
+//            logger.info("Training policy for [{}]th iteration", i);
+//            trainer.trainPolicy(sampleEpisodeCount);
+//        }
 
         logger.info("PaperPolicy test starts");
 
         String nnBasedPolicyName = "NNBased";
         String mcBasedPolicyName = "MCBased";
+        String mcBasedExpandEvalPolicyName = "MCBasedExpandEval";
 
 
         Benchmark benchmark = new Benchmark(
-            Arrays.asList(new BenchmarkingPolicy(nnBasedPolicyName, nnBasedPolicySupplier), new BenchmarkingPolicy(mcBasedPolicyName, mcBasedPolicySupplier)),
+            Arrays.asList(
+//                new BenchmarkingPolicy(nnBasedPolicyName, nnBasedPolicySupplier)
+//                new BenchmarkingPolicy(mcBasedPolicyName, mcBasedPolicySupplier),
+                new BenchmarkingPolicy(mcBasedExpandEvalPolicyName, mcBasedExpanderWithEvaluationPolicySupplier)
+            ),
             new EnvironmentPolicySupplier(random),
             hallwayGameInitialInstanceSupplier
             );
@@ -210,18 +258,25 @@ public class PaperPrototype {
         long end = System.currentTimeMillis();
         logger.info("Benchmarking took [{}] milliseconds", end - start);
 
-        PolicyResults nnResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName)).findFirst().get();
-        PolicyResults mcResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedPolicyName)).findFirst().get();
 
-        logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
-        logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-        logger.info("NN Based kill ratio: [{}]", nnResults.getKillRatio());
-        logger.info("NN Based kill counter: [{}]", nnResults.getAgentKillCounter());
+//        PolicyResults nnResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName)).findFirst().get();
+//        PolicyResults mcResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedPolicyName)).findFirst().get();
+        PolicyResults mcExpandEvalResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedExpandEvalPolicyName)).findFirst().get();
 
-        logger.info("MC Based Average reward: [{}]", mcResults.getAverageReward());
-        logger.info("MC Based millis per episode: [{}]", mcResults.getAverageMillisPerEpisode());
-        logger.info("MC Based kill ratio: [{}]", mcResults.getKillRatio());
-        logger.info("MC Based kill counter: [{}]", mcResults.getAgentKillCounter());
+//        logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
+//        logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+//        logger.info("NN Based kill ratio: [{}]", nnResults.getKillRatio());
+//        logger.info("NN Based kill counter: [{}]", nnResults.getAgentKillCounter());
+//
+//        logger.info("MC Based Average reward: [{}]", mcResults.getAverageReward());
+//        logger.info("MC Based millis per episode: [{}]", mcResults.getAverageMillisPerEpisode());
+//        logger.info("MC Based kill ratio: [{}]", mcResults.getKillRatio());
+//        logger.info("MC Based kill counter: [{}]", mcResults.getAgentKillCounter());
+
+        logger.info("MC Expand Eval Based Average reward: [{}]", mcExpandEvalResults.getAverageReward());
+        logger.info("MC Expand Eval Based millis per episode: [{}]", mcExpandEvalResults.getAverageMillisPerEpisode());
+        logger.info("MC Expand Eval Based kill ratio: [{}]", mcExpandEvalResults.getKillRatio());
+        logger.info("MC Expand Eval Based kill counter: [{}]", mcExpandEvalResults.getAgentKillCounter());
 
         cleanUpNativeTempFiles();
     }
@@ -236,16 +291,18 @@ public class PaperPrototype {
 //         URL url = classLoader.getResource("examples/hallway_demo5.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo6.txt");
 
-        URL url = classLoader.getResource("examples/hallway0.txt");
+//        URL url = classLoader.getResource("examples/hallway0.txt");
 //        URL url = classLoader.getResource("examples/hallway1.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
-//        URL url = classLoader.getResource("examples/hallway0123.txt");
+        URL url = classLoader.getResource("examples/hallway0123.txt");
 //        URL url = classLoader.getResource("examples/hallway0124.txt");
 //        URL url = classLoader.getResource("examples/hallway0125s.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal2.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal3.txt");
+
+//        URL url = classLoader.getResource("examples/trapsEverywhere.txt");
 
         File file = new File(url.getFile());
         return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));

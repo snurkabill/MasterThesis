@@ -1,13 +1,13 @@
 package vahy.paper.benchmark;
 
-import vahy.paper.policy.PolicySupplier;
+import vahy.paper.policy.PaperPolicySupplier;
 
 public class BenchmarkingPolicy {
 
     private final String policyName;
-    private final PolicySupplier policySupplier;
+    private final PaperPolicySupplier policySupplier;
 
-    public BenchmarkingPolicy(String policyName, PolicySupplier policySupplier) {
+    public BenchmarkingPolicy(String policyName, PaperPolicySupplier policySupplier) {
         this.policyName = policyName;
         this.policySupplier = policySupplier;
     }
@@ -16,7 +16,7 @@ public class BenchmarkingPolicy {
         return policyName;
     }
 
-    public PolicySupplier getPolicySupplier() {
+    public PaperPolicySupplier getPolicySupplier() {
         return policySupplier;
     }
 }

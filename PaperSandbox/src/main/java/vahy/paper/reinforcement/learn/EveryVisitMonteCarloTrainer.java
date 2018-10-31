@@ -1,7 +1,8 @@
 package vahy.paper.reinforcement.learn;
 
+import vahy.environment.state.ImmutableStateImpl;
 import vahy.paper.policy.EnvironmentPolicySupplier;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
+import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperEpisode;
 import vahy.paper.reinforcement.episode.StepRecord;
 import vahy.api.model.State;
@@ -19,7 +20,7 @@ import java.util.Map;
 
 public class EveryVisitMonteCarloTrainer extends AbstractMonteCarloTrainer {
 
-    public EveryVisitMonteCarloTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier, PaperTrainablePolicySupplier paperTrainablePolicySupplier, EnvironmentPolicySupplier opponentPolicySupplier, DoubleScalarRewardAggregator rewardAggregator, double discountFactor) {
+    public EveryVisitMonteCarloTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier, PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier, EnvironmentPolicySupplier opponentPolicySupplier, DoubleScalarRewardAggregator rewardAggregator, double discountFactor) {
         super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator);
     }
 
@@ -31,10 +32,13 @@ public class EveryVisitMonteCarloTrainer extends AbstractMonteCarloTrainer {
 //            double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getAction().isTrap() ? 1.0 : 0.0;
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i);
-                if(!everyVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getObservation())) {
-                    everyVisitSet.put(episodeHistory.get(i).getFirst().getState().getObservation(), dataSample);
+
+                DoubleVectorialObservation experimentalObservation = ((ImmutableStateImpl) episodeHistory.get(i).getFirst().getState()).getObservationConsistingOnlyOfCoordinatesAndHeading();
+
+                if(!everyVisitSet.containsKey(experimentalObservation)) {
+                    everyVisitSet.put(experimentalObservation, dataSample);
                 } else {
-                    everyVisitSet.get(episodeHistory.get(i).getFirst().getState().getObservation()).addDataSample(dataSample);
+                    everyVisitSet.get(experimentalObservation).addDataSample(dataSample);
                 }
             }
         }

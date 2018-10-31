@@ -2,33 +2,39 @@ package vahy.paper.policy;
 
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.paper.tree.NodeExpander;
 import vahy.paper.tree.NodeSelector;
 import vahy.paper.tree.OptimalFlowCalculator;
 import vahy.paper.tree.SearchNode;
 import vahy.paper.tree.SearchTree;
-import vahy.paper.tree.TreeUpdater;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
+import vahy.paper.tree.nodeExpander.NodeExpander;
 import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
+import vahy.paper.tree.treeUpdater.TreeUpdater;
 
 import java.util.SplittableRandom;
 
-public class PolicySupplier {
+public class PaperPolicySupplier {
 
     private final double cpuctParameter;
     private final double totalRiskAllowed;
     private final SplittableRandom random;
     private final NodeEvaluator nodeEvaluator;
+    private final NodeExpander nodeExpander;
+    private final TreeUpdater treeUpdater;
     private final TreeUpdateConditionSupplier treeUpdateConditionSupplier;
     private final boolean optimizeFlowInSearchTree;
 
-    public PolicySupplier(double cpuctParameter,
-                          double totalRiskAllowed,
-                          SplittableRandom random,
-                          NodeEvaluator nodeEvaluator,
-                          TreeUpdateConditionSupplier treeUpdateConditionSupplier,
-                          boolean optimizeFlowInSearchTree) {
+    public PaperPolicySupplier(double cpuctParameter,
+                               double totalRiskAllowed,
+                               SplittableRandom random,
+                               NodeEvaluator nodeEvaluator,
+                               NodeExpander nodeExpander,
+                               TreeUpdater treeUpdater,
+                               TreeUpdateConditionSupplier treeUpdateConditionSupplier,
+                               boolean optimizeFlowInSearchTree) {
         this.cpuctParameter = cpuctParameter;
+        this.nodeExpander = nodeExpander;
+        this.treeUpdater = treeUpdater;
         this.treeUpdateConditionSupplier = treeUpdateConditionSupplier;
         this.totalRiskAllowed = totalRiskAllowed;
         this.random = random;
@@ -47,8 +53,8 @@ public class PolicySupplier {
             new SearchTree(
                 node,
                 new NodeSelector(cpuctParameter, random),
-                new NodeExpander(),
-                new TreeUpdater(),
+                nodeExpander,
+                treeUpdater,
                 nodeEvaluator,
                 new OptimalFlowCalculator(),
                 totalRiskAllowed),

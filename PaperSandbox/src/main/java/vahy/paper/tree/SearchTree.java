@@ -9,8 +9,9 @@ import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
+import vahy.paper.tree.nodeExpander.NodeExpander;
+import vahy.paper.tree.treeUpdater.TreeUpdater;
 
-import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -276,35 +277,7 @@ public class SearchTree {
     }
 
     public String toStringForGraphwiz() {
-        DecimalFormat df = new DecimalFormat("#.####");
-        LinkedList<SearchNode> queue = new LinkedList<>();
-        queue.addFirst(root);
-
-        StringBuilder string = new StringBuilder();
-        String start = "digraph G {";
-        String end = "}";
-
-        string.append(start);
-        while(!queue.isEmpty()) {
-            SearchNode node = queue.poll();
-
-            for (Map.Entry<ActionType, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
-                SearchNode child = node.getChildMap().get(entry.getKey());
-                queue.addLast(child);
-
-                string.append("\"" + node.toStringForGraphwiz() + "\"");
-                string.append(" -> ");
-                string.append("\"" + child.toStringForGraphwiz() + "\"");
-                string.append(" ");
-                string.append("[ label = \"P(");
-                string.append(entry.getKey());
-                string.append(") = ");
-                string.append(df.format(entry.getValue().getPriorProbability()));
-                string.append("\" ]; \n");
-            }
-        }
-        string.append(end);
-        return string.toString();
+        return root.toStringAsRootForGraphwiz();
     }
 }
 

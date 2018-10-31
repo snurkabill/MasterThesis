@@ -1,14 +1,16 @@
-package vahy.paper.tree;
+package vahy.paper.tree.treeUpdater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.environment.ActionType;
+import vahy.paper.tree.EdgeMetadata;
+import vahy.paper.tree.SearchNode;
 
-public class TreeUpdater {
+public class PaperTreeUpdater implements TreeUpdater {
 
-    private static final Logger logger = LoggerFactory.getLogger(TreeUpdater.class);
+    private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
 
-
+    @Override
     public void updateTree(SearchNode expandedNode) {
         int i = 0;
         double estimatedLeafReward = (expandedNode.isFinalNode() ?

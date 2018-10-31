@@ -4,6 +4,7 @@ import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,23 +52,12 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
                 exponentiation[i] = Math.exp(actionProbabilityDistribution[i] / temperature);
             }
             double sum = Arrays.stream(exponentiation).sum();
-
             for (int i = 0; i < actionProbabilityDistribution.length; i++) {
                 exponentiation[i] = exponentiation[i] / sum;
             }
-
-
             ActionType[] playerActions = ActionType.playerActions;
-            double rand = random.nextDouble();
-            double cumulativeSum = 0.0d;
-
-            for (int i = 0; i < actionProbabilityDistribution.length; i++) {
-                cumulativeSum += exponentiation[i];
-                if(rand < cumulativeSum) {
-                    return playerActions[i];
-                }
-            }
-            throw new IllegalStateException("Numerically unstable probability calculation");
+            int index = RandomDistributionUtils.getRandomIndexFromDistribution(exponentiation, random);
+            return playerActions[index];
         } else {
             return discreteAction;
         }

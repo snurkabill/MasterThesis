@@ -6,7 +6,7 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperPolicyImpl;
-import vahy.paper.policy.PolicySupplier;
+import vahy.paper.policy.PaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperEpisode;
 
 import java.util.ArrayList;
@@ -19,14 +19,14 @@ public class EpisodeAggregator {
     private final int uniqueEpisodeCount;
     private final int episodeIterationCount;
     private final HallwayGameInitialInstanceSupplier initialStateSupplier;
-    private final PolicySupplier playerPolicySupplier;
+    private final PaperPolicySupplier playerPolicySupplier;
     private final EnvironmentPolicySupplier opponentPolicy;
 
     public EpisodeAggregator(
         int uniqueEpisodeCount,
         int episodeIterationCount,
         HallwayGameInitialInstanceSupplier initialStateSupplier,
-        PolicySupplier playerPolicySupplier,
+        PaperPolicySupplier playerPolicySupplier,
         EnvironmentPolicySupplier opponentPolicy)
     {
         this.uniqueEpisodeCount = uniqueEpisodeCount;

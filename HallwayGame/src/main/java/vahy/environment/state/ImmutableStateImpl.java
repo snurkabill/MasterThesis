@@ -367,6 +367,30 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         return new DoubleVectorialObservation(vector);
     }
 
+    public DoubleVectorialObservation getObservationConsistingOnlyOfCoordinatesAndHeading() {
+        // experimental shit
+        double[] vector = new double[6];
+
+        int xTotal = this.staticGamePart.getWalls().length - 3;
+        int yTotal = this.staticGamePart.getWalls()[0].length - 3;
+
+        int xAgentFixed = agentXCoordination - 1;
+        int yAgentFixed = agentYCoordination - 1;
+
+        double xPortion = xAgentFixed / (double) xTotal;
+        double yPortion = yAgentFixed / (double) yTotal;
+
+        vector[0] = xPortion;
+        vector[1] = yPortion;
+        int[] headingRepresentationAsArray = agentHeading.getHeadingRepresentationAsArray();
+        vector[vector.length - 4] = headingRepresentationAsArray[0];
+        vector[vector.length - 3] = headingRepresentationAsArray[1];
+        vector[vector.length - 2] = headingRepresentationAsArray[2];
+        vector[vector.length - 1] = headingRepresentationAsArray[3];
+
+        return new DoubleVectorialObservation(vector);
+    }
+
     @Override
     public String readableStringRepresentation() {
         boolean[][] walls = staticGamePart.getWalls();

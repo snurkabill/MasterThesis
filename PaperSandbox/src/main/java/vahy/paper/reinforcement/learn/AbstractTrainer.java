@@ -3,7 +3,7 @@ package vahy.paper.reinforcement.learn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.paper.policy.EnvironmentPolicySupplier;
-import vahy.paper.policy.PaperTrainablePolicySupplier;
+import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.paper.reinforcement.episode.StepRecord;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
@@ -25,10 +25,10 @@ public abstract class AbstractTrainer {
     private final PaperRolloutGameSampler gameSampler;
     private final double discountFactor;
     protected final DoubleScalarRewardAggregator rewardAggregator;
-    private final PaperTrainablePolicySupplier paperTrainablePolicySupplier;
+    private final PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier;
 
     public AbstractTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier,
-                           PaperTrainablePolicySupplier paperTrainablePolicySupplier,
+                           PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier,
                            EnvironmentPolicySupplier opponentPolicySupplier,
                            double discountFactor,
                            DoubleScalarRewardAggregator rewardAggregator) {

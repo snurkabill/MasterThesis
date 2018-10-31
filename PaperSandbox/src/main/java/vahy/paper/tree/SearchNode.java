@@ -7,6 +7,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 public class SearchNode {
@@ -142,9 +143,43 @@ public class SearchNode {
         stringBuilder.append(df.format(getEstimatedRisk()));
         stringBuilder.append("\\nisLeaf: ");
         stringBuilder.append(isLeaf());
+        stringBuilder.append("\\nisEvaluated: ");
+        stringBuilder.append(isAlreadyEvaluated());
         stringBuilder.append("\\nNodeProbabilityFlow: ");
         stringBuilder.append(nodeProbabilityFlow != null ? df.format(nodeProbabilityFlow.getSolution()) : null);
         return stringBuilder.toString();
+    }
+
+    public String toStringAsRootForGraphwiz() {
+        DecimalFormat df = new DecimalFormat("#.####");
+        LinkedList<SearchNode> queue = new LinkedList<>();
+        queue.addFirst(this);
+
+        StringBuilder string = new StringBuilder();
+        String start = "digraph G {";
+        String end = "}";
+
+        string.append(start);
+        while(!queue.isEmpty()) {
+            SearchNode node = queue.poll();
+
+            for (Map.Entry<ActionType, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
+                SearchNode child = node.getChildMap().get(entry.getKey());
+                queue.addLast(child);
+
+                string.append("\"" + node.toStringForGraphwiz() + "\"");
+                string.append(" -> ");
+                string.append("\"" + child.toStringForGraphwiz() + "\"");
+                string.append(" ");
+                string.append("[ label = \"P(");
+                string.append(entry.getKey());
+                string.append(") = ");
+                string.append(df.format(entry.getValue().getPriorProbability()));
+                string.append("\" ]; \n");
+            }
+        }
+        string.append(end);
+        return string.toString();
     }
 
     public void setEstimatedRisk(double estimatedRisk) {
