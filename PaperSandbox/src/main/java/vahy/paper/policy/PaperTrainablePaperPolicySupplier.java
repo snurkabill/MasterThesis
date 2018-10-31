@@ -5,7 +5,7 @@ import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.paper.reinforcement.TrainableApproximator;
 import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
 import vahy.paper.tree.nodeExpander.NodeExpander;
-import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
+import vahy.paper.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.tree.treeUpdater.TreeUpdater;
 import vahy.utils.ImmutableTuple;
 
@@ -27,10 +27,10 @@ public class PaperTrainablePaperPolicySupplier extends PaperPolicySupplier {
                                              ApproximatorBasedNodeEvaluator nodeEvaluator,
                                              NodeExpander nodeExpander,
                                              TreeUpdater treeUpdater,
-                                             TreeUpdateConditionSupplier treeUpdateConditionSupplier,
+                                             TreeUpdateConditionFactory treeUpdateConditionFactory,
                                              double cpuctParameter,
                                              boolean optimizeFlowInSearchTree) {
-        super(cpuctParameter, totalRiskAllowed, random, nodeEvaluator, nodeExpander, treeUpdater, treeUpdateConditionSupplier, optimizeFlowInSearchTree);
+        super(cpuctParameter, totalRiskAllowed, random, nodeEvaluator, nodeExpander, treeUpdater, treeUpdateConditionFactory, optimizeFlowInSearchTree);
         this.random = random;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;

@@ -8,7 +8,7 @@ import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
+import vahy.paper.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.timer.SimpleTimer;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
@@ -25,13 +25,13 @@ public class PaperPolicyImpl implements PaperPolicy {
     private final SplittableRandom random;
     private final boolean optimizeFlowInTree;
     private final SearchTree searchTree;
-    private final TreeUpdateConditionSupplier treeUpdateConditionSupplier;
+    private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    public PaperPolicyImpl(SplittableRandom random, SearchTree searchTree, boolean optimizeFlowInTree, TreeUpdateConditionSupplier treeUpdateConditionSupplier) {
+    public PaperPolicyImpl(SplittableRandom random, SearchTree searchTree, boolean optimizeFlowInTree, TreeUpdateCondition treeUpdateCondition) {
         this.random = random;
         this.searchTree = searchTree;
-        this.treeUpdateConditionSupplier = treeUpdateConditionSupplier;
+        this.treeUpdateCondition = treeUpdateCondition;
         this.optimizeFlowInTree = optimizeFlowInTree;
     }
 
@@ -114,6 +114,7 @@ public class PaperPolicyImpl implements PaperPolicy {
         SearchNode node = searchTree.getRoot();
 
         if(optimizeFlowInTree) {
+            
             searchTree.optimizeFlow();
 
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
@@ -150,12 +151,12 @@ public class PaperPolicyImpl implements PaperPolicy {
     private void expandSearchTree(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
         checkStateRoot(gameState);
         timer.startTimer();
-        treeUpdateConditionSupplier.treeUpdateRequired();
-        for (int i = 0; treeUpdateConditionSupplier.isConditionSatisfied(); i++) {
+        treeUpdateCondition.treeUpdateRequired();
+        for (int i = 0; treeUpdateCondition.isConditionSatisfied(); i++) {
             logger.trace("Performing tree update for [{}]th iteration", i);
             searchTree.updateTree();
         }
-        treeUpdateConditionSupplier.treeUpdateFinished();
+        treeUpdateCondition.treeUpdateFinished();
         timer.stopTimer();
 
         if (searchTree.getTotalNodesExpanded() == 0) {

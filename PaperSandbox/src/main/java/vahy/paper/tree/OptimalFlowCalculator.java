@@ -22,6 +22,7 @@ public class OptimalFlowCalculator {
     private static final double RISK_COEFFICIENT = 1.0;
 
     public double calculateFlow(SearchNode root, double totalRiskAllowed) {
+        long startBuildingLinearProgram = System.currentTimeMillis();
         CLP model = new CLP();
         LinkedList<SearchNode> queue = new LinkedList<>();
         queue.addFirst(root);
@@ -65,6 +66,9 @@ public class OptimalFlowCalculator {
         if(totalRiskExpression != null) {
             totalRiskExpression.leq(totalRiskAllowed);
         }
+        long finishBuildingLinearProgram = System.currentTimeMillis();
+        logger.debug("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
+        long startOptimalization = System.currentTimeMillis();
         CLP.STATUS status = model.maximize();
         if(status != CLP.STATUS.OPTIMAL) {
             //throw new IllegalStateException("Optimal solution was not found");
@@ -73,6 +77,8 @@ public class OptimalFlowCalculator {
             }
             return -100000;
         }
+        long finishOptimalization = System.currentTimeMillis();
+        logger.debug("Optimizing linear program took [{}] ms", finishOptimalization - startBuildingLinearProgram);
         return model.getObjectiveValue();
     }
 

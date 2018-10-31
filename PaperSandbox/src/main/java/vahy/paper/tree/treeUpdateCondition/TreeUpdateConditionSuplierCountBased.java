@@ -1,6 +1,6 @@
-package vahy.paper.tree.treeUpdateConditionSupplier;
+package vahy.paper.tree.treeUpdateCondition;
 
-public class TreeUpdateConditionSuplierCountBased implements TreeUpdateConditionSupplier  {
+public class TreeUpdateConditionSuplierCountBased implements TreeUpdateCondition {
 
     private final int callsPerStep;
     private int callCount = 0;
@@ -23,5 +23,10 @@ public class TreeUpdateConditionSuplierCountBased implements TreeUpdateCondition
     @Override
     public void treeUpdateFinished() {
         // empty
+    }
+
+    @Override
+    public void reset() {
+        treeUpdateRequired();
     }
 }

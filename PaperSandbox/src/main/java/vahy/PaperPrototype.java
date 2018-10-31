@@ -25,8 +25,8 @@ import vahy.paper.tree.nodeEvaluator.MCRolloutBasedNodeEvaluator;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.paper.tree.nodeExpander.McRolloutCompetitiveTreeExpander;
 import vahy.paper.tree.nodeExpander.PaperNodeExpander;
-import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplier;
-import vahy.paper.tree.treeUpdateConditionSupplier.TreeUpdateConditionSupplierImpl;
+import vahy.paper.tree.treeUpdateCondition.HybridTreeUpdateConditionFactory;
+import vahy.paper.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.tree.treeUpdater.PaperTreeUpdater;
 
 import java.io.File;
@@ -49,8 +49,8 @@ public class PaperPrototype {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
-            .stepPenalty(10)
-            .trapProbability(0.95)
+            .stepPenalty(2)
+            .trapProbability(0.05)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
@@ -110,8 +110,13 @@ public class PaperPrototype {
 
 
         // TREE UPDATE POLICY
-       // TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSuplierCountBased(treeUpdateCount);
-        TreeUpdateConditionSupplier treeUpdateConditionSupplier = new TreeUpdateConditionSupplierImpl(5000, 10000, 100);
+       // TreeUpdateCondition treeUpdateCondition = new TreeUpdateConditionSuplierCountBased(treeUpdateCount);
+        // TreeUpdateCondition treeUpdateCondition = new TreeUpdateConditionImpl(5000, 10000, 100);
+
+
+
+        TreeUpdateConditionFactory treeUpdateConditionFactory = new HybridTreeUpdateConditionFactory(5000, 10000, 100);
+//        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(500);
 
 
 
@@ -156,7 +161,7 @@ public class PaperPrototype {
             nnbasedEvaluator,
             paperNodeExpander,
             paperTreeUpdater,
-            treeUpdateConditionSupplier,
+            treeUpdateConditionFactory,
             cpuctParameter,
             optimizeFlowInSearchTree
         );
@@ -168,24 +173,21 @@ public class PaperPrototype {
             nnbasedEvaluator,
             paperNodeExpander,
             paperTreeUpdater,
-            treeUpdateConditionSupplier,
+            treeUpdateConditionFactory,
             optimizeFlowInSearchTree);
 
 
         // MCTS WITH MC EVAL
-        NodeEvaluator mcBasedEvaluator = new MCRolloutBasedNodeEvaluator(random, mcRolloutCount, discountFactor);
 
         PaperPolicySupplier mcBasedPolicySupplier = new PaperPolicySupplier(
             cpuctParameter,
             totalRiskAllowed,
             random,
-            mcBasedEvaluator,
+            new MCRolloutBasedNodeEvaluator(random, mcRolloutCount, discountFactor),
             new PaperNodeExpander(),
             new PaperTreeUpdater(),
-            treeUpdateConditionSupplier,
+            treeUpdateConditionFactory,
             optimizeFlowInSearchTree);
-
-
 
 
         // MCTS WITH MC EXPAND + EVAL
@@ -197,14 +199,8 @@ public class PaperPrototype {
             new EmptyNodeEvaluator(),
             new McRolloutCompetitiveTreeExpander(mcRolloutCount, random, discountFactor, new DoubleScalarRewardAggregator()),
             new PaperTreeUpdater(),
-            treeUpdateConditionSupplier,
+            treeUpdateConditionFactory,
             optimizeFlowInSearchTree);
-
-
-
-
-
-
 
 
 //        AbstractTrainer trainer = new FirstVisitMonteCarloTrainer(
@@ -295,10 +291,10 @@ public class PaperPrototype {
 //        URL url = classLoader.getResource("examples/hallway1.txt");
 //        URL url = classLoader.getResource("examples/hallway8.txt");
 //        URL url = classLoader.getResource("examples/hallway1-traps.txt");
-        URL url = classLoader.getResource("examples/hallway0123.txt");
+//        URL url = classLoader.getResource("examples/hallway0123.txt");
 //        URL url = classLoader.getResource("examples/hallway0124.txt");
 //        URL url = classLoader.getResource("examples/hallway0125s.txt");
-//        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
+        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal2.txt");
 //        URL url = classLoader.getResource("examples/hallway-trap-minimal3.txt");
 

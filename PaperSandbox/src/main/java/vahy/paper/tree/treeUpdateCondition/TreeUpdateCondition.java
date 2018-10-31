@@ -1,11 +1,13 @@
-package vahy.paper.tree.treeUpdateConditionSupplier;
+package vahy.paper.tree.treeUpdateCondition;
 
-public interface TreeUpdateConditionSupplier {
+public interface TreeUpdateCondition {
 
     void treeUpdateRequired();
 
     boolean isConditionSatisfied();
 
     void treeUpdateFinished();
+
+    void reset();
 
 }

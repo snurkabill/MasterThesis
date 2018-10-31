@@ -1,9 +1,14 @@
-package vahy.paper.tree.treeUpdateConditionSupplier;
+package vahy.paper.tree.treeUpdateCondition;
 
-public class TreeUpdateConditionSupplierImpl implements TreeUpdateConditionSupplier {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class TreeUpdateConditionImpl implements TreeUpdateCondition {
+
+    private final Logger logger = LoggerFactory.getLogger(TreeUpdateConditionImpl.class);
 
     private final long firstStepTimeBoundInMilliseconds;
-    private final long otherStepTimeBOundInMilliseconds;
+    private final long otherStepTimeBoundInMilliseconds;
     private final int firstStepTreeUpdatesBound;
 
     private boolean wasFirstStepDone = false;
@@ -11,10 +16,10 @@ public class TreeUpdateConditionSupplierImpl implements TreeUpdateConditionSuppl
     private long stepStart;
     private int callCount;
 
-    public TreeUpdateConditionSupplierImpl(long firstStepTimeBoundInMilliseconds, int firstStepTreeUpdatesBound, long otherStepTimeBOundInMilliseconds) {
+    public TreeUpdateConditionImpl(long firstStepTimeBoundInMilliseconds, int firstStepTreeUpdatesBound, long otherStepTimeBoundInMilliseconds) {
         this.firstStepTimeBoundInMilliseconds = firstStepTimeBoundInMilliseconds;
         this.firstStepTreeUpdatesBound = firstStepTreeUpdatesBound;
-        this.otherStepTimeBOundInMilliseconds = otherStepTimeBOundInMilliseconds;
+        this.otherStepTimeBoundInMilliseconds = otherStepTimeBoundInMilliseconds;
     }
 
     @Override
@@ -30,20 +35,28 @@ public class TreeUpdateConditionSupplierImpl implements TreeUpdateConditionSuppl
 
         if(!wasFirstStepDone) {
             if(stepDurationSoFar > firstStepTimeBoundInMilliseconds) {
+                logger.info("First step happening since time limit [{}]ms was hit. Done updates: [{}]", firstStepTimeBoundInMilliseconds, callCount);
                 return false;
             }
             if(callCount > firstStepTreeUpdatesBound) {
+                logger.info("First step happening since call count [{}] was hit. In [{}]ms", callCount, stepDurationSoFar);
                 return false;
             }
-            wasFirstStepDone = true;
             return true;
         } else {
-            return stepDurationSoFar <= otherStepTimeBOundInMilliseconds;
+            return stepDurationSoFar <= otherStepTimeBoundInMilliseconds;
         }
     }
 
     @Override
     public void treeUpdateFinished() {
+        wasFirstStepDone = true;
         // empty
+    }
+
+    @Override
+    public void reset() {
+        wasFirstStepDone = false;
+
     }
 }
