@@ -31,11 +31,12 @@ public abstract class AbstractTrainer {
                            PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier,
                            EnvironmentPolicySupplier opponentPolicySupplier,
                            double discountFactor,
-                           DoubleScalarRewardAggregator rewardAggregator) {
+                           DoubleScalarRewardAggregator rewardAggregator,
+                           int stepCountLimit) {
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
         this.paperTrainablePolicySupplier = paperTrainablePolicySupplier;
-        this.gameSampler = new PaperRolloutGameSampler(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier);
+        this.gameSampler = new PaperRolloutGameSampler(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, stepCountLimit);
     }
 
     public abstract void trainPolicy(int episodeCount);

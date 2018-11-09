@@ -25,8 +25,7 @@ public class ApproximatorBasedNodeEvaluator extends NodeEvaluator {
         if(node.isAlreadyEvaluated()) {
             throw new IllegalStateException("Node was already evaluated");
         }
-//        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
-        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservationConsistingOnlyOfCoordinatesAndHeading());
+        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
         node.setEstimatedReward(new DoubleScalarReward(prediction[Q_VALUE_INDEX]));
         node.setEstimatedRisk(prediction[RISK_VALUE_INDEX]);
         if(node.getWrappedState().isAgentTurn()) {

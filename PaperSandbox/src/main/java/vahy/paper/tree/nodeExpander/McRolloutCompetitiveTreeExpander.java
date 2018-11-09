@@ -29,6 +29,8 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
     private final double discountFactor;
     private final DoubleScalarRewardAggregator rewardAggregator;
 
+    private int nodesExpandedCount = 0;
+
     public McRolloutCompetitiveTreeExpander(int rolloutCount, SplittableRandom random, double discountFactor, DoubleScalarRewardAggregator rewardAggregator) {
         this.rolloutCount = rolloutCount;
         this.random = random;
@@ -41,76 +43,97 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         if (node.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
+        if(node.isFakeRisk()) {
+            node.setFakeRisk(false);
+        }
+
         SearchNode currentNode = node;
 
         if (node.getChildMap().isEmpty()) {
             firstLevelExpansion(node);
         }
 
+        int depth = 0;
         double riskSum = 0.0;
         double rewardSum = 0.0;
-            List<DoubleScalarReward> rewardList = new ArrayList<>();
-            ActionType firstAction = null;
-            ActionType secondAction = null;
-            while(!currentNode.isFinalNode()) {
-                if(currentNode.isLeaf()) {
-                    expandChildren(currentNode);
-                }
-                ActionType nextAction = selectNextAction(currentNode);
-                if(firstAction == null) {
-                    firstAction = nextAction;
-                } else if(secondAction == null) {
-                    secondAction = nextAction;
-                }
-
-                currentNode = currentNode.getChildMap().get(nextAction);
-                if(currentNode.getParent() == node) {
-                    rewardList.add(new DoubleScalarReward(currentNode.getGainedReward().getValue() + node.getCumulativeReward().getValue()));
-                } else {
-                    rewardList.add(currentNode.getGainedReward());
-                }
+        List<DoubleScalarReward> rewardList = new ArrayList<>();
+        ActionType firstAction = null;
+        ActionType secondAction = null;
+        while(!currentNode.isFinalNode()) {
+            depth++;
+            if(currentNode.isLeaf()) {
+                expandChildren(currentNode);
+            }
+            ActionType nextAction = selectNextAction(currentNode);
+            if(firstAction == null) {
+                firstAction = nextAction;
+            } else if(secondAction == null) {
+                secondAction = nextAction;
             }
 
-            double leafRisk = currentNode.getWrappedState().isAgentKilled() ? 1.0 : 0.0;
-            double leafReward = rewardAggregator.aggregateDiscount(rewardList, discountFactor).getValue();
-
-            riskSum += leafRisk;
-            rewardSum += leafReward;
-
-            if(currentNode.getWrappedState().isAgentKilled()) {
-                if(secondAction != null) {
-                    SearchNode subChildNodeSearched = node.getChildMap().get(firstAction).getChildMap().get(secondAction);
-                    subChildNodeSearched.getChildMap().clear();
-                    subChildNodeSearched.getEdgeMetadataMap().clear();
-                }
-
-                node.setEvaluated();
+            currentNode = currentNode.getChildMap().get(nextAction);
+            if(currentNode.getParent() == node) {
+                rewardList.add(new DoubleScalarReward(currentNode.getGainedReward().getValue() + node.getCumulativeReward().getValue()));
             } else {
-                while(currentNode != node) {
-                    if(!currentNode.isAlreadyEvaluated()) {
-                        currentNode.setEvaluated();
-                    }
-                    SearchNode parent = currentNode.getParent();
-                    ActionType appliedAction = currentNode.getAppliedParentAction();
-
-                    currentNode.setTotalVisitCounter(currentNode.getTotalVisitCounter() + 1);
-                    EdgeMetadata metadata = parent.getEdgeMetadataMap().get(appliedAction);
-                    metadata.setVisitCount(metadata.getVisitCount() + 1);
-
-                    metadata.setTotalActionValue(metadata.getTotalActionValue() + leafReward);
-                    metadata.setTotalRiskValue(metadata.getTotalRiskValue() + leafRisk);
-                    metadata.setMeanActionValue(metadata.getTotalActionValue() / metadata.getVisitCount());
-                    metadata.setMeanRiskValue(metadata.getTotalRiskValue() / metadata.getVisitCount());
-
-                    currentNode = currentNode.getParent();
-
-                    currentNode.setEstimatedReward(new DoubleScalarReward(metadata.getMeanActionValue()));
-                    currentNode.setEstimatedRisk(metadata.getMeanRiskValue());
-                }
+                rewardList.add(currentNode.getGainedReward());
             }
+        }
+
+        double leafRisk = currentNode.getWrappedState().isAgentKilled() ? 1.0 : 0.0;
+        double leafReward = rewardAggregator.aggregateDiscount(rewardList, discountFactor).getValue();
+
+        logger.trace("Node expanded in depth [{}] with risk [{}] and reward [{}]", depth, leafRisk, leafReward);
+
+        riskSum += leafRisk;
+        rewardSum += leafReward;
+
+        if(currentNode.getWrappedState().isAgentKilled()) {
+            if(secondAction != null) {
+                SearchNode subChildNodeSearched = node.getChildMap().get(firstAction).getChildMap().get(secondAction);
+                subChildNodeSearched.getChildMap().clear();
+                subChildNodeSearched.getEdgeMetadataMap().clear();
+            }
+
+            node.setEvaluated();
+        } else {
+            currentNode.setFakeRisk(false);
+            while(currentNode != node) {
+                if(!currentNode.isAlreadyEvaluated()) {
+                    currentNode.setEvaluated();
+                }
+                SearchNode parent = currentNode.getParent();
+                ActionType appliedAction = currentNode.getAppliedParentAction();
+
+                currentNode.setTotalVisitCounter(currentNode.getTotalVisitCounter() + 1);
+                EdgeMetadata metadata = parent.getEdgeMetadataMap().get(appliedAction);
+                metadata.setVisitCount(metadata.getVisitCount() + 1);
+
+                metadata.setTotalActionValue(metadata.getTotalActionValue() + leafReward);
+                metadata.setTotalRiskValue(metadata.getTotalRiskValue() + leafRisk);
+                metadata.setMeanActionValue(metadata.getTotalActionValue() / metadata.getVisitCount());
+                metadata.setMeanRiskValue(metadata.getTotalRiskValue() / metadata.getVisitCount());
+
+                currentNode = currentNode.getParent();
+
+                currentNode.setEstimatedReward(new DoubleScalarReward(metadata.getMeanActionValue()));
+                currentNode.setEstimatedRisk(metadata.getMeanRiskValue());
+            }
+        }
         node.setEstimatedRisk(riskSum);
         node.setEstimatedReward(new DoubleScalarReward(rewardSum));
     }
+
+    @Override
+    public int getNodesExpandedCount() {
+        return nodesExpandedCount;
+    }
+
+//    private void deletePriorInit(SearchNode node) {
+//        node.getParent().getEdgeMetadataMap().get(node.getAppliedParentAction()).setTotalRiskValue(0.0d);
+//        node.getParent().getEdgeMetadataMap().get(node.getAppliedParentAction()).setTotalRiskValue(0.0d);
+//        node.setEstimatedRisk(0.0);
+//        node.setEstimatedReward(new DoubleScalarReward(0.0d));
+//    }
 
     private void setPriorProbabilities(SearchNode currentNode) {
         if(currentNode.isOpponentTurn()) {
@@ -154,6 +177,7 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         if (node.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
+        nodesExpandedCount++;
         ActionType[] allActions = node.getWrappedState().getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
 
@@ -167,8 +191,11 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             SearchNode newNode = new SearchNode((ImmutableStateImpl) stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();
+            edgeMetadata.setMeanActionValue(0.0d);
+            edgeMetadata.setMeanRiskValue(1.0d);
             newNode.setEstimatedReward(new DoubleScalarReward(0.0));
             newNode.setEstimatedRisk(1.0d);
+            newNode.setFakeRisk(true);
             node.getChildMap().put(action, newNode);
             node.getEdgeMetadataMap().put(action, edgeMetadata);
        }

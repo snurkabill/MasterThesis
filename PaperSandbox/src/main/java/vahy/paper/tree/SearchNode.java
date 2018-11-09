@@ -1,14 +1,26 @@
 package vahy.paper.tree;
 
 import com.quantego.clp.CLPVariable;
+import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.attribute.RankDir;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.Graph;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.utils.ImmutableTuple;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import static guru.nidi.graphviz.model.Factory.graph;
+import static guru.nidi.graphviz.model.Factory.node;
+import static guru.nidi.graphviz.model.Link.to;
 
 public class SearchNode {
 
@@ -28,6 +40,8 @@ public class SearchNode {
     private int totalVisitCounter;  // sum over all b : N(s, b)
     private DoubleScalarReward estimatedReward; // in article V value
     private double estimatedRisk; // in article V value
+
+    private boolean isFakeRisk = false; // only for that weird MC algorithm
 
     private final Map<ActionType, SearchNode> childMap = new HashMap<>();
     private final Map<ActionType, EdgeMetadata> edgeMetadataMap = new HashMap<>();
@@ -141,6 +155,12 @@ public class SearchNode {
         stringBuilder.append(estimatedReward != null ? df.format(estimatedReward.getValue()) : null);
         stringBuilder.append("\\nEstimatedRisk: ");
         stringBuilder.append(df.format(getEstimatedRisk()));
+        if(parent != null) {
+            stringBuilder.append("\\nMeanRew: ");
+            stringBuilder.append(df.format(parent.getEdgeMetadataMap().get(appliedParentAction).getMeanActionValue()));
+            stringBuilder.append("\\nMeanRisk: ");
+            stringBuilder.append(df.format(parent.getEdgeMetadataMap().get(appliedParentAction).getMeanRiskValue()));
+        }
         stringBuilder.append("\\nisLeaf: ");
         stringBuilder.append(isLeaf());
         stringBuilder.append("\\nisEvaluated: ");
@@ -182,6 +202,40 @@ public class SearchNode {
         return string.toString();
     }
 
+    public void printTreeToFile(String fileName, int depthBound) {
+
+        DecimalFormat df = new DecimalFormat("#.####");
+        LinkedList<ImmutableTuple<SearchNode, Integer>> queue = new LinkedList<>();
+        queue.addFirst(new ImmutableTuple<>(this, 0));
+
+        Graph graph = graph("example1")
+            .directed()
+            .graphAttr()
+            .with(RankDir.TOP_TO_BOTTOM);
+
+        while(!queue.isEmpty()) {
+            ImmutableTuple<SearchNode, Integer> node = queue.poll();
+            if(node.getSecond() < depthBound) {
+                for (Map.Entry<ActionType, EdgeMetadata> entry : node.getFirst().getEdgeMetadataMap().entrySet()) {
+                    SearchNode child = node.getFirst().getChildMap().get(entry.getKey());
+                    queue.addLast(new ImmutableTuple<>(child, node.getSecond() + 1));
+                    graph = graph.with(
+                        node(node.getFirst().toStringForGraphwiz())
+                            .link(
+                                to(node(child.toStringForGraphwiz()))
+                                    .with(Label.of("P(" + entry.getKey() + ") = " + df.format(entry.getValue().getPriorProbability())))
+                            )
+                    );
+                }
+            }
+        }
+        try {
+            Graphviz.fromGraph(graph).render(Format.SVG).toFile(new File(fileName + ".svg"));
+        } catch (IOException e) {
+            throw new IllegalStateException("Saving into graph failed", e);
+        }
+    }
+
     public void setEstimatedRisk(double estimatedRisk) {
         this.estimatedRisk = estimatedRisk;
     }
@@ -196,5 +250,13 @@ public class SearchNode {
 
     public double getRealRisk() {
         return realRisk;
+    }
+
+    public boolean isFakeRisk() {
+        return isFakeRisk;
+    }
+
+    public void setFakeRisk(boolean fakeRisk) {
+        isFakeRisk = fakeRisk;
     }
 }

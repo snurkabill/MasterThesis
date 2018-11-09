@@ -35,11 +35,11 @@ public class TreeUpdateConditionImpl implements TreeUpdateCondition {
 
         if(!wasFirstStepDone) {
             if(stepDurationSoFar > firstStepTimeBoundInMilliseconds) {
-                logger.info("First step happening since time limit [{}]ms was hit. Done updates: [{}]", firstStepTimeBoundInMilliseconds, callCount);
+                logger.info("First step done since time limit [{}]ms was hit. Done updates: [{}]", firstStepTimeBoundInMilliseconds, callCount);
                 return false;
             }
             if(callCount > firstStepTreeUpdatesBound) {
-                logger.info("First step happening since call count [{}] was hit. In [{}]ms", callCount, stepDurationSoFar);
+                logger.info("First step done since call count [{}] was hit. In [{}]ms", callCount, stepDurationSoFar);
                 return false;
             }
             return true;

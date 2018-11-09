@@ -29,8 +29,9 @@ public class ReplayBufferTrainer extends AbstractTrainer {
                                EnvironmentPolicySupplier opponentPolicySupplier,
                                int bufferSize,
                                DoubleScalarRewardAggregator rewardAggregator,
-                               double discountFactor) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator);
+                               double discountFactor,
+                               int stepCountLimit) {
+        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator, stepCountLimit);
         this.bufferSize = bufferSize;
         this.buffer = new LinkedList<>();
     }

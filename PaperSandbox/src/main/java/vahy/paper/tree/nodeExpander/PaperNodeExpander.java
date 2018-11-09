@@ -18,6 +18,8 @@ public class PaperNodeExpander implements NodeExpander {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeExpander.class);
 
+    private int nodesExpandedCount = 0;
+
     @Override
     public void expandNode(SearchNode node) {
         if(node.isFinalNode()) {
@@ -31,12 +33,15 @@ public class PaperNodeExpander implements NodeExpander {
                 innerExpandNode(childEntry.getValue());
             }
         }
+    }
 
-//        ActionType[] allActions = node.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
-
+    @Override
+    public int getNodesExpandedCount() {
+        return nodesExpandedCount;
     }
 
     public void innerExpandNode(SearchNode node) {
+        nodesExpandedCount++;
         ActionType[] allActions = node.getWrappedState().getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
 

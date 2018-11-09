@@ -6,8 +6,8 @@ import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
-import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.api.learning.model.SupervisedTrainableModel;
+import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.timer.SimpleTimer;
 
 import java.io.File;

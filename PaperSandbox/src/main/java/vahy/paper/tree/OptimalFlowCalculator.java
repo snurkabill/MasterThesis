@@ -42,20 +42,36 @@ public class OptimalFlowCalculator {
                 }
             }
             if(node.isLeaf()) {
-                if(node.getWrappedState().isAgentKilled()) {
+
+                if(node.isFakeRisk()) { // this is only for That weird MC
                     if(totalRiskExpression == null) {
                         totalRiskExpression = model.createExpression();
                     }
                     totalRiskExpression.add(RISK_COEFFICIENT, node.getNodeProbabilityFlow());
-                }
-                model.setObjectiveCoefficient(
-                    node.getNodeProbabilityFlow(),
-                    (node.getCumulativeReward().getValue() +
+
+                    model.setObjectiveCoefficient(
+                        node.getNodeProbabilityFlow(),
+                        (node.getCumulativeReward().getValue() +
                             (node.getEstimatedReward() != null ? node.getEstimatedReward().getValue() : 0.0)
-                    )
-                        *
-                        (1 - (node.getRealRisk() + node.getEstimatedRisk()))
-                );
+                        )
+                            * (1 - 1)
+                    );
+
+                } else {
+                    if(node.getWrappedState().isAgentKilled()) {
+                        if(totalRiskExpression == null) {
+                            totalRiskExpression = model.createExpression();
+                        }
+                        totalRiskExpression.add(RISK_COEFFICIENT, node.getNodeProbabilityFlow());
+                    }
+                    model.setObjectiveCoefficient(
+                        node.getNodeProbabilityFlow(),
+                        (node.getCumulativeReward().getValue() +
+                            (node.getEstimatedReward() != null ? node.getEstimatedReward().getValue() : 0.0)
+                        )
+                            * (1 - (node.getRealRisk() + node.getEstimatedRisk()))
+                    );
+                }
             } else {
                 addSummingChildrenToOneExpression(model, node, actionChildFlowMap);
                 if(!node.isAgentTurn()) {
@@ -71,14 +87,14 @@ public class OptimalFlowCalculator {
         long startOptimalization = System.currentTimeMillis();
         CLP.STATUS status = model.maximize();
         if(status != CLP.STATUS.OPTIMAL) {
-            //throw new IllegalStateException("Optimal solution was not found");
-            if(root.getNodeProbabilityFlow().getSolution() == 0.0) {
-                System.out.println("fak me");
-            }
-            return -100000;
+            throw new IllegalStateException("Optimal solution was not found");
+//            if(root.getNodeProbabilityFlow().getSolution() == 0.0) {
+//                System.out.println("fak me");
+//            }
+//            return -100000;
         }
         long finishOptimalization = System.currentTimeMillis();
-        logger.debug("Optimizing linear program took [{}] ms", finishOptimalization - startBuildingLinearProgram);
+        logger.debug("Optimizing linear program took [{}] ms", finishOptimalization - startOptimalization);
         return model.getObjectiveValue();
     }
 

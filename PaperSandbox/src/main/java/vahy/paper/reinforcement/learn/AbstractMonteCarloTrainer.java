@@ -27,8 +27,9 @@ public abstract class AbstractMonteCarloTrainer extends AbstractTrainer {
                                      PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier,
                                      EnvironmentPolicySupplier opponentPolicySupplier,
                                      double discountFactor,
-                                     DoubleScalarRewardAggregator rewardAggregator) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator);
+                                     DoubleScalarRewardAggregator rewardAggregator,
+                                     int stepCountLimit) {
+        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, discountFactor, rewardAggregator, stepCountLimit);
     }
 
     @Override

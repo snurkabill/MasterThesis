@@ -26,7 +26,7 @@ public class Benchmark {
         this.hallwayGameInitialInstanceSupplier = hallwayGameInitialInstanceSupplier;
     }
 
-    public List<PolicyResults> runBenchmark(int uniqueEpisodeCount, int episodeCount) {
+    public List<PolicyResults> runBenchmark(int uniqueEpisodeCount, int episodeCount, int stepCountLimit) {
         logger.info("Running benchmark with [{}] unique episodes each for [{}] iterations", uniqueEpisodeCount, episodeCount);
         int totalEpisodeCount = uniqueEpisodeCount * episodeCount;
         List<PolicyResults> results = new ArrayList<>();
@@ -35,7 +35,7 @@ public class Benchmark {
             EpisodeAggregator episodeAggregator = new EpisodeAggregator(
                 uniqueEpisodeCount,
                 episodeCount,
-                hallwayGameInitialInstanceSupplier,
+                stepCountLimit, hallwayGameInitialInstanceSupplier,
                 benchmarkingPolicy.getPolicySupplier(),
                 environmentPolicySupplier
             );

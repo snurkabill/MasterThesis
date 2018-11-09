@@ -25,6 +25,7 @@ public class PaperEpisode {
     private final ImmutableStateImpl initialState;
     private final PaperPolicy playerPaperPolicy;
     private final EnvironmentPolicy opponentPolicy;
+    private final int stepCountLimit;
 
     private List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>> episodeStateRewardReturnList = new ArrayList<>();
     private List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>, StepRecord>> episodeHistoryList = new ArrayList<>();
@@ -35,10 +36,11 @@ public class PaperEpisode {
     public PaperEpisode(
         ImmutableStateImpl initialState,
         PaperPolicy playerPaperPolicy,
-        EnvironmentPolicy opponentPolicy) {
+        EnvironmentPolicy opponentPolicy, int stepCountLimit) {
         this.initialState = initialState;
         this.playerPaperPolicy = playerPaperPolicy;
         this.opponentPolicy = opponentPolicy;
+        this.stepCountLimit = stepCountLimit;
     }
 
     public void runEpisode() {
@@ -49,7 +51,11 @@ public class PaperEpisode {
         logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         int playerActionCount = 0;
         long start = System.currentTimeMillis();
+        int stepsDone = 0;
         while(!state.isFinalState()) {
+            if(stepsDone >= stepCountLimit) {
+                break;
+            }
             ActionType action = playerPaperPolicy.getDiscreteAction(state);
             double[] actionProbabilities = playerPaperPolicy.getActionProbabilityDistribution(state);
             double[] priorProbabilities = playerPaperPolicy.getPriorActionProbabilityDistribution(state);
@@ -58,6 +64,7 @@ public class PaperEpisode {
             playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
             playerActionCount++;
             StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = state.applyAction(action);
+            stepsDone++;
             logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
             episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
@@ -75,7 +82,6 @@ public class PaperEpisode {
                 episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
                 state = (ImmutableStateImpl) stateRewardReturn.getState();
             }
-
             logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
         }
         long end = System.currentTimeMillis();

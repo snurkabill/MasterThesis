@@ -18,6 +18,7 @@ public class EpisodeAggregator {
 
     private final int uniqueEpisodeCount;
     private final int episodeIterationCount;
+    private final int stepCountLimit;
     private final HallwayGameInitialInstanceSupplier initialStateSupplier;
     private final PaperPolicySupplier playerPolicySupplier;
     private final EnvironmentPolicySupplier opponentPolicy;
@@ -25,12 +26,13 @@ public class EpisodeAggregator {
     public EpisodeAggregator(
         int uniqueEpisodeCount,
         int episodeIterationCount,
-        HallwayGameInitialInstanceSupplier initialStateSupplier,
+        int stepCountLimit, HallwayGameInitialInstanceSupplier initialStateSupplier,
         PaperPolicySupplier playerPolicySupplier,
         EnvironmentPolicySupplier opponentPolicy)
     {
         this.uniqueEpisodeCount = uniqueEpisodeCount;
         this.episodeIterationCount = episodeIterationCount;
+        this.stepCountLimit = stepCountLimit;
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicy = opponentPolicy;
         this.initialStateSupplier = initialStateSupplier;
@@ -44,7 +46,7 @@ public class EpisodeAggregator {
             for (int j = 0; j < episodeIterationCount; j++) {
                 ImmutableStateImpl initialGameState = initialStateSupplier.createInitialState();
                 PaperPolicyImpl policy = playerPolicySupplier.initializePolicy(initialGameState);
-                PaperEpisode paperEpisode = new PaperEpisode(initialGameState, policy, opponentPolicy.initializePolicy(initialGameState));
+                PaperEpisode paperEpisode = new PaperEpisode(initialGameState, policy, opponentPolicy.initializePolicy(initialGameState), stepCountLimit);
                 paperEpisode.runEpisode();
                 episodeList.add(paperEpisode);
             }

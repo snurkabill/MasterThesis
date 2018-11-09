@@ -19,13 +19,15 @@ public class PaperRolloutGameSampler {
     private final HallwayGameInitialInstanceSupplier initialStateSupplier;
     private final PaperTrainablePaperPolicySupplier playerPolicySupplier;
     private final EnvironmentPolicySupplier opponentPolicySupplier;
+    private final int stepCountLimit;
 
     public PaperRolloutGameSampler(HallwayGameInitialInstanceSupplier initialStateSupplier,
                                    PaperTrainablePaperPolicySupplier playerPolicySupplier,
-                                   EnvironmentPolicySupplier opponentPolicySupplier) {
+                                   EnvironmentPolicySupplier opponentPolicySupplier, int stepCountLimit) {
         this.initialStateSupplier = initialStateSupplier;
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
+        this.stepCountLimit = stepCountLimit;
     }
 
     public List<PaperEpisode> sampleEpisodes(int episodeBatchSize) {
@@ -36,7 +38,7 @@ public class PaperRolloutGameSampler {
             ImmutableStateImpl initialGameState = initialStateSupplier.createInitialState();
             PaperPolicy paperPolicy = playerPolicySupplier.initializePolicyWithExploration(initialGameState);
             EnvironmentPolicy opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
-            PaperEpisode paperEpisode = new PaperEpisode(initialGameState, paperPolicy, opponentPolicy);
+            PaperEpisode paperEpisode = new PaperEpisode(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
             paperEpisode.runEpisode();
             paperEpisodeHistoryList.add(paperEpisode);
         }

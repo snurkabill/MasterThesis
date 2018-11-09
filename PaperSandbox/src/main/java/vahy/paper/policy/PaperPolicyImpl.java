@@ -114,8 +114,10 @@ public class PaperPolicyImpl implements PaperPolicy {
         SearchNode node = searchTree.getRoot();
 
         if(optimizeFlowInTree) {
-            
+
+//            this.searchTree.getRoot().printTreeToFile("pre", 5);
             searchTree.optimizeFlow();
+//            this.searchTree.getRoot().printTreeToFile("post", 10);
 
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
 
