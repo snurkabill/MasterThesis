@@ -163,6 +163,8 @@ public class SearchNode {
         }
         stringBuilder.append("\\nisLeaf: ");
         stringBuilder.append(isLeaf());
+        stringBuilder.append("\\nisFakeRisk: ");
+        stringBuilder.append(isFakeRisk);
         stringBuilder.append("\\nisEvaluated: ");
         stringBuilder.append(isAlreadyEvaluated());
         stringBuilder.append("\\nNodeProbabilityFlow: ");

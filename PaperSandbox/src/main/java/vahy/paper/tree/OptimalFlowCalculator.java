@@ -43,7 +43,7 @@ public class OptimalFlowCalculator {
             }
             if(node.isLeaf()) {
 
-                if(node.isFakeRisk()) { // this is only for That weird MC
+                if(node.isFakeRisk() && node.getTotalVisitCounter() == 0) { // this is only for That weird MC
                     if(totalRiskExpression == null) {
                         totalRiskExpression = model.createExpression();
                     }
@@ -56,7 +56,6 @@ public class OptimalFlowCalculator {
                         )
                             * (1 - 1)
                     );
-
                 } else {
                     if(node.getWrappedState().isAgentKilled()) {
                         if(totalRiskExpression == null) {

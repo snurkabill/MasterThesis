@@ -115,7 +115,7 @@ public class PaperPolicyImpl implements PaperPolicy {
 
         if(optimizeFlowInTree) {
 
-//            this.searchTree.getRoot().printTreeToFile("pre", 5);
+//            this.searchTree.getRoot().printTreeToFile("pre", 5000);
             searchTree.optimizeFlow();
 //            this.searchTree.getRoot().printTreeToFile("post", 10);
 

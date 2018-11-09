@@ -87,17 +87,21 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         riskSum += leafRisk;
         rewardSum += leafReward;
 
+
         if(currentNode.getWrappedState().isAgentKilled()) {
             if(secondAction != null) {
-                SearchNode subChildNodeSearched = node.getChildMap().get(firstAction).getChildMap().get(secondAction);
+                SearchNode firstChild = node.getChildMap().get(firstAction);
+                SearchNode subChildNodeSearched = firstChild.getChildMap().get(secondAction);
                 subChildNodeSearched.getChildMap().clear();
                 subChildNodeSearched.getEdgeMetadataMap().clear();
+                firstChild.setFakeRisk(false);
+                subChildNodeSearched.setFakeRisk(false);
             }
-
             node.setEvaluated();
         } else {
-            currentNode.setFakeRisk(false);
+            currentNode.setEstimatedRisk(0.0d);
             while(currentNode != node) {
+                currentNode.setFakeRisk(false);
                 if(!currentNode.isAlreadyEvaluated()) {
                     currentNode.setEvaluated();
                 }
@@ -121,6 +125,7 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         }
         node.setEstimatedRisk(riskSum);
         node.setEstimatedReward(new DoubleScalarReward(rewardSum));
+        node.setFakeRisk(false);
     }
 
     @Override
