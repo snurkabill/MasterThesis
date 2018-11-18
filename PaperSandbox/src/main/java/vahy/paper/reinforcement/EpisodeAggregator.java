@@ -44,6 +44,7 @@ public class EpisodeAggregator {
         for (int i = 0; i < uniqueEpisodeCount; i++) {
             logger.info("Running {}th unique episode", i);
             for (int j = 0; j < episodeIterationCount; j++) {
+                logger.info("Running {}th episode", i * episodeIterationCount + j);
                 ImmutableStateImpl initialGameState = initialStateSupplier.createInitialState();
                 PaperPolicyImpl policy = playerPolicySupplier.initializePolicy(initialGameState);
                 PaperEpisode paperEpisode = new PaperEpisode(initialGameState, policy, opponentPolicy.initializePolicy(initialGameState), stepCountLimit);

@@ -1,12 +1,12 @@
 package vahy;
 
 import org.apache.commons.io.FileUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.environment.ActionType;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
+import vahy.environment.state.StateRepresentation;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
@@ -30,7 +30,7 @@ import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.paper.tree.nodeExpander.McRolloutCompetitiveTreeExpander;
 import vahy.paper.tree.nodeExpander.NodeExpander;
 import vahy.paper.tree.nodeExpander.PaperNodeExpander;
-import vahy.paper.tree.treeUpdateCondition.HybridTreeUpdateConditionFactory;
+import vahy.paper.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paper.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.tree.treeUpdater.PaperTreeUpdater;
 import vahy.paper.tree.treeUpdater.PaperTreeUpdaterThatAlternatesSelectedFinalNodes;
@@ -51,21 +51,22 @@ public class PaperPrototype {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         cleanUpNativeTempFiles();
-        long seed = 3;
+        long seed = 0;
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
-            .trapProbability(1.0)
+            .trapProbability(1)
+            .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
         // TREE UPDATE POLICY
         // TreeUpdateCondition treeUpdateCondition = new TreeUpdateConditionSuplierCountBased(treeUpdateCount);
         // TreeUpdateCondition treeUpdateCondition = new TreeUpdateConditionImpl(5000, 10000, 100);
-         TreeUpdateConditionFactory treeUpdateConditionFactory = new HybridTreeUpdateConditionFactory(5_000, 1_000_000, 100);
-//        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(1_000);
+//         TreeUpdateConditionFactory treeUpdateConditionFactory = new HybridTreeUpdateConditionFactory(5_000, 50_000, 100);
+        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(100);
 
         // MCTS
         double cpuctParameter = 2;
@@ -77,9 +78,9 @@ public class PaperPrototype {
         double discountFactor = 1;
         double explorationConstant = 0.3;
         double temperature = 2;
-        int sampleEpisodeCount = 10;
+        int sampleEpisodeCount = 20;
         int replayBufferSize = 50;
-        int stageCountCount = 200;
+        int stageCountCount = 300;
 
         // NN
         int batchSize = 4;
@@ -92,11 +93,9 @@ public class PaperPrototype {
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
-        int episodeCount = 100;
+        int episodeCount = 1000;
         int stepCountLimit = 1000;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
-
-
 
 
         // MCTS WITH NN EVAL
@@ -189,10 +188,10 @@ public class PaperPrototype {
 
 
         long trainingStart = System.currentTimeMillis();
-//        for (int i = 0; i < stageCountCount; i++) {
-//            logger.info("Training policy for [{}]th iteration", i);
-//            trainer.trainPolicy(sampleEpisodeCount);
-//        }
+        for (int i = 0; i < stageCountCount; i++) {
+            logger.info("Training policy for [{}]th iteration", i);
+            trainer.trainPolicy(sampleEpisodeCount);
+        }
         long trainingTimeInMs = System.currentTimeMillis() - trainingStart;
 
         logger.info("PaperPolicy test starts");
@@ -204,9 +203,9 @@ public class PaperPrototype {
 
         Benchmark benchmark = new Benchmark(
             Arrays.asList(
-//                new BenchmarkingPolicy(nnBasedPolicyName, nnBasedPolicySupplier)
+                new BenchmarkingPolicy(nnBasedPolicyName, nnBasedPolicySupplier)
 //                new BenchmarkingPolicy(mcBasedPolicyName, mcBasedPolicySupplier)
-                new BenchmarkingPolicy(mcBasedExpandEvalPolicyName, mcBasedExpanderWithEvaluationPolicySupplier)
+//                new BenchmarkingPolicy(mcBasedExpandEvalPolicyName, mcBasedExpanderWithEvaluationPolicySupplier)
             ),
             new EnvironmentPolicySupplier(random),
             hallwayGameInitialInstanceSupplier
@@ -218,16 +217,16 @@ public class PaperPrototype {
         logger.info("Benchmarking took [{}] milliseconds", end - start);
 
 
-//        PolicyResults nnResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName)).findFirst().get();
+        PolicyResults nnResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName)).findFirst().get();
 //        PolicyResults mcResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedPolicyName)).findFirst().get();
-        PolicyResults mcExpandEvalResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedExpandEvalPolicyName)).findFirst().get();
-//
-//        logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
-//        logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-//        logger.info("NN Based total expanded nodes: [{}]", paperNodeExpander.getNodesExpandedCount());
-//        logger.info("NN Based kill ratio: [{}]", nnResults.getKillRatio());
-//        logger.info("NN Based kill counter: [{}]", nnResults.getAgentKillCounter());
-//        logger.info("NN Based training time: [{}]ms", trainingTimeInMs);
+//        PolicyResults mcExpandEvalResults = policyResultList.stream().filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(mcBasedExpandEvalPolicyName)).findFirst().get();
+
+        logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
+        logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+        logger.info("NN Based total expanded nodes: [{}]", paperNodeExpander.getNodesExpandedCount());
+        logger.info("NN Based kill ratio: [{}]", nnResults.getKillRatio());
+        logger.info("NN Based kill counter: [{}]", nnResults.getAgentKillCounter());
+        logger.info("NN Based training time: [{}]ms", trainingTimeInMs);
 
 //        logger.info("MC Based Average reward: [{}]", mcResults.getAverageReward());
 //        logger.info("MC Based millis per episode: [{}]", mcResults.getAverageMillisPerEpisode());
@@ -235,16 +234,15 @@ public class PaperPrototype {
 //        logger.info("MC Based kill ratio: [{}]", mcResults.getKillRatio());
 //        logger.info("MC Based kill counter: [{}]", mcResults.getAgentKillCounter());
 
-        logger.info("MC Expand Eval Based Average reward: [{}]", mcExpandEvalResults.getAverageReward());
-        logger.info("MC Expand Eval Based millis per episode: [{}]", mcExpandEvalResults.getAverageMillisPerEpisode());
-        logger.info("MC Expand Eval Based total expanded nodes: [{}]", mcExpandEvalNodeExpander.getNodesExpandedCount());
-        logger.info("MC Expand Eval Based kill ratio: [{}]", mcExpandEvalResults.getKillRatio());
-        logger.info("MC Expand Eval Based kill counter: [{}]", mcExpandEvalResults.getAgentKillCounter());
+//        logger.info("MC Expand Eval Based Average reward: [{}]", mcExpandEvalResults.getAverageReward());
+//        logger.info("MC Expand Eval Based millis per episode: [{}]", mcExpandEvalResults.getAverageMillisPerEpisode());
+//        logger.info("MC Expand Eval Based total expanded nodes: [{}]", mcExpandEvalNodeExpander.getNodesExpandedCount());
+//        logger.info("MC Expand Eval Based kill ratio: [{}]", mcExpandEvalResults.getKillRatio());
+//        logger.info("MC Expand Eval Based kill counter: [{}]", mcExpandEvalResults.getAgentKillCounter());
 
         cleanUpNativeTempFiles();
     }
 
-    @NotNull
     private static AbstractTrainer getAbstractTrainer(Trainer trainer, SplittableRandom random, HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier, double discountFactor, PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier, int replayBufferSize, int stepCountLimit) {
         switch(trainer) {
             case REPLAY_BUFFER:
