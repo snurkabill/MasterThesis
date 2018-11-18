@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 # input_count = 1
-input_count = 75
+input_count = 9
 
 hidden_count_1 = 20
 hidden_count_2 = 10
@@ -90,5 +90,5 @@ print(q.name)
 # print('Tensor to read value of W                ', W.value().name)
 # print('Tensor to read value of b                ', b.value().name)
 
-with open('graph.pb', 'wb') as f:
+with open('../../../../../../resources/tfModel/graph.pb', 'wb') as f:
     f.write(tf.get_default_graph().as_graph_def().SerializeToString())
