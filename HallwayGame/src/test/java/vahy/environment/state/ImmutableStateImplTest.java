@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
+import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 
 import java.util.Arrays;
@@ -34,7 +35,7 @@ public class ImmutableStateImplTest {
             {0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0},
         };
-        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), new double[walls.length][walls[0].length], walls, -1, 0.5);
+        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, new double[walls.length][walls[0].length], ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
         return new ImmutableStateImpl(staticGamePart, rewards, 5, 1, AgentHeading.NORTH);
     }
 
@@ -66,7 +67,7 @@ public class ImmutableStateImplTest {
             {0.0, 0.0, 0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0, 0.0, 0.0},
         };
-        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), traps, walls, -1, 0.5);
+        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
         return new ImmutableStateImpl(staticGamePart, rewards, 5, 2, AgentHeading.NORTH);
     }
 

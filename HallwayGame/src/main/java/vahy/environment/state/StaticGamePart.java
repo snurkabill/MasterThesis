@@ -8,18 +8,40 @@ import java.util.SplittableRandom;
 public class StaticGamePart {
 
     private final SplittableRandom random;
+    private final StateRepresentation stateRepresentation;
     private final double[][] trapProbabilities;
+    private final double[][] rewardsAtStart;
+    private final int rewardCount;
     private final boolean[][] walls;
     private final double defaultStepPenalty;
     private final double noisyMoveProbability;
+    private final int totalRewardsCount;
 
-    public StaticGamePart(SplittableRandom random, double[][] trapProbabilities, boolean[][] walls, double defaultStepPenalty, double noisyMoveProbability) {
+    public StaticGamePart(SplittableRandom random,
+                          StateRepresentation stateRepresentation,
+                          double[][] trapProbabilities,
+                          double[][] rewardsAtStart,
+                          boolean[][] walls,
+                          double defaultStepPenalty,
+                          double noisyMoveProbability,
+                          int totalRewardsCount) {
+        this.stateRepresentation = stateRepresentation;
+        this.rewardsAtStart = rewardsAtStart;
+        this.totalRewardsCount = totalRewardsCount;
         checkInputArguments(trapProbabilities, walls);
         this.random = random;
         this.trapProbabilities = trapProbabilities;
         this.walls = walls;
         this.defaultStepPenalty = defaultStepPenalty;
         this.noisyMoveProbability = noisyMoveProbability;
+        this.rewardCount = Arrays
+            .stream(rewardsAtStart)
+            .map(doubles -> Arrays
+                .stream(doubles)
+                .filter(value -> value > 0.0)
+                .count())
+            .mapToInt(Long::intValue)
+            .sum();
     }
 
     private void checkInputArguments(double[][] trapProbabilities, boolean[][] walls) {
@@ -87,5 +109,34 @@ public class StaticGamePart {
         temp = Double.doubleToLongBits(getNoisyMoveProbability());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
         return result;
+    }
+
+    public int getTotalRewardsCount() {
+        return totalRewardsCount;
+    }
+
+    public boolean[] getLeftRewardsAsVector(double[][] rewardsInEnvironment) {
+        if(rewardsInEnvironment.length != rewardsAtStart.length) {
+            throw new IllegalArgumentException("Dimensions of reward matrix differ");
+        }
+        for (int i = 0; i < rewardsInEnvironment.length; i++) {
+            if(rewardsInEnvironment[i].length != rewardsAtStart[i].length) {
+                throw new IllegalArgumentException("Dimensions of reward matrix differ");
+            }
+        }
+        boolean[] vector = new boolean[rewardCount];
+        int rewardCount = 0;
+        for (int i = 0; i < rewardsInEnvironment.length; i++) {
+            for (int j = 0; j < rewardsInEnvironment[i].length; j++) {
+                if(rewardsAtStart[i][j] > 0.0) {
+                    vector[rewardCount] = rewardsInEnvironment[i][j] > 0.0;
+                }
+            }
+        }
+        return vector;
+    }
+
+    public StateRepresentation getStateRepresentation() {
+        return stateRepresentation;
     }
 }

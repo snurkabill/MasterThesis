@@ -18,6 +18,7 @@ import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
@@ -65,7 +66,8 @@ public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<
                 rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? gameConfig.getGoalReward() : 0.0;
                 trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? gameConfig.getTrapProbability() : 0.0;
             });
-        StaticGamePart staticGamePart = new StaticGamePart(random, trapProbabilities, walls, gameConfig.getStepPenalty(), gameConfig.getNoisyMoveProbability());
+        int totalRewardsCount = (int) Arrays.stream(rewards).mapToLong(x -> Arrays.stream(x).filter(y -> y > 0.0).count()).sum();
+        StaticGamePart staticGamePart = new StaticGamePart(random, gameConfig.getStateRepresentation(), trapProbabilities, ArrayUtils.cloneArray(rewards), walls, gameConfig.getStepPenalty(), gameConfig.getNoisyMoveProbability(), totalRewardsCount);
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
         return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
     }
