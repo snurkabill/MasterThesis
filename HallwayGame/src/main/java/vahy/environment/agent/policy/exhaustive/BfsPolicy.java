@@ -7,10 +7,10 @@ import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.policy.AbstractTreeSearchPolicy;
+import vahy.impl.policy.maximizingEstimatedReward.AbstractEstimatedRewardMaximizingTreeSearchPolicy;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
@@ -19,16 +19,17 @@ import vahy.impl.search.node.nodeMetadata.empty.EmptyStateActionMetadata;
 import vahy.impl.search.nodeExpander.BaseNodeExpander;
 import vahy.impl.search.nodeSelector.exhaustive.BfsNodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
+import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
-public class BfsPolicy extends AbstractTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> {
+public class BfsPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>> {
 
     public BfsPolicy(
         SplittableRandom random,
-        int uprateTreeCount,
+        TreeUpdateCondition uprateTreeCount,
         ImmutableStateImpl gameState,
         NodeTransitionUpdater<
             ActionType,

@@ -18,6 +18,17 @@ public class RandomDistributionUtils {
         return Math.abs(1 - cumulativeSum) < TOLERANCE;
     }
 
+    public static boolean isDistribution(double[] distribution) {
+        double cumulativeSum = 0.0;
+        for (double v : distribution) {
+            cumulativeSum += v;
+            if(v < 0.0 || v > 1.0) {
+                return false;
+            }
+        }
+        return Math.abs(1 - cumulativeSum) < TOLERANCE;
+    }
+
 //    public static List<Double> normalizeDistribution(List<Double> distribution) {
 //        double sum = distribution.stream().mapToD;
 //        double[] normalizedDistribution = new double[distribution.length];
@@ -39,8 +50,26 @@ public class RandomDistributionUtils {
                 return i;
             }
         }
+        throw new IllegalStateException("Numerically unstable probability calculation");
         // rounding
-        return distribution.size()- 1;
+//        return distribution.length - 1;
+    }
+
+    public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
+        if(!isDistribution(distribution)) {
+            throw new IllegalArgumentException("Given array does not represent probability distribution");
+        }
+        double value = random.nextDouble();
+        double cumulativeSum = 0.0;
+        for (int i = 0; i < distribution.length; i++) {
+            cumulativeSum += distribution[i];
+            if(value <= cumulativeSum) {
+                return i;
+            }
+        }
+        throw new IllegalStateException("Numerically unstable probability calculation");
+        // rounding
+//        return distribution.length - 1;
     }
 
 }

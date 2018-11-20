@@ -1,11 +1,14 @@
 package vahy.environment.config;
 
+import vahy.environment.state.StateRepresentation;
+
 public class ConfigBuilder {
 
     private double goalReward;
     private double stepPenalty;
     private double trapProbability;
     private double noisyMoveProbability;
+    private StateRepresentation stateRepresentation;
 
     public ConfigBuilder() {
         GameConfig defaultGameConfig = new DefaultGameConfig();
@@ -13,6 +16,7 @@ public class ConfigBuilder {
         stepPenalty = defaultGameConfig.getStepPenalty();
         trapProbability = defaultGameConfig.getTrapProbability();
         noisyMoveProbability = defaultGameConfig.getNoisyMoveProbability();
+        stateRepresentation = defaultGameConfig.getStateRepresentation();
     }
 
     public ConfigBuilder reward(double goalReward) {
@@ -35,8 +39,13 @@ public class ConfigBuilder {
         return this;
     }
 
+    public ConfigBuilder stateRepresentation(StateRepresentation stateRepresentation) {
+        this.stateRepresentation = stateRepresentation;
+        return this;
+    }
+
     public GameConfig buildConfig() {
-        return new GameConfigImpl(goalReward, stepPenalty, trapProbability, noisyMoveProbability);
+        return new GameConfigImpl(goalReward, stepPenalty, trapProbability, noisyMoveProbability, stateRepresentation);
     }
 
 }

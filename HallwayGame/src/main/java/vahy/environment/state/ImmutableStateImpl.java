@@ -343,6 +343,17 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
 
     @Override
     public DoubleVectorialObservation getObservation() {
+        switch(staticGamePart.getStateRepresentation()) {
+            case FULL:
+                return getFullDoubleVectorialObservation();
+            case COMPACT:
+                return getCompactDOubleVectorialObservation();
+            default:
+                throw EnumUtils.createExceptionForUnknownEnumValue(staticGamePart.getStateRepresentation());
+        }
+    }
+
+    private DoubleVectorialObservation getFullDoubleVectorialObservation() {
         boolean[][] walls = staticGamePart.getWalls();
         double[][] trapProbabilities = staticGamePart.getTrapProbabilities();
         double[] vector = new double[walls.length * walls[0].length + ADDITIONAL_DIMENSION_AGENT_ON_TRAP + ADDITIONAL_DIMENSION_AGENT_HEADING];
@@ -364,6 +375,41 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         vector[vector.length - 3] = headingRepresentationAsArray[2];
         vector[vector.length - 2] = headingRepresentationAsArray[3];
         vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
+        return new DoubleVectorialObservation(vector);
+    }
+
+    public DoubleVectorialObservation getCompactDOubleVectorialObservation() {
+        // experimental shit
+        double[] vector = new double[6 + this.staticGamePart.getTotalRewardsCount()];
+
+        int xTotal = this.staticGamePart.getWalls().length - 3;
+        int yTotal = this.staticGamePart.getWalls()[0].length - 3;
+
+        int xAgentFixed = agentXCoordination - 1;
+        int yAgentFixed = agentYCoordination - 1;
+
+        double xPortion = xAgentFixed / (double) xTotal;
+        double yPortion = yAgentFixed / (double) yTotal;
+
+        vector[0] = xPortion;
+        vector[1] = yPortion;
+
+        boolean[] rewards = this.staticGamePart.getLeftRewardsAsVector(this.rewards);
+
+        if(rewards.length != this.staticGamePart.getTotalRewardsCount()) {
+            throw new IllegalStateException("There is mismatch in dimensions");
+        }
+
+        for (int i = 0; i < rewards.length; i++) {
+            vector[2 + i] = rewards[i] ? 1.0 : 0.0;
+        }
+
+        int[] headingRepresentationAsArray = agentHeading.getHeadingRepresentationAsArray();
+        vector[vector.length - 4] = headingRepresentationAsArray[0];
+        vector[vector.length - 3] = headingRepresentationAsArray[1];
+        vector[vector.length - 2] = headingRepresentationAsArray[2];
+        vector[vector.length - 1] = headingRepresentationAsArray[3];
+
         return new DoubleVectorialObservation(vector);
     }
 
