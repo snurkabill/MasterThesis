@@ -2,13 +2,13 @@ package vahy.paper.policy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paper.tree.SearchNode;
-import vahy.paper.tree.SearchTree;
 import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.paper.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.paper.tree.SearchNode;
+import vahy.paper.tree.SearchTree;
 import vahy.timer.SimpleTimer;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
