@@ -1,4 +1,4 @@
-package vahy.paper.tree.treeUpdateCondition;
+package vahy.impl.search.tree.treeUpdateCondition;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package vahy.paper.tree.treeUpdateCondition;
+package vahy.impl.search.tree.treeUpdateCondition;
 
 public class HybridTreeUpdateConditionFactory implements TreeUpdateConditionFactory {
 
