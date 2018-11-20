@@ -8,26 +8,27 @@ import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.policy.AbstractTreeSearchPolicy;
+import vahy.impl.policy.maximizingEstimatedReward.AbstractEstimatedRewardMaximizingTreeSearchPolicy;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
 import vahy.impl.search.nodeExpander.BaseNodeExpander;
 import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1MinMaxExplorationConstantNodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
+import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
-public class Ucb1Policy extends AbstractTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>>   {
+public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>> {
 
     public Ucb1Policy(
         SplittableRandom random,
-        int uprateTreeCount,
+        TreeUpdateCondition uprateTreeCount,
         ImmutableStateImpl gameState,
         NodeTransitionUpdater<
             ActionType,

@@ -30,6 +30,7 @@ import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
+import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
 import vahy.search.AbstractMetadataWithGivenProbabilitiesTransitionUpdater;
 import vahy.search.Ucb1WithGivenProbabilitiesTransitionUpdater;
@@ -105,45 +106,45 @@ public class Prototype {
         return immutableState -> new UniformRandomWalkPolicy<>(random);
     }
 
-    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideBfsPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideBfsPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, TreeUpdateCondition treeUpdateCondition) {
         return immutableState -> new BfsPolicy(
                 random,
-                uprateTreeCount,
+                treeUpdateCondition,
                 (ImmutableStateImpl) immutableState,
                 provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
 //                new CumulativeRewardSimulator<>()
                 provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideUcb1Policy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideUcb1Policy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, TreeUpdateCondition treeUpdateCondition) {
         return immutableState -> new Ucb1Policy(
                 random,
-                uprateTreeCount,
+                treeUpdateCondition,
                 (ImmutableStateImpl) immutableState,
 //                provideNodeTransitionUpdaterForUcb1Metadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForUcb1WithGivenProbabilities(discountFactor, rewardAggregator),
                 provideMcEstimatorForUcb1Metadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideEGreedyPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideEGreedyPolicy(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, TreeUpdateCondition treeUpdateCondition) {
         return immutableState -> new EGreedyPolicy(
                 0.3,
                 random,
-                uprateTreeCount,
+                treeUpdateCondition,
                 (ImmutableStateImpl) immutableState,
 //                provideNodeTransitionUpdaterForAbstractMetadata(discountFactor, rewardAggregator),
                 provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator),
                 provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator));
     }
 
-    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideTrainedLinearModel(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, int uprateTreeCount) {
+    public static PolicySupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation> provideTrainedLinearModel(SplittableRandom random, RewardAggregator<DoubleScalarReward> rewardAggregator, double discountFactor, int monteCarloSimulationCount, TreeUpdateCondition treeUpdateCondition) {
 
         NodeTransitionUpdater<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater = provideNodeTransitionUpdaterForAbstractMetadataWithGivenProbabilities(discountFactor, rewardAggregator);
         NodeEvaluationSimulator<ActionType, DoubleScalarReward, DoubleVectorialObservation, AbstractStateActionMetadata<DoubleScalarReward>, AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeEvaluationSimulator = provideMcEstimatorForAbstractMetadata(monteCarloSimulationCount, discountFactor, random, rewardAggregator);
         return immutableState -> new EGreedyPolicy(
             0.3,
             random,
-            uprateTreeCount,
+            treeUpdateCondition,
             (ImmutableStateImpl) immutableState,
             nodeTransitionUpdater,
             nodeEvaluationSimulator);

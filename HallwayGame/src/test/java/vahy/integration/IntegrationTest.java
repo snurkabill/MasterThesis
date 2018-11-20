@@ -23,6 +23,7 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
 import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
+import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionSuplierCountBased;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
 
 import java.io.File;
@@ -73,7 +74,7 @@ public class IntegrationTest {
                 new EGreedyPolicy(
                     0.1,
                     random,
-                    100,
+                    new TreeUpdateConditionSuplierCountBased(100),
                     (ImmutableStateImpl) immutableState,
                     transitionUpdater,
                     rewardSimulator),
