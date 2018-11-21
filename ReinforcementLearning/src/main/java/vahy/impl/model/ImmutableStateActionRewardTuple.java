@@ -11,7 +11,7 @@ public class ImmutableStateActionRewardTuple<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation>>
+    TState extends State<TAction, TReward, TObservation, TState>>
     extends ImmutableTuple<ImmutableTuple<TAction, TReward>, TState>
     implements StateActionReward<TAction, TReward, TObservation, TState> {
 

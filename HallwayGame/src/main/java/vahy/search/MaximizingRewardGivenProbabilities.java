@@ -1,12 +1,10 @@
 package vahy.search;
 
 import vahy.api.model.State;
-import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
 import vahy.utils.ImmutableTuple;
 
 import java.util.List;

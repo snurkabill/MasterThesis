@@ -47,11 +47,11 @@ public class TrainedPolicyPrototype {
 //                    DoubleScalarReward,
 //                    DoubleVectorialObservation,
 //                    Ucb1StateActionMetadata<DoubleScalarReward>,
-//                    Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//                    MCTSNodeMetadata<ActionType, DoubleScalarReward>,
 //                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchNodeFactory = new SearchNodeBaseFactoryImpl<>(
 //                    (stateRewardReturn, parent) -> {
 //                        Double cumulativeReward = parent != null ? parent.getSearchNodeMetadata().getCumulativeReward().getValue() : 0.0;
-//                        return new Ucb1SearchNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
+//                        return new MCTSNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
 //                    });
 //
 //                SearchNode<
@@ -59,7 +59,7 @@ public class TrainedPolicyPrototype {
 //                    DoubleScalarReward,
 //                    DoubleVectorialObservation,
 //                    Ucb1StateActionMetadata<DoubleScalarReward>,
-//                    Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//                    MCTSNodeMetadata<ActionType, DoubleScalarReward>,
 //                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> root = searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(initialState, new DoubleScalarReward(0.0)), null, null);
 //
 //                NodeTransitionUpdater<
@@ -67,7 +67,7 @@ public class TrainedPolicyPrototype {
 //                    DoubleScalarReward,
 //                    DoubleVectorialObservation,
 //                    Ucb1StateActionMetadata<DoubleScalarReward>,
-//                    Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//                    MCTSNodeMetadata<ActionType, DoubleScalarReward>,
 //                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater =
 //                    new Ucb1WithGivenProbabilitiesTransitionUpdater(discountFactor, rewardAggregator);
 //
@@ -76,7 +76,7 @@ public class TrainedPolicyPrototype {
 //                    DoubleScalarReward,
 //                    DoubleVectorialObservation,
 //                    Ucb1StateActionMetadata<DoubleScalarReward>,
-//                    Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>> nodeExpander =
+//                    MCTSNodeMetadata<ActionType, DoubleScalarReward>> nodeExpander =
 //                    new BaseNodeExpander<>(searchNodeFactory, x -> new Ucb1StateActionMetadata<>(x.getReward()));
 //
 //                SearchTreeImpl<
@@ -84,7 +84,7 @@ public class TrainedPolicyPrototype {
 //                    DoubleScalarReward,
 //                    DoubleVectorialObservation,
 //                    Ucb1StateActionMetadata<DoubleScalarReward>,
-//                    Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+//                    MCTSNodeMetadata<ActionType, DoubleScalarReward>,
 //                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchTree = new SearchTreeImpl<>(
 //                    root,
 ////                    new Ucb1MinMaxExplorationConstantNodeSelector<>(random, dummyConstant),

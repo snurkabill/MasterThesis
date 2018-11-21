@@ -3,7 +3,6 @@ package vahy.environment.agent.policy.smart;
 
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.simulation.NodeEvaluationSimulator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
@@ -13,8 +12,7 @@ import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.policy.maximizingEstimatedReward.AbstractEstimatedRewardMaximizingTreeSearchPolicy;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
+import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 import vahy.impl.search.nodeExpander.BaseNodeExpander;
 import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1MinMaxExplorationConstantNodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
@@ -24,7 +22,7 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
-public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>> {
+public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MCTSNodeMetadata<ActionType, DoubleScalarReward>> {
 
     public Ucb1Policy(
         SplittableRandom random,
@@ -35,14 +33,14 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
             DoubleScalarReward,
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            MCTSNodeMetadata<ActionType, DoubleScalarReward>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            MCTSNodeMetadata<ActionType, DoubleScalarReward>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
         super(random, uprateTreeCount, createSearchTree(random, gameState, nodeTransitionUpdater, rewardSimulator));
     }
@@ -52,7 +50,7 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
         DoubleScalarReward,
         DoubleVectorialObservation,
         Ucb1StateActionMetadata<DoubleScalarReward>,
-        Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+        MCTSNodeMetadata<ActionType, DoubleScalarReward>,
         State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> createSearchTree(
         SplittableRandom random,
         ImmutableStateImpl gameState,
@@ -61,14 +59,14 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
             DoubleScalarReward,
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            MCTSNodeMetadata<ActionType, DoubleScalarReward>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> nodeTransitionUpdater,
         NodeEvaluationSimulator<
             ActionType,
             DoubleScalarReward,
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            MCTSNodeMetadata<ActionType, DoubleScalarReward>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator) {
 
         SearchNodeFactory<
@@ -76,11 +74,11 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
             DoubleScalarReward,
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            MCTSNodeMetadata<ActionType, DoubleScalarReward>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> searchNodeFactory = new SearchNodeBaseFactoryImpl<>(
                 (stateRewardReturn, parent) -> {
                     Double cumulativeReward = parent != null ? parent.getSearchNodeMetadata().getCumulativeReward().getValue() : 0.0;
-                    return new Ucb1SearchNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
+                    return new MCTSNodeMetadata<>(new DoubleScalarReward(stateRewardReturn.getReward().getValue() + cumulativeReward), new LinkedHashMap<>());
                 });
 
         SearchNode<
@@ -88,7 +86,7 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
             DoubleScalarReward,
             DoubleVectorialObservation,
             Ucb1StateActionMetadata<DoubleScalarReward>,
-            Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+            MCTSNodeMetadata<ActionType, DoubleScalarReward>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> root = searchNodeFactory.createNode(new ImmutableStateRewardReturnTuple<>(gameState, new DoubleScalarReward(0.0)), null, null);
 
         return new SearchTreeImpl<>(

@@ -134,8 +134,8 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
     }
 
 //    private void deletePriorInit(SearchNode node) {
-//        node.getParent().getEdgeMetadataMap().get(node.getAppliedParentAction()).setTotalRiskValue(0.0d);
-//        node.getParent().getEdgeMetadataMap().get(node.getAppliedParentAction()).setTotalRiskValue(0.0d);
+//        node.getParent().getEdgeMetadataMap().get(node.getAppliedAction()).setTotalRiskValue(0.0d);
+//        node.getParent().getEdgeMetadataMap().get(node.getAppliedAction()).setTotalRiskValue(0.0d);
 //        node.setEstimatedRisk(0.0);
 //        node.setEstimatedReward(new DoubleScalarReward(0.0d));
 //    }

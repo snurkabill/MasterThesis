@@ -7,9 +7,7 @@ import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
-import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1SearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.ucb1.Ucb1StateActionMetadata;
+import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,7 +17,7 @@ public class Ucb1WithGivenProbabilitiesTransitionUpdater extends MaximizingRewar
     DoubleScalarReward,
     DoubleVectorialObservation,
     Ucb1StateActionMetadata<DoubleScalarReward>,
-    Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>,
+    MCTSNodeMetadata<ActionType, DoubleScalarReward>,
     State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> {
 
     private final double discountFactor;
@@ -31,8 +29,8 @@ public class Ucb1WithGivenProbabilitiesTransitionUpdater extends MaximizingRewar
     }
 
     @Override
-    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent, SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> child, ActionType action) {
-        Ucb1SearchNodeMetadata<ActionType, DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
+    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MCTSNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent, SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MCTSNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> child, ActionType action) {
+        MCTSNodeMetadata<ActionType, DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
         Ucb1StateActionMetadata<DoubleScalarReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
 
         stateActionMetadata.setEstimatedTotalReward(new DoubleScalarReward(rewardAggregator.aggregateDiscount(

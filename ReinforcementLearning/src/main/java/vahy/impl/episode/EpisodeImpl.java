@@ -16,22 +16,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObservation extends Observation> implements Episode<TAction, TReward, TObservation> {
+public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObservation extends Observation, TState extends State<TAction, TReward, TObservation, TState>>
+    implements Episode<TAction, TReward, TObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(EpisodeImpl.class);
-    private final State<TAction, TReward, TObservation> initialState;
-    private final Policy<TAction, TReward, TObservation> playerPolicy;
-    private final Policy<TAction, TReward, TObservation> opponentPolicy;
+    private final TState initialState;
+    private final Policy<TAction, TReward, TObservation, TState> playerPolicy;
+    private final Policy<TAction, TReward, TObservation, TState> opponentPolicy;
 
-    private List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeStateRewardReturnList = new ArrayList<>();
-    private List<StateActionReward<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeHistoryList = new ArrayList<>();
+    private List<StateRewardReturn<TAction, TReward, TObservation, TState>> episodeStateRewardReturnList = new ArrayList<>();
+    private List<StateActionReward<TAction, TReward, TObservation, TState>> episodeHistoryList = new ArrayList<>();
 
     private boolean episodeAlreadySimulated = false;
 
     public EpisodeImpl(
-        State<TAction, TReward, TObservation> initialState,
-        Policy<TAction, TReward, TObservation> playerPolicy,
-        Policy<TAction, TReward, TObservation> opponentPolicy) {
+        TState initialState,
+        Policy<TAction, TReward, TObservation, TState> playerPolicy,
+        Policy<TAction, TReward, TObservation, TState> opponentPolicy) {
         this.initialState = initialState;
         this.playerPolicy = playerPolicy;
         this.opponentPolicy = opponentPolicy;
@@ -41,14 +42,14 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
         if(episodeAlreadySimulated) {
             throw new IllegalStateException("Episode was already simulated");
         }
-        State<TAction, TReward, TObservation> state = this.initialState;
+        TState state = this.initialState;
         logger.debug("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         int playerActionCount = 0;
         while(!state.isFinalState()) {
             TAction action = playerPolicy.getDiscreteAction(state);
             playerPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
             playerActionCount++;
-            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = state.applyAction(action);
+            StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn = state.applyAction(action);
             logger.info("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
             episodeHistoryList.add(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()));
@@ -73,17 +74,17 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
     }
 
     @Override
-    public List<StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> getEpisodeStateRewardReturnList() {
+    public List<StateRewardReturn<TAction, TReward, TObservation, TState>> getEpisodeStateRewardReturnList() {
         return this.episodeStateRewardReturnList;
     }
 
     @Override
-    public List<StateActionReward<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> getEpisodeStateActionRewardList() {
+    public List<StateActionReward<TAction, TReward, TObservation, TState>> getEpisodeStateActionRewardList() {
         return episodeHistoryList;
     }
 
     @Override
-    public State<TAction, TReward, TObservation> getFinalState() {
+    public TState getFinalState() {
         return this.episodeStateRewardReturnList.get(episodeStateRewardReturnList.size() - 1).getState();
     }
 

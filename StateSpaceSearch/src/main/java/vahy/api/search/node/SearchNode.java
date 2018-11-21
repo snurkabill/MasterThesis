@@ -1,38 +1,34 @@
 package vahy.api.search.node;
 
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
-import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
-import vahy.api.search.node.nodeMetadata.StateActionMetadata;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 public interface SearchNode<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
-    TStateActionMetadata extends StateActionMetadata<TReward>,
-    TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>,
-    TState extends State<TAction, TReward, TObservation>> {
+    TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
+    TState extends State<TAction, TReward, TObservation, TState>> {
 
-    SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> getParent();
+    SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getParent();
 
-    TAction getAppliedParentAction();
+    TAction getAppliedAction();
 
-    Map<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> getChildNodeMap();
+    Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
 
-    void updateChildMap(TAction action, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> child);
-
-    StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> applyAction(TAction action);
+    StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action);
 
     TAction[] getAllPossibleActions();
 
     TSearchNodeMetadata getSearchNodeMetadata();
 
-    State<TAction, TReward, TObservation> getWrappedState();
+    TState getWrappedState();
 
     boolean isFinalNode();
 
@@ -44,5 +40,12 @@ public interface SearchNode<
 
     void makeRoot();
 
-    // TODO: add getting (avg?) reward
+    default boolean isPlayerTurn() {
+        return !isOpponentTurn();
+    }
+
+    default Stream<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> getChildNodeStream() {
+        return getChildNodeMap().values().stream();
+    }
+
 }

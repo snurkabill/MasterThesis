@@ -5,7 +5,11 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 
-public interface InitialStateSupplier<TAction extends Action, TReward extends Reward, TObservation extends Observation> {
+public interface InitialStateSupplier<
+    TAction extends Action,
+    TReward extends Reward,
+    TObservation extends Observation,
+    TState extends State<TAction, TReward, TObservation, TState>> {
 
-    State<TAction, TReward, TObservation> createInitialState();
+    TState createInitialState();
 }

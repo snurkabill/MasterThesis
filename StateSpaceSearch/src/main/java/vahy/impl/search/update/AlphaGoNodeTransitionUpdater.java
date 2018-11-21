@@ -1,21 +1,25 @@
 package vahy.impl.search.update;
 
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.NodeTransitionUpdater;
-import vahy.impl.search.node.nodeMetadata.alphago.AlphaGoNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.alphago.AlphaGoStateActionMetadata;
+import vahy.impl.search.node.nodeMetadata.AlphaGoNodeMetadata;
 
-public class AlphaGoNodeTransitionUpdater<TAction extends Action, TReward extends Reward, TObservation extends Observation>
-    implements NodeTransitionUpdater<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, State<TAction, TReward, TObservation>> {
+public class AlphaGoNodeTransitionUpdater<
+    TAction extends Action,
+    TReward extends Reward,
+    TObservation extends Observation,
+    TState extends State<TAction, TReward, TObservation, TState>>
+    implements NodeTransitionUpdater<TAction, TReward, TObservation, AlphaGoNodeMetadata<TReward>, TState> {
+
 
     @Override
-    public void applyUpdate(SearchNode<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, State<TAction, TReward, TObservation>> parent,
-                            SearchNode<TAction, TReward, TObservation, AlphaGoStateActionMetadata<TReward>, AlphaGoNodeMetadata<TAction, TReward>, State<TAction, TReward, TObservation>> child,
-                            TAction action) {
-
+    public void applyUpdate(SearchNode<TAction, TReward, TObservation, AlphaGoNodeMetadata<TReward>, TState> evaluatedNode,
+                            SearchNode<TAction, TReward, TObservation, AlphaGoNodeMetadata<TReward>, TState> parent,
+                            SearchNode<TAction, TReward, TObservation, AlphaGoNodeMetadata<TReward>, TState> child) {
+        throw new UnsupportedOperationException();
     }
 }

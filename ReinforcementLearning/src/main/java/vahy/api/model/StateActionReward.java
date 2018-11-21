@@ -7,7 +7,7 @@ public interface StateActionReward<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation>> {
+    TState extends State<TAction, TReward, TObservation, TState>> {
 
     TAction getAction();
 

@@ -1,15 +1,19 @@
 package vahy.impl.policy.random;
 
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class UniformRandomWalkPolicy<TAction extends Action, TReward extends Reward, TObservation extends Observation> extends AbstractRandomWalkPolicy<TAction, TReward, TObservation> {
+public class UniformRandomWalkPolicy<TAction extends Action,
+    TReward extends Reward,
+    TObservation extends Observation,
+    TState extends State<TAction, TReward, TObservation, TState>>
+    extends AbstractRandomWalkPolicy<TAction, TReward, TObservation, TState> {
 
     public UniformRandomWalkPolicy(SplittableRandom random) {
         super(random);
@@ -36,14 +40,14 @@ public class UniformRandomWalkPolicy<TAction extends Action, TReward extends Rew
 //    }
 
     @Override
-    public double[] getActionProbabilityDistribution(State<TAction, TReward, TObservation> gameState) {
+    public double[] getActionProbabilityDistribution(TState gameState) {
         double[] probabilities = new double[gameState.getAllPossibleActions().length];
         Arrays.fill(probabilities, 1.0 / (double) probabilities.length);
         return probabilities;
     }
 
     @Override
-    public TAction getDiscreteAction(State<TAction, TReward, TObservation> gameState) {
+    public TAction getDiscreteAction(TState gameState) {
         TAction[] actions = gameState.getAllPossibleActions();
         return actions[getRandom().nextInt(actions.length)];
     }

@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
+public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -164,7 +164,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
     }
 
     @Override
-    public StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> applyAction(ActionType actionType) {
+    public StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> applyAction(ActionType actionType) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -231,7 +231,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         } else {
             switch (actionType) {
                 case NO_ACTION:
-                    State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state = new ImmutableStateImpl(
+                    ImmutableStateImpl state = new ImmutableStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         agentXCoordination,
@@ -314,7 +314,7 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
     }
 
     @Override
-    public State<ActionType, DoubleScalarReward, DoubleVectorialObservation> deepCopy() {
+    public ImmutableStateImpl deepCopy() {
         return new ImmutableStateImpl(
             staticGamePart,
             ArrayUtils.cloneArray(rewards),

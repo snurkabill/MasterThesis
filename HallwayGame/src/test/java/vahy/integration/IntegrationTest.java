@@ -20,8 +20,7 @@ import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
-import vahy.impl.search.node.nodeMetadata.AbstractSearchNodeMetadata;
-import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
+import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 import vahy.impl.search.simulation.MonteCarloSimulator;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionSuplierCountBased;
 import vahy.impl.search.update.UniformAverageDiscountEstimateRewardTransitionUpdater;
@@ -55,7 +54,7 @@ public class IntegrationTest {
             DoubleScalarReward,
             DoubleVectorialObservation,
             AbstractStateActionMetadata<DoubleScalarReward>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            BaseSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
 
         NodeEvaluationSimulator<
@@ -63,7 +62,7 @@ public class IntegrationTest {
             DoubleScalarReward,
             DoubleVectorialObservation,
             AbstractStateActionMetadata<DoubleScalarReward>,
-            AbstractSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
+            BaseSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
             State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> rewardSimulator = new MonteCarloSimulator<>(100, discountFactor, random, rewardAggregator);
 
         EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
