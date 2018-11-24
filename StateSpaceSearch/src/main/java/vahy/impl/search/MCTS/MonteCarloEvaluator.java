@@ -1,4 +1,4 @@
-package vahy.impl.search.nodeEvaluator;
+package vahy.impl.search.MCTS;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,15 +18,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
 
-public class OriginMonteCarloEvaluator<
+public class MonteCarloEvaluator<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
-    TSearchNodeMetadata extends MCTSNodeMetadata<TReward>,
+    TSearchNodeMetadata extends MonteCarloTreeSearchMetadata<TReward>,
     TState extends State<TAction, TReward, TObservation, TState>>
     implements NodeEvaluator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OriginMonteCarloEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(MonteCarloEvaluator.class);
 
     private final SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
@@ -35,11 +34,11 @@ public class OriginMonteCarloEvaluator<
     private final double discountFactor;
     private final int rolloutCount;
 
-    public OriginMonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                                     SplittableRandom random,
-                                     RewardAggregator<TReward> rewardAggregator,
-                                     double discountFactor,
-                                     int rolloutCount) {
+    public MonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+                               SplittableRandom random,
+                               RewardAggregator<TReward> rewardAggregator,
+                               double discountFactor,
+                               int rolloutCount) {
         this.searchNodeFactory = searchNodeFactory;
         this.random = random;
         this.rewardAggregator = rewardAggregator;

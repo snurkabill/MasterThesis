@@ -1,11 +1,10 @@
-package vahy.impl.search.nodeSelector.treeTraversing;
+package vahy.impl.search.AlphaGo;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.AlphaGoNodeMetadata;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.StreamUtils;
 

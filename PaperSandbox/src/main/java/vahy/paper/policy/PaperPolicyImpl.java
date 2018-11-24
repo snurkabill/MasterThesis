@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.paper.tree.SearchNode;
 import vahy.paper.tree.SearchTree;
 import vahy.timer.SimpleTimer;

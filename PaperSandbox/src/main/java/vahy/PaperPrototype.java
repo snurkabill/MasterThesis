@@ -11,7 +11,7 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.benchmark.Benchmark;
 import vahy.paper.benchmark.BenchmarkingPolicy;
 import vahy.paper.benchmark.PolicyResults;

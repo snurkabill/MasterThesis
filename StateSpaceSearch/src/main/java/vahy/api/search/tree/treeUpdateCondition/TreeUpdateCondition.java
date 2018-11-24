@@ -1,4 +1,4 @@
-package vahy.impl.search.tree.treeUpdateCondition;
+package vahy.api.search.tree.treeUpdateCondition;
 
 public interface TreeUpdateCondition {
 

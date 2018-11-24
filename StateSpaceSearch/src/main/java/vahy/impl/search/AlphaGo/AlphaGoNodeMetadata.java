@@ -1,8 +1,9 @@
-package vahy.impl.search.node.nodeMetadata;
+package vahy.impl.search.AlphaGo;
 
 import vahy.api.model.reward.Reward;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
-public class AlphaGoNodeMetadata<TReward extends Reward> extends MCTSNodeMetadata<TReward> {
+public class AlphaGoNodeMetadata<TReward extends Reward> extends MonteCarloTreeSearchMetadata<TReward> {
 
     private final double priorProbability; /// P value
 

@@ -17,10 +17,10 @@ import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
-import vahy.impl.search.node.factory.MCTSSearchNodeMetadataFactory;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
-import vahy.impl.search.nodeEvaluator.OriginMonteCarloEvaluator;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
+import vahy.impl.search.MCTS.MonteCarloEvaluator;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionSuplierCountBased;
 
 import java.io.File;
@@ -49,8 +49,8 @@ public class IntegrationTest {
         int rolloutCount = 20;
 
 
-        NodeEvaluator<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> rewardSimulator = new OriginMonteCarloEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(new MCTSSearchNodeMetadataFactory<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>(rewardAggregator)),
+        NodeEvaluator<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
+            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>(rewardAggregator)),
             random,
             rewardAggregator,
             discountFactor,

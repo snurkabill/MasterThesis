@@ -1,4 +1,4 @@
-package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
+package vahy.impl.search.MCTS.ucb1;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,7 +7,7 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.StreamUtils;
 
@@ -19,11 +19,11 @@ public class Ucb1NodeSelector<
     TReward extends DoubleScalarReward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> {
+    extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
-    protected SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> root;
+    protected SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> root;
     protected final SplittableRandom random;
     protected final double explorationConstant; // TODO: get rid of explorationConstant here. There are Ucb1 heuristics with changing exploration constant
 
@@ -33,7 +33,7 @@ public class Ucb1NodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
         int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
         return node.getChildNodeStream()
             .collect(StreamUtils.toRandomizedMaxCollector(

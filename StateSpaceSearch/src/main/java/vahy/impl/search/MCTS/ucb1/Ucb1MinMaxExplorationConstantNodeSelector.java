@@ -1,11 +1,11 @@
-package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
+package vahy.impl.search.MCTS.ucb1;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
 
@@ -28,7 +28,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
 
     private double findExtreme(Function<DoubleStream, OptionalDouble> function,
                                String exceptionMsg,
-                               SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> node) {
+                               SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
         return function
             .apply(node
                 .getChildNodeStream()
@@ -37,7 +37,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
         double min = findExtreme(DoubleStream::min, "Minimal element was not found", node);
         double max = findExtreme(DoubleStream::max, "Maximal element was not found", node);
         double explorationConstant = (max + min) / 2.0;
@@ -46,7 +46,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
             .map(
                 childNode ->
                 {
-                    MCTSNodeMetadata<TReward> childSearchNodeMetadata = childNode.getSearchNodeMetadata();
+                    MonteCarloTreeSearchMetadata<TReward> childSearchNodeMetadata = childNode.getSearchNodeMetadata();
                     return new ImmutableTuple<>(
                         childNode.getAppliedAction(),
                         calculateUCBValue(

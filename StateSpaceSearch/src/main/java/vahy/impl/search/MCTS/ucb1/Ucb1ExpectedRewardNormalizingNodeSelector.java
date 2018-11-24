@@ -1,11 +1,11 @@
-package vahy.impl.search.nodeSelector.treeTraversing.ucb1;
+package vahy.impl.search.MCTS.ucb1;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
 
@@ -24,7 +24,7 @@ public class Ucb1ExpectedRewardNormalizingNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
         double sum = node
             .getChildNodeStream()
             .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
@@ -34,7 +34,7 @@ public class Ucb1ExpectedRewardNormalizingNodeSelector<
             .map(
                 childNode ->
                 {
-                    MCTSNodeMetadata<TReward> childSearchNodeMetadata = childNode.getSearchNodeMetadata();
+                    MonteCarloTreeSearchMetadata<TReward> childSearchNodeMetadata = childNode.getSearchNodeMetadata();
                     return new ImmutableTuple<>(
                         childNode.getAppliedAction(),
                         calculateUCBValue(

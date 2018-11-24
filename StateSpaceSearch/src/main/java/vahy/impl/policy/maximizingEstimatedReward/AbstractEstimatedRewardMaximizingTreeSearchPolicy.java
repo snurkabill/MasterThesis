@@ -7,7 +7,7 @@ import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNodeMetadata;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.utils.StreamUtils;
 
 import java.util.Comparator;

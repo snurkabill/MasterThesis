@@ -2,7 +2,7 @@ package vahy.paper.policy;
 
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.tree.NodeSelector;
 import vahy.paper.tree.OptimalFlowCalculator;
 import vahy.paper.tree.SearchNode;

@@ -9,7 +9,7 @@ import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
 import vahy.api.search.node.SearchNodeMetadata;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.timer.SimpleTimer;
 
 import java.util.List;

@@ -2,7 +2,7 @@ package vahy.paper.policy;
 
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.reinforcement.TrainableApproximator;
 import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
 import vahy.paper.tree.nodeExpander.NodeExpander;

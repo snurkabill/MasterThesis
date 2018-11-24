@@ -4,7 +4,7 @@ package vahy.search;
 //    ActionType,
 //    DoubleScalarReward,
 //    DoubleVectorialObservation,
-//    MCTSNodeMetadata<DoubleScalarReward>,
+//    MonteCarloTreeSearchMetadata<DoubleScalarReward>,
 //    ImmutableStateImpl> {
 //
 //    private final double discountFactor;
@@ -16,8 +16,8 @@ package vahy.search;
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MCTSNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent, SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MCTSNodeMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> child, ActionType action) {
-//        MCTSNodeMetadata<DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
+//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent, SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> child, ActionType action) {
+//        MonteCarloTreeSearchMetadata<DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
 //        Ucb1StateActionMetadata<DoubleScalarReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
 //
 //        stateActionMetadata.setExpectedReward(new DoubleScalarReward(rewardAggregator.aggregateDiscount(
@@ -43,11 +43,11 @@ package vahy.search;
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> parent,
-//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> evaluatedNode,
+//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> parent,
+//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> child) {
 //
-//        MCTSNodeMetadata<DoubleScalarReward> searchNodeMetadata = parent.getSearchNodeMetadata();
+//        MonteCarloTreeSearchMetadata<DoubleScalarReward> searchNodeMetadata = parent.getSearchNodeMetadata();
 //
 //
 //    }

@@ -17,7 +17,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 import vahy.impl.search.nodeSelector.treeTraversing.EGreedyNodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.SplittableRandom;

@@ -1,4 +1,4 @@
-package vahy.impl.search.node.factory;
+package vahy.impl.search.MCTS;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -8,25 +8,24 @@ import vahy.api.model.reward.Reward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
-import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 
-public class MCTSSearchNodeMetadataFactory<
+public class MonteCarloTreeSearchMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> {
+    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
 
     private final RewardAggregator<TReward> rewardAggregator;
 
-    public MCTSSearchNodeMetadataFactory(RewardAggregator<TReward> rewardAggregator) {
+    public MonteCarloTreeSearchMetadataFactory(RewardAggregator<TReward> rewardAggregator) {
         this.rewardAggregator = rewardAggregator;
     }
 
     @Override
-    public MCTSNodeMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> parent,
-                                                              StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn) {
-        return new MCTSNodeMetadata<>(
+    public MonteCarloTreeSearchMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> parent,
+                                                                          StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn) {
+        return new MonteCarloTreeSearchMetadata<>(
             parent != null ? rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
             stateRewardReturn.getReward(),
             rewardAggregator.emptyReward());

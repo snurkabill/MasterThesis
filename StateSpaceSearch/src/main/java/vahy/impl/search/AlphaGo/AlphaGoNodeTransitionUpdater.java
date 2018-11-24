@@ -1,4 +1,4 @@
-package vahy.impl.search.update;
+package vahy.impl.search.AlphaGo;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -6,7 +6,6 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.NodeTransitionUpdater;
-import vahy.impl.search.node.nodeMetadata.AlphaGoNodeMetadata;
 
 public class AlphaGoNodeTransitionUpdater<
     TAction extends Action,
