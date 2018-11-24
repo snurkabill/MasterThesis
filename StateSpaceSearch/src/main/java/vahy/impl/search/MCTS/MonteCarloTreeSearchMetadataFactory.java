@@ -24,7 +24,8 @@ public class MonteCarloTreeSearchMetadataFactory<
 
     @Override
     public MonteCarloTreeSearchMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> parent,
-                                                                          StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn) {
+                                                                          StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
+                                                                          TAction appliedAction) {
         return new MonteCarloTreeSearchMetadata<>(
             parent != null ? rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
             stateRewardReturn.getReward(),

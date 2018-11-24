@@ -16,6 +16,7 @@ public interface SearchNodeMetadataFactory<
     TState extends State<TAction, TReward, TObservation, TState>> {
 
     TSearchNodeMetadata createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
-                                                 StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn);
+                                                 StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
+                                                 TAction appliedAction);
 
 }

@@ -37,4 +37,14 @@ public enum TestAction implements Action {
     public double getReward() {
         return reward;
     }
+
+    @Override
+    public Action[] getPlayerActionArray() {
+        return playerActions;
+    }
+
+    @Override
+    public Action[] getOpponentActionArray() {
+        return opponentActions;
+    }
 }

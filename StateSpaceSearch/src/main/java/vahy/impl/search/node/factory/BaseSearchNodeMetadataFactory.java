@@ -25,7 +25,8 @@ public class BaseSearchNodeMetadataFactory<
 
     @Override
     public BaseSearchNodeMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, BaseSearchNodeMetadata<TReward>, TState> parent,
-                                                                    StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn) {
+                                                                    StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
+                                                                    TAction appliedAction) {
         return new BaseSearchNodeMetadata<>(
             rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()),
             stateRewardReturn.getReward(),

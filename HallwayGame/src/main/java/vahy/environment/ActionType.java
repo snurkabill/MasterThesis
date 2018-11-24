@@ -53,4 +53,14 @@ public enum ActionType implements Action {
         }
         throw new IllegalStateException("Not expected state");
     }
+
+    @Override
+    public Action[] getPlayerActionArray() {
+        return playerActions;
+    }
+
+    @Override
+    public Action[] getOpponentActionArray() {
+        return environmentActions;
+    }
 }

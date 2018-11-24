@@ -1,29 +1,37 @@
 package vahy.impl.search.AlphaGo;
 
+import vahy.api.model.Action;
 import vahy.api.model.reward.Reward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
-public class AlphaGoNodeMetadata<TReward extends Reward> extends MonteCarloTreeSearchMetadata<TReward> {
+import java.util.Map;
 
-    private final double priorProbability; /// P value
+public class AlphaGoNodeMetadata<TAction extends Action, TReward extends Reward> extends MonteCarloTreeSearchMetadata<TReward> {
 
-    private TReward totalActionValue; // W value
+    private double priorProbability; /// P value
+    private final Map<TAction, Double> childPriorProbabilities;
 
-    public AlphaGoNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward, double priorProbability) {
+    public AlphaGoNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward, double priorProbability, Map<TAction, Double> childPriorProbabilities) {
         super(cumulativeReward, gainedReward, predictedReward);
         this.priorProbability = priorProbability;
-        this.totalActionValue = predictedReward;
+        this.childPriorProbabilities = childPriorProbabilities;
+    }
+
+    public Map<TAction, Double> getChildPriorProbabilities() {
+        return childPriorProbabilities;
     }
 
     public double getPriorProbability() {
         return priorProbability;
     }
 
-    public TReward getTotalActionValue() {
-        return totalActionValue;
-    }
-
-    public void setTotalActionValue(TReward totalActionValue) {
-        this.totalActionValue = totalActionValue;
+    @Override
+    public String toString() {
+        String baseString = super.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(baseString);
+        stringBuilder.append("\\nPriorProbability: ");
+        stringBuilder.append(this.priorProbability);
+        return stringBuilder.toString();
     }
 }
