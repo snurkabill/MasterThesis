@@ -45,7 +45,7 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
 
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);
         Assert.assertEquals(newSearchNodeMetadata.getCumulativeReward().getValue(), action.getReward() + parentCumulativeReward, DOUBLE_TOLERANCE);
-        Assert.assertEquals(newSearchNodeMetadata.getDefaultEstimatedReward().getValue(), 0.0, DOUBLE_TOLERANCE);
+        Assert.assertEquals(newSearchNodeMetadata.getPredictedReward().getValue(), 0.0, DOUBLE_TOLERANCE);
         Assert.assertEquals(newSearchNodeMetadata.getExpectedReward().getValue(), 0.0, DOUBLE_TOLERANCE);
     }
 }

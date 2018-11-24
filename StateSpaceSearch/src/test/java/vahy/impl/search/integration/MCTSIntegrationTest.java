@@ -16,8 +16,7 @@ import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 import vahy.impl.search.nodeEvaluator.OriginMonteCarloEvaluator;
 import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1NodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.search.update.MCTSTransitionUpdater;
-import vahy.impl.search.update.TraversingTreeUpdater;
+import vahy.impl.search.update.MCTSTreeUpdater;
 import vahy.testDomain.model.TestAction;
 import vahy.testDomain.model.TestState;
 
@@ -45,12 +44,12 @@ public class MCTSIntegrationTest {
             new SearchNodeBaseFactoryImpl<>(metadataFactory);
 
         NodeEvaluator<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> nodeEvaluator =
-            new OriginMonteCarloEvaluator<>(nodeFactory, random, rewardAggregator, 1.0);
+            new OriginMonteCarloEvaluator<>(nodeFactory, random, rewardAggregator, 1.0, 1);
 
         SearchTreeImpl<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> searchTree = new SearchTreeImpl<>(
             root,
             new Ucb1NodeSelector<>(random, 1.0),
-            new TraversingTreeUpdater<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState>(new MCTSTransitionUpdater<>()),
+            new MCTSTreeUpdater<>(),
             nodeEvaluator
         );
 

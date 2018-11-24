@@ -28,7 +28,6 @@ public class SearchNodeImpl<
         TSearchNodeMetadata searchNodeMetadata,
         Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
         this(wrappedState, searchNodeMetadata, childNodeMap, null, null);
-        nodeInstanceId++;
     }
 
     public SearchNodeImpl(
@@ -39,6 +38,7 @@ public class SearchNodeImpl<
         TAction appliedAction) {
         super(wrappedState, parent, appliedAction, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
+        nodeInstanceId++;
     }
 
     @Override

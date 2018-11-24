@@ -33,15 +33,18 @@ public class OriginMonteCarloEvaluator<
     private final SplittableRandom random;
     private final RewardAggregator<TReward> rewardAggregator;
     private final double discountFactor;
+    private final int rolloutCount;
 
     public OriginMonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                      SplittableRandom random,
                                      RewardAggregator<TReward> rewardAggregator,
-                                     double discountFactor) {
+                                     double discountFactor,
+                                     int rolloutCount) {
         this.searchNodeFactory = searchNodeFactory;
         this.random = random;
         this.rewardAggregator = rewardAggregator;
         this.discountFactor = discountFactor;
+        this.rolloutCount = rolloutCount;
     }
 
     @Override
@@ -56,14 +59,17 @@ public class OriginMonteCarloEvaluator<
             StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
             childNodeMap.put(nextAction, searchNodeFactory.createNode(stateRewardReturn, selectedNode, nextAction));
         }
-        TAction nextRandomAction = allPossibleActions[random.nextInt(allPossibleActions.length)];
-        logger.trace("Running random simulation for action [{}]", nextRandomAction);
-        SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nextNode = selectedNode.getChildNodeMap().get(nextRandomAction);
-        TReward expectedReward = runRandomWalkSimulation(nextNode);
+        TReward rewardPrediction = runRollouts(selectedNode);
         TSearchNodeMetadata searchNodeMetadata = selectedNode.getSearchNodeMetadata();
-        searchNodeMetadata.setSumOfTotalEstimations(expectedReward);
-        searchNodeMetadata.setExpectedReward(expectedReward);
-        searchNodeMetadata.increaseVisitCounter();
+        searchNodeMetadata.setPredictedReward(rewardPrediction);
+    }
+
+    private TReward runRollouts(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node) {
+        List<TReward> rewardList = new ArrayList<>();
+        for (int i = 0; i < rolloutCount; i++) {
+            rewardList.add(runRandomWalkSimulation(node));
+        }
+        return rewardAggregator.averageReward(rewardList);
     }
 
     private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node) {

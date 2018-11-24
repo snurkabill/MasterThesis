@@ -30,13 +30,9 @@ public class UniformAverageDiscountEstimateRewardTransitionUpdater<
                             SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
                             SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child) {
         parent.getSearchNodeMetadata().setExpectedReward(
-            rewardAggregator.averageReward(
-                parent
-                    .getChildNodeStream()
-                    .map(x -> rewardAggregator.aggregateDiscount(x.getSearchNodeMetadata().getGainedReward(),
-                            x.getSearchNodeMetadata().getExpectedReward(),
-                            discountFactor)
-                    )
+            rewardAggregator.averageReward(parent
+                .getChildNodeStream()
+                .map(x -> rewardAggregator.aggregateDiscount(x.getSearchNodeMetadata().getGainedReward(), x.getSearchNodeMetadata().getExpectedReward(), discountFactor))
             )
         );
     }

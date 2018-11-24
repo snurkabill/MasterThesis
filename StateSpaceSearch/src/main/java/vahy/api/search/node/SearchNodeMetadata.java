@@ -8,9 +8,11 @@ public interface SearchNodeMetadata<TReward extends Reward> {
 
     TReward getGainedReward();
 
-    TReward getDefaultEstimatedReward();
+    TReward getPredictedReward();
 
     TReward getExpectedReward();
+
+    void setPredictedReward(TReward predictedReward);
 
     void setExpectedReward(TReward expectedReward);
 

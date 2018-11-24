@@ -8,10 +8,10 @@ public class AlphaGoNodeMetadata<TReward extends Reward> extends MCTSNodeMetadat
 
     private TReward totalActionValue; // W value
 
-    public AlphaGoNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward defaultEstimatedTotalReward, double priorProbability) {
-        super(cumulativeReward, gainedReward, defaultEstimatedTotalReward);
+    public AlphaGoNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward, double priorProbability) {
+        super(cumulativeReward, gainedReward, predictedReward);
         this.priorProbability = priorProbability;
-        this.totalActionValue = defaultEstimatedTotalReward;
+        this.totalActionValue = predictedReward;
     }
 
     public double getPriorProbability() {

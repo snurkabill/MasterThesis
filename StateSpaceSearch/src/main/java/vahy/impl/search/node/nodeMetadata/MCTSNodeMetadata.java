@@ -7,8 +7,8 @@ public class MCTSNodeMetadata<TReward extends Reward> extends BaseSearchNodeMeta
     private int visitCounter;
     private TReward sumOfTotalEstimations;
 
-    public MCTSNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward defaultEstimationTotalReward) {
-        super(cumulativeReward, gainedReward, defaultEstimationTotalReward);
+    public MCTSNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward) {
+        super(cumulativeReward, gainedReward, predictedReward);
         visitCounter = 0;
     }
 
@@ -35,8 +35,8 @@ public class MCTSNodeMetadata<TReward extends Reward> extends BaseSearchNodeMeta
         stringBuilder.append(baseString);
         stringBuilder.append("\\nVisitCounter: ");
         stringBuilder.append(this.visitCounter);
-        stringBuilder.append("\\nsumOfTotalEstimations: ");
-        stringBuilder.append(sumOfTotalEstimations != null ? this.sumOfTotalEstimations.toPrettyString() : null);
+//        stringBuilder.append("\\nsumOfTotalE: ");
+//        stringBuilder.append(sumOfTotalEstimations != null ? this.sumOfTotalEstimations.toPrettyString() : null);
         return stringBuilder.toString();
     }
 }

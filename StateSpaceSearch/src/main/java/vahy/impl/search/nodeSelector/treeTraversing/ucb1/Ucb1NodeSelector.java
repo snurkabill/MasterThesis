@@ -39,7 +39,7 @@ public class Ucb1NodeSelector<
             .collect(StreamUtils.toRandomizedMaxCollector(
                 Comparator.comparing(
                     o -> calculateUCBValue( // TODO: optimize so calls are done only once
-                        (node.isPlayerTurn() ? 1.0 : -1.0) * (o.getSearchNodeMetadata().getExpectedReward().getValue() + o.getSearchNodeMetadata().getCumulativeReward().getValue()),
+                        (node.isPlayerTurn() ? 1.0 : -1.0) * o.getSearchNodeMetadata().getExpectedReward().getValue(),
                         explorationConstant,
                         nodeVisitCount,
                         o.getSearchNodeMetadata().getVisitCounter())),

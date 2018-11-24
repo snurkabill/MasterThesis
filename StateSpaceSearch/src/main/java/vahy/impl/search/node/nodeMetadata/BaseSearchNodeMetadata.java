@@ -7,19 +7,19 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
 
     private final TReward cumulativeReward;
     private final TReward gainedReward;
-    private final TReward defaultEstimatedReward;
+    private TReward predictedReward;
     private TReward expectedReward;
 
-    public BaseSearchNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward defaultEstimatedReward) {
+    public BaseSearchNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward) {
         this.cumulativeReward = cumulativeReward;
         this.gainedReward = gainedReward;
-        this.defaultEstimatedReward = defaultEstimatedReward;
-        this.expectedReward = defaultEstimatedReward;
+        this.predictedReward = predictedReward;
+        this.expectedReward = predictedReward;
     }
 
     @Override
-    public TReward getDefaultEstimatedReward() {
-        return defaultEstimatedReward;
+    public TReward getPredictedReward() {
+        return predictedReward;
     }
 
     @Override
@@ -38,6 +38,11 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
     }
 
     @Override
+    public void setPredictedReward(TReward predictedReward) {
+        this.predictedReward = predictedReward;
+    }
+
+    @Override
     public void setExpectedReward(TReward expectedReward) {
         this.expectedReward = expectedReward;
     }
@@ -47,12 +52,12 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\\nCumulativeRew: ");
         stringBuilder.append(this.cumulativeReward.toPrettyString());
-        stringBuilder.append("\\nEstimatedRew: ");
+        stringBuilder.append("\\nExpectedRew: ");
         stringBuilder.append(this.expectedReward.toPrettyString());
         stringBuilder.append("\\nGainedReward: ");
         stringBuilder.append(this.gainedReward.toPrettyString());
-        stringBuilder.append("\\nDefaultEstimatedReward: ");
-        stringBuilder.append(this.defaultEstimatedReward.toPrettyString());
+        stringBuilder.append("\\nPredictedReward: ");
+        stringBuilder.append(this.predictedReward.toPrettyString());
         return stringBuilder.toString();
     }
 }
