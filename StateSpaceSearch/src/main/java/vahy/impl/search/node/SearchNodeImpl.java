@@ -19,6 +19,8 @@ public class SearchNodeImpl<
     TState extends State<TAction, TReward, TObservation, TState>>
     extends AbstractSearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
+    public static long nodeInstanceId = 0;
+    private final long nodeId = nodeInstanceId;
     private final Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
     public SearchNodeImpl(
@@ -26,6 +28,7 @@ public class SearchNodeImpl<
         TSearchNodeMetadata searchNodeMetadata,
         Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
         this(wrappedState, searchNodeMetadata, childNodeMap, null, null);
+        nodeInstanceId++;
     }
 
     public SearchNodeImpl(
@@ -51,5 +54,17 @@ public class SearchNodeImpl<
     @Override
     public boolean isLeaf() {
         return isFinalNode() || childNodeMap.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+        String metadataString = this.getSearchNodeMetadata().toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\\nnodeId: ");
+        stringBuilder.append(nodeId);
+        stringBuilder.append(metadataString);
+        stringBuilder.append("\\nisLeaf: ");
+        stringBuilder.append(isLeaf());
+        return stringBuilder.toString();
     }
 }

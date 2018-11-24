@@ -28,6 +28,9 @@ public class TraversingTreeUpdater<
 
     @Override
     public void updateTree(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> expandedNode) {
+        if(expandedNode.isRoot()) {
+            return;
+        }
         SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> traversingNode = expandedNode;
         int i = 0;
         do {
@@ -36,6 +39,7 @@ public class TraversingTreeUpdater<
             traversingNode = traversingNodeParent;
             i++;
         } while(!traversingNode.isRoot());
+
         logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 }

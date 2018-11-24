@@ -38,7 +38,7 @@ public class AlphaGoNodeSelector<
                     childNode -> {
                         AlphaGoNodeMetadata<TReward> childMetadata = childNode.getSearchNodeMetadata();
                         return
-                            childMetadata.getEstimatedTotalReward().getValue() +
+                            (node.isPlayerTurn() ? 1.0 : -1.0) * childMetadata.getExpectedReward().getValue() +
                             calculateUValue(totalNodeVisitCount, childMetadata.getPriorProbability(), childMetadata.getVisitCounter());
                     }), random))
             .getAppliedAction();

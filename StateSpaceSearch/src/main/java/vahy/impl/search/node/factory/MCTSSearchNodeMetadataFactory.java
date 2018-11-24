@@ -10,7 +10,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 
-public class Ucb1SearchNodeMetadataFactory<
+public class MCTSSearchNodeMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
@@ -19,7 +19,7 @@ public class Ucb1SearchNodeMetadataFactory<
 
     private final RewardAggregator<TReward> rewardAggregator;
 
-    public Ucb1SearchNodeMetadataFactory(RewardAggregator<TReward> rewardAggregator) {
+    public MCTSSearchNodeMetadataFactory(RewardAggregator<TReward> rewardAggregator) {
         this.rewardAggregator = rewardAggregator;
     }
 
@@ -27,7 +27,7 @@ public class Ucb1SearchNodeMetadataFactory<
     public MCTSNodeMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> parent,
                                                               StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn) {
         return new MCTSNodeMetadata<>(
-            rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()),
+            parent != null ? rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
             stateRewardReturn.getReward(),
             rewardAggregator.emptyReward());
     }

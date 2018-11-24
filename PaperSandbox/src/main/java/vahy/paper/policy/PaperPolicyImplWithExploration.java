@@ -1,8 +1,7 @@
 package vahy.paper.policy;
 
-import vahy.api.model.State;
 import vahy.environment.ActionType;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.RandomDistributionUtils;
 
@@ -24,25 +23,25 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         this.temperature = temperature;
     }
 
-    public double[] getPriorActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double[] getPriorActionProbabilityDistribution(ImmutableStateImpl gameState) {
         return innerPolicy.getPriorActionProbabilityDistribution(gameState);
     }
 
     @Override
-    public DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public DoubleScalarReward getEstimatedReward(ImmutableStateImpl gameState) {
         return innerPolicy.getEstimatedReward(gameState);
     }
 
     @Override
-    public double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double getEstimatedRisk(ImmutableStateImpl gameState) {
         return innerPolicy.getEstimatedRisk(gameState);
     }
 
-    public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double[] getActionProbabilityDistribution(ImmutableStateImpl gameState) {
         return innerPolicy.getActionProbabilityDistribution(gameState);
     }
 
-    public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public ActionType getDiscreteAction(ImmutableStateImpl gameState) {
         ActionType discreteAction = innerPolicy.getDiscreteAction(gameState);
         double randomDouble = random.nextDouble();
         if(randomDouble < explorationConstant) {

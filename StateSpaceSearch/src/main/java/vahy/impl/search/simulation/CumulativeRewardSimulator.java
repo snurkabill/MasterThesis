@@ -10,12 +10,12 @@ package vahy.impl.search.simulation;
 //
 //    @Override
 //    public void calculateMetadataEstimation(SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> expandedNode) {
-//        if(expandedNode.getSearchNodeMetadata().getEstimatedTotalReward() == null) {
-//            expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(expandedNode.getSearchNodeMetadata().getCumulativeReward());
+//        if(expandedNode.getSearchNodeMetadata().getExpectedReward() == null) {
+//            expandedNode.getSearchNodeMetadata().setExpectedReward(expandedNode.getSearchNodeMetadata().getCumulativeReward());
 //        }
 //        for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState>> entry : expandedNode.getChildNodeMap().entrySet()) {
-//            entry.getValue().getSearchNodeMetadata().setEstimatedTotalReward(entry.getValue().getSearchNodeMetadata().getCumulativeReward());
-//            expandedNode.getSearchNodeMetadata().getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(entry.getValue().getSearchNodeMetadata().getCumulativeReward());
+//            entry.getValue().getSearchNodeMetadata().setExpectedReward(entry.getValue().getSearchNodeMetadata().getCumulativeReward());
+//            expandedNode.getSearchNodeMetadata().getStateActionMetadataMap().get(entry.getKey()).setExpectedReward(entry.getValue().getSearchNodeMetadata().getCumulativeReward());
 //        }
 //    }
 //

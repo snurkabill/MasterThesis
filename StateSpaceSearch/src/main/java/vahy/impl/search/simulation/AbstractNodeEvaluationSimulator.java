@@ -29,17 +29,17 @@ package vahy.impl.search.simulation;
 //            timer.startTimer();
 //            StateRewardReturn<TAction, TReward, TObservation, State<TAction, TReward, TObservation>> stateRewardReturn = expandedNode.getWrappedState().applyAction(entry.getKey());
 //            TReward expectedReward = calcExpectedReward(entry.getValue());
-//            entry.getValue().getSearchNodeMetadata().setEstimatedTotalReward(expectedReward);
-//            searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setEstimatedTotalReward(rewardAggregator.aggregateDiscount(stateRewardReturn.getReward(), expectedReward, discountFactor));
+//            entry.getValue().getSearchNodeMetadata().setExpectedReward(expectedReward);
+//            searchNodeMetadata.getStateActionMetadataMap().get(entry.getKey()).setExpectedReward(rewardAggregator.aggregateDiscount(stateRewardReturn.getReward(), expectedReward, discountFactor));
 //            timer.stopTimer();
 //            logger.debug("Expected reward simulation for action [{}] calculated in [{}] seconds", entry.getKey(), timer.secondsSpent());
 //        }
-//        expandedNode.getSearchNodeMetadata().setEstimatedTotalReward(
+//        expandedNode.getSearchNodeMetadata().setExpectedReward(
 //            rewardAggregator.averageReward(searchNodeMetadata
 //                .getStateActionMetadataMap()
 //                .values()
 //                .stream()
-//                .map(StateActionMetadata::getEstimatedTotalReward)
+//                .map(StateActionMetadata::getExpectedReward)
 //            )
 //        );
 //    }

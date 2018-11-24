@@ -38,7 +38,7 @@ public abstract class AbstractEstimatedRewardMaximizingTreeSearchPolicy<
             .getChildNodeMap()
             .entrySet()
             .stream()
-            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(o -> o.getValue().getSearchNodeMetadata().getEstimatedTotalReward()), random))
+            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(o -> o.getValue().getSearchNodeMetadata().getExpectedReward()), random))
             .getKey();
     }
 

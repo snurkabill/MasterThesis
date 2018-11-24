@@ -7,10 +7,20 @@ import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestState implements State<TestAction, DoubleScalarReward, DoubleVectorialObservation, TestState> {
+
+    public static TestState getDefaultInitialStatePlayerTurn() {
+        return new TestState(Collections.singletonList('Z'));
+    }
+
+    public static TestState getDefaultInitialStateOpponentTurn() {
+        return new TestState(Collections.singletonList('A'));
+    }
 
     private final List<Character> internalState;
 
@@ -23,7 +33,7 @@ public class TestState implements State<TestAction, DoubleScalarReward, DoubleVe
         if(isOpponentTurn()) {
             return TestAction.playerActions;
         } else {
-            return TestAction.environmentActions;
+            return TestAction.opponentActions;
         }
     }
 
@@ -54,10 +64,12 @@ public class TestState implements State<TestAction, DoubleScalarReward, DoubleVe
     @Override
     public boolean isOpponentTurn() {
         char c = internalState.get(internalState.size() - 1);
-        if(c == 'A' || c == 'B' || c == 'C') {
+        if(Arrays.stream(TestAction.opponentActions).anyMatch(testAction -> c == testAction.getCharRepresentation())) {
             return false;
-        } else {
+        } else if(Arrays.stream(TestAction.playerActions).anyMatch(testAction -> c == testAction.getCharRepresentation())) {
             return true;
+        } else {
+            throw new IllegalArgumentException("Not known state: " + c);
         }
     }
 

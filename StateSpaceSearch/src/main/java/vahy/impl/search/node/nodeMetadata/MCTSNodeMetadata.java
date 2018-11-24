@@ -27,4 +27,16 @@ public class MCTSNodeMetadata<TReward extends Reward> extends BaseSearchNodeMeta
     public void setSumOfTotalEstimations(TReward sumOfTotalEstimations) {
         this.sumOfTotalEstimations = sumOfTotalEstimations;
     }
+
+    @Override
+    public String toString() {
+        String baseString = super.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(baseString);
+        stringBuilder.append("\\nVisitCounter: ");
+        stringBuilder.append(this.visitCounter);
+        stringBuilder.append("\\nsumOfTotalEstimations: ");
+        stringBuilder.append(sumOfTotalEstimations != null ? this.sumOfTotalEstimations.toPrettyString() : null);
+        return stringBuilder.toString();
+    }
 }

@@ -8,13 +8,13 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
     private final TReward cumulativeReward;
     private final TReward gainedReward;
     private final TReward defaultEstimatedReward;
-    private TReward estimatedTotalReward;
+    private TReward expectedReward;
 
     public BaseSearchNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward defaultEstimatedReward) {
         this.cumulativeReward = cumulativeReward;
         this.gainedReward = gainedReward;
         this.defaultEstimatedReward = defaultEstimatedReward;
-        this.estimatedTotalReward = defaultEstimatedReward;
+        this.expectedReward = defaultEstimatedReward;
     }
 
     @Override
@@ -33,12 +33,26 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
     }
 
     @Override
-    public TReward getEstimatedTotalReward() {
-        return estimatedTotalReward;
+    public TReward getExpectedReward() {
+        return expectedReward;
     }
 
     @Override
-    public void setEstimatedTotalReward(TReward estimatedTotalReward) {
-        this.estimatedTotalReward = estimatedTotalReward;
+    public void setExpectedReward(TReward expectedReward) {
+        this.expectedReward = expectedReward;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("\\nCumulativeRew: ");
+        stringBuilder.append(this.cumulativeReward.toPrettyString());
+        stringBuilder.append("\\nEstimatedRew: ");
+        stringBuilder.append(this.expectedReward.toPrettyString());
+        stringBuilder.append("\\nGainedReward: ");
+        stringBuilder.append(this.gainedReward.toPrettyString());
+        stringBuilder.append("\\nDefaultEstimatedReward: ");
+        stringBuilder.append(this.defaultEstimatedReward.toPrettyString());
+        return stringBuilder.toString();
     }
 }

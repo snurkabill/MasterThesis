@@ -16,6 +16,9 @@ import vahy.api.search.tree.SearchTree;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 
+import java.util.LinkedList;
+import java.util.Map;
+
 public class SearchTreeImpl<
     TAction extends Action,
     TReward extends Reward,
@@ -142,5 +145,34 @@ public class SearchTreeImpl<
 
     public double calculateAverageBranchingFactor() {
         return totalNodesCreated / (double) totalNodesExpanded;
+    }
+
+    @Override
+    public String toString() {
+        LinkedList<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
+        queue.addFirst(this.getRoot());
+
+        StringBuilder string = new StringBuilder();
+        String start = "digraph G {";
+        String end = "}";
+
+        string.append(start);
+        while(!queue.isEmpty()) {
+            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node = queue.poll();
+            for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+                SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child = entry.getValue();
+                queue.addLast(child);
+
+                string.append("\"" + node.toString() + "\"");
+                string.append(" -> ");
+                string.append("\"" + child.toString() + "\"");
+                string.append(" ");
+                string.append("[ label = \"P(");
+                string.append(entry.getKey());
+                string.append("\" ]; \n");
+            }
+        }
+        string.append(end);
+        return string.toString();
     }
 }

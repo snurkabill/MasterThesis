@@ -16,7 +16,7 @@ public class BaseSearchNodeMetadataTest extends AbstractStateSpaceSearchTest {
 
         Assert.assertEquals(cumulativeReward.getValue(), metadata.getCumulativeReward().getValue(), DOUBLE_TOLERANCE);
         Assert.assertEquals(defaultTotalReward.getValue(), metadata.getDefaultEstimatedReward().getValue(), DOUBLE_TOLERANCE);
-        Assert.assertEquals(defaultTotalReward.getValue(), metadata.getEstimatedTotalReward().getValue(), DOUBLE_TOLERANCE);
+        Assert.assertEquals(defaultTotalReward.getValue(), metadata.getExpectedReward().getValue(), DOUBLE_TOLERANCE);
         Assert.assertEquals(gainedReward.getValue(), metadata.getGainedReward().getValue(), DOUBLE_TOLERANCE);
     }
 

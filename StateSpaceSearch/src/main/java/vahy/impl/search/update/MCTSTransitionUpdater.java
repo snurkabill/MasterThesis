@@ -29,28 +29,28 @@ public class MCTSTransitionUpdater<
 //        MCTSNodeMetadata<TAction, DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
 //        Ucb1StateActionMetadata<DoubleScalarReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
 //
-//        stateActionMetadata.setEstimatedTotalReward(new DoubleScalarReward(rewardAggregator.aggregateDiscount(
+//        stateActionMetadata.setExpectedReward(new DoubleScalarReward(rewardAggregator.aggregateDiscount(
 //            stateActionMetadata.getGainedReward(),
-//            child.getSearchNodeMetadata().getEstimatedTotalReward(),
+//            child.getSearchNodeMetadata().getExpectedReward(),
 //            discountFactor).getValue()));
-//        double parentCumulativeEstimates = parentSearchNodeMetadata.getEstimatedTotalReward().getValue() * (parentSearchNodeMetadata.getVisitCounter() - 1);
+//        double parentCumulativeEstimates = parentSearchNodeMetadata.getExpectedReward().getValue() * (parentSearchNodeMetadata.getVisitCounter() - 1);
 //
 //        DoubleScalarReward newParentCumulativeEstimate = parent.isOpponentTurn() ?
 //            rewardAggregator.averageReward(parentSearchNodeMetadata
 //                .getStateActionMetadataMap()
 //                .values()
 //                .stream()
-//                .map(StateActionMetadata::getEstimatedTotalReward))
+//                .map(StateActionMetadata::getExpectedReward))
 //            : parentSearchNodeMetadata
 //                .getStateActionMetadataMap()
 //                .values()
 //                .stream()
-//                .map(StateActionMetadata::getEstimatedTotalReward)
+//                .map(StateActionMetadata::getExpectedReward)
 //                .max(Comparable::compareTo)
 //                .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update"));
 //
 //        double sum = parentCumulativeEstimates + newParentCumulativeEstimate.getValue();
-//        parentSearchNodeMetadata.setEstimatedTotalReward(new DoubleScalarReward(sum / parentSearchNodeMetadata.getVisitCounter()));
+//        parentSearchNodeMetadata.setExpectedReward(new DoubleScalarReward(sum / parentSearchNodeMetadata.getVisitCounter()));
 //    }
 
     @Override
@@ -59,8 +59,9 @@ public class MCTSTransitionUpdater<
                             SearchNode<TAction, DoubleScalarReward, TObservation, MCTSNodeMetadata<DoubleScalarReward>, TState> child) {
         MCTSNodeMetadata<DoubleScalarReward> parentNodeMetadata = parent.getSearchNodeMetadata();
         parentNodeMetadata.increaseVisitCounter();
-        DoubleScalarReward estimatedTotalReward = evaluatedNode.getSearchNodeMetadata().getEstimatedTotalReward();
-        parentNodeMetadata.setSumOfTotalEstimations(new DoubleScalarReward(parentNodeMetadata.getSumOfTotalEstimations().getValue() + estimatedTotalReward.getValue()));
-        parentNodeMetadata.setEstimatedTotalReward(new DoubleScalarReward(parentNodeMetadata.getSumOfTotalEstimations().getValue() / parentNodeMetadata.getVisitCounter()));
+        double estimatedTotalReward = evaluatedNode.getSearchNodeMetadata().getExpectedReward().getValue() +
+                                                  evaluatedNode.getSearchNodeMetadata().getCumulativeReward().getValue();
+        parentNodeMetadata.setSumOfTotalEstimations(new DoubleScalarReward(parentNodeMetadata.getSumOfTotalEstimations().getValue() + estimatedTotalReward));
+        parentNodeMetadata.setExpectedReward(new DoubleScalarReward(parentNodeMetadata.getSumOfTotalEstimations().getValue() / parentNodeMetadata.getVisitCounter()));
     }
 }

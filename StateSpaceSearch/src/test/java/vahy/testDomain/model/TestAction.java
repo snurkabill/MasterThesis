@@ -15,7 +15,7 @@ public enum TestAction implements Action {
     Z(false, 'Z', -3);
 
     public static TestAction[] playerActions = Arrays.stream(TestAction.values()).filter(TestAction::isPlayerAction).toArray(TestAction[]::new);
-    public static TestAction[] environmentActions = Arrays.stream(TestAction.values()).filter(actionType -> !actionType.isPlayerAction).toArray(TestAction[]::new);
+    public static TestAction[] opponentActions = Arrays.stream(TestAction.values()).filter(actionType -> !actionType.isPlayerAction).toArray(TestAction[]::new);
     private final boolean isPlayerAction;
     private final char charRepresentation;
     private final double reward;

@@ -1,9 +1,7 @@
 package vahy.search;
 
-import vahy.api.model.State;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.ImmutableTuple;
 
@@ -12,20 +10,18 @@ import java.util.Map;
 
 public abstract class MaximizingRewardGivenProbabilities {
 
-    protected DoubleScalarReward resolveReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state, Map<ActionType, AbstractStateActionMetadata<DoubleScalarReward>> stateActionMap) {
+    protected DoubleScalarReward resolveReward(ImmutableStateImpl state, Map<ActionType, DoubleScalarReward> actionRewardMap) {
         if(state.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> actionsWithProbabilities = ((ImmutableStateImpl) state).environmentActionsWithProbabilities();
+            ImmutableTuple<List<ActionType>, List<Double>> actionsWithProbabilities = state.environmentActionsWithProbabilities();
             double sum = 0.0;
             for (int i = 0; i < actionsWithProbabilities.getFirst().size(); i++) {
-                sum += stateActionMap.get(actionsWithProbabilities.getFirst().get(i)).getEstimatedTotalReward().getValue() *
-                    actionsWithProbabilities.getSecond().get(i);
+                sum += actionRewardMap.get(actionsWithProbabilities.getFirst().get(i)).getValue() * actionsWithProbabilities.getSecond().get(i);
             }
             return new DoubleScalarReward(sum);
         } else {
-            return stateActionMap
+            return actionRewardMap
                 .values()
                 .stream()
-                .map(StateActionMetadata::getEstimatedTotalReward)
                 .max(Comparable::compareTo)
                 .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update"));
         }

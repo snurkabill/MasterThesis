@@ -80,7 +80,7 @@ public class PaperPrototype {
         double temperature = 2;
         int sampleEpisodeCount = 20;
         int replayBufferSize = 50;
-        int stageCountCount = 300;
+        int stageCountCount = 200;
 
         // NN
         int batchSize = 4;
@@ -89,7 +89,7 @@ public class PaperPrototype {
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.02;
+        double totalRiskAllowed = 0.00;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;

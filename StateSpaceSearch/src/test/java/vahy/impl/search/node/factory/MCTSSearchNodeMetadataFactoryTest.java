@@ -17,12 +17,12 @@ import vahy.testDomain.search.TestSearchNodeImpl;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 
-public class Ucb1SearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchTest {
+public class MCTSSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchTest {
 
     @Test
     public void testBaseSearchNodeMetadataFactory() {
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        SearchNodeMetadataFactory<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> factory = new Ucb1SearchNodeMetadataFactory<>(rewardAggregator);
+        SearchNodeMetadataFactory<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> factory = new MCTSSearchNodeMetadataFactory<>(rewardAggregator);
         double parentCumulativeReward = 50.0;
         TestSearchNodeImpl<MCTSNodeMetadata<DoubleScalarReward>> node = new TestSearchNodeImpl<>(
             new TestState(Collections.singletonList('A')),
@@ -45,6 +45,6 @@ public class Ucb1SearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);
         Assert.assertEquals(newSearchNodeMetadata.getCumulativeReward().getValue(), action.getReward() + parentCumulativeReward, DOUBLE_TOLERANCE);
         Assert.assertEquals(newSearchNodeMetadata.getDefaultEstimatedReward().getValue(), 0.0, DOUBLE_TOLERANCE);
-        Assert.assertEquals(newSearchNodeMetadata.getEstimatedTotalReward().getValue(), 0.0, DOUBLE_TOLERANCE);
+        Assert.assertEquals(newSearchNodeMetadata.getExpectedReward().getValue(), 0.0, DOUBLE_TOLERANCE);
     }
 }

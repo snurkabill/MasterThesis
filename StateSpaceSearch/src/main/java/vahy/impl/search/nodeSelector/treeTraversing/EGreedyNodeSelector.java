@@ -20,10 +20,19 @@ public class EGreedyNodeSelector<
     TState extends State<TAction, TReward, TObservation, TState>>
     extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
+    private class SearchNodeComparator implements Comparator<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>>{
+
+        @Override
+        public int compare(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> o1, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> o2) {
+            return o1.getSearchNodeMetadata().getExpectedReward().compareTo(o2.getSearchNodeMetadata().getExpectedReward());
+        }
+    }
+
     private final double epsilon;
     private final SplittableRandom random;
+    private final SearchNodeComparator nodeComparator = new SearchNodeComparator();
 
-    public EGreedyNodeSelector(double epsilon, SplittableRandom random) {
+    public EGreedyNodeSelector(SplittableRandom random, double epsilon) {
         this.epsilon = epsilon;
         this.random = random;
     }
@@ -35,13 +44,11 @@ public class EGreedyNodeSelector<
             return allPossibleActions[random.nextInt(allPossibleActions.length)];
         } else {
             return node
-                .getChildNodeMap()
-                .entrySet()
-                .stream()
+                .getChildNodeStream()
                 .collect(StreamUtils.toRandomizedMaxCollector(
-                    Comparator.comparing(
-                        o -> o.getValue().getSearchNodeMetadata().getEstimatedTotalReward()), random))
-                .getKey();
+                    (node.isPlayerTurn() ? nodeComparator : nodeComparator.reversed())
+                    , random))
+                .getAppliedAction();
         }
     }
 }

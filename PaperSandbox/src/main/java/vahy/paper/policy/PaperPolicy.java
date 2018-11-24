@@ -1,15 +1,15 @@
 package vahy.paper.policy;
 
-import vahy.api.model.State;
 import vahy.environment.ActionType;
+import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.reward.DoubleScalarReward;
 
-public interface PaperPolicy extends vahy.api.policy.Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation> {
+public interface PaperPolicy extends vahy.api.policy.Policy<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> {
 
-    double[] getPriorActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
+    double[] getPriorActionProbabilityDistribution(ImmutableStateImpl gameState);
 
-    DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
+    DoubleScalarReward getEstimatedReward(ImmutableStateImpl gameState);
 
-    double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState);
+    double getEstimatedRisk(ImmutableStateImpl gameState);
 }

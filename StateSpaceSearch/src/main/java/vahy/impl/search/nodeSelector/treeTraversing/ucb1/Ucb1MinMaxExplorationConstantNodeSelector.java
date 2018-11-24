@@ -32,7 +32,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
         return function
             .apply(node
                 .getChildNodeStream()
-                .mapToDouble(x -> x.getSearchNodeMetadata().getEstimatedTotalReward().getValue())
+                .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
             ).orElseThrow(() -> new IllegalArgumentException(exceptionMsg));
     }
 
@@ -50,7 +50,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
                     return new ImmutableTuple<>(
                         childNode.getAppliedAction(),
                         calculateUCBValue(
-                            childSearchNodeMetadata.getEstimatedTotalReward().getValue(),
+                            (node.isPlayerTurn() ? 1 : -1) * childSearchNodeMetadata.getExpectedReward().getValue(),
                             explorationConstant,
                             node.getSearchNodeMetadata().getVisitCounter(),
                             childSearchNodeMetadata.getVisitCounter())

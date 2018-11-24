@@ -27,7 +27,7 @@ public class Ucb1ExpectedRewardNormalizingNodeSelector<
     protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> node) {
         double sum = node
             .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getEstimatedTotalReward().getValue())
+            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
             .sum();
         return node
             .getChildNodeStream()
@@ -38,7 +38,7 @@ public class Ucb1ExpectedRewardNormalizingNodeSelector<
                     return new ImmutableTuple<>(
                         childNode.getAppliedAction(),
                         calculateUCBValue(
-                            childSearchNodeMetadata.getEstimatedTotalReward().getValue() / sum,
+                            (node.isPlayerTurn() ? 1 : -1) * childSearchNodeMetadata.getExpectedReward().getValue() / sum,
                             explorationConstant,
                             node.getSearchNodeMetadata().getVisitCounter(),
                             childSearchNodeMetadata.getVisitCounter())

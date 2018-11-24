@@ -11,7 +11,7 @@ import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.impl.search.node.factory.Ucb1SearchNodeMetadataFactory;
+import vahy.impl.search.node.factory.MCTSSearchNodeMetadataFactory;
 import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 import vahy.impl.search.nodeEvaluator.OriginMonteCarloEvaluator;
 import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1NodeSelector;
@@ -21,7 +21,7 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 import vahy.testDomain.model.TestAction;
 import vahy.testDomain.model.TestState;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
@@ -34,21 +34,18 @@ public class MCTSIntegrationTest {
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
         SearchNode<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> root = new SearchNodeImpl<>(
-            new TestState(new ArrayList<>('Z')),
+            new TestState(Arrays.asList('Z')),
             new MCTSNodeMetadata<>(new DoubleScalarReward(0.0), new DoubleScalarReward(0.0), new DoubleScalarReward(0.0)),
             new LinkedHashMap<>()
         );
 
         SearchNodeMetadataFactory<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> metadataFactory =
-            new Ucb1SearchNodeMetadataFactory<>(rewardAggregator);
+            new MCTSSearchNodeMetadataFactory<>(rewardAggregator);
         SearchNodeFactory<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> nodeFactory =
             new SearchNodeBaseFactoryImpl<>(metadataFactory);
 
         NodeEvaluator<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> nodeEvaluator =
-            new OriginMonteCarloEvaluator<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState>(
-                nodeFactory,
-                random,
-                rewardAggregator);
+            new OriginMonteCarloEvaluator<>(nodeFactory, random, rewardAggregator, 1.0);
 
         SearchTreeImpl<TestAction, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, TestState> searchTree = new SearchTreeImpl<>(
             root,
@@ -57,7 +54,11 @@ public class MCTSIntegrationTest {
             nodeEvaluator
         );
 
-        searchTree.updateTree();
+        for (int i = 0; i < 100; i++) {
+            searchTree.updateTree();
+        }
+
+        System.out.println("asdf");
 
 
     }

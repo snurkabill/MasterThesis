@@ -22,17 +22,17 @@ package vahy.impl.search.update;
 //                            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child) {
 //
 //        if(parent.isPlayerTurn()) {
-//            parent.getSearchNodeMetadata().setEstimatedTotalReward(
+//            parent.getSearchNodeMetadata().setExpectedReward(
 //                parent
 //                    .getChildNodeStream()
-//                    .map(x -> x.getSearchNodeMetadata().getEstimatedTotalReward())
+//                    .map(x -> x.getSearchNodeMetadata().getExpectedReward())
 //                    .max(Comparable::compareTo)
 //                    .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update")));
 //        } else {
-//            parent.getSearchNodeMetadata().setEstimatedTotalReward(
+//            parent.getSearchNodeMetadata().setExpectedReward(
 //                parent
 //                    .getChildNodeStream()
-//                    .map(x -> x.getSearchNodeMetadata().getEstimatedTotalReward())
+//                    .map(x -> x.getSearchNodeMetadata().getExpectedReward())
 //                    .min(Comparable::compareTo)
 //                    .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update")));
 //        }
@@ -49,17 +49,17 @@ package vahy.impl.search.update;
 //
 //
 //
-//        parentSearchNodeMetadata.getStateActionMetadataMap().get(action).setEstimatedTotalReward(
+//        parentSearchNodeMetadata.getStateActionMetadataMap().get(action).setExpectedReward(
 //            rewardAggregator.aggregateDiscount(parentSearchNodeMetadata.getStateActionMetadataMap().get(action).getGainedReward(),
-//                child.getSearchNodeMetadata().getEstimatedTotalReward(),
+//                child.getSearchNodeMetadata().getExpectedReward(),
 //                discountFactor)
 //        );
-//        parentSearchNodeMetadata.setEstimatedTotalReward(
+//        parentSearchNodeMetadata.setExpectedReward(
 //            parentSearchNodeMetadata
 //                .getStateActionMetadataMap()
 //                .values()
 //                .stream()
-//                .map(StateActionMetadata::getEstimatedTotalReward)
+//                .map(StateActionMetadata::getExpectedReward)
 //                .max(Comparable::compareTo)
 //                .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update")));
 //    }

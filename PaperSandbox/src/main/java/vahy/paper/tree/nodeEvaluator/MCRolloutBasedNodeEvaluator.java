@@ -1,6 +1,5 @@
 package vahy.paper.tree.nodeEvaluator;
 
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
@@ -59,16 +58,14 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
 
     private ImmutableTuple<Double, Double> runRandomWalkSimulation(SearchNode node) {
         List<DoubleScalarReward> gainedRewards = new ArrayList<>();
-        State<ActionType, DoubleScalarReward, DoubleVectorialObservation> wrappedState = node.getWrappedState();
+        ImmutableStateImpl wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
-            ActionType selectedAction = selectNextAction((ImmutableStateImpl) wrappedState);
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = wrappedState.applyAction(selectedAction);
+            ActionType selectedAction = selectNextAction(wrappedState);
+            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }
-        return new ImmutableTuple<>(
-            doubleScalarRewardAggregator.aggregateDiscount(gainedRewards, discountFactor).getValue(),
-            ((ImmutableStateImpl) wrappedState).isAgentKilled() ? 1.0 : 0.0);
+        return new ImmutableTuple<>(doubleScalarRewardAggregator.aggregateDiscount(gainedRewards, discountFactor).getValue(), wrappedState.isAgentKilled() ? 1.0 : 0.0);
     }
 
     private ActionType selectNextAction(ImmutableStateImpl state) {

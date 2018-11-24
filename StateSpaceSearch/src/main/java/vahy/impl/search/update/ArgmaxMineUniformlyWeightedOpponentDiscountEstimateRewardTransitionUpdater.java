@@ -22,24 +22,24 @@ package vahy.impl.search.update;
 //                            SearchNode<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, TState> child,
 //                            TAction action) {
 //        TSearchNodeMetadata parentSearchNodeMetadata = parent.getSearchNodeMetadata();
-//        parentSearchNodeMetadata.getStateActionMetadataMap().get(action).setEstimatedTotalReward(
+//        parentSearchNodeMetadata.getStateActionMetadataMap().get(action).setExpectedReward(
 //            rewardAggregator.aggregateDiscount(parentSearchNodeMetadata.getStateActionMetadataMap().get(action).getGainedReward(),
-//                child.getSearchNodeMetadata().getEstimatedTotalReward(),
+//                child.getSearchNodeMetadata().getExpectedReward(),
 //                discountFactor)
 //        );
-//        parentSearchNodeMetadata.setEstimatedTotalReward(
+//        parentSearchNodeMetadata.setExpectedReward(
 //            parent.isOpponentTurn() ?
 //                rewardAggregator.averageReward(parentSearchNodeMetadata
 //                    .getStateActionMetadataMap()
 //                    .values()
 //                    .stream()
-//                    .map(StateActionMetadata::getEstimatedTotalReward)
+//                    .map(StateActionMetadata::getExpectedReward)
 //                )
 //                : parentSearchNodeMetadata
 //                    .getStateActionMetadataMap()
 //                    .values()
 //                    .stream()
-//                    .map(StateActionMetadata::getEstimatedTotalReward)
+//                    .map(StateActionMetadata::getExpectedReward)
 //                    .max(Comparable::compareTo)
 //                    .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update"))
 //        );

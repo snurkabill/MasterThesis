@@ -2,7 +2,6 @@ package vahy.paper.tree.nodeExpander;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
@@ -191,10 +190,9 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         }
 
         for (ActionType action : allActions) {
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation,
-                                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = node.getWrappedState().applyAction(action);
+            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
-            SearchNode newNode = new SearchNode((ImmutableStateImpl) stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
+            SearchNode newNode = new SearchNode(stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();
             edgeMetadata.setMeanActionValue(0.0d);
             edgeMetadata.setMeanRiskValue(1.0d);

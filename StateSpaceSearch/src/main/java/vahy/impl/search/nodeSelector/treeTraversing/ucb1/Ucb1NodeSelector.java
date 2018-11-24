@@ -12,7 +12,6 @@ import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.StreamUtils;
 
 import java.util.Comparator;
-import java.util.Map;
 import java.util.SplittableRandom;
 
 public class Ucb1NodeSelector<
@@ -36,12 +35,11 @@ public class Ucb1NodeSelector<
     @Override
     protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState> node) {
         int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
-        Map<TAction, SearchNode<TAction, TReward, TObservation, MCTSNodeMetadata<TReward>, TState>> childNodeMap = node.getChildNodeMap();
         return node.getChildNodeStream()
             .collect(StreamUtils.toRandomizedMaxCollector(
                 Comparator.comparing(
                     o -> calculateUCBValue( // TODO: optimize so calls are done only once
-                        childNodeMap.get(o.getAppliedAction()).getSearchNodeMetadata().getEstimatedTotalReward().getValue(),
+                        (node.isPlayerTurn() ? 1.0 : -1.0) * (o.getSearchNodeMetadata().getExpectedReward().getValue() + o.getSearchNodeMetadata().getCumulativeReward().getValue()),
                         explorationConstant,
                         nodeVisitCount,
                         o.getSearchNodeMetadata().getVisitCounter())),

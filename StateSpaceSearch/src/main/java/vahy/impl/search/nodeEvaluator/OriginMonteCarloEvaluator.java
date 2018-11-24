@@ -32,13 +32,16 @@ public class OriginMonteCarloEvaluator<
     private final SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
     private final RewardAggregator<TReward> rewardAggregator;
+    private final double discountFactor;
 
     public OriginMonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                      SplittableRandom random,
-                                     RewardAggregator<TReward> rewardAggregator) {
+                                     RewardAggregator<TReward> rewardAggregator,
+                                     double discountFactor) {
         this.searchNodeFactory = searchNodeFactory;
         this.random = random;
         this.rewardAggregator = rewardAggregator;
+        this.discountFactor = discountFactor;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class OriginMonteCarloEvaluator<
         TReward expectedReward = runRandomWalkSimulation(nextNode);
         TSearchNodeMetadata searchNodeMetadata = selectedNode.getSearchNodeMetadata();
         searchNodeMetadata.setSumOfTotalEstimations(expectedReward);
-        searchNodeMetadata.setEstimatedTotalReward(expectedReward);
+        searchNodeMetadata.setExpectedReward(expectedReward);
         searchNodeMetadata.increaseVisitCounter();
     }
 
@@ -73,6 +76,6 @@ public class OriginMonteCarloEvaluator<
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
         }
-        return rewardAggregator.aggregate(rewardList);
+        return rewardAggregator.aggregateDiscount(rewardList, discountFactor);
     }
 }

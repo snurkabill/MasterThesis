@@ -2,9 +2,8 @@ package vahy.paper.policy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.model.State;
 import vahy.environment.ActionType;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.paper.tree.SearchNode;
@@ -40,7 +39,7 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double[] getActionProbabilityDistribution(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
         ActionType[] allDoableActions = gameState.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
         double[] vector = new double[allDoableActions.length];
@@ -78,7 +77,7 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public double[] getPriorActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double[] getPriorActionProbabilityDistribution(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
         ActionType[] allDoableActions = gameState.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
         double[] priorProbabilities = new double[allDoableActions.length];
@@ -97,19 +96,19 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public DoubleScalarReward getEstimatedReward(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
         return searchTree.getRootEstimatedReward();
     }
 
     @Override
-    public double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double getEstimatedRisk(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
         return searchTree.getRootEstimatedRisk();
     }
 
     @Override
-    public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public ActionType getDiscreteAction(ImmutableStateImpl gameState) {
         expandSearchTree(gameState);
         SearchNode node = searchTree.getRoot();
 
@@ -150,7 +149,7 @@ public class PaperPolicyImpl implements PaperPolicy {
         }
     }
 
-    private void expandSearchTree(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    private void expandSearchTree(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
@@ -178,7 +177,7 @@ public class PaperPolicyImpl implements PaperPolicy {
         }
     }
 
-    private void checkStateRoot(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    private void checkStateRoot(ImmutableStateImpl gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state or argument itself is invalid. Possibly missing equals method");
         }
