@@ -4,7 +4,6 @@ package vahy.environment.agent.policy.player.smart;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
@@ -15,10 +14,10 @@ import vahy.impl.policy.maximizingEstimatedReward.AbstractEstimatedRewardMaximiz
 import vahy.impl.search.node.factory.MCTSSearchNodeMetadataFactory;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
-import vahy.impl.search.nodeSelector.treeTraversing.ucb1.Ucb1NodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
-import vahy.impl.search.update.TraversingTreeUpdater;
+import vahy.impl.search.update.MCTSTreeUpdater;
+import vahy.search.MinMaxNormalizingNodeSelector;
 
 import java.util.SplittableRandom;
 
@@ -29,25 +28,18 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
         TreeUpdateCondition uprateTreeCondition,
         double explorationConstant,
         ImmutableStateImpl gameState,
-        NodeTransitionUpdater<
-            ActionType,
-            DoubleScalarReward,
-            DoubleVectorialObservation,
-            MCTSNodeMetadata<DoubleScalarReward>,
-            ImmutableStateImpl> nodeTransitionUpdater,
         NodeEvaluator<
                     ActionType,
                     DoubleScalarReward,
                     DoubleVectorialObservation,
                     MCTSNodeMetadata<DoubleScalarReward>,
                     ImmutableStateImpl> rewardSimulator) {
-        super(random, uprateTreeCondition, createSearchTree(random, gameState, nodeTransitionUpdater, rewardSimulator, explorationConstant));
+        super(random, uprateTreeCondition, createSearchTree(random, gameState, rewardSimulator, explorationConstant));
     }
 
     private static SearchTreeImpl<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> createSearchTree(
         SplittableRandom random,
         ImmutableStateImpl gameState,
-        NodeTransitionUpdater<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> nodeTransitionUpdater,
         NodeEvaluator<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> nodeEvaluator,
         double explorationConstant)
     {
@@ -64,8 +56,8 @@ public class Ucb1Policy extends AbstractEstimatedRewardMaximizingTreeSearchPolic
 
         return new SearchTreeImpl<>(
             root,
-            new Ucb1NodeSelector<>(random, explorationConstant),
-            new TraversingTreeUpdater<>(nodeTransitionUpdater),
+            new MinMaxNormalizingNodeSelector(random, explorationConstant),
+            new MCTSTreeUpdater<>(),
             nodeEvaluator);
     }
 }

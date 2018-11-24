@@ -5,7 +5,6 @@ import org.testng.annotations.Test;
 import vahy.api.episode.EpisodeAggregator;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.agent.policy.player.smart.Ucb1Policy;
@@ -23,7 +22,6 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.node.nodeMetadata.MCTSNodeMetadata;
 import vahy.impl.search.nodeEvaluator.OriginMonteCarloEvaluator;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionSuplierCountBased;
-import vahy.impl.search.update.MCTSTransitionUpdater;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,25 +37,24 @@ public class IntegrationTest {
     @Test
     public void MonteCarloSimpleTest() throws IOException, NotValidGameStringRepresentationException {
         ClassLoader classLoader = IntegrationTest.class.getClassLoader();
-        URL url = classLoader.getResource("examples/hallway_demo4.txt");
+        URL url = classLoader.getResource("examples/hallway_demo3.txt");
         File file = new File(url.getFile());
 
         SplittableRandom random = new SplittableRandom(0);
-        GameConfig gameConfig = new ConfigBuilder().reward(10).noisyMoveProbability(0.0).stepPenalty(1).trapProbability(1).buildConfig();
+        GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.0).stepPenalty(1).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
 
         RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        double discountFactor = 1.0; // 0.9
+        double discountFactor = 0.9; // 0.9
+        int rolloutCount = 20;
 
-        // NodeTransitionUpdater<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> transitionUpdater = new UniformAverageDiscountEstimateRewardTransitionUpdater<>(discountFactor, rewardAggregator);
-
-        NodeTransitionUpdater<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> transitionUpdater = new MCTSTransitionUpdater<>();
 
         NodeEvaluator<ActionType, DoubleScalarReward, DoubleVectorialObservation, MCTSNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> rewardSimulator = new OriginMonteCarloEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(new MCTSSearchNodeMetadataFactory<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>(rewardAggregator)),
             random,
             rewardAggregator,
-            discountFactor);
+            discountFactor,
+            rolloutCount);
 
         EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
             1,
@@ -67,14 +64,21 @@ public class IntegrationTest {
                 new Ucb1Policy(
                     random,
                     new TreeUpdateConditionSuplierCountBased(10000),
-                    3,
+                    5,
                     immutableState,
-                    transitionUpdater,
                     rewardSimulator
                     ),
+//                new EGreedyPolicy(
+//                    random,
+//                    new TreeUpdateConditionSuplierCountBased(100),
+//                    immutableState,
+//                    transitionUpdater,
+//                    rewardSimulator
+//                    ),
             new EnvironmentPolicy(random)
         );
         List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
+        System.out.println(rewardHistory.stream().mapToInt(List::size).average());
         Assert.assertTrue(rewardHistory.stream().allMatch(x -> x.size() == 17));
     }
 }
