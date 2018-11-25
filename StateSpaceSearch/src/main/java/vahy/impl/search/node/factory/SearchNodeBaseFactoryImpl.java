@@ -34,7 +34,7 @@ public class SearchNodeBaseFactoryImpl<
         TAction action) {
         return new SearchNodeImpl<>(
             stateRewardReturn.getState(),
-            searchNodeMetadataFactory.createSearchNodeMetadata(parent, stateRewardReturn),
+            searchNodeMetadataFactory.createSearchNodeMetadata(parent, stateRewardReturn, action),
             new LinkedHashMap<>(),
             parent,
             action);

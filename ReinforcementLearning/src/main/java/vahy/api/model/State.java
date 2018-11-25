@@ -17,6 +17,10 @@ public interface State<TAction extends Action, TReward extends Reward, TObservat
 
     boolean isOpponentTurn();
 
+    default boolean isPlayerTurn() {
+        return !isOpponentTurn();
+    }
+
     boolean isFinalState();
 
 }
