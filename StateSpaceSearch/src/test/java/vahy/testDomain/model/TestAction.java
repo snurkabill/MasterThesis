@@ -34,17 +34,26 @@ public enum TestAction implements Action {
         return isPlayerAction;
     }
 
+    @Override
+    public int getActionIndexInPossibleActions() {
+        if(this.isPlayerAction) {
+            for (int i = 0; i < playerActions.length; i++) {
+                if(this.equals(playerActions[i])) {
+                    return i;
+                }
+            }
+        } else {
+            for (int i = 0; i < opponentActions.length; i++) {
+                if(this.equals(opponentActions[i])) {
+                    return i;
+                }
+            }
+        }
+        throw new IllegalStateException("Not expected state");
+    }
+
     public double getReward() {
         return reward;
     }
 
-    @Override
-    public Action[] getPlayerActionArray() {
-        return playerActions;
-    }
-
-    @Override
-    public Action[] getOpponentActionArray() {
-        return opponentActions;
-    }
 }

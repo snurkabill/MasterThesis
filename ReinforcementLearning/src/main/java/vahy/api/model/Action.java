@@ -2,8 +2,8 @@ package vahy.api.model;
 
 public interface Action {
 
-    Action[] getPlayerActionArray();
+    boolean isPlayerAction();
 
-    Action[] getOpponentActionArray();
+    int getActionIndexInPossibleActions();
 
 }

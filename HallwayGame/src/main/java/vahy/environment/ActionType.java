@@ -28,10 +28,6 @@ public enum ActionType implements Action {
         this.isTrap = isTrap;
     }
 
-    public boolean isPlayerAction() {
-        return isPlayerAction;
-    }
-
     public boolean isTrap() {
         return isTrap;
     }
@@ -55,12 +51,26 @@ public enum ActionType implements Action {
     }
 
     @Override
-    public Action[] getPlayerActionArray() {
-        return playerActions;
+    public boolean isPlayerAction() {
+        return isPlayerAction;
     }
 
     @Override
-    public Action[] getOpponentActionArray() {
-        return environmentActions;
+    public int getActionIndexInPossibleActions() {
+        if(this.isPlayerAction) {
+            for (int i = 0; i < playerActions.length; i++) {
+                if(this.equals(playerActions[i])) {
+                    return i;
+                }
+            }
+        } else {
+            for (int i = 0; i < environmentActions.length; i++) {
+                if(this.equals(environmentActions[i])) {
+                    return i;
+                }
+            }
+        }
+        throw new IllegalStateException("Not expected state");
     }
+
 }
