@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
-import vahy.api.search.nodeEvaluator.NodeEvaluator;
+import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.environment.HallwayAction;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class PaperNodeEvaluator implements NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
+public class PaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
 
@@ -65,5 +65,10 @@ public class PaperNodeEvaluator implements NodeEvaluator<HallwayAction, DoubleRe
             }
         }
         return childNode;
+    }
+
+    @Override
+    public void train(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
+        trainableApproximator.train(trainData);
     }
 }
