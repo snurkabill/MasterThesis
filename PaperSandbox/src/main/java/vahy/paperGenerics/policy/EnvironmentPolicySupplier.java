@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.policy;
 
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicySupplier;

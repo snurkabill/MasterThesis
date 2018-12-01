@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;

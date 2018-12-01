@@ -36,4 +36,16 @@ public class PaperMetadataFactory<
             new LinkedHashMap<>()
         );
     }
+
+    @Override
+    public PaperMetadata<TAction, TReward> createEmptyNodeMetadata() {
+        return new PaperMetadata<>(
+            rewardAggregator.emptyReward(),
+            rewardAggregator.emptyReward(),
+            rewardAggregator.emptyReward(),
+            0.0d,
+            0.0,
+            new LinkedHashMap<>()
+        );
+    }
 }

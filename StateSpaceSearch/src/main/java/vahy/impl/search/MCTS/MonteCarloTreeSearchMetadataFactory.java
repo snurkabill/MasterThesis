@@ -31,4 +31,9 @@ public class MonteCarloTreeSearchMetadataFactory<
             stateRewardReturn.getReward(),
             rewardAggregator.emptyReward());
     }
+
+    @Override
+    public MonteCarloTreeSearchMetadata<TReward> createEmptyNodeMetadata() {
+        return new MonteCarloTreeSearchMetadata<>(rewardAggregator.emptyReward(), rewardAggregator.emptyReward(), rewardAggregator.emptyReward());
+    }
 }

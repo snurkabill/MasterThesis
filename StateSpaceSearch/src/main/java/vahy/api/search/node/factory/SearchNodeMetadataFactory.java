@@ -19,4 +19,6 @@ public interface SearchNodeMetadataFactory<
                                                  StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
                                                  TAction appliedAction);
 
+    TSearchNodeMetadata createEmptyNodeMetadata();
+
 }

@@ -1,9 +1,10 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
+import vahy.paperGenerics.PaperMetadata;
 import vahy.utils.RandomDistributionUtils;
 import vahy.utils.ReflectionHacks;
 
@@ -20,14 +21,14 @@ public class PaperPolicyImplWithExploration<
     implements PaperPolicy<TAction, TReward, TObservation, TState> {
 
     private final SplittableRandom random;
-    private final PaperPolicyImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> innerPolicy;
+    private final PaperPolicy<TAction, TReward, TObservation, TState> innerPolicy;
     private final double explorationConstant;
     private final double temperature;
     private final TAction[] playerActions;
 
     public PaperPolicyImplWithExploration(Class<TAction> clazz,
                                           SplittableRandom random,
-                                          PaperPolicyImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> innerPolicy,
+                                          PaperPolicy<TAction, TReward, TObservation, TState> innerPolicy,
                                           double explorationConstant,
                                           double temperature) {
         this.random = random;

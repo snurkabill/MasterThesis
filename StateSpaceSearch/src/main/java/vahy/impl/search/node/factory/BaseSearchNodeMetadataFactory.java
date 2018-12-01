@@ -32,4 +32,9 @@ public class BaseSearchNodeMetadataFactory<
             stateRewardReturn.getReward(),
             rewardAggregator.emptyReward());
     }
+
+    @Override
+    public BaseSearchNodeMetadata<TReward> createEmptyNodeMetadata() {
+        return new BaseSearchNodeMetadata<>(rewardAggregator.emptyReward(), rewardAggregator.emptyReward(), rewardAggregator.emptyReward());
+    }
 }

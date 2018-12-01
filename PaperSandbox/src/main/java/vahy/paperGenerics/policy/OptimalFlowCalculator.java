@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.policy;
 
 import com.quantego.clp.CLP;
 import com.quantego.clp.CLPExpression;
@@ -10,6 +10,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.reward.DoubleReward;
+import vahy.paperGenerics.PaperMetadata;
 
 import java.util.HashMap;
 import java.util.LinkedList;

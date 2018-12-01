@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
@@ -6,6 +6,8 @@ import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
+import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.RiskAverseSearchTree;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ReflectionHacks;
 

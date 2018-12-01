@@ -25,6 +25,11 @@ public class AlphaGoNodeMetadataFactory<
     }
 
     @Override
+    public AlphaGoNodeMetadata<TAction, TReward> createEmptyNodeMetadata() {
+        return new AlphaGoNodeMetadata<>(rewardAggregator.emptyReward(), rewardAggregator.emptyReward(), rewardAggregator.emptyReward(), 0.0d, new LinkedHashMap<>());
+    }
+
+    @Override
     public AlphaGoNodeMetadata<TAction, TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> parent,
                                                                           StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
                                                                           TAction appliedAction) {
@@ -35,5 +40,7 @@ public class AlphaGoNodeMetadataFactory<
             parent != null ? parent.getSearchNodeMetadata().getChildPriorProbabilities().get(appliedAction) : 0.0d,
             new LinkedHashMap<>()
         );
+
+
     }
 }
