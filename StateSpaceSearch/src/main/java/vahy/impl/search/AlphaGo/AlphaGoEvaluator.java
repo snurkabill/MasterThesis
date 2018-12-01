@@ -5,14 +5,14 @@ import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 
 import java.util.function.Function;
 
 public class AlphaGoEvaluator<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends DoubleVectorialObservation,
+    TObservation extends DoubleVector,
     TSearchNodeMetadata extends AlphaGoNodeMetadata<TAction, TReward>,
     TState extends State<TAction, TReward, TObservation, TState>>
     implements NodeEvaluator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
@@ -20,13 +20,13 @@ public class AlphaGoEvaluator<
     public static final int Q_VALUE_INDEX = 0;
     public static final int POLICY_START_INDEX = 1;
 
-    private final Function<DoubleVectorialObservation, double[]> functionApproximator;
+    private final Function<DoubleVector, double[]> functionApproximator;
 
-    public AlphaGoEvaluator(Function<DoubleVectorialObservation, double[]> functionApproximator) {
+    public AlphaGoEvaluator(Function<DoubleVector, double[]> functionApproximator) {
         this.functionApproximator = functionApproximator;
     }
 
-    public Function<DoubleVectorialObservation, double[]> getFunctionApproximator() {
+    public Function<DoubleVector, double[]> getFunctionApproximator() {
         return functionApproximator;
     }
 

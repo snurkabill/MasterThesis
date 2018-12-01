@@ -6,12 +6,12 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 
 public class AlphaGoTreeSearchUpdater<
     TAction extends Action,
-    TObservation extends DoubleVectorialObservation,
+    TObservation extends DoubleVector,
     TState extends State<TAction, DoubleReward, TObservation, TState>>
     implements TreeUpdater<TAction, DoubleReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleReward>, TState> {
 

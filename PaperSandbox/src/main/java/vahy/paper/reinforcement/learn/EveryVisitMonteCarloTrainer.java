@@ -4,7 +4,7 @@ import vahy.api.model.StateActionReward;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.policy.EnvironmentPolicySupplier;
@@ -24,14 +24,14 @@ public class EveryVisitMonteCarloTrainer extends AbstractMonteCarloTrainer {
     }
 
     @Override
-    protected Map<DoubleVectorialObservation, MutableDataSample> calculatedVisitedRewards(PaperEpisode paperEpisode) {
-        Map<DoubleVectorialObservation, MutableDataSample> everyVisitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
+    protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(PaperEpisode paperEpisode) {
+        Map<DoubleVector, MutableDataSample> everyVisitSet = new LinkedHashMap<>();
+        List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
 //            double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getAction().isTrap() ? 1.0 : 0.0;
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i);
-                DoubleVectorialObservation experimentalObservation = episodeHistory.get(i).getFirst().getState().getObservation();
+                DoubleVector experimentalObservation = episodeHistory.get(i).getFirst().getState().getObservation();
                 if(!everyVisitSet.containsKey(experimentalObservation)) {
                     everyVisitSet.put(experimentalObservation, dataSample);
                 } else {

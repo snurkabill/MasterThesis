@@ -4,7 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.AbstractStateSpaceSearchTest;
@@ -21,7 +21,7 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
     @Test
     public void testBaseSearchNodeMetadataFactory() {
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
+        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
 
         double parentCumulativeReward = 50.0;
 
@@ -35,12 +35,12 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
     }
 
     private void assertMetadata(
-        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, TestState> factory,
+        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState> factory,
         double parentCumulativeReward,
         TestSearchNodeImpl<BaseSearchNodeMetadata<DoubleReward>> node,
         TestAction action) {
 
-        StateRewardReturn<TestAction, DoubleReward, DoubleVectorialObservation, TestState> stateRewardReturn = node.applyAction(action);
+        StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState> stateRewardReturn = node.applyAction(action);
         BaseSearchNodeMetadata<DoubleReward> newSearchNodeMetadata = factory.createSearchNodeMetadata(node, stateRewardReturn, action);
 
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);

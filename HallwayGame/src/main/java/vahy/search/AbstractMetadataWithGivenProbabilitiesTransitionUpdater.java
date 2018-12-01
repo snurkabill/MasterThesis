@@ -4,7 +4,7 @@ package vahy.search;
 //public class AbstractMetadataWithGivenProbabilitiesTransitionUpdater extends MaximizingRewardGivenProbabilities implements NodeTransitionUpdater<
 //    ActionType,
 //    DoubleReward,
-//    DoubleVectorialObservation,
+//    DoubleVector,
 //    BaseSearchNodeMetadata<DoubleReward>,
 //    ImmutableStateImpl> {
 //
@@ -18,14 +18,14 @@ package vahy.search;
 //
 //    @Override
 //    public void applyUpdate(
-//        SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, State<ActionType, DoubleReward, DoubleVectorialObservation>> parent,
+//        SearchNode<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, State<ActionType, DoubleReward, DoubleVector>> parent,
 //        SearchNode<
 //            ActionType,
 //            DoubleReward,
-//            DoubleVectorialObservation,
+//            DoubleVector,
 //            AbstractStateActionMetadata<DoubleReward>,
 //            BaseSearchNodeMetadata<ActionType, DoubleReward, AbstractStateActionMetadata<DoubleReward>>,
-//            State<ActionType, DoubleReward, DoubleVectorialObservation>> child,
+//            State<ActionType, DoubleReward, DoubleVector>> child,
 //        ActionType action) {
 //        BaseSearchNodeMetadata<ActionType, DoubleReward, AbstractStateActionMetadata<DoubleReward>> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
 //        AbstractStateActionMetadata<DoubleReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
@@ -45,9 +45,9 @@ package vahy.search;
 //
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> parent,
-//                            SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
+//                            SearchNode<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> parent,
+//                            SearchNode<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> child) {
 //
 //        BaseSearchNodeMetadata<DoubleReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
 //        Map<ActionType, BaseSearchNodeMetadata<DoubleReward>> childSearchNodeMetadataMap = parent.getChildNodeMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, x-> x.getValue().getSearchNodeMetadata()));

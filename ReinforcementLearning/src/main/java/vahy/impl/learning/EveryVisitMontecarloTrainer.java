@@ -10,7 +10,7 @@ import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class EveryVisitMontecarloTrainer<
     TAction extends Action,
     TReward extends DoubleVectorialReward,
-    TObservation extends DoubleVectorialObservation,
+    TObservation extends DoubleVector,
     TState extends State<TAction, TReward, TObservation, TState>>
     extends AbstractMonteCarloTrainer<TAction, TReward, TObservation, TState> {
 

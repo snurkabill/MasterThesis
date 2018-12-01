@@ -4,7 +4,7 @@ import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> {
+public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -163,7 +163,7 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
     }
 
     @Override
-    public StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> applyAction(ActionType actionType) {
+    public StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> applyAction(ActionType actionType) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -341,7 +341,7 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
     }
 
     @Override
-    public DoubleVectorialObservation getObservation() {
+    public DoubleVector getObservation() {
         switch(staticGamePart.getStateRepresentation()) {
             case FULL:
                 return getFullDoubleVectorialObservation();
@@ -352,7 +352,7 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
         }
     }
 
-    private DoubleVectorialObservation getFullDoubleVectorialObservation() {
+    private DoubleVector getFullDoubleVectorialObservation() {
         boolean[][] walls = staticGamePart.getWalls();
         double[][] trapProbabilities = staticGamePart.getTrapProbabilities();
         double[] vector = new double[walls.length * walls[0].length + ADDITIONAL_DIMENSION_AGENT_ON_TRAP + ADDITIONAL_DIMENSION_AGENT_HEADING];
@@ -374,10 +374,10 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
         vector[vector.length - 3] = headingRepresentationAsArray[2];
         vector[vector.length - 2] = headingRepresentationAsArray[3];
         vector[vector.length - 1] = isAgentStandingOnTrap() ? 1.0 : 0.0;
-        return new DoubleVectorialObservation(vector);
+        return new DoubleVector(vector);
     }
 
-    public DoubleVectorialObservation getCompactDOubleVectorialObservation() {
+    public DoubleVector getCompactDOubleVectorialObservation() {
         // experimental shit
         double[] vector = new double[6 + this.staticGamePart.getTotalRewardsCount()];
 
@@ -409,7 +409,7 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
         vector[vector.length - 2] = headingRepresentationAsArray[2];
         vector[vector.length - 1] = headingRepresentationAsArray[3];
 
-        return new DoubleVectorialObservation(vector);
+        return new DoubleVector(vector);
     }
 
     @Override

@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.AbstractStateSpaceSearchTest;
@@ -23,7 +23,7 @@ public class MonteCarloTreeSearchMetadataFactoryTest extends AbstractStateSpaceS
     @Test
     public void testBaseSearchNodeMetadataFactory() {
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory = new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
+        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory = new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
         double parentCumulativeReward = 50.0;
         TestSearchNodeImpl<MonteCarloTreeSearchMetadata<DoubleReward>> node = new TestSearchNodeImpl<>(
             new TestState(Collections.singletonList('A')),
@@ -35,12 +35,12 @@ public class MonteCarloTreeSearchMetadataFactoryTest extends AbstractStateSpaceS
     }
 
     private void assertMetadata(
-        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory,
+        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory,
         double parentCumulativeReward,
         TestSearchNodeImpl<MonteCarloTreeSearchMetadata<DoubleReward>> node,
         TestAction action) {
 
-        StateRewardReturn<TestAction, DoubleReward, DoubleVectorialObservation, TestState> stateRewardReturn = node.applyAction(action);
+        StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState> stateRewardReturn = node.applyAction(action);
         MonteCarloTreeSearchMetadata<DoubleReward> newSearchNodeMetadata = factory.createSearchNodeMetadata(node, stateRewardReturn, action);
 
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);

@@ -9,7 +9,7 @@ import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.EpisodeImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.List;
 public class RolloutGameSampler<
     TAction extends Action,
     TReward extends DoubleVectorialReward,
-    TObservation extends DoubleVectorialObservation,
+    TObservation extends DoubleVector,
     TState extends State<TAction, TReward, TObservation, TState>> {
 
     private final InitialStateSupplier<TAction, TReward, TObservation, TState> initialStateSupplier;

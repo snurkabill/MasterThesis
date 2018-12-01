@@ -4,11 +4,11 @@ import vahy.api.model.observation.Observation;
 
 import java.util.Arrays;
 
-public class DoubleVectorialObservation implements Observation {
+public class DoubleVector implements Observation {
 
     private final double[] observedVector;
 
-    public DoubleVectorialObservation(double[] observedVector) {
+    public DoubleVector(double[] observedVector) {
         this.observedVector = observedVector;
     }
 
@@ -19,9 +19,9 @@ public class DoubleVectorialObservation implements Observation {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DoubleVectorialObservation)) return false;
+        if (!(o instanceof DoubleVector)) return false;
 
-        DoubleVectorialObservation that = (DoubleVectorialObservation) o;
+        DoubleVector that = (DoubleVector) o;
 
         return Arrays.equals(getObservedVector(), that.getObservedVector());
     }

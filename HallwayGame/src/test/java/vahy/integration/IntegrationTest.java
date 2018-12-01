@@ -14,7 +14,7 @@ import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
@@ -49,8 +49,8 @@ public class IntegrationTest {
         int rolloutCount = 20;
 
 
-        NodeEvaluator<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>(rewardAggregator)),
+        NodeEvaluator<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
+            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>(rewardAggregator)),
             random,
             rewardAggregator,
             discountFactor,

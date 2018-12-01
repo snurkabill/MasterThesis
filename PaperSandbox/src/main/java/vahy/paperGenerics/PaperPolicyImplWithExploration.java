@@ -2,7 +2,7 @@ package vahy.paperGenerics;
 
 import vahy.api.model.Action;
 import vahy.environment.state.PaperState;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.RandomDistributionUtils;
 import vahy.utils.ReflectionHacks;
@@ -14,7 +14,7 @@ import java.util.SplittableRandom;
 public class PaperPolicyImplWithExploration<
     TAction extends Enum<TAction> & Action,
     TReward extends DoubleReward,
-    TObservation extends DoubleVectorialObservation,
+    TObservation extends DoubleVector,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TObservation, TState>>
     implements PaperPolicy<TAction, TReward, TObservation, TState> {

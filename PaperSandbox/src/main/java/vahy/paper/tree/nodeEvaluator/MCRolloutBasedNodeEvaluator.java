@@ -3,7 +3,7 @@ package vahy.paper.tree.nodeEvaluator;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.tree.SearchNode;
@@ -61,7 +61,7 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
         ImmutableStateImpl wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             ActionType selectedAction = selectNextAction(wrappedState);
-            StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
+            StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }

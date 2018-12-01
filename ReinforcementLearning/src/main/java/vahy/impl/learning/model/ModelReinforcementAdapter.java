@@ -6,11 +6,11 @@ import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.api.learning.model.SupervisedTrainableValueModel;
 import vahy.api.model.reward.RewardFactory;
 import vahy.api.model.reward.DoubleVectorialReward;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 
 import java.util.List;
 
-public class ModelReinforcementAdapter<TReward extends DoubleVectorialReward> implements SupervisedTrainableValueModel<TReward, DoubleVectorialObservation> {
+public class ModelReinforcementAdapter<TReward extends DoubleVectorialReward> implements SupervisedTrainableValueModel<TReward, DoubleVector> {
 
     private static final Logger logger = LoggerFactory.getLogger(ModelReinforcementAdapter.class);
 
@@ -25,12 +25,12 @@ public class ModelReinforcementAdapter<TReward extends DoubleVectorialReward> im
     }
 
     @Override
-    public TReward approximateReward(DoubleVectorialObservation observationAggregation) {
+    public TReward approximateReward(DoubleVector observationAggregation) {
         return rewardFactory.fromNumericVector(model.predict(observationAggregation.getObservedVector()));
     }
 
     @Override
-    public void fit(List<DoubleVectorialObservation> inputList, List<TReward> rewardList) {
+    public void fit(List<DoubleVector> inputList, List<TReward> rewardList) {
         if(inputList.size() != rewardList.size()) {
             throw new IllegalArgumentException(
                 "Input matrix and reward list differs in common dimension. Input matrix dim: [" + inputList.size() + "], reward list dim: [" + rewardList.size() + "]");

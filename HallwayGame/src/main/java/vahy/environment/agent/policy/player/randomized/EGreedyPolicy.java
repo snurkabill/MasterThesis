@@ -8,7 +8,7 @@ import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.policy.maximizingEstimatedReward.AbstractEstimatedRewardMaximizingTreeSearchPolicy;
@@ -22,7 +22,7 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.SplittableRandom;
 
-public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> {
+public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> {
 
     public EGreedyPolicy(
         SplittableRandom random,
@@ -31,31 +31,31 @@ public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPo
         NodeTransitionUpdater<
             ActionType,
             DoubleReward,
-            DoubleVectorialObservation,
+            DoubleVector,
             BaseSearchNodeMetadata<DoubleReward>,
             ImmutableStateImpl> nodeTransitionUpdater,
         NodeEvaluator<
                     ActionType,
             DoubleReward,
-                    DoubleVectorialObservation,
+            DoubleVector,
                     BaseSearchNodeMetadata<DoubleReward>,
                     ImmutableStateImpl> rewardSimulator) {
         super(random, uprateTreeCount, createSearchTree(random, gameState, nodeTransitionUpdater, rewardSimulator));
     }
 
-    private static SearchTreeImpl<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> createSearchTree(
+    private static SearchTreeImpl<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> createSearchTree(
         SplittableRandom random,
         ImmutableStateImpl gameState,
-        NodeTransitionUpdater<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> nodeTransitionUpdater,
-        NodeEvaluator<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> nodeEvaluator)
+        NodeTransitionUpdater<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> nodeTransitionUpdater,
+        NodeEvaluator<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> nodeEvaluator)
     {
-        SearchNodeFactory<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> searchNodeFactory =
+        SearchNodeFactory<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> searchNodeFactory =
             new SearchNodeBaseFactoryImpl<>(
-                new BaseSearchNodeMetadataFactory<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>(new DoubleScalarRewardAggregator()
+                new BaseSearchNodeMetadataFactory<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>(new DoubleScalarRewardAggregator()
                 )
             );
 
-        SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> root = searchNodeFactory.createNode(
+        SearchNode<ActionType, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> root = searchNodeFactory.createNode(
             new ImmutableStateRewardReturnTuple<>(gameState, new DoubleReward(0.0)),
             null,
             null);

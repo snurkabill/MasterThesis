@@ -1,14 +1,14 @@
 package vahy.paper.reinforcement;
 
 import vahy.api.learning.model.SupervisedTrainableModel;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-public class TrainableApproximator<TObservation extends DoubleVectorialObservation> implements Function<TObservation, double[]> {
+public class TrainableApproximator<TObservation extends DoubleVector> implements Function<TObservation, double[]> {
 
     private final SupervisedTrainableModel supervisedTrainableModel;
 

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.tree.EdgeMetadata;
 import vahy.paper.tree.SearchNode;
@@ -49,7 +49,7 @@ public class PaperNodeExpander implements NodeExpander {
         }
 
         for (ActionType action : allActions) {
-            StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
+            StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             SearchNode newNode = new SearchNode(stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();

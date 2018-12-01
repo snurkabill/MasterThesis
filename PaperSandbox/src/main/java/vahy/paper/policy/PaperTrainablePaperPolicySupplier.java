@@ -1,7 +1,7 @@
 package vahy.paper.policy;
 
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.reinforcement.TrainableApproximator;
 import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
@@ -51,7 +51,7 @@ public class PaperTrainablePaperPolicySupplier extends PaperPolicySupplier {
         return new PaperPolicyImplWithExploration(random, createPolicy(initialState), explorationConstant, temperature);
     }
 
-    public void train(List<ImmutableTuple<DoubleVectorialObservation, double[]>> trainData) {
+    public void train(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
         trainableRewardApproximator.train(trainData);
     }
 }

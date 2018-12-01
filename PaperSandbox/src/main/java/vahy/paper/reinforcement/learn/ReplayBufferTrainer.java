@@ -4,7 +4,7 @@ import vahy.api.model.StateActionReward;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.policy.EnvironmentPolicySupplier;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class ReplayBufferTrainer extends AbstractTrainer {
 
     private final int bufferSize;
-    private final LinkedList<List<ImmutableTuple<DoubleVectorialObservation, double[]>>> buffer;
+    private final LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer;
 
     public ReplayBufferTrainer(HallwayGameInitialInstanceSupplier initialStateSupplier,
                                PaperTrainablePaperPolicySupplier paperTrainablePolicySupplier,
@@ -49,9 +49,9 @@ public class ReplayBufferTrainer extends AbstractTrainer {
         trainPolicy(buffer.stream().flatMap(Collection::stream).collect(Collectors.toList()));
     }
 
-    public List<ImmutableTuple<DoubleVectorialObservation, double[]>> convertEpisodeToDataSamples(PaperEpisode paperEpisode) {
-        List<ImmutableTuple<DoubleVectorialObservation, double[]>> episodeRaw = new ArrayList<>();
-        List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
+    public List<ImmutableTuple<DoubleVector, double[]>> convertEpisodeToDataSamples(PaperEpisode paperEpisode) {
+        List<ImmutableTuple<DoubleVector, double[]>> episodeRaw = new ArrayList<>();
+        List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i);

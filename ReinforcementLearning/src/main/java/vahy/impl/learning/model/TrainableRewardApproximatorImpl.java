@@ -4,13 +4,13 @@ import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.api.learning.model.TrainableRewardApproximator;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardFactory;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class TrainableRewardApproximatorImpl<TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> implements TrainableRewardApproximator<TReward, TObservation> {
+public class TrainableRewardApproximatorImpl<TReward extends DoubleVectorialReward, TObservation extends DoubleVector> implements TrainableRewardApproximator<TReward, TObservation> {
 
     // TODO: make this class more general not just using double arrays
 

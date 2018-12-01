@@ -3,7 +3,7 @@ package vahy.environment.agent.policy.environment;
 import vahy.api.policy.Policy;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
@@ -11,7 +11,7 @@ import vahy.utils.RandomDistributionUtils;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicy implements Policy<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> {
+public class EnvironmentPolicy implements Policy<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> {
 
     private final SplittableRandom random;
 

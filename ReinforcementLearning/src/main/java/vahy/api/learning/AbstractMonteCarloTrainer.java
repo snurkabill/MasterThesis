@@ -11,7 +11,7 @@ import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.learning.RolloutGameSampler;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.MutableTuple;
 
@@ -23,7 +23,7 @@ import java.util.Map;
 public abstract class AbstractMonteCarloTrainer<
     TAction extends Action,
     TReward extends DoubleVectorialReward,
-    TObservation extends DoubleVectorialObservation,
+    TObservation extends DoubleVector,
     TState extends State<TAction, TReward, TObservation, TState>> extends AbstractTrainer { // TODO: make observation and reward more abstract
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMonteCarloTrainer.class.getName());

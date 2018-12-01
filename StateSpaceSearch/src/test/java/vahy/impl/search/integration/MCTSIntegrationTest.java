@@ -6,7 +6,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
@@ -32,21 +32,21 @@ public class MCTSIntegrationTest {
         SplittableRandom random = new SplittableRandom(0);
 
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        SearchNode<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> root = new SearchNodeImpl<>(
+        SearchNode<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> root = new SearchNodeImpl<>(
             new TestState(Arrays.asList('Z')),
             new MonteCarloTreeSearchMetadata<>(new DoubleReward(0.0), new DoubleReward(0.0), new DoubleReward(0.0)),
             new LinkedHashMap<>()
         );
 
-        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> metadataFactory =
+        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> metadataFactory =
             new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
-        SearchNodeFactory<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> nodeFactory =
+        SearchNodeFactory<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> nodeFactory =
             new SearchNodeBaseFactoryImpl<>(metadataFactory);
 
-        NodeEvaluator<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> nodeEvaluator =
+        NodeEvaluator<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> nodeEvaluator =
             new MonteCarloEvaluator<>(nodeFactory, random, rewardAggregator, 1.0, 1);
 
-        SearchTreeImpl<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> searchTree = new SearchTreeImpl<>(
+        SearchTreeImpl<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> searchTree = new SearchTreeImpl<>(
             root,
             new Ucb1NodeSelector<>(random, 1.0),
             new MonteCarloTreeSearchUpdater<>(),

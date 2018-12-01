@@ -6,9 +6,9 @@ import vahy.api.model.observation.AbstractObservationAggregator;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class VectorialStateHistoryObservationAggregator<TAction extends Action> extends AbstractObservationAggregator<TAction, DoubleVectorialObservation, DoubleVectorialObservationAggregation> {
+public class VectorialStateHistoryObservationAggregator<TAction extends Action> extends AbstractObservationAggregator<TAction, DoubleVector, DoubleVectorialObservationAggregation> {
 
-    private final LinkedList<DoubleVectorialObservation> observationQueue = new LinkedList<>();
+    private final LinkedList<DoubleVector> observationQueue = new LinkedList<>();
 
     protected VectorialStateHistoryObservationAggregator(int aggregationQueueSize) {
         super(aggregationQueueSize);
@@ -20,7 +20,7 @@ public class VectorialStateHistoryObservationAggregator<TAction extends Action> 
     }
 
     @Override
-    public void aggregate(TAction playedAction, DoubleVectorialObservation observation) {
+    public void aggregate(TAction playedAction, DoubleVector observation) {
         observationQueue.add(observation);
         reduceQueueSize(observationQueue);
     }
@@ -33,9 +33,9 @@ public class VectorialStateHistoryObservationAggregator<TAction extends Action> 
         int lengthOfObservationVector = observationQueue.getFirst().getObservedVector().length;
         int lengthOfAggregatedObservationVector = lengthOfObservationVector * observationQueue.size();
         double[] representation = new double[lengthOfAggregatedObservationVector];
-        Iterator<DoubleVectorialObservation> queueIterator = observationQueue.iterator();
+        Iterator<DoubleVector> queueIterator = observationQueue.iterator();
         for (int i = 0; queueIterator.hasNext(); i++) {
-            DoubleVectorialObservation next = queueIterator.next();
+            DoubleVector next = queueIterator.next();
             System.arraycopy(next.getObservedVector(), 0, representation, i * lengthOfObservationVector, lengthOfObservationVector);
         }
         return new DoubleVectorialObservationAggregation(representation);
