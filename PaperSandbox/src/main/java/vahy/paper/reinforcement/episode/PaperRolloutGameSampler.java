@@ -2,11 +2,11 @@ package vahy.paper.reinforcement.episode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperPolicy;
 import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.environment.agent.policy.environment.EnvironmentPolicy;
-import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class PaperRolloutGameSampler {
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
         for (int j = 0; j < episodeBatchSize; j++) {
             logger.info("Running [{}]th paperEpisode", j);
-            ImmutableStateImpl initialGameState = initialStateSupplier.createInitialState();
+            HallwayStateImpl initialGameState = initialStateSupplier.createInitialState();
             PaperPolicy paperPolicy = playerPolicySupplier.initializePolicyWithExploration(initialGameState);
             EnvironmentPolicy opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
             PaperEpisode paperEpisode = new PaperEpisode(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);

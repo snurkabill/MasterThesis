@@ -7,7 +7,7 @@ import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 
@@ -28,7 +28,7 @@ public class SearchNode {
 
     private final long nodeId = instanceCounter++;
 
-    private final ImmutableStateImpl wrappedState;
+    private final HallwayStateImpl wrappedState;
 
     private SearchNode parent;
     private HallwayAction appliedParentAction;
@@ -48,7 +48,7 @@ public class SearchNode {
 
     private boolean alreadyEvaluated = false;
 
-    public SearchNode(ImmutableStateImpl wrappedState, SearchNode parent, HallwayAction appliedParentAction, DoubleReward gainedReward) {
+    public SearchNode(HallwayStateImpl wrappedState, SearchNode parent, HallwayAction appliedParentAction, DoubleReward gainedReward) {
         this.wrappedState = wrappedState;
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
@@ -89,7 +89,7 @@ public class SearchNode {
         return parent == null;
     }
 
-    public ImmutableStateImpl getWrappedState() {
+    public HallwayStateImpl getWrappedState() {
         return wrappedState;
     }
 

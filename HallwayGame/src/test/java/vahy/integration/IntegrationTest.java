@@ -10,7 +10,7 @@ import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.agent.policy.player.smart.Ucb1Policy;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
@@ -49,8 +49,8 @@ public class IntegrationTest {
         int rolloutCount = 20;
 
 
-        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>(rewardAggregator)),
+        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
+            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>(rewardAggregator)),
             random,
             rewardAggregator,
             discountFactor,

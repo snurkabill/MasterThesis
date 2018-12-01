@@ -2,7 +2,7 @@ package vahy.paper.tree.nodeEvaluator;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
@@ -58,17 +58,17 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
 
     private ImmutableTuple<Double, Double> runRandomWalkSimulation(SearchNode node) {
         List<DoubleReward> gainedRewards = new ArrayList<>();
-        ImmutableStateImpl wrappedState = node.getWrappedState();
+        HallwayStateImpl wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             HallwayAction selectedAction = selectNextAction(wrappedState);
-            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }
         return new ImmutableTuple<>(doubleScalarRewardAggregator.aggregateDiscount(gainedRewards, discountFactor).getValue(), wrappedState.isAgentKilled() ? 1.0 : 0.0);
     }
 
-    private HallwayAction selectNextAction(ImmutableStateImpl state) {
+    private HallwayAction selectNextAction(HallwayStateImpl state) {
         if(state.isOpponentTurn()) {
             ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = state.environmentActionsWithProbabilities();
             List<HallwayAction> actions = environmentActionsWithProbabilities.getFirst();

@@ -6,7 +6,7 @@ package vahy.search;
 //    DoubleReward,
 //    DoubleVector,
 //    BaseSearchNodeMetadata<DoubleReward>,
-//    ImmutableStateImpl> {
+//    HallwayStateImpl> {
 //
 //    private final double discountFactor;
 //    private final RewardAggregator<DoubleReward> rewardAggregator;
@@ -45,9 +45,9 @@ package vahy.search;
 //
 //
 //    @Override
-//    public void applyUpdate(SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> parent,
-//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> evaluatedNode,
+//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> parent,
+//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> child) {
 //
 //        BaseSearchNodeMetadata<DoubleReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
 //        Map<HallwayAction, BaseSearchNodeMetadata<DoubleReward>> childSearchNodeMetadataMap = parent.getChildNodeMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, x-> x.getValue().getSearchNodeMetadata()));

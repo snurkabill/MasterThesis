@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.tree.EdgeMetadata;
@@ -49,7 +49,7 @@ public class PaperNodeExpander implements NodeExpander {
         }
 
         for (HallwayAction action : allActions) {
-            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             SearchNode newNode = new SearchNode(stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();

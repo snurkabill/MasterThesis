@@ -7,7 +7,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.reinforcement.TrainableApproximator;
@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class PaperNodeEvaluator implements NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> {
+public class PaperNodeEvaluator implements NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
 
@@ -25,29 +25,29 @@ public class PaperNodeEvaluator implements NodeEvaluator<HallwayAction, DoubleRe
     public static final int RISK_VALUE_INDEX = 1;
     public static final int POLICY_START_INDEX = 2;
 
-    private final SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> searchNodeFactory;
+    private final SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory;
     private final TrainableApproximator<DoubleVector> trainableApproximator;
 
-    public PaperNodeEvaluator(SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> searchNodeFactory,
+    public PaperNodeEvaluator(SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory,
                               TrainableApproximator<DoubleVector> trainableApproximator) {
         this.searchNodeFactory = searchNodeFactory;
         this.trainableApproximator = trainableApproximator;
     }
 
     @Override
-    public void evaluateNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> selectedNode) {
+    public void evaluateNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> selectedNode) {
         HallwayAction[] allPossibleActions = selectedNode.getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
-        Map<HallwayAction, SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl>> childNodeMap = selectedNode.getChildNodeMap();
+        Map<HallwayAction, SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> childNodeMap = selectedNode.getChildNodeMap();
         for (HallwayAction nextAction : allPossibleActions) {
             childNodeMap.put(nextAction, evaluateChildNode(selectedNode, nextAction));
         }
     }
 
-    private SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> evaluateChildNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> parent,
-                                                                                                                                                    HallwayAction nextAction) {
-        StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = parent.applyAction(nextAction);
-        SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, ImmutableStateImpl> childNode = searchNodeFactory
+    private SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> evaluateChildNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> parent,
+                                                                                                                                                  HallwayAction nextAction) {
+        StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = parent.applyAction(nextAction);
+        SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> childNode = searchNodeFactory
             .createNode(stateRewardReturn, parent, nextAction);
         double[] prediction = trainableApproximator.apply(stateRewardReturn.getState().getObservation());
         childNode.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));

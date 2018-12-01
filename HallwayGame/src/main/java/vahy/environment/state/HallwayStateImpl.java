@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> {
+public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -35,7 +35,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
     private final boolean hasAgentMoved;
     private final boolean hasAgentResigned;
 
-    public ImmutableStateImpl(
+    public HallwayStateImpl(
         StaticGamePart staticGamePart,
         double[][] rewards,
         int agentXCoordination,
@@ -60,7 +60,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
             false);
     }
 
-    private ImmutableStateImpl(
+    private HallwayStateImpl(
         StaticGamePart staticGamePart,
         double[][] rewards,
         int agentXCoordination,
@@ -163,7 +163,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
     }
 
     @Override
-    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> applyAction(HallwayAction hallwayAction) {
+    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> applyAction(HallwayAction hallwayAction) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -181,7 +181,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                         newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
                     }
                     return new ImmutableStateRewardReturnTuple<>(
-                        new ImmutableStateImpl(
+                        new HallwayStateImpl(
                             staticGamePart,
                             newRewards,
                             agentCoordinates.getFirst(),
@@ -197,7 +197,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                 case TURN_LEFT:
                     AgentHeading newAgentHeading = agentHeading.turn(hallwayAction);
                     return new ImmutableStateRewardReturnTuple<>(
-                        new ImmutableStateImpl(
+                        new HallwayStateImpl(
                             staticGamePart,
                             ArrayUtils.cloneArray(rewards),
                             agentXCoordination,
@@ -211,7 +211,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                         new DoubleReward(-staticGamePart.getDefaultStepPenalty()));
 //                case RESIGN:
 //                    return new ImmutableStateRewardReturnTuple<>(
-//                        new ImmutableStateImpl(
+//                        new HallwayStateImpl(
 //                            staticGamePart,
 //                            ArrayUtils.cloneArray(rewards),
 //                            agentXCoordination,
@@ -230,7 +230,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
         } else {
             switch (hallwayAction) {
                 case NO_ACTION:
-                    ImmutableStateImpl state = new ImmutableStateImpl(
+                    HallwayStateImpl state = new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         agentXCoordination,
@@ -244,7 +244,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                     return new ImmutableStateRewardReturnTuple<>(state, new DoubleReward(0.0));
                 case NOISY_RIGHT:
                     ImmutableTuple<Integer, Integer> newRightCoordinates = makeRightMove();
-                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newRightCoordinates.getFirst(),
@@ -257,7 +257,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                         false), new DoubleReward(0.0));
                 case NOISY_LEFT:
                     ImmutableTuple<Integer, Integer> newLeftCoordinates = makeLeftMove();
-                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newLeftCoordinates.getFirst(),
@@ -269,7 +269,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                         false,
                         false), new DoubleReward(0.0));
                 case TRAP:
-                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         agentXCoordination,
@@ -282,7 +282,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                         false), new DoubleReward(0.0));
                 case NOISY_RIGHT_TRAP:
                     ImmutableTuple<Integer, Integer> newRightTrapCoordinates = makeRightMove();
-                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newRightTrapCoordinates.getFirst(),
@@ -295,7 +295,7 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
                         false), new DoubleReward(0.0));
                 case NOISY_LEFT_TRAP:
                     ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeLeftMove();
-                    return new ImmutableStateRewardReturnTuple<>(new ImmutableStateImpl(
+                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newLeftTrapCoordinates.getFirst(),
@@ -313,8 +313,8 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
     }
 
     @Override
-    public ImmutableStateImpl deepCopy() {
-        return new ImmutableStateImpl(
+    public HallwayStateImpl deepCopy() {
+        return new HallwayStateImpl(
             staticGamePart,
             ArrayUtils.cloneArray(rewards),
             agentXCoordination,
@@ -546,9 +546,9 @@ public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleRewar
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ImmutableStateImpl)) return false;
+        if (!(o instanceof HallwayStateImpl)) return false;
 
-        ImmutableStateImpl that = (ImmutableStateImpl) o;
+        HallwayStateImpl that = (HallwayStateImpl) o;
 
         if (rewardsLeft != that.rewardsLeft) return false;
         if (isAgentKilled != that.isAgentKilled) return false;

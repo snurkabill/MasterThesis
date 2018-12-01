@@ -12,11 +12,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class ImmutableStateImplTest {
+public class HallwayStateImplTest {
 
     private static final double DOUBLE_TOLERANCE = Math.pow(10, -10);
 
-    private ImmutableStateImpl getHallGame1() {
+    private HallwayStateImpl getHallGame1() {
         boolean[][] walls = new boolean[][]{
             {true, true, true},
             {true, false, true},
@@ -36,10 +36,10 @@ public class ImmutableStateImplTest {
             {0.0, 0.0, 0.0},
         };
         StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, new double[walls.length][walls[0].length], ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
-        return new ImmutableStateImpl(staticGamePart, rewards, 5, 1, AgentHeading.NORTH);
+        return new HallwayStateImpl(staticGamePart, rewards, 5, 1, AgentHeading.NORTH);
     }
 
-    private ImmutableStateImpl getHallGame2() {
+    private HallwayStateImpl getHallGame2() {
         boolean[][] walls = new boolean[][]{
             {true, true,  true,  true, true},
             {true, false, false, false, true},
@@ -68,15 +68,15 @@ public class ImmutableStateImplTest {
             {0.0, 0.0, 0.0, 0.0, 0.0},
         };
         StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
-        return new ImmutableStateImpl(staticGamePart, rewards, 5, 2, AgentHeading.NORTH);
+        return new HallwayStateImpl(staticGamePart, rewards, 5, 2, AgentHeading.NORTH);
     }
 
-    private void assertAgentCoordinations(ImmutableStateImpl game, int expectedX, int expectedY, int gameXdim) {
+    private void assertAgentCoordinations(HallwayStateImpl game, int expectedX, int expectedY, int gameXdim) {
         double[] observation = game.getObservation().getObservedVector();
-        Assert.assertEquals(observation[gameXdim * expectedX + expectedY], ImmutableStateImpl.AGENT_LOCATION_REPRESENTATION, DOUBLE_TOLERANCE);
+        Assert.assertEquals(observation[gameXdim * expectedX + expectedY], HallwayStateImpl.AGENT_LOCATION_REPRESENTATION, DOUBLE_TOLERANCE);
     }
 
-    private void assertAgentHeading(ImmutableStateImpl game, AgentHeading expectedAgentHeading) {
+    private void assertAgentHeading(HallwayStateImpl game, AgentHeading expectedAgentHeading) {
         double[] observation = game.getObservation().getObservedVector();
         int observationIndex = agentHeadingIndexOnArray(expectedAgentHeading);
         Assert.assertEquals(observation[observation.length + observationIndex], 1.0, DOUBLE_TOLERANCE);
@@ -99,22 +99,22 @@ public class ImmutableStateImplTest {
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void envActionWhenAgentOnTurnTest() {
-        ImmutableStateImpl game = getHallGame1();
+        HallwayStateImpl game = getHallGame1();
         game.applyAction(HallwayAction.TRAP);
     }
 
     @Test(expectedExceptions = IllegalStateException.class)
     public void agentActionWhenEnvOnTurnTest() {
-        ImmutableStateImpl game = getHallGame1();
+        HallwayStateImpl game = getHallGame1();
         game.applyAction(HallwayAction.FORWARD).getState().applyAction(HallwayAction.FORWARD);
     }
 
     @Test
     public void simpleForwardStateChangeTest() {
-        ImmutableStateImpl state1 = getHallGame1();
+        HallwayStateImpl state1 = getHallGame1();
         assertAgentCoordinations(state1, 5, 1, 3);
         assertAgentHeading(state1, AgentHeading.NORTH);
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1.applyAction(HallwayAction.FORWARD).getState();
+        HallwayStateImpl state2 = (HallwayStateImpl) state1.applyAction(HallwayAction.FORWARD).getState();
         Assert.assertFalse(state2.isAgentTurn());
         Assert.assertFalse(state2.isFinalState());
         assertAgentCoordinations(state2, 4, 1, 3);
@@ -123,10 +123,10 @@ public class ImmutableStateImplTest {
 
     @Test
     public void toWallForwardStateChangeTest() {
-        ImmutableStateImpl state1 = getHallGame1();
+        HallwayStateImpl state1 = getHallGame1();
         assertAgentCoordinations(state1, 5, 1, 3);
         assertAgentHeading(state1, AgentHeading.NORTH);
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.TURN_LEFT).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
@@ -137,9 +137,9 @@ public class ImmutableStateImplTest {
 
     @Test
     public void agentRightTurnTest() {
-        ImmutableStateImpl state1 = getHallGame1();
+        HallwayStateImpl state1 = getHallGame1();
         assertAgentHeading(state1, AgentHeading.NORTH);
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.TURN_RIGHT).getState();
         Assert.assertFalse(state2.isAgentTurn());
         Assert.assertFalse(state2.isFinalState());
@@ -148,9 +148,9 @@ public class ImmutableStateImplTest {
 
     @Test
     public void agentLeftTurnTest() {
-        ImmutableStateImpl state1 = getHallGame1();
+        HallwayStateImpl state1 = getHallGame1();
         assertAgentHeading(state1, AgentHeading.NORTH);
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.TURN_LEFT).getState();
         Assert.assertFalse(state2.isAgentTurn());
         Assert.assertFalse(state2.isFinalState());
@@ -159,7 +159,7 @@ public class ImmutableStateImplTest {
 
     @Test
     public void emptyEnvironmentActionsWithProbabilitiesTest() {
-        ImmutableStateImpl state = getHallGame1();
+        HallwayStateImpl state = getHallGame1();
         Assert.assertTrue(state.isAgentTurn());
         Assert.assertTrue(state.environmentActionsWithProbabilities().getFirst().isEmpty());
         Assert.assertTrue(state.environmentActionsWithProbabilities().getSecond().isEmpty());
@@ -167,14 +167,14 @@ public class ImmutableStateImplTest {
 
     @Test
     public void onlyNoActionEnvironmentActionsWithProbabilitiesTest() {
-        ImmutableStateImpl state1 = getHallGame1();
+        HallwayStateImpl state1 = getHallGame1();
         Assert.assertTrue(state1.isAgentTurn());
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.FORWARD).getState();
         Assert.assertEquals(state2.environmentActionsWithProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
         Assert.assertEquals(state2.environmentActionsWithProbabilities().getSecond(), Collections.singletonList(1.0));
 
-        ImmutableStateImpl state3 = (ImmutableStateImpl) state2
+        HallwayStateImpl state3 = (HallwayStateImpl) state2
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.TURN_LEFT).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
@@ -185,9 +185,9 @@ public class ImmutableStateImplTest {
 
     @Test
     public void noisyMovesEnvironmentActionsWithProbabilitiesTest() {
-        ImmutableStateImpl state1 = getHallGame2();
+        HallwayStateImpl state1 = getHallGame2();
         Assert.assertTrue(state1.isAgentTurn());
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.FORWARD).getState();
         List<HallwayAction> moves = state2.environmentActionsWithProbabilities().getFirst();
         List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.NO_ACTION);
@@ -197,9 +197,9 @@ public class ImmutableStateImplTest {
 
     @Test
     public void noisyTrapMovesEnvironmentActionsWithProbabilitiesTest() {
-        ImmutableStateImpl state1 = getHallGame2();
+        HallwayStateImpl state1 = getHallGame2();
         Assert.assertTrue(state1.isAgentTurn());
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
@@ -211,9 +211,9 @@ public class ImmutableStateImplTest {
 
     @Test
     public void noisyTrapMovesWithTrapEnvironmentActionsWithProbabilitiesTest() {
-        ImmutableStateImpl state1 = getHallGame2();
+        HallwayStateImpl state1 = getHallGame2();
         Assert.assertTrue(state1.isAgentTurn());
-        ImmutableStateImpl state2 = (ImmutableStateImpl) state1
+        HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState()

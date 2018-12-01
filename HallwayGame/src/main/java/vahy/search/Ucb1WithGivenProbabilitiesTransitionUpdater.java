@@ -5,7 +5,7 @@ package vahy.search;
 //    DoubleReward,
 //    DoubleVector,
 //    MonteCarloTreeSearchMetadata<DoubleReward>,
-//    ImmutableStateImpl> {
+//    HallwayStateImpl> {
 //
 //    private final double discountFactor;
 //    private final RewardAggregator<DoubleReward> rewardAggregator;
@@ -43,9 +43,9 @@ package vahy.search;
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> parent,
-//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> evaluatedNode,
+//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> parent,
+//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> child) {
 //
 //        MonteCarloTreeSearchMetadata<DoubleReward> searchNodeMetadata = parent.getSearchNodeMetadata();
 //

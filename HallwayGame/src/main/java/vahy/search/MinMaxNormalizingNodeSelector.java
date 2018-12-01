@@ -2,7 +2,7 @@ package vahy.search;
 
 import vahy.api.search.node.SearchNode;
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
@@ -13,7 +13,7 @@ import vahy.utils.StreamUtils;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> {
+public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> {
 
     public static final double TOLERANCE = 0.0000000001;
 
@@ -26,7 +26,7 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
     }
 
     @Override
-    protected HallwayAction getBestAction(SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> node) {
+    protected HallwayAction getBestAction(SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> node) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
         double max = node

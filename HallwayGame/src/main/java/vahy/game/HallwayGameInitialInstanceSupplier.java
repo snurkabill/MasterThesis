@@ -4,7 +4,7 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.environment.HallwayAction;
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.GameConfig;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.environment.state.StaticGamePart;
 import vahy.game.cell.Cell;
 import vahy.game.cell.CellPosition;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;
@@ -36,7 +36,7 @@ public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<
     }
 
     @Override
-    public ImmutableStateImpl createInitialState() {
+    public HallwayStateImpl createInitialState() {
         return createImmutableInitialState(gameMatrix);
     }
 
@@ -55,7 +55,7 @@ public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<
         return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
     }
 
-    private ImmutableStateImpl createImmutableInitialState(List<List<Cell>> gameSetup) {
+    private HallwayStateImpl createImmutableInitialState(List<List<Cell>> gameSetup) {
         boolean[][] walls = new boolean[gameSetup.size()][gameSetup.get(0).size()];
         double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
         double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
@@ -69,7 +69,7 @@ public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<
         int totalRewardsCount = (int) Arrays.stream(rewards).mapToLong(x -> Arrays.stream(x).filter(y -> y > 0.0).count()).sum();
         StaticGamePart staticGamePart = new StaticGamePart(random, gameConfig.getStateRepresentation(), trapProbabilities, ArrayUtils.cloneArray(rewards), walls, gameConfig.getStepPenalty(), gameConfig.getNoisyMoveProbability(), totalRewardsCount);
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup);
-        return new ImmutableStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
+        return new HallwayStateImpl(staticGamePart, rewards, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), AgentHeading.NORTH);
     }
 
     private List<List<Cell>> deserialize(String stringRepresentation) throws NotValidGameStringRepresentationException {

@@ -3,7 +3,7 @@ package vahy.paper.policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.paper.tree.SearchNode;
@@ -39,7 +39,7 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public double[] getActionProbabilityDistribution(ImmutableStateImpl gameState) {
+    public double[] getActionProbabilityDistribution(HallwayStateImpl gameState) {
         checkStateRoot(gameState);
         HallwayAction[] allDoableActions = gameState.isOpponentTurn() ? HallwayAction.environmentActions : HallwayAction.playerActions;
         double[] vector = new double[allDoableActions.length];
@@ -77,7 +77,7 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public double[] getPriorActionProbabilityDistribution(ImmutableStateImpl gameState) {
+    public double[] getPriorActionProbabilityDistribution(HallwayStateImpl gameState) {
         checkStateRoot(gameState);
         HallwayAction[] allDoableActions = gameState.isOpponentTurn() ? HallwayAction.environmentActions : HallwayAction.playerActions;
         double[] priorProbabilities = new double[allDoableActions.length];
@@ -96,19 +96,19 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public DoubleReward getEstimatedReward(ImmutableStateImpl gameState) {
+    public DoubleReward getEstimatedReward(HallwayStateImpl gameState) {
         checkStateRoot(gameState);
         return searchTree.getRootEstimatedReward();
     }
 
     @Override
-    public double getEstimatedRisk(ImmutableStateImpl gameState) {
+    public double getEstimatedRisk(HallwayStateImpl gameState) {
         checkStateRoot(gameState);
         return searchTree.getRootEstimatedRisk();
     }
 
     @Override
-    public HallwayAction getDiscreteAction(ImmutableStateImpl gameState) {
+    public HallwayAction getDiscreteAction(HallwayStateImpl gameState) {
         expandSearchTree(gameState);
         SearchNode node = searchTree.getRoot();
 
@@ -149,7 +149,7 @@ public class PaperPolicyImpl implements PaperPolicy {
         }
     }
 
-    private void expandSearchTree(ImmutableStateImpl gameState) {
+    private void expandSearchTree(HallwayStateImpl gameState) {
         checkStateRoot(gameState);
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
@@ -177,7 +177,7 @@ public class PaperPolicyImpl implements PaperPolicy {
         }
     }
 
-    private void checkStateRoot(ImmutableStateImpl gameState) {
+    private void checkStateRoot(HallwayStateImpl gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state or argument itself is invalid. Possibly missing equals method");
         }

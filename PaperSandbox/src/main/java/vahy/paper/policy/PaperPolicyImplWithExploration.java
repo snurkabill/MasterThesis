@@ -1,7 +1,7 @@
 package vahy.paper.policy;
 
 import vahy.environment.HallwayAction;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.RandomDistributionUtils;
 
@@ -23,25 +23,25 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         this.temperature = temperature;
     }
 
-    public double[] getPriorActionProbabilityDistribution(ImmutableStateImpl gameState) {
+    public double[] getPriorActionProbabilityDistribution(HallwayStateImpl gameState) {
         return innerPolicy.getPriorActionProbabilityDistribution(gameState);
     }
 
     @Override
-    public DoubleReward getEstimatedReward(ImmutableStateImpl gameState) {
+    public DoubleReward getEstimatedReward(HallwayStateImpl gameState) {
         return innerPolicy.getEstimatedReward(gameState);
     }
 
     @Override
-    public double getEstimatedRisk(ImmutableStateImpl gameState) {
+    public double getEstimatedRisk(HallwayStateImpl gameState) {
         return innerPolicy.getEstimatedRisk(gameState);
     }
 
-    public double[] getActionProbabilityDistribution(ImmutableStateImpl gameState) {
+    public double[] getActionProbabilityDistribution(HallwayStateImpl gameState) {
         return innerPolicy.getActionProbabilityDistribution(gameState);
     }
 
-    public HallwayAction getDiscreteAction(ImmutableStateImpl gameState) {
+    public HallwayAction getDiscreteAction(HallwayStateImpl gameState) {
         HallwayAction discreteAction = innerPolicy.getDiscreteAction(gameState);
         double randomDouble = random.nextDouble();
         if(randomDouble < explorationConstant) {

@@ -6,7 +6,7 @@ import vahy.api.model.StateActionReward;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.EnvironmentPolicy;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.ImmutableStateActionRewardTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -21,19 +21,19 @@ import java.util.stream.Collectors;
 public class PaperEpisode {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperEpisode.class);
-    private final ImmutableStateImpl initialState;
+    private final HallwayStateImpl initialState;
     private final PaperPolicy playerPaperPolicy;
     private final EnvironmentPolicy opponentPolicy;
     private final int stepCountLimit;
 
-    private List<StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>> episodeStateRewardReturnList = new ArrayList<>();
-    private List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>, StepRecord>> episodeHistoryList = new ArrayList<>();
+    private List<StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>> episodeStateRewardReturnList = new ArrayList<>();
+    private List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>, StepRecord>> episodeHistoryList = new ArrayList<>();
     private long millisecondDuration;
 
     private boolean episodeAlreadySimulated = false;
 
     public PaperEpisode(
-        ImmutableStateImpl initialState,
+        HallwayStateImpl initialState,
         PaperPolicy playerPaperPolicy,
         EnvironmentPolicy opponentPolicy, int stepCountLimit) {
         this.initialState = initialState;
@@ -46,7 +46,7 @@ public class PaperEpisode {
         if(episodeAlreadySimulated) {
             throw new IllegalStateException("PaperEpisode was already simulated");
         }
-        ImmutableStateImpl state = this.initialState;
+        HallwayStateImpl state = this.initialState;
         logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         int playerActionCount = 0;
         long start = System.currentTimeMillis();
@@ -62,7 +62,7 @@ public class PaperEpisode {
             double estimatedRisk = playerPaperPolicy.getEstimatedRisk(state);
             playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
             playerActionCount++;
-            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = state.applyAction(action);
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = state.applyAction(action);
             stepsDone++;
             logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
@@ -100,18 +100,18 @@ public class PaperEpisode {
     }
 
     public boolean isAgentKilled() {
-        return ((ImmutableStateImpl) this.getFinalState()).isAgentKilled();
+        return ((HallwayStateImpl) this.getFinalState()).isAgentKilled();
     }
 
-    public List<StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>> getEpisodeStateRewardReturnList() {
+    public List<StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>> getEpisodeStateRewardReturnList() {
         return this.episodeStateRewardReturnList;
     }
 
-    public List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>, StepRecord>> getEpisodeStateActionRewardList() {
+    public List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>, StepRecord>> getEpisodeStateActionRewardList() {
         return episodeHistoryList;
     }
 
-    public ImmutableStateImpl getFinalState() {
+    public HallwayStateImpl getFinalState() {
         return this.episodeStateRewardReturnList.get(episodeStateRewardReturnList.size() - 1).getState();
     }
 
