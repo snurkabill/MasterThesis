@@ -7,7 +7,7 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.paper.tree.nodeExpander.NodeExpander;
 import vahy.paper.tree.treeUpdater.TreeUpdater;
@@ -56,7 +56,7 @@ public class SearchTree {
         this.totalRiskAllowed = totalRiskAllowed;
     }
 
-    public DoubleScalarReward getRootEstimatedReward() {
+    public DoubleReward getRootEstimatedReward() {
         return root.getEstimatedReward();
     }
 
@@ -83,7 +83,7 @@ public class SearchTree {
         return this.root.getWrappedState().getAllPossibleActions();
     }
 
-    public StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> applyAction(ActionType action) {
+    public StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> applyAction(ActionType action) {
         if(root.isFinalNode()) {
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
@@ -92,7 +92,7 @@ public class SearchTree {
             expandNode(root);
         }
         SearchNode child = root.getChildMap().get(action);
-        DoubleScalarReward reward = child.getGainedReward();
+        DoubleReward reward = child.getGainedReward();
         if(root.getNodeProbabilityFlow() != null) {
             if(action.isPlayerAction()) {
                 calculateNumericallyStableNewRiskThreshold(action);

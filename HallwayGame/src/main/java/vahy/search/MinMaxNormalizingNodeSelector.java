@@ -4,7 +4,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.ImmutableTuple;
@@ -13,7 +13,7 @@ import vahy.utils.StreamUtils;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> {
+public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> {
 
     public static final double TOLERANCE = 0.0000000001;
 
@@ -26,7 +26,7 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
     }
 
     @Override
-    protected ActionType getBestAction(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> node) {
+    protected ActionType getBestAction(SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> node) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
         double max = node

@@ -3,7 +3,7 @@ package vahy.paperGenerics;
 import vahy.api.model.Action;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.RandomDistributionUtils;
 import vahy.utils.ReflectionHacks;
 
@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public class PaperPolicyImplWithExploration<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends DoubleVectorialObservation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TObservation, TState>>
@@ -44,7 +44,7 @@ public class PaperPolicyImplWithExploration<
     }
 
     @Override
-    public DoubleScalarReward getEstimatedReward(TState gameState) {
+    public DoubleReward getEstimatedReward(TState gameState) {
         return innerPolicy.getEstimatedReward(gameState);
     }
 

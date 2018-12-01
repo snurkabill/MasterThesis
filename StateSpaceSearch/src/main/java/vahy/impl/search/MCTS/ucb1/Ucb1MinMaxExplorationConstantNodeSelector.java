@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
@@ -17,7 +17,7 @@ import java.util.stream.DoubleStream;
 
 public class Ucb1MinMaxExplorationConstantNodeSelector<
     TAction extends Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation, TState>>
     extends Ucb1NodeSelector<TAction, TReward, TObservation, TState> {

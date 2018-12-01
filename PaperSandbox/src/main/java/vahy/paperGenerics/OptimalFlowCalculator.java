@@ -9,7 +9,7 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.environment.state.PaperState;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class OptimalFlowCalculator<
     TAction extends Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TObservation, TState>> {

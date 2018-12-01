@@ -15,7 +15,7 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
@@ -44,19 +44,19 @@ public class IntegrationTest {
         GameConfig gameConfig = new ConfigBuilder().reward(1000).noisyMoveProbability(0.0).stepPenalty(1).trapProbability(1).buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
 
-        RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
+        RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
         double discountFactor = 0.9; // 0.9
         int rolloutCount = 20;
 
 
-        NodeEvaluator<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>(rewardAggregator)),
+        NodeEvaluator<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
+            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>(rewardAggregator)),
             random,
             rewardAggregator,
             discountFactor,
             rolloutCount);
 
-        EpisodeAggregator<DoubleScalarReward> episodeAggregator = new EpisodeAggregatorImpl<>(
+        EpisodeAggregator<DoubleReward> episodeAggregator = new EpisodeAggregatorImpl<>(
             1,
             10,
             hallwayGameInitialInstanceSupplier,
@@ -77,7 +77,7 @@ public class IntegrationTest {
 //                    ),
             new EnvironmentPolicy(random)
         );
-        List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleScalarReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
+        List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
         System.out.println(rewardHistory.stream().mapToInt(List::size).average());
         Assert.assertTrue(rewardHistory.stream().allMatch(x -> x.size() == 17));
     }

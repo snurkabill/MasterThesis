@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.AbstractStateSpaceSearchTest;
 import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
@@ -20,14 +20,14 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
 
     @Test
     public void testBaseSearchNodeMetadataFactory() {
-        RewardAggregator<DoubleScalarReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        BaseSearchNodeMetadataFactory<TestAction, DoubleScalarReward, DoubleVectorialObservation, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
+        RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
+        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
 
         double parentCumulativeReward = 50.0;
 
-        TestSearchNodeImpl<BaseSearchNodeMetadata<DoubleScalarReward>> node = new TestSearchNodeImpl<>(
+        TestSearchNodeImpl<BaseSearchNodeMetadata<DoubleReward>> node = new TestSearchNodeImpl<>(
             new TestState(Collections.singletonList('A')),
-            new BaseSearchNodeMetadata<>(new DoubleScalarReward(parentCumulativeReward), new DoubleScalarReward(1.0d), new DoubleScalarReward(0.0d)),
+            new BaseSearchNodeMetadata<>(new DoubleReward(parentCumulativeReward), new DoubleReward(1.0d), new DoubleReward(0.0d)),
             new LinkedHashMap<>());
 
         assertMetadata(factory, parentCumulativeReward, node, TestAction.A);
@@ -35,13 +35,13 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
     }
 
     private void assertMetadata(
-        BaseSearchNodeMetadataFactory<TestAction, DoubleScalarReward, DoubleVectorialObservation, TestState> factory,
+        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVectorialObservation, TestState> factory,
         double parentCumulativeReward,
-        TestSearchNodeImpl<BaseSearchNodeMetadata<DoubleScalarReward>> node,
+        TestSearchNodeImpl<BaseSearchNodeMetadata<DoubleReward>> node,
         TestAction action) {
 
-        StateRewardReturn<TestAction, DoubleScalarReward, DoubleVectorialObservation, TestState> stateRewardReturn = node.applyAction(action);
-        BaseSearchNodeMetadata<DoubleScalarReward> newSearchNodeMetadata = factory.createSearchNodeMetadata(node, stateRewardReturn, action);
+        StateRewardReturn<TestAction, DoubleReward, DoubleVectorialObservation, TestState> stateRewardReturn = node.applyAction(action);
+        BaseSearchNodeMetadata<DoubleReward> newSearchNodeMetadata = factory.createSearchNodeMetadata(node, stateRewardReturn, action);
 
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);
         Assert.assertEquals(newSearchNodeMetadata.getCumulativeReward().getValue(), action.getReward() + parentCumulativeReward, DOUBLE_TOLERANCE);

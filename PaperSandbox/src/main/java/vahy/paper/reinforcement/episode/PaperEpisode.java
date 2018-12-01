@@ -9,7 +9,7 @@ import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateActionRewardTuple;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.policy.PaperPolicy;
 import vahy.utils.ImmutableTuple;
 
@@ -26,8 +26,8 @@ public class PaperEpisode {
     private final EnvironmentPolicy opponentPolicy;
     private final int stepCountLimit;
 
-    private List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>> episodeStateRewardReturnList = new ArrayList<>();
-    private List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistoryList = new ArrayList<>();
+    private List<StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>> episodeStateRewardReturnList = new ArrayList<>();
+    private List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistoryList = new ArrayList<>();
     private long millisecondDuration;
 
     private boolean episodeAlreadySimulated = false;
@@ -58,11 +58,11 @@ public class PaperEpisode {
             ActionType action = playerPaperPolicy.getDiscreteAction(state);
             double[] actionProbabilities = playerPaperPolicy.getActionProbabilityDistribution(state);
             double[] priorProbabilities = playerPaperPolicy.getPriorActionProbabilityDistribution(state);
-            DoubleScalarReward estimatedReward = playerPaperPolicy.getEstimatedReward(state);
+            DoubleReward estimatedReward = playerPaperPolicy.getEstimatedReward(state);
             double estimatedRisk = playerPaperPolicy.getEstimatedRisk(state);
             playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
             playerActionCount++;
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = state.applyAction(action);
+            StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = state.applyAction(action);
             stepsDone++;
             logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
@@ -103,11 +103,11 @@ public class PaperEpisode {
         return ((ImmutableStateImpl) this.getFinalState()).isAgentKilled();
     }
 
-    public List<StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>> getEpisodeStateRewardReturnList() {
+    public List<StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>> getEpisodeStateRewardReturnList() {
         return this.episodeStateRewardReturnList;
     }
 
-    public List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> getEpisodeStateActionRewardList() {
+    public List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> getEpisodeStateActionRewardList() {
         return episodeHistoryList;
     }
 

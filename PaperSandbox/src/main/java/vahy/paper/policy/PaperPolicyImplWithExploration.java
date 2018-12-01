@@ -2,7 +2,7 @@ package vahy.paper.policy;
 
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
     }
 
     @Override
-    public DoubleScalarReward getEstimatedReward(ImmutableStateImpl gameState) {
+    public DoubleReward getEstimatedReward(ImmutableStateImpl gameState) {
         return innerPolicy.getEstimatedReward(gameState);
     }
 

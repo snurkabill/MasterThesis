@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.StreamUtils;
 
@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public class AlphaGoNodeSelector<
     TAction extends Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends DoubleVectorialObservation,
     TState extends State<TAction, TReward, TObservation, TState>>
     extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> {

@@ -5,7 +5,7 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
@@ -26,7 +26,7 @@ public class FirstVisitMonteCarloTrainer extends AbstractMonteCarloTrainer {
     @Override
     protected Map<DoubleVectorialObservation, MutableDataSample> calculatedVisitedRewards(PaperEpisode paperEpisode) {
         Map<DoubleVectorialObservation, MutableDataSample> firstVisitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
+        List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getObservation())) {

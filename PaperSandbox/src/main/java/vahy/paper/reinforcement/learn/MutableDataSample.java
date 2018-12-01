@@ -1,6 +1,6 @@
 package vahy.paper.reinforcement.learn;
 
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 
 public class MutableDataSample {
 
@@ -9,7 +9,7 @@ public class MutableDataSample {
     private double risk = 0;
     private int counter = 0;
 
-    public MutableDataSample(double[] probabilities, DoubleScalarReward reward, double risk) {
+    public MutableDataSample(double[] probabilities, DoubleReward reward, double risk) {
         this(probabilities, reward.getValue(), risk);
     }
 
@@ -29,8 +29,8 @@ public class MutableDataSample {
         return probabilities;
     }
 
-    public DoubleScalarReward getReward() {
-        return new DoubleScalarReward(reward);
+    public DoubleReward getReward() {
+        return new DoubleReward(reward);
     }
 
     public double getRisk() {

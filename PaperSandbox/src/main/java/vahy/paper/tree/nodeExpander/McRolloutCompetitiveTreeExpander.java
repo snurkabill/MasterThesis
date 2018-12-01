@@ -6,7 +6,7 @@ import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.tree.EdgeMetadata;
 import vahy.paper.tree.SearchNode;
@@ -55,7 +55,7 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         int depth = 0;
         double riskSum = 0.0;
         double rewardSum = 0.0;
-        List<DoubleScalarReward> rewardList = new ArrayList<>();
+        List<DoubleReward> rewardList = new ArrayList<>();
         ActionType firstAction = null;
         ActionType secondAction = null;
         while(!currentNode.isFinalNode()) {
@@ -72,7 +72,7 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
 
             currentNode = currentNode.getChildMap().get(nextAction);
             if(currentNode.getParent() == node) {
-                rewardList.add(new DoubleScalarReward(currentNode.getGainedReward().getValue() + node.getCumulativeReward().getValue()));
+                rewardList.add(new DoubleReward(currentNode.getGainedReward().getValue() + node.getCumulativeReward().getValue()));
             } else {
                 rewardList.add(currentNode.getGainedReward());
             }
@@ -118,12 +118,12 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
 
                 currentNode = currentNode.getParent();
 
-                currentNode.setEstimatedReward(new DoubleScalarReward(metadata.getMeanActionValue()));
+                currentNode.setEstimatedReward(new DoubleReward(metadata.getMeanActionValue()));
                 currentNode.setEstimatedRisk(metadata.getMeanRiskValue());
             }
         }
         node.setEstimatedRisk(riskSum);
-        node.setEstimatedReward(new DoubleScalarReward(rewardSum));
+        node.setEstimatedReward(new DoubleReward(rewardSum));
         node.setFakeRisk(false);
     }
 
@@ -136,7 +136,7 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
 //        node.getParent().getEdgeMetadataMap().get(node.getAppliedAction()).setTotalRiskValue(0.0d);
 //        node.getParent().getEdgeMetadataMap().get(node.getAppliedAction()).setTotalRiskValue(0.0d);
 //        node.setEstimatedRisk(0.0);
-//        node.setEstimatedReward(new DoubleScalarReward(0.0d));
+//        node.setEstimatedReward(new DoubleReward(0.0d));
 //    }
 
     private void setPriorProbabilities(SearchNode currentNode) {
@@ -190,13 +190,13 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         }
 
         for (ActionType action : allActions) {
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
+            StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             SearchNode newNode = new SearchNode(stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();
             edgeMetadata.setMeanActionValue(0.0d);
             edgeMetadata.setMeanRiskValue(1.0d);
-            newNode.setEstimatedReward(new DoubleScalarReward(0.0));
+            newNode.setEstimatedReward(new DoubleReward(0.0));
             newNode.setEstimatedRisk(1.0d);
             newNode.setFakeRisk(true);
             node.getChildMap().put(action, newNode);

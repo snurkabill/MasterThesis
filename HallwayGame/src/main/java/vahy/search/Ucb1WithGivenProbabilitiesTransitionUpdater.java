@@ -2,31 +2,31 @@ package vahy.search;
 
 //public class Ucb1WithGivenProbabilitiesTransitionUpdater extends MaximizingRewardGivenProbabilities implements NodeTransitionUpdater<
 //    ActionType,
-//    DoubleScalarReward,
+//    DoubleReward,
 //    DoubleVectorialObservation,
-//    MonteCarloTreeSearchMetadata<DoubleScalarReward>,
+//    MonteCarloTreeSearchMetadata<DoubleReward>,
 //    ImmutableStateImpl> {
 //
 //    private final double discountFactor;
-//    private final RewardAggregator<DoubleScalarReward> rewardAggregator;
+//    private final RewardAggregator<DoubleReward> rewardAggregator;
 //
-//    public Ucb1WithGivenProbabilitiesTransitionUpdater(double discountFactor, RewardAggregator<DoubleScalarReward> rewardAggregator) {
+//    public Ucb1WithGivenProbabilitiesTransitionUpdater(double discountFactor, RewardAggregator<DoubleReward> rewardAggregator) {
 //        this.discountFactor = discountFactor;
 //        this.rewardAggregator = rewardAggregator;
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent, SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleScalarReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> child, ActionType action) {
-//        MonteCarloTreeSearchMetadata<DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
-//        Ucb1StateActionMetadata<DoubleScalarReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
+//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleReward>, State<ActionType, DoubleReward, DoubleVectorialObservation>> parent, SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, Ucb1StateActionMetadata<DoubleReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleReward>, State<ActionType, DoubleReward, DoubleVectorialObservation>> child, ActionType action) {
+//        MonteCarloTreeSearchMetadata<DoubleReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
+//        Ucb1StateActionMetadata<DoubleReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
 //
-//        stateActionMetadata.setExpectedReward(new DoubleScalarReward(rewardAggregator.aggregateDiscount(
+//        stateActionMetadata.setExpectedReward(new DoubleReward(rewardAggregator.aggregateDiscount(
 //            stateActionMetadata.getGainedReward(),
 //            child.getSearchNodeMetadata().getExpectedReward(),
 //            discountFactor).getValue()));
 //        double parentCumulativeEstimates = parentSearchNodeMetadata.getExpectedReward().getValue() * (parentSearchNodeMetadata.getVisitCounter() - 1);
 //
-//        DoubleScalarReward newParentCumulativeEstimate = resolveReward(
+//        DoubleReward newParentCumulativeEstimate = resolveReward(
 //            parent.getWrappedState(),
 //            parent.getSearchNodeMetadata()
 //                .getStateActionMetadataMap()
@@ -34,20 +34,20 @@ package vahy.search;
 //                .stream()
 //                .collect(Collectors.toMap(
 //                    Map.Entry::getKey,
-//                    o -> (AbstractStateActionMetadata<DoubleScalarReward>) o.getValue()
+//                    o -> (AbstractStateActionMetadata<DoubleReward>) o.getValue()
 //                ))
 //        );
 //
 //        double sum = parentCumulativeEstimates + newParentCumulativeEstimate.getValue();
-//        parentSearchNodeMetadata.setExpectedReward(new DoubleScalarReward(sum / parentSearchNodeMetadata.getVisitCounter()));
+//        parentSearchNodeMetadata.setExpectedReward(new DoubleReward(sum / parentSearchNodeMetadata.getVisitCounter()));
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> parent,
-//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
+//                            SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> parent,
+//                            SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> child) {
 //
-//        MonteCarloTreeSearchMetadata<DoubleScalarReward> searchNodeMetadata = parent.getSearchNodeMetadata();
+//        MonteCarloTreeSearchMetadata<DoubleReward> searchNodeMetadata = parent.getSearchNodeMetadata();
 //
 //
 //    }

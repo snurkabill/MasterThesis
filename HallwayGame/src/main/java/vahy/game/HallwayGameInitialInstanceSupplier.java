@@ -13,7 +13,7 @@ import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
 
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;

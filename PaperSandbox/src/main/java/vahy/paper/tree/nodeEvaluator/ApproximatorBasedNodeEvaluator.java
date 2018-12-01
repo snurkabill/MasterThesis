@@ -1,7 +1,7 @@
 package vahy.paper.tree.nodeEvaluator;
 
 import vahy.environment.ActionType;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.reinforcement.TrainableApproximator;
 import vahy.paper.tree.SearchNode;
 import vahy.utils.ImmutableTuple;
@@ -26,7 +26,7 @@ public class ApproximatorBasedNodeEvaluator extends NodeEvaluator {
             throw new IllegalStateException("Node was already evaluated");
         }
         double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
-        node.setEstimatedReward(new DoubleScalarReward(prediction[Q_VALUE_INDEX]));
+        node.setEstimatedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
         node.setEstimatedRisk(prediction[RISK_VALUE_INDEX]);
         if(node.getWrappedState().isAgentTurn()) {
             ActionType[] playerActions = ActionType.playerActions;

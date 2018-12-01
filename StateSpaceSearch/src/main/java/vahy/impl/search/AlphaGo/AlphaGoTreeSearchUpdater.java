@@ -7,19 +7,19 @@ import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 
 public class AlphaGoTreeSearchUpdater<
     TAction extends Action,
     TObservation extends DoubleVectorialObservation,
-    TState extends State<TAction, DoubleScalarReward, TObservation, TState>>
-    implements TreeUpdater<TAction, DoubleScalarReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleScalarReward>, TState> {
+    TState extends State<TAction, DoubleReward, TObservation, TState>>
+    implements TreeUpdater<TAction, DoubleReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleReward>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoTreeSearchUpdater.class);
 
 
     @Override
-    public void updateTree(SearchNode<TAction, DoubleScalarReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleScalarReward>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, DoubleReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleReward>, TState> expandedNode) {
         double estimatedLeafReward = (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward().getValue()) + expandedNode.getSearchNodeMetadata().getCumulativeReward().getValue();
         int i = 0;
         while (!expandedNode.isRoot()) {
@@ -31,14 +31,14 @@ public class AlphaGoTreeSearchUpdater<
         logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 
-    private void updateNode(SearchNode<TAction, DoubleScalarReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleScalarReward>, TState> expandedNode, double estimatedLeafReward) {
-        AlphaGoNodeMetadata<TAction, DoubleScalarReward> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
+    private void updateNode(SearchNode<TAction, DoubleReward, TObservation, AlphaGoNodeMetadata<TAction, DoubleReward>, TState> expandedNode, double estimatedLeafReward) {
+        AlphaGoNodeMetadata<TAction, DoubleReward> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
         if(searchNodeMetadata.getVisitCounter() == 1) {
-            searchNodeMetadata.setSumOfTotalEstimations(new DoubleScalarReward(estimatedLeafReward));
+            searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(estimatedLeafReward));
         } else {
-            searchNodeMetadata.setSumOfTotalEstimations(new DoubleScalarReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() + estimatedLeafReward));
+            searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() + estimatedLeafReward));
         }
-        searchNodeMetadata.setExpectedReward(new DoubleScalarReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() / searchNodeMetadata.getVisitCounter()));
+        searchNodeMetadata.setExpectedReward(new DoubleReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() / searchNodeMetadata.getVisitCounter()));
     }
 }

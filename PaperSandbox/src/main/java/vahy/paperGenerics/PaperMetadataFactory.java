@@ -7,13 +7,13 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 
 import java.util.LinkedHashMap;
 
 public class PaperMetadataFactory<
     TAction extends Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends Observation,
     TState extends State<TAction, TReward, TObservation, TState>> implements SearchNodeMetadataFactory<TAction, TReward, TObservation, PaperMetadata<TAction, TReward>, TState> {
 

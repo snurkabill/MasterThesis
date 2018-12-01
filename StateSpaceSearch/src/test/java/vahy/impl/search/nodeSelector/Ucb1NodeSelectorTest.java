@@ -4,7 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.MCTS.ucb1.Ucb1NodeSelector;
 import vahy.testDomain.model.TestAction;
@@ -20,18 +20,18 @@ public class Ucb1NodeSelectorTest {
     @Test
     public void testUcb1SelectPlayerAction() {
         SplittableRandom random = new SplittableRandom(0);
-        Ucb1NodeSelector<TestAction, DoubleScalarReward, DoubleVectorialObservation, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
+        Ucb1NodeSelector<TestAction, DoubleReward, DoubleVectorialObservation, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
         nodeSelector.setNewRoot(TestHelper.createOneLevelTree(true));
-        SearchNode<TestAction, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, TestState> selectedNode = nodeSelector.selectNextNode();
+        SearchNode<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> selectedNode = nodeSelector.selectNextNode();
         Assert.assertEquals(selectedNode.getAppliedAction(), Arrays.stream(TestAction.playerActions).max(Comparator.comparingDouble(TestAction::getReward)).get());
     }
 
     @Test
     public void testUcb1SelectOpponentAction() {
         SplittableRandom random = new SplittableRandom(0);
-        Ucb1NodeSelector<TestAction, DoubleScalarReward, DoubleVectorialObservation, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
+        Ucb1NodeSelector<TestAction, DoubleReward, DoubleVectorialObservation, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
         nodeSelector.setNewRoot(TestHelper.createOneLevelTree(false));
-        SearchNode<TestAction, DoubleScalarReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleScalarReward>, TestState> selectedNode = nodeSelector.selectNextNode();
+        SearchNode<TestAction, DoubleReward, DoubleVectorialObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> selectedNode = nodeSelector.selectNextNode();
         Assert.assertEquals(selectedNode.getAppliedAction(), Arrays.stream(TestAction.opponentActions).min(Comparator.comparingDouble(TestAction::getReward)).get());
     }
 }

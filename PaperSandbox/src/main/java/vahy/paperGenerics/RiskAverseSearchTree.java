@@ -10,7 +10,7 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.environment.state.PaperState;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
 
 import java.util.LinkedList;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class RiskAverseSearchTree<
     TAction extends Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TObservation, TState>> extends SearchTreeImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {

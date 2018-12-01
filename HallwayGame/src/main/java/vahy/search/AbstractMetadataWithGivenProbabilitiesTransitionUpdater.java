@@ -3,54 +3,54 @@ package vahy.search;
 
 //public class AbstractMetadataWithGivenProbabilitiesTransitionUpdater extends MaximizingRewardGivenProbabilities implements NodeTransitionUpdater<
 //    ActionType,
-//    DoubleScalarReward,
+//    DoubleReward,
 //    DoubleVectorialObservation,
-//    BaseSearchNodeMetadata<DoubleScalarReward>,
+//    BaseSearchNodeMetadata<DoubleReward>,
 //    ImmutableStateImpl> {
 //
 //    private final double discountFactor;
-//    private final RewardAggregator<DoubleScalarReward> rewardAggregator;
+//    private final RewardAggregator<DoubleReward> rewardAggregator;
 //
-//    public AbstractMetadataWithGivenProbabilitiesTransitionUpdater(double discountFactor, RewardAggregator<DoubleScalarReward> rewardAggregator) {
+//    public AbstractMetadataWithGivenProbabilitiesTransitionUpdater(double discountFactor, RewardAggregator<DoubleReward> rewardAggregator) {
 //        this.discountFactor = discountFactor;
 //        this.rewardAggregator = rewardAggregator;
 //    }
 //
 //    @Override
 //    public void applyUpdate(
-//        SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleScalarReward>, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> parent,
+//        SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, State<ActionType, DoubleReward, DoubleVectorialObservation>> parent,
 //        SearchNode<
 //            ActionType,
-//            DoubleScalarReward,
+//            DoubleReward,
 //            DoubleVectorialObservation,
-//            AbstractStateActionMetadata<DoubleScalarReward>,
-//            BaseSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>>,
-//            State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> child,
+//            AbstractStateActionMetadata<DoubleReward>,
+//            BaseSearchNodeMetadata<ActionType, DoubleReward, AbstractStateActionMetadata<DoubleReward>>,
+//            State<ActionType, DoubleReward, DoubleVectorialObservation>> child,
 //        ActionType action) {
-//        BaseSearchNodeMetadata<ActionType, DoubleScalarReward, AbstractStateActionMetadata<DoubleScalarReward>> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
-//        AbstractStateActionMetadata<DoubleScalarReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
+//        BaseSearchNodeMetadata<ActionType, DoubleReward, AbstractStateActionMetadata<DoubleReward>> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
+//        AbstractStateActionMetadata<DoubleReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
 //
-//        stateActionMetadata.setExpectedReward(new DoubleScalarReward(rewardAggregator.aggregateDiscount(
+//        stateActionMetadata.setExpectedReward(new DoubleReward(rewardAggregator.aggregateDiscount(
 //                stateActionMetadata.getGainedReward(),
 //                child.getSearchNodeMetadata().getExpectedReward(),
 //            discountFactor).getValue()));
 ////        double parentCumulativeEstimates = parentSearchNodeMetadata.getExpectedReward().getValue();
 //
-//        DoubleScalarReward newParentCumulativeEstimate = resolveReward(parent.getWrappedState(), parent.getSearchNodeMetadata().getStateActionMetadataMap());
+//        DoubleReward newParentCumulativeEstimate = resolveReward(parent.getWrappedState(), parent.getSearchNodeMetadata().getStateActionMetadataMap());
 //
 ////        double sum = parentCumulativeEstimates + newParentCumulativeEstimate.getValue();
-//        parentSearchNodeMetadata.setExpectedReward(new DoubleScalarReward(newParentCumulativeEstimate.getValue()));
+//        parentSearchNodeMetadata.setExpectedReward(new DoubleReward(newParentCumulativeEstimate.getValue()));
 //    }
 //
 //
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> parent,
-//                            SearchNode<ActionType, DoubleScalarReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleScalarReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
+//                            SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> parent,
+//                            SearchNode<ActionType, DoubleReward, DoubleVectorialObservation, BaseSearchNodeMetadata<DoubleReward>, ImmutableStateImpl> child) {
 //
-//        BaseSearchNodeMetadata<DoubleScalarReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
-//        Map<ActionType, BaseSearchNodeMetadata<DoubleScalarReward>> childSearchNodeMetadataMap = parent.getChildNodeMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, x-> x.getValue().getSearchNodeMetadata()));
+//        BaseSearchNodeMetadata<DoubleReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
+//        Map<ActionType, BaseSearchNodeMetadata<DoubleReward>> childSearchNodeMetadataMap = parent.getChildNodeMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, x-> x.getValue().getSearchNodeMetadata()));
 //
 //
 //

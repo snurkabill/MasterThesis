@@ -1,15 +1,15 @@
 package vahy.paper.reinforcement.episode;
 
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 
 public class StepRecord {
 
     private final double[] priorProbabilities;
     private final double[] policyProbabilities;
-    private final DoubleScalarReward rewardPredicted;
+    private final DoubleReward rewardPredicted;
     private final double risk;
 
-    public StepRecord(double[] priorProbabilities, double[] policyProbabilities, DoubleScalarReward rewardPredicted, double risk) {
+    public StepRecord(double[] priorProbabilities, double[] policyProbabilities, DoubleReward rewardPredicted, double risk) {
         this.priorProbabilities = priorProbabilities;
         this.policyProbabilities = policyProbabilities;
         this.rewardPredicted = rewardPredicted;
@@ -24,7 +24,7 @@ public class StepRecord {
         return policyProbabilities;
     }
 
-    public DoubleScalarReward getRewardPredicted() {
+    public DoubleReward getRewardPredicted() {
         return rewardPredicted;
     }
 

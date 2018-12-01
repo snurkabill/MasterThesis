@@ -8,7 +8,7 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 
 import java.io.File;
@@ -32,13 +32,13 @@ public class SearchNode {
 
     private SearchNode parent;
     private ActionType appliedParentAction;
-    private DoubleScalarReward gainedReward;
-    private DoubleScalarReward cumulativeReward;
+    private DoubleReward gainedReward;
+    private DoubleReward cumulativeReward;
     private double realRisk;
     private CLPVariable nodeProbabilityFlow;
 
     private int totalVisitCounter;  // sum over all b : N(s, b)
-    private DoubleScalarReward estimatedReward; // in article V value
+    private DoubleReward estimatedReward; // in article V value
     private double estimatedRisk; // in article V value
 
     private boolean isFakeRisk = false; // only for that weird MC algorithm
@@ -48,15 +48,15 @@ public class SearchNode {
 
     private boolean alreadyEvaluated = false;
 
-    public SearchNode(ImmutableStateImpl wrappedState, SearchNode parent, ActionType appliedParentAction, DoubleScalarReward gainedReward) {
+    public SearchNode(ImmutableStateImpl wrappedState, SearchNode parent, ActionType appliedParentAction, DoubleReward gainedReward) {
         this.wrappedState = wrappedState;
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
         this.gainedReward = gainedReward;
         if(parent != null) {
-            this.cumulativeReward = new DoubleScalarReward(parent.getCumulativeReward().getValue() + gainedReward.getValue());
+            this.cumulativeReward = new DoubleReward(parent.getCumulativeReward().getValue() + gainedReward.getValue());
         } else {
-            this.cumulativeReward = new DoubleScalarReward(gainedReward.getValue());
+            this.cumulativeReward = new DoubleReward(gainedReward.getValue());
         }
         this.realRisk = wrappedState.isAgentKilled() ? 1 : 0;
     }
@@ -77,11 +77,11 @@ public class SearchNode {
         alreadyEvaluated = true;
     }
 
-    public void setEstimatedReward(DoubleScalarReward estimatedReward) {
+    public void setEstimatedReward(DoubleReward estimatedReward) {
         this.estimatedReward = estimatedReward;
     }
 
-    public DoubleScalarReward getGainedReward() {
+    public DoubleReward getGainedReward() {
         return gainedReward;
     }
 
@@ -105,7 +105,7 @@ public class SearchNode {
         return totalVisitCounter;
     }
 
-    public DoubleScalarReward getEstimatedReward() {
+    public DoubleReward getEstimatedReward() {
         return estimatedReward;
     }
 
@@ -138,7 +138,7 @@ public class SearchNode {
         this.totalVisitCounter = totalVisitCounter;
     }
 
-    public DoubleScalarReward getCumulativeReward() {
+    public DoubleReward getCumulativeReward() {
         return cumulativeReward;
     }
 

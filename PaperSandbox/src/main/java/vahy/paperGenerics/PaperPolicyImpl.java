@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ReflectionHacks;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class PaperPolicyImpl<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleScalarReward,
+    TReward extends DoubleReward,
     TObservation extends DoubleVectorialObservation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TObservation, TState>>

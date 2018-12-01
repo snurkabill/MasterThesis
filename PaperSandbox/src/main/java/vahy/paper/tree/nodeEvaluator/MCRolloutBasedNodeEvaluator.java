@@ -4,7 +4,7 @@ import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.tree.SearchNode;
 import vahy.utils.ImmutableTuple;
@@ -39,7 +39,7 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
             rewardSum += result.getFirst();
             riskSum += result.getSecond();
         }
-        node.setEstimatedReward(new DoubleScalarReward(rewardSum / rolloutCount));
+        node.setEstimatedReward(new DoubleReward(rewardSum / rolloutCount));
         node.setEstimatedRisk(riskSum / rolloutCount);
         if(node.getWrappedState().isAgentTurn()) {
             ActionType[] playerActions = ActionType.playerActions;
@@ -57,11 +57,11 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
 
 
     private ImmutableTuple<Double, Double> runRandomWalkSimulation(SearchNode node) {
-        List<DoubleScalarReward> gainedRewards = new ArrayList<>();
+        List<DoubleReward> gainedRewards = new ArrayList<>();
         ImmutableStateImpl wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             ActionType selectedAction = selectNextAction(wrappedState);
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
+            StateRewardReturn<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }

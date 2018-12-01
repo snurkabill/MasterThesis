@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.paper.tree.SearchNode;
 import vahy.paper.tree.SearchTree;
@@ -96,7 +96,7 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public DoubleScalarReward getEstimatedReward(ImmutableStateImpl gameState) {
+    public DoubleReward getEstimatedReward(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
         return searchTree.getRootEstimatedReward();
     }

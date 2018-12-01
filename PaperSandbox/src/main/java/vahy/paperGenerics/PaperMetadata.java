@@ -2,12 +2,12 @@ package vahy.paperGenerics;
 
 import com.quantego.clp.CLPVariable;
 import vahy.api.model.Action;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
 import java.util.Map;
 
-public class PaperMetadata<TAction extends Action, TReward extends DoubleScalarReward> extends MonteCarloTreeSearchMetadata<TReward> {
+public class PaperMetadata<TAction extends Action, TReward extends DoubleReward> extends MonteCarloTreeSearchMetadata<TReward> {
 
     private final Map<TAction, Double> childPriorProbabilities;
     private CLPVariable nodeProbabilityFlow;

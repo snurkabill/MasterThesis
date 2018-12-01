@@ -7,7 +7,7 @@ import vahy.environment.ActionType;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
@@ -45,9 +45,9 @@ public abstract class AbstractTrainer {
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistory, int i) {
+    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVectorialObservation, ImmutableStateImpl>, StepRecord>> episodeHistory, int i) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
-        DoubleScalarReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
+        DoubleReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
         double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
         double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getAction().isTrap() ? 1.0 : 0.0;
         return new MutableDataSample(sampledProbabilities, aggregated, risk);
