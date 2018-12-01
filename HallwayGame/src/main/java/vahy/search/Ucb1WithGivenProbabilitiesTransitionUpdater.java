@@ -1,7 +1,7 @@
 package vahy.search;
 
 //public class Ucb1WithGivenProbabilitiesTransitionUpdater extends MaximizingRewardGivenProbabilities implements NodeTransitionUpdater<
-//    ActionType,
+//    HallwayAction,
 //    DoubleReward,
 //    DoubleVector,
 //    MonteCarloTreeSearchMetadata<DoubleReward>,
@@ -16,7 +16,7 @@ package vahy.search;
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVector, Ucb1StateActionMetadata<DoubleReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleReward>, State<ActionType, DoubleReward, DoubleVector>> parent, SearchNode<ActionType, DoubleReward, DoubleVector, Ucb1StateActionMetadata<DoubleReward>, MonteCarloTreeSearchMetadata<ActionType, DoubleReward>, State<ActionType, DoubleReward, DoubleVector>> child, ActionType action) {
+//    public void applyUpdate(SearchNode<HallwayAction, DoubleReward, DoubleVector, Ucb1StateActionMetadata<DoubleReward>, MonteCarloTreeSearchMetadata<HallwayAction, DoubleReward>, State<HallwayAction, DoubleReward, DoubleVector>> parent, SearchNode<HallwayAction, DoubleReward, DoubleVector, Ucb1StateActionMetadata<DoubleReward>, MonteCarloTreeSearchMetadata<HallwayAction, DoubleReward>, State<HallwayAction, DoubleReward, DoubleVector>> child, HallwayAction action) {
 //        MonteCarloTreeSearchMetadata<DoubleReward> parentSearchNodeMetadata = parent.getSearchNodeMetadata();
 //        Ucb1StateActionMetadata<DoubleReward> stateActionMetadata = parentSearchNodeMetadata.getStateActionMetadataMap().get(action);
 //
@@ -43,9 +43,9 @@ package vahy.search;
 //    }
 //
 //    @Override
-//    public void applyUpdate(SearchNode<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
-//                            SearchNode<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> parent,
-//                            SearchNode<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> child) {
+//    public void applyUpdate(SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> evaluatedNode,
+//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> parent,
+//                            SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> child) {
 //
 //        MonteCarloTreeSearchMetadata<DoubleReward> searchNodeMetadata = parent.getSearchNodeMetadata();
 //

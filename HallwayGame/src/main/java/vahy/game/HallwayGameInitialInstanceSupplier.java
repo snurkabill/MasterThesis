@@ -1,7 +1,7 @@
 package vahy.game;
 
 import vahy.api.episode.InitialStateSupplier;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.ImmutableStateImpl;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;

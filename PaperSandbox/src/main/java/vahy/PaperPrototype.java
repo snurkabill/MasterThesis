@@ -3,7 +3,7 @@ package vahy;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
@@ -102,13 +102,13 @@ public class PaperPrototype {
         TrainableApproximator trainableApproximator = new TrainableApproximator(
 //            new AlphaGoLinearNaiveModel(
 //                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-//                1 + ActionType.playerActions.length,
+//                1 + HallwayAction.playerActions.length,
 //                learningRate
 //            )
 
 //            new Dl4jModel(
 //                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-//                NodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
+//                NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
 //                null,
 //                seed,
 //                learningRate,
@@ -117,7 +117,7 @@ public class PaperPrototype {
 
             new TFModel(
                 hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-                NodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
+                NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
                 trainingEpochCount,
                 batchSize,
                 new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile()),

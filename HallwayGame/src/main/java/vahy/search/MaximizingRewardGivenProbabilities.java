@@ -1,6 +1,6 @@
 package vahy.search;
 
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
@@ -10,9 +10,9 @@ import java.util.Map;
 
 public abstract class MaximizingRewardGivenProbabilities {
 
-    protected DoubleReward resolveReward(ImmutableStateImpl state, Map<ActionType, DoubleReward> actionRewardMap) {
+    protected DoubleReward resolveReward(ImmutableStateImpl state, Map<HallwayAction, DoubleReward> actionRewardMap) {
         if(state.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> actionsWithProbabilities = state.environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> actionsWithProbabilities = state.environmentActionsWithProbabilities();
             double sum = 0.0;
             for (int i = 0; i < actionsWithProbabilities.getFirst().size(); i++) {
                 sum += actionRewardMap.get(actionsWithProbabilities.getFirst().get(i)).getValue() * actionsWithProbabilities.getSecond().get(i);

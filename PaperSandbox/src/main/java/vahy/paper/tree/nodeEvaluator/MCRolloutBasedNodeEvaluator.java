@@ -1,7 +1,7 @@
 package vahy.paper.tree.nodeEvaluator;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -42,12 +42,12 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
         node.setEstimatedReward(new DoubleReward(rewardSum / rolloutCount));
         node.setEstimatedRisk(riskSum / rolloutCount);
         if(node.getWrappedState().isAgentTurn()) {
-            ActionType[] playerActions = ActionType.playerActions;
+            HallwayAction[] playerActions = HallwayAction.playerActions;
             for (int i = 0; i < playerActions.length; i++) {
                 node.getEdgeMetadataMap().get(playerActions[i]).setPriorProbability(1.0 / playerActions.length);
             }
         } else {
-            ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
             for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
                 node.getEdgeMetadataMap().get(environmentActionsWithProbabilities.getFirst().get(i)).setPriorProbability(environmentActionsWithProbabilities.getSecond().get(i));
             }
@@ -60,23 +60,23 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
         List<DoubleReward> gainedRewards = new ArrayList<>();
         ImmutableStateImpl wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
-            ActionType selectedAction = selectNextAction(wrappedState);
-            StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
+            HallwayAction selectedAction = selectNextAction(wrappedState);
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }
         return new ImmutableTuple<>(doubleScalarRewardAggregator.aggregateDiscount(gainedRewards, discountFactor).getValue(), wrappedState.isAgentKilled() ? 1.0 : 0.0);
     }
 
-    private ActionType selectNextAction(ImmutableStateImpl state) {
+    private HallwayAction selectNextAction(ImmutableStateImpl state) {
         if(state.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities = state.environmentActionsWithProbabilities();
-            List<ActionType> actions = environmentActionsWithProbabilities.getFirst();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = state.environmentActionsWithProbabilities();
+            List<HallwayAction> actions = environmentActionsWithProbabilities.getFirst();
             List<Double> probabilities = environmentActionsWithProbabilities.getSecond();
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random);
             return actions.get(index);
         } else {
-            ActionType[] actions = state.getAllPossibleActions();
+            HallwayAction[] actions = state.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
             return actions[actionIndex];
         }

@@ -5,7 +5,7 @@ import com.quantego.clp.CLPExpression;
 import com.quantego.clp.CLPVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,9 +32,9 @@ public class OptimalFlowCalculator {
         CLPExpression totalRiskExpression = null;
         while(!queue.isEmpty()) {
             SearchNode node = queue.poll();
-            Map<ActionType, CLPVariable> actionChildFlowMap = new HashMap<>();
+            Map<HallwayAction, CLPVariable> actionChildFlowMap = new HashMap<>();
             if(!node.isLeaf()) {
-                for (Map.Entry<ActionType, SearchNode> entry : node.getChildMap().entrySet()) {
+                for (Map.Entry<HallwayAction, SearchNode> entry : node.getChildMap().entrySet()) {
                     queue.addLast(entry.getValue());
                     CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
                     entry.getValue().setNodeProbabilityFlow(childFlow);
@@ -97,8 +97,8 @@ public class OptimalFlowCalculator {
         return model.getObjectiveValue();
     }
 
-    public void addChildFlowBasedOnFixedProbabilitiesExpression(CLP model, SearchNode node, Map<ActionType, CLPVariable> actionChildFlowMap) {
-        for (Map.Entry<ActionType, CLPVariable> entry : actionChildFlowMap.entrySet()) {
+    public void addChildFlowBasedOnFixedProbabilitiesExpression(CLP model, SearchNode node, Map<HallwayAction, CLPVariable> actionChildFlowMap) {
+        for (Map.Entry<HallwayAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
             SearchNode child = node.getChildMap().get(entry.getKey());
             double priorProbability = node.getEdgeMetadataMap().get(entry.getKey()).getPriorProbability();
             CLPExpression fixedProbabilityExpression = model.createExpression();
@@ -108,9 +108,9 @@ public class OptimalFlowCalculator {
         }
     }
 
-    public void addSummingChildrenToOneExpression(CLP model, SearchNode node, Map<ActionType, CLPVariable> actionChildFlowMap) {
+    public void addSummingChildrenToOneExpression(CLP model, SearchNode node, Map<HallwayAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
-        for (Map.Entry<ActionType, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {
+        for (Map.Entry<HallwayAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {
             parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlowVariable.getValue());
         }
         parentFlowDistribution.add(PARENT_VARIABLE_COEFFICIENT, node.getNodeProbabilityFlow());

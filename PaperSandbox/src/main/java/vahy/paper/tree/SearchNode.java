@@ -6,7 +6,7 @@ import guru.nidi.graphviz.attribute.RankDir;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
@@ -31,7 +31,7 @@ public class SearchNode {
     private final ImmutableStateImpl wrappedState;
 
     private SearchNode parent;
-    private ActionType appliedParentAction;
+    private HallwayAction appliedParentAction;
     private DoubleReward gainedReward;
     private DoubleReward cumulativeReward;
     private double realRisk;
@@ -43,12 +43,12 @@ public class SearchNode {
 
     private boolean isFakeRisk = false; // only for that weird MC algorithm
 
-    private final Map<ActionType, SearchNode> childMap = new HashMap<>();
-    private final Map<ActionType, EdgeMetadata> edgeMetadataMap = new HashMap<>();
+    private final Map<HallwayAction, SearchNode> childMap = new HashMap<>();
+    private final Map<HallwayAction, EdgeMetadata> edgeMetadataMap = new HashMap<>();
 
     private boolean alreadyEvaluated = false;
 
-    public SearchNode(ImmutableStateImpl wrappedState, SearchNode parent, ActionType appliedParentAction, DoubleReward gainedReward) {
+    public SearchNode(ImmutableStateImpl wrappedState, SearchNode parent, HallwayAction appliedParentAction, DoubleReward gainedReward) {
         this.wrappedState = wrappedState;
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
@@ -97,7 +97,7 @@ public class SearchNode {
         return parent;
     }
 
-    public ActionType getAppliedParentAction() {
+    public HallwayAction getAppliedParentAction() {
         return appliedParentAction;
     }
 
@@ -113,7 +113,7 @@ public class SearchNode {
         return isFinalNode() || childMap.entrySet().stream().noneMatch(x -> x.getValue().isAlreadyEvaluated());
     }
 
-    public Map<ActionType, EdgeMetadata> getEdgeMetadataMap() {
+    public Map<HallwayAction, EdgeMetadata> getEdgeMetadataMap() {
         return edgeMetadataMap;
     }
 
@@ -185,7 +185,7 @@ public class SearchNode {
         while(!queue.isEmpty()) {
             SearchNode node = queue.poll();
 
-            for (Map.Entry<ActionType, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
+            for (Map.Entry<HallwayAction, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
                 SearchNode child = node.getChildMap().get(entry.getKey());
                 queue.addLast(child);
 
@@ -218,7 +218,7 @@ public class SearchNode {
         while(!queue.isEmpty()) {
             ImmutableTuple<SearchNode, Integer> node = queue.poll();
             if(node.getSecond() < depthBound) {
-                for (Map.Entry<ActionType, EdgeMetadata> entry : node.getFirst().getEdgeMetadataMap().entrySet()) {
+                for (Map.Entry<HallwayAction, EdgeMetadata> entry : node.getFirst().getEdgeMetadataMap().entrySet()) {
                     SearchNode child = node.getFirst().getChildMap().get(entry.getKey());
                     queue.addLast(new ImmutableTuple<>(child, node.getSecond() + 1));
                     graph = graph.with(
@@ -246,7 +246,7 @@ public class SearchNode {
         return estimatedRisk;
     }
 
-    public Map<ActionType, SearchNode> getChildMap() {
+    public Map<HallwayAction, SearchNode> getChildMap() {
         return childMap;
     }
 

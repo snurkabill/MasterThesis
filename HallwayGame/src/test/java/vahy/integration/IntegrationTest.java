@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 import vahy.api.episode.EpisodeAggregator;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.agent.policy.player.smart.Ucb1Policy;
 import vahy.environment.config.ConfigBuilder;
@@ -49,8 +49,8 @@ public class IntegrationTest {
         int rolloutCount = 20;
 
 
-        NodeEvaluator<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>(rewardAggregator)),
+        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> rewardSimulator = new MonteCarloEvaluator<>(
+            new SearchNodeBaseFactoryImpl<>(new MonteCarloTreeSearchMetadataFactory<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>(rewardAggregator)),
             random,
             rewardAggregator,
             discountFactor,

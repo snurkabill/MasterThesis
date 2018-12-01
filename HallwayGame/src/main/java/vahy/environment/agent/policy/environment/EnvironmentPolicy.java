@@ -1,7 +1,7 @@
 package vahy.environment.agent.policy.environment;
 
 import vahy.api.policy.Policy;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -11,7 +11,7 @@ import vahy.utils.RandomDistributionUtils;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicy implements Policy<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> {
+public class EnvironmentPolicy implements Policy<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> {
 
     private final SplittableRandom random;
 
@@ -21,18 +21,18 @@ public class EnvironmentPolicy implements Policy<ActionType, DoubleReward, Doubl
 
     @Override
     public double[] getActionProbabilityDistribution(ImmutableStateImpl gameState) {
-        ImmutableTuple<List<ActionType>, List<Double>> actions = gameState.environmentActionsWithProbabilities();
+        ImmutableTuple<List<HallwayAction>, List<Double>> actions = gameState.environmentActionsWithProbabilities();
         return actions.getSecond().stream().mapToDouble(value -> value).toArray();
     }
 
     @Override
-    public ActionType getDiscreteAction(ImmutableStateImpl gameState) {
-        ImmutableTuple<List<ActionType>, List<Double>> actions = gameState.environmentActionsWithProbabilities();
+    public HallwayAction getDiscreteAction(ImmutableStateImpl gameState) {
+        ImmutableTuple<List<HallwayAction>, List<Double>> actions = gameState.environmentActionsWithProbabilities();
         return actions.getFirst().get(RandomDistributionUtils.getRandomIndexFromDistribution(actions.getSecond(), random));
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<ActionType> opponentActionList) {
+    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
         // this is it
     }
 }

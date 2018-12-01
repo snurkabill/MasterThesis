@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 
 import java.util.Arrays;
 
-public enum ActionType implements Action {
+public enum HallwayAction implements Action {
 
     FORWARD(true, false),
     TURN_RIGHT(true, false),
@@ -18,12 +18,12 @@ public enum ActionType implements Action {
     NOISY_LEFT_TRAP(false, true),
     NO_ACTION(false, false);
 
-    public static ActionType[] playerActions = Arrays.stream(ActionType.values()).filter(ActionType::isPlayerAction).toArray(ActionType[]::new);
-    public static ActionType[] environmentActions = Arrays.stream(ActionType.values()).filter(actionType -> !actionType.isPlayerAction).toArray(ActionType[]::new);
+    public static HallwayAction[] playerActions = Arrays.stream(HallwayAction.values()).filter(HallwayAction::isPlayerAction).toArray(HallwayAction[]::new);
+    public static HallwayAction[] environmentActions = Arrays.stream(HallwayAction.values()).filter(actionType -> !actionType.isPlayerAction).toArray(HallwayAction[]::new);
     private final boolean isPlayerAction;
     private final boolean isTrap;
 
-    ActionType(boolean isPlayerAction, boolean isTrap) {
+    HallwayAction(boolean isPlayerAction, boolean isTrap) {
         this.isPlayerAction = isPlayerAction;
         this.isTrap = isTrap;
     }

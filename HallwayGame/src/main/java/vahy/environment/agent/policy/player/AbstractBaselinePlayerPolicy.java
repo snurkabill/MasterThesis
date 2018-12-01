@@ -4,7 +4,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.update.NodeTransitionUpdater;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
@@ -21,20 +21,20 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.SplittableRandom;
 
-public class AbstractBaselinePlayerPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> {
+public class AbstractBaselinePlayerPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> {
 
     public AbstractBaselinePlayerPolicy(
         SplittableRandom random,
         TreeUpdateCondition uprateTreeCount,
         ImmutableStateImpl gameState,
         NodeTransitionUpdater<
-                    ActionType,
+            HallwayAction,
             DoubleReward,
             DoubleVector,
             MonteCarloTreeSearchMetadata<DoubleReward>,
                     ImmutableStateImpl> nodeTransitionUpdater,
         NodeEvaluator<
-                    ActionType,
+            HallwayAction,
             DoubleReward,
             DoubleVector,
             MonteCarloTreeSearchMetadata<DoubleReward>,
@@ -42,19 +42,19 @@ public class AbstractBaselinePlayerPolicy extends AbstractEstimatedRewardMaximiz
         super(random, uprateTreeCount, createSearchTree(random, gameState, nodeTransitionUpdater, rewardSimulator));
     }
 
-    private static SearchTreeImpl<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> createSearchTree(
+    private static SearchTreeImpl<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> createSearchTree(
         SplittableRandom random,
         ImmutableStateImpl gameState,
-        NodeTransitionUpdater<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> nodeTransitionUpdater,
-        NodeEvaluator<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> nodeEvaluator)
+        NodeTransitionUpdater<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> nodeTransitionUpdater,
+        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> nodeEvaluator)
     {
-        SearchNodeFactory<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> searchNodeFactory =
+        SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> searchNodeFactory =
             new SearchNodeBaseFactoryImpl<>(
-                new MonteCarloTreeSearchMetadataFactory<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>(new DoubleScalarRewardAggregator()
+                new MonteCarloTreeSearchMetadataFactory<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>(new DoubleScalarRewardAggregator()
                 )
             );
 
-        SearchNode<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> root = searchNodeFactory.createNode(
+        SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> root = searchNodeFactory.createNode(
             new ImmutableStateRewardReturnTuple<>(gameState, new DoubleReward(0.0)),
             null,
             null);

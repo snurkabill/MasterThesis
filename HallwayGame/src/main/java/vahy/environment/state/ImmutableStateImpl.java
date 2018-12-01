@@ -1,7 +1,7 @@
 package vahy.environment.state;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.agent.AgentHeading;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> {
+public class ImmutableStateImpl implements PaperState<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -83,8 +83,8 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
         this.hasAgentResigned = hasAgentResigned;
     }
 
-    public ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities() {
-        List<ActionType> possibleActions = new LinkedList<>();
+    public ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities() {
+        List<HallwayAction> possibleActions = new LinkedList<>();
         List<Double> actionProbabilities = new LinkedList<>();
         if(isAgentTurn) {
             return new ImmutableTuple<>(possibleActions, actionProbabilities);
@@ -98,16 +98,16 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
             ImmutableTuple<Integer, Integer> coordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
-                    possibleActions.add(ActionType.NOISY_RIGHT);
+                    possibleActions.add(HallwayAction.NOISY_RIGHT);
                     double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
                     actionProbabilities.add(noisyRightProb);
                     sum += noisyRightProb;
-                    possibleActions.add(ActionType.NOISY_RIGHT_TRAP);
+                    possibleActions.add(HallwayAction.NOISY_RIGHT_TRAP);
                     double noisyRightTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
                     actionProbabilities.add(noisyRightTrapProb);
                     sum += noisyRightTrapProb;
                 } else {
-                    possibleActions.add(ActionType.NOISY_RIGHT);
+                    possibleActions.add(HallwayAction.NOISY_RIGHT);
                     double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0;
                     actionProbabilities.add(noisyRightProb);
                     sum += noisyRightProb;
@@ -116,30 +116,30 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
             coordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
-                    possibleActions.add(ActionType.NOISY_LEFT);
+                    possibleActions.add(HallwayAction.NOISY_LEFT);
                     double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
                     actionProbabilities.add(noisyLeftProb);
                     sum += noisyLeftProb;
-                    possibleActions.add(ActionType.NOISY_LEFT_TRAP);
+                    possibleActions.add(HallwayAction.NOISY_LEFT_TRAP);
                     double noisyLeftTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
                     actionProbabilities.add(noisyLeftTrapProb);
                     sum += noisyLeftTrapProb;
                 } else {
-                    possibleActions.add(ActionType.NOISY_LEFT);
+                    possibleActions.add(HallwayAction.NOISY_LEFT);
                     double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0;
                     actionProbabilities.add(noisyLeftProb);
                     sum += noisyLeftProb;
                 }
             }
             if(traps[agentXCoordination][agentYCoordination] != 0) {
-                possibleActions.add(ActionType.TRAP);
+                possibleActions.add(HallwayAction.TRAP);
                 double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability()) * traps[agentXCoordination][agentYCoordination];
                 actionProbabilities.add(straightTrapProb);
                 sum += straightTrapProb;
             }
         } else {
             if(traps[agentXCoordination][agentYCoordination] != 0) {
-                possibleActions.add(ActionType.TRAP);
+                possibleActions.add(HallwayAction.TRAP);
                 actionProbabilities.add(traps[agentXCoordination][agentYCoordination]);
                 sum += traps[agentXCoordination][agentYCoordination];
             }
@@ -148,30 +148,30 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
         if(sum > 1) {
             throw new IllegalStateException("Sum of probabilities should be less than one");
         }
-        possibleActions.add(ActionType.NO_ACTION);
+        possibleActions.add(HallwayAction.NO_ACTION);
         actionProbabilities.add(1.0 - sum);
         return new ImmutableTuple<>(possibleActions, actionProbabilities);
     }
 
     @Override
-    public ActionType[] getAllPossibleActions() {
+    public HallwayAction[] getAllPossibleActions() {
         if(isAgentTurn) {
-            return ActionType.playerActions;
+            return HallwayAction.playerActions;
         } else {
-            return environmentActionsWithProbabilities().getFirst().toArray(new ActionType[0]);
+            return environmentActionsWithProbabilities().getFirst().toArray(new HallwayAction[0]);
         }
     }
 
     @Override
-    public StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> applyAction(ActionType actionType) {
+    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> applyAction(HallwayAction hallwayAction) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
-        if(isAgentTurn != actionType.isPlayerAction()) {
+        if(isAgentTurn != hallwayAction.isPlayerAction()) {
             throw new IllegalStateException("Inconsistency between player turn and applying action");
         }
         if(isAgentTurn) {
-            switch (actionType) {
+            switch (hallwayAction) {
                 case FORWARD:
                     ImmutableTuple<Integer, Integer> agentCoordinates = makeForwardMove();
                     double reward = rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] - staticGamePart.getDefaultStepPenalty();
@@ -195,7 +195,7 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
                         new DoubleReward(reward));
                 case TURN_RIGHT:
                 case TURN_LEFT:
-                    AgentHeading newAgentHeading = agentHeading.turn(actionType);
+                    AgentHeading newAgentHeading = agentHeading.turn(hallwayAction);
                     return new ImmutableStateRewardReturnTuple<>(
                         new ImmutableStateImpl(
                             staticGamePart,
@@ -225,10 +225,10 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
 //                        new DoubleReward(-staticGamePart.getDefaultStepPenalty())
 //                        );
                 default:
-                    throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+                    throw EnumUtils.createExceptionForUnknownEnumValue(hallwayAction);
             }
         } else {
-            switch (actionType) {
+            switch (hallwayAction) {
                 case NO_ACTION:
                     ImmutableStateImpl state = new ImmutableStateImpl(
                         staticGamePart,
@@ -307,7 +307,7 @@ public class ImmutableStateImpl implements PaperState<ActionType, DoubleReward, 
                         false,
                         false), new DoubleReward(0.0));
                 default:
-                    throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+                    throw EnumUtils.createExceptionForUnknownEnumValue(hallwayAction);
             }
         }
     }

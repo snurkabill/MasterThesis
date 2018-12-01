@@ -3,7 +3,7 @@ package vahy.paper.reinforcement.learn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.StateActionReward;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.model.observation.DoubleVector;
@@ -45,7 +45,7 @@ public abstract class AbstractTrainer {
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl>, StepRecord>> episodeHistory, int i) {
+    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl>, StepRecord>> episodeHistory, int i) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
         DoubleReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
         double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();

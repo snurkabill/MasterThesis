@@ -2,7 +2,7 @@ package vahy.paper.policy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
@@ -41,26 +41,26 @@ public class PaperPolicyImpl implements PaperPolicy {
     @Override
     public double[] getActionProbabilityDistribution(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
-        ActionType[] allDoableActions = gameState.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
+        HallwayAction[] allDoableActions = gameState.isOpponentTurn() ? HallwayAction.environmentActions : HallwayAction.playerActions;
         double[] vector = new double[allDoableActions.length];
         if(optimizeFlowInTree && !searchTree.isOpponentTurn()) {
 
             searchTree.optimizeFlow();
 
             // LALALA code duplication!
-            List<ImmutableTuple<ActionType, Double>> actionDoubleList = this.searchTree
+            List<ImmutableTuple<HallwayAction, Double>> actionDoubleList = this.searchTree
                 .getRoot()
                 .getChildMap()
                 .entrySet()
                 .stream()
                 .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getNodeProbabilityFlow().getSolution()))
                 .collect(Collectors.toList());
-            for (ImmutableTuple<ActionType, Double> entry : actionDoubleList) {
+            for (ImmutableTuple<HallwayAction, Double> entry : actionDoubleList) {
                 int actionIndex = entry.getFirst().getActionIndexAsPlayerAction();
                 vector[actionIndex] = entry.getSecond();
             }
         } else {
-            List<ImmutableTuple<ActionType, Integer>> actionIntegerList = this.searchTree
+            List<ImmutableTuple<HallwayAction, Integer>> actionIntegerList = this.searchTree
                 .getRoot()
                 .getEdgeMetadataMap()
                 .entrySet()
@@ -68,7 +68,7 @@ public class PaperPolicyImpl implements PaperPolicy {
                 .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getVisitCount()))
                 .collect(Collectors.toList());
             int sum = actionIntegerList.stream().mapToInt(ImmutableTuple::getSecond).sum();
-            for (ImmutableTuple<ActionType, Integer> entry : actionIntegerList) {
+            for (ImmutableTuple<HallwayAction, Integer> entry : actionIntegerList) {
                 int actionIndex = gameState.isOpponentTurn() ? entry.getFirst().getActionIndexAsEnvironmentAction() : entry.getFirst().getActionIndexAsPlayerAction();
                 vector[actionIndex] = entry.getSecond() / (double) sum;
             }
@@ -79,16 +79,16 @@ public class PaperPolicyImpl implements PaperPolicy {
     @Override
     public double[] getPriorActionProbabilityDistribution(ImmutableStateImpl gameState) {
         checkStateRoot(gameState);
-        ActionType[] allDoableActions = gameState.isOpponentTurn() ? ActionType.environmentActions : ActionType.playerActions;
+        HallwayAction[] allDoableActions = gameState.isOpponentTurn() ? HallwayAction.environmentActions : HallwayAction.playerActions;
         double[] priorProbabilities = new double[allDoableActions.length];
-        List<ImmutableTuple<ActionType, Double>> actionDoubleList = this.searchTree
+        List<ImmutableTuple<HallwayAction, Double>> actionDoubleList = this.searchTree
             .getRoot()
             .getEdgeMetadataMap()
             .entrySet()
             .stream()
             .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getPriorProbability()))
             .collect(Collectors.toList());
-        for (ImmutableTuple<ActionType, Double> entry : actionDoubleList) {
+        for (ImmutableTuple<HallwayAction, Double> entry : actionDoubleList) {
             int actionIndex = gameState.isOpponentTurn() ? entry.getFirst().getActionIndexAsEnvironmentAction() : entry.getFirst().getActionIndexAsPlayerAction();
             priorProbabilities[actionIndex] = entry.getSecond();
         }
@@ -108,7 +108,7 @@ public class PaperPolicyImpl implements PaperPolicy {
     }
 
     @Override
-    public ActionType getDiscreteAction(ImmutableStateImpl gameState) {
+    public HallwayAction getDiscreteAction(ImmutableStateImpl gameState) {
         expandSearchTree(gameState);
         SearchNode node = searchTree.getRoot();
 
@@ -120,7 +120,7 @@ public class PaperPolicyImpl implements PaperPolicy {
 
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
 
-            ActionType[] playerActions = ActionType.playerActions;
+            HallwayAction[] playerActions = HallwayAction.playerActions;
             double rand = random.nextDouble();
             double cumulativeSum = 0.0d;
 
@@ -143,8 +143,8 @@ public class PaperPolicyImpl implements PaperPolicy {
         }
     }
 
-    public void updateStateOnOpponentActions(List<ActionType> opponentActionList) {
-        for (ActionType action : opponentActionList) {
+    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
+        for (HallwayAction action : opponentActionList) {
             searchTree.applyAction(action);
         }
     }

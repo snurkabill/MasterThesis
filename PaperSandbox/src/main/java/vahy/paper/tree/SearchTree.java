@@ -3,7 +3,7 @@ package vahy.paper.tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
@@ -79,11 +79,11 @@ public class SearchTree {
         return true;
     }
 
-    public ActionType[] getAllPossibleActions() {
+    public HallwayAction[] getAllPossibleActions() {
         return this.root.getWrappedState().getAllPossibleActions();
     }
 
-    public StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> applyAction(ActionType action) {
+    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> applyAction(HallwayAction action) {
         if(root.isFinalNode()) {
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
@@ -105,7 +105,7 @@ public class SearchTree {
         return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
     }
 
-    private void calculateNumericallyStableNewRiskThreshold(ActionType appliedAction) {
+    private void calculateNumericallyStableNewRiskThreshold(HallwayAction appliedAction) {
         double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
         double riskDiff = calculateNumericallyStableRiskDiff(riskOfOtherActions);
         double actionProbability = calculateNumericallyStableActionProbability(root.getChildMap().get(appliedAction).getNodeProbabilityFlow().getSolution());
@@ -114,9 +114,9 @@ public class SearchTree {
         isFlowOptimized = false;
     }
 
-    private double calculateNumericallyStableRiskOfAnotherActions(ActionType appliedAction) {
+    private double calculateNumericallyStableRiskOfAnotherActions(HallwayAction appliedAction) {
         double riskOfOtherActions = 0.0;
-        for (Map.Entry<ActionType, SearchNode> entry : root.getChildMap().entrySet()) {
+        for (Map.Entry<HallwayAction, SearchNode> entry : root.getChildMap().entrySet()) {
             if(entry.getKey() != appliedAction) {
                 riskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
             }
@@ -141,7 +141,7 @@ public class SearchTree {
 
     }
 
-    private double calculateNewRiskValue(double riskDiff, double actionProbability, double riskOfOtherActions, ActionType appliedAction) {
+    private double calculateNewRiskValue(double riskDiff, double actionProbability, double riskOfOtherActions, HallwayAction appliedAction) {
         if(actionProbability == 0.0) {
             logger.trace("Taken action with zero probability according to linear optimization. Setting risk to 1.0, since such action is probably taken due to exploration.");
             return 1.0;
@@ -214,7 +214,7 @@ public class SearchTree {
                     risk += node.getNodeProbabilityFlow().getSolution();
                 }
             } else {
-                for (Map.Entry<ActionType, SearchNode> entry : node.getChildMap().entrySet()) {
+                for (Map.Entry<HallwayAction, SearchNode> entry : node.getChildMap().entrySet()) {
                     queue.addLast(entry.getValue());
                 }
             }

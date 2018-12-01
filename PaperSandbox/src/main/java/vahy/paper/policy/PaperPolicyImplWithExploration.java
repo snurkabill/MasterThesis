@@ -1,6 +1,6 @@
 package vahy.paper.policy;
 
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.RandomDistributionUtils;
@@ -41,8 +41,8 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         return innerPolicy.getActionProbabilityDistribution(gameState);
     }
 
-    public ActionType getDiscreteAction(ImmutableStateImpl gameState) {
-        ActionType discreteAction = innerPolicy.getDiscreteAction(gameState);
+    public HallwayAction getDiscreteAction(ImmutableStateImpl gameState) {
+        HallwayAction discreteAction = innerPolicy.getDiscreteAction(gameState);
         double randomDouble = random.nextDouble();
         if(randomDouble < explorationConstant) {
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
@@ -54,7 +54,7 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
             for (int i = 0; i < actionProbabilityDistribution.length; i++) {
                 exponentiation[i] = exponentiation[i] / sum;
             }
-            ActionType[] playerActions = ActionType.playerActions;
+            HallwayAction[] playerActions = HallwayAction.playerActions;
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(exponentiation, random);
             return playerActions[index];
         } else {
@@ -62,7 +62,7 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         }
     }
 
-    public void updateStateOnOpponentActions(List<ActionType> opponentActionList) {
+    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
         innerPolicy.updateStateOnOpponentActions(opponentActionList);
     }
 }

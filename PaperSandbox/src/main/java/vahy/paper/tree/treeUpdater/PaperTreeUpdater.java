@@ -2,7 +2,7 @@ package vahy.paper.tree.treeUpdater;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.paper.tree.EdgeMetadata;
 import vahy.paper.tree.SearchNode;
 
@@ -25,7 +25,7 @@ public class PaperTreeUpdater implements TreeUpdater {
 
         while (!expandedNode.isRoot()) {
             SearchNode parent = expandedNode.getParent();
-            ActionType appliedAction = expandedNode.getAppliedParentAction();
+            HallwayAction appliedAction = expandedNode.getAppliedParentAction();
 
             expandedNode.setTotalVisitCounter(expandedNode.getTotalVisitCounter() + 1);
             EdgeMetadata metadata = parent.getEdgeMetadataMap().get(appliedAction);

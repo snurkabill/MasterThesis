@@ -1,7 +1,7 @@
 package vahy.search;
 
 import vahy.api.search.node.SearchNode;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -13,7 +13,7 @@ import vahy.utils.StreamUtils;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> {
+public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> {
 
     public static final double TOLERANCE = 0.0000000001;
 
@@ -26,7 +26,7 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
     }
 
     @Override
-    protected ActionType getBestAction(SearchNode<ActionType, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> node) {
+    protected HallwayAction getBestAction(SearchNode<HallwayAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, ImmutableStateImpl> node) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
         double max = node
@@ -48,7 +48,7 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
         return node
             .getChildNodeStream()
             .map(x -> {
-                ActionType action = x.getAppliedAction();
+                HallwayAction action = x.getAppliedAction();
                 double uValue = calculateUValue(priorProbability, x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
                 double qValue = x.getSearchNodeMetadata().getExpectedReward().getValue() == 0 ? 0 :
                     (x.getSearchNodeMetadata().getExpectedReward().getValue() - finalMin) /

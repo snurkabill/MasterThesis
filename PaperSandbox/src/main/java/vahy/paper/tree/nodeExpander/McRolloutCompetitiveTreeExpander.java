@@ -3,7 +3,7 @@ package vahy.paper.tree.nodeExpander;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.state.ImmutableStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -56,14 +56,14 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
         double riskSum = 0.0;
         double rewardSum = 0.0;
         List<DoubleReward> rewardList = new ArrayList<>();
-        ActionType firstAction = null;
-        ActionType secondAction = null;
+        HallwayAction firstAction = null;
+        HallwayAction secondAction = null;
         while(!currentNode.isFinalNode()) {
             depth++;
             if(currentNode.isLeaf()) {
                 expandChildren(currentNode);
             }
-            ActionType nextAction = selectNextAction(currentNode);
+            HallwayAction nextAction = selectNextAction(currentNode);
             if(firstAction == null) {
                 firstAction = nextAction;
             } else if(secondAction == null) {
@@ -105,7 +105,7 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
                     currentNode.setEvaluated();
                 }
                 SearchNode parent = currentNode.getParent();
-                ActionType appliedAction = currentNode.getAppliedParentAction();
+                HallwayAction appliedAction = currentNode.getAppliedParentAction();
 
                 currentNode.setTotalVisitCounter(currentNode.getTotalVisitCounter() + 1);
                 EdgeMetadata metadata = parent.getEdgeMetadataMap().get(appliedAction);
@@ -141,29 +141,29 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
 
     private void setPriorProbabilities(SearchNode currentNode) {
         if(currentNode.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities = currentNode.getWrappedState().environmentActionsWithProbabilities();
-            List<ActionType> actions = environmentActionsWithProbabilities.getFirst();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = currentNode.getWrappedState().environmentActionsWithProbabilities();
+            List<HallwayAction> actions = environmentActionsWithProbabilities.getFirst();
             List<Double> probabilities = environmentActionsWithProbabilities.getSecond();
             for (int i = 0; i < actions.size(); i++) {
                 currentNode.getEdgeMetadataMap().get(actions.get(i)).setPriorProbability(probabilities.get(i));
             }
         } else {
             int actionCount = currentNode.getWrappedState().getAllPossibleActions().length;
-            for (Map.Entry<ActionType, EdgeMetadata> entry : currentNode.getEdgeMetadataMap().entrySet()) {
+            for (Map.Entry<HallwayAction, EdgeMetadata> entry : currentNode.getEdgeMetadataMap().entrySet()) {
                 entry.getValue().setPriorProbability(1.0 / actionCount);
             }
         }
     }
 
-    private ActionType selectNextAction(SearchNode currentNode) {
+    private HallwayAction selectNextAction(SearchNode currentNode) {
         if(currentNode.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> environmentActionsWithProbabilities = currentNode.getWrappedState().environmentActionsWithProbabilities();
-            List<ActionType> actions = environmentActionsWithProbabilities.getFirst();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = currentNode.getWrappedState().environmentActionsWithProbabilities();
+            List<HallwayAction> actions = environmentActionsWithProbabilities.getFirst();
             List<Double> probabilities = environmentActionsWithProbabilities.getSecond();
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random);
             return actions.get(index);
         } else {
-            ActionType[] actions = currentNode.getWrappedState().getAllPossibleActions();
+            HallwayAction[] actions = currentNode.getWrappedState().getAllPossibleActions();
             return actions[random.nextInt(actions.length)];
         }
     }
@@ -182,15 +182,15 @@ public class McRolloutCompetitiveTreeExpander implements NodeExpander {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
         nodesExpandedCount++;
-        ActionType[] allActions = node.getWrappedState().getAllPossibleActions();
+        HallwayAction[] allActions = node.getWrappedState().getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
 
         if(node.getChildMap().size() != 0) {
             throw new IllegalStateException("Node was already expanded");
         }
 
-        for (ActionType action : allActions) {
-            StateRewardReturn<ActionType, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
+        for (HallwayAction action : allActions) {
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, ImmutableStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
             SearchNode newNode = new SearchNode(stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();
