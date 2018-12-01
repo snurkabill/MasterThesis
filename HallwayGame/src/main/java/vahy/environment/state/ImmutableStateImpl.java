@@ -1,12 +1,11 @@
 package vahy.environment.state;
 
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.ActionType;
 import vahy.environment.agent.AgentHeading;
-import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.model.observation.DoubleVectorialObservation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.reward.DoubleScalarReward;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
@@ -15,7 +14,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> {
+public class ImmutableStateImpl implements PaperState<ActionType, DoubleScalarReward, DoubleVectorialObservation, ImmutableStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -575,5 +574,10 @@ public class ImmutableStateImpl implements State<ActionType, DoubleScalarReward,
         result = 31 * result + (isAgentTurn() ? 1 : 0);
         result = 31 * result + (hasAgentMoved ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public boolean isRiskHit() {
+        return isAgentKilled();
     }
 }

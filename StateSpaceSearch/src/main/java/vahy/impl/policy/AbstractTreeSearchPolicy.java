@@ -71,7 +71,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
     }
 
-    private void checkStateRoot(TState gameState) {
+    protected void checkStateRoot(TState gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state or argument itself is invalid. Possibly missing equals method");
         }
