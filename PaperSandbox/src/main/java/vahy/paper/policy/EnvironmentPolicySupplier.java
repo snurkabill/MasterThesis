@@ -1,7 +1,7 @@
 package vahy.paper.policy;
 
 import vahy.environment.agent.policy.environment.EnvironmentPolicy;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 
 import java.util.SplittableRandom;
 
@@ -13,7 +13,7 @@ public class EnvironmentPolicySupplier {
         this.random = random;
     }
 
-    public EnvironmentPolicy initializePolicy(ImmutableStateImpl initialState) {
+    public EnvironmentPolicy initializePolicy(HallwayStateImpl initialState) {
         return new EnvironmentPolicy(random);
     }
 }

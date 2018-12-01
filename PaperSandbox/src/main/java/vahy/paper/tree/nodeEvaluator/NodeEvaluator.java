@@ -1,6 +1,6 @@
 package vahy.paper.tree.nodeEvaluator;
 
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.paper.tree.SearchNode;
 
 import java.util.Map;
@@ -18,7 +18,7 @@ public abstract class NodeEvaluator {
         if(!node.isAlreadyEvaluated()) {
             innerEvaluateNode(node);
         }
-        for (Map.Entry<ActionType, SearchNode> childEntry : node.getChildMap().entrySet()) {
+        for (Map.Entry<HallwayAction, SearchNode> childEntry : node.getChildMap().entrySet()) {
             if(!childEntry.getValue().isFinalNode()) {
                 innerEvaluateNode(childEntry.getValue());
             }

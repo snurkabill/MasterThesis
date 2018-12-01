@@ -1,6 +1,6 @@
 package vahy.environment.agent;
 
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 
 public enum AgentHeading {
     NORTH,
@@ -40,13 +40,13 @@ public enum AgentHeading {
         WEST.readableHeadingRepresentation = "→";
     }
 
-    public AgentHeading turn(ActionType actionType) {
-        if(actionType == ActionType.TURN_RIGHT) {
+    public AgentHeading turn(HallwayAction hallwayAction) {
+        if(hallwayAction == HallwayAction.TURN_RIGHT) {
             return right;
-        } else if(actionType == ActionType.TURN_LEFT) {
+        } else if(hallwayAction == HallwayAction.TURN_LEFT) {
             return left;
         } else {
-            throw new IllegalArgumentException("ActionType: [" + actionType + "] cannot be used for turning agent");
+            throw new IllegalArgumentException("HallwayAction: [" + hallwayAction + "] cannot be used for turning agent");
         }
     }
 

@@ -1,12 +1,8 @@
 package vahy.search;
 
-import vahy.api.model.State;
-import vahy.api.search.node.nodeMetadata.StateActionMetadata;
-import vahy.environment.ActionType;
-import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.node.nodeMetadata.AbstractStateActionMetadata;
+import vahy.environment.HallwayAction;
+import vahy.environment.state.HallwayStateImpl;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 
 import java.util.List;
@@ -14,20 +10,18 @@ import java.util.Map;
 
 public abstract class MaximizingRewardGivenProbabilities {
 
-    protected DoubleScalarReward resolveReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> state, Map<ActionType, AbstractStateActionMetadata<DoubleScalarReward>> stateActionMap) {
+    protected DoubleReward resolveReward(HallwayStateImpl state, Map<HallwayAction, DoubleReward> actionRewardMap) {
         if(state.isOpponentTurn()) {
-            ImmutableTuple<List<ActionType>, List<Double>> actionsWithProbabilities = ((ImmutableStateImpl) state).environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> actionsWithProbabilities = state.environmentActionsWithProbabilities();
             double sum = 0.0;
             for (int i = 0; i < actionsWithProbabilities.getFirst().size(); i++) {
-                sum += stateActionMap.get(actionsWithProbabilities.getFirst().get(i)).getEstimatedTotalReward().getValue() *
-                    actionsWithProbabilities.getSecond().get(i);
+                sum += actionRewardMap.get(actionsWithProbabilities.getFirst().get(i)).getValue() * actionsWithProbabilities.getSecond().get(i);
             }
-            return new DoubleScalarReward(sum);
+            return new DoubleReward(sum);
         } else {
-            return stateActionMap
+            return actionRewardMap
                 .values()
                 .stream()
-                .map(StateActionMetadata::getEstimatedTotalReward)
                 .max(Comparable::compareTo)
                 .orElseThrow(() -> new IllegalStateException("Children should be always expanded when doing transition update"));
         }

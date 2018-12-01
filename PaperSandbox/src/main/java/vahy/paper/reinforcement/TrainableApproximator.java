@@ -1,14 +1,14 @@
 package vahy.paper.reinforcement;
 
 import vahy.api.learning.model.SupervisedTrainableModel;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-public class TrainableApproximator implements Function<DoubleVectorialObservation, double[]> {
+public class TrainableApproximator<TObservation extends DoubleVector> implements Function<TObservation, double[]> {
 
     private final SupervisedTrainableModel supervisedTrainableModel;
 
@@ -16,12 +16,12 @@ public class TrainableApproximator implements Function<DoubleVectorialObservatio
         this.supervisedTrainableModel = supervisedTrainableModel;
     }
 
-    public void train(List<ImmutableTuple<DoubleVectorialObservation, double[]>> episodeData) {
+    public void train(List<ImmutableTuple<TObservation, double[]>> episodeData) {
         double[][] input = new double[episodeData.size()][];
         double[][] target = new double[episodeData.size()][];
-        Iterator<ImmutableTuple<DoubleVectorialObservation, double[]>> iterator = episodeData.iterator();
+        Iterator<ImmutableTuple<TObservation, double[]>> iterator = episodeData.iterator();
         for (int i = 0; iterator.hasNext(); i++) {
-            ImmutableTuple<DoubleVectorialObservation, double[]> next = iterator.next();
+            ImmutableTuple<TObservation, double[]> next = iterator.next();
             input[i] = next.getFirst().getObservedVector();
             target[i] = next.getSecond();
         }
@@ -29,7 +29,7 @@ public class TrainableApproximator implements Function<DoubleVectorialObservatio
     }
 
     @Override
-    public double[] apply(DoubleVectorialObservation doubleVectorialObservation) {
+    public double[] apply(TObservation doubleVectorialObservation) {
         return supervisedTrainableModel.predict(doubleVectorialObservation.getObservedVector());
     }
 }

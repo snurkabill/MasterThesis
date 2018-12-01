@@ -2,7 +2,7 @@ package vahy.paper.reinforcement;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.state.ImmutableStateImpl;
+import vahy.environment.state.HallwayStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperPolicyImpl;
@@ -45,7 +45,7 @@ public class EpisodeAggregator {
             logger.info("Running {}th unique episode", i);
             for (int j = 0; j < episodeIterationCount; j++) {
                 logger.info("Running {}th episode", i * episodeIterationCount + j);
-                ImmutableStateImpl initialGameState = initialStateSupplier.createInitialState();
+                HallwayStateImpl initialGameState = initialStateSupplier.createInitialState();
                 PaperPolicyImpl policy = playerPolicySupplier.initializePolicy(initialGameState);
                 PaperEpisode paperEpisode = new PaperEpisode(initialGameState, policy, opponentPolicy.initializePolicy(initialGameState), stepCountLimit);
                 paperEpisode.runEpisode();

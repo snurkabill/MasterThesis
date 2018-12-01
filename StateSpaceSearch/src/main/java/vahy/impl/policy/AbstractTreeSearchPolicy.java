@@ -7,10 +7,9 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
-import vahy.api.search.node.nodeMetadata.SearchNodeMetadata;
-import vahy.api.search.node.nodeMetadata.StateActionMetadata;
+import vahy.api.search.node.SearchNodeMetadata;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.timer.SimpleTimer;
 
 import java.util.List;
@@ -20,19 +19,19 @@ public abstract class AbstractTreeSearchPolicy<
     TAction extends Action,
     TReward extends Reward,
     TObservation extends Observation,
-    TStateActionMetadata extends StateActionMetadata<TReward>,
-    TSearchNodeMetadata extends SearchNodeMetadata<TAction, TReward, TStateActionMetadata>>
-    implements Policy<TAction, TReward, TObservation> {
+    TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
+    TState extends State<TAction, TReward, TObservation, TState>>
+    implements Policy<TAction, TReward, TObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
 
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    protected final SearchTreeImpl<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> searchTree;
+    protected final SearchTreeImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchTree;
 
     public AbstractTreeSearchPolicy(TreeUpdateCondition treeUpdateCondition,
-                                    SearchTreeImpl<TAction, TReward, TObservation, TStateActionMetadata, TSearchNodeMetadata, State<TAction, TReward, TObservation>> searchTree) {
+                                    SearchTreeImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchTree) {
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
     }
@@ -44,7 +43,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
     }
 
-    protected void expandSearchTree(State<TAction, TReward, TObservation> gameState) {
+    protected void expandSearchTree(TState gameState) {
         checkStateRoot(gameState);
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
@@ -72,7 +71,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
     }
 
-    private void checkStateRoot(State<TAction, TReward, TObservation> gameState) {
+    protected void checkStateRoot(TState gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state or argument itself is invalid. Possibly missing equals method");
         }

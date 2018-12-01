@@ -5,8 +5,8 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.reward.Reward;
 
-public interface PolicySupplier<TAction extends Action, TReward extends Reward, TObservation extends Observation> {
+public interface PolicySupplier<TAction extends Action, TReward extends Reward, TObservation extends Observation, TState extends State<TAction, TReward, TObservation, TState>> {
 
-    Policy<TAction, TReward, TObservation> initializePolicy(State<TAction, TReward, TObservation> initialState);
+    Policy<TAction, TReward, TObservation, TState> initializePolicy(TState initialState);
 
 }

@@ -2,6 +2,7 @@ package vahy.impl.search.tree.treeUpdateCondition;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 
 public class TreeUpdateConditionImpl implements TreeUpdateCondition {
 

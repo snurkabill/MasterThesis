@@ -1,8 +1,8 @@
 package vahy.paper.policy;
 
-import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.environment.state.HallwayStateImpl;
+import vahy.impl.model.reward.DoubleReward;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.tree.NodeSelector;
 import vahy.paper.tree.OptimalFlowCalculator;
 import vahy.paper.tree.SearchNode;
@@ -42,12 +42,12 @@ public class PaperPolicySupplier {
         this.optimizeFlowInSearchTree = optimizeFlowInSearchTree;
     }
 
-    public PaperPolicyImpl initializePolicy(ImmutableStateImpl initialState) {
+    public PaperPolicyImpl initializePolicy(HallwayStateImpl initialState) {
         return createPolicy(initialState);
     }
 
-    protected PaperPolicyImpl createPolicy(ImmutableStateImpl initialState) {
-        SearchNode node = new SearchNode(initialState, null, null, new DoubleScalarReward(0.0));
+    protected PaperPolicyImpl createPolicy(HallwayStateImpl initialState) {
+        SearchNode node = new SearchNode(initialState, null, null, new DoubleReward(0.0));
         return new PaperPolicyImpl(
             random,
             new SearchTree(

@@ -1,5 +1,7 @@
 package vahy.impl.search.tree.treeUpdateCondition;
 
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
+
 public class TreeUpdateConditionSuplierCountBased implements TreeUpdateCondition {
 
     private final int callsPerStep;

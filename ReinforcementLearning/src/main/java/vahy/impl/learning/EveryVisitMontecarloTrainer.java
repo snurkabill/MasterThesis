@@ -10,7 +10,7 @@ import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,13 +18,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class EveryVisitMontecarloTrainer<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractMonteCarloTrainer<TAction, TReward, TObservation> {
+public class EveryVisitMontecarloTrainer<
+    TAction extends Action,
+    TReward extends DoubleVectorialReward,
+    TObservation extends DoubleVector,
+    TState extends State<TAction, TReward, TObservation, TState>>
+    extends AbstractMonteCarloTrainer<TAction, TReward, TObservation, TState> {
 
     private final double discountFactor;
 
-    public EveryVisitMontecarloTrainer(InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier,
-                                       TrainablePolicySupplier<TAction, TReward, TObservation> trainablePolicySupplier,
-                                       PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier,
+    public EveryVisitMontecarloTrainer(InitialStateSupplier<TAction, TReward, TObservation, TState> initialStateSupplier,
+                                       TrainablePolicySupplier<TAction, TReward, TObservation, TState> trainablePolicySupplier,
+                                       PolicySupplier<TAction, TReward, TObservation, TState> opponentPolicySupplier,
                                        RewardAggregator<TReward> rewardAggregator,
                                        double discountFactor) {
         super(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier, rewardAggregator);
@@ -32,9 +37,9 @@ public class EveryVisitMontecarloTrainer<TAction extends Action, TReward extends
     }
 
     @Override
-    protected Map<State<TAction, TReward, TObservation>, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation> episode) {
-        Map<State<TAction, TReward, TObservation>, List<TReward>> everyVisitMap = new LinkedHashMap<>();
-        List<StateActionReward<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeHistory = episode.getEpisodeStateActionRewardList();
+    protected Map<TState, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation, TState> episode) {
+        Map<TState, List<TReward>> everyVisitMap = new LinkedHashMap<>();
+        List<StateActionReward<TAction, TReward, TObservation, TState>> episodeHistory = episode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getState().isOpponentTurn()) {
                 TReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(StateActionReward::getReward), discountFactor);

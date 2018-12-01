@@ -1,9 +1,8 @@
 package vahy.paper.policy;
 
-import vahy.api.model.State;
-import vahy.environment.ActionType;
-import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.environment.HallwayAction;
+import vahy.environment.state.HallwayStateImpl;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
@@ -24,26 +23,26 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         this.temperature = temperature;
     }
 
-    public double[] getPriorActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double[] getPriorActionProbabilityDistribution(HallwayStateImpl gameState) {
         return innerPolicy.getPriorActionProbabilityDistribution(gameState);
     }
 
     @Override
-    public DoubleScalarReward getEstimatedReward(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public DoubleReward getEstimatedReward(HallwayStateImpl gameState) {
         return innerPolicy.getEstimatedReward(gameState);
     }
 
     @Override
-    public double getEstimatedRisk(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double getEstimatedRisk(HallwayStateImpl gameState) {
         return innerPolicy.getEstimatedRisk(gameState);
     }
 
-    public double[] getActionProbabilityDistribution(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
+    public double[] getActionProbabilityDistribution(HallwayStateImpl gameState) {
         return innerPolicy.getActionProbabilityDistribution(gameState);
     }
 
-    public ActionType getDiscreteAction(State<ActionType, DoubleScalarReward, DoubleVectorialObservation> gameState) {
-        ActionType discreteAction = innerPolicy.getDiscreteAction(gameState);
+    public HallwayAction getDiscreteAction(HallwayStateImpl gameState) {
+        HallwayAction discreteAction = innerPolicy.getDiscreteAction(gameState);
         double randomDouble = random.nextDouble();
         if(randomDouble < explorationConstant) {
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
@@ -55,7 +54,7 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
             for (int i = 0; i < actionProbabilityDistribution.length; i++) {
                 exponentiation[i] = exponentiation[i] / sum;
             }
-            ActionType[] playerActions = ActionType.playerActions;
+            HallwayAction[] playerActions = HallwayAction.playerActions;
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(exponentiation, random);
             return playerActions[index];
         } else {
@@ -63,7 +62,7 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         }
     }
 
-    public void updateStateOnOpponentActions(List<ActionType> opponentActionList) {
+    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
         innerPolicy.updateStateOnOpponentActions(opponentActionList);
     }
 }

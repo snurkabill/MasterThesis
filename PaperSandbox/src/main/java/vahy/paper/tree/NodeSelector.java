@@ -1,6 +1,6 @@
 package vahy.paper.tree;
 
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.StreamUtils;
 
@@ -56,11 +56,11 @@ public class NodeSelector {
             final double finalMax = max;
             final double finalMin = min;
 
-            ActionType bestAction = node.getEdgeMetadataMap()
+            HallwayAction bestAction = node.getEdgeMetadataMap()
                 .entrySet()
                 .stream()
                 .map(x -> {
-                    ActionType action = x.getKey();
+                    HallwayAction action = x.getKey();
                     double uValue = calculateUValue(x.getValue().getPriorProbability(), x.getValue().getVisitCount(), totalNodeVisitCount);
                     double qValue = x.getValue().getMeanActionValue() == 0 ? 0 :
                         (x.getValue().getMeanActionValue() - finalMin) /
@@ -75,11 +75,11 @@ public class NodeSelector {
 
             double[] meanActionValues = new double[node.getEdgeMetadataMap().size()];
             double[] uValues = new double[node.getEdgeMetadataMap().size()];
-            ActionType[] actions = new ActionType[node.getEdgeMetadataMap().size()];
+            HallwayAction[] actions = new HallwayAction[node.getEdgeMetadataMap().size()];
 
 
             int i = 0;
-            for (Map.Entry<ActionType, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
+            for (Map.Entry<HallwayAction, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
                 actions[i] = entry.getKey();
                 meanActionValues[i] = (entry.getValue().getMeanActionValue() - finalMin) / (Math.abs(finalMax - finalMin) < 0.00000001 ? finalMax : (finalMax - finalMin));
                 uValues[i] = calculateUValue(entry.getValue().getPriorProbability(), entry.getValue().getVisitCount(), totalNodeVisitCount);

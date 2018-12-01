@@ -2,12 +2,11 @@ package vahy.paper.tree.nodeExpander;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.environment.ActionType;
-import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.environment.HallwayAction;
+import vahy.environment.state.HallwayStateImpl;
+import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.tree.EdgeMetadata;
 import vahy.paper.tree.SearchNode;
 
@@ -28,7 +27,7 @@ public class PaperNodeExpander implements NodeExpander {
         if(node.getChildMap().isEmpty()) {
             innerExpandNode(node);
         }
-        for (Map.Entry<ActionType, SearchNode> childEntry : node.getChildMap().entrySet()) {
+        for (Map.Entry<HallwayAction, SearchNode> childEntry : node.getChildMap().entrySet()) {
             if(!childEntry.getValue().isFinalNode()) {
                 innerExpandNode(childEntry.getValue());
             }
@@ -42,18 +41,17 @@ public class PaperNodeExpander implements NodeExpander {
 
     public void innerExpandNode(SearchNode node) {
         nodesExpandedCount++;
-        ActionType[] allActions = node.getWrappedState().getAllPossibleActions();
+        HallwayAction[] allActions = node.getWrappedState().getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", node, Arrays.toString(allActions));
 
         if(node.getChildMap().size() != 0) {
             throw new IllegalStateException("Node was already expanded");
         }
 
-        for (ActionType action : allActions) {
-            StateRewardReturn<ActionType, DoubleScalarReward, DoubleVectorialObservation,
-                                State<ActionType, DoubleScalarReward, DoubleVectorialObservation>> stateRewardReturn = node.getWrappedState().applyAction(action);
+        for (HallwayAction action : allActions) {
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = node.getWrappedState().applyAction(action);
             logger.trace("Expanding node [{}] with action [{}] resulting in reward [{}]", node, action, stateRewardReturn.getReward().toPrettyString());
-            SearchNode newNode = new SearchNode((ImmutableStateImpl) stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
+            SearchNode newNode = new SearchNode(stateRewardReturn.getState(), node, action, stateRewardReturn.getReward());
             EdgeMetadata edgeMetadata = new EdgeMetadata();
             node.getChildMap().put(action, newNode);
             node.getEdgeMetadataMap().put(action, edgeMetadata);

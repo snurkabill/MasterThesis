@@ -2,18 +2,18 @@ package vahy.paper.reinforcement.learn;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.model.StateActionReward;
+import vahy.environment.HallwayAction;
+import vahy.environment.state.HallwayStateImpl;
+import vahy.game.HallwayGameInitialInstanceSupplier;
+import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.model.reward.DoubleReward;
+import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.paper.reinforcement.episode.StepRecord;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
-import vahy.api.model.State;
-import vahy.api.model.StateActionReward;
-import vahy.environment.ActionType;
-import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.impl.model.observation.DoubleVectorialObservation;
-import vahy.impl.model.reward.DoubleScalarReward;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.utils.ImmutableTuple;
 
 import java.util.List;
@@ -45,9 +45,9 @@ public abstract class AbstractTrainer {
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<ActionType, DoubleScalarReward, DoubleVectorialObservation, State<ActionType, DoubleScalarReward, DoubleVectorialObservation>>, StepRecord>> episodeHistory, int i) {
+    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>, StepRecord>> episodeHistory, int i) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
-        DoubleScalarReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
+        DoubleReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
         double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
         double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getAction().isTrap() ? 1.0 : 0.0;
         return new MutableDataSample(sampledProbabilities, aggregated, risk);
@@ -64,7 +64,7 @@ public abstract class AbstractTrainer {
         return outputVector;
     }
 
-    protected void trainPolicy(List<ImmutableTuple<DoubleVectorialObservation, double[]>> trainData) {
+    protected void trainPolicy(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
         paperTrainablePolicySupplier.train(trainData);
     }
 

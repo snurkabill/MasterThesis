@@ -6,9 +6,9 @@ import guru.nidi.graphviz.attribute.RankDir;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
-import vahy.environment.ActionType;
-import vahy.environment.state.ImmutableStateImpl;
-import vahy.impl.model.reward.DoubleScalarReward;
+import vahy.environment.HallwayAction;
+import vahy.environment.state.HallwayStateImpl;
+import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 
 import java.io.File;
@@ -28,35 +28,35 @@ public class SearchNode {
 
     private final long nodeId = instanceCounter++;
 
-    private final ImmutableStateImpl wrappedState;
+    private final HallwayStateImpl wrappedState;
 
     private SearchNode parent;
-    private ActionType appliedParentAction;
-    private DoubleScalarReward gainedReward;
-    private DoubleScalarReward cumulativeReward;
+    private HallwayAction appliedParentAction;
+    private DoubleReward gainedReward;
+    private DoubleReward cumulativeReward;
     private double realRisk;
     private CLPVariable nodeProbabilityFlow;
 
     private int totalVisitCounter;  // sum over all b : N(s, b)
-    private DoubleScalarReward estimatedReward; // in article V value
+    private DoubleReward estimatedReward; // in article V value
     private double estimatedRisk; // in article V value
 
     private boolean isFakeRisk = false; // only for that weird MC algorithm
 
-    private final Map<ActionType, SearchNode> childMap = new HashMap<>();
-    private final Map<ActionType, EdgeMetadata> edgeMetadataMap = new HashMap<>();
+    private final Map<HallwayAction, SearchNode> childMap = new HashMap<>();
+    private final Map<HallwayAction, EdgeMetadata> edgeMetadataMap = new HashMap<>();
 
     private boolean alreadyEvaluated = false;
 
-    public SearchNode(ImmutableStateImpl wrappedState, SearchNode parent, ActionType appliedParentAction, DoubleScalarReward gainedReward) {
+    public SearchNode(HallwayStateImpl wrappedState, SearchNode parent, HallwayAction appliedParentAction, DoubleReward gainedReward) {
         this.wrappedState = wrappedState;
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
         this.gainedReward = gainedReward;
         if(parent != null) {
-            this.cumulativeReward = new DoubleScalarReward(parent.getCumulativeReward().getValue() + gainedReward.getValue());
+            this.cumulativeReward = new DoubleReward(parent.getCumulativeReward().getValue() + gainedReward.getValue());
         } else {
-            this.cumulativeReward = new DoubleScalarReward(gainedReward.getValue());
+            this.cumulativeReward = new DoubleReward(gainedReward.getValue());
         }
         this.realRisk = wrappedState.isAgentKilled() ? 1 : 0;
     }
@@ -77,11 +77,11 @@ public class SearchNode {
         alreadyEvaluated = true;
     }
 
-    public void setEstimatedReward(DoubleScalarReward estimatedReward) {
+    public void setEstimatedReward(DoubleReward estimatedReward) {
         this.estimatedReward = estimatedReward;
     }
 
-    public DoubleScalarReward getGainedReward() {
+    public DoubleReward getGainedReward() {
         return gainedReward;
     }
 
@@ -89,7 +89,7 @@ public class SearchNode {
         return parent == null;
     }
 
-    public ImmutableStateImpl getWrappedState() {
+    public HallwayStateImpl getWrappedState() {
         return wrappedState;
     }
 
@@ -97,7 +97,7 @@ public class SearchNode {
         return parent;
     }
 
-    public ActionType getAppliedParentAction() {
+    public HallwayAction getAppliedParentAction() {
         return appliedParentAction;
     }
 
@@ -105,7 +105,7 @@ public class SearchNode {
         return totalVisitCounter;
     }
 
-    public DoubleScalarReward getEstimatedReward() {
+    public DoubleReward getEstimatedReward() {
         return estimatedReward;
     }
 
@@ -113,7 +113,7 @@ public class SearchNode {
         return isFinalNode() || childMap.entrySet().stream().noneMatch(x -> x.getValue().isAlreadyEvaluated());
     }
 
-    public Map<ActionType, EdgeMetadata> getEdgeMetadataMap() {
+    public Map<HallwayAction, EdgeMetadata> getEdgeMetadataMap() {
         return edgeMetadataMap;
     }
 
@@ -138,7 +138,7 @@ public class SearchNode {
         this.totalVisitCounter = totalVisitCounter;
     }
 
-    public DoubleScalarReward getCumulativeReward() {
+    public DoubleReward getCumulativeReward() {
         return cumulativeReward;
     }
 
@@ -185,7 +185,7 @@ public class SearchNode {
         while(!queue.isEmpty()) {
             SearchNode node = queue.poll();
 
-            for (Map.Entry<ActionType, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
+            for (Map.Entry<HallwayAction, EdgeMetadata> entry : node.getEdgeMetadataMap().entrySet()) {
                 SearchNode child = node.getChildMap().get(entry.getKey());
                 queue.addLast(child);
 
@@ -218,7 +218,7 @@ public class SearchNode {
         while(!queue.isEmpty()) {
             ImmutableTuple<SearchNode, Integer> node = queue.poll();
             if(node.getSecond() < depthBound) {
-                for (Map.Entry<ActionType, EdgeMetadata> entry : node.getFirst().getEdgeMetadataMap().entrySet()) {
+                for (Map.Entry<HallwayAction, EdgeMetadata> entry : node.getFirst().getEdgeMetadataMap().entrySet()) {
                     SearchNode child = node.getFirst().getChildMap().get(entry.getKey());
                     queue.addLast(new ImmutableTuple<>(child, node.getSecond() + 1));
                     graph = graph.with(
@@ -246,7 +246,7 @@ public class SearchNode {
         return estimatedRisk;
     }
 
-    public Map<ActionType, SearchNode> getChildMap() {
+    public Map<HallwayAction, SearchNode> getChildMap() {
         return childMap;
     }
 

@@ -1,5 +1,8 @@
 package vahy.impl.search.tree.treeUpdateCondition;
 
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+
 public class FixedUpdateCountTreeConditionFactory implements TreeUpdateConditionFactory {
 
     private final int countOfEnabledUpdates;

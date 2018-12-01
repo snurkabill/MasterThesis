@@ -10,19 +10,24 @@ import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
-import vahy.impl.model.observation.DoubleVectorialObservation;
+import vahy.impl.model.observation.DoubleVector;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FirstVisitMontecarloTrainer<TAction extends Action, TReward extends DoubleVectorialReward, TObservation extends DoubleVectorialObservation> extends AbstractMonteCarloTrainer<TAction, TReward, TObservation> {
+public class FirstVisitMontecarloTrainer<
+    TAction extends Action,
+    TReward extends DoubleVectorialReward,
+    TObservation extends DoubleVector,
+    TState extends State<TAction, TReward, TObservation, TState>>
+    extends AbstractMonteCarloTrainer<TAction, TReward, TObservation, TState> {
 
     private final double discountFactor;
 
-    public FirstVisitMontecarloTrainer(InitialStateSupplier<TAction, TReward, TObservation> initialStateSupplier,
-                                       TrainablePolicySupplier<TAction, TReward, TObservation> trainablePolicySupplier,
-                                       PolicySupplier<TAction, TReward, TObservation> opponentPolicySupplier,
+    public FirstVisitMontecarloTrainer(InitialStateSupplier<TAction, TReward, TObservation, TState> initialStateSupplier,
+                                       TrainablePolicySupplier<TAction, TReward, TObservation, TState> trainablePolicySupplier,
+                                       PolicySupplier<TAction, TReward, TObservation, TState> opponentPolicySupplier,
                                        RewardAggregator<TReward> rewardAggregator,
                                        double discountFactor) {
         super(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier, rewardAggregator);
@@ -30,9 +35,9 @@ public class FirstVisitMontecarloTrainer<TAction extends Action, TReward extends
     }
 
     @Override
-    protected Map<State<TAction, TReward, TObservation>, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation> episode) {
-        Map<State<TAction, TReward, TObservation>, TReward> firstVisitSet = new LinkedHashMap<>();
-        List<StateActionReward<TAction, TReward, TObservation, State<TAction, TReward, TObservation>>> episodeHistory = episode.getEpisodeStateActionRewardList();
+    protected Map<TState, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation, TState> episode) {
+        Map<TState, TReward> firstVisitSet = new LinkedHashMap<>();
+        List<StateActionReward<TAction, TReward, TObservation, TState>> episodeHistory = episode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getState().isOpponentTurn()) {
                 if(!firstVisitSet.containsKey(episodeHistory.get(i).getState())) {

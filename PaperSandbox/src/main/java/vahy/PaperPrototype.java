@@ -3,7 +3,7 @@ package vahy;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.environment.ActionType;
+import vahy.environment.HallwayAction;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
@@ -11,7 +11,7 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paper.benchmark.Benchmark;
 import vahy.paper.benchmark.BenchmarkingPolicy;
 import vahy.paper.benchmark.PolicyResults;
@@ -80,7 +80,7 @@ public class PaperPrototype {
         double temperature = 2;
         int sampleEpisodeCount = 20;
         int replayBufferSize = 50;
-        int stageCountCount = 300;
+        int stageCountCount = 200;
 
         // NN
         int batchSize = 4;
@@ -89,7 +89,7 @@ public class PaperPrototype {
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.02;
+        double totalRiskAllowed = 0.00;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
@@ -102,13 +102,13 @@ public class PaperPrototype {
         TrainableApproximator trainableApproximator = new TrainableApproximator(
 //            new AlphaGoLinearNaiveModel(
 //                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-//                1 + ActionType.playerActions.length,
+//                1 + HallwayAction.playerActions.length,
 //                learningRate
 //            )
 
 //            new Dl4jModel(
 //                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-//                NodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
+//                NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
 //                null,
 //                seed,
 //                learningRate,
@@ -117,7 +117,7 @@ public class PaperPrototype {
 
             new TFModel(
                 hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-                NodeEvaluator.POLICY_START_INDEX + ActionType.playerActions.length,
+                NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
                 trainingEpochCount,
                 batchSize,
                 new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile()),
