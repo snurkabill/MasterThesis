@@ -18,7 +18,7 @@ import vahy.paper.benchmark.PolicyResults;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperPolicySupplier;
 import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
-import vahy.paper.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paper.reinforcement.learn.AbstractTrainer;
 import vahy.paper.reinforcement.learn.EveryVisitMonteCarloTrainer;
 import vahy.paper.reinforcement.learn.FirstVisitMonteCarloTrainer;

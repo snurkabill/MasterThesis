@@ -10,7 +10,7 @@ import vahy.environment.HallwayAction;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
-import vahy.paper.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.utils.ImmutableTuple;
 
 import java.util.Arrays;

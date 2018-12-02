@@ -1,4 +1,4 @@
-package vahy.paper.reinforcement;
+package vahy.paperGenerics.reinforcement;
 
 import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.impl.model.observation.DoubleVector;

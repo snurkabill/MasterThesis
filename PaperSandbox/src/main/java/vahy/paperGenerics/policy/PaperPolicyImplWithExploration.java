@@ -45,7 +45,7 @@ public class PaperPolicyImplWithExploration<
     }
 
     @Override
-    public DoubleReward getEstimatedReward(TState gameState) {
+    public TReward getEstimatedReward(TState gameState) {
         return innerPolicy.getEstimatedReward(gameState);
     }
 

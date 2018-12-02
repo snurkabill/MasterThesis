@@ -3,7 +3,7 @@ package vahy.paper.policy;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
-import vahy.paper.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paper.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
 import vahy.paper.tree.nodeExpander.NodeExpander;
 import vahy.paper.tree.treeUpdater.TreeUpdater;

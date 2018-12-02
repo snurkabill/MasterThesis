@@ -11,6 +11,7 @@ import vahy.impl.model.ImmutableStateActionRewardTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.policy.PaperPolicy;
+import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -66,7 +67,7 @@ public class PaperEpisode {
             stepsDone++;
             logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
-            episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
+            episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord<>(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
             state = stateRewardReturn.getState();
             if(!state.isFinalState()) {
                 action = opponentPolicy.getDiscreteAction(state);
@@ -78,7 +79,7 @@ public class PaperEpisode {
                 playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
                 logger.debug("Environment's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
                 episodeStateRewardReturnList.add(stateRewardReturn);
-                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
+                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord<>(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
                 state = stateRewardReturn.getState();
             }
             logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
