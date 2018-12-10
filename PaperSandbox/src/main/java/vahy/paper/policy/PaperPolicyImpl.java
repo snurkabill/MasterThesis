@@ -172,7 +172,7 @@ public class PaperPolicyImpl implements PaperPolicy {
                 searchTree.getTotalNodesCreated(),
                 searchTree.getMaxBranchingFactor(),
                 searchTree.calculateAverageBranchingFactor(),
-                timer.secondsSpent(),
+                timer.getTotalTimeInSeconds(),
                 timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
         }
     }
