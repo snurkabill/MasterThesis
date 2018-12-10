@@ -28,6 +28,8 @@ public class PaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction,
     private final SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory;
     private final TrainableApproximator<DoubleVector> trainableApproximator;
 
+    private int nodesExpandedCount = 0;
+
     public PaperNodeEvaluator(SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory,
                               TrainableApproximator<DoubleVector> trainableApproximator) {
         this.searchNodeFactory = searchNodeFactory;
@@ -70,5 +72,9 @@ public class PaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction,
     @Override
     public void train(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
         trainableApproximator.train(trainData);
+    }
+
+    public int getNodesExpandedCount() {
+        return nodesExpandedCount;
     }
 }

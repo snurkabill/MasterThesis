@@ -175,7 +175,7 @@ public class TFModel implements SupervisedTrainableModel, AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         logger.trace("Finalizing TF model resources");
         sess.close();
         logger.debug("TF resources closed");

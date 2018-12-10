@@ -26,7 +26,8 @@ public class EpisodeAggregator {
     public EpisodeAggregator(
         int uniqueEpisodeCount,
         int episodeIterationCount,
-        int stepCountLimit, HallwayGameInitialInstanceSupplier initialStateSupplier,
+        int stepCountLimit,
+        HallwayGameInitialInstanceSupplier initialStateSupplier,
         PaperPolicySupplier playerPolicySupplier,
         EnvironmentPolicySupplier opponentPolicy)
     {

@@ -6,11 +6,12 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.utils.RandomDistributionUtils;
-import vahy.utils.ReflectionHacks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public class PaperPolicyImplWithExploration<
     TAction extends Enum<TAction> & Action,
@@ -24,7 +25,7 @@ public class PaperPolicyImplWithExploration<
     private final PaperPolicy<TAction, TReward, TObservation, TState> innerPolicy;
     private final double explorationConstant;
     private final double temperature;
-    private final TAction[] playerActions;
+    private final List<TAction> playerActions;
 
     public PaperPolicyImplWithExploration(Class<TAction> clazz,
                                           SplittableRandom random,
@@ -36,7 +37,7 @@ public class PaperPolicyImplWithExploration<
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
         TAction[] allActions = clazz.getEnumConstants();
-        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
+        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -76,7 +77,7 @@ public class PaperPolicyImplWithExploration<
                 exponentiation[i] = exponentiation[i] / sum;
             }
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(exponentiation, random);
-            return playerActions[index];
+            return playerActions.get(index);
         }
     }
 

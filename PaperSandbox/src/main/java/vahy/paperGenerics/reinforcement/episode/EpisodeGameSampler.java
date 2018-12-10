@@ -8,9 +8,8 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 
-public class PaperRolloutGameSampler<
+public class EpisodeGameSampler<
     TAction extends Enum<TAction> & Action,
     TReward extends DoubleReward,
     TObservation extends DoubleVector,
@@ -18,19 +17,18 @@ public class PaperRolloutGameSampler<
     TState extends PaperState<TAction, TReward, TObservation, TState>>
     extends AbstractGameSampler<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
 
-    private final TrainablePaperPolicySupplier<TAction, TReward, TObservation, TSearchNodeMetadata, TState> playerPolicySupplier;
+    private final PaperPolicySupplier<TAction, TReward, TObservation, TSearchNodeMetadata, TState> playerPolicySupplier;
 
-    public PaperRolloutGameSampler(InitialStateSupplier<TAction, TReward, TObservation, TState> initialStateSupplier,
-                                   TrainablePaperPolicySupplier<TAction, TReward, TObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
-                                   PaperPolicySupplier<TAction, TReward, TObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                                   int stepCountLimit) {
+    public EpisodeGameSampler(InitialStateSupplier<TAction, TReward, TObservation, TState> initialStateSupplier,
+                              PaperPolicySupplier<TAction, TReward, TObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
+                              PaperPolicySupplier<TAction, TReward, TObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                              int stepCountLimit) {
         super(initialStateSupplier, opponentPolicySupplier, stepCountLimit);
         this.playerPolicySupplier = playerPolicySupplier;
-
     }
 
     @Override
     protected PaperPolicy<TAction, TReward, TObservation, TState> supplyPlayerPolicy(TState initialState) {
-        return playerPolicySupplier.initializePolicyWithExploration(initialState);
+        return playerPolicySupplier.initializePolicy(initialState);
     }
 }

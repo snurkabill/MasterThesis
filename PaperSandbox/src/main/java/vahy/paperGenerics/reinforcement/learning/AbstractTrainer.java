@@ -68,7 +68,7 @@ public abstract class AbstractTrainer<
         return outputVector;
     }
 
-    protected abstract void trainPolicy(int episodeCount);
+    public abstract void trainPolicy(int episodeCount);
 
     protected void trainPolicy(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
         paperNodeEvaluator.train(trainData);
