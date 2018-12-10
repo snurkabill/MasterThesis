@@ -2,8 +2,8 @@ package vahy.timer;
 
 public class SimpleTimer {
 
-    private long startingTime;
-    private long totalTime;
+    private long startingTimeNano;
+    private long totalTimeNano;
     private boolean isRunning;
 
     public boolean isRunning() {
@@ -11,24 +11,36 @@ public class SimpleTimer {
     }
 
     public void startTimer() {
-        startingTime = System.currentTimeMillis();
+        startingTimeNano = System.nanoTime();
         isRunning = true;
     }
 
+    private long getCurrentTimeDiff() {
+        return System.nanoTime() - startingTimeNano;
+    }
+
+    private long getTimeDiff() {
+        return isRunning ? getCurrentTimeDiff() : totalTimeNano;
+    }
+
     public void stopTimer() {
-        totalTime = System.currentTimeMillis() - startingTime;
+        totalTimeNano = getTimeDiff();
         isRunning = false;
     }
 
-    public long getTotalTimeInMillis() {
-        return totalTime;
+    public long getTotalTimeInNanos() {
+        return getTimeDiff();
     }
 
-    public double secondsSpent() {
-        return totalTime / 1000.0;
+    public double getTotalTimeInSeconds() {
+        return getTimeDiff() / 1_000_000_000.0;
+    }
+
+    public double getTotalTimeInMillis() {
+        return totalTimeNano / 1_000.0;
     }
 
     public double samplesPerSec(int samples) {
-        return (double) samples / (getTotalTimeInMillis() / 1000.0);
+        return (double) samples / (getTimeDiff() / 1_000_000_000.0);
     }
 }
