@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 # input_count = 1
-input_count = 7
+input_count = 75
 
 hidden_count_1 = 20
 hidden_count_2 = 10

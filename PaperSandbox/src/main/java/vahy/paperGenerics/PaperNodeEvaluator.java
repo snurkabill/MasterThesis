@@ -48,6 +48,7 @@ public class PaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction,
 
     private SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> evaluateChildNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> parent,
                                                                                                                                                   HallwayAction nextAction) {
+        nodesExpandedCount++;
         StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = parent.applyAction(nextAction);
         SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> childNode = searchNodeFactory
             .createNode(stateRewardReturn, parent, nextAction);
