@@ -75,7 +75,8 @@ public class SearchTreeImpl<
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
         if(root.isLeaf()) {
-            throw new IllegalStateException("Policy cannot pick action from leaf node");
+            expandAndEvaluateNode(root);
+            // throw new IllegalStateException("Policy cannot pick action from leaf node");
         }
         TReward reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
         root = root.getChildNodeMap().get(action);
