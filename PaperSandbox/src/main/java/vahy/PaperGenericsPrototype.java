@@ -58,9 +58,9 @@ public class PaperGenericsPrototype {
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
+            .noisyMoveProbability(0.0)
             .stepPenalty(1)
-            .trapProbability(1)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
@@ -80,7 +80,7 @@ public class PaperGenericsPrototype {
         double temperature = 2;
         int sampleEpisodeCount = 20;
         int replayBufferSize = 50;
-        int stageCountCount = 200;
+        int stageCountCount = 50;
 
         // NN
         int batchSize = 4;
@@ -89,7 +89,7 @@ public class PaperGenericsPrototype {
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.00;
+        double totalRiskAllowed = 0.05;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
@@ -97,10 +97,8 @@ public class PaperGenericsPrototype {
         int stepCountLimit = 1000;
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
-
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
         Class<HallwayAction> clazz = HallwayAction.class;
-
 
 
         // MCTS WITH NN EVAL
@@ -196,7 +194,6 @@ public class PaperGenericsPrototype {
 
         }
 
-        cleanUpNativeTempFiles();
     }
 
     private static AbstractTrainer<
@@ -274,9 +271,9 @@ public class PaperGenericsPrototype {
 
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_01.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_02.txt");
-//        URL url = classLoader.getResource("examples/benchmark/benchmark_03.txt");
+        URL url = classLoader.getResource("examples/benchmark/benchmark_03.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_04.txt");
-        URL url = classLoader.getResource("examples/benchmark/benchmark_05.txt");
+//        URL url = classLoader.getResource("examples/benchmark/benchmark_05.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_06.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_07.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_08.txt");

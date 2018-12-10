@@ -1,5 +1,7 @@
 package vahy.paperGenerics.policy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVector;
@@ -20,6 +22,8 @@ public class PaperPolicyImplWithExploration<
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TObservation, TState>>
     implements PaperPolicy<TAction, TReward, TObservation, TState> {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImplWithExploration.class.getName());
 
     private final SplittableRandom random;
     private final PaperPolicy<TAction, TReward, TObservation, TState> innerPolicy;
@@ -65,6 +69,7 @@ public class PaperPolicyImplWithExploration<
         TAction discreteAction = innerPolicy.getDiscreteAction(gameState);
         double randomDouble = random.nextDouble();
         if(randomDouble > explorationConstant) {
+            logger.debug("Exploitation action [{}].", discreteAction);
             return discreteAction;
         } else {
             double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
@@ -77,6 +82,7 @@ public class PaperPolicyImplWithExploration<
                 exponentiation[i] = exponentiation[i] / sum;
             }
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(exponentiation, random);
+            logger.debug("Exploration action [{}]", playerActions.get(index));
             return playerActions.get(index);
         }
     }
