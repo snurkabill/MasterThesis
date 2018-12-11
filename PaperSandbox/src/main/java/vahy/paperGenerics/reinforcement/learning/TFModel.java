@@ -10,11 +10,7 @@ import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.paper.tree.nodeEvaluator.NodeEvaluator;
 import vahy.timer.SimpleTimer;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.DoubleBuffer;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 import java.util.SplittableRandom;
@@ -37,7 +33,7 @@ public class TFModel implements SupervisedTrainableModel, AutoCloseable {
     private final double[][] trainPolicyTargetBatch;
     private final SimpleTimer timer = new SimpleTimer();
 
-    public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, File graphFile, SplittableRandom random) {
+    public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.trainingIterations = trainingIterations;
@@ -53,11 +49,7 @@ public class TFModel implements SupervisedTrainableModel, AutoCloseable {
         }
         Graph graph = new Graph();
         this.sess = new Session(graph);
-        try {
-            graph.importGraphDef(Files.readAllBytes(Paths.get(graphFile.getAbsolutePath())));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Tf model handling crashed. TODO: quite general exception", e);
-        }
+        graph.importGraphDef(bytes);
         this.sess.runner().addTarget("init").run();
         logger.info("Initialized model based on TensorFlow backend.");
         logger.debug("Model with input dimension: [{}] and output dimension: [{}]. Batch size of model set to: [{}]", inputDimension, outputDimension, batchSize);

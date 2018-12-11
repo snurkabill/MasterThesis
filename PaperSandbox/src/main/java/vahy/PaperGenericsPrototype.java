@@ -40,9 +40,7 @@ import vahy.utils.EnumUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -100,14 +98,13 @@ public class PaperGenericsPrototype {
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
         Class<HallwayAction> clazz = HallwayAction.class;
 
-
         // MCTS WITH NN EVAL
         try(TFModel model = new TFModel(
             hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
             NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
             trainingEpochCount,
             batchSize,
-            new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile()),
+            PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
             random))
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
@@ -247,7 +244,7 @@ public class PaperGenericsPrototype {
 
 
     public static HallwayGameInitialInstanceSupplier getHallwayGameInitialInstanceSupplier(SplittableRandom random, GameConfig gameConfig) throws NotValidGameStringRepresentationException, IOException {
-        ClassLoader classLoader = PaperPrototype.class.getClassLoader();
+        ClassLoader classLoader = PaperGenericsPrototype.class.getClassLoader();
 //        URL url = classLoader.getResource("examples/hallway_demo0.txt");
 //        URL url = classLoader.getResource("examples/hallway_demo2.txt");
 //         URL url = classLoader.getResource("examples/hallway_demo3.txt");
@@ -273,13 +270,14 @@ public class PaperGenericsPrototype {
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_02.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_03.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_04.txt");
-        URL url = classLoader.getResource("examples/benchmark/benchmark_05.txt");
+        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_05.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_06.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_07.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_08.txt");
 
-        File file = new File(url.getFile());
-        return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(Files.readAllBytes(Paths.get(file.getAbsolutePath()))));
+        byte[] bytes = resourceAsStream.readAllBytes();
+
+        return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(bytes));
     }
 
     private static void cleanUpNativeTempFiles() {
