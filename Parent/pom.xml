@@ -21,7 +21,7 @@
         <module>../StateSpaceSearch</module>
         <module>../ReinforcementLearning</module>
         <module>../PaperSandbox</module>
-        <module>../TradingEnvironment</module>
+        <module>../MarketEnvironment</module>
     </modules>
 
     <properties>
