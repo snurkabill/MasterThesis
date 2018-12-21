@@ -17,6 +17,10 @@ public enum MarketAction implements Action {
 
     public static MarketAction[] playerActions = Arrays.stream(MarketAction.values()).filter(MarketAction::isPlayerAction).toArray(MarketAction[]::new);
     public static MarketAction[] environmentActions = Arrays.stream(MarketAction.values()).filter(actionType -> !actionType.isPlayerAction).toArray(MarketAction[]::new);
+
+    public static MarketAction[] noPositionPlayerActions = new MarketAction[] {NO_ACTION, OPEN_LONG, OPEN_SHORT};
+    public static MarketAction[] openPositionPlayerActions = new MarketAction[] {NO_ACTION, REVERSE, CLOSE};
+
     private final boolean isPlayerAction;
 
     MarketAction(boolean isPlayerAction) {
