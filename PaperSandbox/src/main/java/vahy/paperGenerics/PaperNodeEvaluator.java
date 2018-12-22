@@ -38,6 +38,10 @@ public class PaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction,
 
     @Override
     public void evaluateNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> selectedNode) {
+        if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
+            logger.trace("Expanding root since it is freshly created without evaluation");
+            innerEvaluation(selectedNode);
+        }
         HallwayAction[] allPossibleActions = selectedNode.getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         Map<HallwayAction, SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> childNodeMap = selectedNode.getChildNodeMap();
@@ -46,27 +50,31 @@ public class PaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction,
         }
     }
 
-    private SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> evaluateChildNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> parent,
-                                                                                                                                                  HallwayAction nextAction) {
+    private void innerEvaluation(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> node) {
         nodesExpandedCount++;
-        StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = parent.applyAction(nextAction);
-        SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> childNode = searchNodeFactory
-            .createNode(stateRewardReturn, parent, nextAction);
-        double[] prediction = trainableApproximator.apply(stateRewardReturn.getState().getObservation());
-        childNode.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
-        childNode.getSearchNodeMetadata().setPredictedRisk(prediction[RISK_VALUE_INDEX]);
-        Map<HallwayAction, Double> childPriorProbabilities = childNode.getSearchNodeMetadata().getChildPriorProbabilities();
-        if(childNode.getWrappedState().isPlayerTurn()) {
+        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
+        node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
+        node.getSearchNodeMetadata().setPredictedRisk(prediction[RISK_VALUE_INDEX]);
+        Map<HallwayAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
+        if(node.getWrappedState().isPlayerTurn()) {
             HallwayAction[] playerActions = HallwayAction.playerActions;
             for (int i = 0; i < playerActions.length; i++) {
                 childPriorProbabilities.put(playerActions[i], (prediction[i + POLICY_START_INDEX]));
             }
         } else {
-            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = childNode.getWrappedState().environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
             for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
                 childPriorProbabilities.put(environmentActionsWithProbabilities.getFirst().get(i), environmentActionsWithProbabilities.getSecond().get(i));
             }
         }
+    }
+
+    private SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> evaluateChildNode(SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> parent,
+                                                                                                                                                  HallwayAction nextAction) {
+        StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = parent.applyAction(nextAction);
+        SearchNode<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> childNode = searchNodeFactory
+            .createNode(stateRewardReturn, parent, nextAction);
+        innerEvaluation(childNode);
         return childNode;
     }
 
