@@ -39,25 +39,26 @@ public class MarketNodeEvaluator implements TrainableNodeEvaluator<MarketAction,
 
     @Override
     public void evaluateNode(SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> selectedNode) {
+        if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
+            logger.trace("Expanding root since it is freshly created without evaluation");
+            innerEvaluation(selectedNode);
+        }
         MarketAction[] allPossibleActions = selectedNode.getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         Map<MarketAction, SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> childNodeMap = selectedNode.getChildNodeMap();
         for (MarketAction nextAction : allPossibleActions) {
             childNodeMap.put(nextAction, evaluateChildNode(selectedNode, nextAction));
         }
+
     }
 
-    private SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> evaluateChildNode(SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> parent,
-                                                                                                                                           MarketAction nextAction) {
+    private void innerEvaluation(SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> node) {
         nodesExpandedCount++;
-        StateRewardReturn<MarketAction, DoubleReward, DoubleVector, MarketState> stateRewardReturn = parent.applyAction(nextAction);
-        SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> childNode = searchNodeFactory
-            .createNode(stateRewardReturn, parent, nextAction);
-        double[] prediction = trainableApproximator.apply(stateRewardReturn.getState().getObservation());
-        childNode.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
-        childNode.getSearchNodeMetadata().setPredictedRisk(prediction[RISK_VALUE_INDEX]);
-        Map<MarketAction, Double> childPriorProbabilities = childNode.getSearchNodeMetadata().getChildPriorProbabilities();
-        if(childNode.getWrappedState().isPlayerTurn()) {
+        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
+        node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
+        node.getSearchNodeMetadata().setPredictedRisk(prediction[RISK_VALUE_INDEX]);
+        Map<MarketAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
+        if(node.getWrappedState().isPlayerTurn()) {
             MarketAction[] playerActions = MarketAction.playerActions;
             for (int i = 0; i < playerActions.length; i++) {
                 childPriorProbabilities.put(playerActions[i], (prediction[i + POLICY_START_INDEX]));
@@ -73,6 +74,14 @@ public class MarketNodeEvaluator implements TrainableNodeEvaluator<MarketAction,
                 childPriorProbabilities.put(environmentActionsWithProbabilities.getFirst().get(i), environmentActionsWithProbabilities.getSecond().get(i));
             }
         }
+    }
+
+    private SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> evaluateChildNode(SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> parent,
+                                                                                                                                                  MarketAction nextAction) {
+        StateRewardReturn<MarketAction, DoubleReward, DoubleVector, MarketState> stateRewardReturn = parent.applyAction(nextAction);
+        SearchNode<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> childNode = searchNodeFactory
+            .createNode(stateRewardReturn, parent, nextAction);
+        innerEvaluation(childNode);
         return childNode;
     }
 
