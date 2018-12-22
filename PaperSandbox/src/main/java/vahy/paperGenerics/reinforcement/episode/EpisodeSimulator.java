@@ -70,8 +70,8 @@ public class EpisodeSimulator<
                                                                                   PaperPolicy<TAction, TReward, TObservation, TState> otherPolicy) {
         TAction action = onTurnPolicy.getDiscreteAction(state);
         StepRecord<TReward> playerStepRecord = createStepRecord(state, onTurnPolicy);
-        onTurnPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
-        otherPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+        onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
+        otherPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn = state.applyAction(action);
         return new ImmutableTriple<>(action, playerStepRecord, stateRewardReturn);
     }

@@ -37,7 +37,7 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<TAction> opponentActionList) {
+    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
         for (TAction action : opponentActionList) {
             searchTree.applyAction(action);
         }

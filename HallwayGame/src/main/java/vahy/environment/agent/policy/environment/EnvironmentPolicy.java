@@ -32,7 +32,7 @@ public class EnvironmentPolicy implements Policy<HallwayAction, DoubleReward, Do
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
+    public void updateStateOnPlayedActions(List<HallwayAction> opponentActionList) {
         // this is it
     }
 }

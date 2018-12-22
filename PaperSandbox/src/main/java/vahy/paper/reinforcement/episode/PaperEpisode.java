@@ -61,7 +61,7 @@ public class PaperEpisode {
             double[] priorProbabilities = playerPaperPolicy.getPriorActionProbabilityDistribution(state);
             DoubleReward estimatedReward = playerPaperPolicy.getEstimatedReward(state);
             double estimatedRisk = playerPaperPolicy.getEstimatedRisk(state);
-            playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+            playerPaperPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
             playerActionCount++;
             StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = state.applyAction(action);
             stepsDone++;
@@ -76,7 +76,7 @@ public class PaperEpisode {
                 estimatedReward = playerPaperPolicy.getEstimatedReward(state);
                 estimatedRisk = playerPaperPolicy.getEstimatedRisk(state);
                 stateRewardReturn = state.applyAction(action);
-                playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+                playerPaperPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
                 logger.debug("Environment's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
                 episodeStateRewardReturnList.add(stateRewardReturn);
                 episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord<>(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));

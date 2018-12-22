@@ -11,66 +11,154 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
 
     private final boolean isAgentTurn;
     private final TradingSystemState tradingSystemState;
-    private final TradingSystemParameters tradingSystemParameters;
+    private final MarketEnvironmentStaticPart marketEnvironmentStaticPart;
     private final double tradeBalance;
     private final boolean isTradeDone;
-
     private final double[] lookback; // keep it simple for now
+    private final double currentMidPrice;
+    private final int currentDataIndex;
     private final int shiftToEndOfDataCount;
 
-    public MarketState(boolean isAgentTurn,
-                       TradingSystemState tradingSystemState,
-                       TradingSystemParameters tradingSystemParameters,
-                       double tradeBalance,
-                       boolean isTradeDone,
+    public MarketState(TradingSystemState tradingSystemState,
+                       MarketEnvironmentStaticPart marketEnvironmentStaticPart,
                        double[] lookback,
+                       double currentMidPrice,
+                       int dataIndex,
                        int shiftToEndOfDataCount) {
+        this(true,
+            tradingSystemState,
+            marketEnvironmentStaticPart,
+            0.0,
+            false,
+            lookback,
+            currentMidPrice,
+            dataIndex,
+            shiftToEndOfDataCount);
+    }
+
+    private MarketState(boolean isAgentTurn,
+                        TradingSystemState tradingSystemState,
+                        MarketEnvironmentStaticPart marketEnvironmentStaticPart,
+                        double tradeBalance,
+                        boolean isTradeDone,
+                        double[] lookback,
+                        double currentMidPrice,
+                        int currentDataIndex,
+                        int shiftToEndOfDataCount) {
         this.isTradeDone = isTradeDone;
         this.lookback = lookback;
+        this.currentMidPrice = currentMidPrice;
+        this.currentDataIndex = currentDataIndex;
         this.isAgentTurn = isAgentTurn;
         this.tradingSystemState = tradingSystemState;
-        this.tradingSystemParameters = tradingSystemParameters;
+        this.marketEnvironmentStaticPart = marketEnvironmentStaticPart;
         this.tradeBalance = tradeBalance;
         this.shiftToEndOfDataCount = shiftToEndOfDataCount;
     }
 
-    private DoubleReward resolveReward(MarketAction actionType, double newestTradeBalance) {
-//        if(actionType == MarketAction.CLOSE) {
-//            return new DoubleReward(newestTradeBalance);
-//        }
-        return new DoubleReward(newestTradeBalance);
+    public int getCurrentDataIndex() {
+        return currentDataIndex;
+    }
+
+    private double buyPrice(double price) {
+        return price + marketEnvironmentStaticPart.getConstantSpread() / 2.0;
+    }
+
+    private double sellPrice(double price) {
+        return price - marketEnvironmentStaticPart.getConstantSpread() / 2.0;
+    }
+
+    private double buyUnit(double price) {
+        return buyPrice(price) * marketEnvironmentStaticPart.getSize();
+    }
+
+    private double sellUnit(double price) {
+        return sellPrice(price) * marketEnvironmentStaticPart.getSize();
+    }
+
+    private double baseCommission()  {
+        return this.marketEnvironmentStaticPart.getCommission() * this.marketEnvironmentStaticPart.getSize();
     }
 
     private double calculateTradeBalance(MarketAction actionType) {
         if(this.tradingSystemState.isOpenPosition()) {
-            if(actionType == MarketAction.NO_ACTION || actionType == MarketAction.REVERSE || actionType == MarketAction.CLOSE) {
+            if(actionType == MarketAction.NO_ACTION) {
                 return tradeBalance;
-            } else if(actionType == MarketAction.OPEN_LONG || actionType == MarketAction.OPEN_SHORT) {
-                return tradeBalance - tradingSystemParameters.getInstantCommissionWhenTradeOpens();
-            } else if(actionType == MarketAction.UP) {
-                switch (this.tradingSystemState) {
-                    case LONG_POSITION:
-                        return tradeBalance + this.tradingSystemParameters.getSmallestValueDiff();
-                    case SHORT_POSITION:
-                        return tradeBalance - this.tradingSystemParameters.getSmallestValueDiff();
-                        default:
-                            throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+            } else if(actionType == MarketAction.REVERSE) {
+                if (this.tradingSystemState == TradingSystemState.LONG_POSITION) {
+                    return tradeBalance + (sellUnit(currentMidPrice) - baseCommission()) * 2;
+                } else {
+                    return tradeBalance - (buyUnit(currentMidPrice) - baseCommission()) * 2;
                 }
-            } else if(actionType == MarketAction.DOWN) {
+            } else if(actionType == MarketAction.CLOSE) {
+                if(tradingSystemState == TradingSystemState.LONG_POSITION) {
+                    return tradeBalance + sellUnit(currentMidPrice) - baseCommission();
+                } else {
+                    return tradeBalance - buyUnit(currentMidPrice) - baseCommission();
+                }
+            } else if(actionType == MarketAction.UP || actionType == MarketAction.DOWN) {
+                return tradeBalance;
+            } else {
+                throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+            }
+        } else {
+            if(actionType == MarketAction.OPEN_LONG) {
+                return tradeBalance - buyUnit(currentMidPrice) - baseCommission();
+            } else if(actionType == MarketAction.OPEN_SHORT) {
+                return tradeBalance + sellUnit(currentMidPrice) - baseCommission();
+//                       + (currentMidPrice - this.marketEnvironmentStaticPart.getConstantSpread() / 2.0) * this.marketEnvironmentStaticPart.getSize()
+            } else {
+                return 0.0;
+            }
+        }
+    }
+
+    private double calculateProfitAndLoss(MarketAction actionType, double newTradeBalance, double nextBarPrice) {
+        if(this.tradingSystemState.isOpenPosition()) {
+            if(actionType == MarketAction.NO_ACTION ) {
                 switch (this.tradingSystemState) {
                     case LONG_POSITION:
-                        return tradeBalance - this.tradingSystemParameters.getSmallestValueDiff();
+                        return newTradeBalance + sellUnit(currentMidPrice);
                     case SHORT_POSITION:
-                        return tradeBalance + this.tradingSystemParameters.getSmallestValueDiff();
-                    default:
-                        throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+                        return newTradeBalance - buyUnit(currentMidPrice);
+                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+                }
+            } else if(actionType == MarketAction.CLOSE) {
+                return newTradeBalance;
+            } else if(actionType == MarketAction.OPEN_LONG) {
+                return newTradeBalance + sellUnit(currentMidPrice);
+            } else if(actionType == MarketAction.OPEN_SHORT) {
+                return newTradeBalance - buyUnit(currentMidPrice);
+            } else if(actionType == MarketAction.REVERSE ) {
+                switch (this.tradingSystemState) {
+                    case LONG_POSITION:
+                        return - buyUnit(currentMidPrice);
+                    case SHORT_POSITION:
+                        return + sellUnit(currentMidPrice);
+                        default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+                }
+            } else if(actionType == MarketAction.UP || actionType == MarketAction.DOWN) {
+                switch (this.tradingSystemState) {
+                    case LONG_POSITION:
+                        return newTradeBalance + sellUnit(nextBarPrice);
+                    case SHORT_POSITION:
+                        return newTradeBalance - buyUnit(nextBarPrice);
+                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
                 }
             } else {
                 throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
             }
         } else {
-            return tradeBalance;
+            return 0.0;
         }
+    }
+
+
+    private DoubleReward resolveReward(MarketAction actionType, double profitAndLoss) {
+//        if(actionType == MarketAction.CLOSE) {
+//            return new DoubleReward(profitAndLoss);
+//        }
+        return new DoubleReward(profitAndLoss);
     }
 
     private double[] createNewLookback(MarketAction action) {
@@ -89,7 +177,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
 
     @Override
     public boolean isRiskHit() {
-        return tradeBalance <= -tradingSystemParameters.getSystemStopLoss();
+        return tradeBalance <= -marketEnvironmentStaticPart.getSystemStopLoss();
     }
 
     @Override
@@ -122,8 +210,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         if(actionType == MarketAction.CLOSE && !tradingSystemState.isOpenPosition()) {
             throw new IllegalStateException("Can't close position when there is none opened");
         }
+        double nextStatePrice = currentMidPrice + (actionType == MarketAction.UP || actionType == MarketAction.DOWN
+            ? ((actionType == MarketAction.UP ? 1 : -1) * marketEnvironmentStaticPart.getPriceRange())
+            : 0.0);
         double newTradeBalance = calculateTradeBalance(actionType);
-        DoubleReward reward = resolveReward(actionType, newTradeBalance);
+        double pnl = calculateProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
+        DoubleReward reward = resolveReward(actionType, pnl);
         switch (actionType) {
             case UP:
             case DOWN:
@@ -131,10 +223,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     new MarketState(
                         true,
                         tradingSystemState,
-                        tradingSystemParameters,
+                        marketEnvironmentStaticPart,
                         newTradeBalance,
                         false,
                         createNewLookback(actionType),
+                        nextStatePrice,
+                        currentDataIndex + 1,
                         shiftToEndOfDataCount - 1),
                     reward);
 
@@ -143,10 +237,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     new MarketState(
                         false,
                         tradingSystemState,
-                        tradingSystemParameters,
+                        marketEnvironmentStaticPart,
                         newTradeBalance,
                         false,
                         this.lookback,
+                        nextStatePrice,
+                        currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
 
@@ -155,10 +251,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     new MarketState(
                         false,
                         TradingSystemState.LONG_POSITION,
-                        tradingSystemParameters,
+                        marketEnvironmentStaticPart,
                         newTradeBalance,
                         false,
                         this.lookback,
+                        nextStatePrice,
+                        currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
 
@@ -167,10 +265,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     new MarketState(
                         false,
                         TradingSystemState.SHORT_POSITION,
-                        tradingSystemParameters,
+                        marketEnvironmentStaticPart,
                         newTradeBalance,
                         false,
                         this.lookback,
+                        nextStatePrice,
+                        currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
 
@@ -179,10 +279,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     new MarketState(
                         false,
                         tradingSystemState == TradingSystemState.LONG_POSITION ? TradingSystemState.SHORT_POSITION : TradingSystemState.LONG_POSITION,
-                        tradingSystemParameters,
+                        marketEnvironmentStaticPart,
                         newTradeBalance,
                         false,
                         this.lookback,
+                        nextStatePrice,
+                        currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
 
@@ -191,10 +293,12 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     new MarketState(
                         false,
                         TradingSystemState.NO_POSITION,
-                        tradingSystemParameters,
+                        marketEnvironmentStaticPart,
                         newTradeBalance,
                         true,
                         this.lookback,
+                        nextStatePrice,
+                        currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
 

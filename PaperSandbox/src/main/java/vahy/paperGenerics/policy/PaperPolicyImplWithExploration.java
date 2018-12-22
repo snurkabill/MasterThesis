@@ -88,7 +88,7 @@ public class PaperPolicyImplWithExploration<
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<TAction> opponentActionList) {
-        innerPolicy.updateStateOnOpponentActions(opponentActionList);
+    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
+        innerPolicy.updateStateOnPlayedActions(opponentActionList);
     }
 }

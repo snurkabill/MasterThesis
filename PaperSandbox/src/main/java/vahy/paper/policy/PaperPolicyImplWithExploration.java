@@ -62,7 +62,7 @@ public class PaperPolicyImplWithExploration implements PaperPolicy {
         }
     }
 
-    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
-        innerPolicy.updateStateOnOpponentActions(opponentActionList);
+    public void updateStateOnPlayedActions(List<HallwayAction> opponentActionList) {
+        innerPolicy.updateStateOnPlayedActions(opponentActionList);
     }
 }
