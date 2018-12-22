@@ -6,11 +6,11 @@ import org.slf4j.LoggerFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.reward.RewardAggregator;
+import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
-import vahy.paperGenerics.PaperNodeEvaluator;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
@@ -33,7 +33,7 @@ public abstract class AbstractMonteCarloTrainer<
     public AbstractMonteCarloTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TState> initialStateSupplier,
                                      TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
                                      PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                                     PaperNodeEvaluator paperNodeEvaluator,
+                                     TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperNodeEvaluator,
                                      double discountFactor,
                                      RewardAggregator<DoubleReward> rewardAggregator,
                                      int stepCountLimit) {

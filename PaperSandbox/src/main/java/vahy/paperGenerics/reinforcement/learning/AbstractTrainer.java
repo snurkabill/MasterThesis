@@ -6,6 +6,7 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.RewardAggregator;
+import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -27,14 +28,14 @@ public abstract class AbstractTrainer<
     private static final Logger logger = LoggerFactory.getLogger(AbstractTrainer.class.getName());
 
     private final double discountFactor;
-    private final PaperNodeEvaluator paperNodeEvaluator;
+    private final TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperNodeEvaluator;
     private final PaperRolloutGameSampler<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> gameSampler;
     protected final RewardAggregator<DoubleReward> rewardAggregator;
 
     public AbstractTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TState> initialStateSupplier,
                            TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
                            PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                           PaperNodeEvaluator paperNodeEvaluator,
+                           TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperNodeEvaluator,
                            double discountFactor,
                            RewardAggregator<DoubleReward> rewardAggregator,
                            int stepCountLimit) {
