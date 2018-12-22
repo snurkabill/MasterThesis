@@ -17,12 +17,14 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
     private final double[] lookback; // keep it simple for now
     private final double currentMidPrice;
     private final int currentDataIndex;
+    private final RealMarketAction currentMarketMovement;
     private final int shiftToEndOfDataCount;
 
     public MarketState(TradingSystemState tradingSystemState,
                        MarketEnvironmentStaticPart marketEnvironmentStaticPart,
                        double[] lookback,
                        double currentMidPrice,
+                       RealMarketAction currentMarketMovement,
                        int dataIndex,
                        int shiftToEndOfDataCount) {
         this(true,
@@ -32,6 +34,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
             false,
             lookback,
             currentMidPrice,
+            currentMarketMovement,
             dataIndex,
             shiftToEndOfDataCount);
     }
@@ -43,12 +46,14 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         boolean isTradeDone,
                         double[] lookback,
                         double currentMidPrice,
+                        RealMarketAction currentMarketMovement,
                         int currentDataIndex,
                         int shiftToEndOfDataCount) {
         this.isTradeDone = isTradeDone;
         this.lookback = lookback;
         this.currentMidPrice = currentMidPrice;
         this.currentDataIndex = currentDataIndex;
+        this.currentMarketMovement = currentMarketMovement;
         this.isAgentTurn = isAgentTurn;
         this.tradingSystemState = tradingSystemState;
         this.marketEnvironmentStaticPart = marketEnvironmentStaticPart;
@@ -153,7 +158,6 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         }
     }
 
-
     private DoubleReward resolveReward(MarketAction actionType, double profitAndLoss) {
 //        if(actionType == MarketAction.CLOSE) {
 //            return new DoubleReward(profitAndLoss);
@@ -210,9 +214,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         if(actionType == MarketAction.CLOSE && !tradingSystemState.isOpenPosition()) {
             throw new IllegalStateException("Can't close position when there is none opened");
         }
-        double nextStatePrice = currentMidPrice + (actionType == MarketAction.UP || actionType == MarketAction.DOWN
-            ? ((actionType == MarketAction.UP ? 1 : -1) * marketEnvironmentStaticPart.getPriceRange())
-            : 0.0);
+        double nextStatePrice = calculateNextStatePrice(actionType);
         double newTradeBalance = calculateTradeBalance(actionType);
         double pnl = calculateProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
         DoubleReward reward = resolveReward(actionType, pnl);
@@ -228,6 +230,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         false,
                         createNewLookback(actionType),
                         nextStatePrice,
+                        actionType == MarketAction.UP ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN,
                         currentDataIndex + 1,
                         shiftToEndOfDataCount - 1),
                     reward);
@@ -242,6 +245,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         false,
                         this.lookback,
                         nextStatePrice,
+                        currentMarketMovement,
                         currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
@@ -256,6 +260,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         false,
                         this.lookback,
                         nextStatePrice,
+                        currentMarketMovement,
                         currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
@@ -270,6 +275,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         false,
                         this.lookback,
                         nextStatePrice,
+                        currentMarketMovement,
                         currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
@@ -284,6 +290,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         false,
                         this.lookback,
                         nextStatePrice,
+                        currentMarketMovement,
                         currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
@@ -298,12 +305,27 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         true,
                         this.lookback,
                         nextStatePrice,
+                        currentMarketMovement,
                         currentDataIndex,
                         shiftToEndOfDataCount),
                     reward);
 
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+        }
+    }
+
+    private double calculateNextStatePrice(MarketAction actionType) {
+        if(actionType.isPlayerAction()) {
+            return currentMidPrice;
+        } else {
+            if(actionType == MarketAction.UP) {
+                return currentMidPrice + marketEnvironmentStaticPart.getPriceRange() * (currentMarketMovement == RealMarketAction.MARKET_UP ? 1 : 2);
+            } else if(actionType == MarketAction.DOWN){
+                return currentMidPrice - marketEnvironmentStaticPart.getPriceRange() * (currentMarketMovement == RealMarketAction.MARKET_DOWN ? 1 : 2);
+            } else {
+                throw new IllegalStateException("Not expected enum value: [" + actionType + "]");
+            }
         }
     }
 
