@@ -55,6 +55,9 @@ public class RiskAverseSearchTree<
 
     @Override
     public StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action) {
+        if(!getRoot().getChildNodeMap().containsKey(action)) {
+            throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
+        }
         isFlowOptimized = false;
         if(action.isPlayerAction()) {
             calculateNumericallyStableNewRiskThreshold(action);
