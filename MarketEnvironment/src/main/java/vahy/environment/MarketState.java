@@ -7,6 +7,8 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.EnumUtils;
 
+import java.util.Arrays;
+
 public class MarketState implements PaperState<MarketAction, DoubleReward, DoubleVector, MarketState> {
 
     private final boolean isAgentTurn;
@@ -379,5 +381,43 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
             throw new IllegalStateException("Somewhere is off by one error. State can't reach negative shift ahead of end of data");
         }
         return shiftToEndOfDataCount == 0;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MarketState)) return false;
+
+        MarketState that = (MarketState) o;
+
+        if (getCurrentDataIndex() != that.getCurrentDataIndex()) return false;
+        if (tradingSystemState != that.tradingSystemState) return false;
+        if (isAgentTurn != that.isAgentTurn) return false;
+        if (Double.compare(that.tradeBalance, tradeBalance) != 0) return false;
+        if (isTradeDone != that.isTradeDone) return false;
+        if (Double.compare(that.currentMidPrice, currentMidPrice) != 0) return false;
+        if (shiftToEndOfDataCount != that.shiftToEndOfDataCount) return false;
+        if (marketEnvironmentStaticPart != null ? !marketEnvironmentStaticPart.equals(that.marketEnvironmentStaticPart) : that.marketEnvironmentStaticPart != null) return false;
+        if (!Arrays.equals(lookback, that.lookback)) return false;
+        return currentMarketMovement == that.currentMarketMovement;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (isAgentTurn ? 1 : 0);
+        result = 31 * result + (tradingSystemState != null ? tradingSystemState.hashCode() : 0);
+        result = 31 * result + (marketEnvironmentStaticPart != null ? marketEnvironmentStaticPart.hashCode() : 0);
+        temp = Double.doubleToLongBits(tradeBalance);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (isTradeDone ? 1 : 0);
+        result = 31 * result + Arrays.hashCode(lookback);
+        temp = Double.doubleToLongBits(currentMidPrice);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + getCurrentDataIndex();
+        result = 31 * result + (currentMarketMovement != null ? currentMarketMovement.hashCode() : 0);
+        result = 31 * result + shiftToEndOfDataCount;
+        return result;
     }
 }

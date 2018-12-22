@@ -1,21 +1,40 @@
 package vahy;
 
-import vahy.api.learning.AbstractTrainer;
+
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import vahy.agent.environment.RealDataMarketPolicySupplier;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
-import vahy.environment.HallwayAction;
+import vahy.environment.MarketAction;
 import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketEnvironmentStaticPart;
+import vahy.environment.MarketState;
 import vahy.environment.RealMarketAction;
-import vahy.environment.state.HallwayStateImpl;
-import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperMetadataFactory;
+import vahy.paperGenerics.PaperNodeSelector;
+import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.benchmark.PaperBenchmark;
+import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
+import vahy.paperGenerics.benchmark.PaperPolicyResults;
+import vahy.paperGenerics.policy.PaperPolicySupplier;
+import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
+import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
+import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
+import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
+import vahy.paperGenerics.reinforcement.learning.TFModel;
+import vahy.paperGenerics.reinforcement.learning.Trainer;
+import vahy.tempImpl.MarketNodeEvaluator;
 import vahy.utils.EnumUtils;
 
 import java.io.File;
@@ -29,6 +48,8 @@ import java.util.List;
 import java.util.SplittableRandom;
 
 public class MarketPrototype {
+
+    private static final Logger logger = LoggerFactory.getLogger(MarketPrototype.class);
 
     public static MarketDataProvider createMarketDataProvider(String absoluteFilePath) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(absoluteFilePath));
@@ -58,7 +79,7 @@ public class MarketPrototype {
         // environment
         int lookbackLength = 30;
 
-        MarketDataProvider marketDataProvider = createMarketDataProvider("d:/data_for_trading_enf_testing/data");
+        MarketDataProvider marketDataProvider = createMarketDataProvider("d:/data_for_trading_env_testing/data");
         MarketEnvironmentStaticPart marketEnvironmentStaticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission);
         InitialMarketStateSupplier initialMarketStateSupplier = new InitialMarketStateSupplier(random, marketEnvironmentStaticPart, lookbackLength, marketDataProvider);
 
@@ -95,12 +116,12 @@ public class MarketPrototype {
         int totalEpisodes = uniqueEpisodeCount * episodeCount;
 
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        Class<HallwayAction> clazz = HallwayAction.class;
+        Class<MarketAction> clazz = MarketAction.class;
 
         // MCTS WITH NN EVAL
         try(TFModel model = new TFModel(
-            hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-            NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
+            initialMarketStateSupplier.createInitialState().getObservation().getObservedVector().length,
+            2 + MarketAction.playerActions.length,
             trainingEpochCount,
             batchSize,
             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
@@ -108,45 +129,50 @@ public class MarketPrototype {
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
 
-            PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
-            PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
-            PaperTreeUpdater<HallwayAction, DoubleVector, HallwayStateImpl> paperTreeUpdater = new PaperTreeUpdater<>();
-            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
+            PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
+            PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
+            PaperTreeUpdater<MarketAction, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
+//            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
+            MarketNodeEvaluator marketNodeEvaluator = new MarketNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
 
 
-            TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> paperTrainablePolicySupplier =
+
+
+
+            TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> paperTrainablePolicySupplier =
                 new TrainablePaperPolicySupplier<>(
                     clazz,
                     searchNodeMetadataFactory,
                     totalRiskAllowed,
                     random,
                     nodeSelector,
-                    nnbasedEvaluator,
+                    marketNodeEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
                     explorationConstant,
                     temperature
                 );
 
-            PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier =
+            PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
                 new PaperPolicySupplier<>(
                     clazz,
                     searchNodeMetadataFactory,
                     totalRiskAllowed,
                     random,
                     nodeSelector,
-                    nnbasedEvaluator,
+                    marketNodeEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory);
 
-            AbstractTrainer trainer = getAbstractTrainer(Trainer.EVERY_VISIT_MC,
-                random,
-                hallwayGameInitialInstanceSupplier,
+            AbstractTrainer trainer = getAbstractTrainer(
+                Trainer.EVERY_VISIT_MC,
+                initialMarketStateSupplier,
                 discountFactor,
-                nnbasedEvaluator,
+                marketNodeEvaluator,
                 paperTrainablePolicySupplier,
                 replayBufferSize,
-                stepCountLimit);
+                stepCountLimit,
+                marketDataProvider);
 
 
             long trainingStart = System.currentTimeMillis();
@@ -161,21 +187,20 @@ public class MarketPrototype {
 
             String nnBasedPolicyName = "NNBased";
 
-
-            PaperBenchmark<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> benchmark = new PaperBenchmark<>(
+            PaperBenchmark<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> benchmark = new PaperBenchmark<>(
                 Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
-                new EnvironmentPolicySupplier(random),
-                hallwayGameInitialInstanceSupplier
+                new RealDataMarketPolicySupplier(marketDataProvider),
+                initialMarketStateSupplier
             );
 
             long start = System.currentTimeMillis();
-            List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> policyResultList = benchmark
+            List<PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> policyResultList = benchmark
                 .runBenchmark(uniqueEpisodeCount, episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking took [{}] milliseconds", end - start);
 
 
-            PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnResults = policyResultList
+            PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnResults = policyResultList
                 .stream()
                 .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName))
                 .findFirst()
@@ -183,7 +208,7 @@ public class MarketPrototype {
 
             logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
             logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-            logger.info("NN Based total expanded nodes: [{}]", nnbasedEvaluator.getNodesExpandedCount());
+            logger.info("NN Based total expanded nodes: [{}]", marketNodeEvaluator.getNodesExpandedCount());
             logger.info("NN Based kill ratio: [{}]", nnResults.getRiskHitRatio());
             logger.info("NN Based kill counter: [{}]", nnResults.getRiskHitCounter());
             logger.info("NN Based training time: [{}]ms", trainingTimeInMs);
@@ -192,24 +217,24 @@ public class MarketPrototype {
 
     }
 
-    private static AbstractTrainer<
-        HallwayAction,
-        PaperMetadata<HallwayAction, DoubleReward>,
-        HallwayStateImpl>
-    getAbstractTrainer(Trainer trainer,
-                       SplittableRandom random,
-                       HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
-                       double discountFactor,
-                       PaperNodeEvaluator nodeEvaluator,
-                       TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
-                       int replayBufferSize,
-                       int stepCountLimit) {
+    private static AbstractTrainer<MarketAction, PaperMetadata<MarketAction, DoubleReward>, MarketState> getAbstractTrainer(
+        Trainer trainer,
+        InitialMarketStateSupplier initialMarketStateSupplier,
+        double discountFactor,
+        MarketNodeEvaluator nodeEvaluator,
+        TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> trainablePaperPolicySupplier,
+        int replayBufferSize,
+        int stepCountLimit,
+        MarketDataProvider marketDataProvider)
+    {
+        RealDataMarketPolicySupplier environmentSupplier = new RealDataMarketPolicySupplier(marketDataProvider);
+
         switch(trainer) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
+                    initialMarketStateSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    environmentSupplier,
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
@@ -218,18 +243,18 @@ public class MarketPrototype {
                     replayBufferSize);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
+                    initialMarketStateSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    environmentSupplier,
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     stepCountLimit);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
+                    initialMarketStateSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    environmentSupplier,
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),

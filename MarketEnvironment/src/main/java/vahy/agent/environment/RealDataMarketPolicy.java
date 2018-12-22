@@ -3,6 +3,7 @@ package vahy.agent.environment;
 import vahy.environment.MarketAction;
 import vahy.environment.MarketState;
 import vahy.environment.RealMarketAction;
+import vahy.impl.model.reward.DoubleReward;
 
 import java.util.List;
 
@@ -37,5 +38,20 @@ public class RealDataMarketPolicy extends MarketPolicy {
                 currentIndex++;
             }
         }
+    }
+
+    @Override
+    public double[] getPriorActionProbabilityDistribution(MarketState gameState) {
+        return probabilities;
+    }
+
+    @Override
+    public DoubleReward getEstimatedReward(MarketState gameState) {
+        return new DoubleReward(0.0);
+    }
+
+    @Override
+    public double getEstimatedRisk(MarketState gameState) {
+        return 0.0;
     }
 }

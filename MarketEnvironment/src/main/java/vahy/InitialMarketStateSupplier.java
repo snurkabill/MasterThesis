@@ -38,6 +38,7 @@ public class InitialMarketStateSupplier implements InitialStateSupplier<MarketAc
             marketEnvironmentStaticPart,
             lookback,
             marketDataProvider.getMarketMidPriceArray()[index],
+            marketDataProvider.getMarketMovementArray()[index],
             index,
             indexDiff
             );
