@@ -11,6 +11,7 @@ import vahy.impl.model.ImmutableStateActionRewardTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paper.policy.PaperPolicy;
+import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -60,13 +61,13 @@ public class PaperEpisode {
             double[] priorProbabilities = playerPaperPolicy.getPriorActionProbabilityDistribution(state);
             DoubleReward estimatedReward = playerPaperPolicy.getEstimatedReward(state);
             double estimatedRisk = playerPaperPolicy.getEstimatedRisk(state);
-            playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+            playerPaperPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
             playerActionCount++;
             StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = state.applyAction(action);
             stepsDone++;
             logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
             episodeStateRewardReturnList.add(stateRewardReturn);
-            episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
+            episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord<>(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
             state = stateRewardReturn.getState();
             if(!state.isFinalState()) {
                 action = opponentPolicy.getDiscreteAction(state);
@@ -75,10 +76,10 @@ public class PaperEpisode {
                 estimatedReward = playerPaperPolicy.getEstimatedReward(state);
                 estimatedRisk = playerPaperPolicy.getEstimatedRisk(state);
                 stateRewardReturn = state.applyAction(action);
-                playerPaperPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+                playerPaperPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
                 logger.debug("Environment's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
                 episodeStateRewardReturnList.add(stateRewardReturn);
-                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
+                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()), new StepRecord<>(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk)));
                 state = stateRewardReturn.getState();
             }
             logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);

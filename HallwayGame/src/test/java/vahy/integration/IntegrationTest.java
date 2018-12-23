@@ -17,10 +17,10 @@ import vahy.impl.episode.EpisodeAggregatorImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.search.MCTS.MonteCarloEvaluator;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
-import vahy.impl.search.MCTS.MonteCarloEvaluator;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionSuplierCountBased;
 
 import java.io.File;
@@ -60,14 +60,24 @@ public class IntegrationTest {
             1,
             10,
             hallwayGameInitialInstanceSupplier,
-            immutableState ->
-                new Ucb1Policy(
-                    random,
-                    new TreeUpdateConditionSuplierCountBased(10000),
-                    5,
-                    immutableState,
-                    rewardSimulator
-                    ),
+            initialState -> new Ucb1Policy(
+                random,
+                new TreeUpdateConditionSuplierCountBased(10000),
+                5,
+                initialState,
+                rewardSimulator
+                ),
+            new EnvironmentPolicy(random)
+        );
+//            immutableState ->
+//                new Ucb1Policy(
+//                    random,
+//                    new TreeUpdateConditionSuplierCountBased(10000),
+//                    5,
+//                    immutableState,
+//                    rewardSimulator
+//                    )
+
 //                new EGreedyPolicy(
 //                    random,
 //                    new TreeUpdateConditionSuplierCountBased(100),
@@ -75,8 +85,8 @@ public class IntegrationTest {
 //                    transitionUpdater,
 //                    rewardSimulator
 //                    ),
-            new EnvironmentPolicy(random)
-        );
+
+
         List<List<Double>> rewardHistory = episodeAggregator.runSimulation().stream().map(x -> x.stream().map(DoubleReward::getValue).collect(Collectors.toList())).collect(Collectors.toList());
         System.out.println(rewardHistory.stream().mapToInt(List::size).average());
         Assert.assertTrue(rewardHistory.stream().allMatch(x -> x.size() == 17));

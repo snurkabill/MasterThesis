@@ -9,15 +9,15 @@ import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.RiskAverseSearchTree;
 import vahy.utils.ImmutableTuple;
-import vahy.utils.ReflectionHacks;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class PaperPolicyImpl<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Action,
     TReward extends DoubleReward,
     TObservation extends DoubleVector,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
@@ -25,8 +25,8 @@ public class PaperPolicyImpl<
     extends AbstractTreeSearchPolicy<TAction, TReward, TObservation, TSearchNodeMetadata, TState>
     implements PaperPolicy<TAction, TReward, TObservation, TState> {
 
-    private final TAction[] playerActions;
-    private final TAction[] environmentActions;
+    private final List<TAction> playerActions;
+    private final List<TAction> environmentActions;
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TReward, TObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
     private final OptimalFlowCalculator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
@@ -40,15 +40,20 @@ public class PaperPolicyImpl<
         this.riskAverseSearchTree = searchTree;
 
         TAction[] allActions = clazz.getEnumConstants();
-        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
-        this.environmentActions = Arrays.stream(allActions).filter(x -> !x.isPlayerAction()).toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
+//        Stream<TAction> tActionStream = Arrays.stream(allActions).filter(Action::isPlayerAction);
+//        this.playerActions = tActionStream.<TAction>toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
+//        this.environmentActions = Arrays.stream(allActions).filter(x -> !x.isPlayerAction()).toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
+
+        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
+        this.environmentActions = Arrays.stream(allActions).filter(x -> !x.isPlayerAction()).collect(Collectors.toCollection(ArrayList::new));
+
     }
 
     @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
         optimizeFlow();
-        double[] vector = new double[gameState.isPlayerTurn() ? playerActions.length : environmentActions.length];
+        double[] vector = new double[gameState.isPlayerTurn() ? playerActions.size() : environmentActions.size()];
         List<ImmutableTuple<TAction, Double>> actionDoubleList = this.searchTree
             .getRoot()
             .getChildNodeStream()
@@ -64,6 +69,7 @@ public class PaperPolicyImpl<
     @Override
     public TAction getDiscreteAction(TState gameState) {
         checkStateRoot(gameState);
+        expandSearchTree(gameState);
         optimizeFlow();
         double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
         double rand = random.nextDouble();
@@ -71,7 +77,7 @@ public class PaperPolicyImpl<
         for (int i = 0; i < actionProbabilityDistribution.length; i++) {
             cumulativeSum += actionProbabilityDistribution[i];
             if(rand < cumulativeSum) {
-                return playerActions[i];
+                return playerActions.get(i);
             }
         }
         throw new IllegalStateException("Numerically unstable probability calculation");
@@ -80,7 +86,7 @@ public class PaperPolicyImpl<
     @Override
     public double[] getPriorActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
-        double[] priorProbabilities = new double[gameState.isPlayerTurn() ? playerActions.length : environmentActions.length];
+        double[] priorProbabilities = new double[gameState.isPlayerTurn() ? playerActions.size() : environmentActions.size()];
         List<ImmutableTuple<TAction, Double>> actionDoubleList = this.searchTree
             .getRoot()
             .getChildNodeStream()

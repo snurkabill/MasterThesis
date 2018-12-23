@@ -10,7 +10,7 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paper.policy.EnvironmentPolicySupplier;
 import vahy.paper.policy.PaperTrainablePaperPolicySupplier;
 import vahy.paper.reinforcement.episode.PaperEpisode;
-import vahy.paper.reinforcement.episode.StepRecord;
+import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
 
 import java.util.LinkedHashMap;

@@ -387,8 +387,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
         int xAgentFixed = agentXCoordination - 1;
         int yAgentFixed = agentYCoordination - 1;
 
-        double xPortion = xAgentFixed / (double) xTotal;
-        double yPortion = yAgentFixed / (double) yTotal;
+        double xPortion = xTotal == 0 ? 0.0 : (xAgentFixed / (double) xTotal);
+        double yPortion = yTotal == 0 ? 0.0 : (yAgentFixed / (double) yTotal);
 
         vector[0] = xPortion;
         vector[1] = yPortion;

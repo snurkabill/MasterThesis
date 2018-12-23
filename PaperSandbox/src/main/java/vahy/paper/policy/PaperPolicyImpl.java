@@ -143,7 +143,7 @@ public class PaperPolicyImpl implements PaperPolicy {
         }
     }
 
-    public void updateStateOnOpponentActions(List<HallwayAction> opponentActionList) {
+    public void updateStateOnPlayedActions(List<HallwayAction> opponentActionList) {
         for (HallwayAction action : opponentActionList) {
             searchTree.applyAction(action);
         }
@@ -172,7 +172,7 @@ public class PaperPolicyImpl implements PaperPolicy {
                 searchTree.getTotalNodesCreated(),
                 searchTree.getMaxBranchingFactor(),
                 searchTree.calculateAverageBranchingFactor(),
-                timer.secondsSpent(),
+                timer.getTotalTimeInSeconds(),
                 timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
         }
     }

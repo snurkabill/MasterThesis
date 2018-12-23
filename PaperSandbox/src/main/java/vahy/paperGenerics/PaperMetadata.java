@@ -13,6 +13,7 @@ public class PaperMetadata<TAction extends Action, TReward extends DoubleReward>
     private CLPVariable nodeProbabilityFlow;
     private final double priorProbability;
     private double predictedRisk;
+    private double sumOfRisk;
 
     public PaperMetadata(TReward cumulativeReward,
                          TReward gainedReward,
@@ -24,6 +25,7 @@ public class PaperMetadata<TAction extends Action, TReward extends DoubleReward>
         this.priorProbability = priorProbability;
         this.predictedRisk = predictedRisk;
         this.childPriorProbabilities = childPriorProbabilities;
+        this.sumOfRisk = predictedRisk;
     }
 
     public double getPriorProbability() {
@@ -50,6 +52,15 @@ public class PaperMetadata<TAction extends Action, TReward extends DoubleReward>
         return childPriorProbabilities;
     }
 
+
+    public double getSumOfRisk() {
+        return sumOfRisk;
+    }
+
+    public void setSumOfRisk(double sumOfRisk) {
+        this.sumOfRisk = sumOfRisk;
+    }
+
     @Override
     public String toString() {
         String baseString = super.toString();
@@ -59,9 +70,10 @@ public class PaperMetadata<TAction extends Action, TReward extends DoubleReward>
         stringBuilder.append(this.priorProbability);
         stringBuilder.append("\\nPredictedRisk: ");
         stringBuilder.append(this.predictedRisk);
+        stringBuilder.append("\\nSumOfPredictedRisk: ");
+        stringBuilder.append(this.sumOfRisk);
         stringBuilder.append("\\nCalculatedFlow: ");
         stringBuilder.append(nodeProbabilityFlow != null ? this.nodeProbabilityFlow.getSolution() : null);
         return stringBuilder.toString();
     }
-
 }

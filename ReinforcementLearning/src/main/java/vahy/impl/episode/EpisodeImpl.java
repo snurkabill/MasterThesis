@@ -47,7 +47,7 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
         int playerActionCount = 0;
         while(!state.isFinalState()) {
             TAction action = playerPolicy.getDiscreteAction(state);
-            playerPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+            playerPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
             playerActionCount++;
             StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn = state.applyAction(action);
             logger.info("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
@@ -57,7 +57,7 @@ public class EpisodeImpl<TAction extends Action, TReward extends Reward, TObserv
             if(!state.isFinalState()) {
                 action = opponentPolicy.getDiscreteAction(state);
                 stateRewardReturn = state.applyAction(action);
-                playerPolicy.updateStateOnOpponentActions(Collections.singletonList(action));
+                playerPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
                 logger.info("Environment's [{}]th action: [{}], getting reward [{}]", playerActionCount, action, stateRewardReturn.getReward().toPrettyString());
                 episodeStateRewardReturnList.add(stateRewardReturn);
                 episodeHistoryList.add(new ImmutableStateActionRewardTuple<>(state, action, stateRewardReturn.getReward()));

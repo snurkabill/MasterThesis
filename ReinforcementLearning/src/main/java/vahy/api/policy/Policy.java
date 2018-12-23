@@ -13,5 +13,5 @@ public interface Policy<TAction extends Action, TReward extends Reward, TObserva
 
     TAction getDiscreteAction(TState gameState);
 
-    void updateStateOnOpponentActions(List<TAction> opponentActionList);
+    void updateStateOnPlayedActions(List<TAction> opponentActionList);
 }

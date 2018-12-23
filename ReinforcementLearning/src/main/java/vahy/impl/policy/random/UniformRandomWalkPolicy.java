@@ -53,7 +53,7 @@ public class UniformRandomWalkPolicy<TAction extends Action,
     }
 
     @Override
-    public void updateStateOnOpponentActions(List<TAction> opponentActionList) {
+    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
         // this is it
     }
 }

@@ -2,7 +2,7 @@ package vahy.paper.tree.nodeEvaluator;
 
 import vahy.environment.HallwayAction;
 import vahy.impl.model.reward.DoubleReward;
-import vahy.paper.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paper.tree.SearchNode;
 import vahy.utils.ImmutableTuple;
 

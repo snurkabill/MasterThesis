@@ -5,7 +5,6 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
-import vahy.impl.model.reward.DoubleReward;
 
 public interface PaperPolicy<
     TAction extends Action,
@@ -15,7 +14,7 @@ public interface PaperPolicy<
 
     double[] getPriorActionProbabilityDistribution(TState gameState);
 
-    DoubleReward getEstimatedReward(TState gameState);
+    TReward getEstimatedReward(TState gameState);
 
     double getEstimatedRisk(TState gameState);
 }
