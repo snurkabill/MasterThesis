@@ -64,13 +64,7 @@ public class SearchTreeImpl<
         return true;
     }
 
-    @Override
-    public TAction[] getAllPossibleActions() {
-        return this.root.getWrappedState().getAllPossibleActions();
-    }
-
-    @Override
-    public StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action) {
+    protected void checkApplicableAction(TAction action) {
         if(root.isFinalNode()) {
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
@@ -78,12 +72,26 @@ public class SearchTreeImpl<
             expandAndEvaluateNode(root);
             // throw new IllegalStateException("Policy cannot pick action from leaf node");
         }
+    }
+
+    protected StateRewardReturn<TAction, TReward, TObservation, TState> innerApplyAction(TAction action) {
         TReward reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
         root = root.getChildNodeMap().get(action);
         root.makeRoot();
         nodeSelector.setNewRoot(root);
         resetTreeStatistics();
         return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
+    }
+
+    @Override
+    public TAction[] getAllPossibleActions() {
+        return this.root.getWrappedState().getAllPossibleActions();
+    }
+
+    @Override
+    public StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action) {
+        checkApplicableAction(action);
+        return innerApplyAction(action);
     }
 
     @Override

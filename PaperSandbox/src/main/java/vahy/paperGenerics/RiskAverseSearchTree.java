@@ -55,6 +55,8 @@ public class RiskAverseSearchTree<
 
     @Override
     public StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action) {
+        checkApplicableAction(action);
+        // TODO make general in applicable action
         if(!getRoot().getChildNodeMap().containsKey(action)) {
             throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
         }
@@ -62,7 +64,7 @@ public class RiskAverseSearchTree<
         if(action.isPlayerAction()) {
             calculateNumericallyStableNewRiskThreshold(action);
         }
-        return super.applyAction(action);
+        return innerApplyAction(action);
     }
 
     @Override
