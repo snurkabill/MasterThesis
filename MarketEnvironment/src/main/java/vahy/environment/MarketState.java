@@ -15,6 +15,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
     private final TradingSystemState tradingSystemState;
     private final MarketEnvironmentStaticPart marketEnvironmentStaticPart;
     private final double tradeBalance;
+    private final double currentPnL;
     private final boolean isTradeDone;
     private final double[] lookback; // keep it simple for now
     private final double currentMidPrice;
@@ -33,6 +34,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
             tradingSystemState,
             marketEnvironmentStaticPart,
             0.0,
+            0.0,
             false,
             lookback,
             currentMidPrice,
@@ -45,6 +47,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         TradingSystemState tradingSystemState,
                         MarketEnvironmentStaticPart marketEnvironmentStaticPart,
                         double tradeBalance,
+                        double currentPnL,
                         boolean isTradeDone,
                         double[] lookback,
                         double currentMidPrice,
@@ -60,6 +63,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         this.tradingSystemState = tradingSystemState;
         this.marketEnvironmentStaticPart = marketEnvironmentStaticPart;
         this.tradeBalance = tradeBalance;
+        this.currentPnL = currentPnL;
         this.shiftToEndOfDataCount = shiftToEndOfDataCount;
     }
 
@@ -87,7 +91,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         return this.marketEnvironmentStaticPart.getCommission() * this.marketEnvironmentStaticPart.getSize();
     }
 
-    private double calculateTradeBalance(MarketAction actionType) {
+    private double calculateNewTradeBalance(MarketAction actionType) {
         if(this.tradingSystemState.isOpenPosition()) {
             if(actionType == MarketAction.NO_ACTION) {
                 return tradeBalance;
@@ -113,58 +117,98 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                 return tradeBalance - buyUnit(currentMidPrice) - baseCommission();
             } else if(actionType == MarketAction.OPEN_SHORT) {
                 return tradeBalance + sellUnit(currentMidPrice) - baseCommission();
-//                       + (currentMidPrice - this.marketEnvironmentStaticPart.getConstantSpread() / 2.0) * this.marketEnvironmentStaticPart.getSize()
             } else {
-                return 0.0;
+                return tradeBalance;
             }
         }
     }
 
-    private double calculateProfitAndLoss(MarketAction actionType, double newTradeBalance, double nextBarPrice) {
-        if(this.tradingSystemState.isOpenPosition()) {
-            if(actionType == MarketAction.NO_ACTION ) {
-                switch (this.tradingSystemState) {
-                    case LONG_POSITION:
-                        return newTradeBalance + sellUnit(currentMidPrice);
-                    case SHORT_POSITION:
-                        return newTradeBalance - buyUnit(currentMidPrice);
-                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
-                }
-            } else if(actionType == MarketAction.CLOSE) {
-                return newTradeBalance;
-            } else if(actionType == MarketAction.OPEN_LONG) {
-                return newTradeBalance + sellUnit(currentMidPrice);
-            } else if(actionType == MarketAction.OPEN_SHORT) {
-                return newTradeBalance - buyUnit(currentMidPrice);
-            } else if(actionType == MarketAction.REVERSE ) {
-                switch (this.tradingSystemState) {
-                    case LONG_POSITION:
-                        return - buyUnit(currentMidPrice);
-                    case SHORT_POSITION:
-                        return + sellUnit(currentMidPrice);
-                        default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
-                }
-            } else if(actionType == MarketAction.UP || actionType == MarketAction.DOWN) {
-                switch (this.tradingSystemState) {
-                    case LONG_POSITION:
-                        return newTradeBalance + sellUnit(nextBarPrice);
-                    case SHORT_POSITION:
-                        return newTradeBalance - buyUnit(nextBarPrice);
-                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
-                }
-            } else {
-                throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+    private double calculateNewProfitAndLoss(MarketAction actionType, double newTradeBalance, double nextBarPrice) {
+//        if(actionType == MarketAction.OPEN_LONG
+//            || (actionType == MarketAction.NO_ACTION && tradingSystemState == TradingSystemState.LONG_POSITION)
+//            || (actionType == MarketAction.REVERSE && tradingSystemState == TradingSystemState.SHORT_POSITION)) {
+//            return newTradeBalance + sellUnit(currentMidPrice) - baseCommission();
+//        } else if(actionType == MarketAction.OPEN_SHORT
+//            || (actionType == MarketAction.NO_ACTION && tradingSystemState == TradingSystemState.SHORT_POSITION)
+//            || (actionType == MarketAction.REVERSE && tradingSystemState == TradingSystemState.LONG_POSITION)) {
+//            return newTradeBalance + buyUnit(currentMidPrice) - baseCommission();
+//        }
+        double closingFromLong = newTradeBalance + sellPrice(nextBarPrice) - baseCommission();
+        double closingFromShort = newTradeBalance - buyPrice(nextBarPrice) - baseCommission();
+
+        if(tradingSystemState.isOpenPosition()) {
+            switch (actionType) {
+                case NO_ACTION:
+                case UP:
+                case DOWN:
+                    return tradingSystemState == TradingSystemState.LONG_POSITION ? closingFromLong : closingFromShort;
+                case REVERSE:
+                    return tradingSystemState == TradingSystemState.LONG_POSITION ? closingFromShort : closingFromLong; // swapped because reverse
+                case CLOSE:
+                    return newTradeBalance; // close is already settled
+                default: throw EnumUtils.createExceptionForNotExpectedEnumValue(actionType);
             }
         } else {
-            return 0.0;
+            switch (actionType) {
+                case DOWN:
+                case UP:
+                case NO_ACTION:
+                    return newTradeBalance;
+                case OPEN_LONG:
+                    return closingFromLong;
+                case OPEN_SHORT:
+                    return closingFromShort;
+                default: throw EnumUtils.createExceptionForNotExpectedEnumValue(actionType);
+            }
         }
+
+//
+//
+//
+//        if(this.tradingSystemState.isOpenPosition()) {
+//            if(actionType == MarketAction.NO_ACTION) {
+//                switch (this.tradingSystemState) {
+//                    case LONG_POSITION:
+//                        return newTradeBalance + sellUnit(nextBarPrice) - baseCommission();
+//                    case SHORT_POSITION:
+//                        return newTradeBalance - buyUnit(nextBarPrice) - baseCommission();
+//                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+//                }
+//            } else if(actionType == MarketAction.CLOSE) {
+//                return newTradeBalance;
+//            } else if(actionType == MarketAction.OPEN_LONG) {
+//                return newTradeBalance + sellUnit(nextBarPrice) - baseCommission();
+//            } else if(actionType == MarketAction.OPEN_SHORT) {
+//                return newTradeBalance - buyUnit(nextBarPrice) - baseCommission();
+//            } else if(actionType == MarketAction.REVERSE ) {
+//                switch (this.tradingSystemState) {
+//                    case LONG_POSITION:
+//                        return - buyUnit(nextBarPrice) - baseCommission();
+//                    case SHORT_POSITION:
+//                        return + sellUnit(nextBarPrice) - baseCommission();
+//                        default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+//                }
+//            } else if(actionType == MarketAction.UP || actionType == MarketAction.DOWN) {
+//                switch (this.tradingSystemState) {
+//                    case LONG_POSITION:
+//                        return newTradeBalance + sellUnit(nextBarPrice) - baseCommission();
+//                    case SHORT_POSITION:
+//                        return newTradeBalance - buyUnit(nextBarPrice) - baseCommission();
+//                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+//                }
+//            } else {
+//                throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
+//            }
+//        } else {
+//            return 0.0;
+//        }
     }
 
-    private DoubleReward resolveReward(MarketAction actionType, double profitAndLoss) {
+    private DoubleReward resolveReward(MarketAction actionType, double newProfitAndLoss) {
 //        if(actionType == MarketAction.CLOSE) {
-//            return new DoubleReward(profitAndLoss);
+//            return new DoubleReward(newProfitAndLoss);
 //        }
-        return new DoubleReward(profitAndLoss);
+        return new DoubleReward(newProfitAndLoss - currentPnL);
     }
 
     private double[] createNewLookback(MarketAction action) {
@@ -225,8 +269,8 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
             throw new IllegalStateException("Can't close position when there is none opened");
         }
         double nextStatePrice = calculateNextStatePrice(actionType);
-        double newTradeBalance = calculateTradeBalance(actionType);
-        double newPnl = calculateProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
+        double newTradeBalance = calculateNewTradeBalance(actionType);
+        double newPnl = calculateNewProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
         DoubleReward reward = resolveReward(actionType, newPnl);
         switch (actionType) {
             case UP:
@@ -237,6 +281,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         tradingSystemState,
                         marketEnvironmentStaticPart,
                         newTradeBalance,
+                        newPnl,
                         false,
                         createNewLookback(actionType),
                         nextStatePrice,
@@ -252,6 +297,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         tradingSystemState,
                         marketEnvironmentStaticPart,
                         newTradeBalance,
+                        newPnl,
                         false,
                         this.lookback,
                         nextStatePrice,
@@ -267,6 +313,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         TradingSystemState.LONG_POSITION,
                         marketEnvironmentStaticPart,
                         newTradeBalance,
+                        newPnl,
                         false,
                         this.lookback,
                         nextStatePrice,
@@ -282,6 +329,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         TradingSystemState.SHORT_POSITION,
                         marketEnvironmentStaticPart,
                         newTradeBalance,
+                        newPnl,
                         false,
                         this.lookback,
                         nextStatePrice,
@@ -297,6 +345,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         tradingSystemState == TradingSystemState.LONG_POSITION ? TradingSystemState.SHORT_POSITION : TradingSystemState.LONG_POSITION,
                         marketEnvironmentStaticPart,
                         newTradeBalance,
+                        newPnl,
                         false,
                         this.lookback,
                         nextStatePrice,
@@ -312,6 +361,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                         TradingSystemState.NO_POSITION,
                         marketEnvironmentStaticPart,
                         newTradeBalance,
+                        newPnl,
                         true,
                         this.lookback,
                         nextStatePrice,
