@@ -12,4 +12,9 @@ public class EnumUtils {
     public static IllegalArgumentException createExceptionForUnknownEnumValue(Enum enumValue) {
         return new IllegalArgumentException("Unknown enum value: [" + enumValue + "]");
     }
+
+    public static IllegalStateException createExceptionForNotExpectedEnumValue(Enum enumValue) {
+        return new IllegalStateException("Not expected enum value: [" + enumValue + "])");
+    }
+
 }
