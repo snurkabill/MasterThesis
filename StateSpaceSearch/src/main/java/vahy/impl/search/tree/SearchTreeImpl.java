@@ -57,7 +57,7 @@ public class SearchTreeImpl<
             return false;
         }
         if(!selectedNodeForExpansion.isFinalNode()) {
-            logger.debug("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
+            logger.trace("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
             expandAndEvaluateNode(selectedNodeForExpansion);
         }
         treeUpdater.updateTree(selectedNodeForExpansion);
