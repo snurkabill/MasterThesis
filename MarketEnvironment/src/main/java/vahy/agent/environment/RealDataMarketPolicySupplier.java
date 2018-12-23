@@ -21,6 +21,6 @@ public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketActi
     @Override
     public PaperPolicy<MarketAction, DoubleReward, DoubleVector, MarketState> initializePolicy(MarketState initialState) {
         int index = initialState.getCurrentDataIndex();
-        return new RealDataMarketPolicy(marketDataProvider.getMarketMovementArray(), index);
+        return new RealDataMarketPolicy(marketDataProvider.getMarketMovementArray(), index + 1);
     }
 }

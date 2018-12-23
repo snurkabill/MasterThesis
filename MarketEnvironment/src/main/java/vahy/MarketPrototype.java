@@ -58,7 +58,7 @@ public class MarketPrototype {
         lines.forEach(x -> {
                 String[] lineParts = x.split(",");
                 prices.add(Double.parseDouble(lineParts[0]));
-                movements.add(lineParts[1].equals("UP") ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN);
+                movements.add(lineParts[1].equals("Up") ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN);
             });
         return new MarketDataProvider(movements.toArray(new RealMarketAction[0]), prices.stream().mapToDouble(value -> value).toArray());
     }

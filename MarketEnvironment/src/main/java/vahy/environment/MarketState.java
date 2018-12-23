@@ -172,12 +172,10 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
             throw new IllegalStateException("New lookback cannot be created on player action");
         }
         double[] newLookback = new double[lookback.length];
-        System.arraycopy(lookback, 0, newLookback, 0, lookback.length - 1);
-        if(action == MarketAction.UP) {
-            newLookback[lookback.length - 1] = 1.0;
-        } else if(action == MarketAction.DOWN) {
-            newLookback[lookback.length - 1] = 0.0;
+        for (int i = 0; i < lookback.length - 1; i++) {
+            newLookback[i] = lookback[i + 1] + (action == MarketAction.UP ? -1.0 : 1.0);
         }
+        newLookback[lookback.length - 1] = 0.0;
         return newLookback;
     }
 
@@ -354,7 +352,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         totalLenght += TradingSystemState.values().length; // position representation
         double[] observation = new double[totalLenght];
         for (int i = 0; i < lookback.length; i++) {
-            observation[i] = lookback[i] - currentMidPrice;
+            observation[i] = lookback[i] / lookback.length;
         }
         observation[lookback.length] = tradeBalance;
         switch (this.tradingSystemState) {
