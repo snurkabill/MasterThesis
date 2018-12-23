@@ -172,18 +172,28 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
             throw new IllegalStateException("New lookback cannot be created on player action");
         }
         double[] newLookback = new double[lookback.length];
-        System.arraycopy(lookback, 0, newLookback, 1, lookback.length - 1);
+        System.arraycopy(lookback, 0, newLookback, 0, lookback.length - 1);
         if(action == MarketAction.UP) {
-            newLookback[0] = 1.0;
+            newLookback[lookback.length - 1] = 1.0;
         } else if(action == MarketAction.DOWN) {
-            newLookback[0] = 0.0;
+            newLookback[lookback.length - 1] = 0.0;
         }
         return newLookback;
     }
 
     @Override
     public boolean isRiskHit() {
-        return tradeBalance <= -marketEnvironmentStaticPart.getSystemStopLoss();
+        if(this.tradingSystemState.isOpenPosition()) {
+            if(tradingSystemState == TradingSystemState.LONG_POSITION) {
+                return this.tradeBalance + sellUnit(currentMidPrice) - baseCommission() <= -marketEnvironmentStaticPart.getSystemStopLoss();
+            } else if(tradingSystemState == TradingSystemState.SHORT_POSITION) {
+                return this.tradeBalance - buyUnit(currentMidPrice) - baseCommission() <= -marketEnvironmentStaticPart.getSystemStopLoss();
+            } else {
+                throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -218,8 +228,8 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         }
         double nextStatePrice = calculateNextStatePrice(actionType);
         double newTradeBalance = calculateTradeBalance(actionType);
-        double pnl = calculateProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
-        DoubleReward reward = resolveReward(actionType, pnl);
+        double newPnl = calculateProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
+        DoubleReward reward = resolveReward(actionType, newPnl);
         switch (actionType) {
             case UP:
             case DOWN:
