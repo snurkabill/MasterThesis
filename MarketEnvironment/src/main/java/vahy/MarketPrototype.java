@@ -74,7 +74,7 @@ public class MarketPrototype {
         double constantSpread = 0.0002;
         double priceRange     = 0.0005;
         int tradeSize  = 1;
-        int commission = 5 / 1_000_000;
+        int commission = 0; //5 / 1_000_000;
 
         // environment
         int lookbackLength = 30;
@@ -84,7 +84,7 @@ public class MarketPrototype {
         InitialMarketStateSupplier initialMarketStateSupplier = new InitialMarketStateSupplier(random, marketEnvironmentStaticPart, lookbackLength, marketDataProvider);
 
         // TREE UPDATE POLICY
-        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(100);
+        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(500);
 
         // MCTS
         double cpuctParameter = 2;
