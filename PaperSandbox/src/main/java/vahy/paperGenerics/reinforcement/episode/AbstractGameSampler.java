@@ -40,12 +40,13 @@ public abstract class AbstractGameSampler<
         List<EpisodeResults<TAction, TReward, TObservation, TState>> paperEpisodeHistoryList = new ArrayList<>();
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
         for (int j = 0; j < episodeBatchSize; j++) {
-            logger.info("Running [{}]th paperEpisode", j);
             TState initialGameState = initialStateSupplier.createInitialState();
             PaperPolicy<TAction, TReward, TObservation, TState> paperPolicy = supplyPlayerPolicy(initialGameState);
             PaperPolicy<TAction, TReward, TObservation, TState> opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
             EpisodeImmutableSetup<TAction, TReward, TObservation, TState> paperEpisode = new EpisodeImmutableSetup<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
-            paperEpisodeHistoryList.add(episodeSimulator.calculateEpisode(paperEpisode));
+            EpisodeResults<TAction, TReward, TObservation, TState> episodeResult = episodeSimulator.calculateEpisode(paperEpisode);
+            paperEpisodeHistoryList.add(episodeResult);
+            logger.info("Episode [{}] finished. Total steps done: [{}]. Is risk hit: [{}]", j, episodeResult.getEpisodeHistoryList().size(), episodeResult.isRiskHit());
         }
         return paperEpisodeHistoryList;
     }
