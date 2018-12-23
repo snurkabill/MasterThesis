@@ -96,18 +96,17 @@ public class MarketPrototype {
         double discountFactor = 1;
         double explorationConstant = 0.3;
         double temperature = 2;
-        int sampleEpisodeCount = 10;
+        int sampleEpisodeCount = 100;
         int replayBufferSize = 50;
         int stageCountCount = 200;
 
         // NN
-        int batchSize = 4;
+        int batchSize = 128;
         // double learningRate = 0.001;
-        int trainingEpochCount = 300;
+        int trainingEpochCount = 10;
 
         // risk optimization
-        boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.02;
+        double totalRiskAllowed = 0.3;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
