@@ -64,7 +64,6 @@ public class MarketNodeEvaluator implements TrainableNodeEvaluator<MarketAction,
                 childPriorProbabilities.put(playerActions[i], (prediction[i + POLICY_START_INDEX]));
             }
         } else {
-
             // TODO: TEMP!!!
             ImmutableTuple<List<MarketAction>, List<Double>> environmentActionsWithProbabilities = new ImmutableTuple<>(
                 Arrays.asList(MarketAction.UP, MarketAction.DOWN),

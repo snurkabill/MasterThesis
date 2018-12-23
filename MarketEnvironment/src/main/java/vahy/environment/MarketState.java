@@ -343,7 +343,9 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         totalLenght += 1; // tradeBalance;
         totalLenght += TradingSystemState.values().length; // position representation
         double[] observation = new double[totalLenght];
-        System.arraycopy(lookback, 0, observation, 0, lookback.length);
+        for (int i = 0; i < lookback.length; i++) {
+            observation[i] = lookback[i] - currentMidPrice;
+        }
         observation[lookback.length] = tradeBalance;
         switch (this.tradingSystemState) {
             case NO_POSITION:
