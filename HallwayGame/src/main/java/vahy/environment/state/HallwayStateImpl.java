@@ -6,6 +6,7 @@ import vahy.environment.agent.AgentHeading;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
+import vahy.paperGenerics.PaperState;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;

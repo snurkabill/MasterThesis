@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.environment.state.PaperState;
+import vahy.paperGenerics.PaperState;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 

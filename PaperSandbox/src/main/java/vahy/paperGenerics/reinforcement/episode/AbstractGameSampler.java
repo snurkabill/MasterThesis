@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
-import vahy.environment.state.PaperState;
+import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;

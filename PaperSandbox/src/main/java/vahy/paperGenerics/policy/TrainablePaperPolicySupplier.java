@@ -6,7 +6,7 @@ import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
-import vahy.environment.state.PaperState;
+import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;

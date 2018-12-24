@@ -5,7 +5,7 @@ import vahy.api.model.Action;
 import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
-import vahy.environment.state.PaperState;
+import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
