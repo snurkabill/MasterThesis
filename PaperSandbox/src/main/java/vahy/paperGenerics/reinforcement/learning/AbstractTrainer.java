@@ -61,8 +61,8 @@ public abstract class AbstractTrainer<
     protected double[] createOutputVector(MutableDataSample dataSample) {
         double[] probabilities = dataSample.getProbabilities();
         double[] outputVector = new double[probabilities.length + PaperModel.POLICY_START_INDEX];
-        outputVector[PaperModel.POLICY_START_INDEX] = dataSample.getReward().getValue();
-        outputVector[PaperModel.POLICY_START_INDEX] = dataSample.getRisk();
+        outputVector[PaperModel.Q_VALUE_INDEX] = dataSample.getReward().getValue();
+        outputVector[PaperModel.RISK_VALUE_INDEX] = dataSample.getRisk();
         for (int i = 0; i < probabilities.length; i++) {
             outputVector[i + PaperModel.POLICY_START_INDEX] = probabilities[i];
         }
