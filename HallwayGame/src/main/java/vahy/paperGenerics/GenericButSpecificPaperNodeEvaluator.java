@@ -1,4 +1,4 @@
-package vahy.paperOldImpl.tree.nodeEvaluator;
+package vahy.paperGenerics;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,6 @@ import vahy.environment.HallwayAction;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
-import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.utils.ImmutableTuple;
 

@@ -7,11 +7,11 @@ import vahy.api.model.Action;
 import vahy.api.model.StateActionReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
-import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
-import vahy.paperGenerics.PaperNodeEvaluator;
+import vahy.paperGenerics.PaperModel;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
@@ -60,11 +60,11 @@ public abstract class AbstractTrainer<
 
     protected double[] createOutputVector(MutableDataSample dataSample) {
         double[] probabilities = dataSample.getProbabilities();
-        double[] outputVector = new double[probabilities.length + PaperNodeEvaluator.POLICY_START_INDEX];
-        outputVector[PaperNodeEvaluator.Q_VALUE_INDEX] = dataSample.getReward().getValue();
-        outputVector[PaperNodeEvaluator.RISK_VALUE_INDEX] = dataSample.getRisk();
+        double[] outputVector = new double[probabilities.length + PaperModel.POLICY_START_INDEX];
+        outputVector[PaperModel.POLICY_START_INDEX] = dataSample.getReward().getValue();
+        outputVector[PaperModel.POLICY_START_INDEX] = dataSample.getRisk();
         for (int i = 0; i < probabilities.length; i++) {
-            outputVector[i + PaperNodeEvaluator.POLICY_START_INDEX] = probabilities[i];
+            outputVector[i + PaperModel.POLICY_START_INDEX] = probabilities[i];
         }
         return outputVector;
     }
