@@ -17,9 +17,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class GenericButSpecificPaperNodeEvaluator implements TrainableNodeEvaluator<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
+public class PaperNodeEvaluatorWORKINGCOPY implements TrainableNodeEvaluator<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericButSpecificPaperNodeEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluatorWORKINGCOPY.class);
 
     public static final int Q_VALUE_INDEX = 0;
     public static final int RISK_VALUE_INDEX = 1;
@@ -30,8 +30,8 @@ public class GenericButSpecificPaperNodeEvaluator implements TrainableNodeEvalua
 
     private int nodesExpandedCount = 0;
 
-    public GenericButSpecificPaperNodeEvaluator(SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory,
-                                                TrainableApproximator<DoubleVector> trainableApproximator) {
+    public PaperNodeEvaluatorWORKINGCOPY(SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory,
+                                         TrainableApproximator<DoubleVector> trainableApproximator) {
         this.searchNodeFactory = searchNodeFactory;
         this.trainableApproximator = trainableApproximator;
     }

@@ -32,8 +32,8 @@ import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
-import vahy.paperGenerics.reinforcement.learning.TFModel;
 import vahy.paperGenerics.reinforcement.learning.Trainer;
+import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.tempImpl.MarketNodeEvaluator;
 import vahy.utils.EnumUtils;
 

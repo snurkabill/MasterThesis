@@ -26,13 +26,17 @@ public class PaperNodeEvaluator<
 
     private final SearchNodeFactory<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory;
     private final TrainableApproximator<DoubleVector> trainableApproximator;
+    private final TAction[] allPlayerActions;
+    private final TAction[] allOpponentActions;
 
     private int nodesExpandedCount = 0;
 
     public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory,
-                              TrainableApproximator<DoubleVector> trainableApproximator) {
+                              TrainableApproximator<DoubleVector> trainableApproximator, TAction[] allPlayerActions, TAction[] allOpponentActions) {
         this.searchNodeFactory = searchNodeFactory;
         this.trainableApproximator = trainableApproximator;
+        this.allPlayerActions = allPlayerActions;
+        this.allOpponentActions = allOpponentActions;
     }
 
     @Override
@@ -50,22 +54,23 @@ public class PaperNodeEvaluator<
     }
 
     private void innerEvaluation(SearchNode<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> node) {
-        nodesExpandedCount++;
-        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
-        node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
-        node.getSearchNodeMetadata().setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
-        Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
-        if(node.getWrappedState().isPlayerTurn()) {
-            TAction[] playerActions = TAction.playerActions;
-            for (int i = 0; i < playerActions.length; i++) {
-                childPriorProbabilities.put(playerActions[i], (prediction[i + PaperModel.POLICY_START_INDEX]));
-            }
-        } else {
-            ImmutableTuple<List<TAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
-            for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
-                childPriorProbabilities.put(environmentActionsWithProbabilities.getFirst().get(i), environmentActionsWithProbabilities.getSecond().get(i));
-            }
-        }
+        throw new UnsupportedOperationException("WELL FINISH ME");
+//        nodesExpandedCount++;
+//        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
+//        node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
+//        node.getSearchNodeMetadata().setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
+//        Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
+//        if(node.getWrappedState().isPlayerTurn()) {
+//            for (int i = 0; i < allPlayerActions.length; i++) {
+//                childPriorProbabilities.put(allPlayerActions[i], (prediction[i + PaperModel.POLICY_START_INDEX]));
+//            }
+//        } else {
+
+//            ImmutableTuple<List<TAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
+//            for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
+//                childPriorProbabilities.put(environmentActionsWithProbabilities.getFirst().get(i), environmentActionsWithProbabilities.getSecond().get(i));
+//            }
+//        }
     }
 
     private SearchNode<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> evaluateChildNode(SearchNode<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> parent,

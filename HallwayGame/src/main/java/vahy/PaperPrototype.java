@@ -3,6 +3,7 @@ package vahy;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.environment.HallwayAction;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
@@ -11,20 +12,19 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperOldImpl.benchmark.Benchmark;
 import vahy.paperOldImpl.benchmark.BenchmarkingPolicy;
 import vahy.paperOldImpl.benchmark.PolicyResults;
 import vahy.paperOldImpl.policy.EnvironmentPolicySupplier;
 import vahy.paperOldImpl.policy.PaperPolicySupplier;
 import vahy.paperOldImpl.policy.PaperTrainablePaperPolicySupplier;
-import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperOldImpl.reinforcement.learn.AbstractTrainer;
 import vahy.paperOldImpl.reinforcement.learn.EveryVisitMonteCarloTrainer;
 import vahy.paperOldImpl.reinforcement.learn.FirstVisitMonteCarloTrainer;
 import vahy.paperOldImpl.reinforcement.learn.ReplayBufferTrainer;
 import vahy.paperOldImpl.reinforcement.learn.Trainer;
-import vahy.paperOldImpl.reinforcement.learn.tf.TFModel;
 import vahy.paperOldImpl.tree.nodeEvaluator.ApproximatorBasedNodeEvaluator;
 import vahy.paperOldImpl.tree.nodeEvaluator.EmptyNodeEvaluator;
 import vahy.paperOldImpl.tree.nodeEvaluator.MCRolloutBasedNodeEvaluator;
@@ -120,7 +120,7 @@ public class PaperPrototype {
                 NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
                 trainingEpochCount,
                 batchSize,
-                new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile()),
+                PaperPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
                 random
             )
         );

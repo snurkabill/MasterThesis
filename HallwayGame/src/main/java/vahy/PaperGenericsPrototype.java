@@ -17,10 +17,10 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.paperOldImpl.tree.nodeEvaluator.NodeEvaluator;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
-import vahy.paperGenerics.PaperNodeEvaluator;
+import vahy.paperGenerics.PaperModel;
+import vahy.paperGenerics.PaperNodeEvaluatorWORKINGCOPY;
 import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
@@ -35,6 +35,7 @@ import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.Trainer;
+import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.utils.EnumUtils;
 
 import java.io.File;
@@ -101,7 +102,7 @@ public class PaperGenericsPrototype {
         // MCTS WITH NN EVAL
         try(TFModel model = new TFModel(
             hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
-            NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
+            PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
             trainingEpochCount,
             batchSize,
             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
@@ -112,7 +113,8 @@ public class PaperGenericsPrototype {
             PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
             PaperTreeUpdater<HallwayAction, DoubleVector, HallwayStateImpl> paperTreeUpdater = new PaperTreeUpdater<>();
-            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
+//            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator, allPlayerActions, allOpponentActions);
+            PaperNodeEvaluatorWORKINGCOPY nnbasedEvaluator = new PaperNodeEvaluatorWORKINGCOPY(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
 
 
             TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> paperTrainablePolicySupplier =
@@ -201,7 +203,7 @@ public class PaperGenericsPrototype {
                        SplittableRandom random,
                        HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
                        double discountFactor,
-                       PaperNodeEvaluator nodeEvaluator,
+                       PaperNodeEvaluatorWORKINGCOPY nodeEvaluator,
                        TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit) {
