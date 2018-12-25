@@ -1,10 +1,10 @@
 package vahy.environment;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.paperGenerics.PaperState;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
+import vahy.paperGenerics.PaperState;
 import vahy.utils.EnumUtils;
 
 import java.util.Arrays;
@@ -127,15 +127,6 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
     }
 
     private double calculateNewProfitAndLoss(MarketAction actionType, double newTradeBalance, double nextBarPrice) {
-//        if(actionType == MarketAction.OPEN_LONG
-//            || (actionType == MarketAction.NO_ACTION && tradingSystemState == TradingSystemState.LONG_POSITION)
-//            || (actionType == MarketAction.REVERSE && tradingSystemState == TradingSystemState.SHORT_POSITION)) {
-//            return newTradeBalance + sellUnit(currentMidPrice) - baseCommission();
-//        } else if(actionType == MarketAction.OPEN_SHORT
-//            || (actionType == MarketAction.NO_ACTION && tradingSystemState == TradingSystemState.SHORT_POSITION)
-//            || (actionType == MarketAction.REVERSE && tradingSystemState == TradingSystemState.LONG_POSITION)) {
-//            return newTradeBalance + buyUnit(currentMidPrice) - baseCommission();
-//        }
         double closingFromLong = newTradeBalance + sellPrice(nextBarPrice) - baseCommission();
         double closingFromShort = newTradeBalance - buyPrice(nextBarPrice) - baseCommission();
 
@@ -164,53 +155,9 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                 default: throw EnumUtils.createExceptionForNotExpectedEnumValue(actionType);
             }
         }
-
-//
-//
-//
-//        if(this.tradingSystemState.isOpenPosition()) {
-//            if(actionType == MarketAction.NO_ACTION) {
-//                switch (this.tradingSystemState) {
-//                    case LONG_POSITION:
-//                        return newTradeBalance + sellUnit(nextBarPrice) - baseCommission();
-//                    case SHORT_POSITION:
-//                        return newTradeBalance - buyUnit(nextBarPrice) - baseCommission();
-//                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
-//                }
-//            } else if(actionType == MarketAction.CLOSE) {
-//                return newTradeBalance;
-//            } else if(actionType == MarketAction.OPEN_LONG) {
-//                return newTradeBalance + sellUnit(nextBarPrice) - baseCommission();
-//            } else if(actionType == MarketAction.OPEN_SHORT) {
-//                return newTradeBalance - buyUnit(nextBarPrice) - baseCommission();
-//            } else if(actionType == MarketAction.REVERSE ) {
-//                switch (this.tradingSystemState) {
-//                    case LONG_POSITION:
-//                        return - buyUnit(nextBarPrice) - baseCommission();
-//                    case SHORT_POSITION:
-//                        return + sellUnit(nextBarPrice) - baseCommission();
-//                        default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
-//                }
-//            } else if(actionType == MarketAction.UP || actionType == MarketAction.DOWN) {
-//                switch (this.tradingSystemState) {
-//                    case LONG_POSITION:
-//                        return newTradeBalance + sellUnit(nextBarPrice) - baseCommission();
-//                    case SHORT_POSITION:
-//                        return newTradeBalance - buyUnit(nextBarPrice) - baseCommission();
-//                    default: throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
-//                }
-//            } else {
-//                throw EnumUtils.createExceptionForUnknownEnumValue(actionType);
-//            }
-//        } else {
-//            return 0.0;
-//        }
     }
 
     private DoubleReward resolveReward(MarketAction actionType, double newProfitAndLoss) {
-//        if(actionType == MarketAction.CLOSE) {
-//            return new DoubleReward(newProfitAndLoss);
-//        }
         return new DoubleReward(newProfitAndLoss - currentPnL);
     }
 
