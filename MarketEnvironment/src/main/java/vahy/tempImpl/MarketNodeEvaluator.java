@@ -65,11 +65,6 @@ public class MarketNodeEvaluator implements TrainableNodeEvaluator<MarketAction,
             }
         } else {
             DoubleVector vector = node.getWrappedState().getOpponentObservation();
-//            // TODO: TEMP!!!
-//            ImmutableTuple<List<MarketAction>, List<Double>> environmentActionsWithProbabilities = new ImmutableTuple<>(
-//                Arrays.asList(MarketAction.UP, MarketAction.DOWN),
-//                Arrays.asList(0.5, 0.5));
-
             MarketAction[] marketActions = MarketAction.environmentActions;
             for (int i = 0; i < marketActions.length; i++) {
                 childPriorProbabilities.put(marketActions[i], vector.getObservedVector()[i]);

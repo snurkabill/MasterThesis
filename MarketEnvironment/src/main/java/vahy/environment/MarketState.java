@@ -11,6 +11,9 @@ import java.util.Arrays;
 
 public class MarketState implements PaperState<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> {
 
+    private static double[] staticRandomMarketProbabilities = new double[] {0.5, 0.5};
+    private static DoubleVector wrappedInVector = new DoubleVector(staticRandomMarketProbabilities);
+
     private final boolean isAgentTurn;
     private final TradingSystemState tradingSystemState;
     private final MarketEnvironmentStaticPart marketEnvironmentStaticPart;
@@ -423,7 +426,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
 
     @Override
     public DoubleVector getOpponentObservation() {
-        return null;
+        return wrappedInVector;
     }
 
     @Override
