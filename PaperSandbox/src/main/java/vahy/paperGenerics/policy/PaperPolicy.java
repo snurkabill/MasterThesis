@@ -9,8 +9,9 @@ import vahy.api.policy.Policy;
 public interface PaperPolicy<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>> extends Policy<TAction, TReward, TObservation, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> extends Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     double[] getPriorActionProbabilityDistribution(TState gameState);
 

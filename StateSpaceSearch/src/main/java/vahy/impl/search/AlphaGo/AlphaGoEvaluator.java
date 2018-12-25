@@ -12,10 +12,11 @@ import java.util.function.Function;
 public class AlphaGoEvaluator<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends DoubleVector,
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends DoubleVector,
     TSearchNodeMetadata extends AlphaGoNodeMetadata<TAction, TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements NodeEvaluator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public static final int Q_VALUE_INDEX = 0;
     public static final int POLICY_START_INDEX = 1;
@@ -31,7 +32,7 @@ public class AlphaGoEvaluator<
     }
 
     @Override
-    public void evaluateNode(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public void evaluateNode(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         throw new UnsupportedOperationException(); // TODO: finish it
     }
 }

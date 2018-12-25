@@ -14,9 +14,10 @@ import java.util.SplittableRandom;
 public class AlphaGoNodeSelector<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends DoubleVector,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> {
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends DoubleVector,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> {
 
     private final double cpuctParameter;
     private final SplittableRandom random;
@@ -27,7 +28,7 @@ public class AlphaGoNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> node) {
         AlphaGoNodeMetadata<TAction, TReward> searchNodeMetadata = node.getSearchNodeMetadata();
         int totalNodeVisitCount = searchNodeMetadata.getVisitCounter();
         return node

@@ -14,9 +14,10 @@ import java.util.LinkedHashMap;
 public class AlphaGoNodeMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends DoubleVector,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> {
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends DoubleVector,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> {
 
     private final RewardAggregator<TReward> rewardAggregator;
 
@@ -30,8 +31,8 @@ public class AlphaGoNodeMetadataFactory<
     }
 
     @Override
-    public AlphaGoNodeMetadata<TAction, TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> parent,
-                                                                          StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
+    public AlphaGoNodeMetadata<TAction, TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction, TReward>, TState> parent,
+                                                                          StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
                                                                           TAction appliedAction) {
         return new AlphaGoNodeMetadata<>(
             parent != null ? rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),

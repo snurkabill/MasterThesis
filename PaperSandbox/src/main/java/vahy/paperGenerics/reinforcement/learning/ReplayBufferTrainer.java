@@ -3,12 +3,13 @@ package vahy.paperGenerics.reinforcement.learning;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.StateActionReward;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
-import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
@@ -23,16 +24,17 @@ import java.util.stream.Collectors;
 
 public class ReplayBufferTrainer<
     TAction extends Enum<TAction> & Action,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
-    TState extends PaperState<TAction, DoubleReward, DoubleVector, TState>> extends AbstractTrainer<TAction, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>> extends AbstractTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private final int bufferSize;
     private final LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer;
 
-    public ReplayBufferTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TState> initialStateSupplier,
-                               TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
-                               PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                               TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperNodeEvaluator,
+    public ReplayBufferTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
+                               TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
+                               PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                               TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                                double discountFactor,
                                RewardAggregator<DoubleReward> rewardAggregator,
                                int stepCountLimit,
@@ -57,13 +59,13 @@ public class ReplayBufferTrainer<
         trainPolicy(buffer.stream().flatMap(Collection::stream).collect(Collectors.toList()));
     }
 
-    public List<ImmutableTuple<DoubleVector, double[]>> convertEpisodeToDataSamples(EpisodeResults<TAction, DoubleReward, DoubleVector, TState> paperEpisode) {
+    public List<ImmutableTuple<DoubleVector, double[]>> convertEpisodeToDataSamples(EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         List<ImmutableTuple<DoubleVector, double[]>> episodeRaw = new ArrayList<>();
-        List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TState>, StepRecord<DoubleReward>>> episodeHistory = paperEpisode.getEpisodeHistoryList();
+        List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>, StepRecord<DoubleReward>>> episodeHistory = paperEpisode.getEpisodeHistoryList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i);
-                episodeRaw.add(new ImmutableTuple<>(episodeHistory.get(i).getFirst().getState().getObservation(), createOutputVector(dataSample)));
+                episodeRaw.add(new ImmutableTuple<>(episodeHistory.get(i).getFirst().getState().getPlayerObservation(), createOutputVector(dataSample)));
             }
         }
         return episodeRaw;

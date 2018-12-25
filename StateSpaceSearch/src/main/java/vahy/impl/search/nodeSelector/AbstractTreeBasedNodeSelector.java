@@ -11,17 +11,18 @@ import vahy.api.search.nodeSelector.NodeSelector;
 public abstract class AbstractTreeBasedNodeSelector<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements NodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    protected SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root;
+    protected SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root;
 
-    protected abstract TAction getBestAction(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node);
+    protected abstract TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
 
     @Override
-    public void setNewRoot(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root) {
+    public void setNewRoot(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
         this.root = root;
     }
 
@@ -31,9 +32,9 @@ public abstract class AbstractTreeBasedNodeSelector<
         }
     }
 
-    public SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectNextNode() {
+    public SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode() {
         checkRoot();
-        SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node = root;
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = root;
         while(!node.isLeaf()) {
             TAction bestAction = getBestAction(node);
             node = node.getChildNodeMap().get(bestAction);

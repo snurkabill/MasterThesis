@@ -13,9 +13,10 @@ import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 public class BaseSearchNodeMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, BaseSearchNodeMetadata<TReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, BaseSearchNodeMetadata<TReward>, TState> {
 
     private final RewardAggregator<TReward> rewardAggregator;
 
@@ -24,8 +25,8 @@ public class BaseSearchNodeMetadataFactory<
     }
 
     @Override
-    public BaseSearchNodeMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, BaseSearchNodeMetadata<TReward>, TState> parent,
-                                                                    StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
+    public BaseSearchNodeMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, BaseSearchNodeMetadata<TReward>, TState> parent,
+                                                                    StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>stateRewardReturn,
                                                                     TAction appliedAction) {
         return new BaseSearchNodeMetadata<>(
             rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()),

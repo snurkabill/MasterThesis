@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.HallwayAction;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
@@ -83,7 +84,7 @@ public class SearchTree {
         return this.root.getWrappedState().getAllPossibleActions();
     }
 
-    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> applyAction(HallwayAction action) {
+    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> applyAction(HallwayAction action) {
         if(root.isFinalNode()) {
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
@@ -230,7 +231,7 @@ public class SearchTree {
     }
 
     public DoubleVector getObservation() {
-        return root.getWrappedState().getObservation();
+        return root.getWrappedState().getPlayerObservation();
     }
 
     public String readableStringRepresentation() {

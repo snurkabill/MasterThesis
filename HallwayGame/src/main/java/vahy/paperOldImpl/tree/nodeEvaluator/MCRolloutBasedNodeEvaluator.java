@@ -2,6 +2,7 @@ package vahy.paperOldImpl.tree.nodeEvaluator;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.environment.HallwayAction;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -47,7 +48,7 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
                 node.getEdgeMetadataMap().get(playerActions[i]).setPriorProbability(1.0 / playerActions.length);
             }
         } else {
-            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().getOpponentObservation().getProbabilities();
             for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
                 node.getEdgeMetadataMap().get(environmentActionsWithProbabilities.getFirst().get(i)).setPriorProbability(environmentActionsWithProbabilities.getSecond().get(i));
             }
@@ -61,7 +62,7 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
         HallwayStateImpl wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             HallwayAction selectedAction = selectNextAction(wrappedState);
-            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
+            StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> stateRewardReturn = wrappedState.applyAction(selectedAction);
             wrappedState = stateRewardReturn.getState();
             gainedRewards.add(stateRewardReturn.getReward());
         }
@@ -70,7 +71,7 @@ public class MCRolloutBasedNodeEvaluator extends NodeEvaluator {
 
     private HallwayAction selectNextAction(HallwayStateImpl state) {
         if(state.isOpponentTurn()) {
-            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = state.environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = state.getOpponentObservation().getProbabilities();
             List<HallwayAction> actions = environmentActionsWithProbabilities.getFirst();
             List<Double> probabilities = environmentActionsWithProbabilities.getSecond();
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random);

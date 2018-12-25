@@ -6,6 +6,6 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.policy.PaperPolicy;
 
-public abstract class MarketPolicy implements PaperPolicy<MarketAction, DoubleReward, DoubleVector, MarketState> {
+public abstract class MarketPolicy implements PaperPolicy<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> {
 
 }

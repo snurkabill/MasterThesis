@@ -6,6 +6,7 @@ import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.environment.HallwayAction;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
@@ -22,7 +23,7 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.SplittableRandom;
 
-public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> {
+public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> {
 
     public EGreedyPolicy(
         SplittableRandom random,
@@ -32,30 +33,32 @@ public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPo
             HallwayAction,
             DoubleReward,
             DoubleVector,
+            EnvironmentProbabilities,
             BaseSearchNodeMetadata<DoubleReward>,
             HallwayStateImpl> nodeTransitionUpdater,
         NodeEvaluator<
             HallwayAction,
             DoubleReward,
             DoubleVector,
-                    BaseSearchNodeMetadata<DoubleReward>,
+            EnvironmentProbabilities,
+            BaseSearchNodeMetadata<DoubleReward>,
             HallwayStateImpl> rewardSimulator) {
         super(random, uprateTreeCount, createSearchTree(random, gameState, nodeTransitionUpdater, rewardSimulator));
     }
 
-    private static SearchTreeImpl<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> createSearchTree(
+    private static SearchTreeImpl<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> createSearchTree(
         SplittableRandom random,
         HallwayStateImpl gameState,
-        NodeTransitionUpdater<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> nodeTransitionUpdater,
-        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> nodeEvaluator)
+        NodeTransitionUpdater<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> nodeTransitionUpdater,
+        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> nodeEvaluator)
     {
-        SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> searchNodeFactory =
+        SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> searchNodeFactory =
             new SearchNodeBaseFactoryImpl<>(
-                new BaseSearchNodeMetadataFactory<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>(new DoubleScalarRewardAggregator()
+                new BaseSearchNodeMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(new DoubleScalarRewardAggregator()
                 )
             );
 
-        SearchNode<HallwayAction, DoubleReward, DoubleVector, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> root = searchNodeFactory.createNode(
+        SearchNode<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> root = searchNodeFactory.createNode(
             new ImmutableStateRewardReturnTuple<>(gameState, new DoubleReward(0.0)),
             null,
             null);

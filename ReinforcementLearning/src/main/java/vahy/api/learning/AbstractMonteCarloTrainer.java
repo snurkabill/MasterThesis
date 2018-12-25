@@ -7,10 +7,11 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.learning.model.TrainablePolicySupplier;
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
-import vahy.impl.learning.RolloutGameSampler;
+import vahy.impl.learning.model.RolloutGameSampler;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.MutableTuple;
@@ -23,19 +24,20 @@ import java.util.Map;
 public abstract class AbstractMonteCarloTrainer<
     TAction extends Action,
     TReward extends DoubleVectorialReward,
-    TObservation extends DoubleVector,
-    TState extends State<TAction, TReward, TObservation, TState>> extends AbstractTrainer { // TODO: make observation and reward more abstract
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> extends AbstractTrainer { // TODO: make observation and reward more abstract
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMonteCarloTrainer.class.getName());
 
-    private final RolloutGameSampler<TAction, TReward, TObservation, TState> rolloutGameSampler;
-    private final TrainablePolicySupplier<TAction, TReward, TObservation, TState> trainablePolicySupplier;
+    private final RolloutGameSampler<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> rolloutGameSampler;
+    private final TrainablePolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> trainablePolicySupplier;
     private final Map<TState, MutableTuple<Integer, TReward>> visitAverageRewardMap = new LinkedHashMap<>();
     protected final RewardAggregator<TReward> rewardAggregator;
 
-    public AbstractMonteCarloTrainer(InitialStateSupplier<TAction, TReward, TObservation, TState> initialStateSupplier,
-                                     TrainablePolicySupplier<TAction, TReward, TObservation, TState> trainablePolicySupplier,
-                                     PolicySupplier<TAction, TReward, TObservation, TState> opponentPolicySupplier,
+    public AbstractMonteCarloTrainer(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                                     TrainablePolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> trainablePolicySupplier,
+                                     PolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> opponentPolicySupplier,
                                      RewardAggregator<TReward> rewardAggregator) {
         this.rewardAggregator = rewardAggregator;
         this.rolloutGameSampler = new RolloutGameSampler<>(initialStateSupplier, trainablePolicySupplier, opponentPolicySupplier);
@@ -45,19 +47,19 @@ public abstract class AbstractMonteCarloTrainer<
     @Override
     public void trainPolicy(int episodeCount) {
         logger.info("Starting MonteCarlo training on [{}] episodeCount", episodeCount);
-        List<Episode<TAction, TReward, TObservation, TState>> episodeHistoryList = rolloutGameSampler.sampleEpisodes(episodeCount);
-        for (Episode<TAction, TReward, TObservation, TState> entry : episodeHistoryList) {
+        List<Episode<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeHistoryList = rolloutGameSampler.sampleEpisodes(episodeCount);
+        for (Episode<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> entry : episodeHistoryList) {
             addVisitedRewards(calculatedVisitedRewards(entry));
         }
         logger.debug("Sampled all episodes");
-        List<ImmutableTuple<TObservation, TReward>> observationRewardList = new ArrayList<>();
+        List<ImmutableTuple<TPlayerObservation, TReward>> observationRewardList = new ArrayList<>();
         for (Map.Entry<TState, MutableTuple<Integer, TReward>> entry : visitAverageRewardMap.entrySet()) {
-            observationRewardList.add(new ImmutableTuple<>(entry.getKey().getObservation(), entry.getValue().getSecond()));
+            observationRewardList.add(new ImmutableTuple<>(entry.getKey().getPlayerObservation(), entry.getValue().getSecond()));
         }
         trainablePolicySupplier.train(observationRewardList);
     }
 
-    protected abstract Map<TState, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TObservation, TState> episode);
+    protected abstract Map<TState, TReward> calculatedVisitedRewards(Episode<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> episode);
 
     protected void addVisitedRewards(Map<TState, TReward> sampledStateVisitMap) {
         for (Map.Entry<TState, TReward> entry : sampledStateVisitMap.entrySet()) {
@@ -77,8 +79,8 @@ public abstract class AbstractMonteCarloTrainer<
 
 //        for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry1 : visitAverageRewardMap.entrySet()) {
 //            for (Map.Entry<State<TAction, TReward, TObservation>, MutableTuple<Integer, TReward>> entry2 : visitAverageRewardMap.entrySet()) {
-//                double[] observation1 = entry1.getKey().getObservation().getObservedVector();
-//                double[] observation2 = entry2.getKey().getObservation().getObservedVector();
+//                double[] observation1 = entry1.getKey().getPlayerObservation().getObservedVector();
+//                double[] observation2 = entry2.getKey().getPlayerObservation().getObservedVector();
 //                int hash1 = entry1.getKey().hashCode();
 //                int hash2 = entry2.getKey().hashCode();
 //                if(Arrays.equals(observation1, observation2)) {

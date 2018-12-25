@@ -8,6 +8,7 @@ import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.environment.HallwayAction;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.environment.state.StateRepresentation;
 import vahy.game.HallwayGameInitialInstanceSupplier;
@@ -101,7 +102,7 @@ public class PaperGenericsPrototype {
 
         // MCTS WITH NN EVAL
         try(TFModel model = new TFModel(
-            hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+            hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
             PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
             trainingEpochCount,
             batchSize,
@@ -110,14 +111,14 @@ public class PaperGenericsPrototype {
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
 
-            PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
-            PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
-            PaperTreeUpdater<HallwayAction, DoubleVector, HallwayStateImpl> paperTreeUpdater = new PaperTreeUpdater<>();
+            PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
+            PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
+            PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> paperTreeUpdater = new PaperTreeUpdater<>();
 //            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator, allPlayerActions, allOpponentActions);
             PaperNodeEvaluatorWORKINGCOPY nnbasedEvaluator = new PaperNodeEvaluatorWORKINGCOPY(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
 
 
-            TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> paperTrainablePolicySupplier =
+            TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> paperTrainablePolicySupplier =
                 new TrainablePaperPolicySupplier<>(
                     clazz,
                     searchNodeMetadataFactory,
@@ -131,7 +132,7 @@ public class PaperGenericsPrototype {
                     temperature
                 );
 
-            PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier =
+            PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier =
                 new PaperPolicySupplier<>(
                     clazz,
                     searchNodeMetadataFactory,
@@ -165,20 +166,20 @@ public class PaperGenericsPrototype {
             String nnBasedPolicyName = "NNBased";
 
 
-            PaperBenchmark<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> benchmark = new PaperBenchmark<>(
+            PaperBenchmark<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> benchmark = new PaperBenchmark<>(
                 Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
                 new EnvironmentPolicySupplier(random),
                 hallwayGameInitialInstanceSupplier
             );
 
             long start = System.currentTimeMillis();
-            List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> policyResultList = benchmark
+            List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> policyResultList = benchmark
                 .runBenchmark(uniqueEpisodeCount, episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking took [{}] milliseconds", end - start);
 
 
-            PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnResults = policyResultList
+            PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnResults = policyResultList
                 .stream()
                 .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName))
                 .findFirst()
@@ -197,6 +198,7 @@ public class PaperGenericsPrototype {
 
     private static AbstractTrainer<
         HallwayAction,
+        EnvironmentProbabilities,
         PaperMetadata<HallwayAction, DoubleReward>,
         HallwayStateImpl>
     getAbstractTrainer(Trainer trainer,
@@ -204,7 +206,7 @@ public class PaperGenericsPrototype {
                        HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
                        double discountFactor,
                        PaperNodeEvaluatorWORKINGCOPY nodeEvaluator,
-                       TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
+                       TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit) {
         switch(trainer) {

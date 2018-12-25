@@ -10,10 +10,11 @@ import vahy.utils.ImmutableTuple;
 public class ImmutableStateActionRewardTuple<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     extends ImmutableTuple<ImmutableTuple<TAction, TReward>, TState>
-    implements StateActionReward<TAction, TReward, TObservation, TState> {
+    implements StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     public ImmutableStateActionRewardTuple(TState state, TAction action, TReward reward) {
         super(new ImmutableTuple<>(action, reward), state);

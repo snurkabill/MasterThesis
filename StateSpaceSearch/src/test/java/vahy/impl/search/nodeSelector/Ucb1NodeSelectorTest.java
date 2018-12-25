@@ -20,18 +20,18 @@ public class Ucb1NodeSelectorTest {
     @Test
     public void testUcb1SelectPlayerAction() {
         SplittableRandom random = new SplittableRandom(0);
-        Ucb1NodeSelector<TestAction, DoubleReward, DoubleVector, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
+        Ucb1NodeSelector<TestAction, DoubleReward, DoubleVector, TestState, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
         nodeSelector.setNewRoot(TestHelper.createOneLevelTree(true));
-        SearchNode<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> selectedNode = nodeSelector.selectNextNode();
+        SearchNode<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> selectedNode = nodeSelector.selectNextNode();
         Assert.assertEquals(selectedNode.getAppliedAction(), Arrays.stream(TestAction.playerActions).max(Comparator.comparingDouble(TestAction::getReward)).get());
     }
 
     @Test
     public void testUcb1SelectOpponentAction() {
         SplittableRandom random = new SplittableRandom(0);
-        Ucb1NodeSelector<TestAction, DoubleReward, DoubleVector, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
+        Ucb1NodeSelector<TestAction, DoubleReward, DoubleVector, TestState, TestState> nodeSelector = new Ucb1NodeSelector<>(random, 1.0);
         nodeSelector.setNewRoot(TestHelper.createOneLevelTree(false));
-        SearchNode<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> selectedNode = nodeSelector.selectNextNode();
+        SearchNode<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> selectedNode = nodeSelector.selectNextNode();
         Assert.assertEquals(selectedNode.getAppliedAction(), Arrays.stream(TestAction.opponentActions).min(Comparator.comparingDouble(TestAction::getReward)).get());
     }
 }

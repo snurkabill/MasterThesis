@@ -2,6 +2,7 @@ package vahy.paperOldImpl.reinforcement.learn;
 
 import vahy.api.model.StateActionReward;
 import vahy.environment.HallwayAction;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.model.observation.DoubleVector;
@@ -26,11 +27,11 @@ public class FirstVisitMonteCarloTrainer extends AbstractMonteCarloTrainer {
     @Override
     protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(PaperEpisode paperEpisode) {
         Map<DoubleVector, MutableDataSample> firstVisitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
+        List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
-                if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getObservation())) {
-                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getObservation(), createDataSample(episodeHistory, i));
+                if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getPlayerObservation())) {
+                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getPlayerObservation(), createDataSample(episodeHistory, i));
                 }
             }
         }

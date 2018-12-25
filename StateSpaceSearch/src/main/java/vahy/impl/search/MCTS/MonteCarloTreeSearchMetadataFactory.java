@@ -12,9 +12,10 @@ import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 public class MonteCarloTreeSearchMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
 
     private final RewardAggregator<TReward> rewardAggregator;
 
@@ -23,8 +24,8 @@ public class MonteCarloTreeSearchMetadataFactory<
     }
 
     @Override
-    public MonteCarloTreeSearchMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> parent,
-                                                                          StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
+    public MonteCarloTreeSearchMetadata<TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> parent,
+                                                                          StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>stateRewardReturn,
                                                                           TAction appliedAction) {
         return new MonteCarloTreeSearchMetadata<>(
             parent != null ? rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),

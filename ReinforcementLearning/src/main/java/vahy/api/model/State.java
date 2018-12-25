@@ -3,15 +3,22 @@ package vahy.api.model;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 
-public interface State<TAction extends Action, TReward extends Reward, TObservation extends Observation, TState extends State<TAction, TReward, TObservation, TState>> {
+public interface State<
+    TAction extends Action,
+    TReward extends Reward,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
     TAction[] getAllPossibleActions();
 
-    StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction actionType);
+    StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction actionType);
 
     TState deepCopy();
 
-    TObservation getObservation();
+    TPlayerObservation getPlayerObservation();
+
+    TOpponentObservation getOpponentObservation();
 
     String readableStringRepresentation();
 

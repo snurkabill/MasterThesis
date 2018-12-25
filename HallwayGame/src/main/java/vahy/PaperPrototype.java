@@ -101,13 +101,13 @@ public class PaperPrototype {
         // MCTS WITH NN EVAL
         TrainableApproximator trainableApproximator = new TrainableApproximator(
 //            new AlphaGoLinearNaiveModel(
-//                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+//                hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
 //                1 + HallwayAction.playerActions.length,
 //                learningRate
 //            )
 
 //            new Dl4jModel(
-//                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+//                hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
 //                NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
 //                null,
 //                seed,
@@ -116,7 +116,7 @@ public class PaperPrototype {
 //            )
 
             new TFModel(
-                hallwayGameInitialInstanceSupplier.createInitialState().getObservation().getObservedVector().length,
+                hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
                 NodeEvaluator.POLICY_START_INDEX + HallwayAction.playerActions.length,
                 trainingEpochCount,
                 batchSize,

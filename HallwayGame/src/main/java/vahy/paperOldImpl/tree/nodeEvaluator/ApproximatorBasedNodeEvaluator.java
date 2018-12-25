@@ -25,7 +25,7 @@ public class ApproximatorBasedNodeEvaluator extends NodeEvaluator {
         if(node.isAlreadyEvaluated()) {
             throw new IllegalStateException("Node was already evaluated");
         }
-        double[] prediction = trainableApproximator.apply(node.getWrappedState().getObservation());
+        double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
         node.setEstimatedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
         node.setEstimatedRisk(prediction[RISK_VALUE_INDEX]);
         if(node.getWrappedState().isAgentTurn()) {
@@ -34,7 +34,7 @@ public class ApproximatorBasedNodeEvaluator extends NodeEvaluator {
                 node.getEdgeMetadataMap().get(playerActions[i]).setPriorProbability(prediction[i + POLICY_START_INDEX]);
             }
         } else {
-            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities = node.getWrappedState().getOpponentObservation().getProbabilities();
 
             for (int i = 0; i < environmentActionsWithProbabilities.getFirst().size(); i++) {
                 node.getEdgeMetadataMap().get(environmentActionsWithProbabilities.getFirst().get(i)).setPriorProbability(environmentActionsWithProbabilities.getSecond().get(i));

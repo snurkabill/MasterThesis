@@ -1,6 +1,7 @@
 package vahy.paperGenerics.policy.environment;
 
 import vahy.environment.HallwayAction;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -10,7 +11,7 @@ import vahy.paperGenerics.policy.PaperPolicySupplier;
 
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicySupplier extends PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
+public class EnvironmentPolicySupplier extends PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> {
 
     public final SplittableRandom random;
 
@@ -20,7 +21,7 @@ public class EnvironmentPolicySupplier extends PaperPolicySupplier<HallwayAction
     }
 
     @Override
-    public PaperPolicy<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> initializePolicy(HallwayStateImpl initialState) {
+    public PaperPolicy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> initializePolicy(HallwayStateImpl initialState) {
         return new PaperEnvironmentPolicy(random);
     }
 }

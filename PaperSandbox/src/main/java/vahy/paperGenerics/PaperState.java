@@ -8,9 +8,10 @@ import vahy.impl.model.reward.DoubleReward;
 public interface PaperState<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends State<TAction, TReward, TObservation, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     boolean isRiskHit();
 }

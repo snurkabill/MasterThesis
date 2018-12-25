@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> {
+public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -84,7 +84,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
         this.hasAgentResigned = hasAgentResigned;
     }
 
-    public ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities() {
+    private ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities() {
         List<HallwayAction> possibleActions = new LinkedList<>();
         List<Double> actionProbabilities = new LinkedList<>();
         if(isAgentTurn) {
@@ -164,7 +164,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
     }
 
     @Override
-    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> applyAction(HallwayAction hallwayAction) {
+    public StateRewardReturn<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> applyAction(HallwayAction hallwayAction) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -342,7 +342,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
     }
 
     @Override
-    public DoubleVector getObservation() {
+    public DoubleVector getPlayerObservation() {
         switch(staticGamePart.getStateRepresentation()) {
             case FULL:
                 return getFullDoubleVectorialObservation();
@@ -351,6 +351,11 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(staticGamePart.getStateRepresentation());
         }
+    }
+
+    @Override
+    public EnvironmentProbabilities getOpponentObservation() {
+        return new EnvironmentProbabilities(this.environmentActionsWithProbabilities());
     }
 
     private DoubleVector getFullDoubleVectorialObservation() {

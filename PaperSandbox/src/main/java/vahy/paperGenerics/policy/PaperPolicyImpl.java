@@ -1,12 +1,13 @@
 package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
+import vahy.api.model.observation.Observation;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
-import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.RiskAverseSearchTree;
 import vahy.utils.ImmutableTuple;
 
@@ -19,21 +20,22 @@ import java.util.stream.Collectors;
 public class PaperPolicyImpl<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends DoubleVector,
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TReward, TObservation, TSearchNodeMetadata, TState>
-    implements PaperPolicy<TAction, TReward, TObservation, TState> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeSearchPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
+    implements PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     private final List<TAction> playerActions;
     private final List<TAction> environmentActions;
     private final SplittableRandom random;
-    private final RiskAverseSearchTree<TAction, TReward, TObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
-    private final OptimalFlowCalculator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
+    private final RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
+    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
-                           RiskAverseSearchTree<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchTree,
+                           RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random) {
         super(treeUpdateCondition, searchTree);
         this.random = random;

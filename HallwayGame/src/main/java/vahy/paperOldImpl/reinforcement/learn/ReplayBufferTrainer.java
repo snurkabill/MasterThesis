@@ -2,6 +2,7 @@ package vahy.paperOldImpl.reinforcement.learn;
 
 import vahy.api.model.StateActionReward;
 import vahy.environment.HallwayAction;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.model.observation.DoubleVector;
@@ -51,11 +52,11 @@ public class ReplayBufferTrainer extends AbstractTrainer {
 
     public List<ImmutableTuple<DoubleVector, double[]>> convertEpisodeToDataSamples(PaperEpisode paperEpisode) {
         List<ImmutableTuple<DoubleVector, double[]>> episodeRaw = new ArrayList<>();
-        List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
+        List<ImmutableTuple<StateActionReward<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>, StepRecord>> episodeHistory = paperEpisode.getEpisodeStateActionRewardList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i);
-                episodeRaw.add(new ImmutableTuple<>(episodeHistory.get(i).getFirst().getState().getObservation(), createOutputVector(dataSample)));
+                episodeRaw.add(new ImmutableTuple<>(episodeHistory.get(i).getFirst().getState().getPlayerObservation(), createOutputVector(dataSample)));
             }
         }
         return episodeRaw;

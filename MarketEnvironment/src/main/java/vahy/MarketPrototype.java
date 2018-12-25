@@ -119,7 +119,7 @@ public class MarketPrototype {
 
         // MCTS WITH NN EVAL
         try(TFModel model = new TFModel(
-            initialMarketStateSupplier.createInitialState().getObservation().getObservedVector().length,
+            initialMarketStateSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
             2 + MarketAction.playerActions.length,
             trainingEpochCount,
             batchSize,
@@ -128,9 +128,9 @@ public class MarketPrototype {
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
 
-            PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
-            PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
-            PaperTreeUpdater<MarketAction, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
+            PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
+            PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
+            PaperTreeUpdater<MarketAction, DoubleVector, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
 //            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
             MarketNodeEvaluator marketNodeEvaluator = new MarketNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
 
@@ -138,7 +138,7 @@ public class MarketPrototype {
 
 
 
-            TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> paperTrainablePolicySupplier =
+            TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> paperTrainablePolicySupplier =
                 new TrainablePaperPolicySupplier<>(
                     clazz,
                     searchNodeMetadataFactory,
@@ -152,7 +152,7 @@ public class MarketPrototype {
                     temperature
                 );
 
-            PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
+            PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
                 new PaperPolicySupplier<>(
                     clazz,
                     searchNodeMetadataFactory,
@@ -186,20 +186,20 @@ public class MarketPrototype {
 
             String nnBasedPolicyName = "NNBased";
 
-            PaperBenchmark<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> benchmark = new PaperBenchmark<>(
+            PaperBenchmark<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> benchmark = new PaperBenchmark<>(
                 Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
                 new RealDataMarketPolicySupplier(marketDataProvider),
                 initialMarketStateSupplier
             );
 
             long start = System.currentTimeMillis();
-            List<PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> policyResultList = benchmark
+            List<PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> policyResultList = benchmark
                 .runBenchmark(uniqueEpisodeCount, episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking took [{}] milliseconds", end - start);
 
 
-            PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnResults = policyResultList
+            PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnResults = policyResultList
                 .stream()
                 .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName))
                 .findFirst()
@@ -216,12 +216,12 @@ public class MarketPrototype {
 
     }
 
-    private static AbstractTrainer<MarketAction, PaperMetadata<MarketAction, DoubleReward>, MarketState> getAbstractTrainer(
+    private static AbstractTrainer<MarketAction, DoubleVector,  PaperMetadata<MarketAction, DoubleReward>, MarketState> getAbstractTrainer(
         Trainer trainer,
         InitialMarketStateSupplier initialMarketStateSupplier,
         double discountFactor,
         MarketNodeEvaluator nodeEvaluator,
-        TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> trainablePaperPolicySupplier,
+        TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> trainablePaperPolicySupplier,
         int replayBufferSize,
         int stepCountLimit,
         MarketDataProvider marketDataProvider)

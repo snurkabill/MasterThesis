@@ -12,17 +12,18 @@ import java.util.stream.Stream;
 public interface SearchNode<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
-    SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getParent();
+    SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getParent();
 
     TAction getAppliedAction();
 
-    Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
+    Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
 
-    StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action);
+    StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action);
 
     TAction[] getAllPossibleActions();
 
@@ -44,7 +45,7 @@ public interface SearchNode<
         return !isOpponentTurn();
     }
 
-    default Stream<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> getChildNodeStream() {
+    default Stream<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeStream() {
         return getChildNodeMap().values().stream();
     }
 

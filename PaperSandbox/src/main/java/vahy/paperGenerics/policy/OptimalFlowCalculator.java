@@ -19,9 +19,10 @@ import java.util.Map;
 public class OptimalFlowCalculator<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TObservation, TState>> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
     private static final Logger logger = LoggerFactory.getLogger(OptimalFlowCalculator.class.getName());
 
@@ -31,20 +32,20 @@ public class OptimalFlowCalculator<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
-    public double calculateFlow(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root, double totalRiskAllowed) {
+    public double calculateFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root, double totalRiskAllowed) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         CLP model = new CLP();
-        LinkedList<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
+        LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
         queue.addFirst(root);
 
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
 
         CLPExpression totalRiskExpression = null;
         while(!queue.isEmpty()) {
-            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node = queue.poll();
+            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
             Map<TAction, CLPVariable> actionChildFlowMap = new HashMap<>();
             if(!node.isLeaf()) {
-                for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+                for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
                     queue.addLast(entry.getValue());
                     CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
                     entry.getValue().getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
@@ -93,10 +94,10 @@ public class OptimalFlowCalculator<
     }
 
     public void addChildFlowBasedOnFixedProbabilitiesExpression(CLP model,
-                                                                SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node,
+                                                                SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                                                 Map<TAction, CLPVariable> actionChildFlowMap) {
         for (Map.Entry<TAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
-            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
+            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
             double priorProbability = child.getSearchNodeMetadata().getPriorProbability();
             CLPExpression fixedProbabilityExpression = model.createExpression();
             fixedProbabilityExpression.add(CHILD_VARIABLE_COEFFICIENT, child.getSearchNodeMetadata().getNodeProbabilityFlow());
@@ -106,7 +107,7 @@ public class OptimalFlowCalculator<
     }
 
     public void addSummingChildrenToOneExpression(CLP model,
-                                                  SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node,
+                                                  SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                                   Map<TAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
         for (Map.Entry<TAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {

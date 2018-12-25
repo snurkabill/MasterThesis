@@ -9,7 +9,7 @@ import vahy.utils.EnumUtils;
 
 import java.util.Arrays;
 
-public class MarketState implements PaperState<MarketAction, DoubleReward, DoubleVector, MarketState> {
+public class MarketState implements PaperState<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> {
 
     private final boolean isAgentTurn;
     private final TradingSystemState tradingSystemState;
@@ -252,7 +252,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
     }
 
     @Override
-    public StateRewardReturn<MarketAction, DoubleReward, DoubleVector, MarketState> applyAction(MarketAction actionType) {
+    public StateRewardReturn<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> applyAction(MarketAction actionType) {
         if(actionType.isPlayerAction() && !this.isAgentTurn) {
             throw new IllegalStateException("Trying to play agent action when agent is not on turn");
         }
@@ -395,7 +395,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
     }
 
     @Override
-    public DoubleVector getObservation() {
+    public DoubleVector getPlayerObservation() {
         int totalLenght = 0;
         totalLenght += lookback.length;
         totalLenght += 1; // tradeBalance;
@@ -419,6 +419,11 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
                     throw EnumUtils.createExceptionForUnknownEnumValue(tradingSystemState);
         }
         return new DoubleVector(observation);
+    }
+
+    @Override
+    public DoubleVector getOpponentObservation() {
+        return null;
     }
 
     @Override

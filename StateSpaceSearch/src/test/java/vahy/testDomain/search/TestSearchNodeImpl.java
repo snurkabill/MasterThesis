@@ -11,18 +11,18 @@ import vahy.testDomain.model.TestState;
 import java.util.Map;
 
 public class TestSearchNodeImpl<TSearchNodeMetadata extends SearchNodeMetadata<DoubleReward>>
-    extends SearchNodeImpl<TestAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TestState> {
+    extends SearchNodeImpl<TestAction, DoubleReward, DoubleVector, TestState, TSearchNodeMetadata, TestState> {
 
     public TestSearchNodeImpl(TestState wrappedState,
                               TSearchNodeMetadata searchNodeMetadata,
-                              Map<TestAction, SearchNode<TestAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TestState>> childNodeMap) {
+                              Map<TestAction, SearchNode<TestAction, DoubleReward, DoubleVector, TestState, TSearchNodeMetadata, TestState>> childNodeMap) {
         super(wrappedState, searchNodeMetadata, childNodeMap);
     }
 
     public TestSearchNodeImpl(TestState wrappedState,
                               TSearchNodeMetadata searchNodeMetadata,
-                              Map<TestAction, SearchNode<TestAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TestState>> childNodeMap,
-                              SearchNode<TestAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TestState> parent,
+                              Map<TestAction, SearchNode<TestAction, DoubleReward, DoubleVector, TestState, TSearchNodeMetadata, TestState>> childNodeMap,
+                              SearchNode<TestAction, DoubleReward, DoubleVector, TestState, TSearchNodeMetadata, TestState> parent,
                               TestAction appliedAction) {
         super(wrappedState, searchNodeMetadata, childNodeMap, parent, appliedAction);
     }

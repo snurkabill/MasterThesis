@@ -11,12 +11,13 @@ import vahy.api.search.node.SearchNodeMetadata;
 public interface SearchNodeMetadataFactory<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
-    TSearchNodeMetadata createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
-                                                 StateRewardReturn<TAction, TReward, TObservation, TState>stateRewardReturn,
+    TSearchNodeMetadata createSearchNodeMetadata(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+                                                 StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>stateRewardReturn,
                                                  TAction appliedAction);
 
     TSearchNodeMetadata createEmptyNodeMetadata();

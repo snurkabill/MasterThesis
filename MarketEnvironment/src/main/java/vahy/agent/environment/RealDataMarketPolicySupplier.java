@@ -9,7 +9,7 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 
-public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> {
+public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> {
 
     private final MarketDataProvider marketDataProvider;
 
@@ -19,7 +19,7 @@ public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketActi
     }
 
     @Override
-    public PaperPolicy<MarketAction, DoubleReward, DoubleVector, MarketState> initializePolicy(MarketState initialState) {
+    public PaperPolicy<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> initializePolicy(MarketState initialState) {
         int index = initialState.getCurrentDataIndex();
         return new RealDataMarketPolicy(marketDataProvider.getMarketMovementArray(), index + 1);
     }

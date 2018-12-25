@@ -12,7 +12,7 @@ public abstract class MaximizingRewardGivenProbabilities {
 
     protected DoubleReward resolveReward(HallwayStateImpl state, Map<HallwayAction, DoubleReward> actionRewardMap) {
         if(state.isOpponentTurn()) {
-            ImmutableTuple<List<HallwayAction>, List<Double>> actionsWithProbabilities = state.environmentActionsWithProbabilities();
+            ImmutableTuple<List<HallwayAction>, List<Double>> actionsWithProbabilities = state.getOpponentObservation().getProbabilities();
             double sum = 0.0;
             for (int i = 0; i < actionsWithProbabilities.getFirst().size(); i++) {
                 sum += actionRewardMap.get(actionsWithProbabilities.getFirst().get(i)).getValue() * actionsWithProbabilities.getSecond().get(i);

@@ -18,9 +18,10 @@ import java.util.stream.DoubleStream;
 public class PaperNodeSelector<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, PaperMetadata<TAction, TReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> {
 
     public static final double TOLERANCE = Math.pow(10, -15);
 
@@ -32,7 +33,7 @@ public class PaperNodeSelector<
         this.random = random;
     }
 
-    private double getExtremeElement(SearchNode<TAction, TReward, TObservation, PaperMetadata<TAction, TReward>, TState> node,
+    private double getExtremeElement(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node,
                                      Function<DoubleStream, OptionalDouble> function,
                                      String nonExistingElementMessage) {
         return function.apply(node
@@ -42,7 +43,7 @@ public class PaperNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, PaperMetadata<TAction, TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
         final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
