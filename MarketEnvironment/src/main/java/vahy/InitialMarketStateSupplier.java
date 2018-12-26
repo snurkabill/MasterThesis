@@ -12,7 +12,7 @@ import vahy.impl.model.reward.DoubleReward;
 
 import java.util.SplittableRandom;
 
-public class InitialMarketStateSupplier implements InitialStateSupplier<MarketAction, DoubleReward, DoubleVector, MarketState> {
+public class InitialMarketStateSupplier implements InitialStateSupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector,  MarketState> {
 
     private final SplittableRandom random;
     private final MarketEnvironmentStaticPart marketEnvironmentStaticPart;

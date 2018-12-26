@@ -72,12 +72,12 @@ public class HallwayStateImplTest {
     }
 
     private void assertAgentCoordinations(HallwayStateImpl game, int expectedX, int expectedY, int gameXdim) {
-        double[] observation = game.getObservation().getObservedVector();
+        double[] observation = game.getPlayerObservation().getObservedVector();
         Assert.assertEquals(observation[gameXdim * expectedX + expectedY], HallwayStateImpl.AGENT_LOCATION_REPRESENTATION, DOUBLE_TOLERANCE);
     }
 
     private void assertAgentHeading(HallwayStateImpl game, AgentHeading expectedAgentHeading) {
-        double[] observation = game.getObservation().getObservedVector();
+        double[] observation = game.getPlayerObservation().getObservedVector();
         int observationIndex = agentHeadingIndexOnArray(expectedAgentHeading);
         Assert.assertEquals(observation[observation.length + observationIndex], 1.0, DOUBLE_TOLERANCE);
     }
@@ -161,8 +161,8 @@ public class HallwayStateImplTest {
     public void emptyEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state = getHallGame1();
         Assert.assertTrue(state.isAgentTurn());
-        Assert.assertTrue(state.environmentActionsWithProbabilities().getFirst().isEmpty());
-        Assert.assertTrue(state.environmentActionsWithProbabilities().getSecond().isEmpty());
+        Assert.assertTrue(state.getOpponentObservation().getProbabilities().getFirst().isEmpty());
+        Assert.assertTrue(state.getOpponentObservation().getProbabilities().getSecond().isEmpty());
     }
 
     @Test
@@ -171,16 +171,16 @@ public class HallwayStateImplTest {
         Assert.assertTrue(state1.isAgentTurn());
         HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.FORWARD).getState();
-        Assert.assertEquals(state2.environmentActionsWithProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
-        Assert.assertEquals(state2.environmentActionsWithProbabilities().getSecond(), Collections.singletonList(1.0));
+        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
+        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Collections.singletonList(1.0));
 
         HallwayStateImpl state3 = (HallwayStateImpl) state2
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.TURN_LEFT).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
-        Assert.assertEquals(state3.environmentActionsWithProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
-        Assert.assertEquals(state3.environmentActionsWithProbabilities().getSecond(), Collections.singletonList(1.0));
+        Assert.assertEquals(state3.getOpponentObservation().getProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
+        Assert.assertEquals(state3.getOpponentObservation().getProbabilities().getSecond(), Collections.singletonList(1.0));
     }
 
     @Test
@@ -189,10 +189,10 @@ public class HallwayStateImplTest {
         Assert.assertTrue(state1.isAgentTurn());
         HallwayStateImpl state2 = (HallwayStateImpl) state1
             .applyAction(HallwayAction.FORWARD).getState();
-        List<HallwayAction> moves = state2.environmentActionsWithProbabilities().getFirst();
+        List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
         List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.NO_ACTION);
         Assert.assertEquals(moves, expectedMoves);
-        Assert.assertEquals(state2.environmentActionsWithProbabilities().getSecond(), Arrays.asList(0.25, 0.25, 0.5));
+        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25, 0.25, 0.5));
     }
 
     @Test
@@ -203,10 +203,10 @@ public class HallwayStateImplTest {
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
-        List<HallwayAction> moves = state2.environmentActionsWithProbabilities().getFirst();
+        List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
         List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NO_ACTION);
         Assert.assertEquals(moves, expectedMoves);
-        Assert.assertEquals(state2.environmentActionsWithProbabilities().getSecond(), Arrays.asList(0.25 * 0.9, 0.25 * 0.1, 0.25 * 0.5, 0.25 * 0.5, 0.5));
+        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25 * 0.9, 0.25 * 0.1, 0.25 * 0.5, 0.25 * 0.5, 0.5));
     }
 
     @Test
@@ -219,10 +219,10 @@ public class HallwayStateImplTest {
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
-        List<HallwayAction> moves = state2.environmentActionsWithProbabilities().getFirst();
+        List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
         List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.TRAP, HallwayAction.NO_ACTION);
         Assert.assertEquals(moves, expectedMoves);
-        Assert.assertEquals(state2.environmentActionsWithProbabilities().getSecond(), Arrays.asList(0.25 * 0.8, 0.25 * 0.2, 0.25 * 0.8, 0.25 * 0.2, 0.5 * 0.2, 0.5 * 0.8));
+        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25 * 0.8, 0.25 * 0.2, 0.25 * 0.8, 0.25 * 0.2, 0.5 * 0.2, 0.5 * 0.8));
     }
 
 }

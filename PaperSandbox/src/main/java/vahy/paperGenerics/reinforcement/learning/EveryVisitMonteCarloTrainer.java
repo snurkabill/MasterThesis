@@ -3,12 +3,13 @@ package vahy.paperGenerics.reinforcement.learning;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.StateActionReward;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
-import vahy.environment.state.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
@@ -21,14 +22,15 @@ import java.util.Map;
 
 public class EveryVisitMonteCarloTrainer<
     TAction extends Enum<TAction> & Action,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
-    TState extends PaperState<TAction, DoubleReward, DoubleVector, TState>>
-    extends AbstractMonteCarloTrainer<TAction, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>>
+    extends AbstractMonteCarloTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    public EveryVisitMonteCarloTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TState> initialStateSupplier,
-                                       TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
-                                       PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                                       TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TSearchNodeMetadata, TState> paperNodeEvaluator,
+    public EveryVisitMonteCarloTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
+                                       TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
+                                       PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                                       TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                                        double discountFactor,
                                        RewardAggregator<DoubleReward> rewardAggregator,
                                        int stepCountLimit) {
@@ -36,13 +38,13 @@ public class EveryVisitMonteCarloTrainer<
     }
 
     @Override
-    protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleReward, DoubleVector, TState> paperEpisode) {
+    protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         Map<DoubleVector, MutableDataSample> everyVisitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TState>, StepRecord<DoubleReward>>> episodeHistory = paperEpisode.getEpisodeHistoryList();
+        List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>, StepRecord<DoubleReward>>> episodeHistory = paperEpisode.getEpisodeHistoryList();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i);
-                DoubleVector experimentalObservation = episodeHistory.get(i).getFirst().getState().getObservation();
+                DoubleVector experimentalObservation = episodeHistory.get(i).getFirst().getState().getPlayerObservation();
                 if(!everyVisitSet.containsKey(experimentalObservation)) {
                     everyVisitSet.put(experimentalObservation, dataSample);
                 } else {

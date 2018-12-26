@@ -1,10 +1,11 @@
 package vahy.paperGenerics.benchmark;
 
 import vahy.api.model.Action;
-import vahy.environment.state.PaperState;
+import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 
 import java.util.List;
@@ -12,20 +13,21 @@ import java.util.List;
 public class PaperPolicyResults<
     TAction extends Enum<TAction> & Action,
     TReward extends DoubleReward,
-    TObservation extends DoubleVector,
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TObservation, TState>> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
-    private final PaperBenchmarkingPolicy<TAction, TReward, TObservation, TSearchNodeMetadata, TState> benchmarkingPolicy;
-    private final List<EpisodeResults<TAction, TReward, TObservation, TState>> episodeList;
+    private final PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy;
+    private final List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeList;
     private final double averageNanosPerEpisode;
     private final double averageMillisPerEpisode;
     private final double averageReward;
     private final long riskHitCounter;
     private final double riskHitRatio;
 
-    public PaperPolicyResults(PaperBenchmarkingPolicy<TAction, TReward, TObservation, TSearchNodeMetadata, TState> benchmarkingPolicy,
-                              List<EpisodeResults<TAction, TReward, TObservation, TState>> episodeList,
+    public PaperPolicyResults(PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy,
+                              List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeList,
                               double averageNanosPerEpisode) {
         this.benchmarkingPolicy = benchmarkingPolicy;
         this.episodeList = episodeList;
@@ -42,11 +44,11 @@ public class PaperPolicyResults<
         this.averageMillisPerEpisode = episodeList.stream().mapToDouble(EpisodeResults::getMillisecondDuration).sum() / (double) episodeList.size();
     }
 
-    public PaperBenchmarkingPolicy<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getBenchmarkingPolicy() {
+    public PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getBenchmarkingPolicy() {
         return benchmarkingPolicy;
     }
 
-    public List<EpisodeResults<TAction, TReward, TObservation, TState>> getEpisodeList() {
+    public List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeList() {
         return episodeList;
     }
 

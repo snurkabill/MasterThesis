@@ -9,7 +9,6 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
-import vahy.environment.state.PaperState;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
 
@@ -19,9 +18,11 @@ import java.util.Map;
 public class RiskAverseSearchTree<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TObservation, TState>> extends SearchTreeImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends SearchTreeImpl<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(RiskAverseSearchTree.class);
 
@@ -32,10 +33,10 @@ public class RiskAverseSearchTree<
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
 
-    public RiskAverseSearchTree(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root,
-                                NodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeSelector,
-                                TreeUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> treeUpdater,
-                                NodeEvaluator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeEvaluator,
+    public RiskAverseSearchTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
+                                NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                                TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
+                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                 double totalRiskAllowed) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
         this.totalRiskAllowed = totalRiskAllowed;
@@ -54,7 +55,7 @@ public class RiskAverseSearchTree<
     }
 
     @Override
-    public StateRewardReturn<TAction, TReward, TObservation, TState> applyAction(TAction action) {
+    public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         checkApplicableAction(action);
         // TODO make general in applicable action
         if(!getRoot().getChildNodeMap().containsKey(action)) {
@@ -87,7 +88,7 @@ public class RiskAverseSearchTree<
 
     private double calculateNumericallyStableRiskOfAnotherActions(TAction appliedAction) {
         double riskOfOtherActions = 0.0;
-        for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
+        for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             if(entry.getKey() != appliedAction) {
                 riskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
             }
@@ -172,20 +173,20 @@ public class RiskAverseSearchTree<
         return riskDiff;
     }
 
-    private double calculateRiskContributionInSubTree(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> subTreeRoot) {
+    private double calculateRiskContributionInSubTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
 
-        LinkedList<SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
+        LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
         queue.addFirst(subTreeRoot);
 
         while(!queue.isEmpty()) {
-            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node = queue.poll();
+            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
             if(node.isLeaf()) {
                 if(node.getWrappedState().isRiskHit()) {
                     risk += node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
                 }
             } else {
-                for (Map.Entry<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+                for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
                     queue.addLast(entry.getValue());
                 }
             }

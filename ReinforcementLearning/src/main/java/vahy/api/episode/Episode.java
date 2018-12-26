@@ -9,15 +9,20 @@ import vahy.api.model.reward.Reward;
 
 import java.util.List;
 
-public interface Episode<TAction extends Action, TReward extends Reward, TObservation extends Observation, TState extends State<TAction, TReward, TObservation, TState>> {
+public interface Episode<
+    TAction extends Action,
+    TReward extends Reward,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
     void runEpisode();
 
     boolean isEpisodeAlreadySimulated();
 
-    List<StateRewardReturn<TAction, TReward, TObservation, TState>> getEpisodeStateRewardReturnList();
+    List<StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateRewardReturnList();
 
-    List<StateActionReward<TAction, TReward, TObservation, TState>> getEpisodeStateActionRewardList();
+    List<StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateActionRewardList();
 
     TState getFinalState();
 

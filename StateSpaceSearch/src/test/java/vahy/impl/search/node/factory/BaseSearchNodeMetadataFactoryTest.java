@@ -21,7 +21,7 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
     @Test
     public void testBaseSearchNodeMetadataFactory() {
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
+        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
 
         double parentCumulativeReward = 50.0;
 
@@ -35,12 +35,12 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
     }
 
     private void assertMetadata(
-        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState> factory,
+        BaseSearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState, TestState> factory,
         double parentCumulativeReward,
         TestSearchNodeImpl<BaseSearchNodeMetadata<DoubleReward>> node,
         TestAction action) {
 
-        StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState> stateRewardReturn = node.applyAction(action);
+        StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState, TestState> stateRewardReturn = node.applyAction(action);
         BaseSearchNodeMetadata<DoubleReward> newSearchNodeMetadata = factory.createSearchNodeMetadata(node, stateRewardReturn, action);
 
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);

@@ -11,14 +11,15 @@ import vahy.impl.model.reward.DoubleReward;
 
 public class MonteCarloTreeSearchUpdater<
     TAction extends Action,
-    TObservation extends Observation,
-    TState extends State<TAction, DoubleReward, TObservation, TState>>
-    implements TreeUpdater<TAction, DoubleReward, TObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements TreeUpdater<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloTreeSearchUpdater.class);
 
     @Override
-    public void updateTree(SearchNode<TAction, DoubleReward, TObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TState> expandedNode) {
         int i = 0;
         double estimatedLeafReward = (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward().getValue()) + expandedNode.getSearchNodeMetadata().getCumulativeReward().getValue();
         while (!expandedNode.isRoot()) {
@@ -30,7 +31,7 @@ public class MonteCarloTreeSearchUpdater<
         logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 
-    private void updateNode(SearchNode<TAction, DoubleReward, TObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TState> expandedNode, double estimatedLeafReward) {
+    private void updateNode(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<DoubleReward>, TState> expandedNode, double estimatedLeafReward) {
         MonteCarloTreeSearchMetadata<DoubleReward> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
         if(searchNodeMetadata.getVisitCounter() == 1) {

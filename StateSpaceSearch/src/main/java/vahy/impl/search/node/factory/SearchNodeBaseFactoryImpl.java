@@ -16,21 +16,22 @@ import java.util.LinkedHashMap;
 public class SearchNodeBaseFactoryImpl<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchNodeFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private final SearchNodeMetadataFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
+    private final SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
 
-    public SearchNodeBaseFactoryImpl(SearchNodeMetadataFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory) {
+    public SearchNodeBaseFactoryImpl(SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory) {
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
     }
 
     @Override
-    public SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> createNode(
-        StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
-        SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
+    public SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createNode(
+        StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
         TAction action) {
         return new SearchNodeImpl<>(
             stateRewardReturn.getState(),

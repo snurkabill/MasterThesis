@@ -17,13 +17,14 @@ import java.util.SplittableRandom;
 public class Ucb1NodeSelector<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
-    protected SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> root;
+    protected SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> root;
     protected final SplittableRandom random;
     protected final double explorationConstant; // TODO: get rid of explorationConstant here. There are Ucb1 heuristics with changing exploration constant
 
@@ -33,7 +34,7 @@ public class Ucb1NodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
         int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
         return node.getChildNodeStream()
             .collect(StreamUtils.toRandomizedMaxCollector(

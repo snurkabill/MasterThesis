@@ -2,23 +2,25 @@ package vahy.api.learning.model;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.DoubleVectorialReward;
 import vahy.impl.model.observation.DoubleVector;
 
 public abstract class AbstractTrainableStateEvaluatingPolicySupplier<
     TAction extends Action,
     TReward extends DoubleVectorialReward,
-    TObservation extends DoubleVector,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements TrainablePolicySupplier<TAction, TReward, TObservation, TState> {
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements TrainablePolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
-    private final TrainableRewardApproximator<TReward, TObservation> trainableRewardApproximator;
+    private final TrainableRewardApproximator<TReward, TPlayerObservation> trainableRewardApproximator;
 
-    public AbstractTrainableStateEvaluatingPolicySupplier(TrainableRewardApproximator<TReward, TObservation> trainableRewardApproximator) {
+    public AbstractTrainableStateEvaluatingPolicySupplier(TrainableRewardApproximator<TReward, TPlayerObservation> trainableRewardApproximator) {
         this.trainableRewardApproximator = trainableRewardApproximator;
     }
 
-    public TrainableRewardApproximator<TReward, TObservation> getTrainableRewardApproximator() {
+    public TrainableRewardApproximator<TReward, TPlayerObservation> getTrainableRewardApproximator() {
         return trainableRewardApproximator;
     }
 }

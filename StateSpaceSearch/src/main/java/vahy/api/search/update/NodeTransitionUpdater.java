@@ -10,11 +10,12 @@ import vahy.api.search.node.SearchNodeMetadata;
 public interface NodeTransitionUpdater<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
-    void applyUpdate(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> evaluatedNode,
-                     SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
-                     SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child);
+    void applyUpdate(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> evaluatedNode,
+                     SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+                     SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child);
 }

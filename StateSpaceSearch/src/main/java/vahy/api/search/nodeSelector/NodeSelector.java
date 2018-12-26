@@ -10,12 +10,13 @@ import vahy.api.search.node.SearchNodeMetadata;
 public interface NodeSelector<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
-    void setNewRoot(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> root);
+    void setNewRoot(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root);
 
-    SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectNextNode();
+    SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode();
 
 }

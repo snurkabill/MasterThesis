@@ -4,6 +4,7 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.environment.HallwayAction;
 import vahy.environment.agent.AgentHeading;
 import vahy.environment.config.GameConfig;
+import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.environment.state.StaticGamePart;
 import vahy.game.cell.Cell;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction, DoubleReward, DoubleVector, HallwayStateImpl> {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;

@@ -21,20 +21,21 @@ import java.util.SplittableRandom;
 public class MonteCarloEvaluator<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends MonteCarloTreeSearchMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements NodeEvaluator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloEvaluator.class);
 
-    private final SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
+    private final SearchNodeFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
     private final RewardAggregator<TReward> rewardAggregator;
     private final double discountFactor;
     private final int rolloutCount;
 
-    public MonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+    public MonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                SplittableRandom random,
                                RewardAggregator<TReward> rewardAggregator,
                                double discountFactor,
@@ -47,15 +48,15 @@ public class MonteCarloEvaluator<
     }
 
     @Override
-    public void evaluateNode(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public void evaluateNode(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         if(selectedNode.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
-        Map<TAction, SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
+        Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
-            StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
+            StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
             childNodeMap.put(nextAction, searchNodeFactory.createNode(stateRewardReturn, selectedNode, nextAction));
         }
         TReward rewardPrediction = runRollouts(selectedNode);
@@ -63,7 +64,7 @@ public class MonteCarloEvaluator<
         searchNodeMetadata.setPredictedReward(rewardPrediction);
     }
 
-    private TReward runRollouts(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node) {
+    private TReward runRollouts(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         List<TReward> rewardList = new ArrayList<>();
         for (int i = 0; i < rolloutCount; i++) {
             rewardList.add(runRandomWalkSimulation(node));
@@ -71,13 +72,13 @@ public class MonteCarloEvaluator<
         return rewardAggregator.averageReward(rewardList);
     }
 
-    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node) {
+    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         List<TReward> rewardList = new ArrayList<>();
         TState wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
-            StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
+            StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
         }

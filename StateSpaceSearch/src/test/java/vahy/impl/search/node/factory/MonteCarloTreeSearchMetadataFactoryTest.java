@@ -23,7 +23,7 @@ public class MonteCarloTreeSearchMetadataFactoryTest extends AbstractStateSpaceS
     @Test
     public void testBaseSearchNodeMetadataFactory() {
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
-        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory = new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
+        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory = new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
         double parentCumulativeReward = 50.0;
         TestSearchNodeImpl<MonteCarloTreeSearchMetadata<DoubleReward>> node = new TestSearchNodeImpl<>(
             new TestState(Collections.singletonList('A')),
@@ -35,12 +35,12 @@ public class MonteCarloTreeSearchMetadataFactoryTest extends AbstractStateSpaceS
     }
 
     private void assertMetadata(
-        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory,
+        SearchNodeMetadataFactory<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> factory,
         double parentCumulativeReward,
         TestSearchNodeImpl<MonteCarloTreeSearchMetadata<DoubleReward>> node,
         TestAction action) {
 
-        StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState> stateRewardReturn = node.applyAction(action);
+        StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState, TestState> stateRewardReturn = node.applyAction(action);
         MonteCarloTreeSearchMetadata<DoubleReward> newSearchNodeMetadata = factory.createSearchNodeMetadata(node, stateRewardReturn, action);
 
         Assert.assertEquals(newSearchNodeMetadata.getGainedReward().getValue(), action.getReward(), DOUBLE_TOLERANCE);

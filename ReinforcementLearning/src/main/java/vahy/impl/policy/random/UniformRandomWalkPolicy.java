@@ -11,9 +11,10 @@ import java.util.SplittableRandom;
 
 public class UniformRandomWalkPolicy<TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends AbstractRandomWalkPolicy<TAction, TReward, TObservation, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractRandomWalkPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     public UniformRandomWalkPolicy(SplittableRandom random) {
         super(random);

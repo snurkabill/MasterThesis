@@ -12,10 +12,11 @@ import java.util.List;
 public interface TrainableNodeEvaluator<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends NodeEvaluator<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    void train(List<ImmutableTuple<TObservation, double[]>> trainData);
+    void train(List<ImmutableTuple<TPlayerObservation, double[]>> trainData);
 }

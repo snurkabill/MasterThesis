@@ -6,19 +6,19 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
-import vahy.environment.state.PaperState;
 import vahy.impl.model.reward.DoubleReward;
 
 public class PaperTreeUpdater<
     TAction extends Action,
-    TObservation extends Observation,
-    TState extends PaperState<TAction, DoubleReward, TObservation, TState>>
-    implements TreeUpdater<TAction, DoubleReward, TObservation, PaperMetadata<TAction, DoubleReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends PaperState<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements TreeUpdater<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
 
     @Override
-    public void updateTree(SearchNode<TAction, DoubleReward, TObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode) {
         int i = 0;
         double estimatedLeafReward = (expandedNode.isFinalNode() ?
             0.0d :
@@ -39,7 +39,7 @@ public class PaperTreeUpdater<
         logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 
-    private void updateNode(SearchNode<TAction, DoubleReward, TObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode,
+    private void updateNode(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode,
                             double estimatedLeafReward,
                             double estimatedRisk) {
         PaperMetadata<TAction, DoubleReward> searchNodeMetadata = expandedNode.getSearchNodeMetadata();

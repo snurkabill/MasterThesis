@@ -18,20 +18,21 @@ import java.util.List;
 public abstract class AbstractTreeSearchPolicy<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements Policy<TAction, TReward, TObservation, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
 
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    protected final SearchTreeImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchTree;
+    protected final SearchTreeImpl<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree;
 
     public AbstractTreeSearchPolicy(TreeUpdateCondition treeUpdateCondition,
-                                    SearchTreeImpl<TAction, TReward, TObservation, TSearchNodeMetadata, TState> searchTree) {
+                                    SearchTreeImpl<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree) {
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
     }

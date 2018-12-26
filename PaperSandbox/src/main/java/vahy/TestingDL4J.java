@@ -2,11 +2,10 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paper.reinforcement.learn.tf.TFModel;
+import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.SplittableRandom;
 
 public class TestingDL4J {
 
@@ -47,8 +46,8 @@ public class TestingDL4J {
 
         File tfGraphFile = new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile());
 
-//        Dl4jModel asdf = new Dl4jModel(4, 5, null, 0, 0.01, 100);
-        TFModel asdf = new TFModel(4, 5, 100, 1, tfGraphFile, new SplittableRandom());
+        Dl4jModel asdf = new Dl4jModel(4, 5, null, 0, 0.01, 100);
+        // TFModel asdf = new TFModel(4, 5, 100, 1, tfGraphFile, new SplittableRandom());
 
         for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 4; j++) {

@@ -12,10 +12,11 @@ import vahy.api.search.update.NodeTransitionUpdater;
 public class UniformAverageDiscountEstimateRewardTransitionUpdater<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements NodeTransitionUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements NodeTransitionUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private final double discountFactor;
     private final RewardAggregator<TReward> rewardAggregator;
@@ -26,9 +27,9 @@ public class UniformAverageDiscountEstimateRewardTransitionUpdater<
     }
 
     @Override
-    public void applyUpdate(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> evaluatedNode,
-                            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
-                            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> child) {
+    public void applyUpdate(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> evaluatedNode,
+                            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+                            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child) {
         parent.getSearchNodeMetadata().setExpectedReward(
             rewardAggregator.averageReward(parent
                 .getChildNodeStream()

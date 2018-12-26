@@ -3,10 +3,11 @@ package vahy.paperGenerics.policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.environment.state.PaperState;
+import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
@@ -18,15 +19,16 @@ import java.util.stream.Collectors;
 public class PaperPolicyImplWithExploration<
     TAction extends Enum<TAction> & Action,
     TReward extends DoubleReward,
-    TObservation extends DoubleVector,
+    TPlayerObservation extends DoubleVector,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TObservation, TState>>
-    implements PaperPolicy<TAction, TReward, TObservation, TState> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImplWithExploration.class.getName());
 
     private final SplittableRandom random;
-    private final PaperPolicy<TAction, TReward, TObservation, TState> innerPolicy;
+    private final PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> innerPolicy;
     private final double explorationConstant;
     private final double temperature;
     private final List<TAction> playerActions;
@@ -34,7 +36,7 @@ public class PaperPolicyImplWithExploration<
 
     public PaperPolicyImplWithExploration(Class<TAction> clazz,
                                           SplittableRandom random,
-                                          PaperPolicy<TAction, TReward, TObservation, TState> innerPolicy,
+                                          PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> innerPolicy,
                                           double explorationConstant,
                                           double temperature) {
         this.random = random;

@@ -11,10 +11,11 @@ import java.util.SplittableRandom;
 public class RandomNodeSelector<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private final SplittableRandom random;
 
@@ -23,7 +24,7 @@ public class RandomNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         TAction[] allPossibleActions = node.getAllPossibleActions();
         return allPossibleActions[random.nextInt(allPossibleActions.length)];
     }

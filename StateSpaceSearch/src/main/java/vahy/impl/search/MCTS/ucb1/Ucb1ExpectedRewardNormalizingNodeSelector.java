@@ -15,16 +15,17 @@ import java.util.SplittableRandom;
 public class Ucb1ExpectedRewardNormalizingNodeSelector<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    extends Ucb1NodeSelector<TAction, TReward, TObservation, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends Ucb1NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     public Ucb1ExpectedRewardNormalizingNodeSelector(SplittableRandom random, double explorationConstant) {
         super(random, explorationConstant);
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
         double sum = node
             .getChildNodeStream()
             .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())

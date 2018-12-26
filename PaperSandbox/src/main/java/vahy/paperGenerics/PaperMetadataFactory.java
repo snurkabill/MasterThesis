@@ -14,8 +14,9 @@ import java.util.LinkedHashMap;
 public class PaperMetadataFactory<
     TAction extends Action,
     TReward extends DoubleReward,
-    TObservation extends Observation,
-    TState extends State<TAction, TReward, TObservation, TState>> implements SearchNodeMetadataFactory<TAction, TReward, TObservation, PaperMetadata<TAction, TReward>, TState> {
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> implements SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> {
 
     private final RewardAggregator<TReward> rewardAggregator;
 
@@ -24,8 +25,8 @@ public class PaperMetadataFactory<
     }
 
     @Override
-    public PaperMetadata<TAction, TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TObservation, PaperMetadata<TAction, TReward>, TState> parent,
-                                                                          StateRewardReturn<TAction, TReward, TObservation, TState> stateRewardReturn,
+    public PaperMetadata<TAction, TReward> createSearchNodeMetadata(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> parent,
+                                                                          StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
                                                                           TAction appliedAction) {
         return new PaperMetadata<>(
             parent != null ? rewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),

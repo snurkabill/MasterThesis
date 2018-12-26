@@ -14,27 +14,28 @@ import vahy.api.search.update.TreeUpdater;
 public class TraversingTreeUpdater<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements TreeUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversingTreeUpdater.class);
-    private final NodeTransitionUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeTransitionUpdater;
+    private final NodeTransitionUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeTransitionUpdater;
 
-    public TraversingTreeUpdater(NodeTransitionUpdater<TAction, TReward, TObservation, TSearchNodeMetadata, TState> nodeTransitionUpdater) {
+    public TraversingTreeUpdater(NodeTransitionUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeTransitionUpdater) {
         this.nodeTransitionUpdater = nodeTransitionUpdater;
     }
 
     @Override
-    public void updateTree(SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> expandedNode) {
         if(expandedNode.isRoot()) {
             return;
         }
-        SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> traversingNode = expandedNode;
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> traversingNode = expandedNode;
         int i = 0;
         do {
-            SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> traversingNodeParent = traversingNode.getParent();
+            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> traversingNodeParent = traversingNode.getParent();
             nodeTransitionUpdater.applyUpdate(expandedNode, traversingNodeParent, traversingNode);
             traversingNode = traversingNodeParent;
             i++;

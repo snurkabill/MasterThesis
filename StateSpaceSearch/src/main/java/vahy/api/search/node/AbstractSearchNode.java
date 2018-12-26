@@ -8,19 +8,20 @@ import vahy.api.model.reward.Reward;
 public abstract class AbstractSearchNode<
     TAction extends Action,
     TReward extends Reward,
-    TObservation extends Observation,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TObservation, TState>>
-    implements SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private final TState wrappedState;
     private final TSearchNodeMetadata searchNodeMetadata;
-    private SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent;
+    private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent;
     private TAction appliedParentAction;
 
     protected AbstractSearchNode(
         TState wrappedState,
-        SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> parent,
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
         TAction appliedParentAction,
         TSearchNodeMetadata searchNodeMetadata) {
         this.wrappedState = wrappedState;
@@ -35,7 +36,7 @@ public abstract class AbstractSearchNode<
     }
 
     @Override
-    public SearchNode<TAction, TReward, TObservation, TSearchNodeMetadata, TState> getParent() {
+    public SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getParent() {
         return parent;
     }
 

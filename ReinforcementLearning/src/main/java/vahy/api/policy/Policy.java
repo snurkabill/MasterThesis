@@ -7,7 +7,12 @@ import vahy.api.model.reward.Reward;
 
 import java.util.List;
 
-public interface Policy<TAction extends Action, TReward extends Reward, TObservation extends Observation, TState extends State<TAction, TReward, TObservation, TState>> {
+public interface Policy<
+    TAction extends Action,
+    TReward extends Reward,
+    TPlayerObservation extends Observation,
+    TOpponentObservation extends Observation,
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
     double[] getActionProbabilityDistribution(TState gameState);
 
