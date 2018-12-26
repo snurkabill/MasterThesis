@@ -114,7 +114,7 @@ public class HallwayStateImplTest {
         HallwayStateImpl state1 = getHallGame1();
         assertAgentCoordinations(state1, 5, 1, 3);
         assertAgentHeading(state1, AgentHeading.NORTH);
-        HallwayStateImpl state2 = (HallwayStateImpl) state1.applyAction(HallwayAction.FORWARD).getState();
+        HallwayStateImpl state2 = state1.applyAction(HallwayAction.FORWARD).getState();
         Assert.assertFalse(state2.isAgentTurn());
         Assert.assertFalse(state2.isFinalState());
         assertAgentCoordinations(state2, 4, 1, 3);
@@ -126,7 +126,7 @@ public class HallwayStateImplTest {
         HallwayStateImpl state1 = getHallGame1();
         assertAgentCoordinations(state1, 5, 1, 3);
         assertAgentHeading(state1, AgentHeading.NORTH);
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.TURN_LEFT).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
@@ -139,7 +139,7 @@ public class HallwayStateImplTest {
     public void agentRightTurnTest() {
         HallwayStateImpl state1 = getHallGame1();
         assertAgentHeading(state1, AgentHeading.NORTH);
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.TURN_RIGHT).getState();
         Assert.assertFalse(state2.isAgentTurn());
         Assert.assertFalse(state2.isFinalState());
@@ -150,7 +150,7 @@ public class HallwayStateImplTest {
     public void agentLeftTurnTest() {
         HallwayStateImpl state1 = getHallGame1();
         assertAgentHeading(state1, AgentHeading.NORTH);
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.TURN_LEFT).getState();
         Assert.assertFalse(state2.isAgentTurn());
         Assert.assertFalse(state2.isFinalState());
@@ -169,12 +169,12 @@ public class HallwayStateImplTest {
     public void onlyNoActionEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state1 = getHallGame1();
         Assert.assertTrue(state1.isAgentTurn());
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.FORWARD).getState();
         Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
         Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Collections.singletonList(1.0));
 
-        HallwayStateImpl state3 = (HallwayStateImpl) state2
+        HallwayStateImpl state3 = state2
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.TURN_LEFT).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
@@ -187,7 +187,7 @@ public class HallwayStateImplTest {
     public void noisyMovesEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state1 = getHallGame2();
         Assert.assertTrue(state1.isAgentTurn());
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.FORWARD).getState();
         List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
         List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.NO_ACTION);
@@ -199,7 +199,7 @@ public class HallwayStateImplTest {
     public void noisyTrapMovesEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state1 = getHallGame2();
         Assert.assertTrue(state1.isAgentTurn());
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
@@ -213,7 +213,7 @@ public class HallwayStateImplTest {
     public void noisyTrapMovesWithTrapEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state1 = getHallGame2();
         Assert.assertTrue(state1.isAgentTurn());
-        HallwayStateImpl state2 = (HallwayStateImpl) state1
+        HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState()
