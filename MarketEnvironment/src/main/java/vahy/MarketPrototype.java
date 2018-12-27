@@ -32,7 +32,7 @@ import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
-import vahy.paperGenerics.reinforcement.learning.Trainer;
+import vahy.api.episode.TrainerAlgorithm;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.tempImpl.MarketNodeEvaluator;
 import vahy.utils.EnumUtils;
@@ -164,7 +164,7 @@ public class MarketPrototype {
                     treeUpdateConditionFactory);
 
             AbstractTrainer trainer = getAbstractTrainer(
-                Trainer.EVERY_VISIT_MC,
+                TrainerAlgorithm.EVERY_VISIT_MC,
                 initialMarketStateSupplier,
                 discountFactor,
                 marketNodeEvaluator,
@@ -217,7 +217,7 @@ public class MarketPrototype {
     }
 
     private static AbstractTrainer<MarketAction, DoubleVector,  PaperMetadata<MarketAction, DoubleReward>, MarketState> getAbstractTrainer(
-        Trainer trainer,
+        TrainerAlgorithm trainerAlgorithm,
         InitialMarketStateSupplier initialMarketStateSupplier,
         double discountFactor,
         MarketNodeEvaluator nodeEvaluator,
@@ -228,7 +228,7 @@ public class MarketPrototype {
     {
         RealDataMarketPolicySupplier environmentSupplier = new RealDataMarketPolicySupplier(marketDataProvider);
 
-        switch(trainer) {
+        switch(trainerAlgorithm) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
                     initialMarketStateSupplier,
@@ -259,7 +259,7 @@ public class MarketPrototype {
                     new DoubleScalarRewardAggregator(),
                     stepCountLimit);
             default:
-                throw EnumUtils.createExceptionForUnknownEnumValue(trainer);
+                throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
 
         }
 

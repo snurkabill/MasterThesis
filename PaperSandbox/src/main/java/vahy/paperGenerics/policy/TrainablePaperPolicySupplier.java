@@ -7,13 +7,11 @@ import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
-import vahy.paperGenerics.PaperState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
-import vahy.utils.ImmutableTuple;
+import vahy.paperGenerics.PaperState;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
 public class TrainablePaperPolicySupplier<
@@ -25,7 +23,6 @@ public class TrainablePaperPolicySupplier<
     TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     extends PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private TrainableNodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> trainableNodeEvaluator;
     private final double explorationConstant;
     private final double temperature;
 
@@ -42,18 +39,14 @@ public class TrainablePaperPolicySupplier<
         super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory);
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
-        this.trainableNodeEvaluator = nodeEvaluator;
     }
 
     public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
         return createPolicy(initialState);
     }
 
-    public PaperPolicyImplWithExploration<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> initializePolicyWithExploration(TState initialState) {
+    public PaperPolicyImplWithExploration<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
         return new PaperPolicyImplWithExploration<>(getActionClass(), getRandom(), createPolicy(initialState), explorationConstant, temperature);
     }
 
-    public void train(List<ImmutableTuple<TPlayerObservation, double[]>> trainData) {
-        trainableNodeEvaluator.train(trainData);
-    }
 }

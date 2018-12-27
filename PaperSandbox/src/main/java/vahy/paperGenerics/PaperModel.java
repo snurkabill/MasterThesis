@@ -1,6 +1,8 @@
 package vahy.paperGenerics;
 
-public class PaperModel {
+import vahy.api.learning.model.Model;
+
+public abstract class PaperModel implements Model {
 
     public static final int Q_VALUE_INDEX = 0;
     public static final int RISK_VALUE_INDEX = 1;
