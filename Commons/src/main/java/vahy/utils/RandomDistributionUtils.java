@@ -88,4 +88,28 @@ public class RandomDistributionUtils {
         return getRandomIndexFromDistribution(distribution, random, 0);
     }
 
+    public static void applyTemperatureNoise(double[] distribution, double temperature) {
+        for (int i = 0; i < distribution.length; i++) {
+            distribution[i] = distribution[i] / temperature;
+        }
+    }
+
+    public static void applySoftmax(double[] distribution) {
+        double max = Double.MIN_VALUE;
+        for (double entry : distribution) {
+            if (entry > max) {
+                max = entry;
+            }
+        }
+        for (int i = 0; i < distribution.length; i++) {
+            distribution[i] = Math.exp(distribution[i] - max);
+        }
+        double sum = 0.0;
+        for (double entry : distribution) {
+            sum += entry;
+        }
+        for (int i = 0; i < distribution.length; i++) {
+            distribution[i] = distribution[i] / sum;
+        }
+    }
 }
