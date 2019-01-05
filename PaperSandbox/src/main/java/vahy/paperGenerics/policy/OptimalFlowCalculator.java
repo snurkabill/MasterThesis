@@ -68,7 +68,7 @@ public class OptimalFlowCalculator<
                         * (1 - node.getSearchNodeMetadata().getPredictedRisk())
                 );
             } else {
-                addSummingChildrenToOneExpression(model, node, actionChildFlowMap);
+                addSummingChildrenWithParentToZeroExpression(model, node, actionChildFlowMap);
                 if(!node.getWrappedState().isPlayerTurn()) {
                     addChildFlowBasedOnFixedProbabilitiesExpression(model, node, actionChildFlowMap);
                 }
@@ -106,9 +106,9 @@ public class OptimalFlowCalculator<
         }
     }
 
-    public void addSummingChildrenToOneExpression(CLP model,
-                                                  SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                  Map<TAction, CLPVariable> actionChildFlowMap) {
+    public void addSummingChildrenWithParentToZeroExpression(CLP model,
+                                                             SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+                                                             Map<TAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
         for (Map.Entry<TAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {
             parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlowVariable.getValue());
