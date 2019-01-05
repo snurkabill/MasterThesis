@@ -51,9 +51,10 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
         this.sess = new Session(graph);
         graph.importGraphDef(bytes);
         this.sess.runner().addTarget("init").run();
+
+//        this.sess = savedModelBundle.session();
         logger.info("Initialized model based on TensorFlow backend.");
         logger.debug("Model with input dimension: [{}] and output dimension: [{}]. Batch size of model set to: [{}]", inputDimension, outputDimension, batchSize);
-
     }
 
     private void fillbatch(int batchesDone, int[] order, double[][] input, double[][] target) {

@@ -76,18 +76,15 @@ public class PaperPolicyImplWithExploration<
         } else {
             updateMask(gameState.getAllPossibleActions());
 
-            double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
-            double[] exponentiation = new double[actionProbabilityDistribution.length];
-            for (int i = 0; i < actionProbabilityDistribution.length; i++) {
-                if(actionMask[i]) {
-                    exponentiation[i] = Math.exp(actionProbabilityDistribution[i] / temperature);
-                }
+            double[] actionDistribution = this.getActionProbabilityDistribution(gameState);
+            for (int i = 0; i < actionDistribution.length; i++) {
+                actionDistribution[i] = actionMask[i] ? actionDistribution[i] : 0.0;
             }
-            double sum = Arrays.stream(exponentiation).sum();
-            for (int i = 0; i < actionProbabilityDistribution.length; i++) {
-                exponentiation[i] = exponentiation[i] / sum;
-            }
-            int index = RandomDistributionUtils.getRandomIndexFromDistribution(exponentiation, random);
+            RandomDistributionUtils.applyTemperatureNoise(actionDistribution, temperature);
+            RandomDistributionUtils.applySoftmax(actionDistribution);
+//            logger.info("ActionProbabilityDistribution: [{}]", Arrays.toString(actionDistribution));
+//            logger.info("Exponentiation:                [{}]", Arrays.toString(exponentiation));
+            int index = RandomDistributionUtils.getRandomIndexFromDistribution(actionDistribution, random);
             logger.debug("Exploration action [{}]", playerActions.get(index));
             return playerActions.get(index);
         }

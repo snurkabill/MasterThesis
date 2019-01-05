@@ -3,6 +3,7 @@ package vahy;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.environment.HallwayAction;
@@ -35,7 +36,6 @@ import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
-import vahy.api.episode.TrainerAlgorithm;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.utils.EnumUtils;
 
@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class PaperGenericsPrototype {
 
@@ -65,7 +66,7 @@ public class PaperGenericsPrototype {
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
         // TREE UPDATE POLICY
-        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(200);
+        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(100);
 
         // MCTS
         double cpuctParameter = 2;
@@ -76,10 +77,34 @@ public class PaperGenericsPrototype {
         // REINFORCEMENT
         double discountFactor = 1;
         double explorationConstant = 0.3;
-        double temperature = 2;
+
         int sampleEpisodeCount = 10;
-        int replayBufferSize = 50;
-        int stageCountCount = 200;
+        int replayBufferSize = 100;
+        int stageCount = 200;
+
+        Supplier<Double> explorationConstantSupplier = new Supplier<>() {
+
+            private int callCount = 0;
+
+            @Override
+            public Double get() {
+                // callCount++;
+                // return Math.exp(-callCount / 500.0);
+                return 0.3;
+            }
+        };;
+        Supplier<Double> temperatureSupplier = new Supplier<>() {
+
+            private int callCount = 0;
+
+            @Override
+            public Double get() {
+                callCount++;
+                // return Math.exp(-callCount / 5000.0) * 3;
+                return 2.0;
+            }
+        };
+
 
         // NN
         int batchSize = 4;
@@ -106,7 +131,9 @@ public class PaperGenericsPrototype {
             PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
             trainingEpochCount,
             batchSize,
-            PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
+
+             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/rgraph.pb").readAllBytes(),
+//            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
             random))
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
@@ -128,8 +155,8 @@ public class PaperGenericsPrototype {
                     nnbasedEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
-                    explorationConstant,
-                    temperature
+                    explorationConstantSupplier,
+                    temperatureSupplier
                 );
 
             PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier =
@@ -154,7 +181,7 @@ public class PaperGenericsPrototype {
 
 
             long trainingStart = System.currentTimeMillis();
-            for (int i = 0; i < stageCountCount; i++) {
+            for (int i = 0; i < stageCount; i++) {
                 logger.info("Training policy for [{}]th iteration", i);
                 trainer.trainPolicy(sampleEpisodeCount);
             }
