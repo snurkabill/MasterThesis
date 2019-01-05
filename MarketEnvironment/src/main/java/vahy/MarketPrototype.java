@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.agent.environment.RealDataMarketPolicySupplier;
+import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.environment.MarketAction;
@@ -32,7 +33,6 @@ import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
-import vahy.api.episode.TrainerAlgorithm;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.tempImpl.MarketNodeEvaluator;
 import vahy.utils.EnumUtils;
@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class MarketPrototype {
 
@@ -94,11 +95,16 @@ public class MarketPrototype {
 
         // REINFORCEMENT
         double discountFactor = 1;
-        double explorationConstant = 0.3;
-        double temperature = 2;
+
+
         int sampleEpisodeCount = 100;
         int replayBufferSize = 50;
-        int stageCountCount = 200;
+        int stageCount = 200;
+
+
+        double temperatureSteps = stageCount;
+        Supplier<Double> explorationConstantSupplier = () -> 0.3;
+        Supplier<Double> temperatureSupplier = () -> 2.0;
 
         // NN
         int batchSize = 128;
@@ -124,6 +130,7 @@ public class MarketPrototype {
             trainingEpochCount,
             batchSize,
             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
+//            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
             random))
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
@@ -133,9 +140,6 @@ public class MarketPrototype {
             PaperTreeUpdater<MarketAction, DoubleVector, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
 //            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
             MarketNodeEvaluator marketNodeEvaluator = new MarketNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
-
-
-
 
 
             TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> paperTrainablePolicySupplier =
@@ -148,8 +152,8 @@ public class MarketPrototype {
                     marketNodeEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
-                    explorationConstant,
-                    temperature
+                    explorationConstantSupplier,
+                    temperatureSupplier
                 );
 
             PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
@@ -175,7 +179,7 @@ public class MarketPrototype {
 
 
             long trainingStart = System.currentTimeMillis();
-            for (int i = 0; i < stageCountCount; i++) {
+            for (int i = 0; i < stageCount; i++) {
                 logger.info("Training policy for [{}]th iteration", i);
                 trainer.trainPolicy(sampleEpisodeCount);
             }

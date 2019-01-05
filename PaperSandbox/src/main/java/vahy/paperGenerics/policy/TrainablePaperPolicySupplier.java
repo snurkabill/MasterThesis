@@ -1,5 +1,7 @@
 package vahy.paperGenerics.policy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
@@ -13,6 +15,7 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class TrainablePaperPolicySupplier<
     TAction extends Enum<TAction> & Action,
@@ -23,8 +26,10 @@ public class TrainablePaperPolicySupplier<
     TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     extends PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private final double explorationConstant;
-    private final double temperature;
+    private static final Logger logger = LoggerFactory.getLogger(TrainablePaperPolicySupplier.class.getName());
+
+    private final Supplier<Double> expplorationConstantSupplier;
+    private final Supplier<Double> temperatureSupplier;
 
     public TrainablePaperPolicySupplier(Class<TAction> actionClass,
                                         SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
@@ -34,11 +39,11 @@ public class TrainablePaperPolicySupplier<
                                         TrainableNodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                         TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
-                                        double explorationConstant,
-                                        double temperature) {
+                                        Supplier<Double> explorationConstantSupplier,
+                                        Supplier<Double> temperatureSupplier) {
         super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory);
-        this.explorationConstant = explorationConstant;
-        this.temperature = temperature;
+        this.expplorationConstantSupplier = explorationConstantSupplier;
+        this.temperatureSupplier = temperatureSupplier;
     }
 
     public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
@@ -46,6 +51,9 @@ public class TrainablePaperPolicySupplier<
     }
 
     public PaperPolicyImplWithExploration<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
+        double explorationConstant = expplorationConstantSupplier.get();
+        double temperature = temperatureSupplier.get();
+        logger.info("Initialized policy with exploration. Exploration constant: [{}], Temperature: [{}]", explorationConstant, temperature);
         return new PaperPolicyImplWithExploration<>(getActionClass(), getRandom(), createPolicy(initialState), explorationConstant, temperature);
     }
 

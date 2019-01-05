@@ -1,10 +1,16 @@
 package vahy.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.SplittableRandom;
 
 public class RandomDistributionUtils {
 
+    private final Logger logger = LoggerFactory.getLogger(RandomDistributionUtils.class.getName());
+
+    public static int SAMPLING_RANOMD_INDEX_TRIAL_COUNT = 10;
     public static double TOLERANCE = Math.pow(10, -10);
 
     public static boolean isDistribution(List<Double> distribution) {
@@ -38,9 +44,9 @@ public class RandomDistributionUtils {
 //        return normalizedDistribution;
 //    }
 
-    public static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random) {
-        if(!isDistribution(distribution)) {
-            throw new IllegalArgumentException("Given array does not represent probability distribution");
+    private static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random, int trialCount) {
+        if(trialCount > SAMPLING_RANOMD_INDEX_TRIAL_COUNT) {
+            throw new IllegalStateException("Numerically unstable probability calculation");
         }
         double value = random.nextDouble();
         double cumulativeSum = 0.0;
@@ -50,14 +56,12 @@ public class RandomDistributionUtils {
                 return i;
             }
         }
-        throw new IllegalStateException("Numerically unstable probability calculation");
-        // rounding
-//        return distribution.length - 1;
+        return getRandomIndexFromDistribution(distribution, random, trialCount + 1);
     }
 
-    public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
-        if(!isDistribution(distribution)) {
-            throw new IllegalArgumentException("Given array does not represent probability distribution");
+    private static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random, int trialCount) {
+        if(trialCount > SAMPLING_RANOMD_INDEX_TRIAL_COUNT) {
+            throw new IllegalStateException("Numerically unstable probability calculation");
         }
         double value = random.nextDouble();
         double cumulativeSum = 0.0;
@@ -67,9 +71,45 @@ public class RandomDistributionUtils {
                 return i;
             }
         }
-        throw new IllegalStateException("Numerically unstable probability calculation");
-        // rounding
-//        return distribution.length - 1;
+        return getRandomIndexFromDistribution(distribution, random, trialCount + 1);
     }
 
+    public static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random) {
+        if(!isDistribution(distribution)) {
+            throw new IllegalArgumentException("Given array does not represent probability distribution");
+        }
+        return getRandomIndexFromDistribution(distribution, random, 0);
+    }
+
+    public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
+        if(!isDistribution(distribution)) {
+            throw new IllegalArgumentException("Given array does not represent probability distribution");
+        }
+        return getRandomIndexFromDistribution(distribution, random, 0);
+    }
+
+    public static void applyTemperatureNoise(double[] distribution, double temperature) {
+        for (int i = 0; i < distribution.length; i++) {
+            distribution[i] = distribution[i] / temperature;
+        }
+    }
+
+    public static void applySoftmax(double[] distribution) {
+        double max = Double.MIN_VALUE;
+        for (double entry : distribution) {
+            if (entry > max) {
+                max = entry;
+            }
+        }
+        for (int i = 0; i < distribution.length; i++) {
+            distribution[i] = Math.exp(distribution[i] - max);
+        }
+        double sum = 0.0;
+        for (double entry : distribution) {
+            sum += entry;
+        }
+        for (int i = 0; i < distribution.length; i++) {
+            distribution[i] = distribution[i] / sum;
+        }
+    }
 }
