@@ -20,26 +20,6 @@ public class UniformRandomWalkPolicy<TAction extends Action,
         super(random);
     }
 
-//    @Override
-//    public ActionType getDiscreteAction(State<ActionType, DoubleReward, DoubleVector> gameState) {
-//        ActionType[] actions = gameState.getAllPossibleActions();
-//        return actions[getRandom().nextInt(actions.length)];
-//    }
-//
-//    @Override
-//    public double[] getActionProbabilityDistribution(State<ActionType, DoubleReward, DoubleVector> gameState) {
-//        // ignoring impossible actions here
-//        double[] probabilities = new double[ActionType.values().length];
-//        Arrays.fill(probabilities, 1.0 / (double) probabilities.length);
-//        return probabilities;
-//    }
-//
-//    @Override
-//    public void updateState(ActionType applyAction) {
-//        // this is it
-//        // implements IStatefulPolicy just because we want to plug such policy into episodic runs for comparison
-//    }
-
     @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         double[] probabilities = new double[gameState.getAllPossibleActions().length];

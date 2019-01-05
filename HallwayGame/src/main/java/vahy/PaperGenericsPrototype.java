@@ -35,7 +35,7 @@ import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
-import vahy.paperGenerics.reinforcement.learning.Trainer;
+import vahy.api.episode.TrainerAlgorithm;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.utils.EnumUtils;
 
@@ -49,7 +49,7 @@ import java.util.SplittableRandom;
 
 public class PaperGenericsPrototype {
 
-    private static final Logger logger = LoggerFactory.getLogger(PaperPrototype.class);
+    private static final Logger logger = LoggerFactory.getLogger(PaperGenericsPrototype.class);
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         cleanUpNativeTempFiles();
@@ -57,15 +57,15 @@ public class PaperGenericsPrototype {
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.0)
+            .noisyMoveProbability(0.1)
             .stepPenalty(1)
-            .trapProbability(0.1)
-            .stateRepresentation(StateRepresentation.COMPACT)
+            .trapProbability(1)
+            .stateRepresentation(StateRepresentation.FULL)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
 
         // TREE UPDATE POLICY
-        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(20);
+        TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(200);
 
         // MCTS
         double cpuctParameter = 2;
@@ -75,11 +75,11 @@ public class PaperGenericsPrototype {
 
         // REINFORCEMENT
         double discountFactor = 1;
-        double explorationConstant = 0.9;
-        double temperature = 4;
+        double explorationConstant = 0.3;
+        double temperature = 2;
         int sampleEpisodeCount = 10;
         int replayBufferSize = 50;
-        int stageCountCount = 300;
+        int stageCountCount = 200;
 
         // NN
         int batchSize = 4;
@@ -89,7 +89,7 @@ public class PaperGenericsPrototype {
 
         // risk optimization
         boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.15;
+        double totalRiskAllowed = 0.02;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
@@ -143,7 +143,7 @@ public class PaperGenericsPrototype {
                     paperTreeUpdater,
                     treeUpdateConditionFactory);
 
-            AbstractTrainer trainer = getAbstractTrainer(Trainer.EVERY_VISIT_MC,
+            AbstractTrainer trainer = getAbstractTrainer(TrainerAlgorithm.EVERY_VISIT_MC,
                 random,
                 hallwayGameInitialInstanceSupplier,
                 discountFactor,
@@ -201,7 +201,7 @@ public class PaperGenericsPrototype {
         EnvironmentProbabilities,
         PaperMetadata<HallwayAction, DoubleReward>,
         HallwayStateImpl>
-    getAbstractTrainer(Trainer trainer,
+    getAbstractTrainer(TrainerAlgorithm trainerAlgorithm,
                        SplittableRandom random,
                        HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
                        double discountFactor,
@@ -209,7 +209,7 @@ public class PaperGenericsPrototype {
                        TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit) {
-        switch(trainer) {
+        switch(trainerAlgorithm) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
                     hallwayGameInitialInstanceSupplier,
@@ -240,7 +240,7 @@ public class PaperGenericsPrototype {
                     new DoubleScalarRewardAggregator(),
                     stepCountLimit);
             default:
-                throw EnumUtils.createExceptionForUnknownEnumValue(trainer);
+                throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
 
         }
 
@@ -274,10 +274,10 @@ public class PaperGenericsPrototype {
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_02.txt");
 //        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_03.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_04.txt");
-//        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_05.txt");
+        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_05.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_06.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_07.txt");
-        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08.txt");
+//        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08.txt");
 
         byte[] bytes = resourceAsStream.readAllBytes();
 

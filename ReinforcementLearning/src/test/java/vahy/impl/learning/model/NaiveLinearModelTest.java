@@ -59,7 +59,7 @@ public class NaiveLinearModelTest {
     private void runFit(List<ImmutableTuple<DoubleVector, DoubleReward>> data) {
         RewardFactory<DoubleReward> rewardFactory = new DoubleScalarRewardFactory();
         SupervisedTrainableModel linearModel = new LinearModelNaiveImpl(2, 1, 0.1);
-        ModelReinforcementAdapter<DoubleReward> naiveLinearModel = new ModelReinforcementAdapter<DoubleReward>(linearModel,  rewardFactory);
+        ModelReinforcementAdapter<DoubleReward> naiveLinearModel = new ModelReinforcementAdapter<>(linearModel,  rewardFactory);
         boolean atLeastOneFail = false;
         for (ImmutableTuple<DoubleVector, DoubleReward> entry : data) {
             double predicted = naiveLinearModel.approximateReward(entry.getFirst()).getValue();

@@ -6,7 +6,6 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
-import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.RandomDistributionUtils;
 
@@ -21,7 +20,6 @@ public class PaperPolicyImplWithExploration<
     TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     implements PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 

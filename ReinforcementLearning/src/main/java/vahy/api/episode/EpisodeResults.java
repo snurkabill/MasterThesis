@@ -6,23 +6,24 @@ import vahy.api.model.StateActionReward;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
+import vahy.utils.ImmutableTuple;
 
 import java.util.List;
 
-public interface Episode<
-    TAction extends Action,
+public interface EpisodeResults<
+    TAction extends Enum<TAction> & Action,
     TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
 
-    void runEpisode();
-
-    boolean isEpisodeAlreadySimulated();
-
     List<StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateRewardReturnList();
 
-    List<StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateActionRewardList();
+    List<ImmutableTuple<StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>, StepRecord<TReward>>> getEpisodeHistoryList();
+
+    long getMillisecondDuration();
+
+    String printActionHistory();
 
     TState getFinalState();
 
