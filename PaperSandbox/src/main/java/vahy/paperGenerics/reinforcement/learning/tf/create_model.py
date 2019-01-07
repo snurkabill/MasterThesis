@@ -12,6 +12,8 @@ hidden_count_3 = 10
 action_count = 3
 # action_count = 5
 
+tf.reset_default_graph()
+
 x = tf.placeholder(tf.double, [None, input_count], name= 'input_node')
 q_target = tf.placeholder(tf.double, [None, 1], name = 'Q_target_node')
 risk_target = tf.placeholder(tf.double, [None, 1], name = 'Risk_target_node')
@@ -75,16 +77,16 @@ print(q.name)
 #
 #     print("Epoch:", '%04d' % (epoch + 1), "total_cost = ", "{:.9f} ".format(sum(total_cost)), "q_cost = ", "{:.9f} ".format(sum(q_cost)), "r_cost = ", "{:.9f} ".format(sum(r_cost)), "policy_cost = ", "{:.9f} ".format(sum(policy_cost)))
 #
-
-
-
+#
+#
+#
 # saver_def = tf.trainPolicy.Saver().as_saver_def()
 #
 # print('Operation to initialize variables:       ', init.name)
 # print('Tensor to feed as input data:            ', x.name)
 # print('Tensor to feed as training targets:      ', y_.name)
-
-
+#
+#
 # print('Tensor to fetch as prediction:           ', y.name)
 # print('Operation to trainPolicy one step:             ', train_op.name)
 # print('Tensor to be fed for checkpoint filename:', saver_def.filename_tensor_name)
@@ -95,3 +97,13 @@ print(q.name)
 
 with open('../../../../../../resources/tfModel/graph.pb', 'wb') as f:
     f.write(tf.get_default_graph().as_graph_def().SerializeToString())
+
+
+
+# builder = tf.saved_model.builder.SavedModelBuilder("C:/Users/Snurka/init_model")
+# builder.add_meta_graph_and_variables(
+#   sess,
+#   [tf.saved_model.tag_constants.SERVING]
+# )
+# builder.save()
+

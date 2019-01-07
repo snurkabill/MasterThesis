@@ -7,12 +7,15 @@ import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.RandomDistributionUtils;
 import vahy.utils.StreamUtils;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.OptionalDouble;
 import java.util.SplittableRandom;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class PaperNodeSelector<
@@ -44,25 +47,37 @@ public class PaperNodeSelector<
 
     @Override
     protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
-        int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
+        if(node.isPlayerTurn()) {
+            int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
-        final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
-        final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
+            final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
+            final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
 
-        TAction bestAction = node
-            .getChildNodeStream()
-            .map(x -> {
-                TAction action = x.getAppliedAction();
-                double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
-                double qValue = x.getSearchNodeMetadata().getExpectedReward().getValue() == 0 ? 0 :
-                    (x.getSearchNodeMetadata().getExpectedReward().getValue() - min) /
-                        (Math.abs(max - min) < TOLERANCE ? max : (max - min));
+            TAction bestAction = node
+                .getChildNodeStream()
+                .map(x -> {
+                    TAction action = x.getAppliedAction();
+                    double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
+                    double qValue = x.getSearchNodeMetadata().getExpectedReward().getValue() == 0 ? 0 :
+                        (x.getSearchNodeMetadata().getExpectedReward().getValue() - min) /
+                            (Math.abs(max - min) < TOLERANCE ? max : (max - min));
 
-                return new ImmutableTuple<>(action, qValue + uValue);
-            })
-            .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
-            .getFirst();
-        return bestAction;
+                    return new ImmutableTuple<>(action, qValue + uValue);
+                })
+                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
+                .getFirst();
+            return bestAction;
+        } else {
+            ArrayList<ImmutableTuple<TAction, Double>> actions = node.getChildNodeStream()
+                .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
+                .collect(Collectors.toCollection(ArrayList::new));
+            return actions
+                .get(RandomDistributionUtils.getRandomIndexFromDistribution(actions
+                    .stream()
+                    .map(ImmutableTuple::getSecond)
+                    .collect(Collectors.toList()), random))
+                .getFirst();
+        }
     }
 
     private double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {

@@ -15,6 +15,7 @@ import vahy.utils.ImmutableTriple;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,7 +47,13 @@ public class EpisodeSimulator<
             ImmutableTriple<TAction, StepRecord<TReward>, StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> step = makePolicyStep(state, playerPolicy, opponentPolicy);
             playerActionCount++;
             stepsDone++;
-            logger.debug("Player's [{}]th action: [{}], getting reward [{}]", playerActionCount, step.getFirst(), step.getThird().getReward().toPrettyString());
+            logger.debug("Player's [{}]th action: [{}] getting reward [{}]. ExpectedReward: [{}], Expected risk: [{}], PolicyProbabilities: [{}]",
+                playerActionCount,
+                step.getFirst(),
+                step.getSecond().getRewardPredicted(),
+                step.getSecond().getRisk(),
+                Arrays.toString(step.getSecond().getPolicyProbabilities()),
+                step.getThird().getReward().toPrettyString());
             episodeStateRewardReturnList.add(step.getThird());
             episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, step.getFirst(), step.getThird().getReward()), step.getSecond()));
             state = step.getThird().getState();
