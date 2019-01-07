@@ -21,6 +21,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
+import vahy.paperGenerics.PaperNodeEvaluator;
 import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
@@ -34,8 +35,8 @@ import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
-import vahy.tempImpl.MarketNodeEvaluator;
 import vahy.utils.EnumUtils;
+import vahy.utils.ImmutableTuple;
 
 import java.io.File;
 import java.io.IOException;
@@ -138,8 +139,22 @@ public class MarketPrototype {
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
             PaperTreeUpdater<MarketAction, DoubleVector, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
-//            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
-            MarketNodeEvaluator marketNodeEvaluator = new MarketNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
+
+            PaperNodeEvaluator<MarketAction, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> marketNodeEvaluator = new PaperNodeEvaluator<>(
+                new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
+                trainableApproximator,
+                doubleVector -> {
+                    List<MarketAction> arrayList = new ArrayList<>();
+                    arrayList.add(MarketAction.UP);
+                    arrayList.add(MarketAction.DOWN);
+                    List<Double> probabilities = new ArrayList<>();
+                    probabilities.add(doubleVector.getObservedVector()[0]);
+                    probabilities.add(doubleVector.getObservedVector()[1]);
+                    return new ImmutableTuple<>(arrayList, probabilities);
+                },
+                MarketAction.playerActions,
+                MarketAction.environmentActions
+                );
 
 
             TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> paperTrainablePolicySupplier =
@@ -224,7 +239,7 @@ public class MarketPrototype {
         TrainerAlgorithm trainerAlgorithm,
         InitialMarketStateSupplier initialMarketStateSupplier,
         double discountFactor,
-        MarketNodeEvaluator nodeEvaluator,
+        PaperNodeEvaluator<MarketAction, DoubleVector,  PaperMetadata<MarketAction, DoubleReward>, MarketState> nodeEvaluator,
         TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> trainablePaperPolicySupplier,
         int replayBufferSize,
         int stepCountLimit,

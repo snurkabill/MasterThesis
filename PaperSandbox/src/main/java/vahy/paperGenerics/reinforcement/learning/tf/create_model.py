@@ -2,7 +2,7 @@ import tensorflow as tf
 
 # input_count = 1
 
-input_count = 75
+input_count = 25
  # input_count = 34
 
 hidden_count_1 = 20
@@ -24,7 +24,7 @@ hidden_2 = tf.layers.dense(hidden_1, hidden_count_2, tf.nn.relu, True, tf.glorot
 # hidden_3 = tf.layers.dense(hidden_2, hidden_count_3, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_3")
 
 policy = tf.layers.dense(hidden_2, action_count, tf.nn.softmax, kernel_initializer = tf.zeros_initializer, name = 'policy_node')
-risk =   tf.layers.dense(hidden_2, 1, tf.nn.sigmoid, kernel_initializer = tf.zeros_initializer, name = "risk_node")
+risk =   tf.layers.dense(hidden_2, 1, tf.nn.tanh, kernel_initializer = tf.zeros_initializer, name = "risk_node")
 q =      tf.layers.dense(hidden_2, 1, kernel_initializer = tf.zeros_initializer, name = "q_node")
 
 prediction = tf.concat([q, risk, policy], 1, name = "prediction_node_2")

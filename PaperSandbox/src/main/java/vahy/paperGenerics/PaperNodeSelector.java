@@ -29,14 +29,14 @@ public class PaperNodeSelector<
     public static final double TOLERANCE = Math.pow(10, -15);
 
     private final double cpuctParameter;
-    private final SplittableRandom random;
+    protected final SplittableRandom random;
 
     public PaperNodeSelector(double cpuctParameter, SplittableRandom random) {
         this.cpuctParameter = cpuctParameter;
         this.random = random;
     }
 
-    private double getExtremeElement(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node,
+    protected double getExtremeElement(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node,
                                      Function<DoubleStream, OptionalDouble> function,
                                      String nonExistingElementMessage) {
         return function.apply(node
