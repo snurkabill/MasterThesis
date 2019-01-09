@@ -58,9 +58,7 @@ public class PaperNodeSelector<
                 .map(x -> {
                     TAction action = x.getAppliedAction();
                     double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
-                    double qValue = x.getSearchNodeMetadata().getExpectedReward().getValue() == 0 ? 0 :
-                        (x.getSearchNodeMetadata().getExpectedReward().getValue() - min) /
-                            (Math.abs(max - min) < TOLERANCE ? max : (max - min));
+                    double qValue = max == min ? 0.5 : (x.getSearchNodeMetadata().getExpectedReward().getValue() - min) / (max - min);
 
                     return new ImmutableTuple<>(action, qValue + uValue);
                 })
@@ -81,6 +79,6 @@ public class PaperNodeSelector<
     }
 
     private double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {
-        return cpuctParameter * priorProbability * Math.sqrt(nodeTotalVisitCount) / (1.0 + childVisitCount);
+        return cpuctParameter * priorProbability * Math.sqrt(nodeTotalVisitCount / (1.0 + childVisitCount));
     }
 }
