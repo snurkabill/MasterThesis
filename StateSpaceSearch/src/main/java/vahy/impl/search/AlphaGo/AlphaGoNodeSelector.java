@@ -46,6 +46,6 @@ public class AlphaGoNodeSelector<
 
     private double calculateUValue(int nodeTotalVisitCount, double priorActionProbability, int childTotalVisitCount) {
 //        return cpuctParameter * priorActionProbability * Math.sqrt(nodeTotalVisitCount) / (1.0 + childTotalVisitCount);
-        return cpuctParameter * priorActionProbability * (Math.sqrt(nodeTotalVisitCount) / childTotalVisitCount);
+        return cpuctParameter * priorActionProbability * (Math.sqrt(nodeTotalVisitCount / (double)childTotalVisitCount));
     }
 }

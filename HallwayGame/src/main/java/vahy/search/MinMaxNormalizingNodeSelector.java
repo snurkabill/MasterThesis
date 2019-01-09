@@ -62,6 +62,6 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
     }
 
     private double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {
-        return cpuctParameter * priorProbability * Math.sqrt(nodeTotalVisitCount) / (1.0 + childVisitCount);
+        return cpuctParameter * priorProbability * Math.sqrt(nodeTotalVisitCount / (1.0 + childVisitCount));
     }
 }
