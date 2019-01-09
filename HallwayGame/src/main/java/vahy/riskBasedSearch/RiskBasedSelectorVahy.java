@@ -21,7 +21,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
-public class RiskBasedSelector<
+public class RiskBasedSelectorVahy<
     TAction extends Action,
     TReward extends DoubleReward,
     TPlayerObservation extends Observation,
@@ -33,7 +33,7 @@ public class RiskBasedSelector<
 
     private final double totalRiskAllowed;
 
-    public RiskBasedSelector(double cpuctParameter, SplittableRandom random, double totalRiskAllowed) {
+    public RiskBasedSelectorVahy(double cpuctParameter, SplittableRandom random, double totalRiskAllowed) {
         super(cpuctParameter, random);
         this.totalRiskAllowed = totalRiskAllowed;
     }
@@ -43,13 +43,6 @@ public class RiskBasedSelector<
         if(node.isPlayerTurn()) {
             int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
-            double minimalRisk = node
-                .getChildNodeStream()
-                .mapToDouble(x -> x.getSearchNodeMetadata().getPredictedRisk())
-                .min()
-                .orElseThrow(() -> new IllegalStateException("Minimal risk does not exist"));
-
-            if(minimalRisk <= totalRiskAllowed) {
                 final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
                 final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
 
@@ -58,29 +51,22 @@ public class RiskBasedSelector<
                         TAction action = x.getAppliedAction();
                         double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
                         double qValue = max == min ? 0.5 : ((x.getSearchNodeMetadata().getPredictedReward().getValue() - min) / (max - min));
-
                         return new ImmutableTuple<>(action, qValue + uValue);
                     })
                     .collect(Collectors.toList());
 
-                logger.info("UcbValues: [{}]", actionsUcbValue.stream().map(x -> x.getSecond().toString()).reduce((x, y) -> x + ", " + y));
-
                 CLP model = new CLP();
-                final CLPExpression totalRiskExpression = model.createExpression();
                 final CLPExpression sumToOneExpression = model.createExpression();
                 final SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> finalNodeReference = node;
                 List<ImmutableTuple<ImmutableTuple<TAction, Double>, CLPVariable>> collect = actionsUcbValue
                     .stream()
                     .map(x -> {
                         CLPVariable probabilityVariable = model.addVariable().lb(0.0).ub(1.0);
-                        model.setObjectiveCoefficient(probabilityVariable, x.getSecond());
-                        totalRiskExpression.add(probabilityVariable,
-                            finalNodeReference.getChildNodeMap().get(x.getFirst()).getSearchNodeMetadata().getPredictedRisk());
+                        model.setObjectiveCoefficient(probabilityVariable, x.getSecond() * (1 - finalNodeReference.getChildNodeMap().get(x.getFirst()).getSearchNodeMetadata().getPredictedRisk()));
                         sumToOneExpression.add(probabilityVariable, 1.0);
                         return new ImmutableTuple<>(x, probabilityVariable);
                     })
                     .collect(Collectors.toCollection(ArrayList::new));
-                totalRiskExpression.leq(totalRiskAllowed);
                 sumToOneExpression.eq(1.0);
 
                 CLP.STATUS status = model.maximize();
@@ -93,9 +79,7 @@ public class RiskBasedSelector<
                 int actionIndex = RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random);
 
                 return collect.get(actionIndex).getFirst().getFirst();
-            } else {
-                return super.getBestAction(node);
-            }
+
         } else {
             return sampleOpponentAction(node);
         }

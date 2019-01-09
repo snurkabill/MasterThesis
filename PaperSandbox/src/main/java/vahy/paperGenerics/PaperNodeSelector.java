@@ -45,6 +45,18 @@ public class PaperNodeSelector<
         ).orElseThrow(() -> new IllegalStateException(nonExistingElementMessage));
     }
 
+    protected TAction sampleOpponentAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+        ArrayList<ImmutableTuple<TAction, Double>> actions = node.getChildNodeStream()
+            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
+            .collect(Collectors.toCollection(ArrayList::new));
+        return actions
+            .get(RandomDistributionUtils.getRandomIndexFromDistribution(actions
+                .stream()
+                .map(ImmutableTuple::getSecond)
+                .collect(Collectors.toList()), random))
+            .getFirst();
+    }
+
     @Override
     protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
         if(node.isPlayerTurn()) {
@@ -58,27 +70,18 @@ public class PaperNodeSelector<
                 .map(x -> {
                     TAction action = x.getAppliedAction();
                     double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
-                    double qValue = max == min ? 0.5 : (x.getSearchNodeMetadata().getExpectedReward().getValue() - min) / (max - min);
-
+                    double qValue = max == min ? 0.5 : ((x.getSearchNodeMetadata().getPredictedReward().getValue() - min) / (max - min));
                     return new ImmutableTuple<>(action, qValue + uValue);
                 })
                 .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
                 .getFirst();
             return bestAction;
         } else {
-            ArrayList<ImmutableTuple<TAction, Double>> actions = node.getChildNodeStream()
-                .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
-                .collect(Collectors.toCollection(ArrayList::new));
-            return actions
-                .get(RandomDistributionUtils.getRandomIndexFromDistribution(actions
-                    .stream()
-                    .map(ImmutableTuple::getSecond)
-                    .collect(Collectors.toList()), random))
-                .getFirst();
+            return sampleOpponentAction(node);
         }
     }
 
-    private double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {
+    protected double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {
         return cpuctParameter * priorProbability * Math.sqrt(nodeTotalVisitCount / (1.0 + childVisitCount));
     }
 }
