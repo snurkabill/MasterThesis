@@ -132,7 +132,7 @@ public class PaperGenericsPrototype {
             trainingEpochCount,
             batchSize,
 
-             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/rgraph.pb").readAllBytes(),
+             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
 //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
             random))
         {
