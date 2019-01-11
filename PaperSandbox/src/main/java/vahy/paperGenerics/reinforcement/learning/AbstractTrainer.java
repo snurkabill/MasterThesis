@@ -52,11 +52,12 @@ public abstract class AbstractTrainer<
     }
 
     protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>, StepRecord<DoubleReward>>> episodeHistory,
-                                                 int i) {
+                                                 int i,
+                                                 boolean isRiskHit) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
         DoubleReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
         double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
-        double risk = episodeHistory.get(episodeHistory.size() - 1).getFirst().getState().isRiskHit() ? 1.0 : 0.0;
+        double risk = isRiskHit ? 1.0 : 0.0;
         return new MutableDataSample(sampledProbabilities, aggregated, risk);
     }
 

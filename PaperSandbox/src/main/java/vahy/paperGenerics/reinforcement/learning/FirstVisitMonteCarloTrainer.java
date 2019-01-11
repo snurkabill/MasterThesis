@@ -41,10 +41,11 @@ public class FirstVisitMonteCarloTrainer<
     protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         Map<DoubleVector, MutableDataSample> firstVisitSet = new LinkedHashMap<>();
         List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TOpponentObservation,  TState>, StepRecord<DoubleReward>>> episodeHistory = paperEpisode.getEpisodeHistoryList();
+        boolean isRiskHit = paperEpisode.isRiskHit();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getPlayerObservation())) {
-                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getPlayerObservation(), createDataSample(episodeHistory, i));
+                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getPlayerObservation(), createDataSample(episodeHistory, i, isRiskHit));
                 }
             }
         }

@@ -7,6 +7,8 @@ public interface RewardAggregator<TReward extends Reward> {
 
     TReward emptyReward();
 
+    TReward negate(TReward reward);
+
     TReward aggregate(TReward first, TReward second);
 
     TReward aggregate(TReward[] rewardArray);

@@ -63,7 +63,7 @@ public class RiskBasedSelector<
                     })
                     .collect(Collectors.toList());
 
-                logger.info("UcbValues: [{}]", actionsUcbValue.stream().map(x -> x.getSecond().toString()).reduce((x, y) -> x + ", " + y));
+//                logger.info("UcbValues: [{}]", actionsUcbValue.stream().map(x -> x.getSecond().toString()).reduce((x, y) -> x + ", " + y));
 
                 CLP model = new CLP();
                 final CLPExpression totalRiskExpression = model.createExpression();

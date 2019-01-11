@@ -2,6 +2,7 @@ package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -29,15 +30,18 @@ public class PaperPolicyImpl<
 
     private final List<TAction> playerActions;
     private final List<TAction> environmentActions;
+    private final RewardAggregator<TReward> rewardAggregator;
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
     private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
+                           RewardAggregator<TReward> rewardAggregator,
                            RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random) {
         super(treeUpdateCondition, searchTree);
+        this.rewardAggregator = rewardAggregator;
         this.random = random;
         this.riskAverseSearchTree = searchTree;
 
@@ -104,7 +108,8 @@ public class PaperPolicyImpl<
     @Override
     public TReward getEstimatedReward(TState gameState) {
         checkStateRoot(gameState);
-        return searchTree.getRoot().getSearchNodeMetadata().getExpectedReward();
+        TSearchNodeMetadata searchNodeMetadata = searchTree.getRoot().getSearchNodeMetadata();
+        return rewardAggregator.aggregate(searchNodeMetadata.getExpectedReward(), rewardAggregator.negate(searchNodeMetadata.getCumulativeReward()));
     }
 
     @Override
