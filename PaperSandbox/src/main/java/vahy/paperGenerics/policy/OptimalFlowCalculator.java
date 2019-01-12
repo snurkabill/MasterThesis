@@ -82,11 +82,8 @@ public class OptimalFlowCalculator<
         long startOptimalization = System.currentTimeMillis();
         CLP.STATUS status = model.maximize();
         if(status != CLP.STATUS.OPTIMAL) {
+
             throw new IllegalStateException("Optimal solution was not found");
-//            if(root.getNodeProbabilityFlow().getSolution() == 0.0) {
-//                System.out.println("fak me");
-//            }
-//            return -100000;
         }
         long finishOptimalization = System.currentTimeMillis();
         logger.debug("Optimizing linear program took [{}] ms", finishOptimalization - startOptimalization);
