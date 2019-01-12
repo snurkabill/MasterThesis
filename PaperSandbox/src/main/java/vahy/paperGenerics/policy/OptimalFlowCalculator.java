@@ -63,7 +63,7 @@ public class OptimalFlowCalculator<
                 model.setObjectiveCoefficient(
                     node.getSearchNodeMetadata().getNodeProbabilityFlow(),
                     (node.getSearchNodeMetadata().getCumulativeReward().getValue() +
-                        (node.getSearchNodeMetadata().getPredictedReward() != null ? node.getSearchNodeMetadata().getPredictedReward().getValue() : 0.0)
+                        (node.getSearchNodeMetadata().getExpectedReward() != null ? node.getSearchNodeMetadata().getExpectedReward().getValue() : 0.0)
                     )
                         * (1 - node.getSearchNodeMetadata().getPredictedRisk())
                 );

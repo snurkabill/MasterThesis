@@ -18,6 +18,7 @@ import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,17 @@ public abstract class AbstractMonteCarloTrainer<
                                      RewardAggregator<DoubleReward> rewardAggregator,
                                      int stepCountLimit) {
         super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, stepCountLimit);
+    }
+
+    @Override
+    public void printDataset() {
+        for (Map.Entry<DoubleVector, MutableDataSample> entry : visitAverageRewardMap.entrySet()) {
+            logger.info("Input: [{}] Target: [{}] Count: [{}] Prediction: [{}]",
+                Arrays.toString(entry.getKey().getObservedVector()),
+                Arrays.toString(createOutputVector(entry.getValue())),
+                entry.getValue().getCounter(),
+                Arrays.toString(this.evaluatePolicy(entry.getKey())));
+        }
     }
 
     @Override

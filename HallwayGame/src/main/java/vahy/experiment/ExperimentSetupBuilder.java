@@ -3,6 +3,7 @@ package vahy.experiment;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
+import vahy.riskBasedSearch.SelectorType;
 
 import java.util.function.Supplier;
 
@@ -38,6 +39,7 @@ public class ExperimentSetupBuilder {
 
     // PAPER
     private double globalRiskAllowed;
+    private SelectorType selectorType;
 
     public ExperimentSetupBuilder() {
     }
@@ -115,6 +117,13 @@ public class ExperimentSetupBuilder {
         return this;
     }
 
+    public ExperimentSetupBuilder selectorType(SelectorType selectorType) {
+        this.selectorType = selectorType;
+        return this;
+    }
+
+
+
     public ExperimentSetup buildExperimentSetup() {
         return new ExperimentSetup(
             randomSeed,
@@ -133,6 +142,7 @@ public class ExperimentSetupBuilder {
             trainingBatchSize,
             trainingEpochCount,
             evalEpisodeCount,
-            globalRiskAllowed);
+            globalRiskAllowed,
+            selectorType);
     }
 }

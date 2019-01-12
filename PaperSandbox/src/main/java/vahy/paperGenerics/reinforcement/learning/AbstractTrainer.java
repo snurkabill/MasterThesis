@@ -74,6 +74,12 @@ public abstract class AbstractTrainer<
 
     public abstract void trainPolicy(int episodeCount);
 
+    public abstract void printDataset();
+
+    protected double[] evaluatePolicy(DoubleVector doubleVector) {
+        return this.paperNodeEvaluator.evaluate(doubleVector);
+    }
+
     protected void trainPolicy(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
         paperNodeEvaluator.train(trainData);
     }

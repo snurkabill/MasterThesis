@@ -1,5 +1,7 @@
 package vahy.paperGenerics.reinforcement.learning;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.StateActionReward;
@@ -17,6 +19,7 @@ import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +30,8 @@ public class ReplayBufferTrainer<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
     TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>> extends AbstractTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReplayBufferTrainer.class.getName());
 
     private final int bufferSize;
     private final LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer;
@@ -57,6 +62,16 @@ public class ReplayBufferTrainer<
             buffer.removeFirst();
         }
         trainPolicy(buffer.stream().flatMap(Collection::stream).collect(Collectors.toList()));
+    }
+
+    @Override
+    public void printDataset() {
+        for (ImmutableTuple<DoubleVector, double[]> entry : buffer.stream().flatMap(Collection::stream).collect(Collectors.toList())) {
+            logger.info("Input: [{}] Target: [{}] Prediction: [{}]",
+                Arrays.toString(entry.getFirst().getObservedVector()),
+                Arrays.toString(entry.getSecond()),
+                Arrays.toString(this.evaluatePolicy(entry.getFirst())));
+        }
     }
 
     public List<ImmutableTuple<DoubleVector, double[]>> convertEpisodeToDataSamples(EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> paperEpisode) {

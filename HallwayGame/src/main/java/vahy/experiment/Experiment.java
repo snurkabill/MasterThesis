@@ -20,12 +20,14 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperNodeEvaluator;
+import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
+import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -33,6 +35,8 @@ import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.riskBasedSearch.RiskBasedSelector;
+import vahy.riskBasedSearch.RiskBasedSelectorVahy;
+import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
@@ -52,17 +56,18 @@ public class Experiment {
     private void initializeModelAndRun(ImmutableTuple<GameConfig, ExperimentSetup> setup, SplittableRandom random) throws NotValidGameStringRepresentationException, IOException {
         var provider = new HallwayGameSupplierFactory();
         var hallwayGameInitialInstanceSupplier = provider.getInstanceProvider(setup.getSecond().getHallwayInstance(), setup.getFirst(), random);
+        var inputLenght = hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length;
         try(TFModel model = new TFModel(
-            hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
+            inputLenght,
             PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
             setup.getSecond().getTrainingEpochCount(),
             setup.getSecond().getTrainingBatchSize(),
-            PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
+            PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
             random)
         ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
         {
-            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
-//            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
+//            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
+            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
             createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, trainableApproximator);
         }
     }
@@ -76,7 +81,7 @@ public class Experiment {
         var clazz = HallwayAction.class;
         var searchNodeMetadataFactory = new PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(rewardAggregator);
         var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>();
-        var nodeSelector = createNodeSelector(experimentSetup.getCpuctParameter(), random, experimentSetup.getGlobalRiskAllowed());
+        var nodeSelector = createNodeSelector(experimentSetup.getCpuctParameter(), random, experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
 
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
@@ -137,6 +142,7 @@ public class Experiment {
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
             trainer.trainPolicy(experimentSetup.getBatchEpisodeCount());
+            trainer.printDataset();
         }
         return System.currentTimeMillis() - trainingStart;
     }
@@ -217,55 +223,24 @@ public class Experiment {
                     stepCountLimit);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
-
         }
-
     }
 
-    private NodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> createNodeSelector(double cpuctParameter, SplittableRandom random, double totalRiskAllowed) {
-//        var nodeSelector = new PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(cpuctParameter, random);
-        var nodeSelector = new RiskBasedSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(cpuctParameter, random, totalRiskAllowed);
-//        var  nodeSelector = new RiskBasedSelectorVahy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(cpuctParameter, random, totalRiskAllowed);
-        return nodeSelector;
+    private NodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> createNodeSelector(
+        double cpuctParameter,
+        SplittableRandom random,
+        double totalRiskAllowed,
+        SelectorType selectorType)
+    {
+        switch (selectorType) {
+            case UCB:
+                return new PaperNodeSelector<>(cpuctParameter, random);
+            case VAHY_1:
+                return new RiskBasedSelectorVahy<>(cpuctParameter, random);
+            case LINEAR_HARD_VS_UCB:
+                return new RiskBasedSelector<>(cpuctParameter, random, totalRiskAllowed);
+                default:
+                    throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
+        }
     }
-//
-//    private HallwayGameInitialInstanceSupplier getHallwayGameInitialInstanceSupplier(SplittableRandom random,
-//                                                                                           GameConfig gameConfig) throws NotValidGameStringRepresentationException, IOException {
-//        ClassLoader classLoader = PaperGenericsPrototype.class.getClassLoader();
-////        URL url = classLoader.getResource("examples/hallway_demo0.txt");
-////        URL url = classLoader.getResource("examples/hallway_demo2.txt");
-////         URL url = classLoader.getResource("examples/hallway_demo3.txt");
-////         URL url = classLoader.getResource("examples/hallway_demo4.txt");
-////         URL url = classLoader.getResource("examples/hallway_demo5.txt");
-////         URL url = classLoader.getResource("examples/hallway_demo6.txt");
-//
-////        URL url = classLoader.getResource("examples/hallway0.txt");
-////        URL url = classLoader.getResource("examples/hallway1.txt");
-////        URL url = classLoader.getResource("examples/hallway8.txt");
-////        URL url = classLoader.getResource("examples/hallway1-traps.txt");
-////        URL url = classLoader.getResource("examples/hallway0123.txt");
-////        URL url = classLoader.getResource("examples/hallway0124.txt");
-////        URL url = classLoader.getResource("examples/hallway0125s.txt");
-////        URL url = classLoader.getResource("examples/hallway-trap-minimal.txt");
-////        URL url = classLoader.getResource("examples/hallway-trap-minimal2.txt");
-////        URL url = classLoader.getResource("examples/hallway-trap-minimal3.txt");
-//
-////        URL url = classLoader.getResource("examples/trapsEverywhere.txt");
-//
-//
-////        URL url = classLoader.getResource("examples/benchmark/benchmark_01.txt");
-////        URL url = classLoader.getResource("examples/benchmark/benchmark_02.txt");
-////        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_03.txt");
-////        URL url = classLoader.getResource("examples/benchmark/benchmark_04.txt");
-////        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_05.txt");
-////        URL url = classLoader.getResource("examples/benchmark/benchmark_06.txt");
-////        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_07.txt");
-//        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08.txt");
-////        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08_multiStart.txt");
-//
-//        byte[] bytes = resourceAsStream.readAllBytes();
-//
-//        return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(bytes));
-//    }
-
 }

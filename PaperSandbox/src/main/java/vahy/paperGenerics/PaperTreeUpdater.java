@@ -20,9 +20,9 @@ public class PaperTreeUpdater<
     @Override
     public void updateTree(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode) {
         int i = 0;
-        double estimatedLeafReward = (expandedNode.isFinalNode() ?
-            0.0d :
-            expandedNode.getSearchNodeMetadata().getPredictedReward().getValue())
+        double estimatedLeafReward = (expandedNode.isFinalNode()
+                ? 0.0d
+                : expandedNode.getSearchNodeMetadata().getPredictedReward().getValue())
             + expandedNode.getSearchNodeMetadata().getCumulativeReward().getValue();
         double estimatedLeafRisk = expandedNode.isFinalNode() ?
             expandedNode.getWrappedState().isRiskHit() ?
@@ -45,7 +45,7 @@ public class PaperTreeUpdater<
         PaperMetadata<TAction, DoubleReward> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
         if(searchNodeMetadata.getVisitCounter() == 1) {
-            searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(estimatedLeafReward));
+            searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(searchNodeMetadata.getPredictedReward().getValue()));
             searchNodeMetadata.setSumOfRisk(estimatedRisk);
         } else {
             searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() + estimatedLeafReward));

@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 public class RiskBasedSelector<
     TAction extends Action,
@@ -50,20 +49,15 @@ public class RiskBasedSelector<
                 .orElseThrow(() -> new IllegalStateException("Minimal risk does not exist"));
 
             if(minimalRisk <= totalRiskAllowed) {
-                final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
-                final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
+
+                ImmutableTuple<Double, Double> minMax = getMinMax(node);
+                final double min = minMax.getFirst();
+                final double max = minMax.getSecond();
+                assert(min <= max); // paranoia
 
                 List<ImmutableTuple<TAction, Double>> actionsUcbValue = node.getChildNodeStream()
-                    .map(x -> {
-                        TAction action = x.getAppliedAction();
-                        double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
-                        double qValue = max == min ? 0.5 : ((x.getSearchNodeMetadata().getPredictedReward().getValue() - min) / (max - min));
-
-                        return new ImmutableTuple<>(action, qValue + uValue);
-                    })
+                    .map(getSearchNodeImmutableTupleFunction(totalNodeVisitCount, min, max))
                     .collect(Collectors.toList());
-
-//                logger.info("UcbValues: [{}]", actionsUcbValue.stream().map(x -> x.getSecond().toString()).reduce((x, y) -> x + ", " + y));
 
                 CLP model = new CLP();
                 final CLPExpression totalRiskExpression = model.createExpression();

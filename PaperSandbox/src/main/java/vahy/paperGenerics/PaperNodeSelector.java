@@ -1,5 +1,6 @@
 package vahy.paperGenerics;
 
+import org.jetbrains.annotations.NotNull;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -36,7 +37,23 @@ public class PaperNodeSelector<
         this.random = random;
     }
 
-    protected double getExtremeElement(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node,
+    protected final ImmutableTuple<Double, Double> getMinMax(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+        double helpMax = -Double.MAX_VALUE;
+        double helpMin = Double.MAX_VALUE;
+
+        for (SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> entry : node.getChildNodeMap().values()) {
+            double value = entry.getSearchNodeMetadata().getExpectedReward().getValue() + entry.getSearchNodeMetadata().getGainedReward().getValue();
+            if(helpMax < value) {
+                helpMax = value;
+            }
+            if(helpMin > value) {
+                helpMin = value;
+            }
+        }
+        return new ImmutableTuple<>(helpMin, helpMax);
+    }
+
+    protected final double getExtremeElement(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node,
                                      Function<DoubleStream, OptionalDouble> function,
                                      String nonExistingElementMessage) {
         return function.apply(node
@@ -45,7 +62,7 @@ public class PaperNodeSelector<
         ).orElseThrow(() -> new IllegalStateException(nonExistingElementMessage));
     }
 
-    protected TAction sampleOpponentAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+    protected final TAction sampleOpponentAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
         ArrayList<ImmutableTuple<TAction, Double>> actions = node.getChildNodeStream()
             .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
             .collect(Collectors.toCollection(ArrayList::new));
@@ -62,23 +79,39 @@ public class PaperNodeSelector<
         if(node.isPlayerTurn()) {
             int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
-            final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
-            final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
+//            final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
+//            final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
 
-            TAction bestAction = node
+            ImmutableTuple<Double, Double> minMax = getMinMax(node);
+            final double min = minMax.getFirst();
+            final double max = minMax.getSecond();
+            assert(min <= max); // paranoia
+
+            return node
                 .getChildNodeStream()
-                .map(x -> {
-                    TAction action = x.getAppliedAction();
-                    double uValue = calculateUValue(x.getSearchNodeMetadata().getPriorProbability(), x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
-                    double qValue = max == min ? 0.5 : ((x.getSearchNodeMetadata().getPredictedReward().getValue() - min) / (max - min));
-                    return new ImmutableTuple<>(action, qValue + uValue);
-                })
+                .map(getSearchNodeImmutableTupleFunction(totalNodeVisitCount, min, max))
                 .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
                 .getFirst();
-            return bestAction;
         } else {
             return sampleOpponentAction(node);
         }
+    }
+
+    @NotNull
+    protected final Function<
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState>,
+        ImmutableTuple<TAction, Double>>
+    getSearchNodeImmutableTupleFunction(final int totalNodeVisitCount, final double min, final double max)
+    {
+        return x -> {
+            var metadata = x.getSearchNodeMetadata();
+            TAction action = x.getAppliedAction();
+            double uValue = calculateUValue(metadata.getPriorProbability(), metadata.getVisitCounter(), totalNodeVisitCount);
+            double qValue = max == min
+                ? 0.5
+                : (((metadata.getExpectedReward().getValue() + metadata.getGainedReward().getValue()) - min) / (max - min));
+            return new ImmutableTuple<>(action, qValue + uValue);
+        };
     }
 
     protected double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {

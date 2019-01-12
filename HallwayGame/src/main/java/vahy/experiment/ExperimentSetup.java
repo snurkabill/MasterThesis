@@ -3,6 +3,7 @@ package vahy.experiment;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
+import vahy.riskBasedSearch.SelectorType;
 
 import java.util.function.Supplier;
 
@@ -39,8 +40,9 @@ public class ExperimentSetup {
 
     // PAPER
     private final double globalRiskAllowed;
+    private final SelectorType selectorType;
 
-    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed) {
+    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType) {
         this.randomSeed = randomSeed;
         this.hallwayInstance = hallwayInstance;
         this.cpuctParameter = cpuctParameter;
@@ -58,6 +60,7 @@ public class ExperimentSetup {
         this.trainingEpochCount = trainingEpochCount;
         this.evalEpisodeCount = evalEpisodeCount;
         this.globalRiskAllowed = globalRiskAllowed;
+        this.selectorType = selectorType;
     }
 
     public double getCpuctParameter() {
@@ -126,5 +129,9 @@ public class ExperimentSetup {
 
     public HallwayInstance getHallwayInstance() {
         return hallwayInstance;
+    }
+
+    public SelectorType getSelectorType() {
+        return selectorType;
     }
 }
