@@ -1,7 +1,6 @@
 package vahy;
 
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.agent.environment.RealDataMarketPolicySupplier;
@@ -37,8 +36,8 @@ import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.ThirdPartBinaryUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -66,7 +65,7 @@ public class MarketPrototype {
     }
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
-        cleanUpNativeTempFiles();
+        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
         long seed = 0;
         SplittableRandom random = new SplittableRandom(seed);
 
@@ -215,7 +214,7 @@ public class MarketPrototype {
 
             long start = System.currentTimeMillis();
             List<PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> policyResultList = benchmark
-                .runBenchmark(uniqueEpisodeCount, episodeCount, stepCountLimit);
+                .runBenchmark(episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking took [{}] milliseconds", end - start);
 
@@ -283,29 +282,5 @@ public class MarketPrototype {
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
 
         }
-
     }
-
-
-    private static void cleanUpNativeTempFiles() {
-        // TODO: code duplicity
-        System.gc();
-        String bridJFolderNameStart = "BridJExtractedLibraries";
-        String CLPFolderNameStart = "CLPExtractedLib";
-        String TFFolderNameStart = "tensorflow_native_libraries";
-        String tempPath = System.getProperty("java.io.tmpdir");
-        File file = new File(tempPath);
-        String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
-        if (directories != null) {
-            Arrays.stream(directories).filter(x -> x.startsWith(bridJFolderNameStart) || x.startsWith(CLPFolderNameStart) || x.startsWith(TFFolderNameStart)).forEach(x -> {
-                try {
-                    FileUtils.deleteDirectory(new File(tempPath + "/" + x));
-                } catch (IOException e) {
-                    e.printStackTrace(); // todo: deal with this later
-                }
-            });
-        }
-
-    }
-
 }
