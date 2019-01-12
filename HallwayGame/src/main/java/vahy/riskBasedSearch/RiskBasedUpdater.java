@@ -11,6 +11,7 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PaperTreeUpdater;
 
+@Deprecated
 public class RiskBasedUpdater<
     TAction extends Action,
     TPlayerObservation extends Observation,

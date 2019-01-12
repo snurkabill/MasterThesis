@@ -2,7 +2,7 @@ import tensorflow as tf
 
 # input_count = 1
 
-input_count = 9
+input_count = 8
  # input_count = 34
 
 hidden_count_1 = 100

@@ -23,7 +23,6 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperNodeEvaluator;
-import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
@@ -37,6 +36,7 @@ import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
+import vahy.riskBasedSearch.RiskBasedSelectorVahy;
 import vahy.utils.EnumUtils;
 
 import java.io.File;
@@ -58,9 +58,9 @@ public class PaperGenericsPrototype {
         SplittableRandom random = new SplittableRandom(seed);
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
+            .noisyMoveProbability(0.0)
             .stepPenalty(1)
-            .trapProbability(1)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
         HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier = getHallwayGameInitialInstanceSupplier(random, gameConfig);
@@ -112,7 +112,7 @@ public class PaperGenericsPrototype {
 
 
         // risk optimization
-        double totalRiskAllowed = 0.0;
+        double totalRiskAllowed = 0.15;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
@@ -138,12 +138,12 @@ public class PaperGenericsPrototype {
             PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
 
             PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> paperTreeUpdater = new PaperTreeUpdater<>();
-//            RiskBasedUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> paperTreeUpdater = new RiskBasedUpdater<>();
+////////            RiskBasedUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> paperTreeUpdater = new RiskBasedUpdater<>();
 
 
-            PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
+//            PaperNodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
 //            RiskBasedSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> nodeSelector = new RiskBasedSelector<>(cpuctParameter, random, totalRiskAllowed);
-//            RiskBasedSelectorVahy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> nodeSelector = new RiskBasedSelectorVahy<>(cpuctParameter, random, totalRiskAllowed);
+            RiskBasedSelectorVahy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> nodeSelector = new RiskBasedSelectorVahy<>(cpuctParameter, random, totalRiskAllowed);
 
 
             PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnbasedEvaluator =
@@ -316,10 +316,10 @@ public class PaperGenericsPrototype {
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_02.txt");
 //        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_03.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_04.txt");
-        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_05.txt");
+//        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_05.txt");
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_06.txt");
 //        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_07.txt");
-//        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08.txt");
+        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08.txt");
 //        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08_multiStart.txt");
 
         byte[] bytes = resourceAsStream.readAllBytes();
