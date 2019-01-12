@@ -31,7 +31,6 @@ import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
-import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -70,7 +69,7 @@ public class PaperGenericsPrototype {
         TreeUpdateConditionFactory treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(100);
 
         // MCTS
-        double cpuctParameter = 10;
+        double cpuctParameter = 5;
 
         // MCTS - mc rollout based
         int mcRolloutCount = 1;
@@ -79,8 +78,8 @@ public class PaperGenericsPrototype {
         double discountFactor = 1;
 
         int sampleEpisodeCount = 10;
-        int replayBufferSize = 100;
-        int stageCount = 200;
+        int replayBufferSize = 200;
+        int stageCount = 1000;
 
         Supplier<Double> explorationConstantSupplier = new Supplier<>() {
 
@@ -88,20 +87,20 @@ public class PaperGenericsPrototype {
 
             @Override
             public Double get() {
-                // callCount++;
-                // return Math.exp(-callCount / 500.0);
-                return 0.0;
+//                 callCount++;
+//                 return Math.exp(-callCount / 500.0) / 2;
+                return 0.05;
             }
-        };;
+        };
         Supplier<Double> temperatureSupplier = new Supplier<>() {
 
             private int callCount = 0;
 
             @Override
             public Double get() {
-                callCount++;
-                // return Math.exp(-callCount / 5000.0) * 3;
-                return 0.0;
+//                callCount++;
+//                 return Math.exp(-callCount / 2500.0) * 2;
+                return 2.0;
             }
         };
 
@@ -113,14 +112,12 @@ public class PaperGenericsPrototype {
 
 
         // risk optimization
-        boolean optimizeFlowInSearchTree = true;
-        double totalRiskAllowed = 0.00;
+        double totalRiskAllowed = 0.0;
 
         // simmulation after training
         int uniqueEpisodeCount = 1;
-        int episodeCount = 10000;
-        int stepCountLimit = 100;
-        int totalEpisodes = uniqueEpisodeCount * episodeCount;
+        int episodeCount = 1000;
+        int stepCountLimit = 1000;
 
         RewardAggregator<DoubleReward> rewardAggregator = new DoubleScalarRewardAggregator();
         Class<HallwayAction> clazz = HallwayAction.class;
@@ -132,12 +129,10 @@ public class PaperGenericsPrototype {
             trainingEpochCount,
             batchSize,
 
-             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
-//            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
-            random))
+             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(), random)) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
         {
-//            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
-            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
+            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
+//            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
 
 
             PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
@@ -197,29 +192,14 @@ public class PaperGenericsPrototype {
 
 
             long trainingStart = System.currentTimeMillis();
-//            for (int i = 0; i < stageCount; i++) {
-//                logger.info("Training policy for [{}]th iteration", i);
-//                trainer.trainPolicy(sampleEpisodeCount);
-////                PaperBenchmark<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> benchmark = new PaperBenchmark<>(
-////                    Arrays.asList(new PaperBenchmarkingPolicy<>("sample", nnBasedPolicySupplier)),
-////                    new EnvironmentPolicySupplier(random),
-////                    hallwayGameInitialInstanceSupplier
-////                );
-////                List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> policyResultList = benchmark
-////                    .runBenchmark(1, 10, stepCountLimit);
-////
-////                PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnResults = policyResultList
-////                    .stream()
-////                    .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals("sample"))
-////                    .findFirst()
-////                    .get();
-////
-////                logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
-////                logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-////                logger.info("NN Based total expanded nodes: [{}]", nnbasedEvaluator.getNodesExpandedCount());
-////                logger.info("NN Based kill ratio: [{}]", nnResults.getRiskHitRatio());
-////                logger.info("NN Based kill counter: [{}]", nnResults.getRiskHitCounter());
-//            }
+            for (int i = 0; i < stageCount; i++) {
+                logger.info("Training policy for [{}]th iteration", i);
+                if(logger.isDebugEnabled()) {
+                    ModelEvaluator modelEvaluator = new ModelEvaluator(ModelEvaluator.getStates2(hallwayGameInitialInstanceSupplier));
+                    modelEvaluator.evaluate(model);
+                }
+                trainer.trainPolicy(sampleEpisodeCount);
+            }
 
             long trainingTimeInMs = System.currentTimeMillis() - trainingStart;
 
@@ -340,6 +320,7 @@ public class PaperGenericsPrototype {
 //        URL url = classLoader.getResource("examples/benchmark/benchmark_06.txt");
 //        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_07.txt");
 //        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08.txt");
+//        InputStream resourceAsStream = classLoader.getResourceAsStream("examples/benchmark/benchmark_08_multiStart.txt");
 
         byte[] bytes = resourceAsStream.readAllBytes();
 
