@@ -1,4 +1,4 @@
-package vahy;
+package vahy.solutionExamples;
 
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.data.HallwayInstance;
@@ -18,54 +18,60 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class PaperGenericsPrototype {
-
-
+public class Benchmark05Solution {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
-        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment();
+        //  EXAMPLE 1
+        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
+
+        //  EXAMPLE 2
+//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
+//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+//        new Experiment().prepareAndRun(setup, random);
+
+
     }
 
-    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment() {
+    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.0)
+            .noisyMoveProbability(0.1)
             .stepPenalty(1)
-            .trapProbability(0.1)
+            .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_03)
+            .hallwayInstance(HallwayInstance.BENCHMARK_05)
             //MCTS
-            .cpuctParameter(2)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .cpuctParameter(3)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(4)
-            .trainingEpochCount(300)
+            .trainingBatchSize(64)
+            .trainingEpochCount(100)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(10)
+            .batchEpisodeCount(20)
             .stageCount(100)
             .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(TrainerAlgorithm.REPLAY_BUFFER)
+            .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
-            // .replayBufferSize(200)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.15)
+            .globalRiskAllowed(0.00)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
 //                 callCount++;
 //                 return Math.exp(-callCount / 500.0) / 2;
-                    return 0.2;
+                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -80,8 +86,4 @@ public class PaperGenericsPrototype {
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }
-
-
-
-
 }

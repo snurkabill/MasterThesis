@@ -53,16 +53,16 @@ public class Benchmark03Solution {
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(8)
-            .trainingEpochCount(1)
+            .trainingBatchSize(64)
+            .trainingEpochCount(100)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(10)
+            .batchEpisodeCount(20)
             .stageCount(100)
             .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(TrainerAlgorithm.REPLAY_BUFFER)
+            .replayBufferSize(1000)
             .selectorType(SelectorType.UCB)
-            // .replayBufferSize(200)
             .evalEpisodeCount(1000)
             .globalRiskAllowed(0.025)
             .explorationConstantSupplier(new Supplier<>() {

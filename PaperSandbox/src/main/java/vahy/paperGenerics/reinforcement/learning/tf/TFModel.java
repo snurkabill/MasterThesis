@@ -11,10 +11,8 @@ import vahy.paperGenerics.PaperModel;
 import vahy.timer.SimpleTimer;
 
 import java.nio.DoubleBuffer;
-import java.util.List;
 import java.util.Random;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class TFModel extends PaperModel implements SupervisedTrainableModel, AutoCloseable {
@@ -136,25 +134,27 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
 
     @Override
     public double[][] predict(double[][] input) {
-        try (Tensor<Double> tfInput = Tensors.create(input)) {
-            List<Tensor<Double>> output = sess
-                .runner()
-                .feed("input_node", tfInput)
-                .fetch("prediction_node_2")
-                .run()
-                .stream()
-                .map(x -> x.expect(Double.class))
-                .collect(Collectors.toList());
-            double[][] outputMatrix = new double[input.length][];
-            for (int i = 0; i < outputMatrix.length; i++) {
-                double[] outputVector = new double[outputDimension];
-                DoubleBuffer doubleBuffer = DoubleBuffer.wrap(outputVector);
-                output.get(i).writeTo(doubleBuffer);
-                outputMatrix[i] = outputVector;
-            }
-            output.forEach(Tensor::close); // needed?
-            return outputMatrix;
-        }
+        throw new UnsupportedOperationException();
+//        try (Tensor<Double> tfInput = Tensors.create(input)) {
+//            List<Tensor<Double>> output = sess
+//                .runner()
+//                .feed("input_node", tfInput)
+//                .fetch("prediction_node_2")
+//                .run()
+//                .stream()
+//                .map(x -> x.expect(Double.class))
+//                .collect(Collectors.toList());
+//
+//            double[] outputBuffer = new double[outputDimension * inputDimension];
+//            DoubleBuffer doubleBuffer = DoubleBuffer.wrap(outputBuffer);
+//            double[][] outputMatrix = new double[input.length][];
+//            for (int i = 0; i < outputMatrix.length; i++) {
+//                outputMatrix[i] = new double[outputDimension];
+//                System.arraycopy(outputBuffer, i * outputDimension, outputMatrix[i], 0, outputDimension);
+//            }
+//            output.forEach(Tensor::close); // needed?
+//            return outputMatrix;
+//        }
     }
 
     @Override

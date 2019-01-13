@@ -109,7 +109,8 @@ public class PaperPolicyImpl<
     public TReward getEstimatedReward(TState gameState) {
         checkStateRoot(gameState);
         TSearchNodeMetadata searchNodeMetadata = searchTree.getRoot().getSearchNodeMetadata();
-        return rewardAggregator.aggregate(searchNodeMetadata.getExpectedReward(), rewardAggregator.negate(searchNodeMetadata.getCumulativeReward()));
+        // return rewardAggregator.aggregate(searchNodeMetadata.getExpectedReward(), rewardAggregator.negate(searchNodeMetadata.getCumulativeReward()));
+        return searchNodeMetadata.getExpectedReward();
     }
 
     @Override

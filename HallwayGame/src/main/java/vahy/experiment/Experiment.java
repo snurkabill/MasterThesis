@@ -27,7 +27,6 @@ import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
-import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -66,8 +65,8 @@ public class Experiment {
             random)
         ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
         {
-//            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
-            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
+            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
+//            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
             createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, trainableApproximator);
         }
     }

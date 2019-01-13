@@ -2,12 +2,12 @@ import tensorflow as tf
 
 # input_count = 1
 
-input_count = 7
+input_count = 9
  # input_count = 34
 
-hidden_count_1 = 20
-hidden_count_2 = 10
-hidden_count_3 = 10
+hidden_count_1 = 200
+hidden_count_2 = 100
+hidden_count_3 = 100
 
 action_count = 3
 # action_count = 5
@@ -23,9 +23,9 @@ hidden_1 = tf.layers.dense(x,        hidden_count_1, tf.nn.relu, True, tf.glorot
 hidden_2 = tf.layers.dense(hidden_1, hidden_count_2, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_2") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
 hidden_3 = tf.layers.dense(hidden_2, hidden_count_3, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_3") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
 
-policy = tf.layers.dense(hidden_2, action_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, name = 'policy_node')
-risk =   tf.layers.dense(hidden_2, 1,            tf.nn.sigmoid, use_bias = True, kernel_initializer = tf.zeros_initializer, name = "risk_node")
-q =      tf.layers.dense(hidden_2, 1,                           use_bias = True, kernel_initializer = tf.zeros_initializer, name = "q_node")
+policy = tf.layers.dense(hidden_3, action_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, name = 'policy_node')
+risk =   tf.layers.dense(hidden_3, 1,            tf.nn.sigmoid, use_bias = True, kernel_initializer = tf.zeros_initializer, name = "risk_node")
+q =      tf.layers.dense(hidden_3, 1,                           use_bias = True, kernel_initializer = tf.zeros_initializer, name = "q_node")
 
 prediction = tf.concat([q, risk, policy], 1, name = "prediction_node_2")
 
@@ -37,9 +37,9 @@ policy_loss = tf.keras.losses.categorical_crossentropy(y_true = policy_target, y
 q_loss = tf.keras.losses.mean_squared_error(y_true = q_target, y_pred = q)
 r_loss = tf.keras.losses.mean_squared_error(y_true = risk_target, y_pred = risk)
 
-# total_loss = policy_loss + q_loss + r_loss
+total_loss = policy_loss + q_loss + r_loss
 # total_loss = q_loss + r_loss
-total_loss = q_loss
+# total_loss = q_loss
 
 
 
@@ -49,7 +49,7 @@ total_loss = q_loss
 # total_loss = policy_loss
 
 
-optimizer = tf.train.AdamOptimizer(learning_rate = 0.001, name = "Adam")
+optimizer = tf.train.AdamOptimizer(learning_rate = 0.0001, name = "Adam")
 train_op = optimizer.minimize(total_loss, name = 'train_node')
 
 init = tf.global_variables_initializer()
@@ -59,8 +59,12 @@ sess = tf.Session()
 sess.run(init)
 
 
+
+
+
+
 print(q.name)
-#
+
 # n_samples = 0
 # avg_cost = 0.
 # for epoch in range(100000):
@@ -69,7 +73,7 @@ print(q.name)
 #     # batch_xs = [[1], [2], [3], [4]]
 #
 #     batch_xs = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]
-#m
+#
 #     batch_Q = [[96], [97], [98], [99]]
 #     batch_R = [[0.9], [0.6], [0.4], [0.1]]
 #     batch_Policy = [[0.02, 0.49, 0.49], [0.01, 0.01, 0.98], [0.01, 0.98, 0.01], [0.98, 0.01, 0.01]]
@@ -100,7 +104,7 @@ print(q.name)
 # print('Tensor to read value of W                ', W.value().name)
 # print('Tensor to read value of b                ', b.value().name)
 
-with open('../../../../../../resources/tfModel/graph_BENCHMARK_03.pb', 'wb') as f:
+with open('../../../../../../resources/tfModel/graph_BENCHMARK_05.pb', 'wb') as f:
     f.write(tf.get_default_graph().as_graph_def().SerializeToString())
 
 
