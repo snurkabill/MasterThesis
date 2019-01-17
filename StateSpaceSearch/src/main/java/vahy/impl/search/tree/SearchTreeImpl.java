@@ -70,6 +70,7 @@ public class SearchTreeImpl<
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
         if(root.isLeaf()) {
+            logger.warn("Trying to apply action [{}] on not expanded node", action);
             expandAndEvaluateNode(root);
             // throw new IllegalStateException("Policy cannot pick action from leaf node");
         }

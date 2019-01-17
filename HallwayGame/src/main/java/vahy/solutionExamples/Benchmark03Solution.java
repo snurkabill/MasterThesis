@@ -10,6 +10,7 @@ import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
@@ -27,12 +28,6 @@ public class Benchmark03Solution {
         ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
-
-        //  EXAMPLE 2
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
-//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-//        new Experiment().prepareAndRun(setup, random);
-
 
     }
 
@@ -53,33 +48,27 @@ public class Benchmark03Solution {
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(64)
-            .trainingEpochCount(100)
+            .trainingBatchSize(0)
+            .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(20)
+            .batchEpisodeCount(100)
             .stageCount(100)
             .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.REPLAY_BUFFER)
-            .replayBufferSize(1000)
+            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .approximatorType(ApproximatorType.HASHMAP)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(1000)
+            .evalEpisodeCount(10000)
             .globalRiskAllowed(0.025)
             .explorationConstantSupplier(new Supplier<>() {
-                private int callCount = 0;
                 @Override
                 public Double get() {
-//                 callCount++;
-//                 return Math.exp(-callCount / 500.0) / 2;
                     return 0.2;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
-                private int callCount = 0;
                 @Override
                 public Double get() {
-//                callCount++;
-//                 return Math.exp(-callCount / 2500.0) * 2;
                     return 2.0;
                 }
             })

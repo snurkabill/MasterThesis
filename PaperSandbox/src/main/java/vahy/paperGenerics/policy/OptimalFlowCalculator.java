@@ -60,13 +60,15 @@ public class OptimalFlowCalculator<
                     }
                     totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
                 }
-                model.setObjectiveCoefficient(
-                    node.getSearchNodeMetadata().getNodeProbabilityFlow(),
-                    (node.getSearchNodeMetadata().getCumulativeReward().getValue() +
-                        (node.getSearchNodeMetadata().getExpectedReward() != null ? node.getSearchNodeMetadata().getExpectedReward().getValue() : 0.0)
-                    )
-                        * (1 - node.getSearchNodeMetadata().getPredictedRisk())
-                );
+
+                double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward().getValue();
+                double expectedReward = node.getSearchNodeMetadata().getExpectedReward().getValue();
+                double predictedRisk = node.getSearchNodeMetadata().getPredictedRisk();
+
+                double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
+
+
+                model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);
             } else {
                 addSummingChildrenWithParentToZeroExpression(model, node, actionChildFlowMap);
                 if(!node.getWrappedState().isPlayerTurn()) {

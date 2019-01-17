@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark05Solution {
+public class Benchmark10Solution {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
@@ -40,46 +40,49 @@ public class Benchmark05Solution {
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
-            .stepPenalty(1)
-            .trapProbability(1)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(2)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_05)
+            .hallwayInstance(HallwayInstance.BENCHMARK_10)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
-            // REINFORCEMENT
+            .trainingBatchSize(0)
+            .trainingEpochCount(0)
+            // REINFORCEMENTs
             .discountFactor(1)
-
             .batchEpisodeCount(100)
             .stageCount(100)
-
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
-
-            .replayBufferSize(10000)
+            .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.00)
+            .globalRiskAllowed(0.11)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.2;
+                    callCount++;
+                 return Math.exp(-callCount / 10000.0);
+//                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 1.5;
+                    callCount++;
+                return Math.exp(-callCount / 10000.0) * 3;
+//                    return 2.0;
                 }
             })
             .buildExperimentSetup();

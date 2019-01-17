@@ -3,6 +3,7 @@ package vahy.experiment;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
+import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 
 import java.util.function.Supplier;
@@ -30,6 +31,7 @@ public class ExperimentSetup {
     private final Supplier<Double> temperatureSupplier;
 
     private final TrainerAlgorithm trainerAlgorithm;
+    private final ApproximatorType approximatorType;
 
     // NN
     private final int trainingBatchSize;
@@ -42,7 +44,7 @@ public class ExperimentSetup {
     private final double globalRiskAllowed;
     private final SelectorType selectorType;
 
-    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType) {
+    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType) {
         this.randomSeed = randomSeed;
         this.hallwayInstance = hallwayInstance;
         this.cpuctParameter = cpuctParameter;
@@ -56,6 +58,7 @@ public class ExperimentSetup {
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
         this.trainerAlgorithm = trainerAlgorithm;
+        this.approximatorType = approximatorType;
         this.trainingBatchSize = trainingBatchSize;
         this.trainingEpochCount = trainingEpochCount;
         this.evalEpisodeCount = evalEpisodeCount;
@@ -101,6 +104,10 @@ public class ExperimentSetup {
 
     public TrainerAlgorithm getTrainerAlgorithm() {
         return trainerAlgorithm;
+    }
+
+    public ApproximatorType getApproximatorType() {
+        return approximatorType;
     }
 
     public int getTrainingBatchSize() {

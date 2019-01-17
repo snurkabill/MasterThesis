@@ -2,6 +2,7 @@ import tensorflow as tf
 
 # input_count = 1
 
+benchmark_name = 'BENCHMARK_05'
 input_count = 9
  # input_count = 34
 
@@ -37,8 +38,8 @@ policy_loss = tf.keras.losses.categorical_crossentropy(y_true = policy_target, y
 q_loss = tf.keras.losses.mean_squared_error(y_true = q_target, y_pred = q)
 r_loss = tf.keras.losses.mean_squared_error(y_true = risk_target, y_pred = risk)
 
-total_loss = policy_loss + q_loss + r_loss
-# total_loss = q_loss + r_loss
+# total_loss = policy_loss + q_loss + r_loss
+total_loss = q_loss + r_loss
 # total_loss = q_loss
 
 
@@ -104,7 +105,7 @@ print(q.name)
 # print('Tensor to read value of W                ', W.value().name)
 # print('Tensor to read value of b                ', b.value().name)
 
-with open('../../../../../../resources/tfModel/graph_BENCHMARK_05.pb', 'wb') as f:
+with open('../../../../../../resources/tfModel/graph_' + benchmark_name + '.pb', 'wb') as f:
     f.write(tf.get_default_graph().as_graph_def().SerializeToString())
 
 

@@ -63,6 +63,7 @@ public abstract class AbstractGameSampler<
             EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> episodeResult = episodeSimulator.calculateEpisode(paperEpisode);
             paperEpisodeHistoryList.add(episodeResult);
             logger.info("Episode [{}] finished. Total steps done: [{}]. Is risk hit: [{}]", j, episodeResult.getEpisodeHistoryList().size(), episodeResult.isRiskHit());
+//            logger.info("Action history: [{}]", episodeResult.printActionHistory());
         }
 
 //        if(logger.isDebugEnabled()) {

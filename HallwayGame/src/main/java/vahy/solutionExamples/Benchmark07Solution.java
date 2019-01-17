@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark05Solution {
+public class Benchmark07Solution {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
@@ -29,18 +29,13 @@ public class Benchmark05Solution {
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
 
-        //  EXAMPLE 2
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
-//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-//        new Experiment().prepareAndRun(setup, random);
-
 
     }
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
+            .noisyMoveProbability(0.4)
             .stepPenalty(1)
             .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
@@ -48,14 +43,14 @@ public class Benchmark05Solution {
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_05)
+            .hallwayInstance(HallwayInstance.BENCHMARK_07)
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
+            .trainingBatchSize(0)
+            .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
 
@@ -73,13 +68,13 @@ public class Benchmark05Solution {
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 0.2;
+                    return 0.0;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 1.5;
+                    return 0.0;
                 }
             })
             .buildExperimentSetup();

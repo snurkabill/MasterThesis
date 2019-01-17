@@ -3,6 +3,7 @@ package vahy.experiment;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
+import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 
 import java.util.function.Supplier;
@@ -29,6 +30,7 @@ public class ExperimentSetupBuilder {
     private Supplier<Double> temperatureSupplier;
 
     private TrainerAlgorithm trainerAlgorithm;
+    private ApproximatorType approximatorType;
 
     // NN
     private int trainingBatchSize;
@@ -96,6 +98,10 @@ public class ExperimentSetupBuilder {
         this.trainerAlgorithm = trainerAlgorithm; return this;
     }
 
+    public ExperimentSetupBuilder approximatorType(ApproximatorType approximatorType) {
+        this.approximatorType = approximatorType; return this;
+    }
+
     public ExperimentSetupBuilder trainingBatchSize(int trainingBatchSize) {
         this.trainingBatchSize = trainingBatchSize; return this;
     }
@@ -122,8 +128,6 @@ public class ExperimentSetupBuilder {
         return this;
     }
 
-
-
     public ExperimentSetup buildExperimentSetup() {
         return new ExperimentSetup(
             randomSeed,
@@ -139,6 +143,7 @@ public class ExperimentSetupBuilder {
             explorationConstantSupplier,
             temperatureSupplier,
             trainerAlgorithm,
+            approximatorType,
             trainingBatchSize,
             trainingEpochCount,
             evalEpisodeCount,

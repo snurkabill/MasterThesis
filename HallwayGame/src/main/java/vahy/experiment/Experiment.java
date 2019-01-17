@@ -27,6 +27,8 @@ import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
+import vahy.paperGenerics.reinforcement.DataTableApproximator;
+import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -56,18 +58,31 @@ public class Experiment {
         var provider = new HallwayGameSupplierFactory();
         var hallwayGameInitialInstanceSupplier = provider.getInstanceProvider(setup.getSecond().getHallwayInstance(), setup.getFirst(), random);
         var inputLenght = hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length;
-        try(TFModel model = new TFModel(
-            inputLenght,
-            PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
-            setup.getSecond().getTrainingEpochCount(),
-            setup.getSecond().getTrainingBatchSize(),
-            PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
-            random)
-        ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
-        {
-            TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
-//            TrainableApproximator<DoubleVector> trainableApproximator = new EmptyApproximator<>();
-            createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, trainableApproximator);
+
+        switch (setup.getSecond().getApproximatorType()) {
+            case EMPTY:
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new EmptyApproximator<>());
+                break;
+            case HASHMAP:
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>());
+                break;
+            case NN:
+            {
+                try(TFModel model = new TFModel(
+                    inputLenght,
+                    PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
+                    setup.getSecond().getTrainingEpochCount(),
+                    setup.getSecond().getTrainingBatchSize(),
+                    PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
+                    random)
+                ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
+                {
+                    TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
+                    createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, trainableApproximator);
+                }
+            }
+            default:
+                throw EnumUtils.createExceptionForUnknownEnumValue(setup.getSecond().getApproximatorType());
         }
     }
 

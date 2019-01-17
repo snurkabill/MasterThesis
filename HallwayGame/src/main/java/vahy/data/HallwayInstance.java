@@ -10,7 +10,12 @@ public enum HallwayInstance {
     BENCHMARK_06("examples/benchmark/benchmark_06.txt", 7),
     BENCHMARK_07("examples/benchmark/benchmark_07.txt", 7),
     BENCHMARK_08("examples/benchmark/benchmark_08.txt", 8),
-    BENCHMARK_09("examples/benchmark/benchmark_09.txt", 10);
+    BENCHMARK_09("examples/benchmark/benchmark_09.txt", 10),
+
+    BENCHMARK_10("examples/benchmark/benchmark_10.txt", 8),
+    BENCHMARK_11("examples/benchmark/benchmark_11.txt", 10);
+
+
 
     private String path;
     private int observationLenghtInCompactMode;
