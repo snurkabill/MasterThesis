@@ -46,6 +46,7 @@ public class PaperPolicyImpl<
         this.riskAverseSearchTree = searchTree;
 
         TAction[] allActions = clazz.getEnumConstants();
+
 //        Stream<TAction> tActionStream = Arrays.stream(allActions).filter(Action::isPlayerAction);
 //        this.playerActions = tActionStream.<TAction>toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
 //        this.environmentActions = Arrays.stream(allActions).filter(x -> !x.isPlayerAction()).toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
@@ -53,6 +54,11 @@ public class PaperPolicyImpl<
         this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
         this.environmentActions = Arrays.stream(allActions).filter(x -> !x.isPlayerAction()).collect(Collectors.toCollection(ArrayList::new));
 
+    }
+
+    @Override
+    public List<TAction> getAllowedActionsForExploration() {
+        return riskAverseSearchTree.getAllowedActionsForExploration();
     }
 
     @Override

@@ -18,6 +18,7 @@ import vahy.impl.model.ImmutableStateRewardReturnTuple;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SearchTreeImpl<
     TAction extends Action,
@@ -49,6 +50,28 @@ public class SearchTreeImpl<
         this.treeUpdater = treeUpdater;
         this.nodeEvaluator = nodeEvaluator;
         this.nodeSelector.setNewRoot(root);
+
+        expandTreeToNextPlayerLevel();
+    }
+
+    protected void expandTreeToNextPlayerLevel() {
+        if(root.isFinalNode()) {
+            throw new IllegalArgumentException("Cannot expand final node");
+        }
+        if(root.getChildNodeMap().size() == 0) {
+            logger.debug("Expanding root since it is not final node and has no children expanded");
+            expandAndEvaluateNode(root);
+            treeUpdater.updateTree(root);
+        }
+        var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(LinkedList::new));
+        while(!queue.isEmpty()) {
+            var node = queue.pop();
+            if(!node.isFinalNode() && node.getChildNodeMap().size() == 0) {
+                expandAndEvaluateNode(node);
+                treeUpdater.updateTree(node);
+            }
+            queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
+        }
     }
 
     @Override
@@ -70,9 +93,9 @@ public class SearchTreeImpl<
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
         if(root.isLeaf()) {
-            logger.warn("Trying to apply action [{}] on not expanded node", action);
-            expandAndEvaluateNode(root);
-            // throw new IllegalStateException("Policy cannot pick action from leaf node");
+//            logger.warn("Trying to apply action [{}] on not expanded node", action);
+//            expandAndEvaluateNode(root);
+             throw new IllegalStateException("Policy cannot pick action from leaf node");
         }
     }
 
@@ -82,6 +105,9 @@ public class SearchTreeImpl<
         root.makeRoot();
         nodeSelector.setNewRoot(root);
         resetTreeStatistics();
+        if(!root.isFinalNode()) {
+            expandTreeToNextPlayerLevel();
+        }
         return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
     }
 

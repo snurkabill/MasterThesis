@@ -50,8 +50,8 @@ public class Benchmark10Solution {
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_10)
             //MCTS
-            .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
+            .cpuctParameter(5)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1000))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)

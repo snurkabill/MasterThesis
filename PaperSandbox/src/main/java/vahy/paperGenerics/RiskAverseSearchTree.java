@@ -11,8 +11,10 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
+import vahy.utils.ImmutableTuple;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class RiskAverseSearchTree<
@@ -54,6 +56,34 @@ public class RiskAverseSearchTree<
         isFlowOptimized = flowOptimized;
     }
 
+    public List<TAction> getAllowedActionsForExploration() {
+        TAction[] actions = getRoot().getAllPossibleActions();
+        var allowedActions = new LinkedList<TAction>();
+        for (TAction action : actions) {
+            if (calculateRiskOfOpponentNodes(getRoot().getChildNodeMap().get(action)) <= totalRiskAllowed) {
+                allowedActions.add(action);
+            }
+        }
+        return allowedActions;
+    }
+
+    private double calculateRiskOfOpponentNodes(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        if(node.isFinalNode()) {
+            return node.getWrappedState().isRiskHit() ?  1.0 : 0.0;
+        }
+        if(node.isPlayerTurn()) {
+            return 0.0;
+        }
+        if(node.isLeaf()) {
+            throw new IllegalStateException("Risk can't be calculated from leaf nodes which are not player turns. Tree should be expanded up to player or final nodes");
+        }
+        return node
+            .getChildNodeStream()
+            .map(x -> new ImmutableTuple<>(x, x.getSearchNodeMetadata().getPriorProbability()))
+            .mapToDouble(x -> calculateRiskOfOpponentNodes(x.getFirst()) * x.getSecond())
+            .sum();
+    }
+
     @Override
     public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         checkApplicableAction(action);
@@ -61,11 +91,14 @@ public class RiskAverseSearchTree<
         if(!getRoot().getChildNodeMap().containsKey(action)) {
             throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
         }
+//        logger.info("Old Global risk: [{}] and applying action: [{}]", totalRiskAllowed, action);
         isFlowOptimized = false;
         if(action.isPlayerAction()) {
             calculateNumericallyStableNewRiskThreshold(action);
         }
-        return innerApplyAction(action);
+        var stateReward = innerApplyAction(action);
+//        logger.info("New Global risk: [{}]", totalRiskAllowed);
+        return stateReward;
     }
 
     @Override
@@ -75,7 +108,12 @@ public class RiskAverseSearchTree<
     }
 
     private void calculateNumericallyStableNewRiskThreshold(TAction appliedAction) {
+
         double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
+        // vypocitat risk z druhycho pootomku (az muj node) a pak vynasobit pravdepodobnosti (jsou dve  - mono vice) ze do nich pujdu
+
+
+        // pokud exploruji, tak brat pravdepodobnost z te distribuce, kterou epxloruji
         double riskDiff = calculateNumericallyStableRiskDiff(riskOfOtherActions);
         double actionProbability = calculateNumericallyStableActionProbability(getRoot()
             .getChildNodeMap()
@@ -185,6 +223,7 @@ public class RiskAverseSearchTree<
                 if(node.getWrappedState().isRiskHit()) {
                     risk += node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
                 }
+                // TODO: go through all lists and add risk according to predictions
             } else {
                 for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
                     queue.addLast(entry.getValue());

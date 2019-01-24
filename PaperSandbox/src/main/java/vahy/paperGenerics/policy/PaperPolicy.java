@@ -6,6 +6,8 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
 
+import java.util.List;
+
 public interface PaperPolicy<
     TAction extends Action,
     TReward extends Reward,
@@ -18,4 +20,6 @@ public interface PaperPolicy<
     TReward getEstimatedReward(TState gameState);
 
     double getEstimatedRisk(TState gameState);
+
+    List<TAction> getAllowedActionsForExploration();
 }

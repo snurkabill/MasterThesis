@@ -8,6 +8,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.policy.PaperPolicy;
 
+import java.util.List;
 import java.util.SplittableRandom;
 
 public class PaperEnvironmentPolicy extends EnvironmentPolicy implements PaperPolicy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
@@ -29,5 +30,10 @@ public class PaperEnvironmentPolicy extends EnvironmentPolicy implements PaperPo
     @Override
     public double getEstimatedRisk(HallwayStateImpl gameState) {
         return 0;
+    }
+
+    @Override
+    public List<HallwayAction> getAllowedActionsForExploration() {
+        return null; // this is it. TODO: EnvironmentPolicy should not implement paper policy
     }
 }

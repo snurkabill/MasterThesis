@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark07Solution {
+public class Benchmark06Solution {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
@@ -41,17 +41,17 @@ public class Benchmark07Solution {
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.4)
-            .stepPenalty(1)
-            .trapProbability(1)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(3)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_07)
+            .hallwayInstance(HallwayInstance.BENCHMARK_06)
             //MCTS
-            .cpuctParameter(3)
+            .cpuctParameter(5)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
@@ -61,7 +61,7 @@ public class Benchmark07Solution {
             .discountFactor(1)
 
             .batchEpisodeCount(100)
-            .stageCount(100)
+            .stageCount(1000)
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
@@ -72,15 +72,21 @@ public class Benchmark07Solution {
             .evalEpisodeCount(10000)
             .globalRiskAllowed(0.00)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0);
+//                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0) * 4;
+//                    return 2.0;
                 }
             })
             .buildExperimentSetup();
@@ -91,17 +97,17 @@ public class Benchmark07Solution {
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment2() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.4)
-            .stepPenalty(1)
-            .trapProbability(1)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(3)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_07)
+            .hallwayInstance(HallwayInstance.BENCHMARK_06)
             //MCTS
-            .cpuctParameter(3)
+            .cpuctParameter(5)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
@@ -111,7 +117,7 @@ public class Benchmark07Solution {
             .discountFactor(1)
 
             .batchEpisodeCount(100)
-            .stageCount(100)
+            .stageCount(1000)
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
@@ -120,17 +126,23 @@ public class Benchmark07Solution {
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.25)
+            .globalRiskAllowed(0.5)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0);
+//                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0) * 4;
+//                    return 2.0;
                 }
             })
             .buildExperimentSetup();

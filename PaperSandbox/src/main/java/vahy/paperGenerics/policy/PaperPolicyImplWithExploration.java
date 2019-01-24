@@ -11,6 +11,7 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
@@ -47,6 +48,11 @@ public class PaperPolicyImplWithExploration<
     }
 
     @Override
+    public List<TAction> getAllowedActionsForExploration() {
+        return innerPolicy.getAllowedActionsForExploration();
+    }
+
+    @Override
     public double[] getPriorActionProbabilityDistribution(TState gameState) {
         return innerPolicy.getPriorActionProbabilityDistribution(gameState);
     }
@@ -74,7 +80,20 @@ public class PaperPolicyImplWithExploration<
             logger.debug("Exploitation action [{}].", discreteAction);
             return discreteAction;
         } else {
-            updateMask(gameState.getAllPossibleActions());
+
+            TAction[] stateAllowedActions = gameState.getAllPossibleActions();
+            List<TAction> policyAllowedActions = innerPolicy.getAllowedActionsForExploration();
+
+            var allowedActions = new LinkedList<TAction>();
+            for (TAction policyAllowedAction : policyAllowedActions) { // N * N
+                for (TAction stateAllowedAction : stateAllowedActions) {
+                    if (stateAllowedAction == policyAllowedAction) {
+                        allowedActions.add(stateAllowedAction);
+                        break;
+                    }
+                }
+            }
+            updateMask(allowedActions);
 
             double[] actionDistribution = this.getActionProbabilityDistribution(gameState);
             for (int i = 0; i < actionDistribution.length; i++) {
@@ -90,7 +109,7 @@ public class PaperPolicyImplWithExploration<
         }
     }
 
-    private void updateMask(TAction[] possibleActions) {
+    private void updateMask(List<TAction> possibleActions) {
         for (int i = 0; i < playerActions.size(); i++) {
             this.actionMask[i] = false;
             for (TAction possibleAction : possibleActions) {

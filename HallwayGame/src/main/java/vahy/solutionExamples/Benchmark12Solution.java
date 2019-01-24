@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark07Solution {
+public class Benchmark12Solution {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
@@ -29,8 +29,7 @@ public class Benchmark07Solution {
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
 
-
-        // EXAMPLE 2
+        //  EXAMPLE 2
 //        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
 //        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
 //        new Experiment().prepareAndRun(setup, random);
@@ -41,101 +40,52 @@ public class Benchmark07Solution {
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.4)
-            .stepPenalty(1)
-            .trapProbability(1)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(2)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_07)
+            .hallwayInstance(HallwayInstance.BENCHMARK_12)
             //MCTS
-            .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .cpuctParameter(5)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
-            // REINFORCEMENT
+            // REINFORCEMENTs
             .discountFactor(1)
-
             .batchEpisodeCount(100)
             .stageCount(100)
-
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
-
-            .replayBufferSize(10000)
+            .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.00)
+            .evalEpisodeCount(1000)
+            .globalRiskAllowed(0.2)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+//                 return Math.exp(-callCount / 10000.0);
+                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+//                return Math.exp(-callCount / 10000.0) * 3;
+                    return 2.0;
                 }
             })
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }
-
-
-    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment2() {
-        GameConfig gameConfig = new ConfigBuilder()
-            .reward(100)
-            .noisyMoveProbability(0.4)
-            .stepPenalty(1)
-            .trapProbability(1)
-            .stateRepresentation(StateRepresentation.COMPACT)
-            .buildConfig();
-
-        ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
-            .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_07)
-            //MCTS
-            .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(0)
-            .trainingEpochCount(0)
-            // REINFORCEMENT
-            .discountFactor(1)
-
-            .batchEpisodeCount(100)
-            .stageCount(100)
-
-            .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
-
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.25)
-            .explorationConstantSupplier(new Supplier<>() {
-                @Override
-                public Double get() {
-                    return 0.0;
-                }
-            })
-            .temperatureSupplier(new Supplier<>() {
-                @Override
-                public Double get() {
-                    return 0.0;
-                }
-            })
-            .buildExperimentSetup();
-        return new ImmutableTuple<>(gameConfig, experimentSetup);
-    }
-
-
 }
