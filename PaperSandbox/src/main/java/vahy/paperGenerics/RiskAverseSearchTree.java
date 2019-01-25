@@ -155,7 +155,13 @@ public class RiskAverseSearchTree<
             double riskDiff = calculateNumericallyStableRiskDiff(totalOtherActionsRiskSum);
             totalRiskAllowed = calculateNewRiskValue(
                 riskDiff,
-                parentPathProbability * getOpponentActionProbability(appliedAction),
+                // parentPathProbability * getOpponentActionProbability(appliedAction),
+                parentPathProbability * calculateNumericallyStableActionProbability(getRoot()
+                        .getChildNodeMap()
+                        .get(appliedAction)
+                        .getSearchNodeMetadata()
+                        .getNodeProbabilityFlow()
+                        .getSolution()),
                 totalOtherActionsRiskSum,
                 appliedAction);
         } else {
@@ -173,10 +179,17 @@ public class RiskAverseSearchTree<
         double riskOfOtherActions = 0.0;
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             if(entry.getKey() != appliedAction) {
-                double risk = calculateRiskContributionPerOneAction(entry.getValue(), getPlayerActionProbability(entry.getKey()));
+//                double risk = calculateRiskContributionPerOneAction(entry.getValue(), getPlayerActionProbability(entry.getKey()));
+                double risk = calculateRiskContributionInSubTree(entry.getValue()) * (getRoot().isPlayerTurn() ? getPlayerActionProbability(entry.getKey()) : 1.0);
+//                double risk = calculateRiskContributionInSubTree(entry.getValue()) * calculateNumericallyStableActionProbability(getRoot()
+//                    .getChildNodeMap()
+//                    .get(appliedAction)
+//                    .getSearchNodeMetadata()
+//                    .getNodeProbabilityFlow()
+//                    .getSolution());
+
                 logger.debug("Risk for [{}] action-subtree is [{}]", entry.getKey(), risk);
                 riskOfOtherActions += risk;
-//                riskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
             }
         }
 
@@ -263,18 +276,18 @@ public class RiskAverseSearchTree<
         return riskDiff;
     }
 
-    private double calculateRiskContributionPerOneAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double nodeProbability) {
-        return calculateRiskContributionInSubTree(node) * (node.isPlayerTurn() ? 1.0 :  nodeProbability);
-
-//        if(node.isPlayerTurn()) {
-//            return calculateRiskContributionInSubTree(node) * nodeProbability;
-//        } else {
-//            return node
-//                .getChildNodeStream()
-//                .mapToDouble(x -> calculateRiskContributionPerOneAction(x, x.getSearchNodeMetadata().getPriorProbability()))
-//                .sum() * nodeProbability;
-//        }
-    }
+//    private double calculateRiskContributionPerOneAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double nodeProbability) {
+//        return calculateRiskContributionInSubTree(node) * (node.isPlayerTurn() ? 1.0 :  nodeProbability);
+//
+////        if(node.isPlayerTurn()) {
+////            return calculateRiskContributionInSubTree(node) * nodeProbability;
+////        } else {
+////            return node
+////                .getChildNodeStream()
+////                .mapToDouble(x -> calculateRiskContributionPerOneAction(x, x.getSearchNodeMetadata().getPriorProbability()))
+////                .sum() * nodeProbability;
+////        }
+//    }
 
     private double calculateRiskContributionInSubTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
@@ -287,6 +300,7 @@ public class RiskAverseSearchTree<
             if(node.isLeaf()) {
                 if(node.isFinalNode()) {
                     risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() : 0.0;
+//                    risk += node.getWrappedState().isRiskHit() ? 1.0 : 0.0;
                 } else {
 //                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
 

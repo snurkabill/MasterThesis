@@ -66,7 +66,7 @@ public class Benchmark12Solution {
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.0)
+            .globalRiskAllowed(0.2)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
