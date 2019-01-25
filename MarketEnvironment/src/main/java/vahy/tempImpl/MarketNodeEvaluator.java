@@ -86,6 +86,11 @@ public class MarketNodeEvaluator implements TrainableNodeEvaluator<MarketAction,
         trainableApproximator.train(trainData);
     }
 
+    @Override
+    public double[] evaluate(DoubleVector observation) {
+        throw new UnsupportedOperationException("Not implemented now");
+    }
+
     public int getNodesExpandedCount() {
         return nodesExpandedCount;
     }

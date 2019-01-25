@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark12Solution {
+public class Benchmark13Solution {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
@@ -48,10 +48,10 @@ public class Benchmark12Solution {
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_12)
+            .hallwayInstance(HallwayInstance.BENCHMARK_13)
             //MCTS
             .cpuctParameter(10)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(500))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)

@@ -34,6 +34,8 @@ public class RiskAverseSearchTree<
 
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
+    private double parentPathProbability = 0.0;
+    private double acumulatedRiskOfOtherActions = 0.0;
 
     public RiskAverseSearchTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
                                 NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
@@ -91,13 +93,19 @@ public class RiskAverseSearchTree<
         if(!getRoot().getChildNodeMap().containsKey(action)) {
             throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
         }
-//        logger.info("Old Global risk: [{}] and applying action: [{}]", totalRiskAllowed, action);
+        logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction() ? getPlayerActionProbability(action) : getOpponentActionProbability(action));
+        logger.debug("Action probability distribution: [{}]", getRoot()
+            .getChildNodeStream()
+            .map(x -> action.isPlayerAction() ? getPlayerActionProbability(x.getAppliedAction()) : getOpponentActionProbability(x.getAppliedAction()))
+            .map(Object::toString)
+            .reduce((s, s2) -> s + ", " + s2)
+            .orElseThrow(() -> new IllegalStateException("Reduce op does not exists")));
         isFlowOptimized = false;
-        if(action.isPlayerAction()) {
-            calculateNumericallyStableNewRiskThreshold(action);
-        }
+
+        calculateNumericallyStableNewRiskThreshold(action);
+
         var stateReward = innerApplyAction(action);
-//        logger.info("New Global risk: [{}]", totalRiskAllowed);
+        logger.debug("New Global risk: [{}]", totalRiskAllowed);
         return stateReward;
     }
 
@@ -107,39 +115,79 @@ public class RiskAverseSearchTree<
         return super.updateTree();
     }
 
-    private void calculateNumericallyStableNewRiskThreshold(TAction appliedAction) {
-
-        double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
-        // vypocitat risk z druhycho pootomku (az muj node) a pak vynasobit pravdepodobnosti (jsou dve  - mono vice) ze do nich pujdu
-
-
-        // pokud exploruji, tak brat pravdepodobnost z te distribuce, kterou epxloruji
-        double riskDiff = calculateNumericallyStableRiskDiff(riskOfOtherActions);
-        double actionProbability = calculateNumericallyStableActionProbability(getRoot()
+    private double getPlayerActionProbability(TAction appliedAction) {
+        return calculateNumericallyStableActionProbability(getRoot()
             .getChildNodeMap()
             .get(appliedAction)
             .getSearchNodeMetadata()
             .getNodeProbabilityFlow()
             .getSolution());
-        totalRiskAllowed = calculateNewRiskValue(riskDiff, actionProbability, riskOfOtherActions, appliedAction);
+    }
+
+    private double getOpponentActionProbability(TAction appliedAction) {
+        return getRoot()
+            .getChildNodeMap()
+            .get(appliedAction)
+            .getSearchNodeMetadata()
+            .getPriorProbability();
+    }
+
+    private void calculateNumericallyStableNewRiskThreshold(TAction appliedAction) {
+
+        if(getRoot().getChildNodeMap().get(appliedAction).isFinalNode()) {
+            totalRiskAllowed = 1.0; // CORRECT?
+            return;
+        }
+
+        // TODO: pokud exploruji, tak brat pravdepodobnost z distribuce, kterou epxloruji a ne z linearni optimalizace
+
+        if(appliedAction.isPlayerAction()) {
+            parentPathProbability = 0.0;
+            acumulatedRiskOfOtherActions = 0.0;
+        }
+        double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
+        if(getRoot().getChildNodeMap().get(appliedAction).isPlayerTurn()) {
+            if(getRoot().isPlayerTurn()) {
+                //TODO: why the fuck do I allow opponent to play multiple actions but player can play only one in a row?
+                throw new IllegalStateException("Player can't play two actions in a row");
+            }
+            double totalOtherActionsRiskSum = acumulatedRiskOfOtherActions + riskOfOtherActions;
+            double riskDiff = calculateNumericallyStableRiskDiff(totalOtherActionsRiskSum);
+            totalRiskAllowed = calculateNewRiskValue(
+                riskDiff,
+                parentPathProbability * getOpponentActionProbability(appliedAction),
+                totalOtherActionsRiskSum,
+                appliedAction);
+        } else {
+            if(appliedAction.isPlayerAction()) {
+                acumulatedRiskOfOtherActions += riskOfOtherActions;
+                parentPathProbability = getPlayerActionProbability(appliedAction);
+            } else {
+                acumulatedRiskOfOtherActions += riskOfOtherActions * parentPathProbability;
+                parentPathProbability *= getOpponentActionProbability(appliedAction);
+            }
+        }
     }
 
     private double calculateNumericallyStableRiskOfAnotherActions(TAction appliedAction) {
         double riskOfOtherActions = 0.0;
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             if(entry.getKey() != appliedAction) {
-                riskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
+                double risk = calculateRiskContributionPerOneAction(entry.getValue(), getPlayerActionProbability(entry.getKey()));
+                logger.debug("Risk for [{}] action-subtree is [{}]", entry.getKey(), risk);
+                riskOfOtherActions += risk;
+//                riskOfOtherActions += calculateRiskContributionInSubTree(entry.getValue());
             }
         }
 
         if(Math.abs(riskOfOtherActions) < NUMERICAL_ACTION_RISK_TOLERANCE) {
             if (riskOfOtherActions != 0.0) {
-                logger.trace("Rounding risk of other actions to 0. This is done because linear optimization is not numerically stable");
+                logger.debug("Rounding risk of other actions to 0. This is done because linear optimization is not numerically stable");
             }
             return 0.0;
         } else if(Math.abs(riskOfOtherActions - 1.0) < NUMERICAL_ACTION_RISK_TOLERANCE) {
             if(riskOfOtherActions != 1.0) {
-                logger.trace("Rounding risk of other actions to 1. This is done because linear optimization is not numerically stable");
+                logger.debug("Rounding risk of other actions to 1. This is done because linear optimization is not numerically stable");
             }
             return 1.0;
         } else if(riskOfOtherActions < 0.0) {
@@ -153,47 +201,51 @@ public class RiskAverseSearchTree<
 
     private double calculateNewRiskValue(double riskDiff, double actionProbability, double riskOfOtherActions, TAction appliedAction) {
         if(actionProbability == 0.0) {
-            logger.trace("Taken action with zero probability according to linear optimization. Setting risk to 1.0, since such action is probably taken due to exploration.");
+            logger.debug("Taken action with zero probability according to linear optimization. Setting risk to 1.0, since such action is probably taken due to exploration.");
             return 1.0;
-        } else {
-            double newRisk = riskDiff / actionProbability;
-            if((newRisk < -NUMERICAL_RISK_DIFF_TOLERANCE) || (newRisk - 1.0 > NUMERICAL_RISK_DIFF_TOLERANCE)) {
-                throw new IllegalStateException(
-                    "Risk out of bounds. " +
-                        "Old risk [" + totalRiskAllowed + "]. " +
-                        "Risk diff numerically stabilised: [" +  riskDiff + "] " +
-                        "New risk calculated: [" + newRisk + "], " +
-                        "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
-                        "Dividing probability: [" + getRoot().getChildNodeMap().get(appliedAction).getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() + "], " +
-                        "Numerically stabilised dividing probability: [" + actionProbability + "]");
-            }
-            if(newRisk > 1.0) {
-                logger.trace("Rounding new risk to 1.0.");
-                return 1.0;
-            }
-            if(newRisk < 0.0) {
-                logger.trace("Rounding newRisk to 0.0");
-                return 0.0;
-            }
-            return newRisk;
         }
+        if(Math.abs(totalRiskAllowed - 1.0) < NUMERICAL_ACTION_RISK_TOLERANCE) {
+            logger.warn("Risk is set to 1 already, no recalculation is needed");
+            return 1.0;
+        }
+        double newRisk = riskDiff / actionProbability;
+        if((newRisk < -NUMERICAL_RISK_DIFF_TOLERANCE) || (newRisk - 1.0 > NUMERICAL_RISK_DIFF_TOLERANCE)) {
+            throw new IllegalStateException(
+                "Risk out of bounds. " +
+                    "Old risk [" + totalRiskAllowed + "]. " +
+                    "Risk diff numerically stabilised: [" +  riskDiff + "] " +
+                    "New risk calculated: [" + newRisk + "], " +
+                    "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
+                    "Dividing probability: [" + getRoot().getChildNodeMap().get(appliedAction).getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() + "], " +
+                    "Numerically stabilised dividing probability: [" + actionProbability + "]");
+        }
+        if(newRisk > 1.0) {
+            logger.debug("Rounding new risk from [{}] to 1.0.", newRisk);
+            return 1.0;
+        }
+        if(newRisk < 0.0) {
+            logger.debug("Rounding newRisk from [{}] to 0.0", newRisk);
+            return 0.0;
+        }
+        return newRisk;
+
     }
 
     private double calculateNumericallyStableActionProbability(double calculatedProbability) {
         if(Math.abs(calculatedProbability) < NUMERICAL_PROBABILITY_TOLERANCE) {
             if (calculatedProbability != 0.0) {
-                logger.trace("Rounding action probability to 0. This is done because linear optimization is not numerically stable");
+                logger.debug("Rounding action probability from [{}] to 0. This is done because linear optimization is not numerically stable", calculatedProbability);
             }
             return 0.0;
         } else if(Math.abs(calculatedProbability - 1.0) < NUMERICAL_PROBABILITY_TOLERANCE) {
             if(calculatedProbability != 1.0) {
-                logger.trace("Rounding action probability to 1. This is done because linear optimization is not numerically stable");
+                logger.debug("Rounding action probability from [{}] to 1. This is done because linear optimization is not numerically stable", calculatedProbability);
             }
             return 1.0;
         } else if(calculatedProbability < 0.0) {
-            throw new IllegalStateException("Probability cannot be lower than 0. This would cause program failure later in simulation");
+            throw new IllegalStateException("Probability cannot be lower than 0. Actual value: [" + calculatedProbability + "]. This would cause program failure later in simulation");
         } else if(calculatedProbability > 1.0) {
-            throw new IllegalStateException("Probability cannot be higher than 1. This would cause program failure later in simulation");
+            throw new IllegalStateException("Probability cannot be higher than 1. Actual value: [" + calculatedProbability + "]. This would cause program failure later in simulation");
         }
         return calculatedProbability;
     }
@@ -202,13 +254,26 @@ public class RiskAverseSearchTree<
         double riskDiff = (totalRiskAllowed - totalRiskOfOtherActions);
         if(Math.abs(riskDiff) < NUMERICAL_RISK_DIFF_TOLERANCE) {
             if(riskDiff != 0) {
-                logger.trace("Rounding risk difference to 0. This si done because linear optimization is not numerically stable");
+                logger.debug("Rounding risk difference to 0. This si done because linear optimization is not numerically stable");
             }
             riskDiff = 0.0;
         } else if(riskDiff < 0.0) {
             throw new IllegalStateException("Risk difference is out of bounds. New risk difference [" + riskDiff + "]. Risk exceeds tolerated bound: [" + -NUMERICAL_RISK_DIFF_TOLERANCE + "]");
         }
         return riskDiff;
+    }
+
+    private double calculateRiskContributionPerOneAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double nodeProbability) {
+        return calculateRiskContributionInSubTree(node) * (node.isPlayerTurn() ? 1.0 :  nodeProbability);
+
+//        if(node.isPlayerTurn()) {
+//            return calculateRiskContributionInSubTree(node) * nodeProbability;
+//        } else {
+//            return node
+//                .getChildNodeStream()
+//                .mapToDouble(x -> calculateRiskContributionPerOneAction(x, x.getSearchNodeMetadata().getPriorProbability()))
+//                .sum() * nodeProbability;
+//        }
     }
 
     private double calculateRiskContributionInSubTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
@@ -220,10 +285,12 @@ public class RiskAverseSearchTree<
         while(!queue.isEmpty()) {
             SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
             if(node.isLeaf()) {
-                if(node.getWrappedState().isRiskHit()) {
-                    risk += node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
+                if(node.isFinalNode()) {
+                    risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() : 0.0;
+                } else {
+//                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
+
                 }
-                // TODO: go through all lists and add risk according to predictions
             } else {
                 for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
                     queue.addLast(entry.getValue());

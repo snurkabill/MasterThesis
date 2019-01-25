@@ -93,6 +93,17 @@ public class PaperNodeSelector<
                 .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
                 .getFirst();
         } else {
+//
+//            Map<TAction, Integer> justTempMap = new HashMap<>();
+//            for (int i = 0; i < 100000; i++) {
+//                TAction sampledAction = sampleOpponentAction(node);
+//                if(justTempMap.containsKey(sampledAction)) {
+//                    justTempMap.put(sampledAction, justTempMap.get(sampledAction) + 1);
+//                } else {
+//                    justTempMap.put(sampledAction, 1);
+//                }
+//            }
+
             return sampleOpponentAction(node);
         }
     }

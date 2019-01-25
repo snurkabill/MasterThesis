@@ -84,8 +84,7 @@ public class PaperPolicyImpl<
         expandSearchTree(gameState);
         optimizeFlow();
         double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
-        double rand = random.nextDouble();
-        double cumulativeSum = 0.0d;
+        double rand = random.nextDouble();double cumulativeSum = 0.0d;
         for (int i = 0; i < actionProbabilityDistribution.length; i++) {
             cumulativeSum += actionProbabilityDistribution[i];
             if(rand < cumulativeSum) {

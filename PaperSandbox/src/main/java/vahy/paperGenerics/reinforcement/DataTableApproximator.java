@@ -13,7 +13,7 @@ public class DataTableApproximator<TObservation extends DoubleVector> extends Tr
         super(null);
     }
 
-    private static double[] defaultPrediction = {0.0, 0.5, 1/3.0, 1/3.0, 1/3.0};
+    private static double[] defaultPrediction = {0.0, 0.0, 1/3.0, 1/3.0, 1/3.0};
     private HashMap<TObservation, double[]> predictionMap = new HashMap<>();
 
     @Override
