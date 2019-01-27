@@ -66,7 +66,7 @@ public abstract class AbstractGameSampler<
 //            logger.info("Action history: [{}]", episodeResult.printActionHistory());
         }
 
-//        if(logger.isDebugEnabled()) {
+        if(logger.isInfoEnabled()) {
             double avgRisk = paperEpisodeHistoryList
                 .stream()
                 .mapToDouble(x -> x.isRiskHit() ? 1.0 : 0.0)
@@ -89,7 +89,7 @@ public abstract class AbstractGameSampler<
             avgStepCountVisualization.draw(DataSeriesCreator.createDataset(stepCountSeries));
             avgRewardVisualization.draw(DataSeriesCreator.createDataset(totalRewardSeries));
             avgRiskHitVisualization.draw(DataSeriesCreator.createDataset(riskHitSeries));
-//        }
+        }
         sampledBatches++;
         return paperEpisodeHistoryList;
     }

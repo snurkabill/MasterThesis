@@ -24,6 +24,7 @@ import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
+import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
@@ -44,11 +45,24 @@ import vahy.utils.ImmutableTuple;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.SplittableRandom;
 
 public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
+
+    private List<PaperPolicyResults<
+        HallwayAction,
+        DoubleReward,
+        DoubleVector,
+        EnvironmentProbabilities,
+        PaperMetadata<HallwayAction, DoubleReward>,
+        HallwayStateImpl>> results;
+
+    public List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> getResults() {
+        return results;
+    }
 
     public void prepareAndRun(ImmutableTuple<GameConfig, ExperimentSetup> setup, SplittableRandom random) throws NotValidGameStringRepresentationException, IOException {
         initializeModelAndRun(setup, random);
@@ -138,17 +152,8 @@ public class Experiment {
             experimentSetup.getReplayBufferSize(),
             experimentSetup.getMaximalStepCountBound());
 
-        runProcess(experimentSetup, trainer, random, hallwayGameInitialInstanceSupplier, nnbasedEvaluator, nnBasedPolicySupplier);
-    }
-
-    private void runProcess(ExperimentSetup experimentSetup,
-                                   AbstractTrainer trainer,
-                                   SplittableRandom random,
-                                   HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
-                                   PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnbasedEvaluator,
-                                   PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier) {
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        evaluatePolicy(random, hallwayGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
+        this.results = evaluatePolicy(random, hallwayGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -161,12 +166,20 @@ public class Experiment {
         return System.currentTimeMillis() - trainingStart;
     }
 
-    private void evaluatePolicy(SplittableRandom random,
-                                       HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
-                                       ExperimentSetup experimentSetup,
-                                       PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnbasedEvaluator,
-                                       PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier,
-                                       long trainingTimeInMs) {
+    private List<PaperPolicyResults<
+        HallwayAction,
+        DoubleReward,
+        DoubleVector,
+        EnvironmentProbabilities,
+        PaperMetadata<HallwayAction, DoubleReward>,
+        HallwayStateImpl>>
+    evaluatePolicy(
+            SplittableRandom random,
+            HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
+            ExperimentSetup experimentSetup,
+            PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnbasedEvaluator,
+            PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier,
+            long trainingTimeInMs) {
         logger.info("PaperPolicy test starts");
         String nnBasedPolicyName = "NNBased";
         var benchmark = new PaperBenchmark<>(
@@ -190,6 +203,8 @@ public class Experiment {
         logger.info("NN Based kill ratio: [{}]", nnResults.getRiskHitRatio());
         logger.info("NN Based kill counter: [{}]", nnResults.getRiskHitCounter());
         logger.info("NN Based training time: [{}]ms", trainingTimeInMs);
+
+        return policyResultList;
     }
 
     private AbstractTrainer<
