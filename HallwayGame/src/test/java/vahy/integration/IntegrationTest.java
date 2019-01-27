@@ -79,7 +79,7 @@ public class IntegrationTest {
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(1000)
+            .evalEpisodeCount(10000)
             .globalRiskAllowed(0.05)
             .explorationConstantSupplier(() -> 0.2)
             .temperatureSupplier(() -> 2.0)
