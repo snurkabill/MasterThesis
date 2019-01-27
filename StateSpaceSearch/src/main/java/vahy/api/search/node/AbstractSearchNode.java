@@ -14,7 +14,10 @@ public abstract class AbstractSearchNode<
     TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     implements SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private final TState wrappedState;
+    protected final boolean isFinalState;
+    protected final boolean isOpponentTurn;
+    protected final TAction[] allPossibleActions;
+    protected final TState wrappedState;
     private final TSearchNodeMetadata searchNodeMetadata;
     private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent;
     private TAction appliedParentAction;
@@ -28,6 +31,9 @@ public abstract class AbstractSearchNode<
         this.searchNodeMetadata = searchNodeMetadata;
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
+        this.isFinalState = wrappedState.isFinalState();
+        this.isOpponentTurn = wrappedState.isOpponentTurn();
+        this.allPossibleActions = wrappedState.getAllPossibleActions();
     }
 
     @Override
@@ -42,7 +48,7 @@ public abstract class AbstractSearchNode<
 
     @Override
     public TAction[] getAllPossibleActions() {
-        return wrappedState.getAllPossibleActions();
+        return allPossibleActions;
     }
 
     @Override
@@ -57,7 +63,7 @@ public abstract class AbstractSearchNode<
 
     @Override
     public boolean isFinalNode() {
-        return wrappedState.isFinalState();
+        return isFinalState;
     }
 
     @Override
@@ -67,7 +73,7 @@ public abstract class AbstractSearchNode<
 
     @Override
     public boolean isOpponentTurn() {
-        return wrappedState.isOpponentTurn();
+        return isOpponentTurn;
     }
 
     @Override
