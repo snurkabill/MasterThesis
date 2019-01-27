@@ -26,8 +26,6 @@ public class PaperNodeSelector<
     TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> {
 
-    public static final double TOLERANCE = Math.pow(10, -15);
-
     private final double cpuctParameter;
     protected final SplittableRandom random;
 
