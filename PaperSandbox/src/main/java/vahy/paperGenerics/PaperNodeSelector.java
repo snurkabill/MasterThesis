@@ -16,7 +16,6 @@ import java.util.Comparator;
 import java.util.OptionalDouble;
 import java.util.SplittableRandom;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 public class PaperNodeSelector<
@@ -63,33 +62,54 @@ public class PaperNodeSelector<
     }
 
     protected final TAction sampleOpponentAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
-        ArrayList<ImmutableTuple<TAction, Double>> actions = node.getChildNodeStream()
-            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
-            .collect(Collectors.toCollection(ArrayList::new));
-        return actions
-            .get(RandomDistributionUtils.getRandomIndexFromDistribution(actions
-                .stream()
-                .map(ImmutableTuple::getSecond)
-                .collect(Collectors.toList()), random))
-            .getFirst();
+        var actions = new ArrayList<TAction>();
+        var priorProbabilities = new double[node.getChildNodeMap().size()];
+        int index = 0;
+        for(var entry : node.getChildNodeMap().values()) {
+            actions.add(entry.getAppliedAction());
+            priorProbabilities[index] = entry.getSearchNodeMetadata().getPriorProbability();
+            index++;
+        }
+        int randomIndex = RandomDistributionUtils.getRandomIndexFromDistribution(priorProbabilities, random);
+        return actions.get(randomIndex);
     }
 
     @Override
     protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
-        if(node.isPlayerTurn()) {
+        if(!node.isOpponentTurn()) {
             int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
 //            final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
 //            final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
 
-            ImmutableTuple<Double, Double> minMax = getMinMax(node);
-            final double min = minMax.getFirst();
-            final double max = minMax.getSecond();
-            assert(min <= max); // paranoia
+            double maxHelp = -Double.MAX_VALUE;
+            double minHelp = Double.MAX_VALUE;
+
+            var childNodeMap = node.getChildNodeMap();
+            for (var entry : childNodeMap.values()) {
+                double value = entry.getSearchNodeMetadata().getExpectedReward().getValue() + entry.getSearchNodeMetadata().getGainedReward().getValue();
+                if(maxHelp < value) {
+                    maxHelp = value;
+                }
+                if(minHelp > value) {
+                    minHelp = value;
+                }
+            }
+
+            double max = maxHelp;
+            double min = minHelp;
 
             return node
                 .getChildNodeStream()
-                .map(getSearchNodeImmutableTupleFunction(totalNodeVisitCount, min, max))
+                .map(x -> {
+                    var metadata = x.getSearchNodeMetadata();
+                    TAction action = x.getAppliedAction();
+                    double uValue = calculateUValue(metadata.getPriorProbability(), metadata.getVisitCounter(), totalNodeVisitCount);
+                    double qValue = max == min
+                        ? 0.5
+                        : (((metadata.getExpectedReward().getValue() + metadata.getGainedReward().getValue()) - min) / (max - min));
+                    return new ImmutableTuple<>(action, qValue + uValue);
+                })
                 .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
                 .getFirst();
         } else {
