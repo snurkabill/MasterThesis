@@ -42,7 +42,7 @@ public class Benchmark12Solution {
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(2)
-            .trapProbability(0.2)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
@@ -50,17 +50,17 @@ public class Benchmark12Solution {
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_12)
             //MCTS
-            .cpuctParameter(10)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(500))
+            .cpuctParameter(5)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
-            // REINFORCEMENTs
+            // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
             .stageCount(100)
-            .maximalStepCountBound(1000)
+            .maximalStepCountBound(100)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .replayBufferSize(20000)
@@ -73,7 +73,7 @@ public class Benchmark12Solution {
                 public Double get() {
                     callCount++;
 //                 return Math.exp(-callCount / 10000.0);
-                    return 0.0;
+                    return 0.05;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -82,7 +82,7 @@ public class Benchmark12Solution {
                 public Double get() {
                     callCount++;
 //                return Math.exp(-callCount / 10000.0) * 3;
-                    return 2.0;
+                    return 1.5;
                 }
             })
             .buildExperimentSetup();

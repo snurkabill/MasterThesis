@@ -13,7 +13,8 @@ public interface PaperPolicy<
     TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> extends Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     double[] getPriorActionProbabilityDistribution(TState gameState);
 

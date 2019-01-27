@@ -33,7 +33,7 @@ public class PaperPolicyImpl<
     private final RewardAggregator<TReward> rewardAggregator;
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
-    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
+
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
@@ -64,7 +64,7 @@ public class PaperPolicyImpl<
     @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
-        optimizeFlow();
+        riskAverseSearchTree.optimizeFlow();
         double[] vector = new double[gameState.isPlayerTurn() ? playerActions.size() : environmentActions.size()];
         List<ImmutableTuple<TAction, Double>> actionDoubleList = this.searchTree
             .getRoot()
@@ -82,7 +82,7 @@ public class PaperPolicyImpl<
     public TAction getDiscreteAction(TState gameState) {
         checkStateRoot(gameState);
         expandSearchTree(gameState);
-        optimizeFlow();
+        riskAverseSearchTree.optimizeFlow();
         double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
         double rand = random.nextDouble();double cumulativeSum = 0.0d;
         for (int i = 0; i < actionProbabilityDistribution.length; i++) {
@@ -114,7 +114,6 @@ public class PaperPolicyImpl<
     public TReward getEstimatedReward(TState gameState) {
         checkStateRoot(gameState);
         TSearchNodeMetadata searchNodeMetadata = searchTree.getRoot().getSearchNodeMetadata();
-        // return rewardAggregator.aggregate(searchNodeMetadata.getExpectedReward(), rewardAggregator.negate(searchNodeMetadata.getCumulativeReward()));
         return searchNodeMetadata.getExpectedReward();
     }
 
@@ -122,12 +121,5 @@ public class PaperPolicyImpl<
     public double getEstimatedRisk(TState gameState) {
         checkStateRoot(gameState);
         return searchTree.getRoot().getSearchNodeMetadata().getPredictedRisk();
-    }
-
-    public void optimizeFlow() {
-        if(!riskAverseSearchTree.isFlowOptimized()) {
-            optimalFlowCalculator.calculateFlow(searchTree.getRoot(), riskAverseSearchTree.getTotalRiskAllowed());
-            riskAverseSearchTree.setFlowOptimized(true);
-        }
     }
 }

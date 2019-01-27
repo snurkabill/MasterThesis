@@ -32,7 +32,7 @@ public class OptimalFlowCalculator<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
-    public double calculateFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root, double totalRiskAllowed) {
+    public boolean calculateFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root, double totalRiskAllowed) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         CLP model = new CLP();
         LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
@@ -84,12 +84,13 @@ public class OptimalFlowCalculator<
         long startOptimalization = System.currentTimeMillis();
         CLP.STATUS status = model.maximize();
         if(status != CLP.STATUS.OPTIMAL) {
-
-            throw new IllegalStateException("Optimal solution was not found");
+            logger.error("Optimal solution was not found.");
+            return false;
+//            throw new IllegalStateException("Optimal solution was not found");
         }
         long finishOptimalization = System.currentTimeMillis();
         logger.debug("Optimizing linear program took [{}] ms", finishOptimalization - startOptimalization);
-        return model.getObjectiveValue();
+        return true;
     }
 
     public void addChildFlowBasedOnFixedProbabilitiesExpression(CLP model,

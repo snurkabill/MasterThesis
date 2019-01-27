@@ -11,6 +11,7 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
+import vahy.paperGenerics.policy.OptimalFlowCalculator;
 import vahy.utils.ImmutableTuple;
 
 import java.util.LinkedList;
@@ -28,10 +29,12 @@ public class RiskAverseSearchTree<
 
     private static final Logger logger = LoggerFactory.getLogger(RiskAverseSearchTree.class);
 
-    public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -10);
-    public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -10);
-    public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -10);
+    public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -13);
+    public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
+    public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
 
+    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
+    private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> latestTreeWithPlayerOnTurn = null;
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
     private double parentPathProbability = 0.0;
@@ -46,16 +49,15 @@ public class RiskAverseSearchTree<
         this.totalRiskAllowed = totalRiskAllowed;
     }
 
-    public double getTotalRiskAllowed() {
-        return totalRiskAllowed;
-    }
-
-    public boolean isFlowOptimized() {
-        return isFlowOptimized;
-    }
-
-    public void setFlowOptimized(boolean flowOptimized) {
-        isFlowOptimized = flowOptimized;
+    public void optimizeFlow() {
+        if(!isFlowOptimized) {
+            boolean optimalSolutionExists = optimalFlowCalculator.calculateFlow(getRoot(), totalRiskAllowed);
+            if(!optimalSolutionExists) {
+                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0");
+                totalRiskAllowed = 1.0;
+            }
+            isFlowOptimized = true;
+        }
     }
 
     public List<TAction> getAllowedActionsForExploration() {
@@ -92,6 +94,9 @@ public class RiskAverseSearchTree<
         // TODO make general in applicable action
         if(!getRoot().getChildNodeMap().containsKey(action)) {
             throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
+        }
+        if(action.isPlayerAction()) {
+            latestTreeWithPlayerOnTurn = this.getRoot();
         }
         logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction() ? getPlayerActionProbability(action) : getOpponentActionProbability(action));
         logger.debug("Action probability distribution: [{}]", getRoot()
@@ -156,7 +161,8 @@ public class RiskAverseSearchTree<
             totalRiskAllowed = calculateNewRiskValue(
                 riskDiff,
                 // parentPathProbability * getOpponentActionProbability(appliedAction),
-                parentPathProbability * calculateNumericallyStableActionProbability(getRoot()
+//                parentPathProbability *
+                    calculateNumericallyStableActionProbability(getRoot()
                         .getChildNodeMap()
                         .get(appliedAction)
                         .getSearchNodeMetadata()
@@ -179,8 +185,9 @@ public class RiskAverseSearchTree<
         double riskOfOtherActions = 0.0;
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             if(entry.getKey() != appliedAction) {
+                double risk = calculateRiskContributionInSubTree(entry.getValue());
 //                double risk = calculateRiskContributionPerOneAction(entry.getValue(), getPlayerActionProbability(entry.getKey()));
-                double risk = calculateRiskContributionInSubTree(entry.getValue()) * (getRoot().isPlayerTurn() ? getPlayerActionProbability(entry.getKey()) : 1.0);
+//                double risk = calculateRiskContributionInSubTree(entry.getValue()) * (getRoot().isPlayerTurn() ? getPlayerActionProbability(entry.getKey()) : 1.0);
 //                double risk = calculateRiskContributionInSubTree(entry.getValue()) * calculateNumericallyStableActionProbability(getRoot()
 //                    .getChildNodeMap()
 //                    .get(appliedAction)
@@ -223,6 +230,11 @@ public class RiskAverseSearchTree<
         }
         double newRisk = riskDiff / actionProbability;
         if((newRisk < -NUMERICAL_RISK_DIFF_TOLERANCE) || (newRisk - 1.0 > NUMERICAL_RISK_DIFF_TOLERANCE)) {
+//            this.printTreeToFile(this.latestTreeWithPlayerOnTurn, "TreeDump_player", 100);
+//            this.printTreeToFile(this.getRoot(), "TreeDump_latest", 100);
+
+            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
+            this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
             throw new IllegalStateException(
                 "Risk out of bounds. " +
                     "Old risk [" + totalRiskAllowed + "]. " +
@@ -230,7 +242,9 @@ public class RiskAverseSearchTree<
                     "New risk calculated: [" + newRisk + "], " +
                     "Numerically stable risk of other actions: [" + riskOfOtherActions + "], " +
                     "Dividing probability: [" + getRoot().getChildNodeMap().get(appliedAction).getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() + "], " +
-                    "Numerically stabilised dividing probability: [" + actionProbability + "]");
+                    "Numerically stabilised dividing probability: [" + actionProbability + "]" +
+                    "In environment: " + System.lineSeparator() +
+                    "" + getRoot().getWrappedState().readableStringRepresentation());
         }
         if(newRisk > 1.0) {
             logger.debug("Rounding new risk from [{}] to 1.0.", newRisk);
@@ -312,6 +326,10 @@ public class RiskAverseSearchTree<
             }
         }
         return risk;
+    }
+
+    private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
+        printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);
     }
 
 }
