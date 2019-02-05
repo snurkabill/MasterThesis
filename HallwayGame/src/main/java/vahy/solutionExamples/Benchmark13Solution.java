@@ -40,9 +40,9 @@ public class Benchmark13Solution {
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.0)
+            .noisyMoveProbability(0.1)
             .stepPenalty(2)
-            .trapProbability(0.2)
+            .trapProbability(0.01)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
@@ -51,7 +51,7 @@ public class Benchmark13Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_13)
             //MCTS
             .cpuctParameter(10)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(400))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
@@ -59,21 +59,21 @@ public class Benchmark13Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .stageCount(100)
+            .stageCount(200)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.0)
+            .globalRiskAllowed(0.2)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
 //                 return Math.exp(-callCount / 10000.0);
-                    return 0.0;
+                    return 0.00;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -82,7 +82,7 @@ public class Benchmark13Solution {
                 public Double get() {
                     callCount++;
 //                return Math.exp(-callCount / 10000.0) * 3;
-                    return 2.0;
+                    return 1.5;
                 }
             })
             .buildExperimentSetup();
