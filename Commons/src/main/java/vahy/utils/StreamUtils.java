@@ -1,6 +1,6 @@
 package vahy.utils;
 
-import vahy.collectors.RandomizedMaxCollector;
+import vahy.collections.RandomizedMaxCollector;
 
 import java.util.Comparator;
 import java.util.SplittableRandom;

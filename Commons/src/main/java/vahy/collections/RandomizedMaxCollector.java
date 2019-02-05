@@ -1,4 +1,4 @@
-package vahy.collectors;
+package vahy.collections;
 
 import java.util.ArrayList;
 import java.util.Collections;
