@@ -8,13 +8,15 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.PaperState;
+import vahy.collections.RandomIterator;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.SplittableRandom;
 
 public class OptimalFlowCalculator<
     TAction extends Action,
@@ -32,6 +34,12 @@ public class OptimalFlowCalculator<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
+    private final SplittableRandom random;
+
+    public OptimalFlowCalculator(SplittableRandom random) {
+        this.random = random;
+    }
+
     public boolean calculateFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root, double totalRiskAllowed) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         CLP model = new CLP();
@@ -45,7 +53,12 @@ public class OptimalFlowCalculator<
             SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
             Map<TAction, CLPVariable> actionChildFlowMap = new HashMap<>();
             if(!node.isLeaf()) {
-                for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+                var entries = node.getChildNodeMap().entrySet();
+                var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
+//                var nodeChildIterator = entries.iterator();
+
+                while(nodeChildIterator.hasNext()) {
+                    var entry = nodeChildIterator.next();
                     queue.addLast(entry.getValue());
                     CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
                     entry.getValue().getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);

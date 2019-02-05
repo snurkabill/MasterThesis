@@ -33,7 +33,7 @@ public class RiskAverseSearchTree<
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
 
-    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
+    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator;
     private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> latestTreeWithPlayerOnTurn = null;
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
@@ -44,8 +44,10 @@ public class RiskAverseSearchTree<
                                 NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
+                                OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator,
                                 double totalRiskAllowed) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
+        this.optimalFlowCalculator = optimalFlowCalculator;
         this.totalRiskAllowed = totalRiskAllowed;
     }
 
@@ -227,7 +229,7 @@ public class RiskAverseSearchTree<
             return 1.0;
         }
         if(Math.abs(totalRiskAllowed - 1.0) < NUMERICAL_ACTION_RISK_TOLERANCE) {
-            logger.warn("Risk is set to 1 already, no recalculation is needed");
+            logger.debug("Risk is set to 1 already, no recalculation is needed");
             return 1.0;
         }
         double newRisk = riskDiff / actionProbability;

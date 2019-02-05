@@ -83,6 +83,7 @@ public class PaperPolicySupplier<
                 nodeSelector,
                 treeUpdater,
                 nodeEvaluator,
+                new OptimalFlowCalculator<>(random),
                 totalRiskAllowed),
             random);
     }
