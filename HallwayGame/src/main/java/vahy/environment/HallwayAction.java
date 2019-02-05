@@ -70,7 +70,7 @@ public enum HallwayAction implements Action {
                 }
             }
         }
-        throw new IllegalStateException("Not expected state");
+        throw new IllegalStateException("Not expected state. Called on action: [" + this.toString() + "]");
     }
 
 }

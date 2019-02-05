@@ -1,7 +1,6 @@
 package vahy;
 
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.agent.environment.RealDataMarketPolicySupplier;
@@ -21,6 +20,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
+import vahy.paperGenerics.PaperNodeEvaluator;
 import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
@@ -34,10 +34,10 @@ import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
-import vahy.tempImpl.MarketNodeEvaluator;
 import vahy.utils.EnumUtils;
+import vahy.utils.ImmutableTuple;
+import vahy.utils.ThirdPartBinaryUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -65,7 +65,7 @@ public class MarketPrototype {
     }
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
-        cleanUpNativeTempFiles();
+        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
         long seed = 0;
         SplittableRandom random = new SplittableRandom(seed);
 
@@ -138,8 +138,22 @@ public class MarketPrototype {
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
             PaperTreeUpdater<MarketAction, DoubleVector, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
-//            PaperNodeEvaluator nnbasedEvaluator = new PaperNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
-            MarketNodeEvaluator marketNodeEvaluator = new MarketNodeEvaluator(new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), trainableApproximator);
+
+            PaperNodeEvaluator<MarketAction, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> marketNodeEvaluator = new PaperNodeEvaluator<>(
+                new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
+                trainableApproximator,
+                doubleVector -> {
+                    List<MarketAction> arrayList = new ArrayList<>();
+                    arrayList.add(MarketAction.UP);
+                    arrayList.add(MarketAction.DOWN);
+                    List<Double> probabilities = new ArrayList<>();
+                    probabilities.add(doubleVector.getObservedVector()[0]);
+                    probabilities.add(doubleVector.getObservedVector()[1]);
+                    return new ImmutableTuple<>(arrayList, probabilities);
+                },
+                MarketAction.playerActions,
+                MarketAction.environmentActions
+                );
 
 
             TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> paperTrainablePolicySupplier =
@@ -153,7 +167,8 @@ public class MarketPrototype {
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
                     explorationConstantSupplier,
-                    temperatureSupplier
+                    temperatureSupplier,
+                    rewardAggregator
                 );
 
             PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
@@ -165,7 +180,8 @@ public class MarketPrototype {
                     nodeSelector,
                     marketNodeEvaluator,
                     paperTreeUpdater,
-                    treeUpdateConditionFactory);
+                    treeUpdateConditionFactory,
+                    rewardAggregator);
 
             AbstractTrainer trainer = getAbstractTrainer(
                 TrainerAlgorithm.EVERY_VISIT_MC,
@@ -198,7 +214,7 @@ public class MarketPrototype {
 
             long start = System.currentTimeMillis();
             List<PaperPolicyResults<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> policyResultList = benchmark
-                .runBenchmark(uniqueEpisodeCount, episodeCount, stepCountLimit);
+                .runBenchmark(episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking took [{}] milliseconds", end - start);
 
@@ -224,7 +240,7 @@ public class MarketPrototype {
         TrainerAlgorithm trainerAlgorithm,
         InitialMarketStateSupplier initialMarketStateSupplier,
         double discountFactor,
-        MarketNodeEvaluator nodeEvaluator,
+        PaperNodeEvaluator<MarketAction, DoubleVector,  PaperMetadata<MarketAction, DoubleReward>, MarketState> nodeEvaluator,
         TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> trainablePaperPolicySupplier,
         int replayBufferSize,
         int stepCountLimit,
@@ -266,29 +282,5 @@ public class MarketPrototype {
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
 
         }
-
     }
-
-
-    private static void cleanUpNativeTempFiles() {
-        // TODO: code duplicity
-        System.gc();
-        String bridJFolderNameStart = "BridJExtractedLibraries";
-        String CLPFolderNameStart = "CLPExtractedLib";
-        String TFFolderNameStart = "tensorflow_native_libraries";
-        String tempPath = System.getProperty("java.io.tmpdir");
-        File file = new File(tempPath);
-        String[] directories = file.list((current, name) -> new File(current, name).isDirectory());
-        if (directories != null) {
-            Arrays.stream(directories).filter(x -> x.startsWith(bridJFolderNameStart) || x.startsWith(CLPFolderNameStart) || x.startsWith(TFFolderNameStart)).forEach(x -> {
-                try {
-                    FileUtils.deleteDirectory(new File(tempPath + "/" + x));
-                } catch (IOException e) {
-                    e.printStackTrace(); // todo: deal with this later
-                }
-            });
-        }
-
-    }
-
 }

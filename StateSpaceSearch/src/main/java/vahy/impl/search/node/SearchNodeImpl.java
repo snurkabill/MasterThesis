@@ -49,12 +49,12 @@ public class SearchNodeImpl<
 
     @Override
     public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
-        return getWrappedState().applyAction(action);
+        return wrappedState.applyAction(action);
     }
 
     @Override
     public boolean isLeaf() {
-        return isFinalNode() || childNodeMap.isEmpty();
+        return childNodeMap.isEmpty() || isFinalState;
     }
 
     @Override

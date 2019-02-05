@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
@@ -40,8 +41,9 @@ public class TrainablePaperPolicySupplier<
                                         TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
                                         Supplier<Double> explorationConstantSupplier,
-                                        Supplier<Double> temperatureSupplier) {
-        super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory);
+                                        Supplier<Double> temperatureSupplier,
+                                        RewardAggregator<TReward> rewardAggregator) {
+        super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory, rewardAggregator);
         this.expplorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
     }

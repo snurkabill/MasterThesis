@@ -2,6 +2,7 @@ package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
@@ -29,19 +30,23 @@ public class PaperPolicyImpl<
 
     private final List<TAction> playerActions;
     private final List<TAction> environmentActions;
+    private final RewardAggregator<TReward> rewardAggregator;
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
-    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator = new OptimalFlowCalculator<>(); // pass in constructor
+
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
+                           RewardAggregator<TReward> rewardAggregator,
                            RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random) {
         super(treeUpdateCondition, searchTree);
+        this.rewardAggregator = rewardAggregator;
         this.random = random;
         this.riskAverseSearchTree = searchTree;
 
         TAction[] allActions = clazz.getEnumConstants();
+
 //        Stream<TAction> tActionStream = Arrays.stream(allActions).filter(Action::isPlayerAction);
 //        this.playerActions = tActionStream.<TAction>toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
 //        this.environmentActions = Arrays.stream(allActions).filter(x -> !x.isPlayerAction()).toArray(size -> ReflectionHacks.arrayFromGenericClass(clazz, size));
@@ -52,9 +57,14 @@ public class PaperPolicyImpl<
     }
 
     @Override
+    public List<TAction> getAllowedActionsForExploration() {
+        return riskAverseSearchTree.getAllowedActionsForExploration();
+    }
+
+    @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
-        optimizeFlow();
+        riskAverseSearchTree.optimizeFlow();
         double[] vector = new double[gameState.isPlayerTurn() ? playerActions.size() : environmentActions.size()];
         List<ImmutableTuple<TAction, Double>> actionDoubleList = this.searchTree
             .getRoot()
@@ -72,10 +82,9 @@ public class PaperPolicyImpl<
     public TAction getDiscreteAction(TState gameState) {
         checkStateRoot(gameState);
         expandSearchTree(gameState);
-        optimizeFlow();
+        riskAverseSearchTree.optimizeFlow();
         double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
-        double rand = random.nextDouble();
-        double cumulativeSum = 0.0d;
+        double rand = random.nextDouble();double cumulativeSum = 0.0d;
         for (int i = 0; i < actionProbabilityDistribution.length; i++) {
             cumulativeSum += actionProbabilityDistribution[i];
             if(rand < cumulativeSum) {
@@ -104,19 +113,13 @@ public class PaperPolicyImpl<
     @Override
     public TReward getEstimatedReward(TState gameState) {
         checkStateRoot(gameState);
-        return searchTree.getRoot().getSearchNodeMetadata().getExpectedReward();
+        TSearchNodeMetadata searchNodeMetadata = searchTree.getRoot().getSearchNodeMetadata();
+        return searchNodeMetadata.getExpectedReward();
     }
 
     @Override
     public double getEstimatedRisk(TState gameState) {
         checkStateRoot(gameState);
         return searchTree.getRoot().getSearchNodeMetadata().getPredictedRisk();
-    }
-
-    public void optimizeFlow() {
-        if(!riskAverseSearchTree.isFlowOptimized()) {
-            optimalFlowCalculator.calculateFlow(searchTree.getRoot(), riskAverseSearchTree.getTotalRiskAllowed());
-            riskAverseSearchTree.setFlowOptimized(true);
-        }
     }
 }

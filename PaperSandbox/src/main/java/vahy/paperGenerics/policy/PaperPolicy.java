@@ -6,16 +6,21 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
 
+import java.util.List;
+
 public interface PaperPolicy<
     TAction extends Action,
     TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> extends Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    extends Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
 
     double[] getPriorActionProbabilityDistribution(TState gameState);
 
     TReward getEstimatedReward(TState gameState);
 
     double getEstimatedRisk(TState gameState);
+
+    List<TAction> getAllowedActionsForExploration();
 }

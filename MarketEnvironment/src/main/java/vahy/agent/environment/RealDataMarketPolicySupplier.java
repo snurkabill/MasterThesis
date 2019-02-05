@@ -14,7 +14,7 @@ public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketActi
     private final MarketDataProvider marketDataProvider;
 
     public RealDataMarketPolicySupplier(MarketDataProvider marketDataProvider) {
-        super(null, null, 0.0, null, null, null, null, null);
+        super(null, null, 0.0, null, null, null, null, null, null);
         this.marketDataProvider = marketDataProvider;
     }
 

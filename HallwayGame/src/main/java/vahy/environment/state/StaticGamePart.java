@@ -130,6 +130,7 @@ public class StaticGamePart {
             for (int j = 0; j < rewardsInEnvironment[i].length; j++) {
                 if(rewardsAtStart[i][j] > 0.0) {
                     vector[rewardCount] = rewardsInEnvironment[i][j] > 0.0;
+                    rewardCount++;
                 }
             }
         }

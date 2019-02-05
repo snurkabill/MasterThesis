@@ -38,9 +38,9 @@ public class PaperBenchmark<
         this.initialStateSupplier = initialStateSupplier;
     }
 
-    public List<PaperPolicyResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> runBenchmark(int uniqueEpisodeCount, int episodeCount, int stepCountLimit) {
-        logger.info("Running benchmark with [{}] unique episodes each for [{}] iterations", uniqueEpisodeCount, episodeCount);
-        int totalEpisodeCount = uniqueEpisodeCount * episodeCount;
+    public List<PaperPolicyResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> runBenchmark(int episodeCount,
+                                                                                                                                          int stepCountLimit) {
+        logger.info("Running benchmark for [{}] iterations", episodeCount);
         List<PaperPolicyResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> results = new ArrayList<>();
         for (PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy : benchmarkingPolicyList) {
             logger.info("Starting benchmark for policy [{}]", benchmarkingPolicy.getPolicyName());
@@ -50,10 +50,10 @@ public class PaperBenchmark<
                 environmentPolicySupplier,
                 stepCountLimit);
             long start = System.nanoTime();
-            List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> resultList = gameSampler.sampleEpisodes(totalEpisodeCount);
+            List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> resultList = gameSampler.sampleEpisodes(episodeCount);
             long end = System.nanoTime();
             logger.info("Benchmarking [{}] policy took [{}] nanosecond", benchmarkingPolicy.getPolicyName(), end - start);
-            results.add(new PaperPolicyResults<>(benchmarkingPolicy, resultList, (end - start) / (double) totalEpisodeCount));
+            results.add(new PaperPolicyResults<>(benchmarkingPolicy, resultList, (end - start) / (double) episodeCount));
         }
         return results;
     }

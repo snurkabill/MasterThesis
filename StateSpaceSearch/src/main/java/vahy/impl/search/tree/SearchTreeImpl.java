@@ -1,6 +1,12 @@
 package vahy.impl.search.tree;
 
 
+import guru.nidi.graphviz.attribute.Label;
+import guru.nidi.graphviz.attribute.RankDir;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.engine.GraphvizException;
+import guru.nidi.graphviz.model.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
@@ -15,9 +21,18 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.SearchTree;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.utils.ImmutableTuple;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static guru.nidi.graphviz.model.Factory.graph;
+import static guru.nidi.graphviz.model.Factory.node;
+import static guru.nidi.graphviz.model.Link.to;
 
 public class SearchTreeImpl<
     TAction extends Action,
@@ -49,6 +64,28 @@ public class SearchTreeImpl<
         this.treeUpdater = treeUpdater;
         this.nodeEvaluator = nodeEvaluator;
         this.nodeSelector.setNewRoot(root);
+
+        expandTreeToNextPlayerLevel();
+    }
+
+    protected void expandTreeToNextPlayerLevel() {
+        if(root.isFinalNode()) {
+            throw new IllegalArgumentException("Cannot expand final node");
+        }
+        if(root.getChildNodeMap().size() == 0) {
+            logger.debug("Expanding root since it is not final node and has no children expanded");
+            expandAndEvaluateNode(root);
+            treeUpdater.updateTree(root);
+        }
+        var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(LinkedList::new));
+        while(!queue.isEmpty()) {
+            var node = queue.pop();
+            if(!node.isFinalNode() && node.getChildNodeMap().size() == 0) {
+                expandAndEvaluateNode(node);
+                treeUpdater.updateTree(node);
+            }
+            queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
+        }
     }
 
     @Override
@@ -70,8 +107,9 @@ public class SearchTreeImpl<
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
         if(root.isLeaf()) {
-            expandAndEvaluateNode(root);
-            // throw new IllegalStateException("Policy cannot pick action from leaf node");
+//            logger.warn("Trying to apply action [{}] on not expanded node", action);
+//            expandAndEvaluateNode(root);
+             throw new IllegalStateException("Policy cannot pick action from leaf node");
         }
     }
 
@@ -81,6 +119,9 @@ public class SearchTreeImpl<
         root.makeRoot();
         nodeSelector.setNewRoot(root);
         resetTreeStatistics();
+        if(!root.isFinalNode()) {
+            expandTreeToNextPlayerLevel();
+        }
         return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
     }
 
@@ -189,5 +230,53 @@ public class SearchTreeImpl<
         }
         string.append(end);
         return string.toString();
+    }
+
+    public void printTreeToFile(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName, int depthBound) {
+        while (depthBound >= 1) {
+            try {
+                printTreeToFileInternal(subtreeRoot, fileName, depthBound, a -> true);
+                return;
+            } catch(GraphvizException e) {
+                logger.error("Tree dump with depth [{}] failed. Halving depth to [{}] and trying again", depthBound, depthBound / 2);
+            }
+            depthBound = depthBound / 2;
+        }
+    }
+
+    protected void printTreeToFileInternal(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot,
+                                         String fileName,
+                                         int depthBound,
+                                         Function<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Boolean> filter) {
+        var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>>();
+        queue.addFirst(new ImmutableTuple<>(subtreeRoot, 0));
+
+        Graph graph = graph("example1")
+            .directed()
+            .graphAttr()
+            .with(RankDir.TOP_TO_BOTTOM);
+
+        while(!queue.isEmpty()) {
+            var nodeParent = queue.poll();
+            if(nodeParent.getSecond() < depthBound) {
+                for (var child : nodeParent.getFirst().getChildNodeMap().entrySet()) {
+                    if(filter.apply(child.getValue())) {
+                        queue.addLast(new ImmutableTuple<>(child.getValue(), nodeParent.getSecond() + 1));
+                    }
+                    graph = graph.with(
+                        node(nodeParent.getFirst().toString())
+                            .link(
+                                to(node(child.getValue().toString()))
+                                    .with(Label.of(child.getKey().toString()))
+                            )
+                    );
+                }
+            }
+        }
+        try {
+            Graphviz.fromGraph(graph).render(Format.SVG).toFile(new File(fileName + ".svg"));
+        } catch (IOException e) {
+            throw new IllegalStateException("Saving into graph failed", e);
+        }
     }
 }

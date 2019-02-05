@@ -71,6 +71,29 @@ public class HallwayStateImplTest {
         return new HallwayStateImpl(staticGamePart, rewards, 5, 2, AgentHeading.NORTH);
     }
 
+    private HallwayStateImpl getHallGame3() {
+        boolean[][] walls = new boolean[][]{
+            {true, true,  true,  true, true},
+            {true, false, false, false, true},
+            {true, false, false, false, true},
+            {true, true,  true,  true, true}
+        };
+        double[][] rewards = new double[][] {
+            {0.0, 0.0, 0.0, 0.0,   0.0},
+            {0.0, 100.0, 100.0, 100.0, 0.0},
+            {0.0, 0.0, 0.0, 0.0,   0.0},
+            {0.0, 0.0, 0.0, 0.0,   0.0},
+        };
+        double[][] traps = new double[][] {
+            {0.0, 0.0, 0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0, 0.0, 0.0},
+            {0.0, 0.0, 0.0, 0.0, 0.0},
+        };
+        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, 1, 0.5, 3);
+        return new HallwayStateImpl(staticGamePart, rewards, 2, 2, AgentHeading.NORTH);
+    }
+
     private void assertAgentCoordinations(HallwayStateImpl game, int expectedX, int expectedY, int gameXdim) {
         double[] observation = game.getPlayerObservation().getObservedVector();
         Assert.assertEquals(observation[gameXdim * expectedX + expectedY], HallwayStateImpl.AGENT_LOCATION_REPRESENTATION, DOUBLE_TOLERANCE);
@@ -225,4 +248,42 @@ public class HallwayStateImplTest {
         Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25 * 0.8, 0.25 * 0.2, 0.25 * 0.8, 0.25 * 0.2, 0.5 * 0.2, 0.5 * 0.8));
     }
 
+
+    @Test
+    public void noisyMoveToGold() {
+        HallwayStateImpl state1 = getHallGame3();
+        Assert.assertTrue(state1.isAgentTurn());
+        var stateRewardReturn = state1.applyAction(HallwayAction.FORWARD);
+        Assert.assertTrue(Math.abs(stateRewardReturn.getReward().getValue() - 99.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn2 = stateRewardReturn.getState().applyAction(HallwayAction.NOISY_LEFT);
+        Assert.assertEquals(stateRewardReturn2.getReward().getValue(), 0.0);
+        var stateRewardReturn3 = stateRewardReturn2.getState().applyAction(HallwayAction.TURN_RIGHT);
+        Assert.assertTrue(Math.abs(stateRewardReturn3.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn4 = stateRewardReturn3.getState().applyAction(HallwayAction.NO_ACTION);
+        Assert.assertEquals(stateRewardReturn4.getReward().getValue(), 0.0);
+        var stateRewardReturn5 = stateRewardReturn4.getState().applyAction(HallwayAction.FORWARD);
+        Assert.assertTrue(Math.abs(stateRewardReturn5.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn6 = stateRewardReturn5.getState().applyAction(HallwayAction.NO_ACTION);
+        Assert.assertEquals(stateRewardReturn6.getReward().getValue(), 0.0);
+        var stateRewardReturn7 = stateRewardReturn6.getState().applyAction(HallwayAction.FORWARD);
+        Assert.assertTrue(Math.abs(stateRewardReturn7.getReward().getValue() - 99.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn8 = stateRewardReturn7.getState().applyAction(HallwayAction.NO_ACTION);
+        Assert.assertEquals(stateRewardReturn8.getReward().getValue(), 0.0);
+        var stateRewardReturn9 = stateRewardReturn8.getState().applyAction(HallwayAction.TURN_RIGHT);
+        Assert.assertTrue(Math.abs(stateRewardReturn9.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn10 = stateRewardReturn9.getState().applyAction(HallwayAction.NO_ACTION);
+        Assert.assertEquals(stateRewardReturn10.getReward().getValue(), 0.0);
+        var stateRewardReturn11 = stateRewardReturn10.getState().applyAction(HallwayAction.TURN_RIGHT);
+        Assert.assertTrue(Math.abs(stateRewardReturn11.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn12 = stateRewardReturn11.getState().applyAction(HallwayAction.NO_ACTION);
+        Assert.assertEquals(stateRewardReturn12.getReward().getValue(), 0.0);
+
+        var stateRewardReturn13 = stateRewardReturn12.getState().applyAction(HallwayAction.FORWARD);
+        Assert.assertTrue(Math.abs(stateRewardReturn13.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        var stateRewardReturn14 = stateRewardReturn13.getState().applyAction(HallwayAction.NO_ACTION);
+        Assert.assertEquals(stateRewardReturn14.getReward().getValue(), 0.0);
+
+        var stateRewardReturn15 = stateRewardReturn14.getState().applyAction(HallwayAction.FORWARD);
+        Assert.assertTrue(Math.abs(stateRewardReturn15.getReward().getValue() - 99.0) < DOUBLE_TOLERANCE);
+    }
 }

@@ -15,6 +15,11 @@ public class DoubleScalarRewardAggregator implements RewardAggregator<DoubleRewa
     }
 
     @Override
+    public DoubleReward negate(DoubleReward reward) {
+        return new DoubleReward(-reward.getValue());
+    }
+
+    @Override
     public DoubleReward aggregate(DoubleReward first, DoubleReward second) {
         return new DoubleReward(first.getValue() + second.getValue());
     }

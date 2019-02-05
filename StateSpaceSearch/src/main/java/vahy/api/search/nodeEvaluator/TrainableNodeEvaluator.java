@@ -19,4 +19,7 @@ public interface TrainableNodeEvaluator<
     extends NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     void train(List<ImmutableTuple<TPlayerObservation, double[]>> trainData);
+
+    double[] evaluate(TPlayerObservation observation);
+
 }
