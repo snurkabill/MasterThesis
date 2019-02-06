@@ -92,30 +92,36 @@ public class RiskAverseSearchTree<
 
     @Override
     public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
-        checkApplicableAction(action);
-        // TODO make general in applicable action
-        if(!getRoot().getChildNodeMap().containsKey(action)) {
-            throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
-        }
-        if(action.isPlayerAction()) {
-            latestTreeWithPlayerOnTurn = this.getRoot();
-        }
-        logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction()
-            ? getPlayerActionProbability(action)
-            : getOpponentActionProbability(action));
-        logger.debug("Action probability distribution: [{}]", getRoot()
-            .getChildNodeStream()
-            .map(x -> action.isPlayerAction() ? getPlayerActionProbability(x.getAppliedAction()) : getOpponentActionProbability(x.getAppliedAction()))
-            .map(Object::toString)
-            .reduce((s, s2) -> s + ", " + s2)
-            .orElseThrow(() -> new IllegalStateException("Reduce op does not exists")));
-        isFlowOptimized = false;
+        try {
+            checkApplicableAction(action);
+            // TODO make general in applicable action
+            if(!getRoot().getChildNodeMap().containsKey(action)) {
+                throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
+            }
+            if(action.isPlayerAction()) {
+                latestTreeWithPlayerOnTurn = this.getRoot();
+            }
+            logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction()
+                ? getPlayerActionProbability(action)
+                : getOpponentActionProbability(action));
+            logger.debug("Action probability distribution: [{}]", getRoot()
+                .getChildNodeStream()
+                .map(x -> action.isPlayerAction() ? getPlayerActionProbability(x.getAppliedAction()) : getOpponentActionProbability(x.getAppliedAction()))
+                .map(Object::toString)
+                .reduce((s, s2) -> s + ", " + s2)
+                .orElseThrow(() -> new IllegalStateException("Reduce op does not exists")));
+            isFlowOptimized = false;
 
-        calculateNumericallyStableNewRiskThreshold(action);
+            calculateNumericallyStableNewRiskThreshold(action);
 
-        var stateReward = innerApplyAction(action);
-        logger.debug("New Global risk: [{}]", totalRiskAllowed);
-        return stateReward;
+            var stateReward = innerApplyAction(action);
+            logger.debug("New Global risk: [{}]", totalRiskAllowed);
+            return stateReward;
+        } catch(Exception e) {
+            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
+            this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
+            throw e;
+        }
     }
 
     @Override
@@ -236,9 +242,6 @@ public class RiskAverseSearchTree<
         if((newRisk < -NUMERICAL_RISK_DIFF_TOLERANCE) || (newRisk - 1.0 > NUMERICAL_RISK_DIFF_TOLERANCE)) {
 //            this.printTreeToFile(this.latestTreeWithPlayerOnTurn, "TreeDump_player", 100);
 //            this.printTreeToFile(this.getRoot(), "TreeDump_latest", 100);
-
-            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
-            this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
             throw new IllegalStateException(
                 "Risk out of bounds. " +
                     "Old risk [" + totalRiskAllowed + "]. " +
@@ -320,7 +323,7 @@ public class RiskAverseSearchTree<
                     risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() : 0.0;
 //                    risk += node.getWrappedState().isRiskHit() ? 1.0 : 0.0;
                 } else {
-//                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
+                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
 
                 }
             } else {
