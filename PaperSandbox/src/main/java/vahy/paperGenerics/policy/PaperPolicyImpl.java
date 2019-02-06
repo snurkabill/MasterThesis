@@ -61,16 +61,36 @@ public class PaperPolicyImpl<
         return riskAverseSearchTree.getAllowedActionsForExploration();
     }
 
+    private List<ImmutableTuple<TAction, Double>> getUcbVisitActionProbabilityDistribution() {
+        List<ImmutableTuple<TAction, Double>> nonNormalizedDistr = this.searchTree
+            .getRoot()
+            .getChildNodeStream()
+            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), (double) x.getSearchNodeMetadata().getVisitCounter()))
+            .collect(Collectors.toList());
+
+        double totalSum = this.searchTree
+            .getRoot()
+            .getChildNodeStream()
+            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
+            .sum();
+        return nonNormalizedDistr
+            .stream()
+            .map(x -> new ImmutableTuple<>(x.getFirst(), x.getSecond() / totalSum))
+            .collect(Collectors.toList());
+    }
+
     @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
         riskAverseSearchTree.optimizeFlow();
         double[] vector = new double[gameState.isPlayerTurn() ? playerActions.size() : environmentActions.size()];
-        List<ImmutableTuple<TAction, Double>> actionDoubleList = this.searchTree
-            .getRoot()
-            .getChildNodeStream()
-            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
-            .collect(Collectors.toList());
+        List<ImmutableTuple<TAction, Double>> actionDoubleList = riskAverseSearchTree.isFlowOptimized() ?
+            this.searchTree
+                .getRoot()
+                .getChildNodeStream()
+                .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
+                .collect(Collectors.toList())
+            : getUcbVisitActionProbabilityDistribution();
         for (ImmutableTuple<TAction, Double> entry : actionDoubleList) {
             int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
             vector[actionIndex] = entry.getSecond();
@@ -82,9 +102,9 @@ public class PaperPolicyImpl<
     public TAction getDiscreteAction(TState gameState) {
         checkStateRoot(gameState);
         expandSearchTree(gameState);
-        riskAverseSearchTree.optimizeFlow();
         double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
-        double rand = random.nextDouble();double cumulativeSum = 0.0d;
+        double rand = random.nextDouble();
+        double cumulativeSum = 0.0d;
         for (int i = 0; i < actionProbabilityDistribution.length; i++) {
             cumulativeSum += actionProbabilityDistribution[i];
             if(rand < cumulativeSum) {

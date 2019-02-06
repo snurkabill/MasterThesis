@@ -34,6 +34,8 @@ public class OptimalFlowCalculator<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
+    private static final double LOWR_BOUND_2 = -Math.pow(10, -18);
+
     private final SplittableRandom random;
 
     public OptimalFlowCalculator(SplittableRandom random) {
@@ -67,18 +69,17 @@ public class OptimalFlowCalculator<
             }
 
             if(node.isLeaf()) {
-                if(node.getWrappedState().isRiskHit()) {
-                    if(totalRiskExpression == null) {
-                        totalRiskExpression = model.createExpression();
-                    }
-                    totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
+                if(totalRiskExpression == null) {
+                    totalRiskExpression = model.createExpression();
                 }
+                double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getPredictedRisk();
+                totalRiskExpression.add(nodeRisk, node.getSearchNodeMetadata().getNodeProbabilityFlow());
+
 
                 double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward().getValue();
                 double expectedReward = node.getSearchNodeMetadata().getExpectedReward().getValue();
-                double predictedRisk = node.getSearchNodeMetadata().getPredictedRisk();
 
-                double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
+                double leafCoefficient = cumulativeReward + expectedReward;
 
 
                 model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);

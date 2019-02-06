@@ -51,14 +51,28 @@ public class RiskAverseSearchTree<
         this.totalRiskAllowed = totalRiskAllowed;
     }
 
+    public boolean isFlowOptimized() {
+        return isFlowOptimized;
+    }
+
+    public boolean isRiskIgnored() {
+        return totalRiskAllowed >= 1.0;
+    }
+
     public void optimizeFlow() {
+        if(isRiskIgnored()) {
+            isFlowOptimized = false;
+            return;
+        }
         if(!isFlowOptimized) {
             boolean optimalSolutionExists = optimalFlowCalculator.calculateFlow(getRoot(), totalRiskAllowed);
             if(!optimalSolutionExists) {
                 logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0");
                 totalRiskAllowed = 1.0;
+                isFlowOptimized = false;
+            } else {
+                isFlowOptimized = true;
             }
-            isFlowOptimized = true;
         }
     }
 
@@ -112,8 +126,9 @@ public class RiskAverseSearchTree<
                 .orElseThrow(() -> new IllegalStateException("Reduce op does not exists")));
             isFlowOptimized = false;
 
-            calculateNumericallyStableNewRiskThreshold(action);
-
+            if(!isRiskIgnored()) {
+                calculateNumericallyStableNewRiskThreshold(action);
+            }
             var stateReward = innerApplyAction(action);
             logger.debug("New Global risk: [{}]", totalRiskAllowed);
             return stateReward;
@@ -131,12 +146,17 @@ public class RiskAverseSearchTree<
     }
 
     private double getPlayerActionProbability(TAction appliedAction) {
-        return calculateNumericallyStableActionProbability(getRoot()
-            .getChildNodeMap()
-            .get(appliedAction)
-            .getSearchNodeMetadata()
-            .getNodeProbabilityFlow()
-            .getSolution());
+        if(isFlowOptimized) {
+            return calculateNumericallyStableActionProbability(getRoot()
+                .getChildNodeMap()
+                .get(appliedAction)
+                .getSearchNodeMetadata()
+                .getNodeProbabilityFlow()
+                .getSolution());
+        } else {
+            double sum = getRoot().getChildNodeStream().mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter()).sum();
+            return getRoot().getChildNodeMap().get(appliedAction).getSearchNodeMetadata().getVisitCounter() / sum;
+        }
     }
 
     private double getOpponentActionProbability(TAction appliedAction) {
@@ -148,14 +168,10 @@ public class RiskAverseSearchTree<
     }
 
     private void calculateNumericallyStableNewRiskThreshold(TAction appliedAction) {
-
         if(getRoot().getChildNodeMap().get(appliedAction).isFinalNode()) {
             totalRiskAllowed = 1.0; // CORRECT?
             return;
         }
-
-        // TODO: pokud exploruji, tak brat pravdepodobnost z distribuce, kterou epxloruji a ne z linearni optimalizace
-
         if(appliedAction.isPlayerAction()) {
             parentPathProbability = 0.0;
             acumulatedRiskOfOtherActions = 0.0;
@@ -170,8 +186,6 @@ public class RiskAverseSearchTree<
             double riskDiff = calculateNumericallyStableRiskDiff(totalOtherActionsRiskSum);
             totalRiskAllowed = calculateNewRiskValue(
                 riskDiff,
-                // parentPathProbability * getOpponentActionProbability(appliedAction),
-//                parentPathProbability *
                     calculateNumericallyStableActionProbability(getRoot()
                         .getChildNodeMap()
                         .get(appliedAction)
@@ -221,9 +235,9 @@ public class RiskAverseSearchTree<
             }
             return 1.0;
         } else if(riskOfOtherActions < 0.0) {
-            throw new IllegalStateException("Risk of other actions cannot be lower than 0. This would cause program failure later in simulation");
+            throw new IllegalStateException("Risk of other actions cannot be lower than 0. Actual value: [ " + riskOfOtherActions + " ]. This would cause program failure later in simulation");
         } else if(riskOfOtherActions > 1.0) {
-            throw new IllegalStateException("Risk of other actions cannot be higher than 1. This would cause program failure later in simulation");
+            throw new IllegalStateException("Risk of other actions cannot be higher than 1. Actual value: [ " + riskOfOtherActions + " ]. This would cause program failure later in simulation");
         }
         return riskOfOtherActions;
 
