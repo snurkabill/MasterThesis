@@ -98,7 +98,9 @@ public class RiskAverseSearchTree<
         if(action.isPlayerAction()) {
             latestTreeWithPlayerOnTurn = this.getRoot();
         }
-        logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction() ? getPlayerActionProbability(action) : getOpponentActionProbability(action));
+        logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction()
+            ? getPlayerActionProbability(action)
+            : getOpponentActionProbability(action));
         logger.debug("Action probability distribution: [{}]", getRoot()
             .getChildNodeStream()
             .map(x -> action.isPlayerAction() ? getPlayerActionProbability(x.getAppliedAction()) : getOpponentActionProbability(x.getAppliedAction()))

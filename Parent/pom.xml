@@ -22,6 +22,7 @@
         <module>../ReinforcementLearning</module>
         <module>../PaperSandbox</module>
         <module>../MarketEnvironment</module>
+        <module>../RandomWalk</module>
     </modules>
 
     <properties>

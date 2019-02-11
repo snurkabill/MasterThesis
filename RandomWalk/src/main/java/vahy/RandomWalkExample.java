@@ -1,0 +1,50 @@
+package vahy;
+
+import vahy.api.episode.TrainerAlgorithm;
+import vahy.environment.RandomWalkSetup;
+import vahy.experiment.Experiment;
+import vahy.experiment.ExperimentSetup;
+import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
+import vahy.utils.ImmutableTuple;
+import vahy.utils.ThirdPartBinaryUtils;
+
+import java.io.IOException;
+import java.util.SplittableRandom;
+
+public class RandomWalkExample {
+
+    public static void main(String[] args) throws IOException {
+        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
+
+        //  EXAMPLE 1
+        ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup = createExperiment1();
+        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+        new Experiment().prepareAndRun(setup, random);
+    }
+
+    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
+        var randomWalkSetup = new RandomWalkSetup(1000, 50, 1, 1, 10, 10, 0.7, 0.6);
+        ExperimentSetup experimentSetup = new ExperimentSetup(
+            0,
+            3,
+            1,
+            new FixedUpdateCountTreeConditionFactory(50),
+            1.0,
+            100,
+            20000,
+            2000,
+            100,
+            () -> 0.0,
+            () -> 0.0,
+            TrainerAlgorithm.EVERY_VISIT_MC,
+            ApproximatorType.HASHMAP,
+            128,
+            1,
+            10000,
+            0.2
+        );
+        return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
+    }
+
+}

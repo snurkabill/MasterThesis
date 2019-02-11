@@ -2,20 +2,18 @@ package vahy.experiment;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.PaperGenericsPrototype;
+import vahy.RandomWalkExample;
 import vahy.api.episode.TrainerAlgorithm;
-import vahy.api.search.nodeSelector.NodeSelector;
-import vahy.data.HallwayGameSupplierFactory;
-import vahy.environment.HallwayAction;
-import vahy.environment.config.GameConfig;
-import vahy.environment.state.EnvironmentProbabilities;
-import vahy.environment.state.HallwayStateImpl;
-import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.game.NotValidGameStringRepresentationException;
+import vahy.environment.RandomWalkAction;
+import vahy.environment.RandomWalkInitialInstanceSupplier;
+import vahy.environment.RandomWalkProbabilities;
+import vahy.environment.RandomWalkSetup;
+import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
+import vahy.opponent.RandomWalkOpponentSupplier;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
@@ -27,7 +25,6 @@ import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
-import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
 import vahy.paperGenerics.reinforcement.DataTableApproximator;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
@@ -36,9 +33,6 @@ import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
-import vahy.riskBasedSearch.RiskBasedSelector;
-import vahy.riskBasedSearch.RiskBasedSelectorVahy;
-import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
@@ -50,43 +44,40 @@ import java.util.SplittableRandom;
 
 public class Experiment {
 
+    // TODO: REMOVE CODE REDUNDANCY
+
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> results;
+    private List<PaperPolicyResults<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> results;
 
-    public List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> getResults() {
+    public List<PaperPolicyResults<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> getResults() {
         return results;
     }
 
-    public void prepareAndRun(ImmutableTuple<GameConfig, ExperimentSetup> setup, SplittableRandom random) throws NotValidGameStringRepresentationException, IOException {
-        initializeModelAndRun(setup, random);
-    }
-
-    private void initializeModelAndRun(ImmutableTuple<GameConfig, ExperimentSetup> setup, SplittableRandom random) throws NotValidGameStringRepresentationException, IOException {
-        var provider = new HallwayGameSupplierFactory();
-        var hallwayGameInitialInstanceSupplier = provider.getInstanceProvider(setup.getSecond().getHallwayInstance(), setup.getFirst(), random);
-        var inputLenght = hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length;
+    public void prepareAndRun(ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup, SplittableRandom random) throws IOException {
+        var provider = new RandomWalkInitialInstanceSupplier(setup.getFirst());
+        var inputLength = provider.createInitialState().getPlayerObservation().getObservedVector().length;
 
         switch (setup.getSecond().getApproximatorType()) {
             case EMPTY:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new EmptyApproximator<>());
+                createPolicyAndRunProcess(setup, random, provider, new EmptyApproximator<>());
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length));
+                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximator<>(RandomWalkAction.playerActions.length));
                 break;
             case NN:
             {
                 try(TFModel model = new TFModel(
-                    inputLenght,
-                    PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
+                    inputLength,
+                    PaperModel.POLICY_START_INDEX + RandomWalkAction.playerActions.length,
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
-                    PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
+                    RandomWalkExample.class.getClassLoader().getResourceAsStream("tfModel/graph_randomWalk.pb").readAllBytes(),
                     random)
-                ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
+                )
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
-                    createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, trainableApproximator);
+                    createPolicyAndRunProcess(setup, random, provider, trainableApproximator);
                 }
             }
             default:
@@ -94,22 +85,22 @@ public class Experiment {
         }
     }
 
-    private void createPolicyAndRunProcess(ImmutableTuple<GameConfig, ExperimentSetup> setup,
-                                                  SplittableRandom random,
-                                                  HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
-                                                  TrainableApproximator<DoubleVector> approximator) {
+    private void createPolicyAndRunProcess(ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup,
+                                           SplittableRandom random,
+                                           RandomWalkInitialInstanceSupplier RandomWalkGameInitialInstanceSupplier,
+                                           TrainableApproximator<DoubleVector> approximator) {
         var experimentSetup = setup.getSecond();
         var rewardAggregator = new DoubleScalarRewardAggregator();
-        var clazz = HallwayAction.class;
-        var searchNodeMetadataFactory = new PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(rewardAggregator);
-        var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>();
-        var nodeSelector = createNodeSelector(experimentSetup.getCpuctParameter(), random, experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
+        var clazz = RandomWalkAction.class;
+        var searchNodeMetadataFactory = new PaperMetadataFactory<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState>(rewardAggregator);
+        var paperTreeUpdater = new PaperTreeUpdater<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>();
+        var nodeSelector = new PaperNodeSelector<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState>(setup.getSecond().getCpuctParameter(), random);
 
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
             approximator,
-            EnvironmentProbabilities::getProbabilities,
-            HallwayAction.playerActions, HallwayAction.environmentActions);
+            RandomWalkProbabilities::getProbabilities,
+            RandomWalkAction.playerActions, RandomWalkAction.environmentActions);
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
@@ -139,7 +130,7 @@ public class Experiment {
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
             random,
-            hallwayGameInitialInstanceSupplier,
+            RandomWalkGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
             nnbasedEvaluator,
             paperTrainablePolicySupplier,
@@ -147,7 +138,7 @@ public class Experiment {
             experimentSetup.getMaximalStepCountBound());
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        this.results = evaluatePolicy(random, hallwayGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
+        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -161,25 +152,25 @@ public class Experiment {
     }
 
     private List<PaperPolicyResults<
-        HallwayAction,
+        RandomWalkAction,
         DoubleReward,
         DoubleVector,
-        EnvironmentProbabilities,
-        PaperMetadata<HallwayAction, DoubleReward>,
-        HallwayStateImpl>>
+        RandomWalkProbabilities,
+        PaperMetadata<RandomWalkAction, DoubleReward>,
+        RandomWalkState>>
     evaluatePolicy(
-            SplittableRandom random,
-            HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
-            ExperimentSetup experimentSetup,
-            PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnbasedEvaluator,
-            PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier,
-            long trainingTimeInMs) {
+        SplittableRandom random,
+        RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
+        ExperimentSetup experimentSetup,
+        PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nnbasedEvaluator,
+        PaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nnBasedPolicySupplier,
+        long trainingTimeInMs) {
         logger.info("PaperPolicy test starts");
         String nnBasedPolicyName = "NNBased";
         var benchmark = new PaperBenchmark<>(
             Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
-            new EnvironmentPolicySupplier(random),
-            hallwayGameInitialInstanceSupplier
+            new RandomWalkOpponentSupplier(random),
+            randomWalkInitialInstanceSupplier
         );
         long start = System.currentTimeMillis();
         var policyResultList = benchmark.runBenchmark(experimentSetup.getEvalEpisodeCount(), experimentSetup.getMaximalStepCountBound());
@@ -202,24 +193,24 @@ public class Experiment {
     }
 
     private AbstractTrainer<
-        HallwayAction,
-        EnvironmentProbabilities,
-        PaperMetadata<HallwayAction, DoubleReward>,
-        HallwayStateImpl>
+        RandomWalkAction,
+        RandomWalkProbabilities,
+        PaperMetadata<RandomWalkAction, DoubleReward>,
+        RandomWalkState>
     getAbstractTrainer(TrainerAlgorithm trainerAlgorithm,
                        SplittableRandom random,
-                       HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
+                       RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
                        double discountFactor,
-                       PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nodeEvaluator,
-                       TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
+                       PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nodeEvaluator,
+                       TrainablePaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit) {
         switch(trainerAlgorithm) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
+                    randomWalkInitialInstanceSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    new RandomWalkOpponentSupplier(random),
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
@@ -228,18 +219,18 @@ public class Experiment {
                     replayBufferSize);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
+                    randomWalkInitialInstanceSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    new RandomWalkOpponentSupplier(random),
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     stepCountLimit);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
+                    randomWalkInitialInstanceSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    new RandomWalkOpponentSupplier(random),
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
@@ -249,21 +240,4 @@ public class Experiment {
         }
     }
 
-    private NodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> createNodeSelector(
-        double cpuctParameter,
-        SplittableRandom random,
-        double totalRiskAllowed,
-        SelectorType selectorType)
-    {
-        switch (selectorType) {
-            case UCB:
-                return new PaperNodeSelector<>(cpuctParameter, random);
-            case VAHY_1:
-                return new RiskBasedSelectorVahy<>(cpuctParameter, random);
-            case LINEAR_HARD_VS_UCB:
-                return new RiskBasedSelector<>(cpuctParameter, random, totalRiskAllowed);
-                default:
-                    throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
-        }
-    }
 }

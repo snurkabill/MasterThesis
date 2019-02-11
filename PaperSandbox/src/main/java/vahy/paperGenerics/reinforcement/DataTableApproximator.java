@@ -9,11 +9,20 @@ import java.util.stream.Collectors;
 
 public class DataTableApproximator<TObservation extends DoubleVector> extends TrainableApproximator<TObservation> {
 
-    public DataTableApproximator() {
+    private final int actionCount;
+    private final double[] defaultPrediction;
+    public DataTableApproximator(int actionCount) {
         super(null);
+        this.actionCount = actionCount;
+        this.defaultPrediction = new double[2 + actionCount];
+        this.defaultPrediction[0] = 0;
+        this.defaultPrediction[1] = 0;
+        for (int i = 0; i < actionCount; i++) {
+            defaultPrediction[i + 2] = 1.0 / actionCount;
+        }
     }
 
-    private static double[] defaultPrediction = {0.0, 0.0, 1/3.0, 1/3.0, 1/3.0};
+
     private HashMap<TObservation, double[]> predictionMap = new HashMap<>();
 
     @Override
