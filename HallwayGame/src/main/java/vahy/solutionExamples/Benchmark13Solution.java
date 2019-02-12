@@ -42,7 +42,7 @@ public class Benchmark13Solution {
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(2)
-            .trapProbability(0.01)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 

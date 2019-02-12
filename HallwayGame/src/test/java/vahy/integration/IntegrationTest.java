@@ -88,6 +88,7 @@ public class IntegrationTest {
     }
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment_05() {
+
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.1)
