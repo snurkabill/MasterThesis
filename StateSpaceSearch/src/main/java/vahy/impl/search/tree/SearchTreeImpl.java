@@ -68,24 +68,20 @@ public class SearchTreeImpl<
         expandTreeToNextPlayerLevel();
     }
 
-    protected void expandTreeToNextPlayerLevel() {
-        if(root.isFinalNode()) {
-            throw new IllegalArgumentException("Cannot expand final node");
-        }
-        if(root.getChildNodeMap().size() == 0) {
-            logger.debug("Expanding root since it is not final node and has no children expanded");
-            expandAndEvaluateNode(root);
-            treeUpdater.updateTree(root);
-        }
-        var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(LinkedList::new));
-        while(!queue.isEmpty()) {
-            var node = queue.pop();
-            if(!node.isFinalNode() && node.getChildNodeMap().size() == 0) {
-                expandAndEvaluateNode(node);
-                treeUpdater.updateTree(node);
-            }
-            queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
-        }
+    public int getTotalNodesExpanded() {
+        return totalNodesExpanded;
+    }
+
+    public int getTotalNodesCreated() {
+        return totalNodesCreated;
+    }
+
+    public int getMaxBranchingFactor() {
+        return maxBranchingFactor;
+    }
+
+    public double calculateAverageBranchingFactor() {
+        return totalNodesCreated / (double) totalNodesExpanded;
     }
 
     @Override
@@ -100,29 +96,6 @@ public class SearchTreeImpl<
         }
         treeUpdater.updateTree(selectedNodeForExpansion);
         return true;
-    }
-
-    protected void checkApplicableAction(TAction action) {
-        if(root.isFinalNode()) {
-            throw new IllegalStateException("Can't apply action [" + action +"] on final state");
-        }
-        if(root.isLeaf()) {
-//            logger.warn("Trying to apply action [{}] on not expanded node", action);
-//            expandAndEvaluateNode(root);
-             throw new IllegalStateException("Policy cannot pick action from leaf node");
-        }
-    }
-
-    protected StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> innerApplyAction(TAction action) {
-        TReward reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
-        root = root.getChildNodeMap().get(action);
-        root.makeRoot();
-        nodeSelector.setNewRoot(root);
-        resetTreeStatistics();
-        if(!root.isFinalNode()) {
-            expandTreeToNextPlayerLevel();
-        }
-        return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
     }
 
     @Override
@@ -171,38 +144,6 @@ public class SearchTreeImpl<
         return root;
     }
 
-    private void expandAndEvaluateNode(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
-        nodeEvaluator.evaluateNode(selectedNodeForExpansion);
-        totalNodesExpanded++;
-        int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
-        if(branchingNodesCount > maxBranchingFactor) {
-            maxBranchingFactor = branchingNodesCount;
-        }
-        totalNodesCreated += branchingNodesCount;
-    }
-
-    private void resetTreeStatistics() {
-        totalNodesCreated = 0;
-        totalNodesExpanded = 0;
-        maxBranchingFactor = Integer.MIN_VALUE;
-    }
-
-    public int getTotalNodesExpanded() {
-        return totalNodesExpanded;
-    }
-
-    public int getTotalNodesCreated() {
-        return totalNodesCreated;
-    }
-
-    public int getMaxBranchingFactor() {
-        return maxBranchingFactor;
-    }
-
-    public double calculateAverageBranchingFactor() {
-        return totalNodesCreated / (double) totalNodesExpanded;
-    }
-
     @Override
     public String toString() {
         LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
@@ -232,6 +173,50 @@ public class SearchTreeImpl<
         return string.toString();
     }
 
+    protected void checkApplicableAction(TAction action) {
+        if(root.isFinalNode()) {
+            throw new IllegalStateException("Can't apply action [" + action +"] on final state");
+        }
+        if(root.isLeaf()) {
+            throw new IllegalStateException("Policy cannot apply action to leaf node without expanded descendants");
+        }
+        if(!root.getChildNodeMap().containsKey(action)) {
+            throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
+        }
+    }
+
+    protected StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> innerApplyAction(TAction action) {
+        TReward reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
+        root = root.getChildNodeMap().get(action);
+        root.makeRoot();
+        nodeSelector.setNewRoot(root);
+        resetTreeStatistics();
+        if(!root.isFinalNode()) {
+            expandTreeToNextPlayerLevel();
+        }
+        return new ImmutableStateRewardReturnTuple<>(root.getWrappedState(), reward);
+    }
+
+    protected void expandTreeToNextPlayerLevel() {
+        if(root.isFinalNode()) {
+            throw new IllegalArgumentException("Cannot expand final node");
+        }
+        if(root.getChildNodeMap().size() == 0) {
+            logger.debug("Expanding root since it is not final node and has no children expanded");
+            expandAndEvaluateNode(root);
+            treeUpdater.updateTree(root);
+        }
+        var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(LinkedList::new));
+        while(!queue.isEmpty()) {
+            var node = queue.pop();
+            if(!node.isFinalNode() && node.getChildNodeMap().size() == 0) {
+                expandAndEvaluateNode(node);
+                treeUpdater.updateTree(node);
+            }
+            queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
+        }
+    }
+
     public void printTreeToFile(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName, int depthBound) {
         while (depthBound >= 1) {
             try {
@@ -245,9 +230,9 @@ public class SearchTreeImpl<
     }
 
     protected void printTreeToFileInternal(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot,
-                                         String fileName,
-                                         int depthBound,
-                                         Function<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Boolean> filter) {
+                                           String fileName,
+                                           int depthBound,
+                                           Function<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Boolean> filter) {
         var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>>();
         queue.addFirst(new ImmutableTuple<>(subtreeRoot, 0));
 
@@ -278,5 +263,21 @@ public class SearchTreeImpl<
         } catch (IOException e) {
             throw new IllegalStateException("Saving into graph failed", e);
         }
+    }
+
+    private void expandAndEvaluateNode(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
+        nodeEvaluator.evaluateNode(selectedNodeForExpansion);
+        totalNodesExpanded++;
+        int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
+        if(branchingNodesCount > maxBranchingFactor) {
+            maxBranchingFactor = branchingNodesCount;
+        }
+        totalNodesCreated += branchingNodesCount;
+    }
+
+    private void resetTreeStatistics() {
+        totalNodesCreated = 0;
+        totalNodesExpanded = 0;
+        maxBranchingFactor = Integer.MIN_VALUE;
     }
 }

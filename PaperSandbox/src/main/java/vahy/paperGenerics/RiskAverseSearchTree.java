@@ -12,11 +12,17 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.policy.OptimalFlowCalculator;
+import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.RandomDistributionUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public class RiskAverseSearchTree<
     TAction extends Action,
@@ -34,21 +40,123 @@ public class RiskAverseSearchTree<
     public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
 
     private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator;
+    private final SplittableRandom random;
+
     private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> latestTreeWithPlayerOnTurn = null;
+
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
-    private double parentPathProbability = 0.0;
-    private double acumulatedRiskOfOtherActions = 0.0;
 
-    public RiskAverseSearchTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
+    private double playedPlayerProbability = 0.0;
+    private double playerRiskOfOtherActions = 0.0;
+
+    private TAction expectedPlayerAction;
+    private final List<TAction> playerActions;
+
+    public RiskAverseSearchTree(Class<TAction> clazz,
+                                SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
                                 NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                 OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator,
+                                SplittableRandom random,
                                 double totalRiskAllowed) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
+        TAction[] allActions = clazz.getEnumConstants();
+        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
         this.optimalFlowCalculator = optimalFlowCalculator;
+        this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
+    }
+
+    private ImmutableTuple<List<TAction>, double[]> createDistributionAsArray(List<ImmutableTuple<TAction, Double>> distribution) {
+        var vector = new double[playerActions.size()];
+        var actionList = new ArrayList<TAction>(playerActions.size());
+        for (ImmutableTuple<TAction, Double> entry : distribution) {
+            int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
+            vector[actionIndex] = entry.getSecond();
+            actionList.add(entry.getFirst());
+        }
+        return new ImmutableTuple<>(actionList, vector);
+    }
+
+    private ImmutableTuple<TAction, double[]> inferencePolicyBranch(TState state) {
+        if(tryOptimizeFlow()) {
+            var alternateDistribution = createDistributionAsArray(getRoot()
+                    .getChildNodeStream()
+                    .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
+                    .collect(Collectors.toList()));
+            int index = RandomDistributionUtils.getRandomIndexFromDistribution(alternateDistribution.getSecond(), random);
+            return new ImmutableTuple<>(alternateDistribution.getFirst().get(index), alternateDistribution.getSecond());
+        } else {
+            var ucbDistribution = getUcbVisitDistribution();
+            var max = ucbDistribution.getSecond()[0];
+            var index = 0;
+            for (int i = 1; i < ucbDistribution.getFirst().size(); i++) {
+                if(max < ucbDistribution.getSecond()[i]) {
+                    max = ucbDistribution.getSecond()[i];
+                    index = i;
+                }
+            }
+            return new ImmutableTuple<>(ucbDistribution.getFirst().get(index), ucbDistribution.getSecond());
+        }
+    }
+
+    private ImmutableTuple<List<TAction>, double[]> getUcbVisitDistribution() {
+        double totalVisitSum = getRoot()
+            .getChildNodeStream()
+            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
+            .sum();
+        return createDistributionAsArray(getRoot()
+            .getChildNodeStream()
+            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getVisitCounter() / totalVisitSum))
+            .collect(Collectors.toList()));
+    }
+
+    private ImmutableTuple<TAction, double[]> explorationPolicyBranch(TState state, double temperature) {
+        if(tryOptimizeFlow()) {
+
+            var alternateDistribution = createDistributionAsArray(getRoot()
+                .getChildNodeStream()
+                .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
+                .collect(Collectors.toList()));
+
+            double[] actionDistributionAsArray = alternateDistribution.getSecond();
+            RandomDistributionUtils.applyTemperatureNoise(actionDistributionAsArray, temperature);
+
+
+
+
+            return null;
+        } else {
+            var ucbDistribution = getUcbVisitDistribution();
+            int index = RandomDistributionUtils.getRandomIndexFromDistribution(ucbDistribution.getSecond(), random);
+            return new ImmutableTuple<>(ucbDistribution.getFirst().get(index), ucbDistribution.getSecond());
+        }
+    }
+
+    private ImmutableTuple<TAction, double[]> createActionWithDistribution(TState state, PolicyMode policyMode, double temperature) {
+        switch (policyMode) {
+            case EXPLOITATION:
+                return inferencePolicyBranch(state);
+            case EXPLORATION:
+                return explorationPolicyBranch(state, temperature);
+            default: throw EnumUtils.createExceptionForUnknownEnumValue(policyMode);
+        }
+    }
+
+    public ImmutableTuple<TAction, double[]> getActionDistributionAndDiscreteAction(TState state, PolicyMode policyMode, double temperature) {
+        if(state.isOpponentTurn()) {
+            throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
+        }
+        var actionWithActionDistribution = createActionWithDistribution(state, policyMode, temperature);
+
+
+        // CALCULATE NEW RISK & SHIT
+
+
+        expectedPlayerAction = actionWithActionDistribution.getFirst();
+        return actionWithActionDistribution;
     }
 
     public boolean isFlowOptimized() {
@@ -59,10 +167,10 @@ public class RiskAverseSearchTree<
         return totalRiskAllowed >= 1.0;
     }
 
-    public void optimizeFlow() {
+    private boolean tryOptimizeFlow() {
         if(isRiskIgnored()) {
             isFlowOptimized = false;
-            return;
+            return false;
         }
         if(!isFlowOptimized) {
             boolean optimalSolutionExists = optimalFlowCalculator.calculateFlow(getRoot(), totalRiskAllowed);
@@ -70,73 +178,13 @@ public class RiskAverseSearchTree<
                 logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0");
                 totalRiskAllowed = 1.0;
                 isFlowOptimized = false;
+                return true;
             } else {
                 isFlowOptimized = true;
+                return false;
             }
         }
-    }
-
-    public List<TAction> getAllowedActionsForExploration() {
-        TAction[] actions = getRoot().getAllPossibleActions();
-        var allowedActions = new LinkedList<TAction>();
-        for (TAction action : actions) {
-            if (calculateRiskOfOpponentNodes(getRoot().getChildNodeMap().get(action)) <= totalRiskAllowed) {
-                allowedActions.add(action);
-            }
-        }
-        return allowedActions;
-    }
-
-    private double calculateRiskOfOpponentNodes(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        if(node.isFinalNode()) {
-            return node.getWrappedState().isRiskHit() ?  1.0 : 0.0;
-        }
-        if(node.isPlayerTurn()) {
-            return 0.0;
-        }
-        if(node.isLeaf()) {
-            throw new IllegalStateException("Risk can't be calculated from leaf nodes which are not player turns. Tree should be expanded up to player or final nodes");
-        }
-        return node
-            .getChildNodeStream()
-            .map(x -> new ImmutableTuple<>(x, x.getSearchNodeMetadata().getPriorProbability()))
-            .mapToDouble(x -> calculateRiskOfOpponentNodes(x.getFirst()) * x.getSecond())
-            .sum();
-    }
-
-    @Override
-    public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
-        try {
-            checkApplicableAction(action);
-            // TODO make general in applicable action
-            if(!getRoot().getChildNodeMap().containsKey(action)) {
-                throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
-            }
-            if(action.isPlayerAction()) {
-                latestTreeWithPlayerOnTurn = this.getRoot();
-            }
-            logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction()
-                ? getPlayerActionProbability(action)
-                : getOpponentActionProbability(action));
-            logger.debug("Action probability distribution: [{}]", getRoot()
-                .getChildNodeStream()
-                .map(x -> action.isPlayerAction() ? getPlayerActionProbability(x.getAppliedAction()) : getOpponentActionProbability(x.getAppliedAction()))
-                .map(Object::toString)
-                .reduce((s, s2) -> s + ", " + s2)
-                .orElseThrow(() -> new IllegalStateException("Reduce op does not exists")));
-            isFlowOptimized = false;
-
-            if(!isRiskIgnored()) {
-                calculateNumericallyStableNewRiskThreshold(action);
-            }
-            var stateReward = innerApplyAction(action);
-            logger.debug("New Global risk: [{}]", totalRiskAllowed);
-            return stateReward;
-        } catch(Exception e) {
-            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
-            this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
-            throw e;
-        }
+        return true;
     }
 
     @Override
@@ -144,6 +192,86 @@ public class RiskAverseSearchTree<
         isFlowOptimized = false;
         return super.updateTree();
     }
+
+    @Override
+    public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
+        try {
+
+            if(action.isPlayerAction() && action != expectedPlayerAction) {
+                throw new IllegalStateException("RiskAverseTree is applied with player action which was not selected by riskAverseTree. Discrepancy.");
+            }
+            isFlowOptimized = false;
+            var stateReward = innerApplyAction(action);
+            logger.debug("New Global risk: [{}]", totalRiskAllowed);
+            return stateReward;
+
+
+//
+//            if(action.isPlayerAction()) {
+//
+//            } else {
+//                checkApplicableAction(action);
+//                if(action.isPlayerAction()) { // debug purposes
+//                    latestTreeWithPlayerOnTurn = this.getRoot();
+//                }
+//                logger.debug("Old Global risk: [{}] and applying action: [{}] with probability: [{}]", totalRiskAllowed, action, action.isPlayerAction()
+//                    ? getPlayerActionProbability(action)
+//                    : getOpponentActionProbability(action));
+//                logger.debug("Action probability distribution: [{}]", getRoot()
+//                    .getChildNodeStream()
+//                    .map(x -> action.isPlayerAction() ? getPlayerActionProbability(x.getAppliedAction()) : getOpponentActionProbability(x.getAppliedAction()))
+//                    .map(Object::toString)
+//                    .reduce((s, s2) -> s + ", " + s2)
+//                    .orElseThrow(() -> new IllegalStateException("Reduce op does not exists")));
+//
+//
+//
+//                if(!isRiskIgnored()) {
+//                    calculateNumericallyStableNewRiskThreshold(action);
+//                }
+//                isFlowOptimized = false;
+//                var stateReward = innerApplyAction(action);
+//                logger.debug("New Global risk: [{}]", totalRiskAllowed);
+//                return stateReward;
+//            }
+//
+//
+//
+
+        } catch(Exception e) {
+            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
+            this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
+            throw e;
+        }
+    }
+
+//    private List<TAction> getAllowedActionsForExploration() {
+//        TAction[] actions = getRoot().getAllPossibleActions();
+//        var allowedActions = new LinkedList<TAction>();
+//        for (TAction action : actions) {
+//            if (calculateRiskOfOpponentNodes(getRoot().getChildNodeMap().get(action)) <= totalRiskAllowed) {
+//                allowedActions.add(action);
+//            }
+//        }
+//        return allowedActions;
+//    }
+//
+//    private double calculateRiskOfOpponentNodes(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+//        if(node.isFinalNode()) {
+//            return node.getWrappedState().isRiskHit() ?  1.0 : 0.0;
+//        }
+//        if(node.isPlayerTurn()) {
+//            return 0.0;
+//        }
+//        if(node.isLeaf()) {
+//            throw new IllegalStateException("Risk can't be calculated from leaf nodes which are not player turns. Tree should be expanded up to player or final nodes");
+//        }
+//        return node
+//            .getChildNodeStream()
+//            .map(x -> new ImmutableTuple<>(x, x.getSearchNodeMetadata().getPriorProbability()))
+//            .mapToDouble(x -> calculateRiskOfOpponentNodes(x.getFirst()) * x.getSecond())
+//            .sum();
+//    }
 
     private double getPlayerActionProbability(TAction appliedAction) {
         if(isFlowOptimized) {
@@ -173,8 +301,8 @@ public class RiskAverseSearchTree<
             return;
         }
         if(appliedAction.isPlayerAction()) {
-            parentPathProbability = 0.0;
-            acumulatedRiskOfOtherActions = 0.0;
+            playedPlayerProbability = 0.0;
+            playerRiskOfOtherActions = 0.0;
         }
         double riskOfOtherActions = calculateNumericallyStableRiskOfAnotherActions(appliedAction);
         if(getRoot().getChildNodeMap().get(appliedAction).isPlayerTurn()) {
@@ -182,7 +310,7 @@ public class RiskAverseSearchTree<
                 //TODO: why the fuck do I allow opponent to play multiple actions but player can play only one in a row?
                 throw new IllegalStateException("Player can't play two actions in a row");
             }
-            double totalOtherActionsRiskSum = acumulatedRiskOfOtherActions + riskOfOtherActions;
+            double totalOtherActionsRiskSum = playerRiskOfOtherActions + riskOfOtherActions;
             double riskDiff = calculateNumericallyStableRiskDiff(totalOtherActionsRiskSum);
             totalRiskAllowed = calculateNewRiskValue(
                 riskDiff,
@@ -196,11 +324,10 @@ public class RiskAverseSearchTree<
                 appliedAction);
         } else {
             if(appliedAction.isPlayerAction()) {
-                acumulatedRiskOfOtherActions += riskOfOtherActions;
-                parentPathProbability = getPlayerActionProbability(appliedAction);
+                playerRiskOfOtherActions = riskOfOtherActions;
+                playedPlayerProbability = getPlayerActionProbability(appliedAction);
             } else {
-                acumulatedRiskOfOtherActions += riskOfOtherActions * parentPathProbability;
-                parentPathProbability *= getOpponentActionProbability(appliedAction);
+                throw new IllegalStateException("can't apply another opponent's action");
             }
         }
     }
@@ -210,15 +337,6 @@ public class RiskAverseSearchTree<
         for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             if(entry.getKey() != appliedAction) {
                 double risk = calculateRiskContributionInSubTree(entry.getValue());
-//                double risk = calculateRiskContributionPerOneAction(entry.getValue(), getPlayerActionProbability(entry.getKey()));
-//                double risk = calculateRiskContributionInSubTree(entry.getValue()) * (getRoot().isPlayerTurn() ? getPlayerActionProbability(entry.getKey()) : 1.0);
-//                double risk = calculateRiskContributionInSubTree(entry.getValue()) * calculateNumericallyStableActionProbability(getRoot()
-//                    .getChildNodeMap()
-//                    .get(appliedAction)
-//                    .getSearchNodeMetadata()
-//                    .getNodeProbabilityFlow()
-//                    .getSolution());
-
                 logger.debug("Risk for [{}] action-subtree is [{}]", entry.getKey(), risk);
                 riskOfOtherActions += risk;
             }
@@ -310,19 +428,6 @@ public class RiskAverseSearchTree<
         }
         return riskDiff;
     }
-
-//    private double calculateRiskContributionPerOneAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double nodeProbability) {
-//        return calculateRiskContributionInSubTree(node) * (node.isPlayerTurn() ? 1.0 :  nodeProbability);
-//
-////        if(node.isPlayerTurn()) {
-////            return calculateRiskContributionInSubTree(node) * nodeProbability;
-////        } else {
-////            return node
-////                .getChildNodeStream()
-////                .mapToDouble(x -> calculateRiskContributionPerOneAction(x, x.getSearchNodeMetadata().getPriorProbability()))
-////                .sum() * nodeProbability;
-////        }
-//    }
 
     private double calculateRiskContributionInSubTree(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;

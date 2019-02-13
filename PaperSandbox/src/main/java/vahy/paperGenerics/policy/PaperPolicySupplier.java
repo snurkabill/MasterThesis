@@ -2,7 +2,6 @@ package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
@@ -37,7 +36,6 @@ public class PaperPolicySupplier<
     private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
-    private final RewardAggregator<TReward> rewardAggregator;
 
     public PaperPolicySupplier(Class<TAction> actionClass,
                                SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
@@ -46,8 +44,7 @@ public class PaperPolicySupplier<
                                NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
-                               TreeUpdateConditionFactory treeUpdateConditionFactory,
-                               RewardAggregator<TReward> rewardAggregator) {
+                               TreeUpdateConditionFactory treeUpdateConditionFactory) {
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
         this.totalRiskAllowed = totalRiskAllowed;
@@ -56,7 +53,6 @@ public class PaperPolicySupplier<
         this.nodeEvaluator = nodeEvaluator;
         this.treeUpdater = treeUpdater;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
-        this.rewardAggregator = rewardAggregator;
     }
 
     @Override
@@ -78,7 +74,7 @@ public class PaperPolicySupplier<
         return new PaperPolicyImpl<>(
             actionClass,
             treeUpdateConditionFactory.create(),
-            rewardAggregator, new RiskAverseSearchTree<>(
+            new RiskAverseSearchTree<>(
                 node,
                 nodeSelector,
                 treeUpdater,
@@ -86,5 +82,23 @@ public class PaperPolicySupplier<
                 new OptimalFlowCalculator<>(random),
                 totalRiskAllowed),
             random);
+    }
+
+    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature) {
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
+            new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
+        return new PaperPolicyImpl<>(
+            actionClass,
+            treeUpdateConditionFactory.create(),
+            new RiskAverseSearchTree<>(
+                node,
+                nodeSelector,
+                treeUpdater,
+                nodeEvaluator,
+                new OptimalFlowCalculator<>(random),
+                totalRiskAllowed),
+            random,
+            explorationConstant,
+            temperature);
     }
 }

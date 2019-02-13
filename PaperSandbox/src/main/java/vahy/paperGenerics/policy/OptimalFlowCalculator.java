@@ -34,8 +34,6 @@ public class OptimalFlowCalculator<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
-    private static final double LOWR_BOUND_2 = -Math.pow(10, -18);
-
     private final SplittableRandom random;
 
     public OptimalFlowCalculator(SplittableRandom random) {
