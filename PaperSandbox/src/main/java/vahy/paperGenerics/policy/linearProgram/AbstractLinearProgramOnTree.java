@@ -1,4 +1,4 @@
-package vahy.paperGenerics.policy;
+package vahy.paperGenerics.policy.linearProgram;
 
 import com.quantego.clp.CLP;
 import com.quantego.clp.CLPExpression;
@@ -18,15 +18,15 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.SplittableRandom;
 
-public class OptimalFlowCalculator<
+public abstract class AbstractLinearProgramOnTree<
     TAction extends Action,
     TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>  {
 
-    private static final Logger logger = LoggerFactory.getLogger(OptimalFlowCalculator.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTree.class.getName());
 
     private static final double LOWER_BOUND = 0.0;
     private static final double UPPER_BOUND = 1.0;
@@ -35,78 +35,75 @@ public class OptimalFlowCalculator<
     private static final double RISK_COEFFICIENT = 1.0;
 
     private final SplittableRandom random;
+    protected CLP model;
+    protected LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
+    private boolean maximize;
 
-    public OptimalFlowCalculator(SplittableRandom random) {
+    protected AbstractLinearProgramOnTree(SplittableRandom random, boolean maximize) {
+        this.model = new CLP();
+        this.queue = new LinkedList<>();
         this.random = random;
+        this.maximize = maximize;
     }
 
-    public boolean calculateFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root, double totalRiskAllowed) {
+    protected abstract void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
+
+    public double getObjectiveValue() {
+        return model.getObjectiveValue();
+    }
+
+    public boolean optimizeFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
-        CLP model = new CLP();
-        LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
         queue.addFirst(root);
-
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
-
-        CLPExpression totalRiskExpression = null;
         while(!queue.isEmpty()) {
             SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
             Map<TAction, CLPVariable> actionChildFlowMap = new HashMap<>();
-            if(!node.isLeaf()) {
-                var entries = node.getChildNodeMap().entrySet();
-                var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
-//                var nodeChildIterator = entries.iterator();
 
-                while(nodeChildIterator.hasNext()) {
-                    var entry = nodeChildIterator.next();
-                    queue.addLast(entry.getValue());
-                    CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
-                    entry.getValue().getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
-                    actionChildFlowMap.put(entry.getKey(), childFlow);
-                }
+            if(!node.isLeaf()) {
+                addNodeToQueue(node, actionChildFlowMap);
             }
 
             if(node.isLeaf()) {
-                if(totalRiskExpression == null) {
-                    totalRiskExpression = model.createExpression();
-                }
-                double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getPredictedRisk();
-                totalRiskExpression.add(nodeRisk, node.getSearchNodeMetadata().getNodeProbabilityFlow());
-
-
-                double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward().getValue();
-                double expectedReward = node.getSearchNodeMetadata().getExpectedReward().getValue();
-
-                double leafCoefficient = cumulativeReward + expectedReward;
-
-
-                model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);
+                setLeafObjective(node);
             } else {
-                addSummingChildrenWithParentToZeroExpression(model, node, actionChildFlowMap);
+                addSummingChildrenWithParentToZeroExpression(node, actionChildFlowMap);
                 if(!node.getWrappedState().isPlayerTurn()) {
-                    addChildFlowBasedOnFixedProbabilitiesExpression(model, node, actionChildFlowMap);
+                    addChildFlowBasedOnFixedProbabilitiesExpression(node, actionChildFlowMap);
                 }
             }
         }
-        if(totalRiskExpression != null) {
-            totalRiskExpression.leq(totalRiskAllowed);
-        }
+
         long finishBuildingLinearProgram = System.currentTimeMillis();
         logger.debug("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
-        long startOptimalization = System.currentTimeMillis();
-        CLP.STATUS status = model.maximize();
+        long startOptimization = System.currentTimeMillis();
+        CLP.STATUS status = maximize ? model.maximize() : model.minimize();
         if(status != CLP.STATUS.OPTIMAL) {
             logger.error("Optimal solution was not found.");
             return false;
-//            throw new IllegalStateException("Optimal solution was not found");
         }
-        long finishOptimalization = System.currentTimeMillis();
-        logger.debug("Optimizing linear program took [{}] ms", finishOptimalization - startOptimalization);
+        long finishOptimization = System.currentTimeMillis();
+        logger.debug("Optimizing linear program took [{}] ms", finishOptimization - startOptimization);
         return true;
     }
 
-    public void addChildFlowBasedOnFixedProbabilitiesExpression(CLP model,
-                                                                SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    private void addNodeToQueue(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+                                Map<TAction, CLPVariable> actionChildFlowMap) {
+
+        var entries = node.getChildNodeMap().entrySet();
+        var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
+//            var nodeChildIterator = entries.iterator();
+
+        while(nodeChildIterator.hasNext()) {
+            var entry = nodeChildIterator.next();
+            queue.addLast(entry.getValue());
+            CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
+            entry.getValue().getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
+            actionChildFlowMap.put(entry.getKey(), childFlow);
+        }
+    }
+
+    public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                                                 Map<TAction, CLPVariable> actionChildFlowMap) {
         for (Map.Entry<TAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
             SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
@@ -118,8 +115,7 @@ public class OptimalFlowCalculator<
         }
     }
 
-    public void addSummingChildrenWithParentToZeroExpression(CLP model,
-                                                             SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                                              Map<TAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
         for (Map.Entry<TAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {

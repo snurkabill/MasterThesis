@@ -36,11 +36,6 @@ public class RandomWalkPolicy implements PaperPolicy<RandomWalkAction, DoubleRew
     }
 
     @Override
-    public List<RandomWalkAction> getAllowedActionsForExploration() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public double[] getActionProbabilityDistribution(RandomWalkState gameState) {
         ImmutableTuple<List<RandomWalkAction>, List<Double>> actions = gameState.getOpponentObservation().getProbabilities();
         return actions.getSecond().stream().mapToDouble(value -> value).toArray();

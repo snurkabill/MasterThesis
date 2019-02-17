@@ -1,9 +1,12 @@
 package vahy.utils;
 
+import Jama.Matrix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SplittableRandom;
 
 public class RandomDistributionUtils {
@@ -88,6 +91,11 @@ public class RandomDistributionUtils {
         return getRandomIndexFromDistribution(distribution, random, 0);
     }
 
+    public static void applyBoltzmannNoise(double[] distribution, double temperature) {
+        applyTemperatureNoise(distribution, temperature);
+        applySoftmax(distribution);
+    }
+
     public static void applyTemperatureNoise(double[] distribution, double temperature) {
         for (int i = 0; i < distribution.length; i++) {
             distribution[i] = distribution[i] / temperature;
@@ -112,4 +120,88 @@ public class RandomDistributionUtils {
             distribution[i] = distribution[i] / sum;
         }
     }
+
+    public static double[] findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk) {
+        Set<Integer> negativeIndexes = new HashSet<>();
+        while (!"pigs".equals("fly")) {
+            var hasNegativeElements = false;
+            var newDistribution = findSimilarSuitableDistributionByLeastSquares(distribution, riskArray, totalRisk, negativeIndexes);
+            for (int i = 0; i < distribution.length; i++) {
+                if(newDistribution[i] < 0.0) {
+                    hasNegativeElements = true;
+                    negativeIndexes.add(i);
+                }
+            }
+            if(!hasNegativeElements) {
+                return newDistribution;
+            }
+        }
+        throw new IllegalStateException("Unreachable code");
+    }
+
+    private static double[] findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk, Set<Integer> negativeIndexes) {
+
+        int distributionSize = distribution.length;
+        int helpVariableCount = 2;
+        int negativeHelpVariableCount = negativeIndexes.size();
+        int automaticColumnCount = distributionSize + negativeHelpVariableCount;
+        int totalColumnCount = helpVariableCount + automaticColumnCount;
+
+
+        double[][] lhsArray = new double[totalColumnCount][totalColumnCount];
+        double[] rhsArray = new double[totalColumnCount];
+
+        // A
+        for (int i = 0; i < distributionSize; i++) {
+            for (int j = 0; j < distributionSize; j++) {
+                lhsArray[i][j] = i == j ? 2 : 0;
+            }
+            for (int j = 0; j < negativeHelpVariableCount; j++) {
+                lhsArray[i][j + distributionSize] = negativeIndexes.contains(i) ? -1 : 0;
+            }
+            lhsArray[i][automaticColumnCount] = -1 ;
+            lhsArray[i][automaticColumnCount + 1] = -riskArray[i];
+            rhsArray[i] = 2 * distribution[i];
+        }
+
+        // D
+        int negativeIndexesAdded = 0;
+        for (Integer negativeIndex : negativeIndexes) {
+            for (int j = 0; j < distributionSize; j++) {
+                lhsArray[distributionSize + negativeIndexesAdded][negativeIndex] = -1;
+            }
+            rhsArray[distributionSize + negativeIndexesAdded] = 0;
+            negativeIndexesAdded++;
+        }
+
+
+        // B
+        for (int i = 0; i < distributionSize; i++) {
+            lhsArray[automaticColumnCount][i] = 1;
+        }
+//        for (int i = 0; i < negativeHelpVariableCount; i++) {
+//            lhsArray[automaticColumnCount][i + distributionSize] = 0;
+//        }
+//        lhsArray[automaticColumnCount][automaticColumnCount] = 0;
+//        lhsArray[automaticColumnCount][automaticColumnCount + 1] = 0;
+        rhsArray[automaticColumnCount] = 1;
+
+
+        // C
+        for (int i = 0; i < distributionSize; i++) {
+            lhsArray[automaticColumnCount + 1][i] = riskArray[i];
+        }
+        rhsArray[automaticColumnCount + 1] = totalRisk;
+
+        Matrix lhs = new Matrix(lhsArray);
+        Matrix rhs = new Matrix(rhsArray, totalColumnCount);
+        Matrix ans = lhs.solve(rhs);
+
+        var newDistribution = new double[distributionSize];
+        for (int i = 0; i < distribution.length; i++) {
+            newDistribution[i] = ans.get(i, 0);
+        }
+        return newDistribution;
+    }
+
 }

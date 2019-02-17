@@ -11,8 +11,11 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.paperGenerics.policy.OptimalFlowCalculator;
+import vahy.paperGenerics.policy.linearProgram.MinimalRiskReachAbilityCalculator;
+import vahy.paperGenerics.policy.linearProgram.OptimalFlowHardConstraintCalculator;
+import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.utils.EnumUtils;
+import vahy.utils.ImmutableTriple;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
@@ -22,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class RiskAverseSearchTree<
@@ -39,7 +43,6 @@ public class RiskAverseSearchTree<
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
 
-    private final OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator;
     private final SplittableRandom random;
 
     private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> latestTreeWithPlayerOnTurn = null;
@@ -51,43 +54,64 @@ public class RiskAverseSearchTree<
     private double playerRiskOfOtherActions = 0.0;
 
     private TAction expectedPlayerAction;
+    private int indexOfExpectedPlayerAction;
+    private double[] playerActionDistribution;
+    private double[] playerRiskEstimatedDistribution;
     private final List<TAction> playerActions;
+
+    private final Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
 
     public RiskAverseSearchTree(Class<TAction> clazz,
                                 SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
                                 NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
-                                OptimalFlowCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> optimalFlowCalculator,
                                 SplittableRandom random,
                                 double totalRiskAllowed) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
         TAction[] allActions = clazz.getEnumConstants();
         this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
-        this.optimalFlowCalculator = optimalFlowCalculator;
         this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
+        this.subtreeRiskCalculatorSupplier = () -> new MinimalRiskReachAbilityCalculator<>(random);
     }
 
-    private ImmutableTuple<List<TAction>, double[]> createDistributionAsArray(List<ImmutableTuple<TAction, Double>> distribution) {
-        var vector = new double[playerActions.size()];
+    private ImmutableTriple<List<TAction>, double[], double[]> getUcbVisitDistribution() {
+        double totalVisitSum = getRoot()
+            .getChildNodeStream()
+            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
+            .sum();
+        return createDistributionAsArray(getRoot()
+            .getChildNodeStream()
+            .map(x -> new ImmutableTriple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getVisitCounter() / totalVisitSum, 1.0d))
+            .collect(Collectors.toList()));
+    }
+
+    private ImmutableTriple<List<TAction>, double[], double[]> createDistributionAsArray(List<ImmutableTriple<TAction, Double, Double>> actionDistribution) {
+        var actionVector = new double[playerActions.size()];
+        var riskVector = new double[playerActions.size()];
         var actionList = new ArrayList<TAction>(playerActions.size());
-        for (ImmutableTuple<TAction, Double> entry : distribution) {
+        for (ImmutableTriple<TAction, Double, Double> entry : actionDistribution) {
             int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
-            vector[actionIndex] = entry.getSecond();
-            actionList.add(entry.getFirst());
+            actionList.add(actionIndex, entry.getFirst());
+            actionVector[actionIndex] = entry.getSecond();
+            riskVector[actionIndex] = entry.getThird();
         }
-        return new ImmutableTuple<>(actionList, vector);
+        return new ImmutableTriple<>(actionList, actionVector, riskVector);
     }
 
-    private ImmutableTuple<TAction, double[]> inferencePolicyBranch(TState state) {
+    private ImmutableTriple<ImmutableTuple<TAction, Integer>, double[], double[]> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
             var alternateDistribution = createDistributionAsArray(getRoot()
                     .getChildNodeStream()
-                    .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
+                    .map(x -> {
+                        var minimalRiskReachAbilityCalculator = subtreeRiskCalculatorSupplier.get();
+                        var subtreeRisk = minimalRiskReachAbilityCalculator.calculateRisk(x);
+                        return new ImmutableTriple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution(), subtreeRisk);
+                    })
                     .collect(Collectors.toList()));
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(alternateDistribution.getSecond(), random);
-            return new ImmutableTuple<>(alternateDistribution.getFirst().get(index), alternateDistribution.getSecond());
+            return new ImmutableTriple<>(new ImmutableTuple<>(alternateDistribution.getFirst().get(index), index), alternateDistribution.getSecond(), alternateDistribution.getThird());
         } else {
             var ucbDistribution = getUcbVisitDistribution();
             var max = ucbDistribution.getSecond()[0];
@@ -98,44 +122,50 @@ public class RiskAverseSearchTree<
                     index = i;
                 }
             }
-            return new ImmutableTuple<>(ucbDistribution.getFirst().get(index), ucbDistribution.getSecond());
+            return new ImmutableTriple<>(new ImmutableTuple<>(ucbDistribution.getFirst().get(index), index), ucbDistribution.getSecond(), ucbDistribution.getThird());
         }
     }
 
-    private ImmutableTuple<List<TAction>, double[]> getUcbVisitDistribution() {
-        double totalVisitSum = getRoot()
-            .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
-            .sum();
-        return createDistributionAsArray(getRoot()
-            .getChildNodeStream()
-            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getVisitCounter() / totalVisitSum))
-            .collect(Collectors.toList()));
-    }
 
-    private ImmutableTuple<TAction, double[]> explorationPolicyBranch(TState state, double temperature) {
+    private ImmutableTriple<ImmutableTuple<TAction, Integer>, double[], double[]> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
 
             var alternateDistribution = createDistributionAsArray(getRoot()
                 .getChildNodeStream()
-                .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
+                .map(x -> {
+                    var minimalRiskReachAbilityCalculator = subtreeRiskCalculatorSupplier.get();
+                    var subtreeRisk = minimalRiskReachAbilityCalculator.calculateRisk(x);
+                    return new ImmutableTriple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution(), subtreeRisk);
+                })
                 .collect(Collectors.toList()));
 
             double[] actionDistributionAsArray = alternateDistribution.getSecond();
-            RandomDistributionUtils.applyTemperatureNoise(actionDistributionAsArray, temperature);
+            RandomDistributionUtils.applyBoltzmannNoise(actionDistributionAsArray, temperature);
+            double[] actionRiskAsArray = alternateDistribution.getThird();
 
-
-
-
-            return null;
+            var sum = 0.0d;
+            for (int i = 0; i < actionDistributionAsArray.length; i++) {
+                sum += actionDistributionAsArray[i] * actionRiskAsArray[i];
+            }
+            if(sum >= totalRiskAllowed) {
+                var suitableExplorationDistribution = RandomDistributionUtils.findSimilarSuitableDistributionByLeastSquares(
+                    alternateDistribution.getSecond(),
+                    alternateDistribution.getThird(),
+                    totalRiskAllowed);
+                int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution, random);
+                return new ImmutableTriple<>(new ImmutableTuple<>(alternateDistribution.getFirst().get(index), index), suitableExplorationDistribution, alternateDistribution.getThird());
+            } else {
+                int index = RandomDistributionUtils.getRandomIndexFromDistribution(alternateDistribution.getSecond(), random);
+                return new ImmutableTriple<>(new ImmutableTuple<>(alternateDistribution.getFirst().get(index), index), alternateDistribution.getSecond(), alternateDistribution.getThird());
+            }
         } else {
             var ucbDistribution = getUcbVisitDistribution();
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(ucbDistribution.getSecond(), random);
-            return new ImmutableTuple<>(ucbDistribution.getFirst().get(index), ucbDistribution.getSecond());
+            return new ImmutableTriple<>(new ImmutableTuple<>(ucbDistribution.getFirst().get(index), index), ucbDistribution.getSecond(), ucbDistribution.getThird());
         }
     }
 
-    private ImmutableTuple<TAction, double[]> createActionWithDistribution(TState state, PolicyMode policyMode, double temperature) {
+    private ImmutableTriple<ImmutableTuple<TAction, Integer>, double[], double[]> createActionWithDistribution(TState state, PolicyMode policyMode, double temperature) {
         switch (policyMode) {
             case EXPLOITATION:
                 return inferencePolicyBranch(state);
@@ -151,12 +181,12 @@ public class RiskAverseSearchTree<
         }
         var actionWithActionDistribution = createActionWithDistribution(state, policyMode, temperature);
 
+        expectedPlayerAction = actionWithActionDistribution.getFirst().getFirst();
+        indexOfExpectedPlayerAction = actionWithActionDistribution.getFirst().getSecond();
+        playerActionDistribution = actionWithActionDistribution.getSecond();
+        playerRiskEstimatedDistribution = actionWithActionDistribution.getThird();
 
-        // CALCULATE NEW RISK & SHIT
-
-
-        expectedPlayerAction = actionWithActionDistribution.getFirst();
-        return actionWithActionDistribution;
+        return new ImmutableTuple<>(actionWithActionDistribution.getFirst().getFirst(), actionWithActionDistribution.getSecond());
     }
 
     public boolean isFlowOptimized() {
@@ -173,7 +203,8 @@ public class RiskAverseSearchTree<
             return false;
         }
         if(!isFlowOptimized) {
-            boolean optimalSolutionExists = optimalFlowCalculator.calculateFlow(getRoot(), totalRiskAllowed);
+            var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
+            boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(getRoot());
             if(!optimalSolutionExists) {
                 logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0");
                 totalRiskAllowed = 1.0;
@@ -196,14 +227,31 @@ public class RiskAverseSearchTree<
     @Override
     public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         try {
-
             if(action.isPlayerAction() && action != expectedPlayerAction) {
                 throw new IllegalStateException("RiskAverseTree is applied with player action which was not selected by riskAverseTree. Discrepancy.");
             }
             isFlowOptimized = false;
-            var stateReward = innerApplyAction(action);
-            logger.debug("New Global risk: [{}]", totalRiskAllowed);
-            return stateReward;
+            if(!action.isPlayerAction()) {
+                var playerActionProbability = playerActionDistribution[indexOfExpectedPlayerAction];
+                var opponentActionProbability = getRoot().getSearchNodeMetadata().getChildPriorProbabilities().get(action);
+                var riskOfOtherPlayerActions = 0.0d;
+                for (int i = 0; i < playerRiskEstimatedDistribution.length; i++) {
+                    if(i != indexOfExpectedPlayerAction) {
+                        riskOfOtherPlayerActions += playerRiskEstimatedDistribution[i];
+                    }
+                }
+                var riskOfOtherOpponentActions = getRoot()
+                    .getChildNodeStream()
+                    .filter(x -> x.getAppliedAction() != action)
+                    .mapToDouble(x -> {
+                        var minimalRiskReachAbilityCalculator = subtreeRiskCalculatorSupplier.get();
+                        return minimalRiskReachAbilityCalculator.calculateRisk(x);
+                    })
+                    .sum();
+                totalRiskAllowed = (totalRiskAllowed - (riskOfOtherPlayerActions + riskOfOtherOpponentActions)) / (playerActionProbability * opponentActionProbability);
+                logger.debug("New Global risk: [{}]", totalRiskAllowed);
+            }
+            return innerApplyAction(action);
 
 
 //

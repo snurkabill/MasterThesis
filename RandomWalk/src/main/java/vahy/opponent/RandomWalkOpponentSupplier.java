@@ -16,7 +16,7 @@ public class RandomWalkOpponentSupplier extends PaperPolicySupplier<RandomWalkAc
     public final SplittableRandom random;
 
     public RandomWalkOpponentSupplier(SplittableRandom random) {
-        super(null, null, 0.0, random, null, null, null, null, null);
+        super(null, null, 0.0, random, null, null, null, null);
         this.random = random;
     }
 

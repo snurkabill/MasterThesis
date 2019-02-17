@@ -167,8 +167,7 @@ public class MarketPrototype {
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
                     explorationConstantSupplier,
-                    temperatureSupplier,
-                    rewardAggregator
+                    temperatureSupplier
                 );
 
             PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
@@ -180,8 +179,7 @@ public class MarketPrototype {
                     nodeSelector,
                     marketNodeEvaluator,
                     paperTreeUpdater,
-                    treeUpdateConditionFactory,
-                    rewardAggregator);
+                    treeUpdateConditionFactory);
 
             AbstractTrainer trainer = getAbstractTrainer(
                 TrainerAlgorithm.EVERY_VISIT_MC,

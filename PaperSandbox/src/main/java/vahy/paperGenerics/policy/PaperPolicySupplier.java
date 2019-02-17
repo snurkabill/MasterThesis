@@ -75,11 +75,12 @@ public class PaperPolicySupplier<
             actionClass,
             treeUpdateConditionFactory.create(),
             new RiskAverseSearchTree<>(
+                actionClass,
                 node,
                 nodeSelector,
                 treeUpdater,
                 nodeEvaluator,
-                new OptimalFlowCalculator<>(random),
+                random,
                 totalRiskAllowed),
             random);
     }
@@ -91,11 +92,12 @@ public class PaperPolicySupplier<
             actionClass,
             treeUpdateConditionFactory.create(),
             new RiskAverseSearchTree<>(
+                actionClass,
                 node,
                 nodeSelector,
                 treeUpdater,
                 nodeEvaluator,
-                new OptimalFlowCalculator<>(random),
+                random,
                 totalRiskAllowed),
             random,
             explorationConstant,

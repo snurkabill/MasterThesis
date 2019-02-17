@@ -121,8 +121,7 @@ public class Experiment {
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
-            experimentSetup.getTemperatureSupplier(),
-            rewardAggregator
+            experimentSetup.getTemperatureSupplier()
         );
 
         var nnBasedPolicySupplier = new PaperPolicySupplier<>(
@@ -133,8 +132,7 @@ public class Experiment {
             nodeSelector,
             nnbasedEvaluator,
             paperTreeUpdater,
-            experimentSetup.getTreeUpdateConditionFactory(),
-            rewardAggregator);
+            experimentSetup.getTreeUpdateConditionFactory());
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
