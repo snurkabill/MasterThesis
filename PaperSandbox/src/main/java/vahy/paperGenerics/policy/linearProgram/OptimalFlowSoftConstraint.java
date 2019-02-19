@@ -26,11 +26,12 @@ public class OptimalFlowSoftConstraint <
     private static final double RISK_COEFFICIENT = 1.0;
 
     private final CLPExpression totalRiskExpression;
+    private final double totalRiskAllowed;
 
     protected OptimalFlowSoftConstraint(SplittableRandom random, double totalRiskAllowed) {
         super(random, true);
         this.totalRiskExpression = model.createExpression();
-        this.totalRiskExpression.leq(totalRiskAllowed);
+        this.totalRiskAllowed = totalRiskAllowed;
     }
 
     @Override
@@ -43,5 +44,10 @@ public class OptimalFlowSoftConstraint <
         double predictedRisk = node.getSearchNodeMetadata().getPredictedRisk();
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
         model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);
+    }
+
+    @Override
+    protected void finalizeHardConstraints() {
+        this.totalRiskExpression.leq(totalRiskAllowed);
     }
 }

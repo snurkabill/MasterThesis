@@ -24,11 +24,12 @@ public class OptimalFlowHardConstraintCalculator<
     private static final Logger logger = LoggerFactory.getLogger(OptimalFlowHardConstraintCalculator.class.getName());
 
     private final CLPExpression totalRiskExpression;
+    private final double totalRiskAllowed;
 
     public OptimalFlowHardConstraintCalculator(SplittableRandom random, double totalRiskAllowed) {
         super(random, true);
         this.totalRiskExpression = model.createExpression();
-        this.totalRiskExpression.leq(totalRiskAllowed);
+        this.totalRiskAllowed = totalRiskAllowed;
     }
 
 
@@ -40,6 +41,11 @@ public class OptimalFlowHardConstraintCalculator<
         double expectedReward = node.getSearchNodeMetadata().getExpectedReward().getValue();
         double leafCoefficient = cumulativeReward + expectedReward;
         model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);
+    }
+
+    @Override
+    protected void finalizeHardConstraints() {
+        this.totalRiskExpression.leq(totalRiskAllowed);
     }
 
 }

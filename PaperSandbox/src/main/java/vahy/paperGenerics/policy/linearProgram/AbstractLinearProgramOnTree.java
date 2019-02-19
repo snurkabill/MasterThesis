@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.collections.RandomIterator;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
@@ -48,6 +47,8 @@ public abstract class AbstractLinearProgramOnTree<
 
     protected abstract void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
 
+    protected abstract void finalizeHardConstraints();
+
     public double getObjectiveValue() {
         return model.getObjectiveValue();
     }
@@ -74,6 +75,8 @@ public abstract class AbstractLinearProgramOnTree<
             }
         }
 
+        finalizeHardConstraints();
+
         long finishBuildingLinearProgram = System.currentTimeMillis();
         logger.debug("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
         long startOptimization = System.currentTimeMillis();
@@ -91,8 +94,8 @@ public abstract class AbstractLinearProgramOnTree<
                                 Map<TAction, CLPVariable> actionChildFlowMap) {
 
         var entries = node.getChildNodeMap().entrySet();
-        var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
-//            var nodeChildIterator = entries.iterator();
+//        var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
+            var nodeChildIterator = entries.iterator();
 
         while(nodeChildIterator.hasNext()) {
             var entry = nodeChildIterator.next();

@@ -74,13 +74,13 @@ public class Benchmark07Solution {
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 0.0;
+                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 0.0;
+                    return 1.5;
                 }
             })
             .buildExperimentSetup();

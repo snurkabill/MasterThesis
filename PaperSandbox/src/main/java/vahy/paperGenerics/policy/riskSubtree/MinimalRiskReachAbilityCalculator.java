@@ -1,4 +1,4 @@
-package vahy.paperGenerics.policy.linearProgram;
+package vahy.paperGenerics.policy.riskSubtree;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +8,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
+import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
 
 import java.util.SplittableRandom;
 
@@ -19,31 +19,37 @@ public class MinimalRiskReachAbilityCalculator<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
     TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractLinearProgramOnTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
     implements SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
-
 
     private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculator.class.getName());
 
-    public MinimalRiskReachAbilityCalculator(SplittableRandom random) {
-        super(random, false);
-    }
+    private final SplittableRandom random;
 
-    @Override
-    protected void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        if(node.getWrappedState().isRiskHit()) {
-            model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
-        } else {
-            model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getPredictedRisk());
-        }
+    public MinimalRiskReachAbilityCalculator(SplittableRandom random) {
+        this.random = random;
     }
 
     @Override
     public double calculateRisk(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
-        var isFeasible = optimizeFlow(subtreeRoot);
+        var linProgram = new AbstractLinearProgramOnTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, false) {
+            @Override
+            protected void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+                if(node.getWrappedState().isRiskHit()) {
+                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
+                } else {
+                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getPredictedRisk());
+                }
+            }
+
+            @Override
+            protected void finalizeHardConstraints() {
+                // this is is
+            }
+        };
+        var isFeasible = linProgram.optimizeFlow(subtreeRoot);
         if(!isFeasible) {
             throw new IllegalStateException("Minimal risk reachAbility is not feasible. Should not happen. Investigate.");
         }
-        return this.getObjectiveValue();
+        return linProgram.getObjectiveValue();
     }
 }

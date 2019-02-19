@@ -50,7 +50,7 @@ public class PaperPolicyImpl<
                            SplittableRandom random,
                            double explorationConstant,
                            double temperature) {
-        this(clazz, treeUpdateCondition, searchTree, random, true, explorationConstant, temperature);
+        this(clazz, treeUpdateCondition, searchTree, random, false, explorationConstant, temperature);
     }
 
     public PaperPolicyImpl(Class<TAction> clazz,

@@ -153,7 +153,7 @@ public class Experiment {
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
             trainer.trainPolicy(experimentSetup.getBatchEpisodeCount());
-            trainer.printDataset();
+//            trainer.printDataset();
         }
         return System.currentTimeMillis() - trainingStart;
     }

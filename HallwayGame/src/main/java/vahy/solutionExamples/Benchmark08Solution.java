@@ -58,7 +58,7 @@ public class Benchmark08Solution {
             .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(1000)
+            .batchEpisodeCount(100)
             .stageCount(100)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
