@@ -37,7 +37,63 @@ public class Benchmark13Solution {
 
     }
 
+
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
+        GameConfig gameConfig = new ConfigBuilder()
+            .reward(100)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(2)
+            .trapProbability(0.1)
+            .stateRepresentation(StateRepresentation.COMPACT)
+            .buildConfig();
+
+        ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
+            .randomSeed(0)
+            .hallwayInstance(HallwayInstance.BENCHMARK_13)
+            //MCTS
+            .cpuctParameter(3)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(400))
+            //.mcRolloutCount(1)
+            //NN
+            .trainingBatchSize(64)
+            .trainingEpochCount(1)
+            // REINFORCEMENTs
+            .discountFactor(1)
+            .batchEpisodeCount(100)
+            .stageCount(100)
+
+            .maximalStepCountBound(1000)
+
+            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .approximatorType(ApproximatorType.HASHMAP)
+            .replayBufferSize(20000)
+            .selectorType(SelectorType.UCB)
+            .evalEpisodeCount(1000)
+            .globalRiskAllowed(0.2)
+            .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 4000.0);
+//                    return 0.1;
+                }
+            })
+            .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 4000.0) * 4;
+//                    return 1.5;
+                }
+            })
+            .buildExperimentSetup();
+        return new ImmutableTuple<>(gameConfig, experimentSetup);
+    }
+
+
+    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment2() { // really quite working with commit "finally"
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
@@ -59,7 +115,7 @@ public class Benchmark13Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(10)
-            .stageCount(10000)
+            .stageCount(1000)
 
             .maximalStepCountBound(1000)
 

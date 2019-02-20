@@ -153,14 +153,14 @@ public class RiskAverseSearchTree<
             }
             if(sum > totalRiskAllowed) {
                 var suitableExplorationDistribution = RandomDistributionUtils.findSimilarSuitableDistributionByLeastSquares(
-                    alternateDistribution.getSecond(),
+                    actionDistributionAsArray,
                     alternateDistribution.getThird(),
                     totalRiskAllowed);
                 int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution, random);
                 return new ImmutableTriple<>(new ImmutableTuple<>(alternateDistribution.getFirst().get(index), index), suitableExplorationDistribution, alternateDistribution.getThird());
             } else {
-                int index = RandomDistributionUtils.getRandomIndexFromDistribution(alternateDistribution.getSecond(), random);
-                return new ImmutableTriple<>(new ImmutableTuple<>(alternateDistribution.getFirst().get(index), index), alternateDistribution.getSecond(), alternateDistribution.getThird());
+                int index = RandomDistributionUtils.getRandomIndexFromDistribution(actionDistributionAsArray, random);
+                return new ImmutableTriple<>(new ImmutableTuple<>(alternateDistribution.getFirst().get(index), index), actionDistributionAsArray, alternateDistribution.getThird());
             }
         } else {
             var ucbDistribution = getUcbVisitDistribution();
@@ -251,6 +251,9 @@ public class RiskAverseSearchTree<
             if(action.isPlayerAction() && action != expectedPlayerAction) {
                 throw new IllegalStateException("RiskAverseTree is applied with player action which was not selected by riskAverseTree. Discrepancy.");
             }
+            if(action.isPlayerAction()) { // debug purposes
+                latestTreeWithPlayerOnTurn = this.getRoot();
+            }
             isFlowOptimized = false;
             if(!action.isPlayerAction()) {
                 var playerActionProbability = playerActionDistribution[indexOfExpectedPlayerAction];
@@ -271,8 +274,34 @@ public class RiskAverseSearchTree<
                     })
                     .sum();
                 riskOfOtherOpponentActions = roundRiskIfBelowZero(riskOfOtherOpponentActions, "RiskOfOtherOpponentActions");
-                totalRiskAllowed = (totalRiskAllowed - (riskOfOtherPlayerActions + riskOfOtherOpponentActions)) / (playerActionProbability * opponentActionProbability);
-                totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
+
+                var dividingProbability = (playerActionProbability * opponentActionProbability);
+
+                var oldRisk = totalRiskAllowed;
+
+                if(Arrays.stream(playerRiskEstimatedDistribution).sum() != 0.0) {
+                    totalRiskAllowed = (totalRiskAllowed - (riskOfOtherPlayerActions + riskOfOtherOpponentActions)) / dividingProbability;
+                    totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
+                }
+
+                logger.debug("Playing action: [{}] from actions: [{}]) with distribution: [{}] with minimalRiskReachAbility: [{}]. Risk of other player actions: [{}]. Risk of other Opponent actions: [{}], dividing probability: [{}], old risk: [{}], new risk: [{}]",
+                    expectedPlayerAction,
+                    playerActions.stream().map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
+                    Arrays.toString(playerActionDistribution),
+                    Arrays.toString(playerRiskEstimatedDistribution),
+                    riskOfOtherPlayerActions,
+                    riskOfOtherOpponentActions,
+                    dividingProbability,
+                    oldRisk,
+                    totalRiskAllowed
+                    );
+
+
+                if(totalRiskAllowed > 1.0 + NUMERICAL_RISK_DIFF_TOLERANCE) {
+                    logger.error("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
+                    totalRiskAllowed = 1.0;
+//                    throw new IllegalStateException("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
+                }
 
                 logger.debug("New Global risk: [{}]", totalRiskAllowed);
             }
