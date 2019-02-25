@@ -52,7 +52,7 @@ public class Benchmark13Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_13)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(400))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(500))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
