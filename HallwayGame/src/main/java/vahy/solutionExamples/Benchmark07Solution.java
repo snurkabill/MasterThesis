@@ -72,15 +72,21 @@ public class Benchmark07Solution {
             .evalEpisodeCount(10000)
             .globalRiskAllowed(0.00)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.1;
+                    callCount++;
+                    return Math.exp(-callCount / 1000.0) / 5;
+//                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 1.5;
+                    callCount++;
+                    return Math.exp(-callCount / 1000.0) * 3;
+//                    return 2.0;
                 }
             })
             .buildExperimentSetup();

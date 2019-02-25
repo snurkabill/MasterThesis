@@ -32,17 +32,6 @@ public class DataTableApproximator<TObservation extends DoubleVector> extends Tr
 
     @Override
     public double[] apply(TObservation doubleVectorialObservation) {
-        if(predictionMap.containsKey(doubleVectorialObservation)) {
-
-            double[] newArray = predictionMap.get(doubleVectorialObservation);
-
-//            newArray[2] = 1.0/3.0;
-//            newArray[3] = 1.0/3.0;
-//            newArray[4] = 1.0/3.0;
-
-            return newArray;
-        } else {
-            return defaultPrediction;
-        }
+        return predictionMap.getOrDefault(doubleVectorialObservation, defaultPrediction);
     }
 }

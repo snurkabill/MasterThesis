@@ -14,7 +14,7 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.RiskAverseSearchTree;
+import vahy.paperGenerics.policy.riskSubtree.RiskAverseSearchTree;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;

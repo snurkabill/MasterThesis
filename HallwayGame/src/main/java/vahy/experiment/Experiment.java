@@ -29,6 +29,7 @@ import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
 import vahy.paperGenerics.reinforcement.DataTableApproximator;
+import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
@@ -73,6 +74,9 @@ public class Experiment {
                 break;
             case HASHMAP:
                 createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length));
+                break;
+            case HASHMAP_LR:
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximatorWithLr<>(HallwayAction.playerActions.length, setup.getSecond().getLearningRate()));
                 break;
             case NN:
             {

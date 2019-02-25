@@ -36,6 +36,8 @@ public class ExperimentSetupBuilder {
     private int trainingBatchSize;
     private int trainingEpochCount;
 
+    private double learningRate;
+
     // Evaluation
     private int evalEpisodeCount;
 
@@ -114,6 +116,10 @@ public class ExperimentSetupBuilder {
         this.evalEpisodeCount = evalEpisodeCount; return this;
     }
 
+    public ExperimentSetupBuilder learningRate(double learningRate) {
+        this.learningRate = learningRate; return this;
+    }
+
     public ExperimentSetupBuilder globalRiskAllowed(double globalRiskAllowed) {
         this.globalRiskAllowed = globalRiskAllowed; return this;
     }
@@ -146,6 +152,7 @@ public class ExperimentSetupBuilder {
             approximatorType,
             trainingBatchSize,
             trainingEpochCount,
+            learningRate,
             evalEpisodeCount,
             globalRiskAllowed,
             selectorType);

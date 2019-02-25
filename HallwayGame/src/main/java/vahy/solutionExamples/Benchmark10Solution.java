@@ -56,13 +56,15 @@ public class Benchmark10Solution {
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
+            .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
-            .batchEpisodeCount(100)
+            .batchEpisodeCount(3)
             .stageCount(100)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)

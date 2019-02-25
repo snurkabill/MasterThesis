@@ -28,7 +28,7 @@ public class OptimalFlowSoftConstraint <
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
 
-    protected OptimalFlowSoftConstraint(SplittableRandom random, double totalRiskAllowed) {
+    public OptimalFlowSoftConstraint(SplittableRandom random, double totalRiskAllowed) {
         super(random, true);
         this.totalRiskExpression = model.createExpression();
         this.totalRiskAllowed = totalRiskAllowed;

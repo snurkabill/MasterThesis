@@ -27,14 +27,14 @@ public class SubtreePriorRiskCalculator<
         while(!queue.isEmpty()) {
             var node = queue.poll();
             if(node.getFirst().isLeaf()) {
-                if(node.getFirst().getWrappedState().isRiskHit()) {
-                    totalRisk += node.getSecond();
+                if(node.getFirst().isFinalNode()) {
+                    totalRisk += node.getFirst().getWrappedState().isRiskHit() ? node.getSecond() : 0.0;
                 } else {
                     totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getPredictedRisk();
                 }
             } else {
                 for (var entry : node.getFirst().getChildNodeMap().entrySet()) {
-                    queue.addLast(new ImmutableTuple<>(entry.getValue(), entry.getValue().getSearchNodeMetadata().getPriorProbability()));
+                    queue.addLast(new ImmutableTuple<>(entry.getValue(), entry.getValue().getSearchNodeMetadata().getPriorProbability() * node.getSecond()));
                 }
             }
         }

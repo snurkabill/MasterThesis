@@ -8,7 +8,6 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
 import java.util.LinkedList;
-import java.util.Map;
 
 public class FlowSumSubtreeRiskCalculator<
     TAction extends Action,
@@ -22,21 +21,18 @@ public class FlowSumSubtreeRiskCalculator<
     @Override
     public double calculateRisk(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
-
-        LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
+        var queue = new LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
         queue.addFirst(subTreeRoot);
-
         while(!queue.isEmpty()) {
-            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
+            var node = queue.poll();
             if(node.isLeaf()) {
                 if(node.isFinalNode()) {
                     risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() : 0.0;
                 } else {
                     risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
-
                 }
             } else {
-                for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+                for (var entry : node.getChildNodeMap().entrySet()) {
                     queue.addLast(entry.getValue());
                 }
             }

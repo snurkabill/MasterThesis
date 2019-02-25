@@ -57,15 +57,16 @@ public class Benchmark13Solution {
             //NN
             .trainingBatchSize(64)
             .trainingEpochCount(1)
+            .learningRate(0.01)
             // REINFORCEMENTs
             .discountFactor(1)
-            .batchEpisodeCount(100)
-            .stageCount(100)
+            .batchEpisodeCount(1)
+            .stageCount(200)
 
             .maximalStepCountBound(1000)
 
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
@@ -75,7 +76,7 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 4000.0);
+                    return Math.exp(-callCount / 10000.0);
 //                    return 0.1;
                 }
             })
@@ -84,7 +85,7 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 4000.0) * 4;
+                    return Math.exp(-callCount / 10000.0) * 4;
 //                    return 1.5;
                 }
             })

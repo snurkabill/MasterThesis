@@ -137,10 +137,10 @@ public class RandomDistributionUtils {
         }
     }
 
-    public static double[] findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk) {
+    public static ImmutableTuple<Boolean, double[]> findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk) {
         Set<Integer> negativeIndexes = new HashSet<>();
         int iterations = 0;
-        while (!"pigs".equals("fly")) {
+        while (iterations <= distribution.length) {
             RandomDistributionUtils.logger.debug("Running [{}]th iteration of solution search for new distribution", iterations);
             var hasNegativeElements = false;
             var newDistribution = findSimilarSuitableDistributionByLeastSquares(distribution, riskArray, totalRisk, negativeIndexes);
@@ -151,12 +151,15 @@ public class RandomDistributionUtils {
                 }
             }
             if(!hasNegativeElements) {
-                return newDistribution;
+                return new ImmutableTuple<>(true, newDistribution);
             } else {
                 iterations++;
             }
         }
-        throw new IllegalStateException("Unreachable code");
+        logger.warn("System of linear equations for action distribution [" + Arrays.toString(distribution) +
+            "] and risk array: [" + Arrays.toString(riskArray) + "] with totalRisk: [" + totalRisk + "] has no solution");
+        return new ImmutableTuple<>(false, new double[0]);
+
     }
 
     private static double[] findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk, Set<Integer> negativeIndexes) {

@@ -37,6 +37,8 @@ public class ExperimentSetup {
     private final int trainingBatchSize;
     private final int trainingEpochCount;
 
+    private final double learningRate;
+
     // Evaluation
     private final int evalEpisodeCount;
 
@@ -44,7 +46,7 @@ public class ExperimentSetup {
     private final double globalRiskAllowed;
     private final SelectorType selectorType;
 
-    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType) {
+    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, double learningRate, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType) {
         this.randomSeed = randomSeed;
         this.hallwayInstance = hallwayInstance;
         this.cpuctParameter = cpuctParameter;
@@ -61,6 +63,7 @@ public class ExperimentSetup {
         this.approximatorType = approximatorType;
         this.trainingBatchSize = trainingBatchSize;
         this.trainingEpochCount = trainingEpochCount;
+        this.learningRate = learningRate;
         this.evalEpisodeCount = evalEpisodeCount;
         this.globalRiskAllowed = globalRiskAllowed;
         this.selectorType = selectorType;
@@ -116,6 +119,10 @@ public class ExperimentSetup {
 
     public int getTrainingEpochCount() {
         return trainingEpochCount;
+    }
+
+    public double getLearningRate() {
+        return learningRate;
     }
 
     public int getEvalEpisodeCount() {
