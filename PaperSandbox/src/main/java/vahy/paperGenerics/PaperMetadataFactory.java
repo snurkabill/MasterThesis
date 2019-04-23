@@ -1,7 +1,6 @@
 package vahy.paperGenerics;
 
 import vahy.api.model.Action;
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
@@ -16,7 +15,8 @@ public class PaperMetadataFactory<
     TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> implements SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> {
+    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> {
 
     private final RewardAggregator<TReward> rewardAggregator;
 
@@ -33,7 +33,7 @@ public class PaperMetadataFactory<
             stateRewardReturn.getReward(),
             rewardAggregator.emptyReward(),
             parent != null && !parent.getSearchNodeMetadata().getChildPriorProbabilities().isEmpty() ? parent.getSearchNodeMetadata().getChildPriorProbabilities().get(appliedAction) : Double.NaN,
-            Double.NaN,
+            stateRewardReturn.getState().isFinalState() ? (stateRewardReturn.getState().isRiskHit() ? 1.0 : 0.0) : Double.NaN,
             new LinkedHashMap<>()
         );
     }
