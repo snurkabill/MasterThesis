@@ -17,6 +17,9 @@ public class DataTableApproximatorWithLr<TObservation extends DoubleVector> exte
     public DataTableApproximatorWithLr(int actionCount, double learningRate) {
         super(null);
         this.actionCount = actionCount;
+        if(learningRate <= 0.0) {
+            throw new IllegalArgumentException("Learning rate must be positive. Value: [" + learningRate + "]");
+        }
         this.learningRate = learningRate;
         this.defaultPrediction = new double[2 + actionCount];
         this.defaultPrediction[0] = 0;
