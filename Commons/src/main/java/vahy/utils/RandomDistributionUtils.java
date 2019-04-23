@@ -20,7 +20,7 @@ public class RandomDistributionUtils {
     private static final Logger logger = LoggerFactory.getLogger(RandomDistributionUtils.class.getName());
 
     public static int SAMPLING_RANDOM_INDEX_TRIAL_COUNT = 10;
-    public static double TOLERANCE = Math.pow(10, -10);
+    public static double TOLERANCE = Math.pow(10, -8);
 
     public static boolean isDistribution(List<Double> distribution) {
         double cumulativeSum = 0.0;
