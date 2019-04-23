@@ -73,10 +73,10 @@ public class Experiment {
                 createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new EmptyApproximator<>());
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length));
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length, setup.getSecond().omitProbabilities()));
                 break;
             case HASHMAP_LR:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximatorWithLr<>(HallwayAction.playerActions.length, setup.getSecond().getLearningRate()));
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximatorWithLr<>(HallwayAction.playerActions.length, setup.getSecond().getLearningRate(), setup.getSecond().omitProbabilities()));
                 break;
             case NN:
             {
@@ -86,7 +86,8 @@ public class Experiment {
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
-                    random)
+                    random,
+                    setup.getSecond().omitProbabilities())
                 ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
@@ -157,7 +158,7 @@ public class Experiment {
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
             trainer.trainPolicy(experimentSetup.getBatchEpisodeCount());
-//            trainer.printDataset();
+            trainer.printDataset();
         }
         return System.currentTimeMillis() - trainingStart;
     }

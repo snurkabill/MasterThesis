@@ -11,6 +11,7 @@ import vahy.utils.ThirdPartBinaryUtils;
 
 import java.io.IOException;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class RandomWalkExample {
 
@@ -24,26 +25,45 @@ public class RandomWalkExample {
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
-        var randomWalkSetup = new RandomWalkSetup(1000, 50, 1, 1, 10, 10, 0.7, 0.6);
+        var randomWalkSetup = new RandomWalkSetup(100, 15, 1, 1, 10, 10, 0.9, 0.8);
         ExperimentSetup experimentSetup = new ExperimentSetup(
             0,
             3,
             1,
-            new FixedUpdateCountTreeConditionFactory(50),
+            new FixedUpdateCountTreeConditionFactory(200),
             1.0,
-            100,
+            10,
             20000,
-            2000,
-            100,
-            () -> 0.0,
-            () -> 0.0,
-            TrainerAlgorithm.EVERY_VISIT_MC,
-            ApproximatorType.HASHMAP,
-            128,
-            1,
             10000,
-            0.2
-        );
+            100,
+            new Supplier<>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                     return Math.exp(-callCount / 2000.0) / 3;
+//                    return 0.2;
+                }
+            },
+            new Supplier<>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 2000.0) * 3;
+                }
+            },
+//            () -> 0.1,
+//            () -> 2.0,
+            TrainerAlgorithm.EVERY_VISIT_MC,
+            ApproximatorType.NN,
+//            ApproximatorType.HASHMAP,
+            4,
+            100,
+            10000,
+            0.3,
+            0.01,
+            false);
         return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
     }
 

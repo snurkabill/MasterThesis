@@ -131,7 +131,8 @@ public class MarketPrototype {
             batchSize,
             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
 //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
-            random))
+            random,
+            false))
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
 

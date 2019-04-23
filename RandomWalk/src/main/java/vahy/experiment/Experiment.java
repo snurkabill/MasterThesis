@@ -26,6 +26,7 @@ import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.DataTableApproximator;
+import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
@@ -63,7 +64,10 @@ public class Experiment {
                 createPolicyAndRunProcess(setup, random, provider, new EmptyApproximator<>());
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximator<>(RandomWalkAction.playerActions.length));
+                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximator<>(RandomWalkAction.playerActions.length, setup.getSecond().omitProbabilities()));
+                break;
+            case HASHMAP_LR:
+                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximatorWithLr<>(RandomWalkAction.playerActions.length, setup.getSecond().getLearningRate(), setup.getSecond().omitProbabilities()));
                 break;
             case NN:
             {
@@ -73,7 +77,8 @@ public class Experiment {
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     RandomWalkExample.class.getClassLoader().getResourceAsStream("tfModel/graph_randomWalk.pb").readAllBytes(),
-                    random)
+                    random,
+                    setup.getSecond().omitProbabilities())
                 )
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);

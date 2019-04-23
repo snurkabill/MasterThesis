@@ -2,15 +2,15 @@ import tensorflow as tf
 
 # input_count = 1
 
-benchmark_name = 'BENCHMARK_13'
-input_count = 18
+benchmark_name = 'randomWalk'
+input_count = 1
  # input_count = 34
 
-hidden_count_1 = 100
+hidden_count_1 = 10
 hidden_count_2 = 100
 hidden_count_3 = 10
 
-action_count = 3
+action_count = 2
 # action_count = 5
 
 tf.reset_default_graph()
@@ -30,12 +30,12 @@ risk_target = tf.placeholder(tf.double, [None, 1], name = 'Risk_target_node')
 policy_target = tf.placeholder(tf.double, [None, action_count], name = 'Policy_target_node')
 
 hidden_1 = Dropout(Dense(x,        hidden_count_1, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_1")) #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
-hidden_2 = Dropout(Dense(hidden_1, hidden_count_2, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_2")) #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
-hidden_3 = Dense(hidden_2, hidden_count_3, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_3") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
+# hidden_2 = Dropout(Dense(hidden_1, hidden_count_2, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_2")) #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
+# hidden_3 = Dense(hidden_2, hidden_count_3, tf.nn.relu, True, tf.glorot_normal_initializer(), name = "Hidden_3") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
 
-policy = tf.layers.dense(hidden_3, action_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'policy_node')
-risk =   tf.layers.dense(hidden_3, 1,            tf.nn.sigmoid,    use_bias = True, kernel_initializer = tf.zeros_initializer, name = "risk_node")
-q =      tf.layers.dense(hidden_3, 1,                           use_bias = True, kernel_initializer = tf.zeros_initializer, name = "q_node")
+policy = tf.layers.dense(hidden_1, action_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'policy_node')
+risk =   tf.layers.dense(hidden_1, 1,            tf.nn.sigmoid,    use_bias = True, kernel_initializer = tf.zeros_initializer, name = "risk_node")
+q =      tf.layers.dense(hidden_1, 1,                           use_bias = True, kernel_initializer = tf.zeros_initializer, name = "q_node")
 
 prediction = tf.concat([q, risk, policy], 1, name = "prediction_node_2")
 
@@ -48,7 +48,7 @@ q_loss = tf.keras.losses.mean_squared_error(y_true = q_target, y_pred = q)
 r_loss = tf.keras.losses.mean_squared_error(y_true = risk_target, y_pred = risk)
 
 # total_loss = policy_loss + q_loss + r_loss
-total_loss = 0.001 * q_loss + r_loss + 0.1 * policy_loss
+total_loss = q_loss + r_loss + policy_loss
 # total_loss = q_loss
 
 
@@ -59,7 +59,7 @@ total_loss = 0.001 * q_loss + r_loss + 0.1 * policy_loss
 # total_loss = policy_loss
 
 
-optimizer = tf.train.AdamOptimizer(learning_rate = 0.0001, name = "Adam")
+optimizer = tf.train.AdamOptimizer(learning_rate = 0.01, name = "Adam")
 train_op = optimizer.minimize(total_loss, name = 'train_node')
 
 init = tf.global_variables_initializer()

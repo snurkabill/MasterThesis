@@ -66,18 +66,19 @@ public class Benchmark07Solution {
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
+            .learningRate(0.0001)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
+            .evalEpisodeCount(1000)
             .globalRiskAllowed(0.00)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 1000.0) / 5;
-//                    return 0.1;
+//                     return Math.exp(-callCount / 2000.0) / 2;
+                    return 0.2;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -85,8 +86,8 @@ public class Benchmark07Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 1000.0) * 3;
-//                    return 2.0;
+//                    return Math.exp(-callCount / 2000.0) * 3;
+                    return 2.0;
                 }
             })
             .buildExperimentSetup();

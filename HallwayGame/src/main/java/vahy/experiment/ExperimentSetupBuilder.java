@@ -45,6 +45,8 @@ public class ExperimentSetupBuilder {
     private double globalRiskAllowed;
     private SelectorType selectorType;
 
+    private boolean omitProbabilities;
+
     public ExperimentSetupBuilder() {
     }
 
@@ -134,6 +136,11 @@ public class ExperimentSetupBuilder {
         return this;
     }
 
+    public ExperimentSetupBuilder omitProbabilities(boolean omitProbabilities) {
+        this.omitProbabilities = omitProbabilities;
+        return this;
+    }
+
     public ExperimentSetup buildExperimentSetup() {
         return new ExperimentSetup(
             randomSeed,
@@ -155,6 +162,7 @@ public class ExperimentSetupBuilder {
             learningRate,
             evalEpisodeCount,
             globalRiskAllowed,
-            selectorType);
+            selectorType,
+            omitProbabilities);
     }
 }

@@ -33,6 +33,7 @@ public class ExperimentSetup {
     // NN
     private final int trainingBatchSize;
     private final int trainingEpochCount;
+    private final double learningRate;
 
     // Evaluation
     private final int evalEpisodeCount;
@@ -40,7 +41,9 @@ public class ExperimentSetup {
     // PAPER
     private final double globalRiskAllowed;
 
-    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed) {
+    private final boolean omitProbabilities;
+
+    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, boolean omitProbabilities) {
         this.randomSeed = randomSeed;
         this.cpuctParameter = cpuctParameter;
         this.mcRolloutCount = mcRolloutCount;
@@ -58,6 +61,8 @@ public class ExperimentSetup {
         this.trainingEpochCount = trainingEpochCount;
         this.evalEpisodeCount = evalEpisodeCount;
         this.globalRiskAllowed = globalRiskAllowed;
+        this.learningRate = learningRate;
+        this.omitProbabilities = omitProbabilities;
     }
 
     public double getCpuctParameter() {
@@ -128,4 +133,11 @@ public class ExperimentSetup {
         return randomSeed;
     }
 
+    public double getLearningRate() {
+        return learningRate;
+    }
+
+    public boolean omitProbabilities() {
+        return omitProbabilities;
+    }
 }
