@@ -82,7 +82,7 @@ public abstract class AbstractLinearProgramOnTree<
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
         if(status != CLP.STATUS.OPTIMAL) {
-            logger.error("Optimal solution was not found.");
+            logger.warn("Optimal solution was not found.");
             return false;
         }
         long finishOptimization = System.currentTimeMillis();
