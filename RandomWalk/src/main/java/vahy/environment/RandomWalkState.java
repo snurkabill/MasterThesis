@@ -67,8 +67,8 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
             isAgentTurnNext,
             actionType,
             randomWalkSetup);
-//        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
-        DoubleReward reward = new DoubleReward((double) (newLevel - level));
+        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
+//        DoubleReward reward = new DoubleReward((double) (newLevel - level));
         return new ImmutableStateRewardReturnTuple<>(nextState, reward);
     }
 

@@ -85,6 +85,14 @@ public abstract class AbstractLinearProgramOnTree<
             logger.warn("Optimal solution was not found.");
             return false;
         }
+        if(root.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() < 0.99999999) {
+            throw new IllegalStateException("Flow is not equal to 1");
+        }
+
+        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < 0.99999999) {
+            throw new IllegalStateException("Flow is not equal to 1");
+        }
+
         long finishOptimization = System.currentTimeMillis();
         logger.debug("Optimizing linear program took [{}] ms", finishOptimization - startOptimization);
         return true;

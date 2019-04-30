@@ -25,6 +25,7 @@ import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTableApproximator;
 import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
@@ -107,6 +108,13 @@ public class Experiment {
             RandomWalkProbabilities::getProbabilities,
             RandomWalkAction.playerActions, RandomWalkAction.environmentActions);
 
+        var strategiesProvider = new StrategiesProvider<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>(
+            experimentSetup.getInferenceExistingFlowStrategy(),
+            experimentSetup.getInferenceNonExistingFlowStrategy(),
+            experimentSetup.getExplorationExistingFlowStrategy(),
+            experimentSetup.getExplorationNonExistingFlowStrategy(),
+            experimentSetup.getFlowOptimizerType());
+
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
             searchNodeMetadataFactory,
@@ -117,7 +125,8 @@ public class Experiment {
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
-            experimentSetup.getTemperatureSupplier()
+            experimentSetup.getTemperatureSupplier(),
+            strategiesProvider
         );
 
         var nnBasedPolicySupplier = new PaperPolicySupplier<>(
@@ -128,7 +137,8 @@ public class Experiment {
             nodeSelector,
             nnbasedEvaluator,
             paperTreeUpdater,
-            experimentSetup.getTreeUpdateConditionFactory());
+            experimentSetup.getTreeUpdateConditionFactory(),
+            strategiesProvider);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),

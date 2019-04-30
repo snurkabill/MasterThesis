@@ -28,6 +28,12 @@ import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -136,6 +142,13 @@ public class MarketPrototype {
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
 
+            var strategiesProvider = new StrategiesProvider<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>(
+                InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
+                InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
+                ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+                ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
+                FlowOptimizerType.SOFT);
+
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
             PaperTreeUpdater<MarketAction, DoubleVector, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
@@ -168,7 +181,8 @@ public class MarketPrototype {
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
                     explorationConstantSupplier,
-                    temperatureSupplier
+                    temperatureSupplier,
+                    strategiesProvider
                 );
 
             PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
@@ -180,7 +194,8 @@ public class MarketPrototype {
                     nodeSelector,
                     marketNodeEvaluator,
                     paperTreeUpdater,
-                    treeUpdateConditionFactory);
+                    treeUpdateConditionFactory,
+                    strategiesProvider);
 
             AbstractTrainer trainer = getAbstractTrainer(
                 TrainerAlgorithm.EVERY_VISIT_MC,

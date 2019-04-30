@@ -38,6 +38,8 @@ public class OptimalFlowSoftConstraint <
     protected void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         if(node.getWrappedState().isRiskHit()) {
             totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
+        } else {
+            totalRiskExpression.add(0.0, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         }
         double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward().getValue();
         double expectedReward = node.getSearchNodeMetadata().getExpectedReward().getValue();

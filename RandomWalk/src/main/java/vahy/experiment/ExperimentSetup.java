@@ -2,6 +2,11 @@ package vahy.experiment;
 
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 
 import java.util.function.Supplier;
@@ -40,10 +45,14 @@ public class ExperimentSetup {
 
     // PAPER
     private final double globalRiskAllowed;
-
+    private final InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
+    private final InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
+    private final ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
+    private final ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy;
+    private final FlowOptimizerType flowOptimizerType;
     private final boolean omitProbabilities;
 
-    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, boolean omitProbabilities) {
+    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, boolean omitProbabilities) {
         this.randomSeed = randomSeed;
         this.cpuctParameter = cpuctParameter;
         this.mcRolloutCount = mcRolloutCount;
@@ -62,6 +71,11 @@ public class ExperimentSetup {
         this.evalEpisodeCount = evalEpisodeCount;
         this.globalRiskAllowed = globalRiskAllowed;
         this.learningRate = learningRate;
+        this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
+        this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
+        this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
+        this.explorationNonExistingFlowStrategy = explorationNonExistingFlowStrategy;
+        this.flowOptimizerType = flowOptimizerType;
         this.omitProbabilities = omitProbabilities;
     }
 
@@ -139,5 +153,25 @@ public class ExperimentSetup {
 
     public boolean omitProbabilities() {
         return omitProbabilities;
+    }
+
+    public InferenceExistingFlowStrategy getInferenceExistingFlowStrategy() {
+        return inferenceExistingFlowStrategy;
+    }
+
+    public InferenceNonExistingFlowStrategy getInferenceNonExistingFlowStrategy() {
+        return inferenceNonExistingFlowStrategy;
+    }
+
+    public ExplorationExistingFlowStrategy getExplorationExistingFlowStrategy() {
+        return explorationExistingFlowStrategy;
+    }
+
+    public ExplorationNonExistingFlowStrategy getExplorationNonExistingFlowStrategy() {
+        return explorationNonExistingFlowStrategy;
+    }
+
+    public FlowOptimizerType getFlowOptimizerType() {
+        return flowOptimizerType;
     }
 }

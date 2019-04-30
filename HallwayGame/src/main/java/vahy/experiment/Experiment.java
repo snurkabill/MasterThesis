@@ -28,6 +28,7 @@ import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTableApproximator;
 import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
@@ -110,6 +111,13 @@ public class Experiment {
         var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>();
         var nodeSelector = createNodeSelector(experimentSetup.getCpuctParameter(), random, experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
 
+        var strategiesProvider = new StrategiesProvider<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>(
+            experimentSetup.getInferenceExistingFlowStrategy(),
+            experimentSetup.getInferenceNonExistingFlowStrategy(),
+            experimentSetup.getExplorationExistingFlowStrategy(),
+            experimentSetup.getExplorationNonExistingFlowStrategy(),
+            experimentSetup.getFlowOptimizerType());
+
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
             approximator,
@@ -126,7 +134,8 @@ public class Experiment {
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
-            experimentSetup.getTemperatureSupplier()
+            experimentSetup.getTemperatureSupplier(),
+            strategiesProvider
         );
 
         var nnBasedPolicySupplier = new PaperPolicySupplier<>(
@@ -137,7 +146,8 @@ public class Experiment {
             nodeSelector,
             nnbasedEvaluator,
             paperTreeUpdater,
-            experimentSetup.getTreeUpdateConditionFactory());
+            experimentSetup.getTreeUpdateConditionFactory(),
+            strategiesProvider);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),

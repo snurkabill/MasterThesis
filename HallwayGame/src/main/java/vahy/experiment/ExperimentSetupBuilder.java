@@ -3,6 +3,11 @@ package vahy.experiment;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 
@@ -44,6 +49,12 @@ public class ExperimentSetupBuilder {
     // PAPER
     private double globalRiskAllowed;
     private SelectorType selectorType;
+
+    private InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
+    private InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
+    private ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
+    private ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy;
+    private FlowOptimizerType flowOptimizerType;
 
     private boolean omitProbabilities;
 
@@ -141,6 +152,31 @@ public class ExperimentSetupBuilder {
         return this;
     }
 
+    public ExperimentSetupBuilder setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy inferenceExistingFlowStrategy) {
+        this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy) {
+        this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy explorationExistingFlowStrategy) {
+        this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy) {
+        this.explorationNonExistingFlowStrategy = explorationNonExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setFlowOptimizerType(FlowOptimizerType flowOptimizerType) {
+        this.flowOptimizerType = flowOptimizerType;
+        return this;
+    }
+
     public ExperimentSetup buildExperimentSetup() {
         return new ExperimentSetup(
             randomSeed,
@@ -163,6 +199,11 @@ public class ExperimentSetupBuilder {
             evalEpisodeCount,
             globalRiskAllowed,
             selectorType,
+            inferenceExistingFlowStrategy,
+            inferenceNonExistingFlowStrategy,
+            explorationExistingFlowStrategy,
+            explorationNonExistingFlowStrategy,
+            flowOptimizerType,
             omitProbabilities);
     }
 }

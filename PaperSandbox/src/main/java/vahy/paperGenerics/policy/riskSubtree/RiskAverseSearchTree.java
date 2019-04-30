@@ -14,12 +14,8 @@ import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyMode;
-import vahy.paperGenerics.policy.linearProgram.OptimalFlowHardConstraintCalculator;
-import vahy.paperGenerics.policy.riskSubtree.playingDistribution.ExplorationFeasibleDistributionProvider;
-import vahy.paperGenerics.policy.riskSubtree.playingDistribution.InferenceFeasibleDistributionProvider;
-import vahy.paperGenerics.policy.riskSubtree.playingDistribution.MaxUcbVisitDistributionProvider;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
-import vahy.paperGenerics.policy.riskSubtree.playingDistribution.UcbVisitDistributionProvider;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
@@ -43,6 +39,7 @@ public class RiskAverseSearchTree<
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
+    public static final double ZERO_TEMPERATURE = 0.0;
 
     private final SplittableRandom random;
 
@@ -55,51 +52,43 @@ public class RiskAverseSearchTree<
 
     private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playingDistribution;
 
+    private final StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
+
     public RiskAverseSearchTree(Class<TAction> clazz,
                                 SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
                                 NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                 SplittableRandom random,
-                                double totalRiskAllowed) {
+                                double totalRiskAllowed,
+                                StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategyProvider) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
         TAction[] allActions = clazz.getEnumConstants();
         this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
         this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
+        this.strategiesProvider = strategyProvider;
     }
 
     private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
-            var playingDistributionProvider = new InferenceFeasibleDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(
-                playerActions,
-                random);
-            return playingDistributionProvider.createDistribution(getRoot());
+            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
         } else {
-            var playingDistributionProvider = new MaxUcbVisitDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(
-                playerActions,
-                random);
-            return playingDistributionProvider.createDistribution(getRoot());
+            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
         }
     }
 
     private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
-            var playingDistributionProvider = new ExplorationFeasibleDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(
-                    playerActions,
-                    random,
-                    totalRiskAllowed,
-                    temperature);
-            return playingDistributionProvider.createDistribution(getRoot());
+            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, temperature).createDistribution(getRoot());
         } else {
-            var playingDistributionProvider = new UcbVisitDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(
-                playerActions,
-                random);
-            return playingDistributionProvider.createDistribution(getRoot());
+            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, temperature).createDistribution(getRoot());
         }
     }
 
-    private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state, PolicyMode policyMode, double temperature) {
+    private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state,
+                                                                                                                                                      PolicyMode policyMode,
+                                                                                                                                                      double temperature) {
         switch (policyMode) {
             case EXPLOITATION:
                 return inferencePolicyBranch(state);
@@ -114,7 +103,7 @@ public class RiskAverseSearchTree<
             throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
         }
         try {
-            this.playingDistribution =  createActionWithDistribution(state, policyMode, temperature);
+            this.playingDistribution = createActionWithDistribution(state, policyMode, temperature);
         return new ImmutableTuple<>(playingDistribution.getExpectedPlayerAction(), playingDistribution.getPlayerDistribution());
         } catch(Exception e) {
             dumpTree();
@@ -143,25 +132,13 @@ public class RiskAverseSearchTree<
             return false;
         }
         if(!isFlowOptimized) {
-            var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
-            boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(getRoot());
-
-            if(!optimalSolutionExists) {
-                var minimalRiskReachAbilityCalculator = new MinimalRiskReachAbilityCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random);
-                totalRiskAllowed = minimalRiskReachAbilityCalculator.calculateRisk(getRoot());
-            }
-            var optimalFlowCalculatorWithFixedRisk = new OptimalFlowHardConstraintCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
-            optimalSolutionExists = optimalFlowCalculatorWithFixedRisk.optimizeFlow(getRoot());
-
-            if(!optimalSolutionExists) {
-//                var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
-//                boolean optimalSoftSolutionExists = optimalSoftFlowCalculator.optimizeFlow(getRoot());
-//                if(!optimalSoftSolutionExists) {
-                    logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + getRoot().getWrappedState().readableStringRepresentation() + "] with allowed risk: [" + totalRiskAllowed + "]");
-                    totalRiskAllowed = 1.0;
-                    isFlowOptimized = false;
-                    return false;
-//                }
+            var result = strategiesProvider.provideFlowOptimizer().optimizeFlow(getRoot(), random, totalRiskAllowed);
+            totalRiskAllowed = result.getFirst();
+            if(!result.getSecond()) {
+                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + getRoot().getWrappedState().readableStringRepresentation() + "] with allowed risk: [" + totalRiskAllowed + "]");
+                totalRiskAllowed = 1.0;
+                isFlowOptimized = false;
+                return false;
             }
             isFlowOptimized = true;
             return true;

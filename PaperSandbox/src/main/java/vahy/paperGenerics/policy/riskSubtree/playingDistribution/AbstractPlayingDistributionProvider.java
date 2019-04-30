@@ -43,6 +43,18 @@ public abstract class AbstractPlayingDistributionProvider<
             .collect(Collectors.toList()));
     }
 
+    protected ImmutableTriple<List<TAction>, double[], double[]> getUcbValueDistribution(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        // TODO: remove code redundancy
+        double totalValueSum = node
+            .getChildNodeStream()
+            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
+            .sum();
+        return createDistributionAsArray(node
+            .getChildNodeStream()
+            .map(x -> new ImmutableTriple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getExpectedReward().getValue()/ totalValueSum, 1.0d))
+            .collect(Collectors.toList()));
+    }
+
     protected ImmutableTriple<List<TAction>, double[], double[]> createDistributionAsArray(List<ImmutableTriple<TAction, Double, Double>> actionDistribution) {
         var actionVector = new double[playerActions.size()];
         var riskVector = new double[playerActions.size()];

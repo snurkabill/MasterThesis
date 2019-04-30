@@ -13,6 +13,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
@@ -40,8 +41,9 @@ public class TrainablePaperPolicySupplier<
                                         TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
                                         Supplier<Double> explorationConstantSupplier,
-                                        Supplier<Double> temperatureSupplier) {
-        super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory);
+                                        Supplier<Double> temperatureSupplier,
+                                        StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
+        super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory, strategiesProvider);
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
     }

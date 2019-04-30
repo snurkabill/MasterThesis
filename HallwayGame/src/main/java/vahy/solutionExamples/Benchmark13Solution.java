@@ -10,6 +10,11 @@ import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.ImmutableTuple;
@@ -63,10 +68,10 @@ public class Benchmark13Solution {
             .batchEpisodeCount(1)
             .stageCount(200)
 
-            .maximalStepCountBound(1000)
+            .maximalStepCountBound(500)
 
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .approximatorType(ApproximatorType.NN)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
@@ -76,8 +81,8 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
-//                    return 0.1;
+//                    return Math.exp(-callCount / 10000.0);
+                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -85,10 +90,16 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) * 4;
-//                    return 1.5;
+//                    return Math.exp(-callCount / 10000.0) * 4;
+                    return 1.5;
                 }
             })
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setFlowOptimizerType(FlowOptimizerType.SOFT)
+
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }

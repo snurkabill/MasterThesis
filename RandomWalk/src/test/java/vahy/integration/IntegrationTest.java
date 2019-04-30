@@ -1,5 +1,9 @@
-package vahy;
+package vahy.integration;
 
+import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.environment.RandomWalkSetup;
 import vahy.experiment.Experiment;
@@ -18,26 +22,43 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class RandomWalkExample {
+public class IntegrationTest {
 
-    public static void main(String[] args) throws IOException {
+    @BeforeTest
+    public void cleanUpNativeLibraries() {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
-
-        //  EXAMPLE 1
-        ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup = createExperiment1();
-        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-        new Experiment().prepareAndRun(setup, random);
     }
 
-    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
+    @DataProvider(name = "myTest")
+    public static Object[][] experimentSettings() {
+        return new Object[][] {
+            {createExperiment_01(), 50, 0.055},
+        };
+    }
+
+    @Test(dataProvider = "myTest")
+    public void benchmarkSolutionTest(ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup,
+                                      double minExpectedReward,
+                                      double maxRiskHitRatio) throws IOException {
+        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+        var experiment = new Experiment();
+        experiment.prepareAndRun(setup, random);
+
+        var results = experiment.getResults().get(0);
+
+        Assert.assertTrue(results.getAverageReward() >= minExpectedReward, "Avg reward is: [" + results.getAverageReward() + "] but expected at least: [" + minExpectedReward + "]");
+        Assert.assertTrue(results.getRiskHitRatio() <= maxRiskHitRatio, "Risk hit ratio is: [" + results.getRiskHitRatio() + "] but expected at most: [" + maxRiskHitRatio + "]");
+    }
+
+    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment_01() {
         var randomWalkSetup = new RandomWalkSetup(100, 50, 1, 1, 10, 10, 0.9, 0.7);
         ExperimentSetup experimentSetup = new ExperimentSetup(
             0,
             3,
             1,
-            new FixedUpdateCountTreeConditionFactory(200),
+            new FixedUpdateCountTreeConditionFactory(20),
             1.0,
-            100,
+            10,
             20000,
             10000,
             100,
@@ -46,7 +67,7 @@ public class RandomWalkExample {
                 @Override
                 public Double get() {
                     callCount++;
-                     return Math.exp(-callCount / 2000.0) / 3;
+                    return Math.exp(-callCount / 2000.0) / 3;
 //                    return 0.2;
                 }
             },
@@ -66,7 +87,7 @@ public class RandomWalkExample {
             4,
             100,
             10000,
-            0.0,
+            0.3,
             0.01,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
             InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
@@ -76,5 +97,7 @@ public class RandomWalkExample {
             false);
         return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
     }
+
+
 
 }

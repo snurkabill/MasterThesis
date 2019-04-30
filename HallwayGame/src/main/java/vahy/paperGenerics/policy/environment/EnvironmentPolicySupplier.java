@@ -16,7 +16,7 @@ public class EnvironmentPolicySupplier extends PaperPolicySupplier<HallwayAction
     public final SplittableRandom random;
 
     public EnvironmentPolicySupplier(SplittableRandom random) {
-        super(null, null, 0.0, random, null, null, null, null);
+        super(null, null, 0.0, random, null, null, null, null, null);
         this.random = random;
     }
 
