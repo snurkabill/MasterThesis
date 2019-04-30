@@ -6,7 +6,6 @@ import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.riskSubtree.FlowSumSubtreeRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.utils.ImmutableTriple;
 import vahy.utils.RandomDistributionUtils;
@@ -27,9 +26,11 @@ public class InferenceFeasibleDistributionProvider<
 
     private final Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
 
-    public InferenceFeasibleDistributionProvider(List<TAction> playerActions, SplittableRandom random) {
+    public InferenceFeasibleDistributionProvider(List<TAction> playerActions,
+                                                 SplittableRandom random,
+                                                 Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
         super(playerActions, random);
-        this.subtreeRiskCalculatorSupplier = FlowSumSubtreeRiskCalculator::new;
+        this.subtreeRiskCalculatorSupplier = subtreeRiskCalculatorSupplier;
     }
 
     @Override

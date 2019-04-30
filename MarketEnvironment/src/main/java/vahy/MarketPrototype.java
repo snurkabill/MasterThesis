@@ -147,7 +147,7 @@ public class MarketPrototype {
                 InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
                 ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
                 ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
-                FlowOptimizerType.SOFT);
+                FlowOptimizerType.SOFT, subTreeRiskCalculatorType, subTreeRiskCalculatorTypeForUnknownFlow, random);
 
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);

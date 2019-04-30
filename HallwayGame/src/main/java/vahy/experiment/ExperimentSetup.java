@@ -4,6 +4,7 @@ import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
@@ -55,10 +56,12 @@ public class ExperimentSetup {
     private final ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
     private final ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy;
     private final FlowOptimizerType flowOptimizerType;
+    private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
+    private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
     private final boolean omitProbabilities;
 
-    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, double learningRate, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, boolean omitProbabilities) {
+    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, double learningRate, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, boolean omitProbabilities) {
         this.randomSeed = randomSeed;
         this.hallwayInstance = hallwayInstance;
         this.cpuctParameter = cpuctParameter;
@@ -84,6 +87,8 @@ public class ExperimentSetup {
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
         this.explorationNonExistingFlowStrategy = explorationNonExistingFlowStrategy;
         this.flowOptimizerType = flowOptimizerType;
+        this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
+        this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
         this.omitProbabilities = omitProbabilities;
     }
 
@@ -189,5 +194,13 @@ public class ExperimentSetup {
 
     public FlowOptimizerType getFlowOptimizerType() {
         return flowOptimizerType;
+    }
+
+    public SubTreeRiskCalculatorType getSubTreeRiskCalculatorTypeForKnownFlow() {
+        return subTreeRiskCalculatorTypeForKnownFlow;
+    }
+
+    public SubTreeRiskCalculatorType getSubTreeRiskCalculatorTypeForUnknownFlow() {
+        return subTreeRiskCalculatorTypeForUnknownFlow;
     }
 }

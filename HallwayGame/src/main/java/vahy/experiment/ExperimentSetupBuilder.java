@@ -4,6 +4,7 @@ import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
@@ -55,6 +56,8 @@ public class ExperimentSetupBuilder {
     private ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
     private ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy;
     private FlowOptimizerType flowOptimizerType;
+    private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
+    private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
     private boolean omitProbabilities;
 
@@ -177,6 +180,16 @@ public class ExperimentSetupBuilder {
         return this;
     }
 
+    public ExperimentSetupBuilder setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow) {
+        this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
+        this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
+        return this;
+    }
+
     public ExperimentSetup buildExperimentSetup() {
         return new ExperimentSetup(
             randomSeed,
@@ -204,6 +217,8 @@ public class ExperimentSetupBuilder {
             explorationExistingFlowStrategy,
             explorationNonExistingFlowStrategy,
             flowOptimizerType,
+            subTreeRiskCalculatorTypeForKnownFlow,
+            subTreeRiskCalculatorTypeForUnknownFlow,
             omitProbabilities);
     }
 }

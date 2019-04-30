@@ -94,7 +94,7 @@ public class IntegrationTest {
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
             FlowOptimizerType.SOFT,
-            false);
+            subTreeRiskCalculatorTypeForKnownFlow, subTreeRiskCalculatorTypeForUnknownFlow, false);
         return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
     }
 

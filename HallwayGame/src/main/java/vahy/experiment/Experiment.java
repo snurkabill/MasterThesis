@@ -116,7 +116,10 @@ public class Experiment {
             experimentSetup.getInferenceNonExistingFlowStrategy(),
             experimentSetup.getExplorationExistingFlowStrategy(),
             experimentSetup.getExplorationNonExistingFlowStrategy(),
-            experimentSetup.getFlowOptimizerType());
+            experimentSetup.getFlowOptimizerType(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
+            random);
 
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),

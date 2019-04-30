@@ -11,7 +11,6 @@ import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyMode;
-import vahy.paperGenerics.policy.riskSubtree.RiskAverseSearchTree;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;

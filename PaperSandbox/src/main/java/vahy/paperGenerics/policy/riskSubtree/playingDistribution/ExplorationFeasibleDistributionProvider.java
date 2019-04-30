@@ -6,8 +6,6 @@ import vahy.api.search.node.SearchNode;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.riskSubtree.FlowSumSubtreeRiskCalculator;
-import vahy.paperGenerics.policy.riskSubtree.SubtreePriorRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.utils.ImmutableTriple;
 import vahy.utils.RandomDistributionUtils;
@@ -31,12 +29,17 @@ public class ExplorationFeasibleDistributionProvider<
     private final double totalRiskAllowed;
     private final double temperature;
 
-    public ExplorationFeasibleDistributionProvider(List<TAction> playerActions, SplittableRandom random, double totalRiskAllowed, double temperature) {
+    public ExplorationFeasibleDistributionProvider(List<TAction> playerActions,
+                                                   SplittableRandom random,
+                                                   Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
+                                                   Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow,
+                                                   double totalRiskAllowed,
+                                                   double temperature) {
         super(playerActions, random);
+        this.subtreeRiskCalculatorSupplierForKnownFlow = subtreeRiskCalculatorSupplierForKnownFlow;
+        this.subtreeRiskCalculatorSupplierForUnknownFlow = subtreeRiskCalculatorSupplierForUnknownFlow;
         this.totalRiskAllowed  = totalRiskAllowed;
         this.temperature = temperature;
-        this.subtreeRiskCalculatorSupplierForKnownFlow = FlowSumSubtreeRiskCalculator::new;
-        this.subtreeRiskCalculatorSupplierForUnknownFlow = SubtreePriorRiskCalculator::new;
     }
 
     @Override

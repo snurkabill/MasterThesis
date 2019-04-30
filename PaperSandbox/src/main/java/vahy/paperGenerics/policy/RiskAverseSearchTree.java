@@ -1,4 +1,4 @@
-package vahy.paperGenerics.policy.riskSubtree;
+package vahy.paperGenerics.policy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,17 +72,17 @@ public class RiskAverseSearchTree<
 
     private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
         } else {
-            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
         }
     }
 
     private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, temperature).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature).createDistribution(getRoot());
         } else {
-            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, random, totalRiskAllowed, temperature).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature).createDistribution(getRoot());
         }
     }
 

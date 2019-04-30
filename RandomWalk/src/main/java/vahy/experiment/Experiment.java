@@ -113,7 +113,10 @@ public class Experiment {
             experimentSetup.getInferenceNonExistingFlowStrategy(),
             experimentSetup.getExplorationExistingFlowStrategy(),
             experimentSetup.getExplorationNonExistingFlowStrategy(),
-            experimentSetup.getFlowOptimizerType());
+            experimentSetup.getFlowOptimizerType(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow(),
+            random);
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
