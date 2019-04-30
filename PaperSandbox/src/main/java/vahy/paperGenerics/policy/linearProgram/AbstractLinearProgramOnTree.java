@@ -89,7 +89,7 @@ public abstract class AbstractLinearProgramOnTree<
             throw new IllegalStateException("Flow is not equal to 1");
         }
 
-        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < 0.99999999) {
+        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < 0.999999) {
             throw new IllegalStateException("Flow is not equal to 1");
         }
 

@@ -10,6 +10,7 @@ import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
@@ -94,7 +95,9 @@ public class IntegrationTest {
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
             FlowOptimizerType.SOFT,
-            subTreeRiskCalculatorTypeForKnownFlow, subTreeRiskCalculatorTypeForUnknownFlow, false);
+            SubTreeRiskCalculatorType.PRIOR_SUM,
+            SubTreeRiskCalculatorType.PRIOR_SUM,
+            false);
         return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
     }
 

@@ -10,6 +10,7 @@ import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.utils.ImmutableTriple;
 import vahy.utils.RandomDistributionUtils;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
@@ -58,6 +59,8 @@ public class ExplorationFeasibleDistributionProvider<
             .collect(Collectors.toList()));
 
         double[] actionDistributionAsArray = alternateDistribution.getSecond();
+        double[] originalDistributionAsArray = new double[actionDistributionAsArray.length];
+        System.arraycopy(actionDistributionAsArray, 0, originalDistributionAsArray, 0, actionDistributionAsArray.length);
         RandomDistributionUtils.tryToRoundDistribution(actionDistributionAsArray);
         RandomDistributionUtils.applyBoltzmannNoise(actionDistributionAsArray, temperature);
         double[] actionRiskAsArray = alternateDistribution.getThird();
@@ -83,7 +86,11 @@ public class ExplorationFeasibleDistributionProvider<
                         subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
                 }
             }
-            throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found");
+            throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found. Total risk allowed: [" + totalRiskAllowed +
+                "] alternated probabilityDistribution: [" + Arrays.toString(actionDistributionAsArray) +
+                "] action risk array: [" + Arrays.toString(actionRiskAsArray) +
+                "] summed risk for original distribution with boltzmann noise: [" + sum +
+                "] original probability array: " + Arrays.toString(originalDistributionAsArray));
         } else {
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(actionDistributionAsArray, random);
             return new PlayingDistribution<>(
