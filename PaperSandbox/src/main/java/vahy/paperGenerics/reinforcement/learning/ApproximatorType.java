@@ -4,6 +4,7 @@ public enum ApproximatorType {
 
     EMPTY,
     HASHMAP,
+    HASHMAP_LR,
     NN
 
 }

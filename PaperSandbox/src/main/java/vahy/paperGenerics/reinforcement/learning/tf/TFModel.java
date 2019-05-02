@@ -31,12 +31,15 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
     private final double[][] trainPolicyTargetBatch;
     private final SimpleTimer timer = new SimpleTimer();
 
-    public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random) {
+    private final boolean omitProbabilities;
+
+    public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random, boolean omitProbabilities) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.trainingIterations = trainingIterations;
         this.batchSize = batchSize;
         this.random = random;
+        this.omitProbabilities = omitProbabilities;
         trainInputBatch = new double[batchSize][];
         trainPolicyTargetBatch = new double[batchSize][];
         trainQTargetBatch = new double[batchSize];
@@ -128,7 +131,14 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
             DoubleBuffer doubleBuffer = DoubleBuffer.wrap(outputVector);
             output.writeTo(doubleBuffer);
             output.close();  // needed?
-            return outputVector;
+            if(omitProbabilities) {
+                for (int i = 0; i < inputDimension - 2; i++) {
+                    outputVector[i + 2] = 1.0 / (inputDimension - 2);
+                }
+                return outputVector;
+            } else {
+                return outputVector;
+            }
         }
     }
 

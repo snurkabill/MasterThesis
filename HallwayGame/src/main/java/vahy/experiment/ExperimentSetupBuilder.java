@@ -3,6 +3,12 @@ package vahy.experiment;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.data.HallwayInstance;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 
@@ -36,12 +42,24 @@ public class ExperimentSetupBuilder {
     private int trainingBatchSize;
     private int trainingEpochCount;
 
+    private double learningRate;
+
     // Evaluation
     private int evalEpisodeCount;
 
     // PAPER
     private double globalRiskAllowed;
     private SelectorType selectorType;
+
+    private InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
+    private InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
+    private ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
+    private ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy;
+    private FlowOptimizerType flowOptimizerType;
+    private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
+    private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
+
+    private boolean omitProbabilities;
 
     public ExperimentSetupBuilder() {
     }
@@ -114,6 +132,10 @@ public class ExperimentSetupBuilder {
         this.evalEpisodeCount = evalEpisodeCount; return this;
     }
 
+    public ExperimentSetupBuilder learningRate(double learningRate) {
+        this.learningRate = learningRate; return this;
+    }
+
     public ExperimentSetupBuilder globalRiskAllowed(double globalRiskAllowed) {
         this.globalRiskAllowed = globalRiskAllowed; return this;
     }
@@ -125,6 +147,46 @@ public class ExperimentSetupBuilder {
 
     public ExperimentSetupBuilder selectorType(SelectorType selectorType) {
         this.selectorType = selectorType;
+        return this;
+    }
+
+    public ExperimentSetupBuilder omitProbabilities(boolean omitProbabilities) {
+        this.omitProbabilities = omitProbabilities;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy inferenceExistingFlowStrategy) {
+        this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy) {
+        this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy explorationExistingFlowStrategy) {
+        this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy) {
+        this.explorationNonExistingFlowStrategy = explorationNonExistingFlowStrategy;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setFlowOptimizerType(FlowOptimizerType flowOptimizerType) {
+        this.flowOptimizerType = flowOptimizerType;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow) {
+        this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
+        return this;
+    }
+
+    public ExperimentSetupBuilder setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
+        this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
         return this;
     }
 
@@ -146,8 +208,17 @@ public class ExperimentSetupBuilder {
             approximatorType,
             trainingBatchSize,
             trainingEpochCount,
+            learningRate,
             evalEpisodeCount,
             globalRiskAllowed,
-            selectorType);
+            selectorType,
+            inferenceExistingFlowStrategy,
+            inferenceNonExistingFlowStrategy,
+            explorationExistingFlowStrategy,
+            explorationNonExistingFlowStrategy,
+            flowOptimizerType,
+            subTreeRiskCalculatorTypeForKnownFlow,
+            subTreeRiskCalculatorTypeForUnknownFlow,
+            omitProbabilities);
     }
 }

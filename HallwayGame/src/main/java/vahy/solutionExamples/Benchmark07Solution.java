@@ -10,6 +10,11 @@ import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.ImmutableTuple;
@@ -24,16 +29,16 @@ public class Benchmark07Solution {
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
-        //  EXAMPLE 1
-        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
-        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-        new Experiment().prepareAndRun(setup, random);
-
-
-        // EXAMPLE 2
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
+//        //  EXAMPLE 1
+//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
 //        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
 //        new Experiment().prepareAndRun(setup, random);
+
+
+//         EXAMPLE 2
+        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
+        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+        new Experiment().prepareAndRun(setup, random);
 
 
     }
@@ -66,21 +71,28 @@ public class Benchmark07Solution {
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
+            .learningRate(0.0001)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
+            .evalEpisodeCount(1000)
             .globalRiskAllowed(0.00)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+//                     return Math.exp(-callCount / 2000.0) / 2;
+                    return 0.2;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.0;
+                    callCount++;
+//                    return Math.exp(-callCount / 2000.0) * 3;
+                    return 2.0;
                 }
             })
             .buildExperimentSetup();
@@ -109,30 +121,22 @@ public class Benchmark07Solution {
             .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-
             .batchEpisodeCount(100)
-            .stageCount(100)
-
+            .stageCount(15)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
-
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.25)
-            .explorationConstantSupplier(new Supplier<>() {
-                @Override
-                public Double get() {
-                    return 0.0;
-                }
-            })
-            .temperatureSupplier(new Supplier<>() {
-                @Override
-                public Double get() {
-                    return 0.0;
-                }
-            })
+            .evalEpisodeCount(1000)
+            .globalRiskAllowed(0.00)
+            .explorationConstantSupplier(() -> 0.0)
+            .temperatureSupplier(() -> 0.0)
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }

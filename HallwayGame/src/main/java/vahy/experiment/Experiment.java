@@ -28,7 +28,9 @@ import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.environment.EnvironmentPolicySupplier;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTableApproximator;
+import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
@@ -52,13 +54,7 @@ public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private List<PaperPolicyResults<
-        HallwayAction,
-        DoubleReward,
-        DoubleVector,
-        EnvironmentProbabilities,
-        PaperMetadata<HallwayAction, DoubleReward>,
-        HallwayStateImpl>> results;
+    private List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> results;
 
     public List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> getResults() {
         return results;
@@ -78,7 +74,10 @@ public class Experiment {
                 createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new EmptyApproximator<>());
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>());
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length, setup.getSecond().omitProbabilities()));
+                break;
+            case HASHMAP_LR:
+                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximatorWithLr<>(HallwayAction.playerActions.length, setup.getSecond().getLearningRate(), setup.getSecond().omitProbabilities()));
                 break;
             case NN:
             {
@@ -88,7 +87,8 @@ public class Experiment {
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
-                    random)
+                    random,
+                    setup.getSecond().omitProbabilities())
                 ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
@@ -111,6 +111,16 @@ public class Experiment {
         var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>();
         var nodeSelector = createNodeSelector(experimentSetup.getCpuctParameter(), random, experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
 
+        var strategiesProvider = new StrategiesProvider<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>(
+            experimentSetup.getInferenceExistingFlowStrategy(),
+            experimentSetup.getInferenceNonExistingFlowStrategy(),
+            experimentSetup.getExplorationExistingFlowStrategy(),
+            experimentSetup.getExplorationNonExistingFlowStrategy(),
+            experimentSetup.getFlowOptimizerType(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow(),
+            random);
+
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
             approximator,
@@ -128,7 +138,7 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
             experimentSetup.getTemperatureSupplier(),
-            rewardAggregator
+            strategiesProvider
         );
 
         var nnBasedPolicySupplier = new PaperPolicySupplier<>(
@@ -140,7 +150,7 @@ public class Experiment {
             nnbasedEvaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
-            rewardAggregator);
+            strategiesProvider);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),

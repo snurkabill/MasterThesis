@@ -28,6 +28,13 @@ import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -131,9 +138,20 @@ public class MarketPrototype {
             batchSize,
             PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph.pb").readAllBytes(),
 //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
-            random))
+            random,
+            false))
         {
             TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
+
+            var strategiesProvider = new StrategiesProvider<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>(
+                InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
+                InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
+                ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+                ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
+                FlowOptimizerType.SOFT,
+                SubTreeRiskCalculatorType.FLOW_SUM,
+                SubTreeRiskCalculatorType.PRIOR_SUM,
+                random);
 
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
@@ -168,7 +186,7 @@ public class MarketPrototype {
                     treeUpdateConditionFactory,
                     explorationConstantSupplier,
                     temperatureSupplier,
-                    rewardAggregator
+                    strategiesProvider
                 );
 
             PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
@@ -181,7 +199,7 @@ public class MarketPrototype {
                     marketNodeEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
-                    rewardAggregator);
+                    strategiesProvider);
 
             AbstractTrainer trainer = getAbstractTrainer(
                 TrainerAlgorithm.EVERY_VISIT_MC,

@@ -88,7 +88,7 @@ public class EpisodeSimulator<
                     .stream()
                     .map(x -> x.getFirst().getAction().toString())
                     .reduce((a, b) -> a + ", " + b)
-                    .get()
+                    .orElse("Episode does not contain any states as history")
                 +
                 "] with the executed episode history: " +
                 episodeHistoryList

@@ -67,7 +67,9 @@ public class PaperNodeEvaluator<
         double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
         node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
         node.getSearchNodeMetadata().setExpectedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
-        node.getSearchNodeMetadata().setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
+        if(!node.isFinalNode()) {
+            node.getSearchNodeMetadata().setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
+        }
         Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
         if(node.getWrappedState().isPlayerTurn()) {
             for (int i = 0; i < allPlayerActions.length; i++) {

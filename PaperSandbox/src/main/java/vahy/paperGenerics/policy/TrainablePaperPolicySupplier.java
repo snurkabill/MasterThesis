@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
@@ -14,6 +13,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
@@ -29,7 +29,7 @@ public class TrainablePaperPolicySupplier<
 
     private static final Logger logger = LoggerFactory.getLogger(TrainablePaperPolicySupplier.class.getName());
 
-    private final Supplier<Double> expplorationConstantSupplier;
+    private final Supplier<Double> explorationConstantSupplier;
     private final Supplier<Double> temperatureSupplier;
 
     public TrainablePaperPolicySupplier(Class<TAction> actionClass,
@@ -42,9 +42,9 @@ public class TrainablePaperPolicySupplier<
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
                                         Supplier<Double> explorationConstantSupplier,
                                         Supplier<Double> temperatureSupplier,
-                                        RewardAggregator<TReward> rewardAggregator) {
-        super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory, rewardAggregator);
-        this.expplorationConstantSupplier = explorationConstantSupplier;
+                                        StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
+        super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory, strategiesProvider);
+        this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
     }
 
@@ -52,11 +52,11 @@ public class TrainablePaperPolicySupplier<
         return createPolicy(initialState);
     }
 
-    public PaperPolicyImplWithExploration<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
-        double explorationConstant = expplorationConstantSupplier.get();
+    public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
+        double explorationConstant = explorationConstantSupplier.get();
         double temperature = temperatureSupplier.get();
         logger.info("Initialized policy with exploration. Exploration constant: [{}], Temperature: [{}]", explorationConstant, temperature);
-        return new PaperPolicyImplWithExploration<>(getActionClass(), getRandom(), createPolicy(initialState), explorationConstant, temperature);
+        return createPolicy(initialState, explorationConstant, temperature);
     }
 
 }

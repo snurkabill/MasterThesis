@@ -56,7 +56,9 @@ public class MarketNodeEvaluator implements TrainableNodeEvaluator<MarketAction,
         nodesExpandedCount++;
         double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
         node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[Q_VALUE_INDEX]));
-        node.getSearchNodeMetadata().setPredictedRisk(prediction[RISK_VALUE_INDEX]);
+        if(!node.isFinalNode()) {
+            node.getSearchNodeMetadata().setPredictedRisk(prediction[RISK_VALUE_INDEX]);
+        }
         Map<MarketAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
         if(node.getWrappedState().isPlayerTurn()) {
             MarketAction[] playerActions = MarketAction.playerActions;

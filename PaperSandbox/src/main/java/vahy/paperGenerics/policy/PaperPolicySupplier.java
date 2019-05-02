@@ -2,7 +2,6 @@ package vahy.paperGenerics.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicySupplier;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
@@ -15,7 +14,7 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.RiskAverseSearchTree;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
@@ -37,7 +36,7 @@ public class PaperPolicySupplier<
     private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
-    private final RewardAggregator<TReward> rewardAggregator;
+    private final StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
 
     public PaperPolicySupplier(Class<TAction> actionClass,
                                SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
@@ -46,8 +45,7 @@ public class PaperPolicySupplier<
                                NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
-                               TreeUpdateConditionFactory treeUpdateConditionFactory,
-                               RewardAggregator<TReward> rewardAggregator) {
+                               TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
         this.totalRiskAllowed = totalRiskAllowed;
@@ -56,7 +54,7 @@ public class PaperPolicySupplier<
         this.nodeEvaluator = nodeEvaluator;
         this.treeUpdater = treeUpdater;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
-        this.rewardAggregator = rewardAggregator;
+        this.strategiesProvider = strategiesProvider;
     }
 
     @Override
@@ -78,12 +76,35 @@ public class PaperPolicySupplier<
         return new PaperPolicyImpl<>(
             actionClass,
             treeUpdateConditionFactory.create(),
-            rewardAggregator, new RiskAverseSearchTree<>(
+            new RiskAverseSearchTree<>(
+                actionClass,
                 node,
                 nodeSelector,
                 treeUpdater,
                 nodeEvaluator,
-                totalRiskAllowed),
+                random,
+                totalRiskAllowed,
+                strategiesProvider),
             random);
+    }
+
+    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature) {
+        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
+            new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
+        return new PaperPolicyImpl<>(
+            actionClass,
+            treeUpdateConditionFactory.create(),
+            new RiskAverseSearchTree<>(
+                actionClass,
+                node,
+                nodeSelector,
+                treeUpdater,
+                nodeEvaluator,
+                random,
+                totalRiskAllowed,
+                strategiesProvider),
+            random,
+            explorationConstant,
+            temperature);
     }
 }

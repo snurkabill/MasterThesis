@@ -55,8 +55,4 @@ public class RealDataMarketPolicy extends MarketPolicy {
         return 0.0;
     }
 
-    @Override
-    public List<MarketAction> getAllowedActionsForExploration() {
-        throw new UnsupportedOperationException("Not implemented now");
-    }
 }

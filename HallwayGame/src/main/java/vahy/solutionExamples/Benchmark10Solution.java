@@ -50,19 +50,21 @@ public class Benchmark10Solution {
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_10)
             //MCTS
-            .cpuctParameter(5)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1000))
+            .cpuctParameter(3)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
+            .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
-            .batchEpisodeCount(100)
+            .batchEpisodeCount(3)
             .stageCount(100)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
