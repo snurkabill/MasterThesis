@@ -118,7 +118,7 @@ public class Experiment {
             experimentSetup.getExplorationNonExistingFlowStrategy(),
             experimentSetup.getFlowOptimizerType(),
             experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
-            experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
+            experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow(),
             random);
 
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
