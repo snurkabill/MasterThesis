@@ -31,6 +31,11 @@ public class MinimalRiskReachAbilityCalculator<
 
     @Override
     public double calculateRisk(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
+
+        if(subtreeRoot.isLeaf()) {
+            return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
+        }
+
         var linProgram = new AbstractLinearProgramOnTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, false) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {

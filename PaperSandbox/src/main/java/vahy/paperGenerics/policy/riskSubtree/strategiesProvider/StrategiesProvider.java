@@ -157,7 +157,7 @@ public class StrategiesProvider<
 
     public Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculator(
         SubTreeRiskCalculatorType subTreeRiskCalculatorType) {
-        switch(subTreeRiskCalculatorTypeForKnownFlow) {
+        switch(subTreeRiskCalculatorType) {
             case FLOW_SUM:
                 return FlowSumSubtreeRiskCalculator::new;
             case MINIMAL_RISK_REACHABILITY:
@@ -167,7 +167,7 @@ public class StrategiesProvider<
             case ROOT_PREDICTION:
                 return SubtreeRootRiskCalculator::new;
             default:
-                throw EnumUtils.createExceptionForNotExpectedEnumValue(subTreeRiskCalculatorTypeForKnownFlow);
+                throw EnumUtils.createExceptionForNotExpectedEnumValue(subTreeRiskCalculatorType);
         }
     }
 
