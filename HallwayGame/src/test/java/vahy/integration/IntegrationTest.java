@@ -94,7 +94,7 @@ public class IntegrationTest {
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.PRIOR_SUM)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.PRIOR_SUM)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
@@ -166,7 +166,7 @@ public class IntegrationTest {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .stageCount(15)
+            .stageCount(10)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)

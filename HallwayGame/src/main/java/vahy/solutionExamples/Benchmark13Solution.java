@@ -11,6 +11,7 @@ import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
@@ -65,13 +66,13 @@ public class Benchmark13Solution {
             .learningRate(0.01)
             // REINFORCEMENTs
             .discountFactor(1)
-            .batchEpisodeCount(1)
+            .batchEpisodeCount(10)
             .stageCount(200)
 
             .maximalStepCountBound(500)
 
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.NN)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
@@ -81,8 +82,8 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-//                    return Math.exp(-callCount / 10000.0);
-                    return 0.1;
+                    return Math.exp(-callCount / 10000.0) / 5;
+//                    return 0.1;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -90,16 +91,17 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-//                    return Math.exp(-callCount / 10000.0) * 4;
-                    return 1.5;
+                    return Math.exp(-callCount / 10000.0) * 4;
+//                    return 1.5;
                 }
             })
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
-            .setFlowOptimizerType(FlowOptimizerType.SOFT)
-
+            .setFlowOptimizerType(FlowOptimizerType.HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }

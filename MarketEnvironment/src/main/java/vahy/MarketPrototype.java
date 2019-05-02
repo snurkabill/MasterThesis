@@ -29,6 +29,7 @@ import vahy.paperGenerics.benchmark.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
@@ -147,7 +148,10 @@ public class MarketPrototype {
                 InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
                 ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
                 ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
-                FlowOptimizerType.SOFT, subTreeRiskCalculatorType, subTreeRiskCalculatorTypeForUnknownFlow, random);
+                FlowOptimizerType.SOFT,
+                SubTreeRiskCalculatorType.FLOW_SUM,
+                SubTreeRiskCalculatorType.PRIOR_SUM,
+                random);
 
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
             PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);

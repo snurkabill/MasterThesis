@@ -62,8 +62,8 @@ public class RandomWalkExample {
 //            () -> 0.1,
 //            () -> 2.0,
             TrainerAlgorithm.EVERY_VISIT_MC,
-            ApproximatorType.NN,
-//            ApproximatorType.HASHMAP,
+//            ApproximatorType.NN,
+            ApproximatorType.HASHMAP,
             4,
             100,
             10000,
@@ -74,8 +74,8 @@ public class RandomWalkExample {
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
             FlowOptimizerType.SOFT,
-            SubTreeRiskCalculatorType.PRIOR_SUM,
-            SubTreeRiskCalculatorType.PRIOR_SUM,
+            SubTreeRiskCalculatorType.FLOW_SUM,
+            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             false);
         return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
     }
