@@ -12,15 +12,17 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public class RandomDistributionUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RandomDistributionUtils.class.getName());
 
     public static int SAMPLING_RANDOM_INDEX_TRIAL_COUNT = 10;
-    public static double TOLERANCE = Math.pow(10, -7);
+    public static double TOLERANCE = Math.pow(10, -5);
 
     public static boolean isDistribution(List<Double> distribution) {
         double cumulativeSum = 0.0;
@@ -55,7 +57,10 @@ public class RandomDistributionUtils {
 
     private static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random, int trialCount) {
         if(trialCount > SAMPLING_RANDOM_INDEX_TRIAL_COUNT) {
-            throw new IllegalStateException("Numerically unstable probability calculation");
+            throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + distribution
+                .stream()
+                .map(Objects::toString)
+                .collect(Collectors.joining(", ")) + "]");
         }
         double value = random.nextDouble();
         double cumulativeSum = 0.0;
@@ -70,7 +75,7 @@ public class RandomDistributionUtils {
 
     private static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random, int trialCount) {
         if(trialCount > SAMPLING_RANDOM_INDEX_TRIAL_COUNT) {
-            throw new IllegalStateException("Numerically unstable probability calculation");
+            throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + Arrays.toString(distribution) +"]");
         }
         double value = random.nextDouble();
         double cumulativeSum = 0.0;
@@ -91,9 +96,9 @@ public class RandomDistributionUtils {
     }
 
     public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
-        if(!isDistribution(distribution)) {
-            throw new IllegalArgumentException("Given array does not represent probability distribution [" + Arrays.toString(distribution) + "]");
-        }
+//        if(!isDistribution(distribution)) {
+//            throw new IllegalArgumentException("Given array does not represent probability distribution [" + Arrays.toString(distribution) + "]");
+//        }
         return getRandomIndexFromDistribution(distribution, random, 0);
     }
 
@@ -128,6 +133,16 @@ public class RandomDistributionUtils {
     }
 
     public static void tryToRoundDistribution(double[] distribution) {
+        for (int i = 0; i < distribution.length; i++) {
+            if(distribution[i] <= 0.0 && distribution[i] + TOLERANCE >= 0.0) {
+                distribution[i] = 0;
+            } else if(distribution[i] >= 1.0 && distribution[i] <= 1.0 + TOLERANCE) {
+                distribution[i] = 1.0;
+            }
+        }
+    }
+
+    public static void hardRoundDistribution(double[] distribution) {
         for (int i = 0; i < distribution.length; i++) {
             if(distribution[i] <= 0.0 && distribution[i] + TOLERANCE >= 0.0) {
                 distribution[i] = 0;
@@ -238,7 +253,7 @@ public class RandomDistributionUtils {
             for (int i = 0; i < distributionSize; i++) {
                 newDistribution[i] = result[i];
             }
-            tryToRoundDistribution(newDistribution);
+            hardRoundDistribution(newDistribution);
             return newDistribution;
 
 //            Matrix ans = lhs.solve(rhs);
