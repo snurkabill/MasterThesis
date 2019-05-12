@@ -11,6 +11,7 @@ import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
@@ -30,15 +31,15 @@ public class Benchmark07Solution {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
 //        //  EXAMPLE 1
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
-//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-//        new Experiment().prepareAndRun(setup, random);
+        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
+        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+        new Experiment().prepareAndRun(setup, random);
 
 
 //         EXAMPLE 2
-        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
-        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-        new Experiment().prepareAndRun(setup, random);
+//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
+//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+//        new Experiment().prepareAndRun(setup, random);
 
 
     }
@@ -56,7 +57,7 @@ public class Benchmark07Solution {
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_07)
             //MCTS
-            .cpuctParameter(3)
+            .cpuctParameter(4)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
@@ -66,24 +67,26 @@ public class Benchmark07Solution {
             .discountFactor(1)
 
             .batchEpisodeCount(100)
-            .stageCount(100)
+            .stageCount(1000)
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
-            .learningRate(0.0001)
+
+//            .approximatorType(ApproximatorType.HASHMAP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .learningRate(0.01)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.00)
+            .evalEpisodeCount(10000)
+            .globalRiskAllowed(0.10)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-//                     return Math.exp(-callCount / 2000.0) / 2;
-                    return 0.2;
+                    return Math.exp(-callCount / 10000.0) ;
+//                    return 0.05;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -91,10 +94,17 @@ public class Benchmark07Solution {
                 @Override
                 public Double get() {
                     callCount++;
-//                    return Math.exp(-callCount / 2000.0) * 3;
-                    return 2.0;
+                    return Math.exp(-callCount / 20000.0) * 5;
+//                    return 1.0;
                 }
             })
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD_SOFT)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }

@@ -48,7 +48,7 @@ public class Benchmark13Solution {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
-            .stepPenalty(2)
+            .stepPenalty(4)
             .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
@@ -62,8 +62,8 @@ public class Benchmark13Solution {
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
-            .trainingEpochCount(1)
-            .learningRate(0.01)
+            .trainingEpochCount(100)
+            .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(10)
@@ -76,14 +76,14 @@ public class Benchmark13Solution {
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.2)
+            .globalRiskAllowed(0.1)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
                     return Math.exp(-callCount / 10000.0) / 5;
-//                    return 0.1;
+//                    return 1.0;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -91,7 +91,7 @@ public class Benchmark13Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) * 4;
+                    return Math.exp(-callCount / 20000.0) * 10;
 //                    return 1.5;
                 }
             })
@@ -99,7 +99,7 @@ public class Benchmark13Solution {
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
-            .setFlowOptimizerType(FlowOptimizerType.HARD)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD_SOFT)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();

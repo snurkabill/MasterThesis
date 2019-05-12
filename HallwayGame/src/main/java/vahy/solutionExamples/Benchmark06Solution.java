@@ -10,6 +10,12 @@ import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.ImmutableTuple;
@@ -43,7 +49,7 @@ public class Benchmark06Solution {
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(3)
-            .trapProbability(0.1)
+            .trapProbability(0.05)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
@@ -51,32 +57,33 @@ public class Benchmark06Solution {
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_06)
             //MCTS
-            .cpuctParameter(5)
+            .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
+            .learningRate(0.1)
             // REINFORCEMENT
             .discountFactor(1)
 
             .batchEpisodeCount(100)
-            .stageCount(1000)
+            .stageCount(200)
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.00)
+            .globalRiskAllowed(0.1)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    return Math.exp(-callCount / 10000.0) / 5;
 //                    return 0.1;
                 }
             })
@@ -89,6 +96,13 @@ public class Benchmark06Solution {
 //                    return 2.0;
                 }
             })
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD_SOFT)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }
