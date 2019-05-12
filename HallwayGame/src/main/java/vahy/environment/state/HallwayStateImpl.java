@@ -96,6 +96,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
         double[][] traps = staticGamePart.getTrapProbabilities();
 
         if(hasAgentMoved) {
+            double failedNoisyMoveProbability = 0.0;
             ImmutableTuple<Integer, Integer> coordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
@@ -113,6 +114,8 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
                     actionProbabilities.add(noisyRightProb);
                     sum += noisyRightProb;
                 }
+            } else {
+                failedNoisyMoveProbability += staticGamePart.getNoisyMoveProbability() / 2.0;
             }
             coordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
@@ -131,10 +134,12 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
                     actionProbabilities.add(noisyLeftProb);
                     sum += noisyLeftProb;
                 }
+            } else {
+                failedNoisyMoveProbability += staticGamePart.getNoisyMoveProbability() / 2.0;
             }
             if(traps[agentXCoordination][agentYCoordination] != 0) {
                 possibleActions.add(HallwayAction.TRAP);
-                double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability()) * traps[agentXCoordination][agentYCoordination];
+                double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability() + failedNoisyMoveProbability) * traps[agentXCoordination][agentYCoordination];
                 actionProbabilities.add(straightTrapProb);
                 sum += straightTrapProb;
             }
