@@ -155,7 +155,7 @@ public class RiskAverseSearchTree<
     private double roundRiskIfBelowZero(double risk, String riskName) {
         if(risk < 0.0 - NUMERICAL_RISK_DIFF_TOLERANCE) {
 //            throw new IllegalStateException("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
-            logger.error("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
+            logger.warn("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
             return 0.0;
         } else
             if(risk < 0.0) {
@@ -229,7 +229,7 @@ public class RiskAverseSearchTree<
 
 
                 if(totalRiskAllowed > 1.0 + NUMERICAL_RISK_DIFF_TOLERANCE) {
-                    logger.error("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
+                    logger.warn("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
                     totalRiskAllowed = 1.0;
 //                    throw new IllegalStateException("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
                 }
