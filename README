@@ -1,0 +1,20 @@
+Reinforcement Learning of Risk-Averse Policies in Partially Observable Markov Decision Processes
+
+The paper implementation itself is in ".../MasterThesis/PaperSandbox/src/main/java/vahy/paperGenerics/"
+
+The Java-CLP libraries are provided and the whole program was tested on Windows OS.
+
+How to start:
+
+1. Install JRE 11+ and latest Maven build tool on your system
+2. Clone this repository
+3. In root directory (.../MasterThesis/), execute command "mvn clean install -Dcheckstyle.skip -DskipTests". It will build the whole project.
+4. Prepared HallwayGame examples can be found in .../MasterThesis/HallwayGame/src/main/java/vahy/solutionExamples/ path
+5. To execute some prepared example, in directory "../MasterThesis/HallwayGame/" execute command "mvn exec:java -Dexec.mainClass="vahy.solutionExamples.<name of the class with main() to be executed>""
+    - example: "mvn exec:java -Dexec.mainClass="vahy.solutionExamples.Benchmark01Solution""
+
+6. The training will start. For some benchmarks, it can take time.
+7. When a logging is set to "Info" level (it is by default), three windows will pop up showing training performance over time.
+8. After evaluation is done, results are printed into info level log.
+
+if encountering any problems, please, contact me on snurkabill@gmail.com
