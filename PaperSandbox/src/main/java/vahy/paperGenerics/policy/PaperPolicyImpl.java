@@ -99,20 +99,6 @@ public class PaperPolicyImpl<
         if(!hasActionChanged) {
             throw new IllegalStateException("Action probability distribution second time without changing state");
         }
-
-//        riskAverseSearchTree.optimizeFlow();
-//        double[] vector = new double[gameState.isPlayerTurn() ? playerActions.size() : environmentActions.size()];
-//        List<ImmutableTuple<TAction, Double>> actionDoubleList = riskAverseSearchTree.isFlowOptimized() ?
-//            this.searchTree
-//                .getRoot()
-//                .getChildNodeStream()
-//                .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()))
-//                .collect(Collectors.toList())
-//            : getUcbVisitActionProbabilityDistribution();
-//        for (ImmutableTuple<TAction, Double> entry : actionDoubleList) {
-//            int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
-//            vector[actionIndex] = entry.getSecond();
-//        }
         return actionDistribution;
     }
 
@@ -137,47 +123,6 @@ public class PaperPolicyImpl<
             logger.debug("Exploration action [{}]", action);
         }
         return action;
-
-//        if(randomDouble > ) {
-//
-//            actionDistribution = actionDistributionAndDiscreteAction.getSecond();
-//            TAction action = actionDistributionAndDiscreteAction.getFirst();
-////            TAction discreteAction = sampleDistributionFromExploitingDistribution(gameState);
-//            logger.debug("Exploitation action [{}].", action);
-//            return action;
-
-//        } else {
-//            var actionDistributionAndDiscreteAction = riskAverseSearchTree.getActionDistributionAndDiscreteAction(gameState, PolicyMode.EXPLORATION);
-//            TAction[] stateAllowedActions = gameState.getAllPossibleActions();
-//            List<TAction> policyAllowedActions = getAllowedActionsForExploration();
-//
-//            var allowedActions = new LinkedList<TAction>();
-//            for (TAction policyAllowedAction : policyAllowedActions) { // N * N
-//                for (TAction stateAllowedAction : stateAllowedActions) {
-//                    if (stateAllowedAction == policyAllowedAction) {
-//                        allowedActions.add(stateAllowedAction);
-//                        break;
-//                    }
-//                }
-//            }
-//            updateMask(allowedActions);
-//
-//            double[] actionDistribution = this.getActionProbabilityDistribution(gameState);
-//            for (int i = 0; i < actionDistribution.length; i++) {
-//                actionDistribution[i] = actionMask[i] ? actionDistribution[i] : 0.0;
-//            }
-//            RandomDistributionUtils.applyTemperatureNoise(actionDistribution, temperature);
-//            RandomDistributionUtils.applySoftmax(actionDistribution);
-//            for (int i = 0; i < playerActions.size(); i++) {
-//                exploringPlayerDistribution.put(playerActions.get(i), actionDistribution[i]);
-//            }
-//            riskAverseSearchTree.setPlayerDistribution(exploringPlayerDistribution);
-////            logger.info("ActionProbabilityDistribution: [{}]", Arrays.toString(actionDistribution));
-////            logger.info("Exponentiation:                [{}]", Arrays.toString(exponentiation));
-//            int index = RandomDistributionUtils.getRandomIndexFromDistribution(actionDistribution, random);
-//            logger.debug("Exploration action [{}]", playerActions.get(index));
-//            return playerActions.get(index);
-//        }
     }
 
     @Override
@@ -198,47 +143,4 @@ public class PaperPolicyImpl<
         }
         return priorProbabilities;
     }
-
-//    private TAction sampleDistributionFromExploitingDistribution(TState gameState) {
-//        double[] actionProbabilityDistribution = this.getActionProbabilityDistribution(gameState);
-//        double rand = random.nextDouble();
-//        double cumulativeSum = 0.0d;
-//        for (int i = 0; i < actionProbabilityDistribution.length; i++) {
-//            cumulativeSum += actionProbabilityDistribution[i];
-//            if(rand < cumulativeSum) {
-//                return playerActions.get(i);
-//            }
-//        }
-//        throw new IllegalStateException("Numerically unstable probability calculation");
-//    }
-
-//    private List<ImmutableTuple<TAction, Double>> getUcbVisitActionProbabilityDistribution() {
-//        List<ImmutableTuple<TAction, Double>> nonNormalizedDistr = this.searchTree
-//            .getRoot()
-//            .getChildNodeStream()
-//            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), (double) x.getSearchNodeMetadata().getVisitCounter()))
-//            .collect(Collectors.toList());
-//
-//        double totalSum = this.searchTree
-//            .getRoot()
-//            .getChildNodeStream()
-//            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
-//            .sum();
-//        return nonNormalizedDistr
-//            .stream()
-//            .map(x -> new ImmutableTuple<>(x.getFirst(), x.getSecond() / totalSum))
-//            .collect(Collectors.toList());
-//    }
-
-//    private void updateMask(List<TAction> possibleActions) {
-//        for (int i = 0; i < playerActions.size(); i++) {
-//            this.actionMask[i] = false;
-//            for (TAction possibleAction : possibleActions) {
-//                if(playerActions.get(i) == possibleAction) {
-//                    this.actionMask[i] = true;
-//                    break;
-//                }
-//            }
-//        }
-//    }
 }
