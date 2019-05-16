@@ -31,23 +31,23 @@ public class RandomWalkExample {
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
-        var randomWalkSetup = new RandomWalkSetup(100, 50, 1, 1, 10, 10, 0.9, 0.7);
+        var randomWalkSetup = new RandomWalkSetup(50, 50, 1, 1, 10, 10, 0.9, 0.7);
         ExperimentSetup experimentSetup = new ExperimentSetup(
             0,
-            3,
+            2,
             1,
-            new FixedUpdateCountTreeConditionFactory(200),
+            new FixedUpdateCountTreeConditionFactory(10),
             1.0,
             100,
             20000,
             10000,
-            100,
+            30,
             new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                     return Math.exp(-callCount / 2000.0) / 3;
+                     return Math.exp(-callCount / 10000.0) / 5;
 //                    return 0.2;
                 }
             },
@@ -56,28 +56,80 @@ public class RandomWalkExample {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 2000.0) * 3;
+                    return Math.exp(-callCount / 10000.0) * 4;
                 }
             },
 //            () -> 0.1,
 //            () -> 2.0,
             TrainerAlgorithm.EVERY_VISIT_MC,
 //            ApproximatorType.NN,
-            ApproximatorType.HASHMAP,
-            4,
+            ApproximatorType.HASHMAP_LR,
+            128,
             100,
-            10000,
+            1000,
             0.0,
             0.01,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
-            InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
+            InferenceNonExistingFlowStrategy.MAX_UCB_VISIT,
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
-            ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
-            FlowOptimizerType.SOFT,
+            ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT,
+            FlowOptimizerType.HARD_HARD,
             SubTreeRiskCalculatorType.FLOW_SUM,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             false);
         return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
     }
 
+
+//    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
+//        var randomWalkSetup = new RandomWalkSetup(100, 50, 1, 1, 10, 10, 0.9, 1.0);
+//        ExperimentSetup experimentSetup = new ExperimentSetup(
+//            0,
+//            3,
+//            1,
+//            new FixedUpdateCountTreeConditionFactory(100),
+//            1.0,
+//            100,
+//            20000,
+//            10000,
+//            100,
+//            new Supplier<>() {
+//                private int callCount = 0;
+//                @Override
+//                public Double get() {
+//                    callCount++;
+//                    return Math.exp(-callCount / 10000.0) / 2;
+////                    return 0.2;
+//                }
+//            },
+//            new Supplier<>() {
+//                private int callCount = 0;
+//                @Override
+//                public Double get() {
+//                    callCount++;
+//                    return Math.exp(-callCount / 10000.0) * 4;
+//                }
+//            },
+////            () -> 0.1,
+////            () -> 2.0,
+//            TrainerAlgorithm.EVERY_VISIT_MC,
+////            ApproximatorType.NN,
+//            ApproximatorType.HASHMAP_LR,
+//            4,
+//            100,
+//            1000,
+//            0.1,
+//            0.1,
+//            InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
+//            InferenceNonExistingFlowStrategy.MAX_UCB_VISIT,
+//            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+//            ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT,
+//            FlowOptimizerType.HARD_HARD_SOFT,
+//            SubTreeRiskCalculatorType.FLOW_SUM,
+//            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
+//            false);
+//        return new ImmutableTuple<>(randomWalkSetup, experimentSetup);
+//    }
+
 }
+

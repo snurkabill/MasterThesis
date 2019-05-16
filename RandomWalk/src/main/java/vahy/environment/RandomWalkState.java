@@ -79,7 +79,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
 
     @Override
     public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {maximumSoFar - level});
+        return new DoubleVector(new double[] {maximumSoFar - level, stepCount});
     }
 
     @Override
