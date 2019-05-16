@@ -58,7 +58,7 @@ public class Benchmark13Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_13)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(500))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -67,7 +67,7 @@ public class Benchmark13Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(10)
-            .stageCount(200)
+            .stageCount(2000)
 
             .maximalStepCountBound(500)
 
@@ -99,12 +99,13 @@ public class Benchmark13Solution {
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
-            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD_SOFT)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }
+
 
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment2() { // really quite working with commit "finally"

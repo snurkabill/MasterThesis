@@ -35,12 +35,6 @@ public class Benchmark05Solution {
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
 
-        //  EXAMPLE 2
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
-//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-//        new Experiment().prepareAndRun(setup, random);
-
-
     }
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
@@ -93,7 +87,7 @@ public class Benchmark05Solution {
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
-            .setFlowOptimizerType(FlowOptimizerType.SOFT)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();

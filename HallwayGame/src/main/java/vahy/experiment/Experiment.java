@@ -171,7 +171,7 @@ public class Experiment {
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
             trainer.trainPolicy(experimentSetup.getBatchEpisodeCount());
-            trainer.printDataset();
+//            trainer.printDataset();
         }
         return System.currentTimeMillis() - trainingStart;
     }
@@ -207,12 +207,12 @@ public class Experiment {
             .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName))
             .findFirst()
             .get();
-        logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
-        logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-        logger.info("NN Based total expanded nodes: [{}]", nnbasedEvaluator.getNodesExpandedCount());
-        logger.info("NN Based kill ratio: [{}]", nnResults.getRiskHitRatio());
-        logger.info("NN Based kill counter: [{}]", nnResults.getRiskHitCounter());
-        logger.info("NN Based training time: [{}]ms", trainingTimeInMs);
+        logger.info("Average reward: [{}]", nnResults.getAverageReward());
+        logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+        logger.info("Total expanded nodes: [{}]", nnbasedEvaluator.getNodesExpandedCount());
+        logger.info("Kill ratio: [{}]", nnResults.getRiskHitRatio());
+        logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
+        logger.info("Training time: [{}]ms", trainingTimeInMs);
 
         return policyResultList;
     }

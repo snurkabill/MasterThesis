@@ -35,13 +35,6 @@ public class Benchmark07Solution {
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
 
-
-//         EXAMPLE 2
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
-//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-//        new Experiment().prepareAndRun(setup, random);
-
-
     }
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
@@ -57,8 +50,8 @@ public class Benchmark07Solution {
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_07)
             //MCTS
-            .cpuctParameter(4)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .cpuctParameter(3)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(30))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
@@ -74,12 +67,12 @@ public class Benchmark07Solution {
 
 //            .approximatorType(ApproximatorType.HASHMAP)
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .learningRate(0.01)
+            .learningRate(0.1)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.10)
+            .globalRiskAllowed(0.0)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
