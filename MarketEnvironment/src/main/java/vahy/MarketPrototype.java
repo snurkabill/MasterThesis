@@ -72,6 +72,7 @@ public class MarketPrototype {
     }
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
+
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
         long seed = 0;
         SplittableRandom random = new SplittableRandom(seed);
@@ -243,12 +244,12 @@ public class MarketPrototype {
                 .findFirst()
                 .get();
 
-            logger.info("NN Based Average reward: [{}]", nnResults.getAverageReward());
-            logger.info("NN Based millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-            logger.info("NN Based total expanded nodes: [{}]", marketNodeEvaluator.getNodesExpandedCount());
-            logger.info("NN Based kill ratio: [{}]", nnResults.getRiskHitRatio());
-            logger.info("NN Based kill counter: [{}]", nnResults.getRiskHitCounter());
-            logger.info("NN Based training time: [{}]ms", trainingTimeInMs);
+            logger.info("Average reward: [{}]", nnResults.getAverageReward());
+            logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+            logger.info("Total expanded nodes: [{}]", marketNodeEvaluator.getNodesExpandedCount());
+            logger.info("Kill ratio: [{}]", nnResults.getRiskHitRatio());
+            logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
+            logger.info("Training time: [{}]ms", trainingTimeInMs);
 
         }
 
