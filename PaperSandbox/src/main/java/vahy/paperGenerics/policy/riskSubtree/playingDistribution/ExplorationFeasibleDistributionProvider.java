@@ -58,12 +58,15 @@ public class ExplorationFeasibleDistributionProvider<
             })
             .collect(Collectors.toList()));
 
+
         double[] actionDistributionAsArray = alternateDistribution.getSecond();
         double[] originalDistributionAsArray = new double[actionDistributionAsArray.length];
         System.arraycopy(actionDistributionAsArray, 0, originalDistributionAsArray, 0, actionDistributionAsArray.length);
         RandomDistributionUtils.tryToRoundDistribution(actionDistributionAsArray);
         RandomDistributionUtils.applyBoltzmannNoise(actionDistributionAsArray, temperature);
         double[] actionRiskAsArray = alternateDistribution.getThird();
+
+
 
         var sum = 0.0d;
         for (int i = 0; i < actionDistributionAsArray.length; i++) {
@@ -90,7 +93,8 @@ public class ExplorationFeasibleDistributionProvider<
                 "] alternated probabilityDistribution: [" + Arrays.toString(actionDistributionAsArray) +
                 "] action risk array: [" + Arrays.toString(actionRiskAsArray) +
                 "] summed risk for original distribution with boltzmann noise: [" + sum +
-                "] original probability array: " + Arrays.toString(originalDistributionAsArray));
+                "] original probability array: [" + Arrays.toString(originalDistributionAsArray) +
+                "] This is probably due to numeric inconsistency. Boltzmann exploration can have such effect with SOFT flow optimizer when allowed risk is 0.");
         } else {
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(actionDistributionAsArray, random);
             return new PlayingDistribution<>(

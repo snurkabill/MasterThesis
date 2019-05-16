@@ -3,7 +3,7 @@ import tensorflow as tf
 # input_count = 1
 
 benchmark_name = 'randomWalk'
-input_count = 1
+input_count = 2
  # input_count = 34
 
 hidden_count_1 = 10
