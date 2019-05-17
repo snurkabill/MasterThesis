@@ -9,10 +9,10 @@ if any problems, please, contact me on snurkabill@gmail.com
 
 1. Install JRE 11+ and latest Maven build tool on your system
 2. Clone this repository
-3. In root directory (.../MasterThesis/), execute command "mvn clean install -Dcheckstyle.skip -DskipTests -U". It will build the whole project.
+3. In root directory (.../MasterThesis/), execute command `mvn clean install -Dcheckstyle.skip -DskipTests -U`. It will build the whole project.
 4. Prepared HallwayGame examples can be found in .../MasterThesis/HallwayGame/src/main/java/vahy/solutionExamples/ path
 5. To execute some example, in directory "../MasterThesis/HallwayGame/" execute command "mvn exec:java -Dexec.mainClass="vahy.solutionExamples.<name of the class with main() to be executed>""
-    - example: "mvn exec:java -Dexec.mainClass="vahy.solutionExamples.Benchmark01Solution""
+    - example: `mvn exec:java -Dexec.mainClass="vahy.solutionExamples.Benchmark01Solution"`
     - the algorithm parameters and hyper-parameters are not necessarily optimal
 6. The training will start. For some benchmarks, it can take time.
 7. When a logging is set to "Info" level (it is by default, check logback.xml for detailed logging), three windows will pop up showing training performance over time.
