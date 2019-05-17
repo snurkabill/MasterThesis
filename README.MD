@@ -2,13 +2,13 @@ Reinforcement Learning of Risk-Averse Policies in Partially Observable Markov De
 
 The paper implementation itself is in ".../MasterThesis/PaperSandbox/src/main/java/vahy/paperGenerics/"
 
-The Java-CLP libraries are provided and the whole program was tested on Windows OS.
+The Java-CLP libraries are provided and the whole program was tested on Windows OS and Linux OS.
 
 How to start:
+if any problems, please, contact me on snurkabill@gmail.com
 
 1. Install JRE 11+ and latest Maven build tool on your system
 2. Clone this repository
-3. In root directory (.../MasterThesis/), execute command "mvn install:install-file -DlocalRepositoryPath=thirdPartyLib -DcreateChecksum=true -Dpackaging=jar -Dfile=thirdPartyLib/clp-java-1.16.11-full.jar -DgroupId=com.quantego -DartifactId=clp -Dversion=1.16.11". It will install Java-CLP to local mvn repository
 3. In root directory (.../MasterThesis/), execute command "mvn clean install -Dcheckstyle.skip -DskipTests -U". It will build the whole project.
 4. Prepared HallwayGame examples can be found in .../MasterThesis/HallwayGame/src/main/java/vahy/solutionExamples/ path
 5. To execute some example, in directory "../MasterThesis/HallwayGame/" execute command "mvn exec:java -Dexec.mainClass="vahy.solutionExamples.<name of the class with main() to be executed>""
@@ -18,7 +18,7 @@ How to start:
 7. When a logging is set to "Info" level (it is by default, check logback.xml for detailed logging), three windows will pop up showing training performance over time.
 8. After evaluation is done, results are printed into info level log.
 
-if encountering any problems, please, contact me on snurkabill@gmail.com
+
 
 
 
@@ -27,6 +27,8 @@ if encountering any problems, please, contact me on snurkabill@gmail.com
 
 experimental parameters:
 
+
+```tex
 
 \begin{itemize}
     \item cpuct
@@ -121,3 +123,7 @@ experimental parameters:
         \item Parameter adjusting speed of training a predictor.
     \end{itemize}
 \end{itemize}
+ 
+```
+
+
