@@ -87,8 +87,7 @@ public class Experiment {
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
-                    random,
-                    setup.getSecond().omitProbabilities())
+                    random)
                 ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
