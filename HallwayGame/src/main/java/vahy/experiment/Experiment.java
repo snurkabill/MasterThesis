@@ -49,6 +49,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class Experiment {
 
@@ -71,13 +72,13 @@ public class Experiment {
 
         switch (setup.getSecond().getApproximatorType()) {
             case EMPTY:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new EmptyApproximator<>());
+                createPolicyAndRunProcess(setup, random.split(), hallwayGameInitialInstanceSupplier, new EmptyApproximator<>());
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length, setup.getSecond().omitProbabilities()));
+                createPolicyAndRunProcess(setup, random.split(), hallwayGameInitialInstanceSupplier, new DataTableApproximator<>(HallwayAction.playerActions.length, setup.getSecond().omitProbabilities()));
                 break;
             case HASHMAP_LR:
-                createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, new DataTableApproximatorWithLr<>(HallwayAction.playerActions.length, setup.getSecond().getLearningRate(), setup.getSecond().omitProbabilities()));
+                createPolicyAndRunProcess(setup, random.split(), hallwayGameInitialInstanceSupplier, new DataTableApproximatorWithLr<>(HallwayAction.playerActions.length, setup.getSecond().getLearningRate(), setup.getSecond().omitProbabilities()));
                 break;
             case NN:
             {
@@ -87,11 +88,11 @@ public class Experiment {
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream("tfModel/graph_" + setup.getSecond().getHallwayInstance().toString() + ".pb").readAllBytes(),
-                    random)
+                    random.split())
                 ) //            SavedModelBundle.load("C:/Users/Snurka/init_model", "serve"),
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
-                    createPolicyAndRunProcess(setup, random, hallwayGameInitialInstanceSupplier, trainableApproximator);
+                    createPolicyAndRunProcess(setup, random.split(), hallwayGameInitialInstanceSupplier, trainableApproximator);
                 }
             }
             default:
@@ -108,7 +109,8 @@ public class Experiment {
         var clazz = HallwayAction.class;
         var searchNodeMetadataFactory = new PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(rewardAggregator);
         var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>();
-        var nodeSelector = createNodeSelector(experimentSetup.getCpuctParameter(), random, experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
+        Supplier<NodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> nodeSelector =
+            () -> createNodeSelector(experimentSetup.getCpuctParameter(), random.split(), experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
 
         var strategiesProvider = new StrategiesProvider<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>(
             experimentSetup.getInferenceExistingFlowStrategy(),
@@ -118,19 +120,20 @@ public class Experiment {
             experimentSetup.getFlowOptimizerType(),
             experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
             experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow(),
-            random);
+            random.split());
 
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
             approximator,
             EnvironmentProbabilities::getProbabilities,
-            HallwayAction.playerActions, HallwayAction.environmentActions);
+            HallwayAction.playerActions,
+            HallwayAction.environmentActions);
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
             searchNodeMetadataFactory,
             experimentSetup.getGlobalRiskAllowed(),
-            random,
+            random.split(),
             nodeSelector,
             nnbasedEvaluator,
             paperTreeUpdater,
@@ -144,7 +147,7 @@ public class Experiment {
             clazz,
             searchNodeMetadataFactory,
             experimentSetup.getGlobalRiskAllowed(),
-            random,
+            random.split(),
             nodeSelector,
             nnbasedEvaluator,
             paperTreeUpdater,
@@ -153,7 +156,7 @@ public class Experiment {
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
-            random,
+            random.split(),
             hallwayGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
             nnbasedEvaluator,
@@ -162,7 +165,7 @@ public class Experiment {
             experimentSetup.getMaximalStepCountBound());
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        this.results = evaluatePolicy(random, hallwayGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
+        this.results = evaluatePolicy(random.split(), hallwayGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -234,7 +237,7 @@ public class Experiment {
                 return new ReplayBufferTrainer<>(
                     hallwayGameInitialInstanceSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    new EnvironmentPolicySupplier(random.split()),
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
@@ -245,7 +248,7 @@ public class Experiment {
                 return new FirstVisitMonteCarloTrainer<>(
                     hallwayGameInitialInstanceSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    new EnvironmentPolicySupplier(random.split()),
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
@@ -254,7 +257,7 @@ public class Experiment {
                 return new EveryVisitMonteCarloTrainer<>(
                     hallwayGameInitialInstanceSupplier,
                     trainablePaperPolicySupplier,
-                    new EnvironmentPolicySupplier(random),
+                    new EnvironmentPolicySupplier(random.split()),
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
@@ -272,11 +275,11 @@ public class Experiment {
     {
         switch (selectorType) {
             case UCB:
-                return new PaperNodeSelector<>(cpuctParameter, random);
+                return new PaperNodeSelector<>(cpuctParameter, random.split());
             case VAHY_1:
-                return new RiskBasedSelectorVahy<>(cpuctParameter, random);
+                return new RiskBasedSelectorVahy<>(cpuctParameter, random.split());
             case LINEAR_HARD_VS_UCB:
-                return new RiskBasedSelector<>(cpuctParameter, random, totalRiskAllowed);
+                return new RiskBasedSelector<>(cpuctParameter, random.split(), totalRiskAllowed);
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
         }

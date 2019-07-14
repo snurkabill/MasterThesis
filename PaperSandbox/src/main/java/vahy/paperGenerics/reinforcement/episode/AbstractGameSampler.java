@@ -11,14 +11,15 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.utils.ImmutableTuple;
-import vahy.vizualiation.DataSeriesCreator;
-import vahy.vizualiation.MyShittyFrameVisualization;
-import vahy.vizualiation.SeriesMetadata;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public abstract class AbstractGameSampler<
     TAction extends Enum<TAction> & Action,
@@ -30,19 +31,12 @@ public abstract class AbstractGameSampler<
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractGameSampler.class.getName());
 
-    private int sampledBatches = 0;
-
     private final InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
     private final PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier;
     private final int stepCountLimit;
-    private final EpisodeSimulator<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> episodeSimulator = new EpisodeSimulator<>();
 
-    private final SeriesMetadata stepCountSeries = new SeriesMetadata("StepCount", new LinkedList<>());
-    private final SeriesMetadata totalRewardSeries = new SeriesMetadata("TotalReward", new LinkedList<>());
-    private final SeriesMetadata riskHitSeries = new SeriesMetadata("RiskHit", new LinkedList<>());
-    private final MyShittyFrameVisualization avgStepCountVisualization = new MyShittyFrameVisualization("Avg Step Count", "SampledBatch", "Value");
-    private final MyShittyFrameVisualization avgRewardVisualization = new MyShittyFrameVisualization("Avg Total Reward", "SampledBatch", "Value");
-    private final MyShittyFrameVisualization avgRiskHitVisualization = new MyShittyFrameVisualization("Avg Risk Hit", "SampledBatch", "Value");
+    private final ExecutorService executorService;
+    private final ProgressTracker<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> progressTracker = new ProgressTracker<>();
 
     public AbstractGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                                PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
@@ -50,48 +44,39 @@ public abstract class AbstractGameSampler<
         this.initialStateSupplier = initialStateSupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
         this.stepCountLimit = stepCountLimit;
+        var processingUnitCount = Runtime.getRuntime().availableProcessors() - 1;
+        logger.info("Initialized [{}] executors for", processingUnitCount);
+        this.executorService = Executors.newFixedThreadPool(processingUnitCount);
     }
 
     public List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> sampleEpisodes(int episodeBatchSize) {
-        List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> paperEpisodeHistoryList = new ArrayList<>();
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
-        for (int j = 0; j < episodeBatchSize; j++) {
+        var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>>(episodeBatchSize);
+        for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState();
-            PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> paperPolicy = supplyPlayerPolicy(initialGameState);
-            PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
-            EpisodeImmutableSetup<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> paperEpisode = new EpisodeImmutableSetup<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
-            EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> episodeResult = episodeSimulator.calculateEpisode(paperEpisode);
-            paperEpisodeHistoryList.add(episodeResult);
-            logger.info("Episode [{}] finished. Total steps done: [{}]. Is risk hit: [{}]", j, episodeResult.getEpisodeHistoryList().size(), episodeResult.isRiskHit());
-//            logger.info("Action history: [{}]", episodeResult.printActionHistory());
+            var paperPolicy = supplyPlayerPolicy(initialGameState);
+            var opponentPolicy = opponentPolicySupplier.initializePolicy(initialGameState);
+            var paperEpisode = new EpisodeImmutableSetup<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
+            var episodeSimulator = new EpisodeSimulator<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>();
+            episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }
+        try {
+            List<Future<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>> results = executorService.invokeAll(episodesToSample);
+            var paperEpisodeHistoryList = results.stream().map(x -> {
+                try {
+                    return x.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new IllegalStateException("Parallel episodes were interrupted.", e);
+                }
+            }).collect(Collectors.toList());
 
-        if(logger.isInfoEnabled()) {
-            double avgRisk = paperEpisodeHistoryList
-                .stream()
-                .mapToDouble(x -> x.isRiskHit() ? 1.0 : 0.0)
-                .average().orElseThrow(() -> new IllegalStateException("Avg does not exist"));
-            double avgReward = paperEpisodeHistoryList
-                .stream()
-                .mapToDouble(x -> x.getEpisodeHistoryList()
-                    .stream()
-                    .mapToDouble(y -> y.getFirst().getReward().getValue()) // TODO: reward aggregator
-                    .sum())
-                .average().orElseThrow(() -> new IllegalArgumentException("Average does not exist"));
-            double avgStepCount = paperEpisodeHistoryList
-                .stream()
-                .mapToInt(x -> x.getEpisodeHistoryList().size())
-                .average().orElseThrow(() -> new IllegalArgumentException("Average does not exist"));
-
-            stepCountSeries.addDataEntry(new ImmutableTuple<>((double) sampledBatches, avgStepCount));
-            totalRewardSeries.addDataEntry(new ImmutableTuple<>((double) sampledBatches, avgReward));
-            riskHitSeries.addDataEntry(new ImmutableTuple<>((double) sampledBatches, avgRisk));
-            avgStepCountVisualization.draw(DataSeriesCreator.createDataset(stepCountSeries));
-            avgRewardVisualization.draw(DataSeriesCreator.createDataset(totalRewardSeries));
-            avgRiskHitVisualization.draw(DataSeriesCreator.createDataset(riskHitSeries));
+            if(logger.isInfoEnabled()) {
+                progressTracker.addData(paperEpisodeHistoryList);
+            }
+            return paperEpisodeHistoryList;
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Parallel episodes were interrupted.", e);
         }
-        sampledBatches++;
-        return paperEpisodeHistoryList;
     }
 
     protected abstract PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> supplyPlayerPolicy(TState initialState);

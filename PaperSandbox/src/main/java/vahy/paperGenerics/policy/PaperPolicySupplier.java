@@ -18,6 +18,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class PaperPolicySupplier<
     TAction extends Enum<TAction> & Action,
@@ -32,7 +33,7 @@ public class PaperPolicySupplier<
     private final SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
     private final double totalRiskAllowed;
     private final SplittableRandom random;
-    private final NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
+    private final Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector;
     private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
@@ -42,7 +43,7 @@ public class PaperPolicySupplier<
                                SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                double totalRiskAllowed,
                                SplittableRandom random,
-                               NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                               Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
@@ -79,7 +80,7 @@ public class PaperPolicySupplier<
             new RiskAverseSearchTree<>(
                 actionClass,
                 node,
-                nodeSelector,
+                nodeSelector.get(),
                 treeUpdater,
                 nodeEvaluator,
                 random,
@@ -97,7 +98,7 @@ public class PaperPolicySupplier<
             new RiskAverseSearchTree<>(
                 actionClass,
                 node,
-                nodeSelector,
+                nodeSelector.get(),
                 treeUpdater,
                 nodeEvaluator,
                 random,

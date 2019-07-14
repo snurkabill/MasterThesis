@@ -36,7 +36,7 @@ public class TrainablePaperPolicySupplier<
                                         SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                         double totalRiskAllowed,
                                         SplittableRandom random,
-                                        NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                                        Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
                                         TrainableNodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                         TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
@@ -55,7 +55,7 @@ public class TrainablePaperPolicySupplier<
     public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
         double explorationConstant = explorationConstantSupplier.get();
         double temperature = temperatureSupplier.get();
-        logger.info("Initialized policy with exploration. Exploration constant: [{}], Temperature: [{}]", explorationConstant, temperature);
+        logger.debug("Initialized policy with exploration. Exploration constant: [{}], Temperature: [{}]", explorationConstant, temperature);
         return createPolicy(initialState, explorationConstant, temperature);
     }
 

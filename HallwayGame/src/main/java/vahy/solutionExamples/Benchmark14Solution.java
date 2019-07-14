@@ -1,5 +1,7 @@
 package vahy.solutionExamples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
@@ -27,6 +29,8 @@ import java.util.function.Supplier;
 
 public class Benchmark14Solution {
 
+    private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
+
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
@@ -53,6 +57,8 @@ public class Benchmark14Solution {
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
+        int batchSize = 200;
+
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_14)
@@ -66,7 +72,7 @@ public class Benchmark14Solution {
             .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
-            .batchEpisodeCount(10)
+            .batchEpisodeCount(batchSize)
             .stageCount(2000)
 
             .maximalStepCountBound(500)
@@ -82,7 +88,11 @@ public class Benchmark14Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) / 5;
+                    var x = Math.exp(-callCount / 10000.0);
+                    if(callCount % batchSize == 0) {
+                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
 //                    return 1.0;
                 }
             })
@@ -91,7 +101,11 @@ public class Benchmark14Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 20000.0) * 10;
+                    double x = Math.exp(-callCount / 20000.0) * 10;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
 //                    return 1.5;
                 }
             })
