@@ -70,7 +70,7 @@ public abstract class AbstractGameSampler<
                 }
             }).collect(Collectors.toList());
 
-            if(logger.isInfoEnabled()) {
+            if(logger.isDebugEnabled()) {
                 if(progressTracker == null) {
                      progressTracker = new ProgressTracker<>();
                 }
