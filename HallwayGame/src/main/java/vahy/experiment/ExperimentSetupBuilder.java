@@ -34,6 +34,7 @@ public class ExperimentSetupBuilder {
 
     private Supplier<Double> explorationConstantSupplier;
     private Supplier<Double> temperatureSupplier;
+    private Supplier<Double> riskSupplier;
 
     private TrainerAlgorithm trainerAlgorithm;
     private ApproximatorType approximatorType;
@@ -110,6 +111,10 @@ public class ExperimentSetupBuilder {
 
     public ExperimentSetupBuilder temperatureSupplier(Supplier<Double> temperatureSupplier) {
         this.temperatureSupplier = temperatureSupplier; return this;
+    }
+
+    public ExperimentSetupBuilder riskSupplier(Supplier<Double> riskSupplier) {
+        this.riskSupplier = riskSupplier; return this;
     }
 
     public ExperimentSetupBuilder trainerAlgorithm(TrainerAlgorithm trainerAlgorithm) {
@@ -204,6 +209,7 @@ public class ExperimentSetupBuilder {
             stageCount,
             explorationConstantSupplier,
             temperatureSupplier,
+            riskSupplier,
             trainerAlgorithm,
             approximatorType,
             trainingBatchSize,

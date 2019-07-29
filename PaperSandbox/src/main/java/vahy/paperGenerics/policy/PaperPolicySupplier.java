@@ -31,7 +31,7 @@ public class PaperPolicySupplier<
 
     private final Class<TAction> actionClass;
     private final SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
-    private final double totalRiskAllowed;
+    private final double totalRiskAllowedInference;
     private final SplittableRandom random;
     private final Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector;
     private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
@@ -41,7 +41,7 @@ public class PaperPolicySupplier<
 
     public PaperPolicySupplier(Class<TAction> actionClass,
                                SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
-                               double totalRiskAllowed,
+                               double totalRiskAllowedInference,
                                SplittableRandom random,
                                Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
@@ -49,7 +49,7 @@ public class PaperPolicySupplier<
                                TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
-        this.totalRiskAllowed = totalRiskAllowed;
+        this.totalRiskAllowedInference = totalRiskAllowedInference;
         this.random = random;
         this.nodeSelector = nodeSelector;
         this.nodeEvaluator = nodeEvaluator;
@@ -84,12 +84,12 @@ public class PaperPolicySupplier<
                 treeUpdater,
                 nodeEvaluator,
                 random,
-                totalRiskAllowed,
+                totalRiskAllowedInference,
                 strategiesProvider),
             random);
     }
 
-    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature) {
+    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
         SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
             new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
         return new PaperPolicyImpl<>(

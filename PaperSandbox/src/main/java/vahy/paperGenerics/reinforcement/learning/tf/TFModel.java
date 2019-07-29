@@ -29,8 +29,6 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
     private final double[][] trainTargetBatch;
     private final SimpleTimer timer = new SimpleTimer();
 
-    private double[] outputVector;
-    private DoubleBuffer doubleBuffer;
     private double[][] inputMatrixForOneVector;
     private Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
 
@@ -47,8 +45,6 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
             trainTargetBatch[i] = new double[outputDimension];
         }
 
-        this.outputVector = new double[outputDimension];
-        this.doubleBuffer = DoubleBuffer.wrap(outputVector);
         this.inputMatrixForOneVector = new double[1][inputDimension];
 
         Graph graph = new Graph();
@@ -112,7 +108,8 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
     }
 
     public double[] predict(double[] input) {
-        System.arraycopy(input, 0, inputMatrixForOneVector[0], 0, inputDimension);
+        var matrix = new double[1][input.length]; // TODO: get rid of allocation
+        System.arraycopy(input, 0, matrix[0], 0, inputDimension);
         try (Tensor<Double> tfInput = Tensors.create(inputMatrixForOneVector)) {
             Tensor<?> output = sess
                 .runner()
@@ -121,8 +118,10 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
                 .run()
                 .get(0);
 
-            output.writeTo(doubleBuffer);
-            doubleBuffer.position(0);
+            var outputVector = new double[outputDimension];
+            var outputBuffer = DoubleBuffer.wrap(outputVector);
+            output.writeTo(outputBuffer);
+//            doubleBuffer.position(0);
             output.close();  // needed?
             return outputVector;
         }

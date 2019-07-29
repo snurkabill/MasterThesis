@@ -82,6 +82,7 @@ public class IntegrationTest {
                     return Math.exp(-callCount / 2000.0) * 3;
                 }
             },
+            () -> 0.3,
 //            () -> 0.1,
 //            () -> 2.0,
             TrainerAlgorithm.EVERY_VISIT_MC,

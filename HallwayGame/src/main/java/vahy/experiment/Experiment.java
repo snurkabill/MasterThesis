@@ -140,8 +140,8 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
             experimentSetup.getTemperatureSupplier(),
-            strategiesProvider
-        );
+            experimentSetup.getRiskSupplier(),
+            strategiesProvider);
 
         var nnBasedPolicySupplier = new PaperPolicySupplier<>(
             clazz,

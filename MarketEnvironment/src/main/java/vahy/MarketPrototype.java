@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import vahy.agent.environment.RealDataMarketPolicySupplier;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.model.reward.RewardAggregator;
+import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.environment.MarketAction;
 import vahy.environment.MarketDataProvider;
@@ -113,6 +114,7 @@ public class MarketPrototype {
         double temperatureSteps = stageCount;
         Supplier<Double> explorationConstantSupplier = () -> 0.3;
         Supplier<Double> temperatureSupplier = () -> 2.0;
+        Supplier<Double> riskSupplier = () -> 0.3;
 
         // NN
         int batchSize = 128;
@@ -154,7 +156,13 @@ public class MarketPrototype {
                 random);
 
             PaperMetadataFactory<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
-            PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
+
+            Supplier<NodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState>> nodeSelectorSupplier = () -> new PaperNodeSelector<>(cpuctParameter, random);
+
+//            PaperNodeSelector<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> nodeSelector = new PaperNodeSelector<>(cpuctParameter, random);
+
+
+
             PaperTreeUpdater<MarketAction, DoubleVector, DoubleVector, MarketState> paperTreeUpdater = new PaperTreeUpdater<>();
 
             PaperNodeEvaluator<MarketAction, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> marketNodeEvaluator = new PaperNodeEvaluator<>(
@@ -180,14 +188,14 @@ public class MarketPrototype {
                     searchNodeMetadataFactory,
                     totalRiskAllowed,
                     random,
-                    nodeSelector,
+                    nodeSelectorSupplier,
                     marketNodeEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory,
                     explorationConstantSupplier,
                     temperatureSupplier,
-                    strategiesProvider
-                );
+                    riskSupplier,
+                    strategiesProvider);
 
             PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> nnBasedPolicySupplier =
                 new PaperPolicySupplier<>(
@@ -195,7 +203,7 @@ public class MarketPrototype {
                     searchNodeMetadataFactory,
                     totalRiskAllowed,
                     random,
-                    nodeSelector,
+                    nodeSelectorSupplier,
                     marketNodeEvaluator,
                     paperTreeUpdater,
                     treeUpdateConditionFactory,

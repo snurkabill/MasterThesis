@@ -18,7 +18,9 @@ public enum HallwayInstance {
     BENCHMARK_12("examples/benchmark/benchmark_12.txt", 12),
     BENCHMARK_13("examples/benchmark/benchmark_13.txt", 18),
     BENCHMARK_14("examples/benchmark/benchmark_14.txt", 11),
-    BENCHMARK_15("examples/benchmark/benchmark_15.txt", 21);
+    BENCHMARK_15("examples/benchmark/benchmark_15.txt", 19),
+    BENCHMARK_16("examples/benchmark/benchmark_16.txt", 27),
+    BENCHMARK_17("examples/benchmark/benchmark_17.txt", 63);
 
 
 

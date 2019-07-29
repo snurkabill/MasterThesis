@@ -1,5 +1,7 @@
 package vahy.solutionExamples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
@@ -25,61 +27,72 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark07Solution {
+public class Benchmark17Solution {
+
+    private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
-//        //  EXAMPLE 1
+        //  EXAMPLE 1
         ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
 
+        //  EXAMPLE 2
+//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
+//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
+//        new Experiment().prepareAndRun(setup, random);
+
     }
+
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.4)
+            .noisyMoveProbability(0.1)
             .stepPenalty(1)
-            .trapProbability(1)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
+        int batchSize = 100;
+
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_07)
+            .hallwayInstance(HallwayInstance.BENCHMARK_17)
             //MCTS
-            .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(30))
+            .cpuctParameter(1)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(0)
-            .trainingEpochCount(0)
-            // REINFORCEMENT
+            .trainingBatchSize(64)
+            .trainingEpochCount(100)
+            .learningRate(0.1)
+            // REINFORCEMENTs
             .discountFactor(1)
-
-            .batchEpisodeCount(100)
-            .stageCount(1000)
+            .batchEpisodeCount(batchSize)
+            .stageCount(30000)
 
             .maximalStepCountBound(1000)
+
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-
-//            .approximatorType(ApproximatorType.HASHMAP)
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .learningRate(0.1)
-
-            .replayBufferSize(10000)
+            .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.0)
+            .evalEpisodeCount(1000)
+            .globalRiskAllowed(1.0)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) ;
-//                    return 0.05;
+                    var x = Math.exp(-callCount / 1000000.0);
+                    if(callCount % batchSize == 0) {
+                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
+//                    return 1.0;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -87,63 +100,24 @@ public class Benchmark07Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 20000.0) * 5;
-//                    return 1.0;
+                    double x = Math.exp(-callCount / 2000000.0) * 10;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
+//                    return 1.5;
                 }
             })
-            .riskSupplier(() -> 0.0)
-            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
-            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
-            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
-            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD_SOFT)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .buildExperimentSetup();
-        return new ImmutableTuple<>(gameConfig, experimentSetup);
-    }
-
-
-    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment2() {
-        GameConfig gameConfig = new ConfigBuilder()
-            .reward(100)
-            .noisyMoveProbability(0.4)
-            .stepPenalty(1)
-            .trapProbability(1)
-            .stateRepresentation(StateRepresentation.COMPACT)
-            .buildConfig();
-
-        ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
-            .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_07)
-            //MCTS
-            .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(0)
-            .trainingEpochCount(0)
-            // REINFORCEMENT
-            .discountFactor(1)
-            .batchEpisodeCount(100)
-            .stageCount(15)
-            .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.00)
-            .explorationConstantSupplier(() -> 0.0)
-            .temperatureSupplier(() -> 0.0)
+            .riskSupplier(() -> 1.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildExperimentSetup();
         return new ImmutableTuple<>(gameConfig, experimentSetup);
     }
-
 
 }

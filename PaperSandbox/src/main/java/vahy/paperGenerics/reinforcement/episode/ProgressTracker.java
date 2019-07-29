@@ -12,7 +12,7 @@ import vahy.vizualiation.DataSeriesCreator;
 import vahy.vizualiation.MyShittyFrameVisualization;
 import vahy.vizualiation.SeriesMetadata;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProgressTracker<
@@ -24,9 +24,9 @@ public class ProgressTracker<
 
     private static final Logger logger = LoggerFactory.getLogger(ProgressTracker.class.getName());
 
-    private final SeriesMetadata stepCountSeries = new SeriesMetadata("StepCount", new LinkedList<>());
-    private final SeriesMetadata totalRewardSeries = new SeriesMetadata("TotalReward", new LinkedList<>());
-    private final SeriesMetadata riskHitSeries = new SeriesMetadata("RiskHit", new LinkedList<>());
+    private final SeriesMetadata stepCountSeries = new SeriesMetadata("StepCount", new ArrayList<>());
+    private final SeriesMetadata totalRewardSeries = new SeriesMetadata("TotalReward", new ArrayList<>());
+    private final SeriesMetadata riskHitSeries = new SeriesMetadata("RiskHit", new ArrayList<>());
     private final MyShittyFrameVisualization avgStepCountVisualization = new MyShittyFrameVisualization("Avg Step Count", "SampledBatch", "Value");
     private final MyShittyFrameVisualization avgRewardVisualization = new MyShittyFrameVisualization("Avg Total Reward", "SampledBatch", "Value");
     private final MyShittyFrameVisualization avgRiskHitVisualization = new MyShittyFrameVisualization("Avg Risk Hit", "SampledBatch", "Value");

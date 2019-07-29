@@ -4,4 +4,5 @@ public enum StateRepresentation {
 
     FULL,
     COMPACT,
+    COMPACT_WITH_LOCAL
 }

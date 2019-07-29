@@ -59,6 +59,7 @@ public class RandomWalkExample {
                     return Math.exp(-callCount / 10000.0) * 4;
                 }
             },
+            () -> 0.0,
 //            () -> 0.1,
 //            () -> 2.0,
             TrainerAlgorithm.EVERY_VISIT_MC,
