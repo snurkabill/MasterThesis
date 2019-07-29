@@ -36,7 +36,7 @@ public abstract class AbstractGameSampler<
     private final int stepCountLimit;
 
     private final ExecutorService executorService;
-    private final ProgressTracker<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> progressTracker = new ProgressTracker<>();
+    private ProgressTracker<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> progressTracker;
 
     public AbstractGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                                PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
@@ -71,6 +71,9 @@ public abstract class AbstractGameSampler<
             }).collect(Collectors.toList());
 
             if(logger.isInfoEnabled()) {
+                if(progressTracker == null) {
+                     progressTracker = new ProgressTracker<>();
+                }
                 progressTracker.addData(paperEpisodeHistoryList);
             }
             return paperEpisodeHistoryList;
