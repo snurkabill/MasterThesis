@@ -24,9 +24,9 @@
         </encoder>
     </appender>
 
-    <logger name="vahy" level="warns"/>
+    <logger name="vahy" level="info"/>
 
-    <root level="warn">
+    <root level="info">
         <appender-ref ref="consoleAppender" />
     </root>
 

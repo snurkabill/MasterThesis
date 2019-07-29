@@ -35,7 +35,7 @@ public abstract class AbstractGameSampler<
     private final PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier;
     private final int stepCountLimit;
 
-    private final ExecutorService executorService;
+
     private ProgressTracker<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> progressTracker;
 
     public AbstractGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
@@ -44,13 +44,15 @@ public abstract class AbstractGameSampler<
         this.initialStateSupplier = initialStateSupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
         this.stepCountLimit = stepCountLimit;
-        var processingUnitCount = Runtime.getRuntime().availableProcessors() - 1;
-        logger.info("Initialized [{}] executors for", processingUnitCount);
-        this.executorService = Executors.newFixedThreadPool(processingUnitCount);
+
     }
 
     public List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> sampleEpisodes(int episodeBatchSize) {
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
+        var processingUnitCount = Runtime.getRuntime().availableProcessors() - 1;
+        logger.info("Initialized [{}] executors for sampling", processingUnitCount);
+        ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
+
         var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState();
@@ -76,6 +78,7 @@ public abstract class AbstractGameSampler<
                 }
                 progressTracker.addData(paperEpisodeHistoryList);
             }
+            executorService.shutdown();
             return paperEpisodeHistoryList;
         } catch (InterruptedException e) {
             throw new IllegalStateException("Parallel episodes were interrupted.", e);
