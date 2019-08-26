@@ -61,6 +61,7 @@ public abstract class AbstractTrainer<
         return new MutableDataSample(sampledProbabilities, aggregated, risk);
     }
 
+
     protected double[] createOutputVector(MutableDataSample dataSample) {
         double[] probabilities = dataSample.getProbabilities();
         double[] outputVector = new double[probabilities.length + PaperModel.POLICY_START_INDEX];

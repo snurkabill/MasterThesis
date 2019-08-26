@@ -9,10 +9,8 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
-import vahy.utils.StreamUtils;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.OptionalDouble;
 import java.util.SplittableRandom;
 import java.util.function.Function;
@@ -76,52 +74,46 @@ public class PaperNodeSelector<
     protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
         if(!node.isOpponentTurn()) {
             int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
-
-//            final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
-//            final double min = getExtremeElement(node, DoubleStream::min, "Minimum Does not exists");
-
-            double maxHelp = -Double.MAX_VALUE;
-            double minHelp = Double.MAX_VALUE;
-
+            double max = -Double.MAX_VALUE;
+            double min = Double.MAX_VALUE;
             var childNodeMap = node.getChildNodeMap();
             for (var entry : childNodeMap.values()) {
                 double value = entry.getSearchNodeMetadata().getExpectedReward().getValue() + entry.getSearchNodeMetadata().getGainedReward().getValue();
-                if(maxHelp < value) {
-                    maxHelp = value;
+                if(max < value) {
+                    max = value;
                 }
-                if(minHelp > value) {
-                    minHelp = value;
+                if(min > value) {
+                    min = value;
                 }
             }
 
-            double max = maxHelp;
-            double min = minHelp;
+            TAction[] possibleActions = node.getAllPossibleActions();
+            var searchNodeMap = node.getChildNodeMap();
 
-            return node
-                .getChildNodeStream()
-                .map(x -> {
-                    var metadata = x.getSearchNodeMetadata();
-                    TAction action = x.getAppliedAction();
-                    double uValue = calculateUValue(metadata.getPriorProbability(), metadata.getVisitCounter(), totalNodeVisitCount);
-                    double qValue = max == min
-                        ? 0.5
-                        : (((metadata.getExpectedReward().getValue() + metadata.getGainedReward().getValue()) - min) / (max - min));
-                    return new ImmutableTuple<>(action, qValue + uValue);
-                })
-                .collect(StreamUtils.toRandomizedMaxCollector(Comparator.comparing(ImmutableTuple::getSecond), random))
-                .getFirst();
+            int maxIndex = -1;
+            double maxValue = -Double.MAX_VALUE;
+            var indexList = new ArrayList<Integer>();
+
+            for (int i = 0; i < possibleActions.length; i++) {
+                var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
+                var quValue =
+                    calculateUValue(metadata.getPriorProbability(), metadata.getVisitCounter(), totalNodeVisitCount) +
+                        (max == min ? 0.5
+                            : (((metadata.getExpectedReward().getValue() + metadata.getGainedReward().getValue()) - min) / (max - min)));
+                if(quValue > maxValue) {
+                    maxIndex = i;
+                    maxValue = quValue;
+                } else if(quValue == maxValue) {
+                    if(indexList.isEmpty()) {
+                        indexList.add(maxIndex);
+                        indexList.add(i);
+                    } else {
+                        indexList.add(i);
+                    }
+                }
+            }
+            return indexList.isEmpty() ? possibleActions[maxIndex] : possibleActions[indexList.get(random.nextInt(indexList.size()))];
         } else {
-//
-//            Map<TAction, Integer> justTempMap = new HashMap<>();
-//            for (int i = 0; i < 100000; i++) {
-//                TAction sampledAction = sampleOpponentAction(node);
-//                if(justTempMap.containsKey(sampledAction)) {
-//                    justTempMap.put(sampledAction, justTempMap.get(sampledAction) + 1);
-//                } else {
-//                    justTempMap.put(sampledAction, 1);
-//                }
-//            }
-
             return sampleOpponentAction(node);
         }
     }

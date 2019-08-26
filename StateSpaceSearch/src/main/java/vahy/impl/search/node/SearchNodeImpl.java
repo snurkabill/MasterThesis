@@ -10,6 +10,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class SearchNodeImpl<
     TAction extends Action,
@@ -20,8 +21,8 @@ public class SearchNodeImpl<
     TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractSearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    public static long nodeInstanceId = 0;
-    private final long nodeId = nodeInstanceId;
+    public static AtomicLong nodeInstanceId = new AtomicLong(0);
+    private final long nodeId = nodeInstanceId.getAndIncrement();
     private final Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
     public SearchNodeImpl(
@@ -39,7 +40,7 @@ public class SearchNodeImpl<
         TAction appliedAction) {
         super(wrappedState, parent, appliedAction, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
-        nodeInstanceId++;
+
     }
 
     @Override

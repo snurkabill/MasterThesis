@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.RandomWalkExample;
 import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
 import vahy.environment.RandomWalkProbabilities;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class Experiment {
 
@@ -78,8 +80,7 @@ public class Experiment {
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     RandomWalkExample.class.getClassLoader().getResourceAsStream("tfModel/graph_randomWalk.pb").readAllBytes(),
-                    random,
-                    setup.getSecond().omitProbabilities())
+                    random)
                 )
                 {
                     TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
@@ -103,6 +104,9 @@ public class Experiment {
         var paperTreeUpdater = new PaperTreeUpdater<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>();
         var nodeSelector = new PaperNodeSelector<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState>(setup.getSecond().getCpuctParameter(), random);
 
+        Supplier<NodeSelector<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> nodeSelectorSupplier =
+            () -> new PaperNodeSelector<>(setup.getSecond().getCpuctParameter(), random);
+
         var nnbasedEvaluator = new PaperNodeEvaluator<>(
             new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
             approximator,
@@ -124,21 +128,21 @@ public class Experiment {
             searchNodeMetadataFactory,
             experimentSetup.getGlobalRiskAllowed(),
             random,
-            nodeSelector,
+            nodeSelectorSupplier,
             nnbasedEvaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
             experimentSetup.getTemperatureSupplier(),
-            strategiesProvider
-        );
+            experimentSetup.getRiskSupplier(),
+            strategiesProvider);
 
         var nnBasedPolicySupplier = new PaperPolicySupplier<>(
             clazz,
             searchNodeMetadataFactory,
             experimentSetup.getGlobalRiskAllowed(),
             random,
-            nodeSelector,
+            nodeSelectorSupplier,
             nnbasedEvaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),

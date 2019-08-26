@@ -18,6 +18,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
+import java.util.function.Supplier;
 
 public class PaperPolicySupplier<
     TAction extends Enum<TAction> & Action,
@@ -30,9 +31,9 @@ public class PaperPolicySupplier<
 
     private final Class<TAction> actionClass;
     private final SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
-    private final double totalRiskAllowed;
+    private final double totalRiskAllowedInference;
     private final SplittableRandom random;
-    private final NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
+    private final Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector;
     private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
@@ -40,15 +41,15 @@ public class PaperPolicySupplier<
 
     public PaperPolicySupplier(Class<TAction> actionClass,
                                SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
-                               double totalRiskAllowed,
+                               double totalRiskAllowedInference,
                                SplittableRandom random,
-                               NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                               Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
-        this.totalRiskAllowed = totalRiskAllowed;
+        this.totalRiskAllowedInference = totalRiskAllowedInference;
         this.random = random;
         this.nodeSelector = nodeSelector;
         this.nodeEvaluator = nodeEvaluator;
@@ -79,16 +80,16 @@ public class PaperPolicySupplier<
             new RiskAverseSearchTree<>(
                 actionClass,
                 node,
-                nodeSelector,
+                nodeSelector.get(),
                 treeUpdater,
                 nodeEvaluator,
                 random,
-                totalRiskAllowed,
+                totalRiskAllowedInference,
                 strategiesProvider),
             random);
     }
 
-    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature) {
+    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
         SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
             new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
         return new PaperPolicyImpl<>(
@@ -97,7 +98,7 @@ public class PaperPolicySupplier<
             new RiskAverseSearchTree<>(
                 actionClass,
                 node,
-                nodeSelector,
+                nodeSelector.get(),
                 treeUpdater,
                 nodeEvaluator,
                 random,

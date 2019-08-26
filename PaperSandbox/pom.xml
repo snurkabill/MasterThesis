@@ -18,7 +18,7 @@
     <properties>
         <dl4j.version>1.0.0-beta2</dl4j.version>
         <nd4j.version>1.0.0-beta2</nd4j.version>
-        <tf.version>1.11.0</tf.version>
+        <tf.version>1.14.0</tf.version>
         <jama.version>1.0.3</jama.version>
         <CLP.version>1.16.11</CLP.version>
     </properties>

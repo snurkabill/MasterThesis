@@ -352,7 +352,9 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
             case FULL:
                 return getFullDoubleVectorialObservation();
             case COMPACT:
-                return getCompactDOubleVectorialObservation();
+                return getCompactDoubleVectorialObservation();
+            case COMPACT_WITH_LOCAL:
+                return getCompactWithLocalDoubleVectorialObservation();
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(staticGamePart.getStateRepresentation());
         }
@@ -388,7 +390,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
         return new DoubleVector(vector);
     }
 
-    public DoubleVector getCompactDOubleVectorialObservation() {
+    public DoubleVector getCompactDoubleVectorialObservation() {
         // experimental shit
         double[] vector = new double[6 + this.staticGamePart.getTotalRewardsCount()];
 
@@ -422,6 +424,40 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleReward,
 
         return new DoubleVector(vector);
     }
+
+    public DoubleVector getCompactWithLocalDoubleVectorialObservation() {
+        DoubleVector compact = getCompactDoubleVectorialObservation();
+        double[][] trapProbabilities = staticGamePart.getTrapProbabilities();
+        var compactLength = compact.getObservedVector().length;
+
+        int localSize = 8;
+        double[] output = new double[compactLength + localSize];
+
+        System.arraycopy(compact.getObservedVector(), 0, output, 0, compactLength);
+
+        boolean[][] walls = staticGamePart.getWalls();
+
+
+        int counter = 0;
+        for (int x = this.agentXCoordination - 1; x <= this.agentXCoordination + 1; x++) {
+            for (int y = this.agentYCoordination - 1; y <= this.agentYCoordination + 1; y++) {
+
+                if(x != this.agentXCoordination || y != this.agentYCoordination) {
+                    output[compactLength + counter] = walls[x][y] ?
+                        WALL_LOCATION_REPRESENTATION
+                        : trapProbabilities[x][y] != 0.0 ?
+                        TRAP_LOCATION_REPRESENTATION
+                        : rewards[x][y];
+                    counter++;
+                }
+            }
+        }
+
+
+        return new DoubleVector(output);
+    }
+
+
 
     @Override
     public String readableStringRepresentation() {

@@ -108,8 +108,7 @@ public class TestingTF2 {
             1,
             1,
             TestingTF2.class.getClassLoader().getResourceAsStream("tfModel/graph_BENCHMARK_03.pb").readAllBytes(),
-            random,
-            false)
+            random)
         )
         {
             for (int i = 0; i < 10000; i++) {

@@ -18,7 +18,8 @@ public class DataSeriesCreator {
         for (SeriesMetadata seriesMetadata : seriesMetadataList) {
             XYSeries series = new XYSeries(seriesMetadata.getDataTitle());
             for (int i = 0; i < seriesMetadata.getData().size(); i++) {
-                series.add(seriesMetadata.getData().get(i).getFirst(), seriesMetadata.getData().get(i).getSecond());
+                var data = seriesMetadata.getData().get(i);
+                series.add(data.getFirst(), data.getSecond());
             }
 
             collectionOfSeries.addSeries(series);

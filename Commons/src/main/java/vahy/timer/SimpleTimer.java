@@ -37,6 +37,10 @@ public class SimpleTimer {
     }
 
     public double getTotalTimeInMillis() {
+        return totalTimeNano / 1_000_000.0;
+    }
+
+    public double getTotalTimeInMicros() {
         return totalTimeNano / 1_000.0;
     }
 

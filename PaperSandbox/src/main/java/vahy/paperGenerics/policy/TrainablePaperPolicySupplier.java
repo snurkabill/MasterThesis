@@ -31,21 +31,24 @@ public class TrainablePaperPolicySupplier<
 
     private final Supplier<Double> explorationConstantSupplier;
     private final Supplier<Double> temperatureSupplier;
+    private final Supplier<Double> riskSupplier;
 
     public TrainablePaperPolicySupplier(Class<TAction> actionClass,
                                         SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                         double totalRiskAllowed,
                                         SplittableRandom random,
-                                        NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                                        Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
                                         TrainableNodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                         TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
                                         Supplier<Double> explorationConstantSupplier,
                                         Supplier<Double> temperatureSupplier,
+                                        Supplier<Double> riskSupplier,
                                         StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
         super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory, strategiesProvider);
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
+        this.riskSupplier = riskSupplier;
     }
 
     public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
@@ -55,8 +58,9 @@ public class TrainablePaperPolicySupplier<
     public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
         double explorationConstant = explorationConstantSupplier.get();
         double temperature = temperatureSupplier.get();
-        logger.info("Initialized policy with exploration. Exploration constant: [{}], Temperature: [{}]", explorationConstant, temperature);
-        return createPolicy(initialState, explorationConstant, temperature);
+        double risk = riskSupplier.get();
+        logger.debug("Initialized policy with exploration. Exploration constant: [{}], Temperature: [{}], Risk: [{}]", explorationConstant, temperature);
+        return createPolicy(initialState, explorationConstant, temperature, risk);
     }
 
 }

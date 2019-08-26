@@ -17,6 +17,7 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
     private final String yAxisLabel;
     private final int width;
     private final int heigth;
+    private final ChartPanel chartPanel = new ChartPanel(null);
 
     public MyShittyFrameVisualization(String title, String xAxisLabel, String yAxisLabel) {
         this(title, xAxisLabel, yAxisLabel, 560, 370);
@@ -43,7 +44,8 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
 
     public void draw(XYDataset dataset) {
         final JFreeChart chart = createChart(dataset);
-        final ChartPanel chartPanel = new ChartPanel(chart);
+//        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setChart(chart);
         chartPanel.setPreferredSize(new java.awt.Dimension(width, heigth));
         chartPanel.setMouseZoomable(true, false);
         setContentPane(chartPanel);
