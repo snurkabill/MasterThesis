@@ -16,20 +16,16 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
     private static final Logger logger = LoggerFactory.getLogger(RandomWalkState.class.getName());
 
     private final int level;
-    private final int maximumSoFar;
-    private final int stepCount;
     private final boolean isAgentTurn;
     private final RandomWalkAction previousAction;
     private final RandomWalkSetup randomWalkSetup;
 
     public RandomWalkState(RandomWalkSetup randomWalkSetup) {
-        this(0, 0, 0, true, RandomWalkAction.DOWN, randomWalkSetup);
+        this(0, true, RandomWalkAction.DOWN, randomWalkSetup);
     }
 
-    protected RandomWalkState(int level, int maximumSoFar, int stepCount, boolean isAgentTurn, RandomWalkAction previousAction, RandomWalkSetup randomWalkSetup) {
+    protected RandomWalkState(int level, boolean isAgentTurn, RandomWalkAction previousAction, RandomWalkSetup randomWalkSetup) {
         this.level = level;
-        this.maximumSoFar = maximumSoFar;
-        this.stepCount = stepCount;
         this.isAgentTurn = isAgentTurn;
         this.previousAction = previousAction;
         this.randomWalkSetup = randomWalkSetup;
@@ -57,18 +53,15 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
     @Override
     public StateRewardReturn<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState> applyAction(RandomWalkAction actionType) {
         int newLevel = resolveNewLevel(actionType);
-        int newMax = newLevel > maximumSoFar ? newLevel : maximumSoFar;
-        int newStepCount = actionType.isPlayerAction() ? stepCount + 1 : stepCount;
         boolean isAgentTurnNext = !isAgentTurn;
         var nextState = new RandomWalkState(
             newLevel,
-            newMax,
-            newStepCount,
             isAgentTurnNext,
             actionType,
             randomWalkSetup);
-        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
+//        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
 //        DoubleReward reward = new DoubleReward((double) (newLevel - level));
+        DoubleReward reward = new  TOTO JE KURVA POTREBA DODELAT
         return new ImmutableStateRewardReturnTuple<>(nextState, reward);
     }
 
@@ -79,7 +72,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
 
     @Override
     public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {maximumSoFar - level, stepCount});
+        return new DoubleVector(new double[] {level});
     }
 
     @Override
@@ -107,7 +100,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
     @Override
     public String readableStringRepresentation() {
         StringBuilder sb = new StringBuilder();
-        return sb.append("Actual level: ").append(level).append(" Max so far: ").append(maximumSoFar).toString();
+        return sb.append("Actual level: ").append(level).toString();
     }
 
     @Override
@@ -117,12 +110,12 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
 
     @Override
     public boolean isFinalState() {
-        return isRiskHit() || stepCount >= randomWalkSetup.getStepBound();
+        return isRiskHit() || level >= randomWalkSetup.getGoalLevel();
     }
 
     @Override
     public boolean isRiskHit() {
-        return maximumSoFar - level > randomWalkSetup.getLowerRiskBound();
+        return level < 0.0;
     }
 
     @Override
@@ -133,8 +126,6 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
         RandomWalkState that = (RandomWalkState) o;
 
         if (level != that.level) return false;
-        if (maximumSoFar != that.maximumSoFar) return false;
-        if (stepCount != that.stepCount) return false;
         if (isAgentTurn != that.isAgentTurn) return false;
         return previousAction == that.previousAction;
     }
@@ -142,8 +133,6 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
     @Override
     public int hashCode() {
         int result = level;
-        result = 31 * result + maximumSoFar;
-        result = 31 * result + stepCount;
         result = 31 * result + (isAgentTurn ? 1 : 0);
         result = 31 * result + previousAction.hashCode();
         return result;

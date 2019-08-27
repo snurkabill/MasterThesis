@@ -2,8 +2,9 @@ package vahy.environment;
 
 public class RandomWalkSetup {
 
-    private final int stepBound;
+    private final int goalLevel;
     private final int lowerRiskBound;
+
     private final int upSafeShift;
     private final int downSafeShift;
 
@@ -13,7 +14,7 @@ public class RandomWalkSetup {
     private final double upAfterSafeProbability;
     private final double upAfterUnsafeProbability;
 
-    public RandomWalkSetup(int stepBound,
+    public RandomWalkSetup(int goalLevel,
                            int lowerRiskBound,
                            int upSafeShift,
                            int downSafeShift,
@@ -21,7 +22,7 @@ public class RandomWalkSetup {
                            int downUnsafeShift,
                            double upAfterSafeProbability,
                            double upAfterUnsafeProbability) {
-        this.stepBound = stepBound;
+        this.goalLevel = goalLevel;
         this.lowerRiskBound = lowerRiskBound;
         this.upSafeShift = upSafeShift;
         this.downSafeShift = downSafeShift;
@@ -31,8 +32,8 @@ public class RandomWalkSetup {
         this.upAfterUnsafeProbability = upAfterUnsafeProbability;
     }
 
-    public int getStepBound() {
-        return stepBound;
+    public int getGoalLevel() {
+        return goalLevel;
     }
 
     public int getLowerRiskBound() {
