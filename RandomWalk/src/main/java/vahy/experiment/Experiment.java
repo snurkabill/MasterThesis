@@ -80,7 +80,7 @@ public class Experiment {
                     PaperModel.POLICY_START_INDEX + RandomWalkAction.playerActions.length,
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
-                    RandomWalkExample.class.getClassLoader().getResourceAsStream("tfModel/graph_randomWalk.pb").readAllBytes(),
+                    RandomWalkExample.class.getClassLoader().getResourceAsStream("tfModel/graph_RANDOM_WALK_LINEAR.pb").readAllBytes(),
                     random)
                 )
                 {

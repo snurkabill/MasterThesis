@@ -54,7 +54,7 @@ public class IntegrationTest {
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment_01() {
-        var randomWalkSetup = new RandomWalkSetup(100, 50, 1, 1, 10, 10, 0.9, 0.7);
+        var randomWalkSetup = new RandomWalkSetup(1000, 1, 1, 10, 10, 0.9, 0.7);
         ExperimentSetup experimentSetup = new ExperimentSetup(
             0,
             3,

@@ -31,7 +31,7 @@ public class RandomWalkExample {
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
-        var randomWalkSetup = new RandomWalkSetup(50, 50, 1, 1, 10, 10, 0.9, 0.7);
+        var randomWalkSetup = new RandomWalkSetup(100, 1, 1, 5, 10, 0.9, 0.8);
         ExperimentSetup experimentSetup = new ExperimentSetup(
             0,
             2,
@@ -41,7 +41,7 @@ public class RandomWalkExample {
             100,
             20000,
             10000,
-            30,
+            1000,
             new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -65,8 +65,8 @@ public class RandomWalkExample {
             TrainerAlgorithm.EVERY_VISIT_MC,
 //            ApproximatorType.NN,
             ApproximatorType.HASHMAP_LR,
-            128,
-            100,
+            1,
+            1,
             1000,
             0.0,
             0.01,
@@ -74,7 +74,7 @@ public class RandomWalkExample {
             InferenceNonExistingFlowStrategy.MAX_UCB_VISIT,
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT,
-            FlowOptimizerType.HARD_HARD,
+            FlowOptimizerType.HARD_HARD_SOFT,
             SubTreeRiskCalculatorType.FLOW_SUM,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             false);

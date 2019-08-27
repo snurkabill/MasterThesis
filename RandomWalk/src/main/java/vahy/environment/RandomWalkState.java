@@ -60,8 +60,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
             actionType,
             randomWalkSetup);
 //        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
-//        DoubleReward reward = new DoubleReward((double) (newLevel - level));
-        DoubleReward reward = new  TOTO JE KURVA POTREBA DODELAT
+        DoubleReward reward = new DoubleReward((double) (newLevel - level));
         return new ImmutableStateRewardReturnTuple<>(nextState, reward);
     }
 
