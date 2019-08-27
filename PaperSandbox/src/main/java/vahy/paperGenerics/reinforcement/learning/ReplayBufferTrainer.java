@@ -17,6 +17,7 @@ import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,8 +45,9 @@ public class ReplayBufferTrainer<
                                RewardAggregator<DoubleReward> rewardAggregator,
                                int stepCountLimit,
                                LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer,
-                               int bufferSize) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, stepCountLimit);
+                               int bufferSize,
+                               ProgressTrackerSettings progressTrackerSettings) {
+        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit);
         this.bufferSize = bufferSize;
         this.buffer = buffer;
     }

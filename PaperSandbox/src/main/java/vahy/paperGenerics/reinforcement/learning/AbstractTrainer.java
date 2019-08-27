@@ -18,6 +18,7 @@ import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.util.List;
 
@@ -40,11 +41,12 @@ public abstract class AbstractTrainer<
                            TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                            double discountFactor,
                            RewardAggregator<DoubleReward> rewardAggregator,
+                           ProgressTrackerSettings progressTrackerSettings,
                            int stepCountLimit) {
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
         this.paperNodeEvaluator = paperNodeEvaluator;
-        this.gameSampler = new PaperRolloutGameSampler<>(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, stepCountLimit);
+        this.gameSampler = new PaperRolloutGameSampler<>(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, progressTrackerSettings, stepCountLimit);
     }
 
     public PaperRolloutGameSampler<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {

@@ -45,6 +45,7 @@ import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -209,6 +210,8 @@ public class MarketPrototype {
                     treeUpdateConditionFactory,
                     strategiesProvider);
 
+            var progressTrackerSettings = new ProgressTrackerSettings(true, true, false, false);
+
             AbstractTrainer trainer = getAbstractTrainer(
                 TrainerAlgorithm.EVERY_VISIT_MC,
                 initialMarketStateSupplier,
@@ -217,7 +220,8 @@ public class MarketPrototype {
                 paperTrainablePolicySupplier,
                 replayBufferSize,
                 stepCountLimit,
-                marketDataProvider);
+                marketDataProvider,
+                progressTrackerSettings);
 
 
             long trainingStart = System.currentTimeMillis();
@@ -235,7 +239,8 @@ public class MarketPrototype {
             PaperBenchmark<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> benchmark = new PaperBenchmark<>(
                 Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
                 new RealDataMarketPolicySupplier(marketDataProvider),
-                initialMarketStateSupplier
+                initialMarketStateSupplier,
+                progressTrackerSettings
             );
 
             long start = System.currentTimeMillis();
@@ -270,7 +275,8 @@ public class MarketPrototype {
         TrainablePaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> trainablePaperPolicySupplier,
         int replayBufferSize,
         int stepCountLimit,
-        MarketDataProvider marketDataProvider)
+        MarketDataProvider marketDataProvider,
+        ProgressTrackerSettings progressTrackerSettings)
     {
         RealDataMarketPolicySupplier environmentSupplier = new RealDataMarketPolicySupplier(marketDataProvider);
 
@@ -285,7 +291,8 @@ public class MarketPrototype {
                     new DoubleScalarRewardAggregator(),
                     stepCountLimit,
                     new LinkedList<>(),
-                    replayBufferSize);
+                    replayBufferSize,
+                    progressTrackerSettings);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
                     initialMarketStateSupplier,
@@ -294,6 +301,7 @@ public class MarketPrototype {
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
+                    progressTrackerSettings,
                     stepCountLimit);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
@@ -303,6 +311,7 @@ public class MarketPrototype {
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
+                    progressTrackerSettings,
                     stepCountLimit);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);

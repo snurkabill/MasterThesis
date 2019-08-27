@@ -12,6 +12,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeGameSampler;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,13 +30,16 @@ public class PaperBenchmark<
     private final List<PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> benchmarkingPolicyList;
     private final PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> environmentPolicySupplier;
     private final InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
+    private final ProgressTrackerSettings progressTrackerSettings;
 
     public PaperBenchmark(List<PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> benchmarkingPolicyList,
                           PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> environmentPolicySupplier,
-                          InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier) {
+                          InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                          ProgressTrackerSettings progressTrackerSettings) {
         this.benchmarkingPolicyList = benchmarkingPolicyList;
         this.environmentPolicySupplier = environmentPolicySupplier;
         this.initialStateSupplier = initialStateSupplier;
+        this.progressTrackerSettings = progressTrackerSettings;
     }
 
     public List<PaperPolicyResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> runBenchmark(int episodeCount,
@@ -48,6 +52,7 @@ public class PaperBenchmark<
                 initialStateSupplier,
                 benchmarkingPolicy.getPolicySupplier(),
                 environmentPolicySupplier,
+                progressTrackerSettings,
                 stepCountLimit);
             long start = System.nanoTime();
             List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> resultList = gameSampler.sampleEpisodes(episodeCount);

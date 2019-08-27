@@ -72,7 +72,7 @@ public class Benchmark10Solution {
             .learningRate(0.01)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.9)
+            .globalRiskAllowed(0.11)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -91,7 +91,7 @@ public class Benchmark10Solution {
 //                    return 1.5;
                 }
             })
-            .riskSupplier(() -> 0.9)
+            .riskSupplier(() -> 0.11)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
