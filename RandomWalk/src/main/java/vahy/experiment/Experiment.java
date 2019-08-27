@@ -38,6 +38,7 @@ import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -148,6 +149,8 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
 
+        var progressTrackerSettings = new ProgressTrackerSettings(true, true, false, false);
+
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
             random,
@@ -156,10 +159,11 @@ public class Experiment {
             nnbasedEvaluator,
             paperTrainablePolicySupplier,
             experimentSetup.getReplayBufferSize(),
-            experimentSetup.getMaximalStepCountBound());
+            experimentSetup.getMaximalStepCountBound(),
+            progressTrackerSettings);
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs);
+        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, progressTrackerSettings, trainingTimeInMs);
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -185,13 +189,16 @@ public class Experiment {
         ExperimentSetup experimentSetup,
         PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nnbasedEvaluator,
         PaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nnBasedPolicySupplier,
+        ProgressTrackerSettings progressTrackerSettings,
         long trainingTimeInMs) {
         logger.info("PaperPolicy test starts");
         String nnBasedPolicyName = "NNBased";
+
         var benchmark = new PaperBenchmark<>(
             Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
             new RandomWalkOpponentSupplier(random),
-            randomWalkInitialInstanceSupplier
+            randomWalkInitialInstanceSupplier,
+            progressTrackerSettings
         );
         long start = System.currentTimeMillis();
         var policyResultList = benchmark.runBenchmark(experimentSetup.getEvalEpisodeCount(), experimentSetup.getMaximalStepCountBound());
@@ -225,7 +232,8 @@ public class Experiment {
                        PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nodeEvaluator,
                        TrainablePaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> trainablePaperPolicySupplier,
                        int replayBufferSize,
-                       int stepCountLimit) {
+                       int stepCountLimit,
+                       ProgressTrackerSettings progressTrackerSettings) {
         switch(trainerAlgorithm) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
@@ -237,7 +245,8 @@ public class Experiment {
                     new DoubleScalarRewardAggregator(),
                     stepCountLimit,
                     new LinkedList<>(),
-                    replayBufferSize);
+                    replayBufferSize,
+                    progressTrackerSettings);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
                     randomWalkInitialInstanceSupplier,
@@ -246,6 +255,7 @@ public class Experiment {
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
+                    progressTrackerSettings,
                     stepCountLimit);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
@@ -255,6 +265,7 @@ public class Experiment {
                     nodeEvaluator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
+                    progressTrackerSettings,
                     stepCountLimit);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);

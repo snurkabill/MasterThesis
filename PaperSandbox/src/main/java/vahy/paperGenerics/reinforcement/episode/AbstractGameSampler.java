@@ -11,6 +11,8 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
+import vahy.vizualiation.ProgressTracker;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,16 +37,46 @@ public abstract class AbstractGameSampler<
     private final PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier;
     private final int stepCountLimit;
 
-
-    private ProgressTracker<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> progressTracker;
+    private final ProgressTracker progressTracker;
+    private final List<FromEpisodesDataPointGenerator<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> dataPointGeneratorList = new ArrayList<>();
+    private int batchCounter = 0;
 
     public AbstractGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                                PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                               ProgressTrackerSettings progressTrackerSettings,
                                int stepCountLimit) {
         this.initialStateSupplier = initialStateSupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
+        this.progressTracker = new ProgressTracker(progressTrackerSettings);
         this.stepCountLimit = stepCountLimit;
+        createDataGenerators();
+    }
 
+    private void registerDataGenerators() {
+        for (FromEpisodesDataPointGenerator fromEpisodesDataPointGenerator : dataPointGeneratorList) {
+            progressTracker.registerDataCollector(fromEpisodesDataPointGenerator);
+        }
+    }
+
+    private void createDataGenerators() {
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>("StepCount",
+            episodeResults -> episodeResults.stream()
+            .mapToInt(x -> x.getEpisodeHistoryList().size())
+            .average().orElseThrow(() -> new IllegalArgumentException("Average does not exist"))));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>("TotalReward",
+            episodeResults -> episodeResults.stream()
+                .mapToDouble(x -> x.getEpisodeHistoryList()
+                    .stream()
+                    .mapToDouble(y -> y.getFirst().getReward().getValue()) // TODO: reward aggregator
+                    .sum())
+                .average().orElseThrow(() -> new IllegalArgumentException("Average does not exist"))));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>("RiskHit",
+            episodeResults -> episodeResults.stream()
+                .mapToDouble(x -> x.isRiskHit() ? 1.0 : 0.0)
+                .average().orElseThrow(() -> new IllegalStateException("Avg does not exist"))));
+        registerDataGenerators();
     }
 
     public List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> sampleEpisodes(int episodeBatchSize) {
@@ -72,12 +104,11 @@ public abstract class AbstractGameSampler<
                 }
             }).collect(Collectors.toList());
 
-            if(logger.isDebugEnabled()) {
-                if(progressTracker == null) {
-                     progressTracker = new ProgressTracker<>();
-                }
-                progressTracker.addData(paperEpisodeHistoryList);
+            for (FromEpisodesDataPointGenerator<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> fromEpisodesDataPointGenerator : dataPointGeneratorList) {
+                fromEpisodesDataPointGenerator.addNewValue(paperEpisodeHistoryList, batchCounter);
             }
+            progressTracker.onNextLog();
+            batchCounter++;
             executorService.shutdown();
             return paperEpisodeHistoryList;
         } catch (InterruptedException e) {

@@ -16,6 +16,7 @@ import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.utils.ImmutableTuple;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,8 +40,9 @@ public abstract class AbstractMonteCarloTrainer<
                                      TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                                      double discountFactor,
                                      RewardAggregator<DoubleReward> rewardAggregator,
+                                     ProgressTrackerSettings progressTrackerSettings,
                                      int stepCountLimit) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, stepCountLimit);
+        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit);
     }
 
     @Override

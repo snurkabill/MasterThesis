@@ -10,6 +10,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
+import vahy.vizualiation.ProgressTrackerSettings;
 
 public class PaperRolloutGameSampler<
     TAction extends Enum<TAction> & Action,
@@ -25,8 +26,9 @@ public class PaperRolloutGameSampler<
     public PaperRolloutGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                                    TrainablePaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
                                    PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                                   ProgressTrackerSettings progressTrackerSettings,
                                    int stepCountLimit) {
-        super(initialStateSupplier, opponentPolicySupplier, stepCountLimit);
+        super(initialStateSupplier, opponentPolicySupplier, progressTrackerSettings, stepCountLimit);
         this.playerPolicySupplier = playerPolicySupplier;
 
     }
