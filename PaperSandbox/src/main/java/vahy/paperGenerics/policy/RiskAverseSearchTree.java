@@ -106,16 +106,20 @@ public class RiskAverseSearchTree<
             this.playingDistribution = createActionWithDistribution(state, policyMode, temperature);
         return new ImmutableTuple<>(playingDistribution.getExpectedPlayerAction(), playingDistribution.getPlayerDistribution());
         } catch(Exception e) {
-            dumpTree();
+            dumpTreeWithFlow();
             throw e;
         }
     }
 
-    private void dumpTree() {
+    private void dumpTreeWithFlow() {
         if(this.latestTreeWithPlayerOnTurn != null) {
             this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
         }
         this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
+    }
+
+    private void dumpTree() {
+        this.printTreeToFile(this.getRoot(), "TreeDump_FULL", 1000);
     }
 
     public boolean isFlowOptimized() {
@@ -149,7 +153,12 @@ public class RiskAverseSearchTree<
     @Override
     public boolean updateTree() {
         isFlowOptimized = false;
-        return super.updateTree();
+        try {
+            return super.updateTree();
+        } catch(Exception e) {
+            dumpTree();
+            throw e;
+        }
     }
 
     private double roundRiskIfBelowZero(double risk, String riskName) {
@@ -239,7 +248,7 @@ public class RiskAverseSearchTree<
             return innerApplyAction(action);
 
         } catch(Exception e) {
-            dumpTree();
+            dumpTreeWithFlow();
             throw e;
         }
     }
