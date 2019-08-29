@@ -63,21 +63,21 @@ public class PaperNodeEvaluator<
     }
 
     protected void innerEvaluation(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-            nodesExpandedCount++;
-            double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
-            node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
-            node.getSearchNodeMetadata().setExpectedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
-            if(!node.isFinalNode()) {
-                node.getSearchNodeMetadata().setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
+        nodesExpandedCount++;
+        double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
+        node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
+        node.getSearchNodeMetadata().setExpectedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
+        if(!node.isFinalNode()) {
+            node.getSearchNodeMetadata().setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
+        }
+        Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
+        if(node.getWrappedState().isPlayerTurn()) {
+            for (int i = 0; i < allPlayerActions.length; i++) {
+                childPriorProbabilities.put(allPlayerActions[i], prediction[i + PaperModel.POLICY_START_INDEX]);
             }
-            Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
-            if(node.getWrappedState().isPlayerTurn()) {
-                for (int i = 0; i < allPlayerActions.length; i++) {
-                    childPriorProbabilities.put(allPlayerActions[i], prediction[i + PaperModel.POLICY_START_INDEX]);
-                }
-            } else {
-                evaluateOpponentNode(node, childPriorProbabilities);
-            }
+        } else {
+            evaluateOpponentNode(node, childPriorProbabilities);
+        }
     }
 
     protected void evaluateOpponentNode(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities) {
