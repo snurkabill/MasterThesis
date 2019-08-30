@@ -1,4 +1,4 @@
-package vahy.solutionExamples;
+package vahy.basicExamples;
 
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.data.HallwayInstance;
@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark05Solution {
+public class TestingRAMCP {
 
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
@@ -52,7 +52,7 @@ public class Benchmark05Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_05)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1000))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(1)
@@ -65,15 +65,15 @@ public class Benchmark05Solution {
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.EMPTY)
-            .evaluatorType(EvaluatorType.RAMCP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .evaluatorType(EvaluatorType.MONTE_CARLO)
             .learningRate(0.1)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.0)
-            .riskSupplier(() -> 0.0)
+            .globalRiskAllowed(0.10)
+            .riskSupplier(() -> 0.10)
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {

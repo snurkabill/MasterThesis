@@ -28,13 +28,13 @@ public class PaperNodeEvaluator<
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
 
-    private final SearchNodeFactory<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
-    private final TrainableApproximator<DoubleVector> trainableApproximator;
-    private final Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator;
-    private final TAction[] allPlayerActions;
-    private final TAction[] allOpponentActions;
+    protected final SearchNodeFactory<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
+    protected final TrainableApproximator<DoubleVector> trainableApproximator;
+    protected final Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator;
+    protected final TAction[] allPlayerActions;
+    protected final TAction[] allOpponentActions;
 
-    private int nodesExpandedCount = 0;
+    protected int nodesExpandedCount = 0;
 
     public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                               TrainableApproximator<DoubleVector> trainableApproximator,
@@ -62,7 +62,7 @@ public class PaperNodeEvaluator<
         }
     }
 
-    private void innerEvaluation(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected void innerEvaluation(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         nodesExpandedCount++;
         double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
         node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(prediction[PaperModel.Q_VALUE_INDEX]));
@@ -73,13 +73,17 @@ public class PaperNodeEvaluator<
         Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
         if(node.getWrappedState().isPlayerTurn()) {
             for (int i = 0; i < allPlayerActions.length; i++) {
-                childPriorProbabilities.put(allPlayerActions[i], (prediction[i + PaperModel.POLICY_START_INDEX]));
+                childPriorProbabilities.put(allPlayerActions[i], prediction[i + PaperModel.POLICY_START_INDEX]);
             }
         } else {
-            ImmutableTuple<List<TAction>, List<Double>> probabilities = opponentApproximator.apply(node.getWrappedState().getOpponentObservation());
-            for (int i = 0; i < probabilities.getFirst().size(); i++) {
-                childPriorProbabilities.put(probabilities.getFirst().get(i), probabilities.getSecond().get(i));
-            }
+            evaluateOpponentNode(node, childPriorProbabilities);
+        }
+    }
+
+    protected void evaluateOpponentNode(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities) {
+        ImmutableTuple<List<TAction>, List<Double>> probabilities = opponentApproximator.apply(node.getWrappedState().getOpponentObservation());
+        for (int i = 0; i < probabilities.getFirst().size(); i++) {
+            childPriorProbabilities.put(probabilities.getFirst().get(i), probabilities.getSecond().get(i));
         }
     }
 

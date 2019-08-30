@@ -26,7 +26,6 @@ import vahy.utils.ImmutableTuple;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -146,8 +145,16 @@ public class SearchTreeImpl<
 
     @Override
     public String toString() {
-        LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue = new LinkedList<>();
-        queue.addFirst(this.getRoot());
+        return dumpTreeToString(Integer.MAX_VALUE);
+    }
+
+    public String toStringWithBoundedDepth(int depth) {
+        return dumpTreeToString(depth);
+    }
+
+    private String dumpTreeToString(int depth) {
+        LinkedList<ImmutableTuple<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>> queue = new LinkedList<>();
+        queue.addFirst(new ImmutableTuple<>(this.getRoot(), 0));
 
         StringBuilder string = new StringBuilder();
         String start = "digraph G {";
@@ -155,12 +162,14 @@ public class SearchTreeImpl<
 
         string.append(start);
         while(!queue.isEmpty()) {
-            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
-            for (Map.Entry<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
-                SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = entry.getValue();
-                queue.addLast(child);
+            var node = queue.poll();
+            for (var entry : node.getFirst().getChildNodeMap().entrySet()) {
+                var child = entry.getValue();
+                if(node.getSecond() < depth) {
+                    queue.addLast(new ImmutableTuple<>(child, node.getSecond() + 1));
+                }
 
-                string.append("\"" + node.toString() + "\"");
+                string.append("\"" + node.getFirst().toString() + "\"");
                 string.append(" -> ");
                 string.append("\"" + child.toString() + "\"");
                 string.append(" ");

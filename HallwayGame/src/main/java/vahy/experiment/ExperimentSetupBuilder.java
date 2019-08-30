@@ -38,6 +38,7 @@ public class ExperimentSetupBuilder {
 
     private TrainerAlgorithm trainerAlgorithm;
     private ApproximatorType approximatorType;
+    private EvaluatorType evaluatorType;
 
     // NN
     private int trainingBatchSize;
@@ -123,6 +124,10 @@ public class ExperimentSetupBuilder {
 
     public ExperimentSetupBuilder approximatorType(ApproximatorType approximatorType) {
         this.approximatorType = approximatorType; return this;
+    }
+
+    public ExperimentSetupBuilder evaluatorType(EvaluatorType evaluatorType) {
+        this.evaluatorType = evaluatorType; return this;
     }
 
     public ExperimentSetupBuilder trainingBatchSize(int trainingBatchSize) {
@@ -212,6 +217,7 @@ public class ExperimentSetupBuilder {
             riskSupplier,
             trainerAlgorithm,
             approximatorType,
+            evaluatorType,
             trainingBatchSize,
             trainingEpochCount,
             learningRate,
