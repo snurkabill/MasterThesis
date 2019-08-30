@@ -5,6 +5,7 @@ import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
@@ -51,7 +52,7 @@ public class Benchmark03Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_03)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
@@ -59,13 +60,23 @@ public class Benchmark03Solution {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(10)
-            .stageCount(30)
+
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
+
+
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .stageCount(0)
+            .evaluatorType(EvaluatorType.RAMCP)
+            .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
+
+
+
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(10000)
-            .globalRiskAllowed(0.25)
+            .evalEpisodeCount(1000)
+
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
@@ -78,7 +89,7 @@ public class Benchmark03Solution {
                     return 2.0;
                 }
             })
-            .riskSupplier(() -> 0.25)
+
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)

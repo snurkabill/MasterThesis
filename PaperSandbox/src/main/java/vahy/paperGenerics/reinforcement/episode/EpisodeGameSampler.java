@@ -26,8 +26,9 @@ public class EpisodeGameSampler<
                               PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
                               PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
                               ProgressTrackerSettings progressTrackerSettings,
-                              int stepCountLimit) {
-        super(initialStateSupplier, opponentPolicySupplier, progressTrackerSettings, stepCountLimit);
+                              int stepCountLimit,
+                              int processingUnitCount) {
+        super(initialStateSupplier, opponentPolicySupplier, progressTrackerSettings, stepCountLimit, processingUnitCount);
         this.playerPolicySupplier = playerPolicySupplier;
     }
 

@@ -53,7 +53,8 @@ public class PaperBenchmark<
                 benchmarkingPolicy.getPolicySupplier(),
                 environmentPolicySupplier,
                 progressTrackerSettings,
-                stepCountLimit);
+                stepCountLimit,
+                1);
             long start = System.nanoTime();
             List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> resultList = gameSampler.sampleEpisodes(episodeCount);
             long end = System.nanoTime();

@@ -1,10 +1,13 @@
 package vahy.solutionExamples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
@@ -27,6 +30,8 @@ import java.util.function.Supplier;
 
 public class Benchmark01Solution {
 
+    private static Logger logger = LoggerFactory.getLogger(Benchmark01Solution.class.getName());
+
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
@@ -45,30 +50,48 @@ public class Benchmark01Solution {
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
+        int batchSize = 100;
+
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_01)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             .batchEpisodeCount(100)
             .stageCount(100)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .learningRate(0.1)
+            .evaluatorType(EvaluatorType.RALF)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
             .globalRiskAllowed(0.0)
             .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 0.2;
+                    callCount++;
+                    var x = Math.exp(-callCount / 10000.0) / 2;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
+//                    return 1.0;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 2.0;
+                    callCount++;
+                    double x = Math.exp(-callCount / 20000.0) * 10;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
+//                    return 1.5;
                 }
             })
             .riskSupplier(() -> 0.0)

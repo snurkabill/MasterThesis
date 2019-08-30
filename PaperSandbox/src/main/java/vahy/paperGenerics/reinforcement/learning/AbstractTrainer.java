@@ -46,7 +46,13 @@ public abstract class AbstractTrainer<
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
         this.paperNodeEvaluator = paperNodeEvaluator;
-        this.gameSampler = new PaperRolloutGameSampler<>(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, progressTrackerSettings, stepCountLimit);
+        this.gameSampler = new PaperRolloutGameSampler<>(
+            initialStateSupplier,
+            paperTrainablePolicySupplier,
+            opponentPolicySupplier,
+            progressTrackerSettings,
+            stepCountLimit,
+            Runtime.getRuntime().availableProcessors() - 1);
     }
 
     public PaperRolloutGameSampler<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {

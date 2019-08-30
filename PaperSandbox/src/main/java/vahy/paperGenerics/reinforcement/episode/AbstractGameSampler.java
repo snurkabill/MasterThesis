@@ -40,15 +40,18 @@ public abstract class AbstractGameSampler<
     private final ProgressTracker progressTracker;
     private final List<FromEpisodesDataPointGenerator<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> dataPointGeneratorList = new ArrayList<>();
     private int batchCounter = 0;
+    private final int processingUnitCount;
 
     public AbstractGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                                PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
                                ProgressTrackerSettings progressTrackerSettings,
-                               int stepCountLimit) {
+                               int stepCountLimit,
+                               int processingUnitCount) {
         this.initialStateSupplier = initialStateSupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
         this.progressTracker = new ProgressTracker(progressTrackerSettings);
         this.stepCountLimit = stepCountLimit;
+        this.processingUnitCount = processingUnitCount;
         createDataGenerators();
     }
 
@@ -81,7 +84,7 @@ public abstract class AbstractGameSampler<
 
     public List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> sampleEpisodes(int episodeBatchSize) {
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
-        var processingUnitCount = Runtime.getRuntime().availableProcessors() - 1;
+
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
 

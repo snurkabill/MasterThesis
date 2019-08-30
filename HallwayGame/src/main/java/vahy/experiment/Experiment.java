@@ -15,6 +15,7 @@ import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.paperGenerics.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.PaperMetadata;
@@ -127,7 +128,7 @@ public class Experiment {
 
         var searchNodeFactory =  new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory);
 
-        PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>  evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random, experimentSetup, rewardAggregator, searchNodeFactory, approximator);
+        var evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random, experimentSetup, rewardAggregator, searchNodeFactory, approximator);
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
@@ -214,7 +215,8 @@ public class Experiment {
         long start = System.currentTimeMillis();
         var policyResultList = benchmark.runBenchmark(experimentSetup.getEvalEpisodeCount(), experimentSetup.getMaximalStepCountBound());
         long end = System.currentTimeMillis();
-        logger.info("Benchmarking took [{}] milliseconds", end - start);
+        var benchmarkingTime = end - start;
+        logger.info("Benchmarking took [{}] milliseconds", benchmarkingTime);
 
         var nnResults = policyResultList
             .stream()
@@ -223,10 +225,12 @@ public class Experiment {
             .get();
         logger.info("Average reward: [{}]", nnResults.getAverageReward());
         logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-        logger.info("Total expanded nodes: [{}]", nnbasedEvaluator.getNodesExpandedCount());
+        logger.info("Total expanded nodes: [{}]", SearchNodeImpl.nodeInstanceId);
         logger.info("Kill ratio: [{}]", nnResults.getRiskHitRatio());
         logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
         logger.info("Training time: [{}]ms", trainingTimeInMs);
+        logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getEpisodeList().size() * nnResults.getAverageMillisPerEpisode());
+
 
         return policyResultList;
     }
