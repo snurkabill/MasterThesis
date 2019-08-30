@@ -7,7 +7,9 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
+import vahy.utils.ImmutableTuple;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PaperPolicyResults<
@@ -102,4 +104,23 @@ public class PaperPolicyResults<
     public double getStdevRisk() {
         return stdevRisk;
     }
+
+    public List<ImmutableTuple<Double, Boolean>> getRewardAndRiskList() {
+
+        double[] totalRewardList = this.episodeList.stream()
+            .mapToDouble(x -> x
+                .getEpisodeStateRewardReturnList()
+                .stream()
+                .mapToDouble(y -> y.getReward().getValue()).sum())
+            .toArray();
+        var totalRiskList = this.episodeList.stream()
+            .map(EpisodeResults::isRiskHit)
+            .toArray();
+        var returnList = new ArrayList<ImmutableTuple<Double, Boolean>>(totalRewardList.length);
+        for (int i = 0; i < totalRewardList.length; i++) {
+            returnList.add(new ImmutableTuple<>(totalRewardList[i], (Boolean) totalRiskList[i]));
+        }
+        return returnList;
+    }
+
 }

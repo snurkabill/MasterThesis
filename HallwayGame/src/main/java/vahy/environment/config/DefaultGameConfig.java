@@ -34,4 +34,15 @@ public class DefaultGameConfig implements GameConfig {
     public StateRepresentation getStateRepresentation() {
         return stateRepresentation;
     }
+
+    @Override
+    public String toString() {
+        return "DefaultGameConfig{" +
+            "goalReward=" + goalReward +
+            ", stepPenalty=" + stepPenalty +
+            ", trapProbability=" + trapProbability +
+            ", noisyMoveProbability=" + noisyMoveProbability +
+            ", stateRepresentation=" + stateRepresentation +
+            '}';
+    }
 }

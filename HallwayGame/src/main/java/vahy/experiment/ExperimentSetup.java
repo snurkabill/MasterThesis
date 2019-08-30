@@ -245,4 +245,40 @@ public class ExperimentSetup {
     public SubTreeRiskCalculatorType getSubTreeRiskCalculatorTypeForUnknownFlow() {
         return subTreeRiskCalculatorTypeForUnknownFlow;
     }
+
+    @Override
+    public String toString() {
+        return "ExperimentSetup{" +
+            "randomSeed=" + randomSeed +
+            ", hallwayInstance=" + hallwayInstance +
+            ", cpuctParameter=" + cpuctParameter +
+            ", mcRolloutCount=" + mcRolloutCount +
+            ", treeUpdateConditionFactory=" + treeUpdateConditionFactory +
+            ", discountFactor=" + discountFactor +
+            ", batchEpisodeCount=" + batchEpisodeCount +
+            ", replayBufferSize=" + replayBufferSize +
+            ", maximalStepCountBound=" + maximalStepCountBound +
+            ", stageCount=" + stageCount +
+            ", explorationConstantSupplier=" + explorationConstantSupplier +
+            ", temperatureSupplier=" + temperatureSupplier +
+            ", riskSupplier=" + riskSupplier +
+            ", trainerAlgorithm=" + trainerAlgorithm +
+            ", approximatorType=" + approximatorType +
+            ", evaluatorType=" + evaluatorType +
+            ", trainingBatchSize=" + trainingBatchSize +
+            ", trainingEpochCount=" + trainingEpochCount +
+            ", learningRate=" + learningRate +
+            ", evalEpisodeCount=" + evalEpisodeCount +
+            ", globalRiskAllowed=" + globalRiskAllowed +
+            ", selectorType=" + selectorType +
+            ", inferenceExistingFlowStrategy=" + inferenceExistingFlowStrategy +
+            ", inferenceNonExistingFlowStrategy=" + inferenceNonExistingFlowStrategy +
+            ", explorationExistingFlowStrategy=" + explorationExistingFlowStrategy +
+            ", explorationNonExistingFlowStrategy=" + explorationNonExistingFlowStrategy +
+            ", flowOptimizerType=" + flowOptimizerType +
+            ", subTreeRiskCalculatorTypeForKnownFlow=" + subTreeRiskCalculatorTypeForKnownFlow +
+            ", subTreeRiskCalculatorTypeForUnknownFlow=" + subTreeRiskCalculatorTypeForUnknownFlow +
+            ", omitProbabilities=" + omitProbabilities +
+            '}';
+    }
 }

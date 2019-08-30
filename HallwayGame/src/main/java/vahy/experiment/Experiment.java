@@ -48,7 +48,13 @@ import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -155,7 +161,7 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
 
-        var progressTrackerSettings = new ProgressTrackerSettings(true, true, false, false);
+        var progressTrackerSettings = new ProgressTrackerSettings(true, false, false, false);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
@@ -173,10 +179,54 @@ public class Experiment {
             random.split(),
             hallwayGameInitialInstanceSupplier,
             experimentSetup,
-            evaluator,
-            nnBasedPolicySupplier,
+            Arrays.asList(new PaperBenchmarkingPolicy<>(evaluator.getClass().getName(), nnBasedPolicySupplier)),
             trainingTimeInMs,
             progressTrackerSettings);
+
+
+        try {
+            dumpResults(results, setup);
+        } catch (IOException e) {
+            logger.error("Results dump failed. ", e);
+        }
+    }
+
+    private void dumpResults(List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> results,
+                             ImmutableTuple<GameConfig, ExperimentSetup> setup) throws IOException {
+
+        if(results.size() > 1) {
+            throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
+        }
+        var policyResult = results.get(0);
+
+        String resultMasterFolderName = "Results";
+        File resultFolder = new File(resultMasterFolderName);
+
+        if(!resultFolder.exists()) {
+            resultFolder.mkdir();
+        }
+
+        File resultSubfolder = new File(resultFolder, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")));
+        resultSubfolder.mkdir();
+
+        File experimentSetuFile = new File(resultSubfolder, "ExperimentSetup");
+        PrintWriter out = new PrintWriter(experimentSetuFile);
+        out.print("ExperimentSetup: " + setup.getSecond().toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + setup.getFirst().toString());
+        out.close();
+        File resultFile = new File(resultSubfolder.getAbsolutePath(), "Rewards");
+        writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());
+    }
+
+    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException{
+        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
+        outputWriter.write("Reward,Risk");
+        outputWriter.newLine();
+        for (int i = 0; i < list.size(); i++) {
+            outputWriter.write(list.get(i).getFirst() + "," + list.get(i).getSecond());
+            outputWriter.newLine();
+        }
+        outputWriter.flush();
+        outputWriter.close();
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -200,14 +250,12 @@ public class Experiment {
             SplittableRandom random,
             HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
             ExperimentSetup experimentSetup,
-            PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnbasedEvaluator,
-            PaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nnBasedPolicySupplier,
+            List<PaperBenchmarkingPolicy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> policySupplierList,
             long trainingTimeInMs,
             ProgressTrackerSettings progressTrackerSettings) {
         logger.info("PaperPolicy test starts");
-        String nnBasedPolicyName = "NNBased";
         var benchmark = new PaperBenchmark<>(
-            Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
+            policySupplierList,
             new EnvironmentPolicySupplier(random),
             hallwayGameInitialInstanceSupplier,
             progressTrackerSettings
@@ -218,20 +266,22 @@ public class Experiment {
         var benchmarkingTime = end - start;
         logger.info("Benchmarking took [{}] milliseconds", benchmarkingTime);
 
-        var nnResults = policyResultList
-            .stream()
-            .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(nnBasedPolicyName))
-            .findFirst()
-            .get();
-        logger.info("Average reward: [{}]", nnResults.getAverageReward());
-        logger.info("Stdev reward: [{}]", nnResults.getStdevReward());
-        logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-        logger.info("Total expanded nodes: [{}]", SearchNodeImpl.nodeInstanceId);
-        logger.info("RiskHit ratio: [{}]", nnResults.getRiskHitRatio());
-        logger.info("Stdev riskHit: [{}]", nnResults.getStdevRisk());
-        logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
-        logger.info("Training time: [{}]ms", trainingTimeInMs);
-        logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getEpisodeList().size() * nnResults.getAverageMillisPerEpisode());
+        for (var policyEntry : policySupplierList) {
+            var nnResults = policyResultList
+                .stream()
+                .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(policyEntry.getPolicyName()))
+                .findFirst()
+                .get();
+            logger.info("Average reward: [{}]", nnResults.getAverageReward());
+            logger.info("Stdev reward: [{}]", nnResults.getStdevReward());
+            logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+            logger.info("Total expanded nodes: [{}]", SearchNodeImpl.nodeInstanceId);
+            logger.info("RiskHit ratio: [{}]", nnResults.getRiskHitRatio());
+            logger.info("Stdev riskHit: [{}]", nnResults.getStdevRisk());
+            logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
+            logger.info("Training time: [{}]ms", trainingTimeInMs);
+            logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getEpisodeList().size() * nnResults.getAverageMillisPerEpisode());
+        }
 
         return policyResultList;
     }

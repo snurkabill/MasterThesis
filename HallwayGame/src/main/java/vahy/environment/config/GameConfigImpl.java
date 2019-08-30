@@ -38,4 +38,15 @@ public class GameConfigImpl implements GameConfig {
     public StateRepresentation getStateRepresentation() {
         return stateRepresentation;
     }
+
+    @Override
+    public String toString() {
+        return "GameConfigImpl{" +
+            "goalReward=" + goalReward +
+            ", stepPenalty=" + stepPenalty +
+            ", trapProbability=" + trapProbability +
+            ", noisyMoveProbability=" + noisyMoveProbability +
+            ", stateRepresentation=" + stateRepresentation +
+            '}';
+    }
 }
