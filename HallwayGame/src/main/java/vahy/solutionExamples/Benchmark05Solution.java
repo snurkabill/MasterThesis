@@ -52,7 +52,7 @@ public class Benchmark05Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_05)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1000))
+
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(1)
@@ -61,23 +61,28 @@ public class Benchmark05Solution {
             .discountFactor(1)
 
             .batchEpisodeCount(100)
-            .stageCount(100)
+
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .stageCount(10)
+            .evaluatorType(EvaluatorType.RALF)
+
+
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.EMPTY)
-            .evaluatorType(EvaluatorType.RAMCP)
-            .learningRate(0.1)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .globalRiskAllowed(0.0)
+            .riskSupplier(() -> 0.0)
 
+            .learningRate(0.1)
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.0)
-            .riskSupplier(() -> 0.0)
+
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 0.0;
+                    return 0.2;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
