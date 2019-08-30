@@ -2,6 +2,8 @@ package vahy.data;
 
 public enum HallwayInstance {
 
+    DEMO_01("examples/hallway_demo0.txt", 1),
+
     BENCHMARK_01("examples/benchmark/benchmark_01.txt", 8),
     BENCHMARK_02("examples/benchmark/benchmark_02.txt", 7),
     BENCHMARK_03("examples/benchmark/benchmark_03.txt", 7),

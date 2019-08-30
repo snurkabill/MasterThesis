@@ -16,12 +16,14 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
+import vahy.paperGenerics.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperNodeEvaluator;
 import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.RamcpNodeEvaluator;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.benchmark.PaperPolicyResults;
@@ -123,12 +125,9 @@ public class Experiment {
             experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow(),
             random.split());
 
-        var nnbasedEvaluator = new PaperNodeEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
-            approximator,
-            EnvironmentProbabilities::getProbabilities,
-            HallwayAction.playerActions,
-            HallwayAction.environmentActions);
+        var searchNodeFactory =  new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory);
+
+        PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>  evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random, experimentSetup, rewardAggregator, searchNodeFactory, approximator);
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
@@ -136,7 +135,7 @@ public class Experiment {
             experimentSetup.getGlobalRiskAllowed(),
             random.split(),
             nodeSelector,
-            nnbasedEvaluator,
+            evaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
@@ -150,7 +149,7 @@ public class Experiment {
             experimentSetup.getGlobalRiskAllowed(),
             random.split(),
             nodeSelector,
-            nnbasedEvaluator,
+            evaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
@@ -162,14 +161,21 @@ public class Experiment {
             random.split(),
             hallwayGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
-            nnbasedEvaluator,
+            evaluator,
             paperTrainablePolicySupplier,
             experimentSetup.getReplayBufferSize(),
             experimentSetup.getMaximalStepCountBound(),
             progressTrackerSettings);
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        this.results = evaluatePolicy(random.split(), hallwayGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, trainingTimeInMs, progressTrackerSettings);
+        this.results = evaluatePolicy(
+            random.split(),
+            hallwayGameInitialInstanceSupplier,
+            experimentSetup,
+            evaluator,
+            nnBasedPolicySupplier,
+            trainingTimeInMs,
+            progressTrackerSettings);
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -292,6 +298,43 @@ public class Experiment {
                 return new RiskBasedSelector<>(cpuctParameter, random.split(), totalRiskAllowed);
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
+        }
+    }
+
+    private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> resolveEvaluator(EvaluatorType evaluatorType,
+                                                SplittableRandom random,
+                                                ExperimentSetup experimentSetup,
+                                                DoubleScalarRewardAggregator rewardAggregator,
+                                                SearchNodeBaseFactoryImpl<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory,
+                                                TrainableApproximator<DoubleVector> approximator) {
+        switch (evaluatorType) {
+            case MONTE_CARLO:
+                return new MonteCarloNodeEvaluator<>(
+                    searchNodeFactory,
+                    EnvironmentProbabilities::getProbabilities,
+                    HallwayAction.playerActions,
+                    HallwayAction.environmentActions,
+                    random.split(),
+                    rewardAggregator,
+                    experimentSetup.getDiscountFactor());
+            case RALF:
+                return new PaperNodeEvaluator<>(
+                    searchNodeFactory,
+                    approximator,
+                    EnvironmentProbabilities::getProbabilities,
+                    HallwayAction.playerActions,
+                    HallwayAction.environmentActions);
+            case RAMCP:
+                return new RamcpNodeEvaluator<>(
+                    searchNodeFactory,
+                    EnvironmentProbabilities::getProbabilities,
+                    HallwayAction.playerActions,
+                    HallwayAction.environmentActions,
+                    random.split(),
+                    rewardAggregator,
+                    experimentSetup.getDiscountFactor());
+            default:
+                throw EnumUtils.createExceptionForUnknownEnumValue(evaluatorType);
         }
     }
 }

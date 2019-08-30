@@ -40,6 +40,8 @@ public class ExperimentSetup {
     private final TrainerAlgorithm trainerAlgorithm;
     private final ApproximatorType approximatorType;
 
+    private final EvaluatorType evaluatorType;
+
     // NN
     private final int trainingBatchSize;
     private final int trainingEpochCount;
@@ -62,7 +64,36 @@ public class ExperimentSetup {
 
     private final boolean omitProbabilities;
 
-    public ExperimentSetup(long randomSeed, HallwayInstance hallwayInstance, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, Supplier<Double> riskSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, double learningRate, int evalEpisodeCount, double globalRiskAllowed, SelectorType selectorType, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, boolean omitProbabilities) {
+    public ExperimentSetup(long randomSeed,
+                           HallwayInstance hallwayInstance,
+                           double cpuctParameter,
+                           double mcRolloutCount,
+                           TreeUpdateConditionFactory treeUpdateConditionFactory,
+                           double discountFactor,
+                           int batchEpisodeCount,
+                           int replayBufferSize,
+                           int maximalStepCountBound,
+                           int stageCount,
+                           Supplier<Double> explorationConstantSupplier,
+                           Supplier<Double> temperatureSupplier,
+                           Supplier<Double> riskSupplier,
+                           TrainerAlgorithm trainerAlgorithm,
+                           ApproximatorType approximatorType,
+                           EvaluatorType evaluatorType,
+                           int trainingBatchSize,
+                           int trainingEpochCount,
+                           double learningRate,
+                           int evalEpisodeCount,
+                           double globalRiskAllowed,
+                           SelectorType selectorType,
+                           InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
+                           InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
+                           ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
+                           ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
+                           FlowOptimizerType flowOptimizerType,
+                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
+                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
+                           boolean omitProbabilities) {
         this.randomSeed = randomSeed;
         this.hallwayInstance = hallwayInstance;
         this.cpuctParameter = cpuctParameter;
@@ -78,6 +109,7 @@ public class ExperimentSetup {
         this.riskSupplier = riskSupplier;
         this.trainerAlgorithm = trainerAlgorithm;
         this.approximatorType = approximatorType;
+        this.evaluatorType = evaluatorType;
         this.trainingBatchSize = trainingBatchSize;
         this.trainingEpochCount = trainingEpochCount;
         this.learningRate = learningRate;
@@ -140,6 +172,10 @@ public class ExperimentSetup {
 
     public ApproximatorType getApproximatorType() {
         return approximatorType;
+    }
+
+    public EvaluatorType getEvaluatorType() {
+        return evaluatorType;
     }
 
     public int getTrainingBatchSize() {

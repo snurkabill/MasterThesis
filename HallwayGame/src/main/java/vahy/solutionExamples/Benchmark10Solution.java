@@ -1,5 +1,7 @@
 package vahy.solutionExamples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
@@ -27,6 +29,8 @@ import java.util.function.Supplier;
 
 public class Benchmark10Solution {
 
+    private static Logger logger = LoggerFactory.getLogger(Benchmark10Solution.class.getName());
+
     public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
@@ -52,20 +56,22 @@ public class Benchmark10Solution {
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
+        int batchSize = 100;
+
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
             .hallwayInstance(HallwayInstance.BENCHMARK_10)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(100)
-            .stageCount(300)
+            .batchEpisodeCount(batchSize)
+            .stageCount(1000)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
@@ -78,7 +84,11 @@ public class Benchmark10Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    double x = Math.exp(-callCount / 10000.0);
+                    if(callCount % batchSize == 0) {
+                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
 //                    return 0.1;
                 }
             })
@@ -87,7 +97,11 @@ public class Benchmark10Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) * 4;
+                    double x = Math.exp(-callCount / 10000.0) * 4;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
 //                    return 1.5;
                 }
             })
