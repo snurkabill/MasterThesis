@@ -23,8 +23,10 @@ public class PaperPolicyResults<
     private final double averageNanosPerEpisode;
     private final double averageMillisPerEpisode;
     private final double averageReward;
+    private final double stdevReward;
     private final long riskHitCounter;
     private final double riskHitRatio;
+    private final double stdevRisk;
 
     public PaperPolicyResults(PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy,
                               List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeList,
@@ -41,6 +43,27 @@ public class PaperPolicyResults<
                 .stream()
                 .mapToDouble(y -> y.getReward().getValue()).sum())
             .sum() / (double) episodeList.size();
+
+        this.stdevReward = Math.sqrt(episodeList
+            .stream()
+            .mapToDouble(x -> {
+                var value = x
+                    .getEpisodeStateRewardReturnList()
+                    .stream()
+                    .mapToDouble(y -> y.getReward().getValue()).sum() - averageReward;
+                return value * value;
+            })
+            .sum()) / (double) episodeList.size();
+
+        this.stdevRisk = Math.sqrt(episodeList
+            .stream()
+            .mapToDouble(x -> {
+                var isRiskHit = x.isRiskHit() ? 1.0 : 0.0;
+                var value = isRiskHit - riskHitRatio;
+                return value * value;
+            })
+            .sum()) / (double) episodeList.size();
+
         this.averageMillisPerEpisode = episodeList.stream().mapToDouble(EpisodeResults::getMillisecondDuration).sum() / (double) episodeList.size();
     }
 
@@ -70,5 +93,13 @@ public class PaperPolicyResults<
 
     public double getRiskHitRatio() {
         return riskHitRatio;
+    }
+
+    public double getStdevReward() {
+        return stdevReward;
+    }
+
+    public double getStdevRisk() {
+        return stdevRisk;
     }
 }

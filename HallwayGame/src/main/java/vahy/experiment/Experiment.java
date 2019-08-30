@@ -224,13 +224,14 @@ public class Experiment {
             .findFirst()
             .get();
         logger.info("Average reward: [{}]", nnResults.getAverageReward());
+        logger.info("Stdev reward: [{}]", nnResults.getStdevReward());
         logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
         logger.info("Total expanded nodes: [{}]", SearchNodeImpl.nodeInstanceId);
-        logger.info("Kill ratio: [{}]", nnResults.getRiskHitRatio());
+        logger.info("RiskHit ratio: [{}]", nnResults.getRiskHitRatio());
+        logger.info("Stdev riskHit: [{}]", nnResults.getStdevRisk());
         logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
         logger.info("Training time: [{}]ms", trainingTimeInMs);
         logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getEpisodeList().size() * nnResults.getAverageMillisPerEpisode());
-
 
         return policyResultList;
     }
