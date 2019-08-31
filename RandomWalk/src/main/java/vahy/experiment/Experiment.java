@@ -12,7 +12,6 @@ import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
 import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
@@ -63,9 +62,9 @@ public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private List<PaperPolicyResults<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> results;
+    private List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> results;
 
-    public List<PaperPolicyResults<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> getResults() {
+    public List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> getResults() {
         return results;
     }
 
@@ -111,11 +110,11 @@ public class Experiment {
         var experimentSetup = setup.getSecond();
         var rewardAggregator = new DoubleScalarRewardAggregator();
         var clazz = RandomWalkAction.class;
-        var searchNodeMetadataFactory = new PaperMetadataFactory<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState>(rewardAggregator);
+        var searchNodeMetadataFactory = new PaperMetadataFactory<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>(rewardAggregator);
         var paperTreeUpdater = new PaperTreeUpdater<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>();
-        var nodeSelector = new PaperNodeSelector<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState>(setup.getSecond().getCpuctParameter(), random);
+        var nodeSelector = new PaperNodeSelector<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>(setup.getSecond().getCpuctParameter(), random);
 
-        Supplier<NodeSelector<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> nodeSelectorSupplier =
+        Supplier<NodeSelector<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> nodeSelectorSupplier =
             () -> new PaperNodeSelector<>(setup.getSecond().getCpuctParameter(), random);
 
 
@@ -137,7 +136,7 @@ public class Experiment {
 ////            rewardAggregator,
 ////            experimentSetup.getDiscountFactor());
 
-        var strategiesProvider = new StrategiesProvider<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>(
+        var strategiesProvider = new StrategiesProvider<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>(
             experimentSetup.getInferenceExistingFlowStrategy(),
             experimentSetup.getInferenceNonExistingFlowStrategy(),
             experimentSetup.getExplorationExistingFlowStrategy(),
@@ -246,17 +245,16 @@ public class Experiment {
 
     private List<PaperPolicyResults<
         RandomWalkAction,
-        DoubleReward,
         DoubleVector,
         RandomWalkProbabilities,
-        PaperMetadata<RandomWalkAction, DoubleReward>,
+        PaperMetadata<RandomWalkAction>,
         RandomWalkState>>
     evaluatePolicy(
         SplittableRandom random,
         RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
         ExperimentSetup experimentSetup,
-        PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nnbasedEvaluator,
-        PaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nnBasedPolicySupplier,
+        PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> nnbasedEvaluator,
+        PaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> nnBasedPolicySupplier,
         ProgressTrackerSettings progressTrackerSettings,
         long trainingTimeInMs) {
         logger.info("PaperPolicy test starts");
@@ -296,14 +294,14 @@ public class Experiment {
     private AbstractTrainer<
         RandomWalkAction,
         RandomWalkProbabilities,
-        PaperMetadata<RandomWalkAction, DoubleReward>,
+        PaperMetadata<RandomWalkAction>,
         RandomWalkState>
     getAbstractTrainer(TrainerAlgorithm trainerAlgorithm,
                        SplittableRandom random,
                        RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
                        double discountFactor,
-                       PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> nodeEvaluator,
-                       TrainablePaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> trainablePaperPolicySupplier,
+                       PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> nodeEvaluator,
+                       TrainablePaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit,
                        ProgressTrackerSettings progressTrackerSettings) {

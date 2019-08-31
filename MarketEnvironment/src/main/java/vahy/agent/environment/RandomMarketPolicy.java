@@ -2,7 +2,6 @@ package vahy.agent.environment;
 
 import vahy.environment.MarketAction;
 import vahy.environment.MarketState;
-import vahy.impl.model.reward.DoubleReward;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -38,8 +37,8 @@ public class RandomMarketPolicy extends MarketPolicy {
     }
 
     @Override
-    public DoubleReward getEstimatedReward(MarketState gameState) {
-        return new DoubleReward(0.0);
+    public double getEstimatedReward(MarketState gameState) {
+        return 0.0;
     }
 
     @Override

@@ -3,13 +3,12 @@ package vahy.environment;
 import vahy.api.model.StateRewardReturn;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.EnumUtils;
 
 import java.util.Arrays;
 
-public class MarketState implements PaperState<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> {
+public class MarketState implements PaperState<MarketAction, DoubleVector, DoubleVector, MarketState> {
 
     private static double[] staticRandomMarketProbabilities = new double[] {0.5, 0.5};
     private static DoubleVector wrappedInVector = new DoubleVector(staticRandomMarketProbabilities);
@@ -157,8 +156,8 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         }
     }
 
-    private DoubleReward resolveReward(MarketAction actionType, double newProfitAndLoss) {
-        return new DoubleReward(newProfitAndLoss - currentPnL);
+    private double resolveReward(MarketAction actionType, double newProfitAndLoss) {
+        return newProfitAndLoss - currentPnL;
     }
 
     private double[] createNewLookback(MarketAction action) {
@@ -202,7 +201,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
     }
 
     @Override
-    public StateRewardReturn<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> applyAction(MarketAction actionType) {
+    public StateRewardReturn<MarketAction, DoubleVector, DoubleVector, MarketState> applyAction(MarketAction actionType) {
         if(actionType.isPlayerAction() && !this.isAgentTurn) {
             throw new IllegalStateException("Trying to play agent action when agent is not on turn");
         }
@@ -221,7 +220,7 @@ public class MarketState implements PaperState<MarketAction, DoubleReward, Doubl
         double nextStatePrice = calculateNextStatePrice(actionType);
         double newTradeBalance = calculateNewTradeBalance(actionType);
         double newPnl = calculateNewProfitAndLoss(actionType, newTradeBalance, nextStatePrice);
-        DoubleReward reward = resolveReward(actionType, newPnl);
+        double reward = resolveReward(actionType, newPnl);
         switch (actionType) {
             case UP:
             case DOWN:

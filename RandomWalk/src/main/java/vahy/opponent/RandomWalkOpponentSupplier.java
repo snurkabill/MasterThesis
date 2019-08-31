@@ -4,14 +4,13 @@ import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 
 import java.util.SplittableRandom;
 
-public class RandomWalkOpponentSupplier extends PaperPolicySupplier<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> {
+public class RandomWalkOpponentSupplier extends PaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> {
 
     public final SplittableRandom random;
 
@@ -21,7 +20,7 @@ public class RandomWalkOpponentSupplier extends PaperPolicySupplier<RandomWalkAc
     }
 
     @Override
-    public PaperPolicy<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState> initializePolicy(RandomWalkState initialState) {
+    public PaperPolicy<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> initializePolicy(RandomWalkState initialState) {
         return new RandomWalkPolicy(random);
     }
 }

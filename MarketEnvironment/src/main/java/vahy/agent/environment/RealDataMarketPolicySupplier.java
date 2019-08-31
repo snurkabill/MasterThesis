@@ -4,12 +4,11 @@ import vahy.environment.MarketAction;
 import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketState;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 
-public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketAction, DoubleReward, DoubleVector, DoubleVector, PaperMetadata<MarketAction, DoubleReward>, MarketState> {
+public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketAction, DoubleVector, DoubleVector, PaperMetadata<MarketAction>, MarketState> {
 
     private final MarketDataProvider marketDataProvider;
 
@@ -19,7 +18,7 @@ public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketActi
     }
 
     @Override
-    public PaperPolicy<MarketAction, DoubleReward, DoubleVector, DoubleVector, MarketState> initializePolicy(MarketState initialState) {
+    public PaperPolicy<MarketAction, DoubleVector, DoubleVector, MarketState> initializePolicy(MarketState initialState) {
         int index = initialState.getCurrentDataIndex();
         return new RealDataMarketPolicy(marketDataProvider.getMarketMovementArray(), index + 1);
     }

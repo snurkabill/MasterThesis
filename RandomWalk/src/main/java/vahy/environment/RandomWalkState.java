@@ -5,13 +5,12 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 
 import java.util.LinkedList;
 
-public class RandomWalkState implements PaperState<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
+public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
 
     private static final Logger logger = LoggerFactory.getLogger(RandomWalkState.class.getName());
 
@@ -51,7 +50,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
     }
 
     @Override
-    public StateRewardReturn<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, RandomWalkState> applyAction(RandomWalkAction actionType) {
+    public StateRewardReturn<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> applyAction(RandomWalkAction actionType) {
         int newLevel = resolveNewLevel(actionType);
         boolean isAgentTurnNext = !isAgentTurn;
         var nextState = new RandomWalkState(
@@ -59,8 +58,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
             isAgentTurnNext,
             actionType,
             randomWalkSetup);
-//        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
-        DoubleReward reward = actionType.isPlayerAction() ? new DoubleReward(0.0) :  (new DoubleReward((double) ((newLevel - level) - randomWalkSetup.getStepPenalty())));
+        var reward = actionType.isPlayerAction() ? 0.0 :  ((double) ((newLevel - level) - randomWalkSetup.getStepPenalty()));
         return new ImmutableStateRewardReturnTuple<>(nextState, reward);
     }
 
