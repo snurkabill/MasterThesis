@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.Reward;
 import vahy.api.policy.Policy;
 import vahy.api.search.node.SearchNodeMetadata;
 import vahy.impl.search.tree.SearchTreeImpl;
@@ -17,22 +16,21 @@ import java.util.List;
 
 public abstract class AbstractTreeSearchPolicy<
     TAction extends Action,
-    TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    implements Policy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TSearchNodeMetadata extends SearchNodeMetadata,
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
 
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    protected final SearchTreeImpl<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree;
+    protected final SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree;
 
     public AbstractTreeSearchPolicy(TreeUpdateCondition treeUpdateCondition,
-                                    SearchTreeImpl<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree) {
+                                    SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree) {
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
     }

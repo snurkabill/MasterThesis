@@ -6,7 +6,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.StreamUtils;
@@ -16,15 +15,14 @@ import java.util.SplittableRandom;
 
 public class Ucb1NodeSelector<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> {
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
-    protected SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> root;
+    protected SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> root;
     protected final SplittableRandom random;
     protected final double explorationConstant; // TODO: get rid of explorationConstant here. There are Ucb1 heuristics with changing exploration constant
 
@@ -34,13 +32,13 @@ public class Ucb1NodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata<TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
         int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
         return node.getChildNodeStream()
             .collect(StreamUtils.toRandomizedMaxCollector(
                 Comparator.comparing(
                     o -> calculateUCBValue( // TODO: optimize so calls are done only once
-                        (node.isPlayerTurn() ? 1.0 : -1.0) * o.getSearchNodeMetadata().getExpectedReward().getValue(),
+                        (node.isPlayerTurn() ? 1.0 : -1.0) * o.getSearchNodeMetadata().getExpectedReward(),
                         explorationConstant,
                         nodeVisitCount,
                         o.getSearchNodeMetadata().getVisitCounter())),

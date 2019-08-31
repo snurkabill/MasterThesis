@@ -5,7 +5,6 @@ import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestState implements State<TestAction, DoubleReward, DoubleVector, TestState, TestState>, Observation {
+public class TestState implements State<TestAction, DoubleVector, TestState, TestState>, Observation {
 
     public static TestState getDefaultInitialStatePlayerTurn() {
         return new TestState(Collections.singletonList('Z'));
@@ -39,12 +38,12 @@ public class TestState implements State<TestAction, DoubleReward, DoubleVector, 
     }
 
     @Override
-    public StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState, TestState> applyAction(TestAction action) {
+    public StateRewardReturn<TestAction, DoubleVector, TestState, TestState> applyAction(TestAction action) {
         List<Character> newInternalState = new ArrayList<>(internalState);
         newInternalState.add(action.getCharRepresentation());
         return new ImmutableStateRewardReturnTuple<>(
             new TestState(newInternalState),
-            new DoubleReward(action.getReward()));
+            action.getReward());
     }
 
     @Override

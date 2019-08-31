@@ -1,19 +1,17 @@
 package vahy.api.search.node;
 
-import vahy.api.model.reward.Reward;
+public interface SearchNodeMetadata {
 
-public interface SearchNodeMetadata<TReward extends Reward> {
+    double getCumulativeReward();
 
-    TReward getCumulativeReward();
+    double getGainedReward();
 
-    TReward getGainedReward();
+    double getPredictedReward();
 
-    TReward getPredictedReward();
+    double getExpectedReward();
 
-    TReward getExpectedReward();
+    void setPredictedReward(double predictedReward);
 
-    void setPredictedReward(TReward predictedReward);
-
-    void setExpectedReward(TReward expectedReward);
+    void setExpectedReward(double expectedReward);
 
 }

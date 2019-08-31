@@ -4,7 +4,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.Reward;
 import vahy.api.search.node.AbstractSearchNode;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
@@ -14,29 +13,28 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SearchNodeImpl<
     TAction extends Action,
-    TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractSearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends SearchNodeMetadata,
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractSearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public static AtomicLong nodeInstanceId = new AtomicLong(0);
     private final long nodeId = nodeInstanceId.getAndIncrement();
-    private final Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap;
+    private final Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
     public SearchNodeImpl(
         TState wrappedState,
         TSearchNodeMetadata searchNodeMetadata,
-        Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap) {
+        Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap) {
         this(wrappedState, searchNodeMetadata, childNodeMap, null, null);
     }
 
     public SearchNodeImpl(
         TState wrappedState,
         TSearchNodeMetadata searchNodeMetadata,
-        Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap,
-        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+        Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap,
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
         TAction appliedAction) {
         super(wrappedState, parent, appliedAction, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
@@ -44,12 +42,12 @@ public class SearchNodeImpl<
     }
 
     @Override
-    public Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeMap() {
+    public Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeMap() {
         return childNodeMap;
     }
 
     @Override
-    public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
+    public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         return wrappedState.applyAction(action);
     }
 

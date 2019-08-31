@@ -13,7 +13,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
@@ -35,29 +34,28 @@ import static guru.nidi.graphviz.model.Link.to;
 
 public class SearchTreeImpl<
     TAction extends Action,
-    TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    implements SearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends SearchNodeMetadata,
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    implements SearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
 
-    private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root;
-    private final NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
-    private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
-    private final TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
+    private SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root;
+    private final NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
+    private final NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
+    private final TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
 
     private int totalNodesExpanded = 0;
     private int totalNodesCreated = 0; // should be 1 for root
     private int maxBranchingFactor = 0;
 
     public SearchTreeImpl(
-        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
-        NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
-        TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
-        NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator) {
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
+        NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+        TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
+        NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator) {
         this.root = root;
         this.nodeSelector = nodeSelector;
         this.treeUpdater = treeUpdater;
@@ -85,7 +83,7 @@ public class SearchTreeImpl<
 
     @Override
     public boolean updateTree() {
-        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode();
         if(selectedNodeForExpansion == null) {
             return false;
         }
@@ -103,7 +101,7 @@ public class SearchTreeImpl<
     }
 
     @Override
-    public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
+    public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         checkApplicableAction(action);
         return innerApplyAction(action);
     }
@@ -139,7 +137,7 @@ public class SearchTreeImpl<
     }
 
     @Override
-    public SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getRoot() {
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getRoot() {
         return root;
     }
 
@@ -153,7 +151,7 @@ public class SearchTreeImpl<
     }
 
     private String dumpTreeToString(int depth) {
-        LinkedList<ImmutableTuple<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>> queue = new LinkedList<>();
+        LinkedList<ImmutableTuple<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>> queue = new LinkedList<>();
         queue.addFirst(new ImmutableTuple<>(this.getRoot(), 0));
 
         StringBuilder string = new StringBuilder();
@@ -194,8 +192,8 @@ public class SearchTreeImpl<
         }
     }
 
-    protected StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> innerApplyAction(TAction action) {
-        TReward reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
+    protected StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> innerApplyAction(TAction action) {
+        double reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
         root = root.getChildNodeMap().get(action);
         root.makeRoot();
         nodeSelector.setNewRoot(root);
@@ -226,7 +224,7 @@ public class SearchTreeImpl<
         }
     }
 
-    public void printTreeToFile(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName, int depthBound) {
+    public void printTreeToFile(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName, int depthBound) {
         while (depthBound >= 1) {
             try {
                 printTreeToFileInternal(subtreeRoot, fileName, depthBound, a -> true);
@@ -238,11 +236,11 @@ public class SearchTreeImpl<
         }
     }
 
-    protected void printTreeToFileInternal(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot,
+    protected void printTreeToFileInternal(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot,
                                            String fileName,
                                            int depthBound,
-                                           Function<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Boolean> filter) {
-        var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>>();
+                                           Function<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Boolean> filter) {
+        var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>, Integer>>();
         queue.addFirst(new ImmutableTuple<>(subtreeRoot, 0));
 
         Graph graph = graph("example1")
@@ -274,7 +272,7 @@ public class SearchTreeImpl<
         }
     }
 
-    private void expandAndEvaluateNode(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
+    private void expandAndEvaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
         nodeEvaluator.evaluateNode(selectedNodeForExpansion);
         totalNodesExpanded++;
         int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();

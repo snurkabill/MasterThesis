@@ -3,7 +3,6 @@ package vahy.impl.search.nodeSelector.treeTraversing;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
@@ -14,18 +13,17 @@ import java.util.SplittableRandom;
 
 public class EGreedyNodeSelector<
     TAction extends Action,
-    TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata<TReward>,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends SearchNodeMetadata,
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private class SearchNodeComparator implements Comparator<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>{
+    private class SearchNodeComparator implements Comparator<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>{
 
         @Override
-        public int compare(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> o1, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> o2) {
-            return o1.getSearchNodeMetadata().getExpectedReward().compareTo(o2.getSearchNodeMetadata().getExpectedReward());
+        public int compare(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> o1, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> o2) {
+            return Double.compare(o1.getSearchNodeMetadata().getExpectedReward(), o2.getSearchNodeMetadata().getExpectedReward());
         }
     }
 
@@ -39,7 +37,7 @@ public class EGreedyNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         if (random.nextDouble() < epsilon) {
             TAction[] allPossibleActions = node.getAllPossibleActions();
             return allPossibleActions[random.nextInt(allPossibleActions.length)];

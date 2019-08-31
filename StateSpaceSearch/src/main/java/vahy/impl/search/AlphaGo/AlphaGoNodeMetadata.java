@@ -1,17 +1,16 @@
 package vahy.impl.search.AlphaGo;
 
 import vahy.api.model.Action;
-import vahy.api.model.reward.Reward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
 import java.util.Map;
 
-public class AlphaGoNodeMetadata<TAction extends Action, TReward extends Reward> extends MonteCarloTreeSearchMetadata<TReward> {
+public class AlphaGoNodeMetadata<TAction extends Action> extends MonteCarloTreeSearchMetadata {
 
     private double priorProbability; /// P value
     private final Map<TAction, Double> childPriorProbabilities;
 
-    public AlphaGoNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward, double priorProbability, Map<TAction, Double> childPriorProbabilities) {
+    public AlphaGoNodeMetadata(double cumulativeReward, double gainedReward, double predictedReward, double priorProbability, Map<TAction, Double> childPriorProbabilities) {
         super(cumulativeReward, gainedReward, predictedReward);
         this.priorProbability = priorProbability;
         this.childPriorProbabilities = childPriorProbabilities;

@@ -6,7 +6,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.Reward;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -20,24 +19,23 @@ import java.util.SplittableRandom;
 
 public class MonteCarloEvaluator<
     TAction extends Action,
-    TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends MonteCarloTreeSearchMetadata<TReward>,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    implements NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends MonteCarloTreeSearchMetadata,
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    implements NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloEvaluator.class);
 
-    private final SearchNodeFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
+    private final SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
-    private final RewardAggregator<TReward> rewardAggregator;
+    private final RewardAggregator rewardAggregator;
     private final double discountFactor;
     private final int rolloutCount;
 
-    public MonteCarloEvaluator(SearchNodeFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+    public MonteCarloEvaluator(SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                SplittableRandom random,
-                               RewardAggregator<TReward> rewardAggregator,
+                               RewardAggregator rewardAggregator,
                                double discountFactor,
                                int rolloutCount) {
         this.searchNodeFactory = searchNodeFactory;
@@ -48,37 +46,37 @@ public class MonteCarloEvaluator<
     }
 
     @Override
-    public void evaluateNode(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public void evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         if(selectedNode.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
-        Map<TAction, SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
+        Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
-            StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
+            StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
             childNodeMap.put(nextAction, searchNodeFactory.createNode(stateRewardReturn, selectedNode, nextAction));
         }
-        TReward rewardPrediction = runRollouts(selectedNode);
+        double rewardPrediction = runRollouts(selectedNode);
         TSearchNodeMetadata searchNodeMetadata = selectedNode.getSearchNodeMetadata();
         searchNodeMetadata.setPredictedReward(rewardPrediction);
     }
 
-    private TReward runRollouts(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        List<TReward> rewardList = new ArrayList<>();
+    private double runRollouts(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        List<Double> rewardList = new ArrayList<>();
         for (int i = 0; i < rolloutCount; i++) {
             rewardList.add(runRandomWalkSimulation(node));
         }
         return rewardAggregator.averageReward(rewardList);
     }
 
-    private TReward runRandomWalkSimulation(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        List<TReward> rewardList = new ArrayList<>();
+    private double runRandomWalkSimulation(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        List<Double> rewardList = new ArrayList<>();
         TState wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
-            StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
+            StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
         }

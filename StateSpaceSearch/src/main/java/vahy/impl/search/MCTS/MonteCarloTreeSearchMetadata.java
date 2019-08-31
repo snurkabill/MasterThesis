@@ -1,14 +1,13 @@
 package vahy.impl.search.MCTS;
 
-import vahy.api.model.reward.Reward;
 import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 
-public class MonteCarloTreeSearchMetadata<TReward extends Reward> extends BaseSearchNodeMetadata<TReward> {
+public class MonteCarloTreeSearchMetadata extends BaseSearchNodeMetadata {
 
     private int visitCounter;
-    private TReward sumOfTotalEstimations;
+    private double sumOfTotalEstimations;
 
-    public MonteCarloTreeSearchMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward) {
+    public MonteCarloTreeSearchMetadata(double cumulativeReward, double gainedReward, double predictedReward) {
         super(cumulativeReward, gainedReward, predictedReward);
         visitCounter = 0;
     }
@@ -21,11 +20,11 @@ public class MonteCarloTreeSearchMetadata<TReward extends Reward> extends BaseSe
         visitCounter++;
     }
 
-    public TReward getSumOfTotalEstimations() {
+    public double getSumOfTotalEstimations() {
         return sumOfTotalEstimations;
     }
 
-    public void setSumOfTotalEstimations(TReward sumOfTotalEstimations) {
+    public void setSumOfTotalEstimations(double sumOfTotalEstimations) {
         this.sumOfTotalEstimations = sumOfTotalEstimations;
     }
 

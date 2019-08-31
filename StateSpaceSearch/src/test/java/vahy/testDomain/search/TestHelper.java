@@ -3,7 +3,6 @@ package vahy.testDomain.search;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.testDomain.model.TestAction;
@@ -14,20 +13,20 @@ import java.util.Map;
 
 public class TestHelper {
 
-    public static SearchNode<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> createOneLevelTree(boolean playerTurn) {
+    public static SearchNode<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> createOneLevelTree(boolean playerTurn) {
         TestState initialState = playerTurn ? TestState.getDefaultInitialStatePlayerTurn() : TestState.getDefaultInitialStateOpponentTurn();
-        MonteCarloTreeSearchMetadata<DoubleReward> rootMetadata = new MonteCarloTreeSearchMetadata<>(new DoubleReward(0.0), new DoubleReward(0.0), new DoubleReward(0.0));
+        MonteCarloTreeSearchMetadata rootMetadata = new MonteCarloTreeSearchMetadata(0.0, 0.0, 0.0);
         rootMetadata.increaseVisitCounter();
-        SearchNode<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState> root = new SearchNodeImpl<>(
+        SearchNode<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> root = new SearchNodeImpl<>(
             initialState,
             rootMetadata,
             new LinkedHashMap<>());
-        Map<TestAction, SearchNode<TestAction, DoubleReward, DoubleVector, TestState, MonteCarloTreeSearchMetadata<DoubleReward>, TestState>> childNodeMap = root.getChildNodeMap();
+        Map<TestAction, SearchNode<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState>> childNodeMap = root.getChildNodeMap();
         for (TestAction playerAction : playerTurn ? TestAction.playerActions : TestAction.opponentActions) {
-            StateRewardReturn<TestAction, DoubleReward, DoubleVector, TestState, TestState> rewardReturn = initialState.applyAction(playerAction);
+            StateRewardReturn<TestAction, DoubleVector, TestState, TestState> rewardReturn = initialState.applyAction(playerAction);
             childNodeMap.put(playerAction, new SearchNodeImpl<>(
                 rewardReturn.getState(),
-                new MonteCarloTreeSearchMetadata<>(new DoubleReward(rewardReturn.getReward().getValue()), new DoubleReward(rewardReturn.getReward().getValue()), new DoubleReward(rewardReturn.getReward().getValue())),
+                new MonteCarloTreeSearchMetadata(rewardReturn.getReward(), rewardReturn.getReward(), rewardReturn.getReward()),
                 new LinkedHashMap<>(),
                 root,
                 playerAction)

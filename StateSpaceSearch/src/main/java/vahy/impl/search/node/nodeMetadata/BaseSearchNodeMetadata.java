@@ -1,16 +1,15 @@
 package vahy.impl.search.node.nodeMetadata;
 
-import vahy.api.model.reward.Reward;
 import vahy.api.search.node.SearchNodeMetadata;
 
-public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNodeMetadata<TReward> {
+public class BaseSearchNodeMetadata implements SearchNodeMetadata {
 
-    private final TReward cumulativeReward;
-    private final TReward gainedReward;
-    private TReward predictedReward;
-    private TReward expectedReward;
+    private final double cumulativeReward;
+    private final double gainedReward;
+    private double predictedReward;
+    private double expectedReward;
 
-    public BaseSearchNodeMetadata(TReward cumulativeReward, TReward gainedReward, TReward predictedReward) {
+    public BaseSearchNodeMetadata(double cumulativeReward, double gainedReward, double predictedReward) {
         this.cumulativeReward = cumulativeReward;
         this.gainedReward = gainedReward;
         this.predictedReward = predictedReward;
@@ -18,32 +17,32 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
     }
 
     @Override
-    public TReward getPredictedReward() {
+    public double getPredictedReward() {
         return predictedReward;
     }
 
     @Override
-    public TReward getCumulativeReward() {
+    public double getCumulativeReward() {
         return cumulativeReward;
     }
 
     @Override
-    public TReward getGainedReward() {
+    public double getGainedReward() {
         return this.gainedReward;
     }
 
     @Override
-    public TReward getExpectedReward() {
+    public double getExpectedReward() {
         return expectedReward;
     }
 
     @Override
-    public void setPredictedReward(TReward predictedReward) {
+    public void setPredictedReward(double predictedReward) {
         this.predictedReward = predictedReward;
     }
 
     @Override
-    public void setExpectedReward(TReward expectedReward) {
+    public void setExpectedReward(double expectedReward) {
         this.expectedReward = expectedReward;
     }
 
@@ -51,13 +50,13 @@ public class BaseSearchNodeMetadata<TReward extends Reward> implements SearchNod
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("\\nCumulativeRew: ");
-        stringBuilder.append(this.cumulativeReward.toPrettyString());
+        stringBuilder.append(this.cumulativeReward);
         stringBuilder.append("\\nExpectedRew: ");
-        stringBuilder.append(this.expectedReward.toPrettyString());
+        stringBuilder.append(this.expectedReward);
         stringBuilder.append("\\nGainedReward: ");
-        stringBuilder.append(this.gainedReward.toPrettyString());
+        stringBuilder.append(this.gainedReward);
         stringBuilder.append("\\nPredictedReward: ");
-        stringBuilder.append(this.predictedReward.toPrettyString());
+        stringBuilder.append(this.predictedReward);
         return stringBuilder.toString();
     }
 }
