@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
@@ -19,11 +18,10 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTree<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>  {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTree.class.getName());
 
@@ -35,7 +33,7 @@ public abstract class AbstractLinearProgramOnTree<
 
     private final SplittableRandom random;
     protected CLP model;
-    protected LinkedList<SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
+    protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
     private boolean maximize;
 
     protected AbstractLinearProgramOnTree(SplittableRandom random, boolean maximize) {
@@ -45,7 +43,7 @@ public abstract class AbstractLinearProgramOnTree<
         this.maximize = maximize;
     }
 
-    protected abstract void setLeafObjective(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
+    protected abstract void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
 
     protected abstract void finalizeHardConstraints();
 
@@ -53,12 +51,12 @@ public abstract class AbstractLinearProgramOnTree<
         return model.getObjectiveValue();
     }
 
-    public boolean optimizeFlow(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    public boolean optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         queue.addFirst(root);
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
         while(!queue.isEmpty()) {
-            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
+            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
             Map<TAction, CLPVariable> actionChildFlowMap = new HashMap<>();
 
             if(!node.isLeaf()) {
@@ -98,7 +96,7 @@ public abstract class AbstractLinearProgramOnTree<
         return true;
     }
 
-    private void addNodeToQueue(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    private void addNodeToQueue(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                 Map<TAction, CLPVariable> actionChildFlowMap) {
 
         var entries = node.getChildNodeMap().entrySet();
@@ -114,10 +112,10 @@ public abstract class AbstractLinearProgramOnTree<
         }
     }
 
-    public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                                                 Map<TAction, CLPVariable> actionChildFlowMap) {
         for (Map.Entry<TAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
-            SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
+            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
             double priorProbability = child.getSearchNodeMetadata().getPriorProbability();
             CLPExpression fixedProbabilityExpression = model.createExpression();
             fixedProbabilityExpression.add(CHILD_VARIABLE_COEFFICIENT, child.getSearchNodeMetadata().getNodeProbabilityFlow());
@@ -126,7 +124,7 @@ public abstract class AbstractLinearProgramOnTree<
         }
     }
 
-    public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
                                                              Map<TAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
         for (Map.Entry<TAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {

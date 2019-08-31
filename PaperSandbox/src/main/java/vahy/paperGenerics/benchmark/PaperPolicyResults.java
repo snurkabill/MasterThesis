@@ -1,9 +1,9 @@
 package vahy.paperGenerics.benchmark;
 
 import vahy.api.model.Action;
+import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
@@ -14,14 +14,13 @@ import java.util.List;
 
 public class PaperPolicyResults<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
-    private final PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy;
-    private final List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeList;
+    private final PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy;
+    private final List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeList;
     private final double averageNanosPerEpisode;
     private final double averageMillisPerEpisode;
     private final double averageReward;
@@ -30,8 +29,8 @@ public class PaperPolicyResults<
     private final double riskHitRatio;
     private final double stdevRisk;
 
-    public PaperPolicyResults(PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy,
-                              List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeList,
+    public PaperPolicyResults(PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy,
+                              List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeList,
                               double averageNanosPerEpisode) {
         this.benchmarkingPolicy = benchmarkingPolicy;
         this.episodeList = episodeList;
@@ -43,7 +42,7 @@ public class PaperPolicyResults<
             .mapToDouble(x -> x
                 .getEpisodeStateRewardReturnList()
                 .stream()
-                .mapToDouble(y -> y.getReward().getValue()).sum())
+                .mapToDouble(StateRewardReturn::getReward).sum())
             .sum() / (double) episodeList.size();
 
         this.stdevReward = Math.sqrt(episodeList
@@ -52,7 +51,7 @@ public class PaperPolicyResults<
                 var value = x
                     .getEpisodeStateRewardReturnList()
                     .stream()
-                    .mapToDouble(y -> y.getReward().getValue()).sum() - averageReward;
+                    .mapToDouble(StateRewardReturn::getReward).sum() - averageReward;
                 return value * value;
             })
             .sum()) / (double) episodeList.size();
@@ -69,11 +68,11 @@ public class PaperPolicyResults<
         this.averageMillisPerEpisode = episodeList.stream().mapToDouble(EpisodeResults::getMillisecondDuration).sum() / (double) episodeList.size();
     }
 
-    public PaperBenchmarkingPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getBenchmarkingPolicy() {
+    public PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getBenchmarkingPolicy() {
         return benchmarkingPolicy;
     }
 
-    public List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeList() {
+    public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> getEpisodeList() {
         return episodeList;
     }
 
@@ -111,7 +110,7 @@ public class PaperPolicyResults<
             .mapToDouble(x -> x
                 .getEpisodeStateRewardReturnList()
                 .stream()
-                .mapToDouble(y -> y.getReward().getValue()).sum())
+                .mapToDouble(StateRewardReturn::getReward).sum())
             .toArray();
         var totalRiskList = this.episodeList.stream()
             .map(EpisodeResults::isRiskHit)

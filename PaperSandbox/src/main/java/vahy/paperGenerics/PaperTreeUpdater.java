@@ -6,23 +6,22 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.reward.DoubleReward;
 
 public class PaperTreeUpdater<
     TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, TState>>
-    implements TreeUpdater<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> {
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
 
     @Override
-    public void updateTree(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
         double estimatedLeafReward =
-            expandedNode.getSearchNodeMetadata().getCumulativeReward().getValue() +
-            (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward().getValue());
+            expandedNode.getSearchNodeMetadata().getCumulativeReward() +
+            (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
 
         double estimatedLeafRisk = expandedNode.isFinalNode() ?
             (expandedNode.getWrappedState().isRiskHit() ?
@@ -39,26 +38,26 @@ public class PaperTreeUpdater<
         logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 
-    private void updateNode(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> updatedNode,
+    private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> updatedNode,
                             double estimatedLeafReward,
                             double estimatedRisk) {
-        PaperMetadata<TAction, DoubleReward> searchNodeMetadata = updatedNode.getSearchNodeMetadata();
+        PaperMetadata<TAction> searchNodeMetadata = updatedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
 
         if(updatedNode.isFinalNode()) {
             if(searchNodeMetadata.getVisitCounter() == 1) {
-                searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(0.0));
+                searchNodeMetadata.setSumOfTotalEstimations(0.0);
                 searchNodeMetadata.setSumOfRisk(estimatedRisk);
             }
         } else {
             if(searchNodeMetadata.getVisitCounter() == 1) {
-                searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(searchNodeMetadata.getPredictedReward().getValue()));
+                searchNodeMetadata.setSumOfTotalEstimations(searchNodeMetadata.getPredictedReward());
                 searchNodeMetadata.setSumOfRisk(estimatedRisk);
             } else {
-                searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() + (estimatedLeafReward - searchNodeMetadata.getCumulativeReward().getValue())));
+                searchNodeMetadata.setSumOfTotalEstimations(searchNodeMetadata.getSumOfTotalEstimations() + (estimatedLeafReward - searchNodeMetadata.getCumulativeReward()));
                 searchNodeMetadata.setSumOfRisk(searchNodeMetadata.getSumOfRisk() + estimatedRisk);
             }
-            searchNodeMetadata.setExpectedReward(new DoubleReward(searchNodeMetadata.getSumOfTotalEstimations().getValue() / searchNodeMetadata.getVisitCounter()));
+            searchNodeMetadata.setExpectedReward(searchNodeMetadata.getSumOfTotalEstimations() / searchNodeMetadata.getVisitCounter());
             searchNodeMetadata.setPredictedRisk(searchNodeMetadata.getSumOfRisk() / searchNodeMetadata.getVisitCounter());
         }
     }

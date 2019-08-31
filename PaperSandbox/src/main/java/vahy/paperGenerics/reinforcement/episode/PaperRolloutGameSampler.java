@@ -4,7 +4,6 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
@@ -14,18 +13,17 @@ import vahy.vizualiation.ProgressTrackerSettings;
 
 public class PaperRolloutGameSampler<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractGameSampler<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractGameSampler<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private final TrainablePaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier;
+    private final TrainablePaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier;
 
-    public PaperRolloutGameSampler(InitialStateSupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
-                                   TrainablePaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
-                                   PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+    public PaperRolloutGameSampler(InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                                   TrainablePaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
+                                   PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
                                    ProgressTrackerSettings progressTrackerSettings,
                                    int stepCountLimit,
                                    int processingUnitCount) {
@@ -35,7 +33,7 @@ public class PaperRolloutGameSampler<
     }
 
     @Override
-    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> supplyPlayerPolicy(TState initialState) {
+    protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> supplyPlayerPolicy(TState initialState) {
         return playerPolicySupplier.initializePolicyWithExploration(initialState);
     }
 }

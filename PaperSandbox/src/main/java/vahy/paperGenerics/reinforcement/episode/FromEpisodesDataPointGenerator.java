@@ -3,7 +3,6 @@ package vahy.paperGenerics.reinforcement.episode;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.DataPointGenerator;
@@ -13,18 +12,17 @@ import java.util.function.Function;
 
 public class FromEpisodesDataPointGenerator<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> implements DataPointGenerator {
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> implements DataPointGenerator {
 
     private final String dataTitle;
-    private final Function<List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>, Double> function;
+    private final Function<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>>, Double> function;
 
     private int counter = 0;
     private double value = Double.NaN;
 
-    public FromEpisodesDataPointGenerator(String dataTitle, Function<List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>, Double> function) {
+    public FromEpisodesDataPointGenerator(String dataTitle, Function<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>>, Double> function) {
         this.dataTitle = dataTitle;
         this.function = function;
     }
@@ -39,7 +37,7 @@ public class FromEpisodesDataPointGenerator<
         return new ImmutableTuple<>((double) counter, value);
     }
 
-    public void addNewValue(List<EpisodeResults<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> paperEpisodeHistoryList, int episode) {
+    public void addNewValue(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> paperEpisodeHistoryList, int episode) {
         counter = episode;
         value = function.apply(paperEpisodeHistoryList);
     }

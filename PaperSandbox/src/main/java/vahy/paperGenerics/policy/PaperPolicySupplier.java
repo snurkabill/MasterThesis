@@ -10,7 +10,6 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
@@ -22,31 +21,30 @@ import java.util.function.Supplier;
 
 public class PaperPolicySupplier<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    implements PolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    implements PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private final Class<TAction> actionClass;
-    private final SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
+    private final SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
     private final double totalRiskAllowedInference;
     private final SplittableRandom random;
-    private final Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector;
-    private final NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
-    private final TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
+    private final Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector;
+    private final NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
+    private final TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
-    private final StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
+    private final StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
 
     public PaperPolicySupplier(Class<TAction> actionClass,
-                               SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
+                               SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                double totalRiskAllowedInference,
                                SplittableRandom random,
-                               Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
-                               NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
-                               TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
-                               TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
+                               Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
+                               NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
+                               TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
+                               TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
         this.totalRiskAllowedInference = totalRiskAllowedInference;
@@ -59,7 +57,7 @@ public class PaperPolicySupplier<
     }
 
     @Override
-    public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
+    public PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
         return createPolicy(initialState);
     }
 
@@ -71,8 +69,8 @@ public class PaperPolicySupplier<
         return random;
     }
 
-    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState) {
-        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
+    protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState) {
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
             new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
         return new PaperPolicyImpl<>(
             actionClass,
@@ -89,8 +87,8 @@ public class PaperPolicySupplier<
             random);
     }
 
-    protected PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
-        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
+    protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
             new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
         return new PaperPolicyImpl<>(
             actionClass,

@@ -2,12 +2,11 @@ package vahy.paperGenerics;
 
 import com.quantego.clp.CLPVariable;
 import vahy.api.model.Action;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
 import java.util.Map;
 
-public class PaperMetadata<TAction extends Action, TReward extends DoubleReward> extends MonteCarloTreeSearchMetadata<TReward> {
+public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchMetadata {
 
     private final Map<TAction, Double> childPriorProbabilities;
     private CLPVariable nodeProbabilityFlow;
@@ -15,9 +14,9 @@ public class PaperMetadata<TAction extends Action, TReward extends DoubleReward>
     private double predictedRisk;
     private double sumOfRisk;
 
-    public PaperMetadata(TReward cumulativeReward,
-                         TReward gainedReward,
-                         TReward predictedReward,
+    public PaperMetadata(double cumulativeReward,
+                         double gainedReward,
+                         double predictedReward,
                          double priorProbability,
                          double predictedRisk,
                          Map<TAction, Double> childPriorProbabilities) {

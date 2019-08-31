@@ -6,7 +6,6 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
@@ -21,20 +20,19 @@ import java.util.stream.Collectors;
 
 public class PaperPolicyImpl<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
-    implements PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
+    implements PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
 
     private final List<TAction> playerActions;
 
     private final SplittableRandom random;
-    private final RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
+    private final RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
 
     private final boolean isExplorationDisabled;
     private final double explorationConstant;
@@ -49,7 +47,7 @@ public class PaperPolicyImpl<
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
-                           RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
+                           RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random,
                            double explorationConstant,
                            double temperature) {
@@ -58,14 +56,14 @@ public class PaperPolicyImpl<
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
-                           RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
+                           RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random) {
         this(clazz, treeUpdateCondition, searchTree, random, true, 0.0, 0.0);
     }
 
     private PaperPolicyImpl(Class<TAction> clazz,
                             TreeUpdateCondition treeUpdateCondition,
-                            RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
+                            RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
                             SplittableRandom random,
                             boolean isExplorationDisabled,
                             double explorationConstant,
@@ -85,7 +83,7 @@ public class PaperPolicyImpl<
     }
 
     @Override
-    public TReward getEstimatedReward(TState gameState) {
+    public double getEstimatedReward(TState gameState) {
         checkStateRoot(gameState);
         return searchTree.getRoot().getSearchNodeMetadata().getExpectedReward();
     }

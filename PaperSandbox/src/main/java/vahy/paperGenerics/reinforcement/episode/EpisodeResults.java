@@ -5,7 +5,6 @@ import vahy.api.model.StateActionReward;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 
@@ -14,28 +13,27 @@ import java.util.stream.Collectors;
 
 public class EpisodeResults<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>  {
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
 
-    private final List<StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList;
-    private final List<ImmutableTuple<StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>, StepRecord<TReward>>> episodeHistoryList;
+    private final List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList;
+    private final List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, StepRecord>> episodeHistoryList;
     private final long millisecondDuration;
 
-    public EpisodeResults(List<StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList,
-                          List<ImmutableTuple<StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>, StepRecord<TReward>>> episodeHistoryList,
+    public EpisodeResults(List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList,
+                          List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, StepRecord>> episodeHistoryList,
                           long millisecondDuration) {
         this.episodeStateRewardReturnList = episodeStateRewardReturnList;
         this.episodeHistoryList = episodeHistoryList;
         this.millisecondDuration = millisecondDuration;
     }
 
-    public List<StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateRewardReturnList() {
+    public List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateRewardReturnList() {
         return episodeStateRewardReturnList;
     }
 
-    public List<ImmutableTuple<StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>, StepRecord<TReward>>> getEpisodeHistoryList() {
+    public List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, StepRecord>> getEpisodeHistoryList() {
         return episodeHistoryList;
     }
 

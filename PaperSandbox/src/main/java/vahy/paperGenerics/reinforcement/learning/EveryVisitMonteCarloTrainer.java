@@ -7,7 +7,6 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
@@ -24,25 +23,25 @@ import java.util.Map;
 public class EveryVisitMonteCarloTrainer<
     TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
-    TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>>
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     extends AbstractMonteCarloTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    public EveryVisitMonteCarloTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
-                                       TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
-                                       PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                                       TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
+    public EveryVisitMonteCarloTrainer(InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
+                                       TrainablePaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
+                                       PaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                                       TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                                        double discountFactor,
-                                       RewardAggregator<DoubleReward> rewardAggregator,
+                                       RewardAggregator rewardAggregator,
                                        ProgressTrackerSettings progressTrackerSettings,
                                        int stepCountLimit) {
         super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit);
     }
 
     @Override
-    protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> paperEpisode) {
+    protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         Map<DoubleVector, MutableDataSample> everyVisitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>, StepRecord<DoubleReward>>> episodeHistory = paperEpisode.getEpisodeHistoryList();
+        List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation, TState>, StepRecord>> episodeHistory = paperEpisode.getEpisodeHistoryList();
         boolean isRiskHit = paperEpisode.isRiskHit();
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {

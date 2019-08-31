@@ -5,7 +5,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
@@ -18,11 +17,10 @@ import java.util.stream.DoubleStream;
 
 public class PaperNodeSelector<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> {
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     protected final SplittableRandom random;
@@ -32,12 +30,12 @@ public class PaperNodeSelector<
         this.random = random;
     }
 
-    protected final ImmutableTuple<Double, Double> getMinMax(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+    protected final ImmutableTuple<Double, Double> getMinMax(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
         double helpMax = -Double.MAX_VALUE;
         double helpMin = Double.MAX_VALUE;
 
-        for (SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> entry : node.getChildNodeMap().values()) {
-            double value = entry.getSearchNodeMetadata().getExpectedReward().getValue() + entry.getSearchNodeMetadata().getGainedReward().getValue();
+        for (SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> entry : node.getChildNodeMap().values()) {
+            double value = entry.getSearchNodeMetadata().getExpectedReward() + entry.getSearchNodeMetadata().getGainedReward();
             if(helpMax < value) {
                 helpMax = value;
             }
@@ -48,16 +46,16 @@ public class PaperNodeSelector<
         return new ImmutableTuple<>(helpMin, helpMax);
     }
 
-    protected final double getExtremeElement(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node,
+    protected final double getExtremeElement(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node,
                                      Function<DoubleStream, OptionalDouble> function,
                                      String nonExistingElementMessage) {
         return function.apply(node
             .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
+            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward())
         ).orElseThrow(() -> new IllegalStateException(nonExistingElementMessage));
     }
 
-    protected final TAction sampleOpponentAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+    protected final TAction sampleOpponentAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
         var actions = new ArrayList<TAction>();
         var priorProbabilities = new double[node.getChildNodeMap().size()];
         int index = 0;
@@ -71,14 +69,14 @@ public class PaperNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
         if(!node.isOpponentTurn()) {
             int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
             double max = -Double.MAX_VALUE;
             double min = Double.MAX_VALUE;
             var childNodeMap = node.getChildNodeMap();
             for (var entry : childNodeMap.values()) {
-                double value = entry.getSearchNodeMetadata().getExpectedReward().getValue() + entry.getSearchNodeMetadata().getGainedReward().getValue();
+                double value = entry.getSearchNodeMetadata().getExpectedReward() + entry.getSearchNodeMetadata().getGainedReward();
                 if(max < value) {
                     max = value;
                 }
@@ -99,7 +97,7 @@ public class PaperNodeSelector<
                 var quValue =
                     calculateUValue(metadata.getPriorProbability(), metadata.getVisitCounter(), totalNodeVisitCount) +
                         (max == min ? 0.5
-                            : (((metadata.getExpectedReward().getValue() + metadata.getGainedReward().getValue()) - min) / (max - min)));
+                            : (((metadata.getExpectedReward() + metadata.getGainedReward()) - min) / (max - min)));
                 if(quValue > maxValue) {
                     maxIndex = i;
                     maxValue = quValue;
@@ -120,7 +118,7 @@ public class PaperNodeSelector<
 
     @NotNull
     protected final Function<
-        SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState>,
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState>,
         ImmutableTuple<TAction, Double>>
     getSearchNodeImmutableTupleFunction(final int totalNodeVisitCount, final double min, final double max)
     {
@@ -130,7 +128,7 @@ public class PaperNodeSelector<
             double uValue = calculateUValue(metadata.getPriorProbability(), metadata.getVisitCounter(), totalNodeVisitCount);
             double qValue = max == min
                 ? 0.5
-                : (((metadata.getExpectedReward().getValue() + metadata.getGainedReward().getValue()) - min) / (max - min));
+                : (((metadata.getExpectedReward() + metadata.getGainedReward()) - min) / (max - min));
             return new ImmutableTuple<>(action, qValue + uValue);
         };
     }

@@ -9,7 +9,6 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
@@ -27,19 +26,19 @@ import java.util.Map;
 public abstract class AbstractMonteCarloTrainer<
     TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
-    TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>>
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     extends AbstractTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractMonteCarloTrainer.class.getName());
     private final Map<DoubleVector, MutableDataSample> visitAverageRewardMap = new LinkedHashMap<>();
 
-    public AbstractMonteCarloTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
-                                     TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
-                                     PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                                     TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
+    public AbstractMonteCarloTrainer(InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
+                                     TrainablePaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
+                                     PaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                                     TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                                      double discountFactor,
-                                     RewardAggregator<DoubleReward> rewardAggregator,
+                                     RewardAggregator rewardAggregator,
                                      ProgressTrackerSettings progressTrackerSettings,
                                      int stepCountLimit) {
         super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit);
@@ -59,8 +58,8 @@ public abstract class AbstractMonteCarloTrainer<
     @Override
     public void trainPolicy(int episodeCount) {
         logger.info("Starting MonteCarlo training on [{}] episodeCount", episodeCount);
-        List<EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>> paperEpisodeHistoryList = this.getGameSampler().sampleEpisodes(episodeCount);
-        for (EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> entry : paperEpisodeHistoryList) {
+        List<EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState>> paperEpisodeHistoryList = this.getGameSampler().sampleEpisodes(episodeCount);
+        for (EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> entry : paperEpisodeHistoryList) {
             addVisitedRewards(calculatedVisitedRewards(entry));
         }
         logger.debug("Sampled all episodes");
@@ -74,7 +73,7 @@ public abstract class AbstractMonteCarloTrainer<
         logger.debug("training iteration finished");
     }
 
-    protected abstract Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> paperEpisode);
+    protected abstract Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode);
 
     protected void addVisitedRewards(Map<DoubleVector, MutableDataSample> sampledStateVisitMap) {
         for (Map.Entry<DoubleVector, MutableDataSample> entry : sampledStateVisitMap.entrySet()) {

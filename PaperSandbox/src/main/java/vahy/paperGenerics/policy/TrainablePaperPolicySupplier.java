@@ -10,7 +10,6 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
@@ -20,12 +19,11 @@ import java.util.function.Supplier;
 
 public class TrainablePaperPolicySupplier<
     TAction extends Enum<TAction> & Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends PaperPolicySupplier<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(TrainablePaperPolicySupplier.class.getName());
 
@@ -34,28 +32,28 @@ public class TrainablePaperPolicySupplier<
     private final Supplier<Double> riskSupplier;
 
     public TrainablePaperPolicySupplier(Class<TAction> actionClass,
-                                        SearchNodeMetadataFactory<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
+                                        SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                         double totalRiskAllowed,
                                         SplittableRandom random,
-                                        Supplier<NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
-                                        TrainableNodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
-                                        TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
+                                        Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
+                                        TrainableNodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
+                                        TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                         TreeUpdateConditionFactory treeUpdateConditionFactory,
                                         Supplier<Double> explorationConstantSupplier,
                                         Supplier<Double> temperatureSupplier,
                                         Supplier<Double> riskSupplier,
-                                        StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
+                                        StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider) {
         super(actionClass, searchNodeMetadataFactory, totalRiskAllowed, random, nodeSelector, nodeEvaluator, treeUpdater, treeUpdateConditionFactory, strategiesProvider);
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
         this.riskSupplier = riskSupplier;
     }
 
-    public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
+    public PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState) {
         return createPolicy(initialState);
     }
 
-    public PaperPolicy<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
+    public PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(TState initialState) {
         double explorationConstant = explorationConstantSupplier.get();
         double temperature = temperatureSupplier.get();
         double risk = riskSupplier.get();

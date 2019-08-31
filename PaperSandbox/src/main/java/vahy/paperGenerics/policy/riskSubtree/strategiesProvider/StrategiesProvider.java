@@ -2,7 +2,6 @@ package vahy.paperGenerics.policy.riskSubtree.strategiesProvider;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizer;
@@ -33,11 +32,10 @@ import java.util.function.Supplier;
 
 public class StrategiesProvider<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
     private final InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
     private final InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
@@ -66,7 +64,7 @@ public class StrategiesProvider<
         this.random = random;
     }
 
-    public PlayingDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy(
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy(
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
@@ -84,7 +82,7 @@ public class StrategiesProvider<
         }
     }
 
-    public PlayingDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceNonExistingFlowStrategy(
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceNonExistingFlowStrategy(
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
@@ -100,7 +98,7 @@ public class StrategiesProvider<
         }
     }
 
-    public PlayingDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationExistingFlowStrategy(
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationExistingFlowStrategy(
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
@@ -121,7 +119,7 @@ public class StrategiesProvider<
         }
     }
 
-    public PlayingDistributionProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationNonExistingFlowStrategy(
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationNonExistingFlowStrategy(
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
@@ -137,7 +135,7 @@ public class StrategiesProvider<
         }
     }
 
-    public FlowOptimizer<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer() {
+    public FlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer() {
 
         switch (flowOptimizerType) {
             case HARD:
@@ -155,7 +153,7 @@ public class StrategiesProvider<
         }
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculator(
+    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculator(
         SubTreeRiskCalculatorType subTreeRiskCalculatorType) {
         switch(subTreeRiskCalculatorType) {
             case FLOW_SUM:
@@ -171,11 +169,11 @@ public class StrategiesProvider<
         }
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculatorForKnownFlow() {
+    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculatorForKnownFlow() {
         return provideRiskCalculator(subTreeRiskCalculatorTypeForKnownFlow);
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculatorForUnknownFlow() {
+    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculatorForUnknownFlow() {
         return provideRiskCalculator(subTreeRiskCalculatorTypeForUnknownFlow);
     }
 

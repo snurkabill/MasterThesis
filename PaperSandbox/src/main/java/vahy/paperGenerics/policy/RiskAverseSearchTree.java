@@ -9,7 +9,6 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
@@ -27,12 +26,11 @@ import java.util.stream.Collectors;
 
 public class RiskAverseSearchTree<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends SearchTreeImpl<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(RiskAverseSearchTree.class);
 
@@ -43,25 +41,25 @@ public class RiskAverseSearchTree<
 
     private final SplittableRandom random;
 
-    private SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> latestTreeWithPlayerOnTurn = null;
+    private SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> latestTreeWithPlayerOnTurn = null;
 
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
 
     private final List<TAction> playerActions;
 
-    private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playingDistribution;
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playingDistribution;
 
-    private final StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
+    private final StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
 
     public RiskAverseSearchTree(Class<TAction> clazz,
-                                SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
-                                NodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
-                                TreeUpdater<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
-                                NodeEvaluator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
+                                SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
+                                NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                                TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
+                                NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                 SplittableRandom random,
                                 double totalRiskAllowed,
-                                StrategiesProvider<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategyProvider) {
+                                StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategyProvider) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
         TAction[] allActions = clazz.getEnumConstants();
         this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
@@ -70,7 +68,7 @@ public class RiskAverseSearchTree<
         this.strategiesProvider = strategyProvider;
     }
 
-    private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
             return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
         } else {
@@ -78,7 +76,7 @@ public class RiskAverseSearchTree<
         }
     }
 
-    private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
             return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature).createDistribution(getRoot());
         } else {
@@ -86,7 +84,7 @@ public class RiskAverseSearchTree<
         }
     }
 
-    private PlayingDistribution<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state,
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state,
                                                                                                                                                       PolicyMode policyMode,
                                                                                                                                                       double temperature) {
         switch (policyMode) {
@@ -176,7 +174,7 @@ public class RiskAverseSearchTree<
     }
 
     @Override
-    public StateRewardReturn<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
+    public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         try {
             if(action.isPlayerAction() && action != playingDistribution.getExpectedPlayerAction()) {
                 throw new IllegalStateException("RiskAverseTree is applied with player action which was not selected by riskAverseTree. Discrepancy.");
@@ -254,7 +252,7 @@ public class RiskAverseSearchTree<
     }
 
 
-    private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
+    private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
         printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);
     }
 

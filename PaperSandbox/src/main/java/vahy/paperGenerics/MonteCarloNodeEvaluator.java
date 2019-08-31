@@ -7,7 +7,6 @@ import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
@@ -20,21 +19,21 @@ import java.util.function.Function;
 public class MonteCarloNodeEvaluator<
     TAction extends Action,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
-    TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>>
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     extends PaperNodeEvaluator<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     protected final SplittableRandom random;
-    protected final RewardAggregator<DoubleReward> rewardAggregator;
+    protected final RewardAggregator rewardAggregator;
     protected final double discountFactor;
     protected final double[] priorProbabilities;
 
-    public MonteCarloNodeEvaluator(SearchNodeFactory<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+    public MonteCarloNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                    Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator,
                                    TAction[] allPlayerActions,
                                    TAction[] allOpponentActions,
                                    SplittableRandom random,
-                                   RewardAggregator<DoubleReward> rewardAggregator,
+                                   RewardAggregator rewardAggregator,
                                    double discountFactor) {
         super(searchNodeFactory, null, opponentApproximator, allPlayerActions, allOpponentActions);
         this.random = random;
@@ -47,13 +46,13 @@ public class MonteCarloNodeEvaluator<
     }
 
     @Override
-    protected void innerEvaluation(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected void innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
 
-        ImmutableTuple<DoubleReward, Boolean> sampledRewardWithRisk = runRandomWalkSimulation(node);
+        ImmutableTuple<Double, Boolean> sampledRewardWithRisk = runRandomWalkSimulation(node);
         node.getSearchNodeMetadata().increaseVisitCounter();
-        node.getSearchNodeMetadata().setPredictedReward(new DoubleReward(sampledRewardWithRisk.getFirst().getValue()));
-        node.getSearchNodeMetadata().setExpectedReward(new DoubleReward(sampledRewardWithRisk.getFirst().getValue()));
-        node.getSearchNodeMetadata().setSumOfTotalEstimations(new DoubleReward(sampledRewardWithRisk.getFirst().getValue()));
+        node.getSearchNodeMetadata().setPredictedReward(sampledRewardWithRisk.getFirst());
+        node.getSearchNodeMetadata().setExpectedReward(sampledRewardWithRisk.getFirst());
+        node.getSearchNodeMetadata().setSumOfTotalEstimations(sampledRewardWithRisk.getFirst());
         if(!node.isFinalNode()) {
             double risk = sampledRewardWithRisk.getSecond() ? 1.0 : 0.0;
             node.getSearchNodeMetadata().setPredictedRisk(risk);
@@ -69,12 +68,12 @@ public class MonteCarloNodeEvaluator<
         }
     }
 
-    protected ImmutableTuple<DoubleReward, Boolean> runRandomWalkSimulation(SearchNode<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        List<DoubleReward> rewardList = new ArrayList<>();
+    protected ImmutableTuple<Double, Boolean> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        List<Double> rewardList = new ArrayList<>();
         TState wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             TAction action = getNextAction(wrappedState);
-            StateRewardReturn<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(action);
+            StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(action);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
         }

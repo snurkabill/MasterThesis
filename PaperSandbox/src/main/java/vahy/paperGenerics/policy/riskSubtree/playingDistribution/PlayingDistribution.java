@@ -2,7 +2,6 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
@@ -11,11 +10,10 @@ import java.util.function.Supplier;
 
 public class PlayingDistribution<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, TReward>,
-    TState extends PaperState<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
     private final TAction expectedPlayerAction;
     private final int expectedPlayerActionIndex;
@@ -23,13 +21,13 @@ public class PlayingDistribution<
     private final double[] playerDistribution;
     private final double[] riskOnPlayerSubNodes;
 
-    private final Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier;
+    private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier;
 
     public PlayingDistribution(TAction expectedPlayerAction,
                                int expectedPlayerActionIndex,
                                double[] playerDistribution,
                                double[] riskOnPlayerSubNodes,
-                               Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier) {
+                               Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier) {
         this.expectedPlayerAction = expectedPlayerAction;
         this.expectedPlayerActionIndex = expectedPlayerActionIndex;
         this.playerDistribution = playerDistribution;
@@ -57,7 +55,7 @@ public class PlayingDistribution<
         return riskOnPlayerSubNodes;
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getUsedSubTreeRiskCalculatorSupplier() {
+    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getUsedSubTreeRiskCalculatorSupplier() {
         return usedSubTreeRiskCalculatorSupplier;
     }
 }

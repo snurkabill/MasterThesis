@@ -9,7 +9,6 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
@@ -25,22 +24,22 @@ import java.util.List;
 public abstract class AbstractTrainer<
     TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction, DoubleReward>,
-    TState extends PaperState<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>> {
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
+    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTrainer.class.getName());
 
     private final double discountFactor;
-    private final TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator;
-    private final PaperRolloutGameSampler<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler;
-    protected final RewardAggregator<DoubleReward> rewardAggregator;
+    private final TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator;
+    private final PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler;
+    protected final RewardAggregator rewardAggregator;
 
-    public AbstractTrainer(InitialStateSupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
-                           TrainablePaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
-                           PaperPolicySupplier<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                           TrainableNodeEvaluator<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
+    public AbstractTrainer(InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
+                           TrainablePaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
+                           PaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
+                           TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
                            double discountFactor,
-                           RewardAggregator<DoubleReward> rewardAggregator,
+                           RewardAggregator rewardAggregator,
                            ProgressTrackerSettings progressTrackerSettings,
                            int stepCountLimit) {
         this.discountFactor = discountFactor;
@@ -55,15 +54,15 @@ public abstract class AbstractTrainer<
             Runtime.getRuntime().availableProcessors() - 1);
     }
 
-    public PaperRolloutGameSampler<TAction, DoubleReward, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {
+    public PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<TAction, DoubleReward, DoubleVector, TOpponentObservation, TState>, StepRecord<DoubleReward>>> episodeHistory,
+    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation, TState>, StepRecord>> episodeHistory,
                                                  int i,
                                                  boolean isRiskHit) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
-        DoubleReward aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
+        double aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
         double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
         double risk = isRiskHit ? 1.0 : 0.0;
         return new MutableDataSample(sampledProbabilities, aggregated, risk);
@@ -73,7 +72,7 @@ public abstract class AbstractTrainer<
     protected double[] createOutputVector(MutableDataSample dataSample) {
         double[] probabilities = dataSample.getProbabilities();
         double[] outputVector = new double[probabilities.length + PaperModel.POLICY_START_INDEX];
-        outputVector[PaperModel.Q_VALUE_INDEX] = dataSample.getReward().getValue();
+        outputVector[PaperModel.Q_VALUE_INDEX] = dataSample.getReward();
         outputVector[PaperModel.RISK_VALUE_INDEX] = dataSample.getRisk();
         for (int i = 0; i < probabilities.length; i++) {
             outputVector[i + PaperModel.POLICY_START_INDEX] = probabilities[i];
