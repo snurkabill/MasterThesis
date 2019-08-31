@@ -1,6 +1,6 @@
 package vahy.api.model.reward;
 
-public interface RewardFactory<TReward extends Reward> {
+public interface RewardFactory {
 
-    TReward fromNumericVector(double[] vector);
+    Double fromNumericVector(double[] vector);
 }

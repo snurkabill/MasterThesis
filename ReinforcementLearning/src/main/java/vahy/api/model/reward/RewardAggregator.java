@@ -3,33 +3,33 @@ package vahy.api.model.reward;
 import java.util.List;
 import java.util.stream.Stream;
 
-public interface RewardAggregator<TReward extends Reward> {
+public interface RewardAggregator {
 
-    TReward emptyReward();
+    double emptyReward();
 
-    TReward negate(TReward reward);
+    double negate(double reward);
 
-    TReward aggregate(TReward first, TReward second);
+    double aggregate(double first, double second);
 
-    TReward aggregate(TReward[] rewardArray);
+    double aggregate(double[] rewardArray);
 
-    TReward aggregate(List<TReward> rewardList);
+    double aggregate(List<Double> rewardList);
 
-    TReward aggregate(Stream<TReward> rewardList);
+    double aggregate(Stream<Double> rewardList);
 
-    TReward aggregateDiscount(TReward first, TReward second, double discountFactor);
+    double aggregateDiscount(double first, double second, double discountFactor);
 
-    TReward aggregateDiscount(TReward[] rewardArray, double discountFactor);
+    double aggregateDiscount(double[] rewardArray, double discountFactor);
 
-    TReward aggregateDiscount(List<TReward> rewardList, double discountFactor);
+    double aggregateDiscount(List<Double> rewardList, double discountFactor);
 
-    TReward aggregateDiscount(Stream<TReward> rewardList, double discountFactor);
+    double aggregateDiscount(Stream<Double> rewardList, double discountFactor);
 
-    TReward averageReward(TReward[] rewardArray);
+    double averageReward(double[] rewardArray);
 
-    TReward averageReward(List<TReward> rewardList);
+    double averageReward(List<Double> rewardList);
 
-    TReward averageReward(Stream<TReward> rewardStream);
+    double averageReward(Stream<Double> rewardStream);
 
-    TReward averageReward(TReward runningAverage, int countOfAlreadyAveragedRewards, TReward newReward);
+    double averageReward(double runningAverage, int countOfAlreadyAveragedRewards, double newReward);
 }

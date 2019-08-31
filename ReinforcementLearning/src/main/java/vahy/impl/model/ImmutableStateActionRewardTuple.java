@@ -4,19 +4,17 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateActionReward;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.Reward;
 import vahy.utils.ImmutableTuple;
 
 public class ImmutableStateActionRewardTuple<
     TAction extends Action,
-    TReward extends Reward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends ImmutableTuple<ImmutableTuple<TAction, TReward>, TState>
-    implements StateActionReward<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends ImmutableTuple<ImmutableTuple<TAction, Double>, TState>
+    implements StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
-    public ImmutableStateActionRewardTuple(TState state, TAction action, TReward reward) {
+    public ImmutableStateActionRewardTuple(TState state, TAction action, Double reward) {
         super(new ImmutableTuple<>(action, reward), state);
     }
 
@@ -26,7 +24,7 @@ public class ImmutableStateActionRewardTuple<
     }
 
     @Override
-    public TReward getReward() {
+    public double  getReward() {
         return super.getFirst().getSecond();
     }
 
