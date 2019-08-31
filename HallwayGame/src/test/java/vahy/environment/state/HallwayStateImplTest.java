@@ -254,36 +254,36 @@ public class HallwayStateImplTest {
         HallwayStateImpl state1 = getHallGame3();
         Assert.assertTrue(state1.isAgentTurn());
         var stateRewardReturn = state1.applyAction(HallwayAction.FORWARD);
-        Assert.assertTrue(Math.abs(stateRewardReturn.getReward().getValue() - 99.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn.getReward() - 99.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn2 = stateRewardReturn.getState().applyAction(HallwayAction.NOISY_LEFT);
-        Assert.assertEquals(stateRewardReturn2.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn2.getReward(), 0.0);
         var stateRewardReturn3 = stateRewardReturn2.getState().applyAction(HallwayAction.TURN_RIGHT);
-        Assert.assertTrue(Math.abs(stateRewardReturn3.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn3.getReward() + 1.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn4 = stateRewardReturn3.getState().applyAction(HallwayAction.NO_ACTION);
-        Assert.assertEquals(stateRewardReturn4.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn4.getReward(), 0.0);
         var stateRewardReturn5 = stateRewardReturn4.getState().applyAction(HallwayAction.FORWARD);
-        Assert.assertTrue(Math.abs(stateRewardReturn5.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn5.getReward() + 1.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn6 = stateRewardReturn5.getState().applyAction(HallwayAction.NO_ACTION);
-        Assert.assertEquals(stateRewardReturn6.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn6.getReward(), 0.0);
         var stateRewardReturn7 = stateRewardReturn6.getState().applyAction(HallwayAction.FORWARD);
-        Assert.assertTrue(Math.abs(stateRewardReturn7.getReward().getValue() - 99.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn7.getReward() - 99.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn8 = stateRewardReturn7.getState().applyAction(HallwayAction.NO_ACTION);
-        Assert.assertEquals(stateRewardReturn8.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn8.getReward(), 0.0);
         var stateRewardReturn9 = stateRewardReturn8.getState().applyAction(HallwayAction.TURN_RIGHT);
-        Assert.assertTrue(Math.abs(stateRewardReturn9.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn9.getReward() + 1.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn10 = stateRewardReturn9.getState().applyAction(HallwayAction.NO_ACTION);
-        Assert.assertEquals(stateRewardReturn10.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn10.getReward(), 0.0);
         var stateRewardReturn11 = stateRewardReturn10.getState().applyAction(HallwayAction.TURN_RIGHT);
-        Assert.assertTrue(Math.abs(stateRewardReturn11.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn11.getReward() + 1.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn12 = stateRewardReturn11.getState().applyAction(HallwayAction.NO_ACTION);
-        Assert.assertEquals(stateRewardReturn12.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn12.getReward(), 0.0);
 
         var stateRewardReturn13 = stateRewardReturn12.getState().applyAction(HallwayAction.FORWARD);
-        Assert.assertTrue(Math.abs(stateRewardReturn13.getReward().getValue() + 1.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn13.getReward() + 1.0) < DOUBLE_TOLERANCE);
         var stateRewardReturn14 = stateRewardReturn13.getState().applyAction(HallwayAction.NO_ACTION);
-        Assert.assertEquals(stateRewardReturn14.getReward().getValue(), 0.0);
+        Assert.assertEquals(stateRewardReturn14.getReward(), 0.0);
 
         var stateRewardReturn15 = stateRewardReturn14.getState().applyAction(HallwayAction.FORWARD);
-        Assert.assertTrue(Math.abs(stateRewardReturn15.getReward().getValue() - 99.0) < DOUBLE_TOLERANCE);
+        Assert.assertTrue(Math.abs(stateRewardReturn15.getReward() - 99.0) < DOUBLE_TOLERANCE);
     }
 }

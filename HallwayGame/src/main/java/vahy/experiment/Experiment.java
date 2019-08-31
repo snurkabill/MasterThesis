@@ -13,7 +13,6 @@ import vahy.environment.state.HallwayStateImpl;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
@@ -65,9 +64,9 @@ public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> results;
+    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> results;
 
-    public List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> getResults() {
+    public List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> getResults() {
         return results;
     }
 
@@ -117,12 +116,12 @@ public class Experiment {
         var experimentSetup = setup.getSecond();
         var rewardAggregator = new DoubleScalarRewardAggregator();
         var clazz = HallwayAction.class;
-        var searchNodeMetadataFactory = new PaperMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(rewardAggregator);
+        var searchNodeMetadataFactory = new PaperMetadataFactory<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(rewardAggregator);
         var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>();
-        Supplier<NodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> nodeSelector =
+        Supplier<NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> nodeSelector =
             () -> createNodeSelector(experimentSetup.getCpuctParameter(), random.split(), experimentSetup.getGlobalRiskAllowed(), experimentSetup.getSelectorType());
 
-        var strategiesProvider = new StrategiesProvider<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>(
+        var strategiesProvider = new StrategiesProvider<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>(
             experimentSetup.getInferenceExistingFlowStrategy(),
             experimentSetup.getInferenceNonExistingFlowStrategy(),
             experimentSetup.getExplorationExistingFlowStrategy(),
@@ -191,7 +190,7 @@ public class Experiment {
         }
     }
 
-    private void dumpResults(List<PaperPolicyResults<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> results,
+    private void dumpResults(List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> results,
                              ImmutableTuple<GameConfig, ExperimentSetup> setup) throws IOException {
 
         if(results.size() > 1) {
@@ -241,16 +240,15 @@ public class Experiment {
 
     private List<PaperPolicyResults<
         HallwayAction,
-        DoubleReward,
         DoubleVector,
         EnvironmentProbabilities,
-        PaperMetadata<HallwayAction, DoubleReward>,
+        PaperMetadata<HallwayAction>,
         HallwayStateImpl>>
     evaluatePolicy(
             SplittableRandom random,
             HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
             ExperimentSetup experimentSetup,
-            List<PaperBenchmarkingPolicy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl>> policySupplierList,
+            List<PaperBenchmarkingPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> policySupplierList,
             long trainingTimeInMs,
             ProgressTrackerSettings progressTrackerSettings) {
         logger.info("PaperPolicy test starts");
@@ -291,14 +289,14 @@ public class Experiment {
     private AbstractTrainer<
         HallwayAction,
         EnvironmentProbabilities,
-        PaperMetadata<HallwayAction, DoubleReward>,
+        PaperMetadata<HallwayAction>,
         HallwayStateImpl>
     getAbstractTrainer(TrainerAlgorithm trainerAlgorithm,
                        SplittableRandom random,
                        HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier,
                        double discountFactor,
-                       PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> nodeEvaluator,
-                       TrainablePaperPolicySupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> trainablePaperPolicySupplier,
+                       PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> nodeEvaluator,
+                       TrainablePaperPolicySupplier<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit,
                        ProgressTrackerSettings progressTrackerSettings) {
@@ -340,7 +338,7 @@ public class Experiment {
         }
     }
 
-    private NodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> createNodeSelector(
+    private NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> createNodeSelector(
         double cpuctParameter,
         SplittableRandom random,
         double totalRiskAllowed,
@@ -358,11 +356,11 @@ public class Experiment {
         }
     }
 
-    private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> resolveEvaluator(EvaluatorType evaluatorType,
+    private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> resolveEvaluator(EvaluatorType evaluatorType,
                                                 SplittableRandom random,
                                                 ExperimentSetup experimentSetup,
                                                 DoubleScalarRewardAggregator rewardAggregator,
-                                                SearchNodeBaseFactoryImpl<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction, DoubleReward>, HallwayStateImpl> searchNodeFactory,
+                                                SearchNodeBaseFactoryImpl<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> searchNodeFactory,
                                                 TrainableApproximator<DoubleVector> approximator) {
         switch (evaluatorType) {
             case MONTE_CARLO:

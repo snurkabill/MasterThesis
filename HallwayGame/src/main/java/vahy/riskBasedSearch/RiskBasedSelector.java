@@ -9,7 +9,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperNodeSelector;
 import vahy.utils.ImmutableTuple;
@@ -22,11 +21,10 @@ import java.util.stream.Collectors;
 
 public class RiskBasedSelector<
     TAction extends Action,
-    TReward extends DoubleReward,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends State<TAction, TReward, TPlayerObservation, TOpponentObservation, TState>>
-    extends PaperNodeSelector<TAction, TReward, TPlayerObservation, TOpponentObservation, TState> {
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends PaperNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector.class.getName());
 
@@ -38,7 +36,7 @@ public class RiskBasedSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
         if(node.isPlayerTurn()) {
             int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
@@ -62,7 +60,7 @@ public class RiskBasedSelector<
                 CLP model = new CLP();
                 final CLPExpression totalRiskExpression = model.createExpression();
                 final CLPExpression sumToOneExpression = model.createExpression();
-                final SearchNode<TAction, TReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, TReward>, TState> finalNodeReference = node;
+                final SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> finalNodeReference = node;
                 List<ImmutableTuple<ImmutableTuple<TAction, Double>, CLPVariable>> collect = actionsUcbValue
                     .stream()
                     .map(x -> {

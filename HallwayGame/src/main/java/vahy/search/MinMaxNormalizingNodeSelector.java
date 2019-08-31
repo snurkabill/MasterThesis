@@ -5,7 +5,6 @@ import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
 import vahy.utils.ImmutableTuple;
@@ -14,7 +13,7 @@ import vahy.utils.StreamUtils;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> {
+public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector<HallwayAction,  DoubleVector, EnvironmentProbabilities, MonteCarloTreeSearchMetadata, HallwayStateImpl> {
 
     public static final double TOLERANCE = 0.0000000001;
 
@@ -27,17 +26,17 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
     }
 
     @Override
-    protected HallwayAction getBestAction(SearchNode<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, MonteCarloTreeSearchMetadata<DoubleReward>, HallwayStateImpl> node) {
+    protected HallwayAction getBestAction(SearchNode<HallwayAction,  DoubleVector, EnvironmentProbabilities, MonteCarloTreeSearchMetadata, HallwayStateImpl> node) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
         double max = node
             .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
+            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward())
             .max().orElseThrow(() -> new IllegalStateException("Maximum Does not exists"));
 
         double min = node
             .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward().getValue())
+            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward())
             .min().orElseThrow(() -> new IllegalStateException("Maximum Does not exists"));
 
 
@@ -51,8 +50,8 @@ public class MinMaxNormalizingNodeSelector extends AbstractTreeBasedNodeSelector
             .map(x -> {
                 HallwayAction action = x.getAppliedAction();
                 double uValue = calculateUValue(priorProbability, x.getSearchNodeMetadata().getVisitCounter(), totalNodeVisitCount);
-                double qValue = x.getSearchNodeMetadata().getExpectedReward().getValue() == 0 ? 0 :
-                    (x.getSearchNodeMetadata().getExpectedReward().getValue() - finalMin) /
+                double qValue = x.getSearchNodeMetadata().getExpectedReward() == 0 ? 0 :
+                    (x.getSearchNodeMetadata().getExpectedReward() - finalMin) /
                         (Math.abs(finalMax - finalMin) < TOLERANCE ? finalMax : (finalMax - finalMin));
 
                 return new ImmutableTuple<>(action, qValue + uValue);

@@ -10,7 +10,6 @@ import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.policy.maximizingEstimatedReward.AbstractEstimatedRewardMaximizingTreeSearchPolicy;
 import vahy.impl.search.node.factory.BaseSearchNodeMetadataFactory;
@@ -23,7 +22,7 @@ import vahy.impl.search.update.TraversingTreeUpdater;
 
 import java.util.SplittableRandom;
 
-public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> {
+public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata, HallwayStateImpl> {
 
     public EGreedyPolicy(
         SplittableRandom random,
@@ -31,35 +30,33 @@ public class EGreedyPolicy extends AbstractEstimatedRewardMaximizingTreeSearchPo
         HallwayStateImpl gameState,
         NodeTransitionUpdater<
             HallwayAction,
-            DoubleReward,
             DoubleVector,
             EnvironmentProbabilities,
-            BaseSearchNodeMetadata<DoubleReward>,
+            BaseSearchNodeMetadata,
             HallwayStateImpl> nodeTransitionUpdater,
         NodeEvaluator<
             HallwayAction,
-            DoubleReward,
             DoubleVector,
             EnvironmentProbabilities,
-            BaseSearchNodeMetadata<DoubleReward>,
+            BaseSearchNodeMetadata,
             HallwayStateImpl> rewardSimulator) {
         super(random, uprateTreeCount, createSearchTree(random, gameState, nodeTransitionUpdater, rewardSimulator));
     }
 
-    private static SearchTreeImpl<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> createSearchTree(
+    private static SearchTreeImpl<HallwayAction,  DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata, HallwayStateImpl> createSearchTree(
         SplittableRandom random,
         HallwayStateImpl gameState,
-        NodeTransitionUpdater<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> nodeTransitionUpdater,
-        NodeEvaluator<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> nodeEvaluator)
+        NodeTransitionUpdater<HallwayAction,  DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata, HallwayStateImpl> nodeTransitionUpdater,
+        NodeEvaluator<HallwayAction,  DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata, HallwayStateImpl> nodeEvaluator)
     {
-        SearchNodeFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> searchNodeFactory =
+        SearchNodeFactory<HallwayAction,  DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata, HallwayStateImpl> searchNodeFactory =
             new SearchNodeBaseFactoryImpl<>(
-                new BaseSearchNodeMetadataFactory<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(new DoubleScalarRewardAggregator()
+                new BaseSearchNodeMetadataFactory<HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl>(new DoubleScalarRewardAggregator()
                 )
             );
 
-        SearchNode<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata<DoubleReward>, HallwayStateImpl> root = searchNodeFactory.createNode(
-            new ImmutableStateRewardReturnTuple<>(gameState, new DoubleReward(0.0)),
+        SearchNode<HallwayAction,  DoubleVector, EnvironmentProbabilities, BaseSearchNodeMetadata, HallwayStateImpl> root = searchNodeFactory.createNode(
+            new ImmutableStateRewardReturnTuple<>(gameState, 0.0),
             null,
             null);
 

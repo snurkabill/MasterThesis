@@ -6,7 +6,6 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PaperTreeUpdater;
@@ -16,27 +15,27 @@ public class RiskBasedUpdater<
     TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, TState>>
-    implements TreeUpdater<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> {
+    TState extends PaperState<TAction,  TPlayerObservation, TOpponentObservation, TState>>
+    implements TreeUpdater<TAction,  TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
 
     @Override
-    public void updateTree(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction,  TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
         double estimatedLeafReward = (expandedNode.isFinalNode() ?
             0.0d :
-            expandedNode.getSearchNodeMetadata().getPredictedReward().getValue())
-            + expandedNode.getSearchNodeMetadata().getCumulativeReward().getValue();
+            expandedNode.getSearchNodeMetadata().getPredictedReward())
+            + expandedNode.getSearchNodeMetadata().getCumulativeReward();
         double estimatedLeafRisk = expandedNode.isFinalNode() ?
             expandedNode.getWrappedState().isRiskHit() ?
                 1.0
                 : 0.0
             : expandedNode.getSearchNodeMetadata().getPredictedRisk();
 
-        PaperMetadata<TAction, DoubleReward> leafSearchNodeMetadata =  expandedNode.getSearchNodeMetadata();
+        PaperMetadata<TAction> leafSearchNodeMetadata =  expandedNode.getSearchNodeMetadata();
         leafSearchNodeMetadata.increaseVisitCounter();
-        leafSearchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(estimatedLeafReward));
+        leafSearchNodeMetadata.setSumOfTotalEstimations(estimatedLeafReward);
         leafSearchNodeMetadata.setSumOfRisk(estimatedLeafRisk);
 
         if(!expandedNode.isRoot()) {
@@ -54,8 +53,8 @@ public class RiskBasedUpdater<
         logger.trace("Traversing updated traversed [{}] tree levels", i);
     }
 
-    private void updateNode(SearchNode<TAction, DoubleReward, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction, DoubleReward>, TState> expandedNode) {
-        PaperMetadata<TAction, DoubleReward> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
+    private void updateNode(SearchNode<TAction,  TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
+        PaperMetadata<TAction> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         double weightedRisk = expandedNode
             .getChildNodeStream()
             .filter(x -> x.getSearchNodeMetadata().getVisitCounter() > 0)
@@ -65,9 +64,9 @@ public class RiskBasedUpdater<
         double weightedReward = expandedNode
             .getChildNodeStream()
             .filter(x -> x.getSearchNodeMetadata().getVisitCounter() > 0)
-            .mapToDouble(x -> x.getSearchNodeMetadata().getPriorProbability() * x.getSearchNodeMetadata().getSumOfTotalEstimations().getValue())
+            .mapToDouble(x -> x.getSearchNodeMetadata().getPriorProbability() * x.getSearchNodeMetadata().getSumOfTotalEstimations())
             .sum();
-        searchNodeMetadata.setSumOfTotalEstimations(new DoubleReward(weightedReward));
+        searchNodeMetadata.setSumOfTotalEstimations(weightedReward);
     }
 
 }

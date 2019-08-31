@@ -5,14 +5,13 @@ import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicy implements Policy<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class EnvironmentPolicy implements Policy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
 
     private final SplittableRandom random;
 

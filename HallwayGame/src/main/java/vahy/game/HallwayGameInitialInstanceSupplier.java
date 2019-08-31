@@ -14,7 +14,6 @@ import vahy.game.cell.CommonCell;
 import vahy.game.cell.GoalCell;
 import vahy.game.cell.TrapCell;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleReward;
 import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
 
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction, DoubleReward, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;
