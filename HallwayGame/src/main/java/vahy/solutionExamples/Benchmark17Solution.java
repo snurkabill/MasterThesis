@@ -7,6 +7,7 @@ import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
@@ -50,7 +51,7 @@ public class Benchmark17Solution {
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
+            .noisyMoveProbability(0.0)
             .stepPenalty(1)
             .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
@@ -63,7 +64,7 @@ public class Benchmark17Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_17)
             //MCTS
             .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -72,22 +73,24 @@ public class Benchmark17Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(30000)
+            .stageCount(1000)
 
             .maximalStepCountBound(1000)
 
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
+            .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(1.0)
+            .globalRiskAllowed(0.05)
+            .riskSupplier(() -> 0.05)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    var x = Math.exp(-callCount / 1000000.0);
+                    var x = Math.exp(-callCount / 100000.0) / 5;
                     if(callCount % batchSize == 0) {
                         logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
                     }
@@ -96,19 +99,18 @@ public class Benchmark17Solution {
                 }
             })
             .temperatureSupplier(new Supplier<>() {
-                private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    double x = Math.exp(-callCount / 2000000.0) * 10;
+                    double x = Math.exp(-callCount / 200000.0) * 10;
                     if(callCount % batchSize == 0) {
                         logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
                     }
                     return x;
 //                    return 1.5;
                 }
+                private int callCount = 0;
             })
-            .riskSupplier(() -> 1.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)

@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark15Solution {
+public class Benchmark18Solution {
 
     private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
 
@@ -45,15 +45,14 @@ public class Benchmark15Solution {
 //        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
 //        new Experiment().prepareAndRun(setup, random);
 
-
     }
 
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.1)
-            .stepPenalty(1)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(10)
             .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
@@ -62,10 +61,10 @@ public class Benchmark15Solution {
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_15)
+            .hallwayInstance(HallwayInstance.BENCHMARK_18)
             //MCTS
             .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -74,7 +73,7 @@ public class Benchmark15Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(3000)
+            .stageCount(200)
 
             .maximalStepCountBound(1000)
 
@@ -84,13 +83,14 @@ public class Benchmark15Solution {
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(1.0)
+            .globalRiskAllowed(0.0)
+            .riskSupplier(() -> 0.00)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    var x = Math.exp(-callCount / 100000.0);
+                    var x = Math.exp(-callCount / 100000.0) / 5;
                     if(callCount % batchSize == 0) {
                         logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
                     }
@@ -99,7 +99,6 @@ public class Benchmark15Solution {
                 }
             })
             .temperatureSupplier(new Supplier<>() {
-                private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
@@ -110,8 +109,8 @@ public class Benchmark15Solution {
                     return x;
 //                    return 1.5;
                 }
+                private int callCount = 0;
             })
-            .riskSupplier(() -> 1.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)

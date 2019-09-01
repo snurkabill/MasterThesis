@@ -63,7 +63,7 @@ public class Benchmark05Solution {
             .batchEpisodeCount(100)
 
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            .stageCount(10)
+            .stageCount(20)
             .evaluatorType(EvaluatorType.RALF)
 
 

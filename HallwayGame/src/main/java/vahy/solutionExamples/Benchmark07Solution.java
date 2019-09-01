@@ -5,6 +5,7 @@ import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
@@ -39,7 +40,7 @@ public class Benchmark07Solution {
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
-            .reward(100)
+            .reward(10_000)
             .noisyMoveProbability(0.4)
             .stepPenalty(1)
             .trapProbability(1)
@@ -51,7 +52,7 @@ public class Benchmark07Solution {
             .hallwayInstance(HallwayInstance.BENCHMARK_07)
             //MCTS
             .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(30))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(0)
@@ -59,7 +60,7 @@ public class Benchmark07Solution {
             // REINFORCEMENT
             .discountFactor(1)
 
-            .batchEpisodeCount(100)
+            .batchEpisodeCount(50)
             .stageCount(1000)
 
             .maximalStepCountBound(1000)
@@ -67,19 +68,21 @@ public class Benchmark07Solution {
 
 //            .approximatorType(ApproximatorType.HASHMAP)
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .learningRate(0.1)
+            .evaluatorType(EvaluatorType.RALF)
+            .learningRate(0.01)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(10000)
             .globalRiskAllowed(0.0)
+            .riskSupplier(() -> 0.0)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) ;
-//                    return 0.05;
+//                    return Math.exp(-callCount / 10000.0) ;
+                    return 0.05;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
@@ -87,11 +90,10 @@ public class Benchmark07Solution {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 20000.0) * 5;
-//                    return 1.0;
+//                    return Math.exp(-callCount / 20000.0) * 5;
+                    return 1.0;
                 }
             })
-            .riskSupplier(() -> 0.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
