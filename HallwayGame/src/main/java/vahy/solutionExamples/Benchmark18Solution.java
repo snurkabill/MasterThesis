@@ -53,7 +53,7 @@ public class Benchmark18Solution {
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
-            .trapProbability(0.1)
+            .trapProbability(0.05)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
@@ -83,8 +83,8 @@ public class Benchmark18Solution {
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.0)
-            .riskSupplier(() -> 0.00)
+            .globalRiskAllowed(0.05)
+            .riskSupplier(() -> 0.05)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
