@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class Benchmark18Solution {
+public class Benchmark19Solution {
 
     private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
 
@@ -52,16 +52,16 @@ public class Benchmark18Solution {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
-            .stepPenalty(10)
+            .stepPenalty(1)
             .trapProbability(0.05)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
-        int batchSize = 1;
+        int batchSize = 100;
 
         ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_18)
+            .hallwayInstance(HallwayInstance.BENCHMARK_19)
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
@@ -73,36 +73,36 @@ public class Benchmark18Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(200)
+            .stageCount(100)
 
             .maximalStepCountBound(1000)
 
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .evaluatorType(EvaluatorType.RAMCP)
+            .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.00)
-            .riskSupplier(() -> 0.00)
+            .globalRiskAllowed(0.0)
+            .riskSupplier(() -> 0.0)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
-                    callCount++;
-                    var x = Math.exp(-callCount / 100000.0) / 5;
-                    if(callCount % batchSize == 0) {
-                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
-                    }
-                    return x;
-//                    return 1.0;
+//                    callCount++;
+//                    var x = Math.exp(-callCount / 1000000.0);
+//                    if(callCount % batchSize == 0) {
+//                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+//                    }
+//                    return x;
+                    return 1.0;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
                     callCount++;
-                    double x = Math.exp(-callCount / 200000.0) * 10;
+                    double x = Math.exp(-callCount / 200000.0) ;
                     if(callCount % batchSize == 0) {
                         logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
                     }
