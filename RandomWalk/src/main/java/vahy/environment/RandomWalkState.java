@@ -21,7 +21,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
     private final RandomWalkSetup randomWalkSetup;
 
     public RandomWalkState(RandomWalkSetup randomWalkSetup) {
-        this(0, true, RandomWalkAction.DOWN, randomWalkSetup);
+        this(randomWalkSetup.getStartLevel(), true, RandomWalkAction.DOWN, randomWalkSetup);
     }
 
     protected RandomWalkState(int level, boolean isAgentTurn, RandomWalkAction previousAction, RandomWalkSetup randomWalkSetup) {
@@ -60,7 +60,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleRewar
             actionType,
             randomWalkSetup);
 //        DoubleReward reward = nextState.isFinalState() ? new DoubleReward((double) level) : new DoubleReward(0.0);
-        DoubleReward reward = new DoubleReward((double) (newLevel - level));
+        DoubleReward reward = actionType.isPlayerAction() ? new DoubleReward(0.0) :  (new DoubleReward((double) ((newLevel - level) - randomWalkSetup.getStepPenalty())));
         return new ImmutableStateRewardReturnTuple<>(nextState, reward);
     }
 

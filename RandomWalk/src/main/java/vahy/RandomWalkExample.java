@@ -1,5 +1,7 @@
 package vahy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.environment.RandomWalkSetup;
 import vahy.experiment.Experiment;
@@ -21,6 +23,8 @@ import java.util.function.Supplier;
 
 public class RandomWalkExample {
 
+    private static Logger logger = LoggerFactory.getLogger(RandomWalkExample.class.getName());
+
     public static void main(String[] args) throws IOException {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
@@ -31,14 +35,22 @@ public class RandomWalkExample {
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
-        var randomWalkSetup = new RandomWalkSetup(100, 1, 1, 5, 10, 0.9, 0.8);
+        var startLevel = 4;
+        var diffLevel = 100;
+        var finishlevel = startLevel + diffLevel;
+        var stepPenalty = 1;
+        var randomWalkSetup = new RandomWalkSetup(finishlevel, startLevel, stepPenalty, 2, 2, 5, 9, 0.9, 0.8);
+
+        var riskAllowed = 0.05;
+        var batchSize = 100;
+
         ExperimentSetup experimentSetup = new ExperimentSetup(
             0,
             2,
             1,
-            new FixedUpdateCountTreeConditionFactory(10),
+            new FixedUpdateCountTreeConditionFactory(100),
             1.0,
-            100,
+            batchSize,
             20000,
             10000,
             1000,
@@ -47,8 +59,12 @@ public class RandomWalkExample {
                 @Override
                 public Double get() {
                     callCount++;
-                     return Math.exp(-callCount / 10000.0) / 5;
+                    var x = Math.exp(-callCount / 100000.0) / 5;
 //                    return 0.2;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
                 }
             },
             new Supplier<>() {
@@ -56,10 +72,14 @@ public class RandomWalkExample {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) * 4;
+                    var x = Math.exp(-callCount / 100000.0) * 4;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
                 }
             },
-            () -> 0.0,
+            () -> riskAllowed,
 //            () -> 0.1,
 //            () -> 2.0,
             TrainerAlgorithm.EVERY_VISIT_MC,
@@ -68,13 +88,13 @@ public class RandomWalkExample {
             1,
             1,
             1000,
-            0.0,
+            riskAllowed,
             0.01,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
             InferenceNonExistingFlowStrategy.MAX_UCB_VISIT,
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT,
-            FlowOptimizerType.HARD_HARD_SOFT,
+            FlowOptimizerType.HARD_HARD,
             SubTreeRiskCalculatorType.FLOW_SUM,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             false);
