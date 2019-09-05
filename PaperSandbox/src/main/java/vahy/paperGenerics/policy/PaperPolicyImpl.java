@@ -43,6 +43,10 @@ public class PaperPolicyImpl<
     private double[] actionDistribution;
     private boolean hasActionChanged = false;
 
+    private long msMeasured;
+    private long counter = 0;
+
+
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
                            RiskAverseSearchTree<TAction, TReward, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
@@ -104,6 +108,8 @@ public class PaperPolicyImpl<
 
     @Override
     public TAction getDiscreteAction(TState gameState) {
+        long start = System.currentTimeMillis();
+
         checkStateRoot(gameState);
         expandSearchTree(gameState); //  TODO expand search tree should be enabled in episode simulation
 
@@ -121,6 +127,15 @@ public class PaperPolicyImpl<
             logger.debug("Exploitation action [{}].", action);
         } else {
             logger.debug("Exploration action [{}]", action);
+        }
+        long end = System.currentTimeMillis();
+        msMeasured += end - start;
+        counter++;
+
+        if(isExplorationDisabled) {
+            if(counter % 10 == 0) {
+                logger.info("Avg decision took: [{}] milliseconds. From [{}] samples", msMeasured / (double) counter, counter);
+            }
         }
         return action;
     }
