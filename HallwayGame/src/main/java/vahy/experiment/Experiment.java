@@ -161,7 +161,7 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
 
-        var progressTrackerSettings = new ProgressTrackerSettings(true, true, false, false);
+        var progressTrackerSettings = new ProgressTrackerSettings(true, false, false, false);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
@@ -275,6 +275,8 @@ public class Experiment {
             logger.info("Average reward: [{}]", nnResults.getAverageReward());
             logger.info("Stdev reward: [{}]", nnResults.getStdevReward());
             logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
+            logger.info("Avg episode length [{}]", nnResults.getEpisodeList().stream().map(x -> x.getEpisodeHistoryList().size()).mapToDouble(x -> x).sum() / nnResults.getEpisodeList().size());
+            logger.info("Avg episode length [{}]", nnResults.getEpisodeList().stream().map(x -> x.getEpisodeStateRewardReturnList().size()).mapToDouble(x -> x).sum() / nnResults.getEpisodeList().size());
             logger.info("Total expanded nodes: [{}]", SearchNodeImpl.nodeInstanceId);
             logger.info("RiskHit ratio: [{}]", nnResults.getRiskHitRatio());
             logger.info("Stdev riskHit: [{}]", nnResults.getStdevRisk());

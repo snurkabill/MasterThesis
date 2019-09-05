@@ -54,7 +54,7 @@ public class RandomWalkExample {
             batchSize,
             20000,
             10000,
-            1000,
+            100,
             new Supplier<>() {
                 private int callCount = 0;
                 @Override

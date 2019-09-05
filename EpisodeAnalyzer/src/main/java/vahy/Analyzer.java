@@ -51,11 +51,7 @@ public class Analyzer {
             String[] parts = x.split(",");
             return new ImmutableTuple<>(Double.valueOf(parts[0]), Boolean.valueOf(parts[1]));
         }).collect(Collectors.toList());
-
-        printStatistics(results, x -> true, "All episodes");
-        printStatistics(results, ImmutableTuple::getSecond, "All unsuccessful episodes");
-        printStatistics(results, x -> !x.getSecond(), "All successful episodes");
-
+        printStatistics(results);
     }
 
     public static double calculateAverage(List<Double> data) {
@@ -70,6 +66,12 @@ public class Analyzer {
                 return diff * diff;
             }).sum();
         return Math.sqrt(innerSum * (1.0 / (data.size() - 1)));
+    }
+
+    public static void printStatistics(List<ImmutableTuple<Double, Boolean>> results) {
+        printStatistics(results, x -> true, "All episodes");
+        printStatistics(results, ImmutableTuple::getSecond, "All unsuccessful episodes");
+        printStatistics(results, x -> !x.getSecond(), "All successful episodes");
     }
 
     public static void printStatistics(List<ImmutableTuple<Double, Boolean>> data, Predicate<ImmutableTuple<Double, Boolean>> filter, String dataName) {

@@ -2,6 +2,7 @@ package vahy.experiment;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.Analyzer;
 import vahy.RandomWalkExample;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.nodeSelector.NodeSelector;
@@ -13,6 +14,7 @@ import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.opponent.RandomWalkOpponentSupplier;
 import vahy.paperGenerics.MonteCarloNodeEvaluator;
@@ -170,7 +172,7 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
 
-        var progressTrackerSettings = new ProgressTrackerSettings(true, true, false, false);
+        var progressTrackerSettings = new ProgressTrackerSettings(true, false, false, false);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),
@@ -185,6 +187,7 @@ public class Experiment {
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
         this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, evaluator, nnBasedPolicySupplier, progressTrackerSettings, trainingTimeInMs);
+        Analyzer.printStatistics(results.get(0).getRewardAndRiskList());
 
         try {
             dumpResults(results, setup);
@@ -276,11 +279,16 @@ public class Experiment {
             .findFirst()
             .get();
         logger.info("Average reward: [{}]", nnResults.getAverageReward());
+        logger.info("Stdev reward: [{}]", nnResults.getStdevReward());
         logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-        logger.info("Total expanded nodes: [{}]", nnbasedEvaluator.getNodesExpandedCount());
-        logger.info("Kill ratio: [{}]", nnResults.getRiskHitRatio());
+        logger.info("Avg episode length [{}]", nnResults.getEpisodeList().stream().map(x -> x.getEpisodeHistoryList().size()).mapToDouble(x -> x).sum() / nnResults.getEpisodeList().size());
+        logger.info("Avg episode length [{}]", nnResults.getEpisodeList().stream().map(x -> x.getEpisodeStateRewardReturnList().size()).mapToDouble(x -> x).sum() / nnResults.getEpisodeList().size());
+        logger.info("Total expanded nodes: [{}]", SearchNodeImpl.nodeInstanceId);
+        logger.info("RiskHit ratio: [{}]", nnResults.getRiskHitRatio());
+        logger.info("Stdev riskHit: [{}]", nnResults.getStdevRisk());
         logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
         logger.info("Training time: [{}]ms", trainingTimeInMs);
+        logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getEpisodeList().size() * nnResults.getAverageMillisPerEpisode());
 
         return policyResultList;
     }
