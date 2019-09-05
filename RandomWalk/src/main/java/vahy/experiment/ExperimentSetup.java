@@ -36,6 +36,7 @@ public class ExperimentSetup {
 
     private final TrainerAlgorithm trainerAlgorithm;
     private final ApproximatorType approximatorType;
+    private final EvaluatorType evaluatorType;
 
     // NN
     private final int trainingBatchSize;
@@ -56,7 +57,7 @@ public class ExperimentSetup {
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
     private final boolean omitProbabilities;
 
-    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, Supplier<Double> riskSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, boolean omitProbabilities) {
+    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, Supplier<Double> riskSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, EvaluatorType evaluatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, boolean omitProbabilities) {
         this.randomSeed = randomSeed;
         this.cpuctParameter = cpuctParameter;
         this.mcRolloutCount = mcRolloutCount;
@@ -71,6 +72,7 @@ public class ExperimentSetup {
         this.riskSupplier = riskSupplier;
         this.trainerAlgorithm = trainerAlgorithm;
         this.approximatorType = approximatorType;
+        this.evaluatorType = evaluatorType;
         this.trainingBatchSize = trainingBatchSize;
         this.trainingEpochCount = trainingEpochCount;
         this.evalEpisodeCount = evalEpisodeCount;
@@ -132,6 +134,10 @@ public class ExperimentSetup {
 
     public ApproximatorType getApproximatorType() {
         return approximatorType;
+    }
+
+    public EvaluatorType getEvaluatorType() {
+        return evaluatorType;
     }
 
     public int getTrainingBatchSize() {

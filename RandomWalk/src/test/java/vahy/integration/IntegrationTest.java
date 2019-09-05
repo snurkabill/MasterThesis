@@ -7,6 +7,7 @@ import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.environment.RandomWalkSetup;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -87,6 +88,7 @@ public class IntegrationTest {
 //            () -> 2.0,
             TrainerAlgorithm.EVERY_VISIT_MC,
             ApproximatorType.NN,
+            EvaluatorType.RALF,
 //            ApproximatorType.HASHMAP,
             4,
             100,

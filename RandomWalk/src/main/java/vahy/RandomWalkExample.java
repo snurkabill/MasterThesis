@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.environment.RandomWalkSetup;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -35,8 +36,8 @@ public class RandomWalkExample {
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
-        var startLevel = 4;
-        var diffLevel = 100;
+        var startLevel = 5;
+        var diffLevel = 20;
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
         var randomWalkSetup = new RandomWalkSetup(finishlevel, startLevel, stepPenalty, 2, 2, 5, 9, 0.9, 0.8);
@@ -48,7 +49,7 @@ public class RandomWalkExample {
             0,
             2,
             1,
-            new FixedUpdateCountTreeConditionFactory(100),
+            new FixedUpdateCountTreeConditionFactory(50),
             1.0,
             batchSize,
             20000,
@@ -85,6 +86,7 @@ public class RandomWalkExample {
             TrainerAlgorithm.EVERY_VISIT_MC,
 //            ApproximatorType.NN,
             ApproximatorType.HASHMAP_LR,
+            EvaluatorType.RALF,
             1,
             1,
             1000,

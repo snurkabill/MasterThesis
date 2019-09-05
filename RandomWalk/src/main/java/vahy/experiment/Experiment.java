@@ -15,12 +15,14 @@ import vahy.impl.model.reward.DoubleReward;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.opponent.RandomWalkOpponentSupplier;
+import vahy.paperGenerics.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperNodeEvaluator;
 import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.RamcpNodeEvaluator;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.benchmark.PaperPolicyResults;
@@ -40,7 +42,13 @@ import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -108,11 +116,24 @@ public class Experiment {
         Supplier<NodeSelector<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> nodeSelectorSupplier =
             () -> new PaperNodeSelector<>(setup.getSecond().getCpuctParameter(), random);
 
-        var nnbasedEvaluator = new PaperNodeEvaluator<>(
-            new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
-            approximator,
-            RandomWalkProbabilities::getProbabilities,
-            RandomWalkAction.playerActions, RandomWalkAction.environmentActions);
+
+        var evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random.split(), setup.getSecond(), rewardAggregator, new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), approximator);
+//
+//        var evaluator = new PaperNodeEvaluator<>(
+//            new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
+//            approximator,
+//            RandomWalkProbabilities::getProbabilities,
+//            RandomWalkAction.playerActions, RandomWalkAction.environmentActions);
+//
+//
+////        var evaluator = new RamcpNodeEvaluator<>(
+////            new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
+////            RandomWalkProbabilities::getProbabilities,
+////            RandomWalkAction.playerActions,
+////            RandomWalkAction.environmentActions,
+////            random.split(),
+////            rewardAggregator,
+////            experimentSetup.getDiscountFactor());
 
         var strategiesProvider = new StrategiesProvider<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>(
             experimentSetup.getInferenceExistingFlowStrategy(),
@@ -130,7 +151,7 @@ public class Experiment {
             experimentSetup.getGlobalRiskAllowed(),
             random,
             nodeSelectorSupplier,
-            nnbasedEvaluator,
+            evaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             experimentSetup.getExplorationConstantSupplier(),
@@ -144,7 +165,7 @@ public class Experiment {
             experimentSetup.getGlobalRiskAllowed(),
             random,
             nodeSelectorSupplier,
-            nnbasedEvaluator,
+            evaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
@@ -156,14 +177,58 @@ public class Experiment {
             random,
             RandomWalkGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
-            nnbasedEvaluator,
+            evaluator,
             paperTrainablePolicySupplier,
             experimentSetup.getReplayBufferSize(),
             experimentSetup.getMaximalStepCountBound(),
             progressTrackerSettings);
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, nnbasedEvaluator, nnBasedPolicySupplier, progressTrackerSettings, trainingTimeInMs);
+        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, evaluator, nnBasedPolicySupplier, progressTrackerSettings, trainingTimeInMs);
+
+        try {
+            dumpResults(results, setup);
+        } catch (IOException e) {
+            logger.error("Results dump failed. ", e);
+        }
+    }
+
+    private void dumpResults(List<PaperPolicyResults<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> results,
+                             ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup) throws IOException {
+
+        if(results.size() > 1) {
+            throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
+        }
+        var policyResult = results.get(0);
+
+        String resultMasterFolderName = "Results";
+        File resultFolder = new File(resultMasterFolderName);
+
+        if(!resultFolder.exists()) {
+            resultFolder.mkdir();
+        }
+
+        File resultSubfolder = new File(resultFolder, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")));
+        resultSubfolder.mkdir();
+
+        File experimentSetuFile = new File(resultSubfolder, "ExperimentSetup");
+        PrintWriter out = new PrintWriter(experimentSetuFile);
+        out.print("ExperimentSetup: " + setup.getSecond().toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + setup.getFirst().toString());
+        out.close();
+        File resultFile = new File(resultSubfolder.getAbsolutePath(), "Rewards");
+        writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());
+    }
+
+    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException{
+        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
+        outputWriter.write("Reward,Risk");
+        outputWriter.newLine();
+        for (int i = 0; i < list.size(); i++) {
+            outputWriter.write(list.get(i).getFirst() + "," + list.get(i).getSecond());
+            outputWriter.newLine();
+        }
+        outputWriter.flush();
+        outputWriter.close();
     }
 
     private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
@@ -171,7 +236,7 @@ public class Experiment {
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
             trainer.trainPolicy(experimentSetup.getBatchEpisodeCount());
-            trainer.printDataset();
+//            trainer.printDataset();
         }
         return System.currentTimeMillis() - trainingStart;
     }
@@ -269,6 +334,43 @@ public class Experiment {
                     stepCountLimit);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
+        }
+    }
+
+    private PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> resolveEvaluator(EvaluatorType evaluatorType,
+                                                                                                                                                            SplittableRandom random,
+                                                                                                                                                            ExperimentSetup experimentSetup,
+                                                                                                                                                            DoubleScalarRewardAggregator rewardAggregator,
+                                                                                                                                                            SearchNodeBaseFactoryImpl<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> searchNodeFactory,
+                                                                                                                                                            TrainableApproximator<DoubleVector> approximator) {
+        switch (evaluatorType) {
+            case MONTE_CARLO:
+                return new MonteCarloNodeEvaluator<>(
+                    searchNodeFactory,
+                    RandomWalkProbabilities::getProbabilities,
+                    RandomWalkAction.playerActions,
+                    RandomWalkAction.environmentActions,
+                    random.split(),
+                    rewardAggregator,
+                    experimentSetup.getDiscountFactor());
+            case RALF:
+                return new PaperNodeEvaluator<>(
+                    searchNodeFactory,
+                    approximator,
+                    RandomWalkProbabilities::getProbabilities,
+                    RandomWalkAction.playerActions,
+                    RandomWalkAction.environmentActions);
+            case RAMCP:
+                return new RamcpNodeEvaluator<>(
+                    searchNodeFactory,
+                    RandomWalkProbabilities::getProbabilities,
+                    RandomWalkAction.playerActions,
+                    RandomWalkAction.environmentActions,
+                    random.split(),
+                    rewardAggregator,
+                    experimentSetup.getDiscountFactor());
+            default:
+                throw EnumUtils.createExceptionForUnknownEnumValue(evaluatorType);
         }
     }
 
