@@ -23,6 +23,7 @@
         <module>../PaperSandbox</module>
         <module>../MarketEnvironment</module>
         <module>../RandomWalk</module>
+        <module>../EpisodeAnalyzer</module>
     </modules>
 
     <properties>
