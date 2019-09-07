@@ -195,7 +195,7 @@ public class Experiment {
         }
     }
 
-    private void dumpResults(List<PaperPolicyResults<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState>> results,
+    private void dumpResults(List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> results,
                              ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup) throws IOException {
 
         if(results.size() > 1) {
@@ -343,11 +343,11 @@ public class Experiment {
         }
     }
 
-    private PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> resolveEvaluator(EvaluatorType evaluatorType,
+    private PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> resolveEvaluator(EvaluatorType evaluatorType,
                                                                                                                                                             SplittableRandom random,
                                                                                                                                                             ExperimentSetup experimentSetup,
                                                                                                                                                             DoubleScalarRewardAggregator rewardAggregator,
-                                                                                                                                                            SearchNodeBaseFactoryImpl<RandomWalkAction, DoubleReward, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction, DoubleReward>, RandomWalkState> searchNodeFactory,
+                                                                                                                                                            SearchNodeBaseFactoryImpl<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> searchNodeFactory,
                                                                                                                                                             TrainableApproximator<DoubleVector> approximator) {
         switch (evaluatorType) {
             case MONTE_CARLO:
