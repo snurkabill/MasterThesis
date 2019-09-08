@@ -106,8 +106,6 @@ public class PaperPolicyImpl<
 
     @Override
     public TAction getDiscreteAction(TState gameState) {
-        long start = System.nanoTime();
-
         checkStateRoot(gameState);
         expandSearchTree(gameState); //  TODO expand search tree should be enabled in episode simulation
 
@@ -125,15 +123,6 @@ public class PaperPolicyImpl<
             logger.debug("Exploitation action [{}].", action);
         } else {
             logger.debug("Exploration action [{}]", action);
-        }
-        long end = System.nanoTime();
-        nanosMeasured += end - start;
-        counter++;
-
-        if(isExplorationDisabled) {
-            if(counter % 10 == 0) {
-                logger.info("Avg decision took: [{}] milliseconds. From [{}] samples", (nanosMeasured / (double) counter) / (1000 * 1000), counter);
-            }
         }
         return action;
     }
