@@ -9,6 +9,7 @@ import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
+import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
@@ -85,8 +86,10 @@ public class IntegrationTest {
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .selectorType(SelectorType.UCB)
+            .evaluatorType(EvaluatorType.RALF)
             .evalEpisodeCount(10000)
             .globalRiskAllowed(0.05)
+            .riskSupplier(() -> 0.05)
             .explorationConstantSupplier(() -> 0.2)
             .temperatureSupplier(() -> 2.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
@@ -129,8 +132,10 @@ public class IntegrationTest {
             .approximatorType(ApproximatorType.HASHMAP)
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
+            .evaluatorType(EvaluatorType.RALF)
             .evalEpisodeCount(1000)
             .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
             .explorationConstantSupplier(() -> 0.2)
             .temperatureSupplier(() -> 1.5)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
@@ -172,8 +177,10 @@ public class IntegrationTest {
             .approximatorType(ApproximatorType.HASHMAP)
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
+            .evaluatorType(EvaluatorType.RALF)
             .evalEpisodeCount(1000)
             .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
             .explorationConstantSupplier(() -> 0.0)
             .temperatureSupplier(() -> 0.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
