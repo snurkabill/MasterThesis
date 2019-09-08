@@ -3,6 +3,7 @@ package vahy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.MathStreamUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +43,6 @@ public class Analyzer {
         }
     }
 
-
-
     public static void analyzeEpisodes(String fileName) throws IOException {
         Stream<String> stream = Files.lines(Paths.get(fileName)).skip(1);
 
@@ -52,20 +51,6 @@ public class Analyzer {
             return new ImmutableTuple<>(Double.valueOf(parts[0]), Boolean.valueOf(parts[1]));
         }).collect(Collectors.toList());
         printStatistics(results);
-    }
-
-    public static double calculateAverage(List<Double> data) {
-        return data.stream().mapToDouble(x -> x).sum() / data.size();
-    }
-
-    public static double calculateStdev(List<Double> data) {
-        var average = calculateAverage(data);
-        var innerSum = data.stream()
-            .mapToDouble(x -> {
-                var diff = x - average;
-                return diff * diff;
-            }).sum();
-        return Math.sqrt(innerSum * (1.0 / (data.size() - 1)));
     }
 
     public static void printStatistics(List<ImmutableTuple<Double, Boolean>> results) {
@@ -77,8 +62,8 @@ public class Analyzer {
     public static void printStatistics(List<ImmutableTuple<Double, Boolean>> data, Predicate<ImmutableTuple<Double, Boolean>> filter, String dataName) {
         var filteredData = data.stream().filter(filter).map(ImmutableTuple::getFirst).collect(Collectors.toList());
 
-        var average = calculateAverage(filteredData);
-        var stdev = calculateStdev(filteredData);
+        var average = MathStreamUtils.calculateAverage(filteredData);
+        var stdev = MathStreamUtils.calculateStdev(filteredData, average);
         logger.info("Dataset Name: [{}]", dataName);
         logger.info("Count: [{}]", filteredData.size());
         logger.info("Average: [{}]", average);
