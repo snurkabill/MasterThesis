@@ -1,4 +1,4 @@
-package vahy.data;
+package vahy.game;
 
 public enum HallwayInstance {
 

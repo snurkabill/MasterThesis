@@ -21,7 +21,7 @@ import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFa
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperNodeEvaluator;
-import vahy.paperGenerics.PaperNodeSelector;
+import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;

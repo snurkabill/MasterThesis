@@ -20,7 +20,7 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperNodeEvaluator;
-import vahy.paperGenerics.PaperNodeSelector;
+import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.RamcpNodeEvaluator;
 import vahy.paperGenerics.benchmark.PaperBenchmark;

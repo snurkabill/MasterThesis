@@ -5,7 +5,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import vahy.api.episode.TrainerAlgorithm;
-import vahy.data.HallwayInstance;
+import vahy.game.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
@@ -22,7 +22,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.riskBasedSearch.SelectorType;
+import vahy.paperGenerics.experiment.SelectorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
 

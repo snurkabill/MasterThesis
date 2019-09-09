@@ -1,4 +1,4 @@
-package vahy.paperGenerics.policy.environment;
+package vahy.environment.agent.policy.environment;
 
 import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;

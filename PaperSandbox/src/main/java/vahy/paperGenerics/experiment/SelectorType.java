@@ -1,4 +1,4 @@
-package vahy.riskBasedSearch;
+package vahy.paperGenerics.experiment;
 
 public enum SelectorType {
 

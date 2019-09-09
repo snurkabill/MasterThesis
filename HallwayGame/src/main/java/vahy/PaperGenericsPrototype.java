@@ -1,7 +1,7 @@
 package vahy;
 
 import vahy.api.episode.TrainerAlgorithm;
-import vahy.data.HallwayInstance;
+import vahy.game.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
@@ -10,7 +10,7 @@ import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.riskBasedSearch.SelectorType;
+import vahy.paperGenerics.experiment.SelectorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
 

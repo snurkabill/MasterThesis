@@ -37,24 +37,24 @@ public class RandomWalkExample {
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
         var startLevel = 5;
-        var diffLevel = 20;
+        var diffLevel = 10000;
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
         var randomWalkSetup = new RandomWalkSetup(finishlevel, startLevel, stepPenalty, 2, 2, 5, 9, 0.9, 0.8);
 
-        var riskAllowed = 0.05;
-        var batchSize = 100;
+        var riskAllowed = 1.00;
+        var batchSize = 1000;
 
         ExperimentSetup experimentSetup = new ExperimentSetup(
-            0,
+            0,G
             2,
             1,
-            new FixedUpdateCountTreeConditionFactory(50),
+            new FixedUpdateCountTreeConditionFactory(1),
             1.0,
             batchSize,
             20000,
             10000,
-            100,
+            1000,
             new Supplier<>() {
                 private int callCount = 0;
                 @Override
