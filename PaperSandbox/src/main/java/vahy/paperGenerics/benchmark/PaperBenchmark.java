@@ -68,13 +68,11 @@ public class PaperBenchmark<
     private CalculatedResultStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeList) {
         var riskHitCounter = episodeList.stream().filter(EpisodeResults::isRiskHit).count();
         var riskHitRatio = riskHitCounter / (double) episodeList.size();
-//        var averagePlayerStepCount = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getPlayerStepCount);
-//        var totalPayoffAverage = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getPlayerCumulativeReward);
-//        var totalPayoffStdev = MathStreamUtils.calculateStdev(episodeList, EpisodeResults::getPlayerCumulativeReward, totalPayoffAverage);
-        var averagePlayerStepCount = 0.0;
-        var totalPayoffAverage = 0.0;
-        var totalPayoffStdev = 0.0;
+        var averagePlayerStepCount = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getPlayerStepCount);
+        var stdevPlayerStepCount = MathStreamUtils.calculateStdev(episodeList, EpisodeResults::getPlayerStepCount);
+        var totalPayoffAverage = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getTotalPayoff);
+        var totalPayoffStdev = MathStreamUtils.calculateStdev(episodeList, EpisodeResults::getTotalPayoff, totalPayoffAverage);
         var averageMillisPerEpisode = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getMillisecondDuration);
-        return new CalculatedResultStatistics(averagePlayerStepCount, averageMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio);
+        return new CalculatedResultStatistics(averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio);
     }
 }

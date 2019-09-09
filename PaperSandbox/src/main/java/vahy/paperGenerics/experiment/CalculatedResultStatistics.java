@@ -5,14 +5,22 @@ import vahy.impl.search.node.SearchNodeImpl;
 public class CalculatedResultStatistics {
 
     private final double averagePlayerStepCount;
+    private final double stdevPlayerStepCount;
     private final double averageMillisPerEpisode;
     private final double totalPayoffAverage;
     private final double totalPayoffStdev;
     private final long riskHitCounter;
     private final double riskHitRatio;
 
-    public CalculatedResultStatistics(double averagePlayerStepCount, double averageMillisPerEpisode, double totalPayoffAverage, double totalPayoffStdev, long riskHitCounter, double riskHitRatio) {
+    public CalculatedResultStatistics(double averagePlayerStepCount,
+                                      double stdevPlayerStepCount,
+                                      double averageMillisPerEpisode,
+                                      double totalPayoffAverage,
+                                      double totalPayoffStdev,
+                                      long riskHitCounter,
+                                      double riskHitRatio) {
         this.averagePlayerStepCount = averagePlayerStepCount;
+        this.stdevPlayerStepCount = stdevPlayerStepCount;
         this.averageMillisPerEpisode = averageMillisPerEpisode;
         this.totalPayoffAverage = totalPayoffAverage;
         this.totalPayoffStdev = totalPayoffStdev;
@@ -22,6 +30,10 @@ public class CalculatedResultStatistics {
 
     public double getAveragePlayerStepCount() {
         return averagePlayerStepCount;
+    }
+
+    public double getStdevPlayerStepCount() {
+        return stdevPlayerStepCount;
     }
 
     public double getAverageMillisPerEpisode() {
@@ -44,23 +56,24 @@ public class CalculatedResultStatistics {
         return riskHitRatio;
     }
 
+    private String printOneProperty(String name, double average, double stdev) {
+        var sb = new StringBuilder();
+        sb.append(name);
+        sb.append(": average: [");
+        sb.append(average);
+        sb.append("] stdev: [");
+        sb.append(stdev);
+        sb.append("].");
+        sb.append(System.lineSeparator());
+        return sb.toString();
+    }
+
     public String printToLog() {
         var sb = new StringBuilder();
 
-        sb.append("Player step count average: [");
-        sb.append(averagePlayerStepCount);
-        sb.append("]");
         sb.append(System.lineSeparator());
-
-        sb.append("Total Payoff average: [");
-        sb.append(totalPayoffAverage);
-        sb.append("]");
-        sb.append(System.lineSeparator());
-
-        sb.append("Total payoff stdev: [");
-        sb.append(totalPayoffStdev);
-        sb.append("]");
-        sb.append(System.lineSeparator());
+        sb.append(printOneProperty("Player Step Count", averagePlayerStepCount, stdevPlayerStepCount));
+        sb.append(printOneProperty("Total Payoff", totalPayoffAverage, totalPayoffStdev));
 
         sb.append("Empirical risk average: [");
         sb.append(riskHitRatio);
