@@ -82,14 +82,14 @@ public abstract class AbstractMonteCarloTrainer<
         for (int i = 0; i < episodeHistory.size(); i++) {
             if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i, isRiskHit);
-                DoubleVector experimentalObservation = episodeHistory.get(i).getFirst().getState().getPlayerObservation();
-                putDataSample(visitSet, dataSample, experimentalObservation);
+                DoubleVector observation = episodeHistory.get(i).getFirst().getState().getPlayerObservation();
+                putDataSample(visitSet, dataSample, observation);
             }
         }
         return visitSet;
     }
 
-    protected abstract void putDataSample(Map<DoubleVector, MutableDataSample> firstVisitSet, MutableDataSample dataSample, DoubleVector experimentalObservation);
+    protected abstract void putDataSample(Map<DoubleVector, MutableDataSample> firstVisitSet, MutableDataSample dataSample, DoubleVector observation);
 
     protected void addVisitedRewards(Map<DoubleVector, MutableDataSample> sampledStateVisitMap) {
         for (Map.Entry<DoubleVector, MutableDataSample> entry : sampledStateVisitMap.entrySet()) {

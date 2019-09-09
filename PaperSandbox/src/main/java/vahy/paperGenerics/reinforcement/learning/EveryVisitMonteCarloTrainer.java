@@ -33,11 +33,11 @@ public class EveryVisitMonteCarloTrainer<
     }
 
     @Override
-    protected void putDataSample(Map<DoubleVector, MutableDataSample> everyVisitSet, MutableDataSample dataSample, DoubleVector experimentalObservation) {
-        if(!everyVisitSet.containsKey(experimentalObservation)) {
-            everyVisitSet.put(experimentalObservation, dataSample);
+    protected void putDataSample(Map<DoubleVector, MutableDataSample> everyVisitSet, MutableDataSample dataSample, DoubleVector observation) {
+        if(!everyVisitSet.containsKey(observation)) {
+            everyVisitSet.put(observation, dataSample);
         } else {
-            everyVisitSet.get(experimentalObservation).addDataSample(dataSample);
+            everyVisitSet.get(observation).addDataSample(dataSample);
         }
     }
 

@@ -33,9 +33,9 @@ public class FirstVisitMonteCarloTrainer<
     }
 
     @Override
-    protected void putDataSample(Map<DoubleVector, MutableDataSample> firstVisitSet, MutableDataSample dataSample, DoubleVector experimentalObservation) {
-        if(!firstVisitSet.containsKey(experimentalObservation)) {
-            firstVisitSet.put(experimentalObservation, dataSample);
+    protected void putDataSample(Map<DoubleVector, MutableDataSample> firstVisitSet, MutableDataSample dataSample, DoubleVector observation) {
+        if(!firstVisitSet.containsKey(observation)) {
+            firstVisitSet.put(observation, dataSample);
         }
     }
 
