@@ -5,7 +5,7 @@ The paper implementation itself is in ".../MasterThesis/PaperSandbox/src/main/ja
 The Java-CLP libraries are provided and the whole program was tested on Windows OS and Linux OS.
 
 How to start:
-if any problems, please, contact me on snurkabill@gmail.com
+if any problems encountered, please, contact me on snurkabill@gmail.com
 
 1. Install JRE 11+ and latest Maven build tool on your system
 2. Clone this repository
@@ -17,9 +17,6 @@ if any problems, please, contact me on snurkabill@gmail.com
 6. The training will start. For some benchmarks, it can take time.
 7. When a logging is set to "Info" level (it is by default, check logback.xml for detailed logging), three windows will pop up showing training performance over time.
 8. After evaluation is done, results are printed into info level log.
-
-
-
 
 
 
