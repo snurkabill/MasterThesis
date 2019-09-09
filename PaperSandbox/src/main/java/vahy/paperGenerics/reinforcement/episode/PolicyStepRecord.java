@@ -1,13 +1,13 @@
 package vahy.paperGenerics.reinforcement.episode;
 
-public class StepRecord {
+public class PolicyStepRecord {
 
     private final double[] priorProbabilities;
     private final double[] policyProbabilities;
     private final double rewardPredicted;
     private final double risk;
 
-    public StepRecord(double[] priorProbabilities, double[] policyProbabilities, double rewardPredicted, double risk) {
+    public PolicyStepRecord(double[] priorProbabilities, double[] policyProbabilities, double rewardPredicted, double risk) {
         this.priorProbabilities = priorProbabilities;
         this.policyProbabilities = policyProbabilities;
         this.rewardPredicted = rewardPredicted;

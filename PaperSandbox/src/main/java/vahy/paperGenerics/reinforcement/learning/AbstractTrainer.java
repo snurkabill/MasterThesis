@@ -15,7 +15,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeGameSampler;
-import vahy.paperGenerics.reinforcement.episode.StepRecord;
+import vahy.paperGenerics.reinforcement.episode.PolicyStepRecord;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -58,7 +58,7 @@ public abstract class AbstractTrainer<
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation, TState>, StepRecord>> episodeHistory,
+    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistory,
                                                  int i,
                                                  boolean isRiskHit) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all

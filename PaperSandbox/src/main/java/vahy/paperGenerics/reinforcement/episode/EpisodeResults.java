@@ -18,11 +18,11 @@ public class EpisodeResults<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
 
     private final List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList;
-    private final List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, StepRecord>> episodeHistoryList;
+    private final List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistoryList;
     private final long millisecondDuration;
 
     public EpisodeResults(List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList,
-                          List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, StepRecord>> episodeHistoryList,
+                          List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistoryList,
                           long millisecondDuration) {
         this.episodeStateRewardReturnList = episodeStateRewardReturnList;
         this.episodeHistoryList = episodeHistoryList;
@@ -33,7 +33,7 @@ public class EpisodeResults<
         return episodeStateRewardReturnList;
     }
 
-    public List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, StepRecord>> getEpisodeHistoryList() {
+    public List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> getEpisodeHistoryList() {
         return episodeHistoryList;
     }
 
