@@ -13,11 +13,13 @@ import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
-import vahy.paperGenerics.reinforcement.episode.EpisodeStepRecord;
+import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractTrainer<
@@ -57,14 +59,23 @@ public abstract class AbstractTrainer<
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<EpisodeStepRecord<TAction, DoubleVector, TOpponentObservation, TState>> episodeHistory,
-                                                 int i,
-                                                 boolean isRiskHit) {
-        // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
-        double aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(EpisodeStepRecord::getReward), discountFactor);
-        double[] sampledProbabilities = episodeHistory.get(i).getPolicyStepRecord().getPolicyProbabilities();
-        double risk = isRiskHit ? 1.0 : 0.0;
-        return new MutableDataSample(sampledProbabilities, aggregated, risk);
+    protected List<ImmutableTuple<DoubleVector, MutableDataSample>> createDataSample(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode) {
+
+        var aggregatedRisk = paperEpisode.isRiskHit() ? 1.0 : 0.0;
+        var aggregatedTotalPayoff = 0.0;
+        var iterator = paperEpisode.getEpisodeHistory().listIterator(paperEpisode.getTotalStepCount());
+        var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDataSample>>();
+        while(iterator.hasPrevious()) {
+            var previous = iterator.previous();
+            aggregatedTotalPayoff = rewardAggregator.aggregateDiscount(previous.getReward(), aggregatedTotalPayoff, discountFactor);
+            if(previous.isPlayerMove()) {
+                mutableDataSampleList.add(new ImmutableTuple<>(
+                    previous.getFromState().getPlayerObservation(),
+                    new MutableDataSample(previous.getPolicyStepRecord().getPolicyProbabilities(), aggregatedTotalPayoff, aggregatedRisk)));
+            }
+        }
+        Collections.reverse(mutableDataSampleList);
+        return mutableDataSampleList;
     }
 
 

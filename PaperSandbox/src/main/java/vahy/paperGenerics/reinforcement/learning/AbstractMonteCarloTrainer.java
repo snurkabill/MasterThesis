@@ -75,15 +75,10 @@ public abstract class AbstractMonteCarloTrainer<
 
     protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         Map<DoubleVector, MutableDataSample> visitSet = new LinkedHashMap<>();
-        var episodeHistory = paperEpisode.getEpisodeHistory();
-
-        boolean isRiskHit = paperEpisode.isRiskHit();
-        for (int i = 0; i < episodeHistory.size(); i++) {
-            if(episodeHistory.get(i).isPlayerMove()) {
-                MutableDataSample dataSample = createDataSample(episodeHistory, i, isRiskHit);
-                DoubleVector observation = episodeHistory.get(i).getFromState().getPlayerObservation();
-                putDataSample(visitSet, dataSample, observation);
-            }
+        var mutableDataList = createDataSample(paperEpisode);
+        for (int i = 0; i < mutableDataList.size(); i++) {
+            var dataSample = mutableDataList.get(i);
+            putDataSample(visitSet, dataSample.getSecond(), dataSample.getFirst());
         }
         return visitSet;
     }

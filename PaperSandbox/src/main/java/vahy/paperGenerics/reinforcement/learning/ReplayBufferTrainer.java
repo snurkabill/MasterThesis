@@ -75,13 +75,10 @@ public class ReplayBufferTrainer<
 
     public List<ImmutableTuple<DoubleVector, double[]>> convertEpisodeToDataSamples(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         List<ImmutableTuple<DoubleVector, double[]>> episodeRaw = new ArrayList<>();
-        var episodeHistory = paperEpisode.getEpisodeHistory();
-        boolean isRiskHit = paperEpisode.isRiskHit();
-        for (int i = 0; i < episodeHistory.size(); i++) {
-            if(episodeHistory.get(i).isPlayerMove()) {
-                MutableDataSample dataSample = createDataSample(episodeHistory, i, isRiskHit);
-                episodeRaw.add(new ImmutableTuple<>(episodeHistory.get(i).getToState().getPlayerObservation(), createOutputVector(dataSample)));
-            }
+        var mutableDataList = createDataSample(paperEpisode);
+        for (int i = 0; i < mutableDataList.size(); i++) {
+            var dataSample = mutableDataList.get(i);
+            episodeRaw.add(new ImmutableTuple<>(dataSample.getFirst(), createOutputVector(dataSample.getSecond())));
         }
         return episodeRaw;
     }
