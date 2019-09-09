@@ -14,7 +14,7 @@ import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
-import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
+import vahy.paperGenerics.reinforcement.episode.EpisodeGameSampler;
 import vahy.paperGenerics.reinforcement.episode.StepRecord;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
@@ -31,7 +31,7 @@ public abstract class AbstractTrainer<
 
     private final double discountFactor;
     private final TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator;
-    private final PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler;
+    private final EpisodeGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler;
     protected final RewardAggregator rewardAggregator;
 
     public AbstractTrainer(InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
@@ -45,7 +45,7 @@ public abstract class AbstractTrainer<
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
         this.paperNodeEvaluator = paperNodeEvaluator;
-        this.gameSampler = new PaperRolloutGameSampler<>(
+        this.gameSampler = new EpisodeGameSampler<>(
             initialStateSupplier,
             paperTrainablePolicySupplier,
             opponentPolicySupplier,
@@ -54,7 +54,7 @@ public abstract class AbstractTrainer<
             Runtime.getRuntime().availableProcessors() - 1);
     }
 
-    public PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {
+    public EpisodeGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {
         return gameSampler;
     }
 
