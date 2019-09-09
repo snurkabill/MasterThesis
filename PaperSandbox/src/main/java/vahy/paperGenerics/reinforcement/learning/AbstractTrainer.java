@@ -14,13 +14,8 @@ import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
-<<<<<<< HEAD
-import vahy.paperGenerics.reinforcement.episode.EpisodeGameSampler;
-import vahy.paperGenerics.reinforcement.episode.PolicyStepRecord;
-=======
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
-import vahy.paperGenerics.reinforcement.episode.StepRecord;
->>>>>>> parent of 8e108bb... Removed PaperRolloutGameSampler
+import vahy.paperGenerics.reinforcement.episode.PolicyStepRecord;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
