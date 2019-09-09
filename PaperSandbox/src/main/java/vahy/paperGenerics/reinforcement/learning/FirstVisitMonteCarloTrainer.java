@@ -2,7 +2,6 @@ package vahy.paperGenerics.reinforcement.learning;
 
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
-import vahy.api.model.StateActionReward;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
@@ -11,13 +10,8 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
-import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
-import vahy.paperGenerics.reinforcement.episode.StepRecord;
-import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class FirstVisitMonteCarloTrainer<
@@ -39,18 +33,10 @@ public class FirstVisitMonteCarloTrainer<
     }
 
     @Override
-    protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode) {
-        Map<DoubleVector, MutableDataSample> firstVisitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation,  TState>, StepRecord>> episodeHistory = paperEpisode.getEpisodeHistoryList();
-        boolean isRiskHit = paperEpisode.isRiskHit();
-        for (int i = 0; i < episodeHistory.size(); i++) {
-            if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
-                if(!firstVisitSet.containsKey(episodeHistory.get(i).getFirst().getState().getPlayerObservation())) {
-                    firstVisitSet.put(episodeHistory.get(i).getFirst().getState().getPlayerObservation(), createDataSample(episodeHistory, i, isRiskHit));
-                }
-            }
+    protected void putDataSample(Map<DoubleVector, MutableDataSample> firstVisitSet, MutableDataSample dataSample, DoubleVector experimentalObservation) {
+        if(!firstVisitSet.containsKey(experimentalObservation)) {
+            firstVisitSet.put(experimentalObservation, dataSample);
         }
-        return firstVisitSet;
     }
 
 }
