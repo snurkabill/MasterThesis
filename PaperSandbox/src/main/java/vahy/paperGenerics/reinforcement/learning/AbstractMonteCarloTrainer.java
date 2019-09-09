@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
-import vahy.api.model.StateActionReward;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
@@ -15,7 +14,6 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
-import vahy.paperGenerics.reinforcement.episode.PolicyStepRecord;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -77,12 +75,13 @@ public abstract class AbstractMonteCarloTrainer<
 
     protected Map<DoubleVector, MutableDataSample> calculatedVisitedRewards(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState> paperEpisode) {
         Map<DoubleVector, MutableDataSample> visitSet = new LinkedHashMap<>();
-        List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistory = paperEpisode.getEpisodeHistoryList();
+        var episodeHistory = paperEpisode.getEpisodeHistory();
+
         boolean isRiskHit = paperEpisode.isRiskHit();
         for (int i = 0; i < episodeHistory.size(); i++) {
-            if(!episodeHistory.get(i).getFirst().getState().isOpponentTurn()) {
+            if(episodeHistory.get(i).isPlayerMove()) {
                 MutableDataSample dataSample = createDataSample(episodeHistory, i, isRiskHit);
-                DoubleVector observation = episodeHistory.get(i).getFirst().getState().getPlayerObservation();
+                DoubleVector observation = episodeHistory.get(i).getFromState().getPlayerObservation();
                 putDataSample(visitSet, dataSample, observation);
             }
         }

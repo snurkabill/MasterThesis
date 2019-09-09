@@ -57,7 +57,7 @@ public class PaperPolicyResults<
     public List<ImmutableTuple<Double, Boolean>> getRewardAndRiskList() {
 
         double[] totalRewardList = this.episodeList.stream()
-            .mapToDouble(x -> x.getEpisodeStateRewardReturnList().stream().mapToDouble(y -> y.getReward()).sum())
+            .mapToDouble(EpisodeResults::getTotalPayoff)
             .toArray();
         var totalRiskList = this.episodeList.stream()
             .map(EpisodeResults::isRiskHit)

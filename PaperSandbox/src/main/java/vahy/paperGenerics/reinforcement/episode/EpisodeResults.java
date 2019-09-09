@@ -1,15 +1,11 @@
 package vahy.paperGenerics.reinforcement.episode;
 
 import vahy.api.model.Action;
-import vahy.api.model.StateActionReward;
-import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
-import vahy.utils.ImmutableTuple;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EpisodeResults<
     TAction extends Enum<TAction> & Action,
@@ -17,40 +13,48 @@ public class EpisodeResults<
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
 
-    private final List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList;
-    private final List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistoryList;
+    private final List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeHistory;
+    private final int playerStepCount;
+    private final int totalStepCount;
+    private final double totalPayoff;
+    private final boolean isRiskHit;
     private final long millisecondDuration;
 
-    public EpisodeResults(List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeStateRewardReturnList,
-                          List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistoryList,
-                          long millisecondDuration) {
-        this.episodeStateRewardReturnList = episodeStateRewardReturnList;
-        this.episodeHistoryList = episodeHistoryList;
+    public EpisodeResults(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeHistory,
+                          int playerStepCount, int totalStepCount, double totalPayoff, boolean isRiskHit, long millisecondDuration) {
+        this.episodeHistory = episodeHistory;
+        this.playerStepCount = playerStepCount;
+        this.totalStepCount = totalStepCount;
+        this.totalPayoff = totalPayoff;
+        this.isRiskHit = isRiskHit;
         this.millisecondDuration = millisecondDuration;
     }
 
-    public List<StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> getEpisodeStateRewardReturnList() {
-        return episodeStateRewardReturnList;
+    public int getTotalStepCount() {
+        return totalStepCount;
     }
 
-    public List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> getEpisodeHistoryList() {
-        return episodeHistoryList;
+    public int getPlayerStepCount() {
+        return playerStepCount;
+    }
+
+    public double getTotalPayoff() {
+        return totalPayoff;
+    }
+
+    public boolean isRiskHit() {
+        return isRiskHit;
     }
 
     public long getMillisecondDuration() {
         return millisecondDuration;
     }
 
-    public String printActionHistory() {
-        return "[" + episodeHistoryList.stream().map(x -> x.getFirst().getAction()).collect(Collectors.toList()) + "]";
+    public List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> getEpisodeHistory() {
+        return episodeHistory;
     }
 
     public TState getFinalState() {
-        return this.episodeStateRewardReturnList.get(episodeStateRewardReturnList.size() - 1).getState();
+        return this.episodeHistory.get(episodeHistory.size() - 1).getToState();
     }
-
-    public boolean isRiskHit() {
-        return this.getFinalState().isRiskHit();
-    }
-
 }

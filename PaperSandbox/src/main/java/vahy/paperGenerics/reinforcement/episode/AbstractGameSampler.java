@@ -10,6 +10,7 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
+import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -60,23 +61,22 @@ public abstract class AbstractGameSampler<
     }
 
     private void createDataGenerators() {
-        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>("StepCount",
-            episodeResults -> episodeResults.stream()
-            .mapToInt(x -> x.getEpisodeHistoryList().size())
-            .average().orElseThrow(() -> new IllegalArgumentException("Average does not exist"))));
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>(
+            "Avg Player Step Count",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getPlayerStepCount)));
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>("TotalReward",
-            episodeResults -> episodeResults.stream()
-                .mapToDouble(x -> x.getEpisodeHistoryList()
-                    .stream()
-                    .mapToDouble(y -> y.getFirst().getReward()) // TODO: reward aggregator
-                    .sum())
-                .average().orElseThrow(() -> new IllegalArgumentException("Average does not exist"))));
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>(
+            "Avg Total Payoff",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getTotalPayoff)));
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>("RiskHit",
-            episodeResults -> episodeResults.stream()
-                .mapToDouble(x -> x.isRiskHit() ? 1.0 : 0.0)
-                .average().orElseThrow(() -> new IllegalStateException("Avg does not exist"))));
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>(
+            "Avt risk ratio",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, x -> x.isRiskHit() ? 1.0 : 0.0)));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGenerator<>(
+            "Avg episode duration [ms]",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getMillisecondDuration)));
+
         registerDataGenerators();
     }
 

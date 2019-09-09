@@ -1,7 +1,6 @@
 package vahy.paperGenerics.reinforcement.episode;
 
 import vahy.api.model.Action;
-import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.paperGenerics.PaperState;
 
@@ -15,15 +14,16 @@ public class EpisodeStepRecord<
     private final TAction playedAction;
     private final PolicyStepRecord policyStepRecord;
     private final TState fromState;
-    private final StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn;
+    private final TState toState;
+    private final double reward;
 
-    public EpisodeStepRecord(boolean isPlayerMove, TAction playedAction, PolicyStepRecord policyStepRecord, TState fromState,
-                             StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn) {
+    public EpisodeStepRecord(boolean isPlayerMove, TAction playedAction, PolicyStepRecord policyStepRecord, TState fromState, TState toState, double reward) {
         this.isPlayerMove = isPlayerMove;
         this.playedAction = playedAction;
         this.policyStepRecord = policyStepRecord;
         this.fromState = fromState;
-        this.stateRewardReturn = stateRewardReturn;
+        this.toState = toState;
+        this.reward = reward;
     }
 
     public boolean isPlayerMove() {
@@ -42,7 +42,11 @@ public class EpisodeStepRecord<
         return fromState;
     }
 
-    public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> getStateRewardReturn() {
-        return stateRewardReturn;
+    public TState getToState() {
+        return toState;
+    }
+
+    public double getReward() {
+        return reward;
     }
 }

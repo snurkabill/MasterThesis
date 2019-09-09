@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
-import vahy.api.model.StateActionReward;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
@@ -14,8 +13,8 @@ import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
+import vahy.paperGenerics.reinforcement.episode.EpisodeStepRecord;
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
-import vahy.paperGenerics.reinforcement.episode.PolicyStepRecord;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -58,12 +57,12 @@ public abstract class AbstractTrainer<
         return gameSampler;
     }
 
-    protected MutableDataSample createDataSample(List<ImmutableTuple<StateActionReward<TAction, DoubleVector, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistory,
+    protected MutableDataSample createDataSample(List<EpisodeStepRecord<TAction, DoubleVector, TOpponentObservation, TState>> episodeHistory,
                                                  int i,
                                                  boolean isRiskHit) {
         // TODO: very ineffective. Quadratic, could be linear. But so far this is not the bottleneck at all
-        double aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(x -> x.getFirst().getReward()), discountFactor);
-        double[] sampledProbabilities = episodeHistory.get(i).getSecond().getPolicyProbabilities();
+        double aggregated = rewardAggregator.aggregateDiscount(episodeHistory.stream().skip(i).map(EpisodeStepRecord::getReward), discountFactor);
+        double[] sampledProbabilities = episodeHistory.get(i).getPolicyStepRecord().getPolicyProbabilities();
         double risk = isRiskHit ? 1.0 : 0.0;
         return new MutableDataSample(sampledProbabilities, aggregated, risk);
     }
