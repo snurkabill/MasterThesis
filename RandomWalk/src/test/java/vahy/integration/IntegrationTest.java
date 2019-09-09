@@ -10,6 +10,7 @@ import vahy.environment.RandomWalkSetup;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.experiment.EvaluatorType;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -49,8 +50,10 @@ public class IntegrationTest {
 
         var results = experiment.getResults().get(0);
 
-        Assert.assertTrue(results.getAverageReward() >= minExpectedReward, "Avg reward is: [" + results.getAverageReward() + "] but expected at least: [" + minExpectedReward + "]");
-        Assert.assertTrue(results.getRiskHitRatio() <= maxRiskHitRatio, "Risk hit ratio is: [" + results.getRiskHitRatio() + "] but expected at most: [" + maxRiskHitRatio + "]");
+        var statistics = results.getCalculatedResultStatistics();
+
+        Assert.assertTrue(statistics.getTotalPayoffAverage() >= minExpectedReward, "Avg reward is: [" + statistics.getTotalPayoffAverage() + "] but expected at least: [" + minExpectedReward + "]");
+        Assert.assertTrue(statistics.getRiskHitRatio() <= maxRiskHitRatio, "Risk hit ratio is: [" + statistics.getRiskHitRatio() + "] but expected at most: [" + maxRiskHitRatio + "]");
     }
 
     public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment_01() {
