@@ -56,7 +56,7 @@ public class PaperNodeSelector<
     }
 
     protected final TAction sampleOpponentAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
-        var actions = new ArrayList<TAction>();
+        var actions = new ArrayList<TAction>(node.getChildNodeMap().size());
         var priorProbabilities = new double[node.getChildNodeMap().size()];
         int index = 0;
         for(var entry : node.getChildNodeMap().values()) {
