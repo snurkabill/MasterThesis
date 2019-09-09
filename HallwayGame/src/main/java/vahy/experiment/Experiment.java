@@ -160,7 +160,7 @@ public class Experiment {
             experimentSetup.getTreeUpdateConditionFactory(),
             strategiesProvider);
 
-        var progressTrackerSettings = new ProgressTrackerSettings(true, false, false, false);
+        var progressTrackerSettings = new ProgressTrackerSettings(true, true, false, false);
 
         var trainer = getAbstractTrainer(
             experimentSetup.getTrainerAlgorithm(),

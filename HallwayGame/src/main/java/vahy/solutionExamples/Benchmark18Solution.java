@@ -83,8 +83,8 @@ public class Benchmark18Solution {
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
             .evalEpisodeCount(1000)
-            .globalRiskAllowed(0.05)
-            .riskSupplier(() -> 0.05)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(() -> 1.00)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
