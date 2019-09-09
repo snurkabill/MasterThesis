@@ -10,7 +10,6 @@ import vahy.impl.model.ImmutableStateActionRewardTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
-import vahy.utils.ImmutableTriple;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -55,97 +54,47 @@ public class EpisodeSimulator<
                 if(stepsDone >= episodeImmutableSetup.getStepCountLimit()) {
                     break;
                 }
-                var step = makePolicyStep(state, playerPolicy, opponentPolicy);
+                var step = makePolicyStep(state, playerPolicy, opponentPolicy, true);
                 playerActionCount++;
                 stepsDone++;
                 logger.debug("Player's [{}]th action: [{}] getting reward [{}]. ExpectedReward: [{}], Expected risk: [{}], PolicyProbabilities: [{}], PriorProbabilities: [{}]",
                     playerActionCount,
-                    step.getFirst(),
-                    step.getThird().getReward(),
-                    step.getSecond().getRewardPredicted(),
-                    step.getSecond().getRisk(),
-                    Arrays.toString(step.getSecond().getPolicyProbabilities()),
-                    Arrays.toString(step.getSecond().getPriorProbabilities()));
-                episodeStateRewardReturnList.add(step.getThird());
-                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, step.getFirst(), step.getThird().getReward()), step.getSecond()));
-                state = step.getThird().getState();
+                    step.getPlayedAction(),
+                    step.getStateRewardReturn().getReward(),
+                    step.getPolicyStepRecord().getRewardPredicted(),
+                    step.getPolicyStepRecord().getRisk(),
+                    Arrays.toString(step.getPolicyStepRecord().getPolicyProbabilities()),
+                    Arrays.toString(step.getPolicyStepRecord().getPriorProbabilities()));
+                episodeStateRewardReturnList.add(step.getStateRewardReturn());
+                episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, step.getPlayedAction(), step.getStateRewardReturn().getReward()), step.getPolicyStepRecord()));
+                state = step.getStateRewardReturn().getState();
                 if(!state.isFinalState()) {
-                    step = makePolicyStep(state, opponentPolicy, playerPolicy);
-                    logger.debug("Opponent's [{}]th action: [{}], getting reward [{}]", playerActionCount, step.getFirst(), step.getThird().getReward());
-                    episodeStateRewardReturnList.add(step.getThird());
-                    episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, step.getFirst(), step.getThird().getReward()), step.getSecond()));
-                    state = step.getThird().getState();
+                    step = makePolicyStep(state, opponentPolicy, playerPolicy, false);
+                    logger.debug("Opponent's [{}]th action: [{}], getting reward [{}]", playerActionCount, step.getPlayedAction(), step.getStateRewardReturn().getReward());
+                    episodeStateRewardReturnList.add(step.getStateRewardReturn());
+                    episodeHistoryList.add(new ImmutableTuple<>(new ImmutableStateActionRewardTuple<>(state, step.getPlayedAction(), step.getStateRewardReturn().getReward()), step.getPolicyStepRecord()));
+                    state = step.getStateRewardReturn().getState();
                 }
                 logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerActionCount);
             }
             long end = System.currentTimeMillis();
             return end - start;
         } catch(Exception e) {
-            throw new IllegalStateException("Episode simulation ended due to inner exception. Episode steps: [" +
-                episodeHistoryList
-                    .stream()
-                    .map(x -> x.getFirst().getAction().toString())
-                    .reduce((a, b) -> a + ", " + b)
-                    .orElse("Episode does not contain any states as history")
-                +
-                "] with the executed episode history: " +
-                episodeHistoryList
-                    .stream()
-                    .map(x -> {
-                            StringBuilder sb = new StringBuilder();
-                            sb.append("----------------------------------------------------------------------------------------------------")
-                                .append(System.lineSeparator())
-                                .append("State information: ")
-                                .append(System.lineSeparator())
-                                .append("Is player turn: ")
-                                .append(x.getFirst().getState().isPlayerTurn())
-                                .append(System.lineSeparator())
-                                .append(x.getFirst().getState().readableStringRepresentation())
-                                .append(System.lineSeparator())
-                                .append("Policy probabilities: ")
-                                .append(System.lineSeparator())
-                                .append(Arrays.toString(x.getSecond().getPolicyProbabilities()))
-                                .append(System.lineSeparator())
-                                .append("Prior probabilities: ")
-                                .append(System.lineSeparator())
-                                .append(Arrays.toString(x.getSecond().getPriorProbabilities()))
-                                .append(System.lineSeparator())
-                                .append("Policy reward : ")
-                                .append(System.lineSeparator())
-                                .append(x.getSecond().getRewardPredicted())
-                                .append(System.lineSeparator())
-                                .append("Policy risk : ")
-                                .append(System.lineSeparator())
-                                .append(x.getSecond().getRisk())
-                                .append(System.lineSeparator())
-                                .append("Applied action: ")
-                                .append(System.lineSeparator())
-                                .append(x.getFirst().getAction())
-                                .append(System.lineSeparator())
-                                .append("Getting reward: ")
-                                .append(System.lineSeparator())
-                                .append(x.getFirst().getReward())
-                                .append(System.lineSeparator());
-                            sb.append("----------------------------------------------------------------------------------------------------");
-                            return sb.toString();
-                        }
-                    ).reduce((a, b) -> a + System.lineSeparator() + b)
-                , e);
+            throw new IllegalStateException(createErrorMsg(episodeHistoryList), e);
         }
     }
 
-    private ImmutableTriple<
-        TAction,
-        PolicyStepRecord,
-        StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>> makePolicyStep(TState state,
-                                                                                  PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> onTurnPolicy,
-                                                                                  PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> otherPolicy) {
+    private EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState> makePolicyStep(
+        TState state,
+        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> onTurnPolicy,
+        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> otherPolicy,
+        boolean isPlayerMove) {
         TAction action = onTurnPolicy.getDiscreteAction(state);
         PolicyStepRecord playerPolicyStepRecord = createStepRecord(state, onTurnPolicy);
         onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         otherPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = state.applyAction(action);
-        return new ImmutableTriple<>(action, playerPolicyStepRecord, stateRewardReturn);
+        return new EpisodeStepRecord<>(isPlayerMove, action, playerPolicyStepRecord, state, stateRewardReturn);
     }
 
     private PolicyStepRecord createStepRecord(TState state, PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> playerPolicy) {
@@ -154,6 +103,58 @@ public class EpisodeSimulator<
         double estimatedReward = playerPolicy.getEstimatedReward(state);
         double estimatedRisk = playerPolicy.getEstimatedRisk(state);
         return new PolicyStepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk);
+    }
+
+    private String createErrorMsg(List<ImmutableTuple<StateActionReward<TAction, TPlayerObservation, TOpponentObservation, TState>, PolicyStepRecord>> episodeHistoryList) {
+        return "Episode simulation ended due to inner exception. Episode steps: [" +
+            episodeHistoryList
+                .stream()
+                .map(x -> x.getFirst().getAction().toString())
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("Episode does not contain any states as history")
+            +
+            "] with the executed episode history: " +
+            episodeHistoryList
+                .stream()
+                .map(x -> {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("----------------------------------------------------------------------------------------------------")
+                            .append(System.lineSeparator())
+                            .append("State information: ")
+                            .append(System.lineSeparator())
+                            .append("Is player turn: ")
+                            .append(x.getFirst().getState().isPlayerTurn())
+                            .append(System.lineSeparator())
+                            .append(x.getFirst().getState().readableStringRepresentation())
+                            .append(System.lineSeparator())
+                            .append("Policy probabilities: ")
+                            .append(System.lineSeparator())
+                            .append(Arrays.toString(x.getSecond().getPolicyProbabilities()))
+                            .append(System.lineSeparator())
+                            .append("Prior probabilities: ")
+                            .append(System.lineSeparator())
+                            .append(Arrays.toString(x.getSecond().getPriorProbabilities()))
+                            .append(System.lineSeparator())
+                            .append("Policy reward : ")
+                            .append(System.lineSeparator())
+                            .append(x.getSecond().getRewardPredicted())
+                            .append(System.lineSeparator())
+                            .append("Policy risk : ")
+                            .append(System.lineSeparator())
+                            .append(x.getSecond().getRisk())
+                            .append(System.lineSeparator())
+                            .append("Applied action: ")
+                            .append(System.lineSeparator())
+                            .append(x.getFirst().getAction())
+                            .append(System.lineSeparator())
+                            .append("Getting reward: ")
+                            .append(System.lineSeparator())
+                            .append(x.getFirst().getReward())
+                            .append(System.lineSeparator());
+                        sb.append("----------------------------------------------------------------------------------------------------");
+                        return sb.toString();
+                    }
+                ).reduce((a, b) -> a + System.lineSeparator() + b);
     }
 
 }
