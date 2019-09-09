@@ -36,7 +36,6 @@ public class AlgorithmSetup {
 
     private final TrainerAlgorithm trainerAlgorithm;
     private final ApproximatorType approximatorType;
-
     private final EvaluatorType evaluatorType;
 
     // NN
@@ -50,7 +49,6 @@ public class AlgorithmSetup {
 
     // PAPER
     private final double globalRiskAllowed;
-    private final SelectorType selectorType;
     private final InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
     private final InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
     private final ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
@@ -79,7 +77,6 @@ public class AlgorithmSetup {
                           double learningRate,
                           int evalEpisodeCount,
                           double globalRiskAllowed,
-                          SelectorType selectorType,
                           InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
                           InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
                           ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
@@ -108,7 +105,6 @@ public class AlgorithmSetup {
         this.learningRate = learningRate;
         this.evalEpisodeCount = evalEpisodeCount;
         this.globalRiskAllowed = globalRiskAllowed;
-        this.selectorType = selectorType;
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
@@ -200,10 +196,6 @@ public class AlgorithmSetup {
 
     public double getGlobalRiskAllowed() {
         return globalRiskAllowed;
-    }
-
-    public SelectorType getSelectorType() {
-        return selectorType;
     }
 
     public InferenceExistingFlowStrategy getInferenceExistingFlowStrategy() {

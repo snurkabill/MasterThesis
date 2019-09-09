@@ -9,12 +9,12 @@ import vahy.data.HallwayInstance;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
-import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.experiment.ExperimentSetupBuilder;
 import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.experiment.EvaluatorType;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -55,8 +55,8 @@ public class IntegrationTest {
 
         var results = experiment.getResults().get(0);
 
-        Assert.assertTrue(results.getAverageReward() >= minExpectedReward, "Avg reward is: [" + results.getAverageReward() + "] but expected at least: [" + minExpectedReward + "]");
-        Assert.assertTrue(results.getRiskHitRatio() <= maxRiskHitRatio, "Risk hit ratio is: [" + results.getRiskHitRatio() + "] but expected at most: [" + maxRiskHitRatio + "]");
+        Assert.assertTrue(results.getCalculatedResultStatistics().getTotalPayoffAverage() >= minExpectedReward, "Avg reward is: [" + results.getCalculatedResultStatistics().getTotalPayoffAverage() + "] but expected at least: [" + minExpectedReward + "]");
+        Assert.assertTrue(results.getCalculatedResultStatistics().getRiskHitRatio() <= maxRiskHitRatio, "Risk hit ratio is: [" + results.getCalculatedResultStatistics().getRiskHitRatio() + "] but expected at most: [" + maxRiskHitRatio + "]");
     }
 
     public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment_03() {

@@ -7,7 +7,6 @@ import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.environment.RandomWalkSetup;
-import vahy.experiment.EvaluatorType;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;

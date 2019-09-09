@@ -8,9 +8,12 @@ import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.experiment.CalculatedResultStatistics;
+import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.reinforcement.episode.EpisodeGameSampler;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
+import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.util.ArrayList;
@@ -41,7 +44,7 @@ public class PaperBenchmark<
     }
 
     public List<PaperPolicyResults<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> runBenchmark(int episodeCount,
-                                                                                                                                          int stepCountLimit) {
+                                                                                                                                 int stepCountLimit) {
         logger.info("Running benchmark for [{}] iterations", episodeCount);
         List<PaperPolicyResults<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> results = new ArrayList<>();
         for (PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy : benchmarkingPolicyList) {
@@ -53,12 +56,25 @@ public class PaperBenchmark<
                 progressTrackerSettings,
                 stepCountLimit,
                 1);
-            long start = System.nanoTime();
+            long start = System.currentTimeMillis();
             List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> resultList = gameSampler.sampleEpisodes(episodeCount);
-            long end = System.nanoTime();
+            long end = System.currentTimeMillis();
             logger.info("Benchmarking [{}] policy took [{}] nanosecond", benchmarkingPolicy.getPolicyName(), end - start);
-            results.add(new PaperPolicyResults<>(benchmarkingPolicy, resultList, (end - start) / (double) episodeCount));
+            results.add(new PaperPolicyResults<>(benchmarkingPolicy, resultList, calculateStatistics(resultList), (end - start)));
         }
         return results;
+    }
+
+    private CalculatedResultStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeList) {
+        var riskHitCounter = episodeList.stream().filter(EpisodeResults::isRiskHit).count();
+        var riskHitRatio = riskHitCounter / (double) episodeList.size();
+//        var averagePlayerStepCount = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getPlayerStepCount);
+//        var totalPayoffAverage = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getPlayerCumulativeReward);
+//        var totalPayoffStdev = MathStreamUtils.calculateStdev(episodeList, EpisodeResults::getPlayerCumulativeReward, totalPayoffAverage);
+        var averagePlayerStepCount = 0.0;
+        var totalPayoffAverage = 0.0;
+        var totalPayoffStdev = 0.0;
+        var averageMillisPerEpisode = MathStreamUtils.calculateAverage(episodeList, EpisodeResults::getMillisecondDuration);
+        return new CalculatedResultStatistics(averagePlayerStepCount, averageMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio);
     }
 }

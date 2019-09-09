@@ -25,7 +25,7 @@ import vahy.paperGenerics.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
-import vahy.paperGenerics.benchmark.PaperPolicyResults;
+import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -255,11 +255,7 @@ public class MarketPrototype {
                 .findFirst()
                 .get();
 
-            logger.info("Average reward: [{}]", nnResults.getAverageReward());
-            logger.info("Millis per episode: [{}]", nnResults.getAverageMillisPerEpisode());
-            logger.info("Total expanded nodes: [{}]", marketNodeEvaluator.getNodesExpandedCount());
-            logger.info("Kill ratio: [{}]", nnResults.getRiskHitRatio());
-            logger.info("Kill counter: [{}]", nnResults.getRiskHitCounter());
+            logger.info("[{}]", nnResults.getCalculatedResultStatistics().printToLog());
             logger.info("Training time: [{}]ms", trainingTimeInMs);
 
         }
