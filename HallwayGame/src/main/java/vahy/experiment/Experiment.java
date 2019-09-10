@@ -131,8 +131,7 @@ public class Experiment {
             algorithmConfig.getExplorationNonExistingFlowStrategy(),
             algorithmConfig.getFlowOptimizerType(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForKnownFlow(),
-            algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow(),
-            masterRandom.split());
+            algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
     }
 
     public List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> getResults() {

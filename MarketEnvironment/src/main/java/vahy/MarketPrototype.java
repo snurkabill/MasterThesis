@@ -152,8 +152,7 @@ public class MarketPrototype {
                 ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE,
                 FlowOptimizerType.SOFT,
                 SubTreeRiskCalculatorType.FLOW_SUM,
-                SubTreeRiskCalculatorType.PRIOR_SUM,
-                random);
+                SubTreeRiskCalculatorType.PRIOR_SUM);
 
             PaperMetadataFactory<MarketAction, DoubleVector, DoubleVector, MarketState> searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
 
@@ -244,7 +243,7 @@ public class MarketPrototype {
 
             long start = System.currentTimeMillis();
             List<PaperPolicyResults<MarketAction, DoubleVector, DoubleVector, PaperMetadata<MarketAction>, MarketState>> policyResultList = benchmark
-                .runBenchmark(episodeCount, stepCountLimit);
+                .runBenchmark(episodeCount, stepCountLimit, 1);
             long end = System.currentTimeMillis();
             logger.info("Benchmarking took [{}] milliseconds", end - start);
 
@@ -287,7 +286,7 @@ public class MarketPrototype {
                     stepCountLimit,
                     new LinkedList<>(),
                     replayBufferSize,
-                    progressTrackerSettings);
+                    progressTrackerSettings, 1);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
                     initialMarketStateSupplier,
@@ -297,7 +296,7 @@ public class MarketPrototype {
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     progressTrackerSettings,
-                    stepCountLimit);
+                    stepCountLimit, 1);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
                     initialMarketStateSupplier,
@@ -307,7 +306,7 @@ public class MarketPrototype {
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     progressTrackerSettings,
-                    stepCountLimit);
+                    stepCountLimit, 1);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
 

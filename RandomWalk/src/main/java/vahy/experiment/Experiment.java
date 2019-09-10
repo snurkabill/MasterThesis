@@ -77,10 +77,10 @@ public class Experiment {
                 createPolicyAndRunProcess(setup, random, provider, new EmptyApproximator<>());
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximator<>(RandomWalkAction.playerActions.length, setup.getSecond().omitProbabilities()));
+                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximator<>(RandomWalkAction.playerActions.length));
                 break;
             case HASHMAP_LR:
-                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximatorWithLr<>(RandomWalkAction.playerActions.length, setup.getSecond().getLearningRate(), setup.getSecond().omitProbabilities()));
+                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximatorWithLr<>(RandomWalkAction.playerActions.length, setup.getSecond().getLearningRate()));
                 break;
             case NN:
             {
@@ -143,8 +143,7 @@ public class Experiment {
             experimentSetup.getExplorationNonExistingFlowStrategy(),
             experimentSetup.getFlowOptimizerType(),
             experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
-            experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow(),
-            random);
+            experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow());
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
@@ -267,7 +266,7 @@ public class Experiment {
             progressTrackerSettings
         );
         long start = System.currentTimeMillis();
-        var policyResultList = benchmark.runBenchmark(experimentSetup.getEvalEpisodeCount(), experimentSetup.getMaximalStepCountBound());
+        var policyResultList = benchmark.runBenchmark(experimentSetup.getEvalEpisodeCount(), experimentSetup.getMaximalStepCountBound(), 1);
         long end = System.currentTimeMillis();
         logger.info("Benchmarking took [{}] milliseconds", end - start);
 
@@ -309,7 +308,7 @@ public class Experiment {
                     stepCountLimit,
                     new LinkedList<>(),
                     replayBufferSize,
-                    progressTrackerSettings);
+                    progressTrackerSettings, 1);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
                     randomWalkInitialInstanceSupplier,
@@ -319,7 +318,7 @@ public class Experiment {
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     progressTrackerSettings,
-                    stepCountLimit);
+                    stepCountLimit, 1);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
                     randomWalkInitialInstanceSupplier,
@@ -329,7 +328,7 @@ public class Experiment {
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     progressTrackerSettings,
-                    stepCountLimit);
+                    stepCountLimit, 1);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
         }
