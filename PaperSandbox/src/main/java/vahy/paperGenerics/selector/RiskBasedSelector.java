@@ -31,6 +31,7 @@ public class RiskBasedSelector<
 
     private final double totalRiskAllowed;
 
+    @Experimental
     public RiskBasedSelector(double cpuctParameter, SplittableRandom random, double totalRiskAllowed) {
         super(cpuctParameter, random);
         this.totalRiskAllowed = totalRiskAllowed;

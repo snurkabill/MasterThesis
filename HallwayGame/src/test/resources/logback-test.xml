@@ -24,9 +24,7 @@
         </encoder>
     </appender>
 
-    <!--<logger name="vahy" level="warn"/>-->
-
-    <root level="debug">
+    <root level="warn">
         <appender-ref ref="CONSOLE" />
     </root>
 

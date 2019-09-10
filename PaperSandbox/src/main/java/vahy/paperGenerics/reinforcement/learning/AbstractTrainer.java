@@ -42,7 +42,8 @@ public abstract class AbstractTrainer<
                            double discountFactor,
                            RewardAggregator rewardAggregator,
                            ProgressTrackerSettings progressTrackerSettings,
-                           int stepCountLimit) {
+                           int stepCountLimit,
+                           int threadCount) {
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
         this.paperNodeEvaluator = paperNodeEvaluator;
@@ -52,7 +53,7 @@ public abstract class AbstractTrainer<
             opponentPolicySupplier,
             progressTrackerSettings,
             stepCountLimit,
-            Runtime.getRuntime().availableProcessors() - 1);
+            threadCount);
     }
 
     public PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> getGameSampler() {

@@ -25,7 +25,7 @@ import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.RamcpNodeEvaluator;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
-import vahy.paperGenerics.experiment.EvaluatorType;
+import vahy.config.EvaluatorType;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;

@@ -29,6 +29,7 @@ public class RiskBasedSelectorVahy<
 
     private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector.class.getName());
 
+    @Experimental
     public RiskBasedSelectorVahy(double cpuctParameter, SplittableRandom random) {
         super(cpuctParameter, random);
     }

@@ -3,16 +3,19 @@ package vahy.solutionExamples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.episode.TrainerAlgorithm;
-import vahy.game.HallwayInstance;
+import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigBuilder;
+import vahy.config.EvaluatorType;
+import vahy.config.SelectorType;
+import vahy.config.StochasticStrategy;
+import vahy.config.SystemConfig;
+import vahy.config.SystemConfigBuilder;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
 import vahy.experiment.Experiment;
-import vahy.experiment.ExperimentSetup;
-import vahy.experiment.ExperimentSetupBuilder;
-import vahy.game.NotValidGameStringRepresentationException;
+import vahy.game.HallwayInstance;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.paperGenerics.experiment.EvaluatorType;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -20,35 +23,18 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.paperGenerics.experiment.SelectorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.io.IOException;
-import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class Benchmark19Solution {
 
     private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
 
-    public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
+    public static void main(String[] args) {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
-        //  EXAMPLE 1
-        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment1();
-        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-        new Experiment().prepareAndRun(setup, random);
-
-        //  EXAMPLE 2
-//        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment2();
-//        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-//        new Experiment().prepareAndRun(setup, random);
-
-    }
-
-
-    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment1() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
@@ -57,11 +43,27 @@ public class Benchmark19Solution {
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
+        var setup = createExperiment();
+        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
+        experiment.run(gameConfig, HallwayInstance.BENCHMARK_19);
+    }
+
+
+    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+
+        var systemConfig = new SystemConfigBuilder()
+            .randomSeed(0)
+            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
+            .setDrawWindow(true)
+            .setParallelThreadsCount(7)
+            .setSingleThreadedEvaluation(true)
+            .setEvalEpisodeCount(1000)
+            .buildSystemConfig();
+
+
         int batchSize = 100;
 
-        ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
-            .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_19)
+        var algorithmConfig = new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
@@ -82,7 +84,6 @@ public class Benchmark19Solution {
             .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .evalEpisodeCount(1000)
             .globalRiskAllowed(0.0)
             .riskSupplier(() -> 0.0)
             .explorationConstantSupplier(new Supplier<>() {
@@ -118,8 +119,8 @@ public class Benchmark19Solution {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .buildExperimentSetup();
-        return new ImmutableTuple<>(gameConfig, experimentSetup);
+            .buildAlgorithmConfig();
+        return new ImmutableTuple<>(algorithmConfig, systemConfig);
     }
 
 }

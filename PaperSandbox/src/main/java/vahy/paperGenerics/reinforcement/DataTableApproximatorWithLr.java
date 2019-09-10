@@ -13,12 +13,10 @@ public class DataTableApproximatorWithLr<TObservation extends DoubleVector> exte
     private final double[] defaultPrediction;
 
     private final double learningRate;
-    private final boolean omitProbabilities;
 
-    public DataTableApproximatorWithLr(int actionCount, double learningRate, boolean omitProbabilities) {
+    public DataTableApproximatorWithLr(int actionCount, double learningRate) {
         super(null);
         this.actionCount = actionCount;
-        this.omitProbabilities = omitProbabilities;
         if(learningRate <= 0.0) {
             throw new IllegalArgumentException("Learning rate must be positive. Value: [" + learningRate + "]");
         }
@@ -48,19 +46,14 @@ public class DataTableApproximatorWithLr<TObservation extends DoubleVector> exte
             var riskDiff = prediction[1] - newSampledPrediction[1];
             prediction[1] = prediction[1] - learningRate * riskDiff;
 
-            if(omitProbabilities) {
-                for (int i = 0; i < actionCount; i++) {
-                    prediction[i + 2] = 1.0 / actionCount;
-                }
-            } else {
-                double[] killMeNow = new double[actionCount];
-                for (int i = 0; i < actionCount; i++) {
-                    var diffByI = - newSampledPrediction[i + 2] / prediction[i + 2];
-                    killMeNow[i] = prediction[i + 2] - learningRate * diffByI;
-                }
-                RandomDistributionUtils.applySoftmax(killMeNow);
-                System.arraycopy(killMeNow, 0, prediction, 2, actionCount);
+            double[] killMeNow = new double[actionCount];
+            for (int i = 0; i < actionCount; i++) {
+                var diffByI = - newSampledPrediction[i + 2] / prediction[i + 2];
+                killMeNow[i] = prediction[i + 2] - learningRate * diffByI;
             }
+            RandomDistributionUtils.applySoftmax(killMeNow);
+            System.arraycopy(killMeNow, 0, prediction, 2, actionCount);
+
             predictionMap.put(entry.getFirst(), prediction);
         }
 

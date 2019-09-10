@@ -7,7 +7,7 @@ import vahy.environment.RandomWalkSetup;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.paperGenerics.experiment.EvaluatorType;
+import vahy.config.EvaluatorType;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -30,12 +30,12 @@ public class RandomWalkExample {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
         //  EXAMPLE 1
-        ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup = createExperiment1();
+        ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup = createExperiment();
         SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
         new Experiment().prepareAndRun(setup, random);
     }
 
-    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
+    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment() {
         var startLevel = 5;
         var diffLevel = 10000;
         var finishlevel = startLevel + diffLevel;
@@ -46,7 +46,7 @@ public class RandomWalkExample {
         var batchSize = 1000;
 
         ExperimentSetup experimentSetup = new ExperimentSetup(
-            0,G
+            0,
             2,
             1,
             new FixedUpdateCountTreeConditionFactory(1),
@@ -104,7 +104,7 @@ public class RandomWalkExample {
     }
 
 
-//    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment1() {
+//    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment() {
 //        var randomWalkSetup = new RandomWalkSetup(100, 50, 1, 1, 10, 10, 0.9, 1.0);
 //        ExperimentSetup experimentSetup = new ExperimentSetup(
 //            0,

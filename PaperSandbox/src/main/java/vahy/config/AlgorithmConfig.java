@@ -1,4 +1,4 @@
-package vahy.paperGenerics.experiment;
+package vahy.config;
 
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
@@ -12,11 +12,7 @@ import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 
 import java.util.function.Supplier;
 
-public class AlgorithmSetup {
-
-    private final long randomSeed;
-    private final boolean singleThreadedEvaluation;
-    private final int parallelThreadsCount;
+public class AlgorithmConfig {
 
     // MCTS
     private final double cpuctParameter;
@@ -37,15 +33,13 @@ public class AlgorithmSetup {
     private final TrainerAlgorithm trainerAlgorithm;
     private final ApproximatorType approximatorType;
     private final EvaluatorType evaluatorType;
+    private final SelectorType selectorType;
 
     // NN
     private final int trainingBatchSize;
     private final int trainingEpochCount;
 
     private final double learningRate;
-
-    // Evaluation
-    private final int evalEpisodeCount;
 
     // PAPER
     private final double globalRiskAllowed;
@@ -57,36 +51,32 @@ public class AlgorithmSetup {
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
-    public AlgorithmSetup(long randomSeed,
-                          boolean singleThreadedEvaluation,
-                          int parallelThreadsCount, double cpuctParameter,
-                          TreeUpdateConditionFactory treeUpdateConditionFactory,
-                          double discountFactor,
-                          int batchEpisodeCount,
-                          int replayBufferSize,
-                          int maximalStepCountBound,
-                          int stageCount,
-                          Supplier<Double> explorationConstantSupplier,
-                          Supplier<Double> temperatureSupplier,
-                          Supplier<Double> riskSupplier,
-                          TrainerAlgorithm trainerAlgorithm,
-                          ApproximatorType approximatorType,
-                          EvaluatorType evaluatorType,
-                          int trainingBatchSize,
-                          int trainingEpochCount,
-                          double learningRate,
-                          int evalEpisodeCount,
-                          double globalRiskAllowed,
-                          InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
-                          InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
-                          ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
-                          ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
-                          FlowOptimizerType flowOptimizerType,
-                          SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                          SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
-        this.randomSeed = randomSeed;
-        this.singleThreadedEvaluation = singleThreadedEvaluation;
-        this.parallelThreadsCount = parallelThreadsCount;
+    public AlgorithmConfig(double cpuctParameter,
+                           TreeUpdateConditionFactory treeUpdateConditionFactory,
+                           double discountFactor,
+                           int batchEpisodeCount,
+                           int replayBufferSize,
+                           int maximalStepCountBound,
+                           int stageCount,
+                           Supplier<Double> explorationConstantSupplier,
+                           Supplier<Double> temperatureSupplier,
+                           Supplier<Double> riskSupplier,
+                           TrainerAlgorithm trainerAlgorithm,
+                           ApproximatorType approximatorType,
+                           EvaluatorType evaluatorType,
+                           SelectorType selectorType,
+                           int trainingBatchSize,
+                           int trainingEpochCount,
+                           double learningRate,
+                           double globalRiskAllowed,
+                           InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
+                           InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
+                           ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
+                           ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
+                           FlowOptimizerType flowOptimizerType,
+                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
+                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
+
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
         this.discountFactor = discountFactor;
@@ -100,10 +90,10 @@ public class AlgorithmSetup {
         this.trainerAlgorithm = trainerAlgorithm;
         this.approximatorType = approximatorType;
         this.evaluatorType = evaluatorType;
+        this.selectorType = selectorType;
         this.trainingBatchSize = trainingBatchSize;
         this.trainingEpochCount = trainingEpochCount;
         this.learningRate = learningRate;
-        this.evalEpisodeCount = evalEpisodeCount;
         this.globalRiskAllowed = globalRiskAllowed;
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
@@ -112,18 +102,6 @@ public class AlgorithmSetup {
         this.flowOptimizerType = flowOptimizerType;
         this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
-    }
-
-    public long getRandomSeed() {
-        return randomSeed;
-    }
-
-    public boolean isSingleThreadedEvaluation() {
-        return singleThreadedEvaluation;
-    }
-
-    public int getParallelThreadsCount() {
-        return parallelThreadsCount;
     }
 
     public double getCpuctParameter() {
@@ -178,6 +156,10 @@ public class AlgorithmSetup {
         return evaluatorType;
     }
 
+    public SelectorType getSelectorType() {
+        return selectorType;
+    }
+
     public int getTrainingBatchSize() {
         return trainingBatchSize;
     }
@@ -188,10 +170,6 @@ public class AlgorithmSetup {
 
     public double getLearningRate() {
         return learningRate;
-    }
-
-    public int getEvalEpisodeCount() {
-        return evalEpisodeCount;
     }
 
     public double getGlobalRiskAllowed() {
@@ -224,5 +202,36 @@ public class AlgorithmSetup {
 
     public SubTreeRiskCalculatorType getSubTreeRiskCalculatorTypeForUnknownFlow() {
         return subTreeRiskCalculatorTypeForUnknownFlow;
+    }
+
+    @Override
+    public String toString() {
+        return "AlgorithmConfig{" +
+            "cpuctParameter=" + cpuctParameter +
+            ", treeUpdateConditionFactory=" + treeUpdateConditionFactory +
+            ", discountFactor=" + discountFactor +
+            ", batchEpisodeCount=" + batchEpisodeCount +
+            ", replayBufferSize=" + replayBufferSize +
+            ", maximalStepCountBound=" + maximalStepCountBound +
+            ", stageCount=" + stageCount +
+            ", explorationConstantSupplier=" + explorationConstantSupplier +
+            ", temperatureSupplier=" + temperatureSupplier +
+            ", riskSupplier=" + riskSupplier +
+            ", trainerAlgorithm=" + trainerAlgorithm +
+            ", approximatorType=" + approximatorType +
+            ", evaluatorType=" + evaluatorType +
+            ", selectorType=" + selectorType +
+            ", trainingBatchSize=" + trainingBatchSize +
+            ", trainingEpochCount=" + trainingEpochCount +
+            ", learningRate=" + learningRate +
+            ", globalRiskAllowed=" + globalRiskAllowed +
+            ", inferenceExistingFlowStrategy=" + inferenceExistingFlowStrategy +
+            ", inferenceNonExistingFlowStrategy=" + inferenceNonExistingFlowStrategy +
+            ", explorationExistingFlowStrategy=" + explorationExistingFlowStrategy +
+            ", explorationNonExistingFlowStrategy=" + explorationNonExistingFlowStrategy +
+            ", flowOptimizerType=" + flowOptimizerType +
+            ", subTreeRiskCalculatorTypeForKnownFlow=" + subTreeRiskCalculatorTypeForKnownFlow +
+            ", subTreeRiskCalculatorTypeForUnknownFlow=" + subTreeRiskCalculatorTypeForUnknownFlow +
+            '}';
     }
 }
