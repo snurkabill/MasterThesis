@@ -9,8 +9,6 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
-import java.util.SplittableRandom;
-
 public class OptimalFlowHardConstraintCalculator<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -24,8 +22,8 @@ public class OptimalFlowHardConstraintCalculator<
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
 
-    public OptimalFlowHardConstraintCalculator(SplittableRandom random, double totalRiskAllowed) {
-        super(random, true);
+    public OptimalFlowHardConstraintCalculator(double totalRiskAllowed) {
+        super(true);
         this.totalRiskExpression = model.createExpression();
         this.totalRiskAllowed = totalRiskAllowed;
     }

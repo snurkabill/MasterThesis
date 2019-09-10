@@ -70,17 +70,17 @@ public class RiskAverseSearchTree<
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE, random).createDistribution(getRoot());
         } else {
-            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE, random).createDistribution(getRoot());
         }
     }
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature, random).createDistribution(getRoot());
         } else {
-            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature, random).createDistribution(getRoot());
         }
     }
 
@@ -134,7 +134,7 @@ public class RiskAverseSearchTree<
             return false;
         }
         if(!isFlowOptimized) {
-            var result = strategiesProvider.provideFlowOptimizer().optimizeFlow(getRoot(), random, totalRiskAllowed);
+            var result = strategiesProvider.provideFlowOptimizer().optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
             if(!result.getSecond()) {
                 logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + getRoot().getWrappedState().readableStringRepresentation() + "] with allowed risk: [" + totalRiskAllowed + "]");

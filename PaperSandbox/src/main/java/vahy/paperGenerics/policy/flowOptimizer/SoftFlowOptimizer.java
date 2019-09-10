@@ -8,8 +8,6 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraint;
 import vahy.utils.ImmutableTuple;
 
-import java.util.SplittableRandom;
-
 public class SoftFlowOptimizer<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -19,8 +17,8 @@ public class SoftFlowOptimizer<
     implements FlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
 
     @Override
-    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, SplittableRandom random, double totalRiskAllowed) {
-        var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
+    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
+        var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed);
         boolean optimalSoftSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
         return new ImmutableTuple<>(totalRiskAllowed, optimalSoftSolutionExists);
     }

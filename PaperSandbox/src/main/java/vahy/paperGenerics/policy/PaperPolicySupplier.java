@@ -66,7 +66,7 @@ public class PaperPolicySupplier<
     }
 
     protected SplittableRandom getRandom() {
-        return random;
+        return random.split();
     }
 
     protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState) {
@@ -81,10 +81,10 @@ public class PaperPolicySupplier<
                 nodeSelector.get(),
                 treeUpdater,
                 nodeEvaluator,
-                random,
+                random.split(),
                 totalRiskAllowedInference,
                 strategiesProvider),
-            random);
+            random.split());
     }
 
     protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
@@ -99,10 +99,10 @@ public class PaperPolicySupplier<
                 nodeSelector.get(),
                 treeUpdater,
                 nodeEvaluator,
-                random,
+                random.split(),
                 totalRiskAllowed,
                 strategiesProvider),
-            random,
+            random.split(),
             explorationConstant,
             temperature);
     }

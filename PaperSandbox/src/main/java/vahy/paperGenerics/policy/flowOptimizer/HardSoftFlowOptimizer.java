@@ -9,8 +9,6 @@ import vahy.paperGenerics.policy.linearProgram.OptimalFlowHardConstraintCalculat
 import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraint;
 import vahy.utils.ImmutableTuple;
 
-import java.util.SplittableRandom;
-
 public class HardSoftFlowOptimizer<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -20,15 +18,13 @@ public class HardSoftFlowOptimizer<
     implements FlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
 
     @Override
-    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                        SplittableRandom random,
-                                                        double totalRiskAllowed) {
+    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
         var optimalFlowCalculator =
-            new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
+            new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed);
         boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(node);
         if(!optimalSolutionExists) {
             var optimalSoftFlowCalculator =
-                new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
+                new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed);
             optimalSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
         }
         return new ImmutableTuple<>(totalRiskAllowed, optimalSolutionExists);
