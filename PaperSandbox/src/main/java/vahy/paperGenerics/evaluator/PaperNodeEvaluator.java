@@ -35,8 +35,6 @@ public class PaperNodeEvaluator<
     protected final TAction[] allPlayerActions;
     protected final TAction[] allOpponentActions;
 
-    protected int nodesExpandedCount = 0;
-
     public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                               TrainableApproximator<DoubleVector> trainableApproximator,
                               Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator,
@@ -63,9 +61,7 @@ public class PaperNodeEvaluator<
         }
     }
 
-    protected void innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        nodesExpandedCount++;
-        double[] prediction = trainableApproximator.apply(node.getWrappedState().getPlayerObservation());
+    protected void fillNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, double[] prediction) {
         node.getSearchNodeMetadata().setPredictedReward(prediction[PaperModel.Q_VALUE_INDEX]);
         node.getSearchNodeMetadata().setExpectedReward(prediction[PaperModel.Q_VALUE_INDEX]);
         if(!node.isFinalNode()) {
@@ -81,6 +77,10 @@ public class PaperNodeEvaluator<
         }
     }
 
+    protected void innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        fillNode(node, trainableApproximator.apply(node.getWrappedState().getPlayerObservation()));
+    }
+
     protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities) {
         ImmutableTuple<List<TAction>, List<Double>> probabilities = opponentApproximator.apply(node.getWrappedState().getOpponentObservation());
         for (int i = 0; i < probabilities.getFirst().size(); i++) {
@@ -92,8 +92,7 @@ public class PaperNodeEvaluator<
         SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> parent,
         TAction nextAction) {
         StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState> stateRewardReturn = parent.applyAction(nextAction);
-        SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> childNode = searchNodeFactory
-            .createNode(stateRewardReturn, parent, nextAction);
+        SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> childNode = searchNodeFactory.createNode(stateRewardReturn, parent, nextAction);
         innerEvaluation(childNode);
         return childNode;
     }
@@ -108,7 +107,4 @@ public class PaperNodeEvaluator<
         return trainableApproximator.apply(observation);
     }
 
-    public int getNodesExpandedCount() {
-        return nodesExpandedCount;
-    }
 }
