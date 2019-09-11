@@ -20,60 +20,83 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 
-public class IntegrationHallway03 extends  AbstractHallwayTest {
+import java.util.function.Supplier;
+
+public class IntegrationHallway18 extends AbstractHallwayTest {
 
     @DataProvider(name = "TestDataProviderMethod")
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 40, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 50, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 52, 0.105}
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.0},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.105}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000);
     }
+
 
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
-            .trapProbability(0.1)
+            .trapProbability(0.05)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
     }
 
     private static AlgorithmConfigBuilder genericAlgoConfig() {
-        return new AlgorithmConfigBuilder()
+        int batchSize = 100;
+        return  new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(3)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
+            .cpuctParameter(1)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(0)
-            .trainingEpochCount(0)
-            // REINFORCEMENT
+            .trainingBatchSize(64)
+            .trainingEpochCount(100)
+            .learningRate(0.1)
+            // REINFORCEMENTs
             .discountFactor(1)
-            .batchEpisodeCount(100)
-            .stageCount(10)
+            .batchEpisodeCount(batchSize)
+            .stageCount(200)
+
             .maximalStepCountBound(1000)
+
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
-            .selectorType(SelectorType.UCB)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
             .evaluatorType(EvaluatorType.RALF)
-            .globalRiskAllowed(0.00)
-            .riskSupplier(() -> 0.00)
-            .explorationConstantSupplier(() -> 0.2)
-            .temperatureSupplier(() -> 2.0)
+            .replayBufferSize(20000)
+            .selectorType(SelectorType.UCB)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(() -> 1.00)
+            .explorationConstantSupplier(new Supplier<>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 100000.0) / 5;
+                }
+            })
+            .temperatureSupplier(new Supplier<>() {
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 200000.0) * 10;
+                }
+                private int callCount = 0;
+            })
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.PRIOR_SUM);
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
     }
 
 
@@ -81,6 +104,7 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
+            .stageCount(50)
             .buildAlgorithmConfig();
     }
 
@@ -88,6 +112,7 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
+            .stageCount(100)
             .buildAlgorithmConfig();
     }
 
@@ -95,7 +120,7 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
+            .stageCount(100)
             .buildAlgorithmConfig();
     }
-
 }

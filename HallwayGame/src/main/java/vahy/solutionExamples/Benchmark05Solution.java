@@ -33,7 +33,7 @@ public class Benchmark05Solution {
 
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.0)
+            .noisyMoveProbability(0.1)
             .stepPenalty(1)
             .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
@@ -68,14 +68,14 @@ public class Benchmark05Solution {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))
-            .stageCount(10)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .globalRiskAllowed(1.0)
-            .riskSupplier(() -> 1.0)
+            .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
             .learningRate(0.1)
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
@@ -83,13 +83,13 @@ public class Benchmark05Solution {
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 1.0;
+                    return 0.2;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 0.0;
+                    return 1.5;
                 }
             })
 

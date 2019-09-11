@@ -28,9 +28,9 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-//            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.0},
-//            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.005},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.005}
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.0},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.005},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.010}
         };
     }
 
@@ -63,8 +63,8 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
 
             .batchEpisodeCount(100)
 
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            .stageCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .stageCount(300)
             .evaluatorType(EvaluatorType.RALF)
 
             .maximalStepCountBound(1000)
@@ -104,6 +104,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
+            .stageCount(50)
             .buildAlgorithmConfig();
     }
 
@@ -111,6 +112,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
+            .stageCount(100)
             .buildAlgorithmConfig();
     }
 
@@ -118,6 +120,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
+            .stageCount(200)
             .buildAlgorithmConfig();
     }
 }

@@ -55,17 +55,17 @@ public class Benchmark18Solution {
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
             .setParallelThreadsCount(7)
-            .setSingleThreadedEvaluation(true)
+            .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
 
 
-        int batchSize = 100;
+        int batchSize = 1000;
 
         var algorithmConfig = new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -74,7 +74,7 @@ public class Benchmark18Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(200)
+            .stageCount(10000)
 
             .maximalStepCountBound(1000)
 
