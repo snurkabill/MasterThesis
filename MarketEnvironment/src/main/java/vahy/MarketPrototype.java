@@ -20,7 +20,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
-import vahy.paperGenerics.PaperNodeEvaluator;
+import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
