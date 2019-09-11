@@ -1,16 +1,13 @@
 package vahy.paperGenerics.reinforcement.learning;
 
-import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
-import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
-import vahy.vizualiation.ProgressTrackerSettings;
+import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 
 import java.util.Map;
 
@@ -21,16 +18,11 @@ public class EveryVisitMonteCarloTrainer<
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     extends AbstractMonteCarloTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    public EveryVisitMonteCarloTrainer(InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState> initialStateSupplier,
-                                       TrainablePaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperTrainablePolicySupplier,
-                                       PaperPolicySupplier<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
-                                       TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> paperNodeEvaluator,
+    public EveryVisitMonteCarloTrainer(PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler,
+                                       TrainableApproximator<DoubleVector> trainableApproximator,
                                        double discountFactor,
-                                       RewardAggregator rewardAggregator,
-                                       ProgressTrackerSettings progressTrackerSettings,
-                                       int stepCountLimit,
-                                       int threadCount) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit, threadCount);
+                                       RewardAggregator rewardAggregator) {
+        super(gameSampler, trainableApproximator, discountFactor, rewardAggregator);
     }
 
     @Override

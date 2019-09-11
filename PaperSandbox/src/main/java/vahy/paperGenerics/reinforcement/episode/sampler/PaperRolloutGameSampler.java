@@ -1,4 +1,4 @@
-package vahy.paperGenerics.reinforcement.episode;
+package vahy.paperGenerics.reinforcement.episode.sampler;
 
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
@@ -29,7 +29,6 @@ public class PaperRolloutGameSampler<
                                    int processingUnitCount) {
         super(initialStateSupplier, opponentPolicySupplier, progressTrackerSettings, stepCountLimit, processingUnitCount);
         this.playerPolicySupplier = playerPolicySupplier;
-
     }
 
     @Override

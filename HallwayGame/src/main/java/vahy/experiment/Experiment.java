@@ -19,15 +19,15 @@ import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
-import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.PaperTreeUpdater;
-import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
+import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
+import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
+import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
@@ -36,6 +36,7 @@ import vahy.paperGenerics.reinforcement.DataTableApproximator;
 import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
@@ -219,7 +220,7 @@ public class Experiment {
             strategiesProvider);
 
 
-        var trainer = getAbstractTrainer(evaluator, paperTrainablePolicySupplier);
+        var trainer = getAbstractTrainer(paperTrainablePolicySupplier);
 
 
         var startTrainingMillis = System.currentTimeMillis();
@@ -316,50 +317,40 @@ public class Experiment {
     }
 
     private AbstractTrainer<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> getAbstractTrainer(
-        PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> nodeEvaluator,
         TrainablePaperPolicySupplier<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> trainablePaperPolicySupplier)
     {
-        var environmentPolicySupplier = new EnvironmentPolicySupplier(masterRandom.split());
         var discountFactor = algorithmConfig.getDiscountFactor();
         var trainerAlgorithm = algorithmConfig.getTrainerAlgorithm();
-        var stepCountLimit = algorithmConfig.getMaximalStepCountBound();
-        int parallelThreadsCount = systemConfig.getParallelThreadsCount();
+
+        var gameSampler = new PaperRolloutGameSampler<>(
+            hallwayGameInitialInstanceSupplier,
+            trainablePaperPolicySupplier,
+            new EnvironmentPolicySupplier(masterRandom.split()),
+            progressTrackerSettings,
+            algorithmConfig.getMaximalStepCountBound(),
+            systemConfig.getParallelThreadsCount());
+
         switch(trainerAlgorithm) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
-                    trainablePaperPolicySupplier,
-                    environmentPolicySupplier,
-                    nodeEvaluator,
+                    gameSampler,
+                    approximator,
                     discountFactor,
                     rewardAggregator,
-                    stepCountLimit,
                     new LinkedList<>(),
-                    algorithmConfig.getReplayBufferSize(),
-                    progressTrackerSettings,
-                    parallelThreadsCount);
+                    algorithmConfig.getReplayBufferSize());
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
-                    trainablePaperPolicySupplier,
-                    environmentPolicySupplier,
-                    nodeEvaluator,
+                    gameSampler,
+                    approximator,
                     discountFactor,
-                    rewardAggregator,
-                    progressTrackerSettings,
-                    stepCountLimit,
-                    parallelThreadsCount);
+                    rewardAggregator);
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
-                    hallwayGameInitialInstanceSupplier,
-                    trainablePaperPolicySupplier,
-                    environmentPolicySupplier,
-                    nodeEvaluator,
+                    gameSampler,
+                    approximator,
                     discountFactor,
-                    rewardAggregator,
-                    progressTrackerSettings,
-                    stepCountLimit,
-                    parallelThreadsCount);
+                    rewardAggregator);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
         }

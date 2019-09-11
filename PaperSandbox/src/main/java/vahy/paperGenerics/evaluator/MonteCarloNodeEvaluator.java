@@ -93,15 +93,4 @@ public class MonteCarloNodeEvaluator<
         }
     }
 
-
-    @Override
-    public double[] evaluate(DoubleVector observation) {
-        return new double[] {0};
-    }
-
-    @Override
-    public void train(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
-        // this is it
-    }
-
 }

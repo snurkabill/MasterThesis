@@ -1,4 +1,4 @@
-package vahy.paperGenerics.reinforcement.episode;
+package vahy.paperGenerics.reinforcement.episode.sampler;
 
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
@@ -31,7 +31,7 @@ public class EpisodeGameSampler<
     }
 
     @Override
-    protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> supplyPlayerPolicy(TState initialState) {
+    protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> supplyPlayerPolicy(TState initialState) { // TODO: delete this and PaperGameSampler and provide supplier to AbstractGameSampler
         return playerPolicySupplier.initializePolicy(initialState);
     }
 }

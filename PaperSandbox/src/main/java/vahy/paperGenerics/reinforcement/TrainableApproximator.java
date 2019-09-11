@@ -32,4 +32,12 @@ public class TrainableApproximator<TObservation extends DoubleVector> implements
     public double[] apply(TObservation doubleVectorialObservation) {
         return supervisedTrainableModel.predict(doubleVectorialObservation.getObservedVector());
     }
+
+    public double[][] apply(TObservation[] doubleVectorialObservationArray) {
+        double[][] input = new double[doubleVectorialObservationArray.length][];
+        for (int i = 0; i < doubleVectorialObservationArray.length; i++) {
+            input[i] = doubleVectorialObservationArray[i].getObservedVector();
+        }
+        return supervisedTrainableModel.predict(input);
+    }
 }

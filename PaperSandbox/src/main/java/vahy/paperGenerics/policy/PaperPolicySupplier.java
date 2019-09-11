@@ -61,14 +61,6 @@ public class PaperPolicySupplier<
         return createPolicy(initialState);
     }
 
-    protected Class<TAction> getActionClass() {
-        return actionClass;
-    }
-
-    protected SplittableRandom getRandom() {
-        return random.split();
-    }
-
     protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState) {
         SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
             new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());

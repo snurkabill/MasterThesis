@@ -74,7 +74,7 @@ public class Benchmark18Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(10000)
+            .stageCount(200)
 
             .maximalStepCountBound(1000)
 

@@ -8,7 +8,7 @@ import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
-import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
+import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperModel;
@@ -25,7 +25,7 @@ public class PaperNodeEvaluator<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends State<TAction, DoubleVector, TOpponentObservation, TState>>
-    implements TrainableNodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> {
+    implements NodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
 
@@ -95,16 +95,6 @@ public class PaperNodeEvaluator<
         SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> childNode = searchNodeFactory.createNode(stateRewardReturn, parent, nextAction);
         innerEvaluation(childNode);
         return childNode;
-    }
-
-    @Override
-    public void train(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
-        trainableApproximator.train(trainData);
-    }
-
-    @Override
-    public double[] evaluate(DoubleVector observation) {
-        return trainableApproximator.apply(observation);
     }
 
 }

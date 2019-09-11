@@ -1,4 +1,4 @@
-package vahy.paperGenerics.reinforcement.episode;
+package vahy.paperGenerics.reinforcement.episode.sampler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,10 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
+import vahy.paperGenerics.reinforcement.episode.EpisodeImmutableSetup;
+import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
+import vahy.paperGenerics.reinforcement.episode.EpisodeSimulator;
+import vahy.paperGenerics.reinforcement.episode.FromEpisodesDataPointGenerator;
 import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;

@@ -11,7 +11,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.experiment.CalculatedResultStatistics;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.paperGenerics.reinforcement.episode.EpisodeGameSampler;
+import vahy.paperGenerics.reinforcement.episode.sampler.EpisodeGameSampler;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTrackerSettings;

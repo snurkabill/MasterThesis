@@ -6,6 +6,7 @@ import vahy.Analyzer;
 import vahy.RandomWalkExample;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.nodeSelector.NodeSelector;
+import vahy.config.EvaluatorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
 import vahy.environment.RandomWalkProbabilities;
@@ -15,17 +16,15 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.opponent.RandomWalkOpponentSupplier;
-import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
-import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
-import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.PaperTreeUpdater;
-import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
-import vahy.config.EvaluatorType;
+import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
+import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
+import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
@@ -34,11 +33,13 @@ import vahy.paperGenerics.reinforcement.DataTableApproximator;
 import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
 import vahy.paperGenerics.reinforcement.EmptyApproximator;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
+import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
@@ -177,7 +178,7 @@ public class Experiment {
             random,
             RandomWalkGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
-            evaluator,
+            approximator,
             paperTrainablePolicySupplier,
             experimentSetup.getReplayBufferSize(),
             experimentSetup.getMaximalStepCountBound(),
@@ -291,44 +292,42 @@ public class Experiment {
                        SplittableRandom random,
                        RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
                        double discountFactor,
-                       PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> nodeEvaluator,
+                       TrainableApproximator<DoubleVector> approximator,
                        TrainablePaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit,
                        ProgressTrackerSettings progressTrackerSettings) {
+
+        var gameSampler = new PaperRolloutGameSampler<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>(
+            randomWalkInitialInstanceSupplier,
+            trainablePaperPolicySupplier,
+            new RandomWalkOpponentSupplier(random.split()),
+            progressTrackerSettings,
+            stepCountLimit,
+            1);
+
+
         switch(trainerAlgorithm) {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
-                    randomWalkInitialInstanceSupplier,
-                    trainablePaperPolicySupplier,
-                    new RandomWalkOpponentSupplier(random),
-                    nodeEvaluator,
+                    gameSampler,
+                    approximator,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
-                    stepCountLimit,
                     new LinkedList<>(),
-                    replayBufferSize,
-                    progressTrackerSettings, 1);
+                    replayBufferSize);
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
-                    randomWalkInitialInstanceSupplier,
-                    trainablePaperPolicySupplier,
-                    new RandomWalkOpponentSupplier(random),
-                    nodeEvaluator,
+                    gameSampler,
+                    approximator,
                     discountFactor,
-                    new DoubleScalarRewardAggregator(),
-                    progressTrackerSettings,
-                    stepCountLimit, 1);
+                    new DoubleScalarRewardAggregator());
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
-                    randomWalkInitialInstanceSupplier,
-                    trainablePaperPolicySupplier,
-                    new RandomWalkOpponentSupplier(random),
-                    nodeEvaluator,
+                    gameSampler,
+                    approximator,
                     discountFactor,
-                    new DoubleScalarRewardAggregator(),
-                    progressTrackerSettings,
-                    stepCountLimit, 1);
+                    new DoubleScalarRewardAggregator());
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
         }
