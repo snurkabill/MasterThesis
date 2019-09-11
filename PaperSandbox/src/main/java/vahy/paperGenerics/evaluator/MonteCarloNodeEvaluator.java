@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.evaluator;
 
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
@@ -7,6 +7,8 @@ import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 

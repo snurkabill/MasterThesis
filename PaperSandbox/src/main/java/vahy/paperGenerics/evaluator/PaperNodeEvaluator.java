@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.evaluator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,8 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.TrainableNodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.reinforcement.TrainableApproximator;
 import vahy.utils.ImmutableTuple;
 
