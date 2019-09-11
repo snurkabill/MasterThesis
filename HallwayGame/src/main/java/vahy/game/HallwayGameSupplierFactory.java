@@ -1,8 +1,6 @@
-package vahy.data;
+package vahy.game;
 
 import vahy.environment.config.GameConfig;
-import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.game.NotValidGameStringRepresentationException;
 
 import java.io.IOException;
 import java.io.InputStream;

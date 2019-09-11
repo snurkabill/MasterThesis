@@ -41,10 +41,6 @@ public class PaperPolicyImpl<
     private double[] actionDistribution;
     private boolean hasActionChanged = false;
 
-    private long nanosMeasured;
-    private long counter = 0;
-
-
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
                            RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,

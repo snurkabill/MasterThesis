@@ -43,8 +43,7 @@ public class PaperBenchmark<
         this.progressTrackerSettings = progressTrackerSettings;
     }
 
-    public List<PaperPolicyResults<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> runBenchmark(int episodeCount,
-                                                                                                                                 int stepCountLimit) {
+    public List<PaperPolicyResults<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> runBenchmark(int episodeCount, int stepCountLimit, int threadCount) {
         logger.info("Running benchmark for [{}] iterations", episodeCount);
         List<PaperPolicyResults<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> results = new ArrayList<>();
         for (PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy : benchmarkingPolicyList) {
@@ -55,7 +54,7 @@ public class PaperBenchmark<
                 environmentPolicySupplier,
                 progressTrackerSettings,
                 stepCountLimit,
-                1);
+                threadCount);
             long start = System.currentTimeMillis();
             List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> resultList = gameSampler.sampleEpisodes(episodeCount);
             long end = System.currentTimeMillis();

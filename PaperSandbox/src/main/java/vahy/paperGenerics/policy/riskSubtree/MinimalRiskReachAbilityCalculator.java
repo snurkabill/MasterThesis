@@ -9,8 +9,6 @@ import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
 
-import java.util.SplittableRandom;
-
 public class MinimalRiskReachAbilityCalculator<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -21,12 +19,6 @@ public class MinimalRiskReachAbilityCalculator<
 
     private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculator.class.getName());
 
-    private final SplittableRandom random;
-
-    public MinimalRiskReachAbilityCalculator(SplittableRandom random) {
-        this.random = random;
-    }
-
     @Override
     public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
@@ -34,7 +26,7 @@ public class MinimalRiskReachAbilityCalculator<
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
         }
 
-        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, false) {
+        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
                 if(node.getWrappedState().isRiskHit()) {

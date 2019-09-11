@@ -9,14 +9,10 @@ import java.util.stream.Collectors;
 
 public class DataTableApproximator<TObservation extends DoubleVector> extends TrainableApproximator<TObservation> {
 
-    private final int actionCount;
     private final double[] defaultPrediction;
-    private final boolean omitProbabilities;
-    public DataTableApproximator(int actionCount, boolean omitProbabilities) {
-        super(null);
-        this.actionCount = actionCount;
-        this.omitProbabilities = omitProbabilities;
 
+    public DataTableApproximator(int actionCount) {
+        super(null);
         this.defaultPrediction = new double[2 + actionCount];
         this.defaultPrediction[0] = 0;
         this.defaultPrediction[1] = 0.0;
@@ -24,7 +20,6 @@ public class DataTableApproximator<TObservation extends DoubleVector> extends Tr
             defaultPrediction[i + 2] = 1.0 / actionCount;
         }
     }
-
 
     private HashMap<TObservation, double[]> predictionMap = new HashMap<>();
 
@@ -43,18 +38,6 @@ public class DataTableApproximator<TObservation extends DoubleVector> extends Tr
 
     @Override
     public double[] apply(TObservation doubleVectorialObservation) {
-
-        if(omitProbabilities) {
-            double[] innerPrediction = predictionMap.getOrDefault(doubleVectorialObservation, defaultPrediction);
-            double[] outerPrediction = new double[innerPrediction.length];
-            outerPrediction[0] = innerPrediction[0];
-            outerPrediction[1] = innerPrediction[1];
-            for (int i = 0; i < actionCount; i++) {
-                outerPrediction[2 + i] = 1.0 / actionCount;
-            }
-            return outerPrediction;
-        } else {
-            return predictionMap.getOrDefault(doubleVectorialObservation, defaultPrediction);
-        }
+        return predictionMap.getOrDefault(doubleVectorialObservation, defaultPrediction);
     }
 }

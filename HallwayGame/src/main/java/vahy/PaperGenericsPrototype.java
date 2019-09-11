@@ -1,36 +1,28 @@
 package vahy;
 
 import vahy.api.episode.TrainerAlgorithm;
-import vahy.data.HallwayInstance;
+import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigBuilder;
+import vahy.config.SelectorType;
+import vahy.config.StochasticStrategy;
+import vahy.config.SystemConfig;
+import vahy.config.SystemConfigBuilder;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
 import vahy.experiment.Experiment;
-import vahy.experiment.ExperimentSetup;
-import vahy.experiment.ExperimentSetupBuilder;
-import vahy.game.NotValidGameStringRepresentationException;
+import vahy.game.HallwayInstance;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.riskBasedSearch.SelectorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.io.IOException;
-import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class PaperGenericsPrototype {
 
-
-
-    public static void main(String[] args) throws NotValidGameStringRepresentationException, IOException {
+    public static void main(String[] args) {
         ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
-        ImmutableTuple<GameConfig, ExperimentSetup> setup = createExperiment();
-        SplittableRandom random = new SplittableRandom(setup.getSecond().getRandomSeed());
-        new Experiment().prepareAndRun(setup, random);
-    }
-
-    public static ImmutableTuple<GameConfig, ExperimentSetup> createExperiment() {
         GameConfig gameConfig = new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
@@ -39,9 +31,24 @@ public class PaperGenericsPrototype {
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
-        ExperimentSetup experimentSetup = new ExperimentSetupBuilder()
+        var setup = createExperiment();
+        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
+        experiment.run(gameConfig, HallwayInstance.BENCHMARK_03);
+    }
+
+    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+
+        var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)
-            .hallwayInstance(HallwayInstance.BENCHMARK_03)
+            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
+            .setDrawWindow(true)
+            .setParallelThreadsCount(7)
+            .setSingleThreadedEvaluation(true)
+            .setEvalEpisodeCount(1000)
+            .buildSystemConfig();
+
+
+        var algorithmConfig = new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(2)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
@@ -57,7 +64,6 @@ public class PaperGenericsPrototype {
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .selectorType(SelectorType.UCB)
             // .replayBufferSize(200)
-            .evalEpisodeCount(1000)
             .globalRiskAllowed(0.15)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
@@ -77,8 +83,8 @@ public class PaperGenericsPrototype {
                     return 2.0;
                 }
             })
-            .buildExperimentSetup();
-        return new ImmutableTuple<>(gameConfig, experimentSetup);
+            .buildAlgorithmConfig();
+        return new ImmutableTuple<>(algorithmConfig, systemConfig);
     }
 
 

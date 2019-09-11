@@ -43,8 +43,9 @@ public class ReplayBufferTrainer<
                                int stepCountLimit,
                                LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer,
                                int bufferSize,
-                               ProgressTrackerSettings progressTrackerSettings) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit);
+                               ProgressTrackerSettings progressTrackerSettings,
+                               int threadCount) {
+        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit, threadCount);
         this.bufferSize = bufferSize;
         this.buffer = buffer;
     }

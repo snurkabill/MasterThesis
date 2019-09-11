@@ -1,19 +1,15 @@
-package vahy.solutionExamples;
+package vahy.integration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.testng.annotations.DataProvider;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
-import vahy.config.StochasticStrategy;
 import vahy.config.SystemConfig;
-import vahy.config.SystemConfigBuilder;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
-import vahy.experiment.Experiment;
 import vahy.game.HallwayInstance;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -23,51 +19,42 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.utils.ImmutableTuple;
-import vahy.utils.ThirdPartBinaryUtils;
 
 import java.util.function.Supplier;
 
-public class Benchmark15Solution {
+public class IntegrationHallway18 extends AbstractHallwayTest {
 
-    private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
+    @DataProvider(name = "TestDataProviderMethod")
+    @Override
+    public Object[][] experimentSettings() {
+        return new Object[][] {
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.0},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.105}
+        };
+    }
 
-    public static void main(String[] args) {
-        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
-
-        GameConfig gameConfig = new ConfigBuilder()
-            .reward(100)
-            .noisyMoveProbability(0.1)
-            .stepPenalty(1)
-            .trapProbability(0.1)
-            .stateRepresentation(StateRepresentation.COMPACT)
-            .buildConfig();
-
-        var setup = createExperiment();
-        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_15);
-
+    private SystemConfig getSystemConfig() {
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000);
     }
 
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+    public static GameConfig createGameConfig() {
+        return new ConfigBuilder()
+            .reward(100)
+            .noisyMoveProbability(0.0)
+            .stepPenalty(10)
+            .trapProbability(0.05)
+            .stateRepresentation(StateRepresentation.COMPACT)
+            .buildConfig();
+    }
 
-        var systemConfig = new SystemConfigBuilder()
-            .randomSeed(0)
-            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
-            .setParallelThreadsCount(7)
-            .setSingleThreadedEvaluation(true)
-            .setEvalEpisodeCount(1000)
-            .buildSystemConfig();
-
-
+    private static AlgorithmConfigBuilder genericAlgoConfig() {
         int batchSize = 100;
-
-        var algorithmConfig = new AlgorithmConfigBuilder()
+        return  new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -76,7 +63,7 @@ public class Benchmark15Solution {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(3000)
+            .stageCount(200)
 
             .maximalStepCountBound(1000)
 
@@ -85,43 +72,55 @@ public class Benchmark15Solution {
             .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(1.0)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(() -> 1.00)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    var x = Math.exp(-callCount / 100000.0);
-                    if(callCount % batchSize == 0) {
-                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
-                    }
-                    return x;
-//                    return 1.0;
+                    return Math.exp(-callCount / 100000.0) / 5;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
-                private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    double x = Math.exp(-callCount / 200000.0) * 10;
-                    if(callCount % batchSize == 0) {
-                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
-                    }
-                    return x;
-//                    return 1.5;
+                    return Math.exp(-callCount / 200000.0) * 10;
                 }
+                private int callCount = 0;
             })
-            .riskSupplier(() -> 1.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .buildAlgorithmConfig();
-        return new ImmutableTuple<>(algorithmConfig, systemConfig);
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
     }
 
+
+    public static AlgorithmConfig createExperiment_SAFE() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 0.0)
+            .globalRiskAllowed(0.0)
+            .stageCount(50)
+            .buildAlgorithmConfig();
+    }
+
+    public static AlgorithmConfig createExperiment_TOTAL_RISK() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 1.0)
+            .globalRiskAllowed(1.0)
+            .stageCount(100)
+            .buildAlgorithmConfig();
+    }
+
+    public static AlgorithmConfig createExperiment_MIDDLE_RISK() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 0.05)
+            .globalRiskAllowed(0.05)
+            .stageCount(100)
+            .buildAlgorithmConfig();
+    }
 }

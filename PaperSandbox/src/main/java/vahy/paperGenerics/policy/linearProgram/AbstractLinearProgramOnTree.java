@@ -14,7 +14,6 @@ import vahy.paperGenerics.PaperState;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTree<
     TAction extends Action,
@@ -31,15 +30,13 @@ public abstract class AbstractLinearProgramOnTree<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
-    private final SplittableRandom random;
     protected CLP model;
     protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
     private boolean maximize;
 
-    protected AbstractLinearProgramOnTree(SplittableRandom random, boolean maximize) {
+    protected AbstractLinearProgramOnTree(boolean maximize) {
         this.model = new CLP();
         this.queue = new LinkedList<>();
-        this.random = random;
         this.maximize = maximize;
     }
 

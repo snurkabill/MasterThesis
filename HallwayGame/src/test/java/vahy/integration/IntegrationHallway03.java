@@ -1,17 +1,15 @@
-package vahy.solutionExamples;
+package vahy.integration;
 
+import org.testng.annotations.DataProvider;
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
-import vahy.config.StochasticStrategy;
 import vahy.config.SystemConfig;
-import vahy.config.SystemConfigBuilder;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
-import vahy.experiment.Experiment;
 import vahy.game.HallwayInstance;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -21,88 +19,83 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.utils.ImmutableTuple;
-import vahy.utils.ThirdPartBinaryUtils;
 
-import java.util.function.Supplier;
+public class IntegrationHallway03 extends  AbstractHallwayTest {
 
-public class Benchmark03Solution {
+    @DataProvider(name = "TestDataProviderMethod")
+    @Override
+    public Object[][] experimentSettings() {
+        return new Object[][] {
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 40, 0.0},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 50, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 52, 0.105}
+        };
+    }
 
-    public static void main(String[] args) {
-        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
+    private SystemConfig getSystemConfig() {
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000);
+    }
 
-        GameConfig gameConfig = new ConfigBuilder()
+    public static GameConfig createGameConfig() {
+        return new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
-            .trapProbability(0.2)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
-
-
-        var setup = createExperiment();
-        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_03);
-
     }
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
-
-        var systemConfig = new SystemConfigBuilder()
-            .randomSeed(0)
-            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
-            .setParallelThreadsCount(7)
-            .setSingleThreadedEvaluation(true)
-            .setEvalEpisodeCount(1000)
-            .buildSystemConfig();
-
-        var algorithmConfig = new AlgorithmConfigBuilder()
+    private static AlgorithmConfigBuilder genericAlgoConfig() {
+        return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(3)
-
-            //.mcRolloutCount(1)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
             //NN
             .trainingBatchSize(0)
             .trainingEpochCount(0)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(10)
-
+            .batchEpisodeCount(100)
+            .stageCount(10)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
-
-
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
-            .stageCount(50)
+            .selectorType(SelectorType.UCB)
             .evaluatorType(EvaluatorType.RALF)
             .globalRiskAllowed(0.00)
             .riskSupplier(() -> 0.00)
-
-            .selectorType(SelectorType.UCB)
-
-            .explorationConstantSupplier(new Supplier<>() {
-                @Override
-                public Double get() {
-                    return 0.2;
-                }
-            })
-            .temperatureSupplier(new Supplier<>() {
-                @Override
-                public Double get() {
-                    return 2.0;
-                }
-            })
-
+            .explorationConstantSupplier(() -> 0.2)
+            .temperatureSupplier(() -> 2.0)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .buildAlgorithmConfig();
-        return new ImmutableTuple<>(algorithmConfig, systemConfig);
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.PRIOR_SUM);
     }
+
+
+    public static AlgorithmConfig createExperiment_SAFE() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 0.0)
+            .globalRiskAllowed(0.0)
+            .buildAlgorithmConfig();
+    }
+
+    public static AlgorithmConfig createExperiment_TOTAL_RISK() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 1.0)
+            .globalRiskAllowed(1.0)
+            .buildAlgorithmConfig();
+    }
+
+    public static AlgorithmConfig createExperiment_MIDDLE_RISK() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 0.05)
+            .globalRiskAllowed(0.05)
+            .buildAlgorithmConfig();
+    }
+
 }

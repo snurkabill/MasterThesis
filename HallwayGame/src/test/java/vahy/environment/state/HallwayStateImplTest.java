@@ -10,7 +10,6 @@ import vahy.utils.EnumUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class HallwayStateImplTest {
 
@@ -35,7 +34,7 @@ public class HallwayStateImplTest {
             {0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0},
         };
-        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, new double[walls.length][walls[0].length], ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
+        StaticGamePart staticGamePart = new StaticGamePart(StateRepresentation.FULL, new double[walls.length][walls[0].length], ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
         return new HallwayStateImpl(staticGamePart, rewards, 5, 1, AgentHeading.NORTH);
     }
 
@@ -67,7 +66,7 @@ public class HallwayStateImplTest {
             {0.0, 0.0, 0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0, 0.0, 0.0},
         };
-        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
+        StaticGamePart staticGamePart = new StaticGamePart(StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, -1, 0.5, 1);
         return new HallwayStateImpl(staticGamePart, rewards, 5, 2, AgentHeading.NORTH);
     }
 
@@ -90,7 +89,7 @@ public class HallwayStateImplTest {
             {0.0, 0.0, 0.0, 0.0, 0.0},
             {0.0, 0.0, 0.0, 0.0, 0.0},
         };
-        StaticGamePart staticGamePart = new StaticGamePart(new SplittableRandom(0), StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, 1, 0.5, 3);
+        StaticGamePart staticGamePart = new StaticGamePart(StateRepresentation.FULL, traps, ArrayUtils.cloneArray(rewards), walls, 1, 0.5, 3);
         return new HallwayStateImpl(staticGamePart, rewards, 2, 2, AgentHeading.NORTH);
     }
 

@@ -1,4 +1,4 @@
-package vahy.paperGenerics.experiment;
+package vahy.config;
 
 public enum EvaluatorType {
 

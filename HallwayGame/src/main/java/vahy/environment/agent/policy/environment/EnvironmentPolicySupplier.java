@@ -1,4 +1,4 @@
-package vahy.paperGenerics.policy.environment;
+package vahy.environment.agent.policy.environment;
 
 import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;
@@ -21,6 +21,6 @@ public class EnvironmentPolicySupplier extends PaperPolicySupplier<HallwayAction
 
     @Override
     public PaperPolicy<HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl> initializePolicy(HallwayStateImpl initialState) {
-        return new PaperEnvironmentPolicy(random);
+        return new PaperEnvironmentPolicy(random.split());
     }
 }

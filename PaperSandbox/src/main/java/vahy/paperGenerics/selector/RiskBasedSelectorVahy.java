@@ -1,4 +1,4 @@
-package vahy.riskBasedSearch;
+package vahy.paperGenerics.selector;
 
 import com.quantego.clp.CLP;
 import com.quantego.clp.CLPExpression;
@@ -10,7 +10,7 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperMetadata;
-import vahy.paperGenerics.PaperNodeSelector;
+import vahy.utils.Experimental;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
+@Experimental
 public class RiskBasedSelectorVahy<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -28,6 +29,7 @@ public class RiskBasedSelectorVahy<
 
     private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector.class.getName());
 
+    @Experimental
     public RiskBasedSelectorVahy(double cpuctParameter, SplittableRandom random) {
         super(cpuctParameter, random);
     }

@@ -28,8 +28,9 @@ public class EveryVisitMonteCarloTrainer<
                                        double discountFactor,
                                        RewardAggregator rewardAggregator,
                                        ProgressTrackerSettings progressTrackerSettings,
-                                       int stepCountLimit) {
-        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit);
+                                       int stepCountLimit,
+                                       int threadCount) {
+        super(initialStateSupplier, paperTrainablePolicySupplier, opponentPolicySupplier, paperNodeEvaluator, discountFactor, rewardAggregator, progressTrackerSettings, stepCountLimit, threadCount);
     }
 
     @Override

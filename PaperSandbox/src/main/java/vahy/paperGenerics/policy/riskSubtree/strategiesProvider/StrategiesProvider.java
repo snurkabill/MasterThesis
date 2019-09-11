@@ -44,7 +44,6 @@ public class StrategiesProvider<
     private final FlowOptimizerType flowOptimizerType;
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
-    private final SplittableRandom random;
 
     public StrategiesProvider(InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
                               InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
@@ -52,8 +51,7 @@ public class StrategiesProvider<
                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
                               FlowOptimizerType flowOptimizerType,
                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                              SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
-                              SplittableRandom random) {
+                              SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
@@ -61,14 +59,14 @@ public class StrategiesProvider<
         this.flowOptimizerType = flowOptimizerType;
         this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
-        this.random = random;
     }
 
     public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy(
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
-        double temperature) {
+        double temperature,
+        SplittableRandom random) {
 
         switch(inferenceExistingFlowStrategy){
             case SAMPLE_OPTIMAL_FLOW:
@@ -86,7 +84,8 @@ public class StrategiesProvider<
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
-        double temperature) {
+        double temperature,
+        SplittableRandom random) {
 
         switch(inferenceNonExistingFlowStrategy){
             case MAX_UCB_VISIT:
@@ -102,7 +101,8 @@ public class StrategiesProvider<
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
-        double temperature) {
+        double temperature,
+        SplittableRandom random) {
         switch(explorationExistingFlowStrategy){
             case SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE:
                 return new ExplorationFeasibleDistributionProvider<>(
@@ -123,7 +123,8 @@ public class StrategiesProvider<
         TState state,
         List<TAction> playerActions,
         double totalRiskAllowed,
-        double temperature) {
+        double temperature,
+        SplittableRandom random) {
 
         switch(explorationNonExistingFlowStrategy){
             case SAMPLE_UCB_VALUE:
@@ -153,13 +154,12 @@ public class StrategiesProvider<
         }
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculator(
-        SubTreeRiskCalculatorType subTreeRiskCalculatorType) {
+    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> provideRiskCalculator(SubTreeRiskCalculatorType subTreeRiskCalculatorType) {
         switch(subTreeRiskCalculatorType) {
             case FLOW_SUM:
                 return FlowSumSubtreeRiskCalculator::new;
             case MINIMAL_RISK_REACHABILITY:
-                return () -> new MinimalRiskReachAbilityCalculator<>(random);
+                return MinimalRiskReachAbilityCalculator::new;
             case PRIOR_SUM:
                 return SubtreePriorRiskCalculator::new;
             case ROOT_PREDICTION:

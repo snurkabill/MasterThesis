@@ -2,8 +2,8 @@ package vahy.experiment;
 
 import vahy.api.episode.TrainerAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
-import vahy.data.HallwayInstance;
-import vahy.paperGenerics.experiment.EvaluatorType;
+import vahy.game.HallwayInstance;
+import vahy.config.EvaluatorType;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -11,7 +11,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.riskBasedSearch.SelectorType;
+import vahy.config.SelectorType;
 
 import java.util.function.Supplier;
 

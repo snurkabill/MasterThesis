@@ -8,8 +8,6 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.linearProgram.OptimalFlowHardConstraintCalculator;
 import vahy.utils.ImmutableTuple;
 
-import java.util.SplittableRandom;
-
 public class HardFlowOptimizer<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -19,10 +17,8 @@ public class HardFlowOptimizer<
     implements FlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
 
     @Override
-    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                        SplittableRandom random,
-                                                        double totalRiskAllowed) {
-        var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, totalRiskAllowed);
+    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
+        var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed);
         boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(node);
         return new ImmutableTuple<>(totalRiskAllowed, optimalSolutionExists);
     }

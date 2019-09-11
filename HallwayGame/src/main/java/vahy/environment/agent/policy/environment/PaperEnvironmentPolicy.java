@@ -1,7 +1,6 @@
-package vahy.paperGenerics.policy.environment;
+package vahy.environment.agent.policy.environment;
 
 import vahy.environment.HallwayAction;
-import vahy.environment.agent.policy.environment.EnvironmentPolicy;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;

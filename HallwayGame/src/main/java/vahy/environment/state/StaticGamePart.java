@@ -3,11 +3,9 @@ package vahy.environment.state;
 import vahy.utils.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.SplittableRandom;
 
 public class StaticGamePart {
 
-    private final SplittableRandom random;
     private final StateRepresentation stateRepresentation;
     private final double[][] trapProbabilities;
     private final double[][] rewardsAtStart;
@@ -17,8 +15,7 @@ public class StaticGamePart {
     private final double noisyMoveProbability;
     private final int totalRewardsCount;
 
-    public StaticGamePart(SplittableRandom random,
-                          StateRepresentation stateRepresentation,
+    public StaticGamePart(StateRepresentation stateRepresentation,
                           double[][] trapProbabilities,
                           double[][] rewardsAtStart,
                           boolean[][] walls,
@@ -29,7 +26,6 @@ public class StaticGamePart {
         this.rewardsAtStart = rewardsAtStart;
         this.totalRewardsCount = totalRewardsCount;
         checkInputArguments(trapProbabilities, walls);
-        this.random = random;
         this.trapProbabilities = trapProbabilities;
         this.walls = walls;
         this.defaultStepPenalty = defaultStepPenalty;
@@ -63,10 +59,6 @@ public class StaticGamePart {
         }
     }
 
-    public SplittableRandom getRandom() {
-        return random;
-    }
-
     public double[][] getTrapProbabilities() {
         return trapProbabilities;
     }
@@ -92,7 +84,6 @@ public class StaticGamePart {
 
         if (Double.compare(that.getDefaultStepPenalty(), getDefaultStepPenalty()) != 0) return false;
         if (Double.compare(that.getNoisyMoveProbability(), getNoisyMoveProbability()) != 0) return false;
-        if (!getRandom().equals(that.getRandom())) return false;
         if (!Arrays.deepEquals(getTrapProbabilities(), that.getTrapProbabilities())) return false;
         return Arrays.deepEquals(getWalls(), that.getWalls());
     }
@@ -101,8 +92,7 @@ public class StaticGamePart {
     public int hashCode() {
         int result;
         long temp;
-        result = getRandom().hashCode();
-        result = 31 * result + Arrays.deepHashCode(getTrapProbabilities());
+        result = Arrays.deepHashCode(getTrapProbabilities());
         result = 31 * result + Arrays.deepHashCode(getWalls());
         temp = Double.doubleToLongBits(getDefaultStepPenalty());
         result = 31 * result + (int) (temp ^ (temp >>> 32));
