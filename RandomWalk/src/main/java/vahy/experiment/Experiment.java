@@ -16,8 +16,6 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.opponent.RandomWalkOpponentSupplier;
-import vahy.paperGenerics.PaperMetadata;
-import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
@@ -26,13 +24,16 @@ import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
-import vahy.paperGenerics.reinforcement.DataTableApproximator;
-import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
-import vahy.paperGenerics.reinforcement.EmptyApproximator;
-import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.impl.predictor.DataTablePredictor;
+import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
+import vahy.impl.predictor.EmptyPredictor;
+import vahy.impl.predictor.TrainableApproximator;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -60,6 +61,7 @@ import java.util.function.Supplier;
 public class Experiment {
 
     // TODO: REMOVE CODE REDUNDANCY
+    // TODO: this file is really shitty.
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
@@ -73,15 +75,23 @@ public class Experiment {
         var provider = new RandomWalkInitialInstanceSupplier(setup.getFirst());
         var inputLength = provider.createInitialState().getPlayerObservation().getObservedVector().length;
 
+        var actionCount = RandomWalkAction.playerActions.length;
+        var defaultPrediction = new double[2 + actionCount];
+        defaultPrediction[0] = 0;
+        defaultPrediction[1] = 0.0;
+        for (int i = 0; i < actionCount; i++) {
+            defaultPrediction[i + 2] = 1.0 / actionCount;
+        }
+
         switch (setup.getSecond().getApproximatorType()) {
             case EMPTY:
-                createPolicyAndRunProcess(setup, random, provider, new EmptyApproximator<>());
+                createPolicyAndRunProcess(setup, random, provider, new EmptyPredictor<>(defaultPrediction));
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximator<>(RandomWalkAction.playerActions.length));
+                createPolicyAndRunProcess(setup, random, provider, new DataTablePredictor<>(defaultPrediction));
                 break;
             case HASHMAP_LR:
-                createPolicyAndRunProcess(setup, random, provider, new DataTableApproximatorWithLr<>(RandomWalkAction.playerActions.length, setup.getSecond().getLearningRate()));
+                createPolicyAndRunProcess(setup, random, provider, new DataTablePredictorWithLr<>(defaultPrediction, setup.getSecond().getLearningRate(), RandomWalkAction.playerActions.length));
                 break;
             case NN:
             {
@@ -107,7 +117,7 @@ public class Experiment {
     private void createPolicyAndRunProcess(ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup,
                                            SplittableRandom random,
                                            RandomWalkInitialInstanceSupplier RandomWalkGameInitialInstanceSupplier,
-                                           TrainableApproximator<DoubleVector> approximator) {
+                                           TrainablePredictor<DoubleVector> predictor) {
         var experimentSetup = setup.getSecond();
         var rewardAggregator = new DoubleScalarRewardAggregator();
         var clazz = RandomWalkAction.class;
@@ -119,11 +129,11 @@ public class Experiment {
             () -> new PaperNodeSelector<>(setup.getSecond().getCpuctParameter(), random);
 
 
-        var evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random.split(), setup.getSecond(), rewardAggregator, new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), approximator);
+        var evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random.split(), setup.getSecond(), rewardAggregator, new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), predictor);
 //
 //        var evaluator = new PaperNodeEvaluator<>(
 //            new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
-//            approximator,
+//            predictor,
 //            RandomWalkProbabilities::getProbabilities,
 //            RandomWalkAction.playerActions, RandomWalkAction.environmentActions);
 //
@@ -178,7 +188,7 @@ public class Experiment {
             random,
             RandomWalkGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
-            approximator,
+            predictor,
             paperTrainablePolicySupplier,
             experimentSetup.getReplayBufferSize(),
             experimentSetup.getMaximalStepCountBound(),
@@ -292,13 +302,13 @@ public class Experiment {
                        SplittableRandom random,
                        RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
                        double discountFactor,
-                       TrainableApproximator<DoubleVector> approximator,
+                       TrainablePredictor<DoubleVector> predictor,
                        TrainablePaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> trainablePaperPolicySupplier,
                        int replayBufferSize,
                        int stepCountLimit,
                        ProgressTrackerSettings progressTrackerSettings) {
 
-        var gameSampler = new PaperRolloutGameSampler<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>(
+        var gameSampler = new PaperRolloutGameSampler<>(
             randomWalkInitialInstanceSupplier,
             trainablePaperPolicySupplier,
             new RandomWalkOpponentSupplier(random.split()),
@@ -311,7 +321,7 @@ public class Experiment {
             case REPLAY_BUFFER:
                 return new ReplayBufferTrainer<>(
                     gameSampler,
-                    approximator,
+                    predictor,
                     discountFactor,
                     new DoubleScalarRewardAggregator(),
                     new LinkedList<>(),
@@ -319,13 +329,13 @@ public class Experiment {
             case FIRST_VISIT_MC:
                 return new FirstVisitMonteCarloTrainer<>(
                     gameSampler,
-                    approximator,
+                    predictor,
                     discountFactor,
                     new DoubleScalarRewardAggregator());
             case EVERY_VISIT_MC:
                 return new EveryVisitMonteCarloTrainer<>(
                     gameSampler,
-                    approximator,
+                    predictor,
                     discountFactor,
                     new DoubleScalarRewardAggregator());
             default:
@@ -338,7 +348,7 @@ public class Experiment {
                                                                                                                                              ExperimentSetup experimentSetup,
                                                                                                                                              DoubleScalarRewardAggregator rewardAggregator,
                                                                                                                                              SearchNodeBaseFactoryImpl<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> searchNodeFactory,
-                                                                                                                                             TrainableApproximator<DoubleVector> approximator) {
+                                                                                                                                             TrainablePredictor<DoubleVector> predictor) {
         switch (evaluatorType) {
             case MONTE_CARLO:
                 return new MonteCarloNodeEvaluator<>(
@@ -352,7 +362,7 @@ public class Experiment {
             case RALF:
                 return new PaperNodeEvaluator<>(
                     searchNodeFactory,
-                    approximator,
+                    predictor,
                     RandomWalkProbabilities::getProbabilities,
                     RandomWalkAction.playerActions,
                     RandomWalkAction.environmentActions);

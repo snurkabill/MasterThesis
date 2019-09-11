@@ -7,7 +7,7 @@ import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
@@ -88,7 +88,7 @@ public class MonteCarloNodeEvaluator<
             int actionIndex = random.nextInt(actions.length);
             return actions[actionIndex];
         } else {
-            var probabilities = opponentApproximator.apply(wrappedState.getOpponentObservation());
+            var probabilities = opponentpredictor.apply(wrappedState.getOpponentObservation());
             return probabilities.getFirst().get(RandomDistributionUtils.getRandomIndexFromDistribution(probabilities.getSecond(), random));
         }
     }

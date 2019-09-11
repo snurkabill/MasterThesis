@@ -9,7 +9,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.Experimental;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;

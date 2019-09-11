@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.paperGenerics.metadata;
 
 import com.quantego.clp.CLPVariable;
 import vahy.api.model.Action;
@@ -10,7 +10,7 @@ public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchM
 
     private final Map<TAction, Double> childPriorProbabilities;
     private CLPVariable nodeProbabilityFlow;
-    private final double priorProbability;
+    private double priorProbability;
     private double predictedRisk;
     private double sumOfRisk;
 
@@ -29,6 +29,10 @@ public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchM
 
     public double getPriorProbability() {
         return priorProbability;
+    }
+
+    public void setPriorProbability(double priorProbability) {
+        this.priorProbability = priorProbability;
     }
 
     public double getPredictedRisk() {
@@ -50,7 +54,6 @@ public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchM
     public Map<TAction, Double> getChildPriorProbabilities() {
         return childPriorProbabilities;
     }
-
 
     public double getSumOfRisk() {
         return sumOfRisk;

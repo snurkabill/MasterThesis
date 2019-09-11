@@ -6,6 +6,7 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
+import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class PaperTreeUpdater<
     TAction extends Action,

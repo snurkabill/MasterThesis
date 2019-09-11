@@ -6,10 +6,10 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.utils.ImmutableTuple;
@@ -27,18 +27,18 @@ public abstract class AbstractTrainer<
     private static final Logger logger = LoggerFactory.getLogger(AbstractTrainer.class.getName());
 
     private final double discountFactor;
-    private final TrainableApproximator<DoubleVector> trainableApproximator;
+    private final TrainablePredictor<DoubleVector> trainablePredictor;
     private final PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler;
     protected final RewardAggregator rewardAggregator;
 
     public AbstractTrainer(PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler,
-                           TrainableApproximator<DoubleVector> trainableApproximator,
+                           TrainablePredictor<DoubleVector> trainablePredictor,
                            double discountFactor,
                            RewardAggregator rewardAggregator) {
         this.gameSampler = gameSampler;
         this.discountFactor = discountFactor;
         this.rewardAggregator = rewardAggregator;
-        this.trainableApproximator = trainableApproximator;
+        this.trainablePredictor = trainablePredictor;
 
     }
 
@@ -80,11 +80,11 @@ public abstract class AbstractTrainer<
     public abstract void printDataset();
 
     protected double[] evaluatePolicy(DoubleVector doubleVector) {
-        return this.trainableApproximator.apply(doubleVector);
+        return this.trainablePredictor.apply(doubleVector);
     }
 
     protected void trainPolicy(List<ImmutableTuple<DoubleVector, double[]>> trainData) {
-        trainableApproximator.train(trainData);
+        trainablePredictor.train(trainData);
     }
 
 }

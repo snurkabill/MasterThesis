@@ -10,7 +10,7 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyMode;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;

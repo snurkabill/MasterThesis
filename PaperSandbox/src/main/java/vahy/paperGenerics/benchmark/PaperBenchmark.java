@@ -6,7 +6,7 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.experiment.CalculatedResultStatistics;
 import vahy.paperGenerics.experiment.PaperPolicyResults;

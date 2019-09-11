@@ -11,7 +11,7 @@ import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.node.SearchNodeImpl;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 

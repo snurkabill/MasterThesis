@@ -4,9 +4,9 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 
 import java.util.Map;
@@ -19,10 +19,10 @@ public class EveryVisitMonteCarloTrainer<
     extends AbstractMonteCarloTrainer<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public EveryVisitMonteCarloTrainer(PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler,
-                                       TrainableApproximator<DoubleVector> trainableApproximator,
+                                       TrainablePredictor<DoubleVector> trainablePredictor,
                                        double discountFactor,
                                        RewardAggregator rewardAggregator) {
-        super(gameSampler, trainableApproximator, discountFactor, rewardAggregator);
+        super(gameSampler, trainablePredictor, discountFactor, rewardAggregator);
     }
 
     @Override

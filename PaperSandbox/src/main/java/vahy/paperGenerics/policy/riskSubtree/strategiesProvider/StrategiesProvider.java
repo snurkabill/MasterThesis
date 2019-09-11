@@ -2,7 +2,7 @@ package vahy.paperGenerics.policy.riskSubtree.strategiesProvider;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;

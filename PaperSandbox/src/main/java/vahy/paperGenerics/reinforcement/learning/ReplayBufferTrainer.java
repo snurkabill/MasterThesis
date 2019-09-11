@@ -6,9 +6,9 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.utils.ImmutableTuple;
@@ -32,12 +32,12 @@ public class ReplayBufferTrainer<
     private final LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer;
 
     public ReplayBufferTrainer(PaperRolloutGameSampler<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> gameSampler,
-                               TrainableApproximator<DoubleVector> trainableApproximator,
+                               TrainablePredictor<DoubleVector> trainablePredictor,
                                double discountFactor,
                                RewardAggregator rewardAggregator,
                                LinkedList<List<ImmutableTuple<DoubleVector, double[]>>> buffer,
                                int bufferSize) {
-        super(gameSampler, trainableApproximator, discountFactor, rewardAggregator);
+        super(gameSampler, trainablePredictor, discountFactor, rewardAggregator);
         this.bufferSize = bufferSize;
         this.buffer = buffer;
     }

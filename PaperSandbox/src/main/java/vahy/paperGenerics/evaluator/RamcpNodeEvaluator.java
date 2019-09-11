@@ -9,7 +9,7 @@ import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 
@@ -75,7 +75,7 @@ public class RamcpNodeEvaluator<
                 childNodePriorProbabilitiesMap.put(possibleAction, priorProbabilities[0]);
             }
         } else {
-            var probabilities = opponentApproximator.apply(node.getWrappedState().getOpponentObservation());
+            var probabilities = opponentpredictor.apply(node.getWrappedState().getOpponentObservation());
             for (int i = 0; i < probabilities.getFirst().size(); i++) {
                 childNodePriorProbabilitiesMap.put(probabilities.getFirst().get(i), probabilities.getSecond().get(i));
             }

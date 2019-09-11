@@ -19,8 +19,6 @@ import vahy.game.NotValidGameStringRepresentationException;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.paperGenerics.PaperMetadata;
-import vahy.paperGenerics.PaperMetadataFactory;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
@@ -29,13 +27,16 @@ import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
-import vahy.paperGenerics.reinforcement.DataTableApproximator;
-import vahy.paperGenerics.reinforcement.DataTableApproximatorWithLr;
-import vahy.paperGenerics.reinforcement.EmptyApproximator;
-import vahy.paperGenerics.reinforcement.TrainableApproximator;
+import vahy.impl.predictor.DataTablePredictor;
+import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
+import vahy.impl.predictor.EmptyPredictor;
+import vahy.impl.predictor.TrainableApproximator;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -89,7 +90,7 @@ public class Experiment {
     private SearchNodeBaseFactoryImpl<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> searchNodeFactory;
     private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> nodeEvaluator;
 
-    private TrainableApproximator<DoubleVector> approximator;
+    private TrainablePredictor<DoubleVector> approximator;
 
     // Domain specific
     private Class<HallwayAction> clazz;
@@ -150,7 +151,7 @@ public class Experiment {
         initializeDomainClasses();
 
         try {
-            approximator = initializeApproximator("tfModel/graph_" + gameInstance.toString() + ".pb");
+            approximator = initializePredictor("tfModel/graph_" + gameInstance.toString() + ".pb");
         } catch (IOException e) {
             throw new RuntimeException("TF model instance was not created.", e);
         }
@@ -166,16 +167,25 @@ public class Experiment {
         createPolicyAndRunProcess(gameConfig);
     }
 
-    private TrainableApproximator<DoubleVector> initializeApproximator(String modelName) throws IOException {
+    private TrainablePredictor<DoubleVector> initializePredictor(String modelName) throws IOException {
         var inputLenght = hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length;
         var approximatorType = algorithmConfig.getApproximatorType();
+
+        var actionCount = allPlayerActions.length;
+        var defaultPrediction = new double[2 + actionCount];
+        defaultPrediction[0] = 0;
+        defaultPrediction[1] = 0.0;
+        for (int i = 0; i < actionCount; i++) {
+            defaultPrediction[i + 2] = 1.0 / actionCount;
+        }
+
         switch(approximatorType) {
             case EMPTY:
-                return new EmptyApproximator<>();
+                return new EmptyPredictor<>(defaultPrediction);
             case HASHMAP:
-                return new DataTableApproximator<>(allPlayerActions.length);
+                return new DataTablePredictor<>(defaultPrediction);
             case HASHMAP_LR:
-                return new DataTableApproximatorWithLr<>(allPlayerActions.length, algorithmConfig.getLearningRate());
+                return new DataTablePredictorWithLr<>(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
             case NN:
                 tfModel = new TFModel(
                     inputLenght,
@@ -381,6 +391,13 @@ public class Experiment {
         var evaluatorType = algorithmConfig.getEvaluatorType();
         var discountFactor = algorithmConfig.getDiscountFactor();
         switch (evaluatorType) {
+            case RALF:
+                return new PaperNodeEvaluator<>(
+                    searchNodeFactory,
+                    approximator,
+                    EnvironmentProbabilities::getProbabilities,
+                    HallwayAction.playerActions,
+                    HallwayAction.environmentActions);
             case MONTE_CARLO:
                 return new MonteCarloNodeEvaluator<>(
                     searchNodeFactory,
@@ -390,13 +407,7 @@ public class Experiment {
                     masterRandom.split(),
                     rewardAggregator,
                     discountFactor);
-            case RALF:
-                return new PaperNodeEvaluator<>(
-                    searchNodeFactory,
-                    approximator,
-                    EnvironmentProbabilities::getProbabilities,
-                    HallwayAction.playerActions,
-                    HallwayAction.environmentActions);
+
             case RAMCP:
                 return new RamcpNodeEvaluator<>(
                     searchNodeFactory,

@@ -7,7 +7,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
-import vahy.paperGenerics.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyMode;
 import vahy.utils.ImmutableTuple;
