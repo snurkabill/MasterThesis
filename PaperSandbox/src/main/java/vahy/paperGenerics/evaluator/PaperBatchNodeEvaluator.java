@@ -4,12 +4,12 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.metadata.PaperBatchedMetadata;
-import vahy.api.predictor.TrainablePredictor;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTuple;
 
 import java.util.LinkedList;
@@ -19,7 +19,7 @@ import java.util.function.Function;
 public class PaperBatchNodeEvaluator<
     TAction extends Action,
     TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperBatchedMetadata<TAction>,
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends State<TAction, DoubleVector, TOpponentObservation, TState>>
     extends PaperNodeEvaluator<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
@@ -37,8 +37,13 @@ public class PaperBatchNodeEvaluator<
 
     @Override
     public void evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
-        if(!selectedNode.getSearchNodeMetadata().isVisible()) {
+        if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
             createSubtree(selectedNode);
+        } else if(selectedNode.getChildNodeMap().isEmpty() && !selectedNode.isFinalNode()) { // TODO: .isempty should not be used. Instead alternate algo so it expands and not evaluates leaves.
+            createSubtree(selectedNode);
+        }
+        if(!selectedNode.isFinalNode()) {
+            selectedNode.unmakeLeaf();
         }
     }
 
@@ -74,23 +79,34 @@ public class PaperBatchNodeEvaluator<
     private void finalizeTreeState(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> rootNode,
                                    LinkedList<StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState>> stateOrder,
                                    double[][] predictionBatch) {
+        if(predictionBatch.length != stateOrder.size()) {
+            throw new IllegalStateException("Different count of predictions [" + predictionBatch.length + "] and nodes to be evaluated [" + stateOrder.size() + "]");
+        }
         var queue = new LinkedList<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>>();
 
-        queue.add(rootNode);
-        int processedNodeCount = 0;
+        fillNode(rootNode, predictionBatch[0]);
+        int processedNodeCount = 1;
+        stateOrder.pop(); //
 
+        queue.add(rootNode);
         while(processedNodeCount < predictionBatch.length) {
             var node = queue.pop();
-            node.getSearchNodeMetadata().setVisible();
-            TAction[] allPossibleActions = node.getAllPossibleActions();
-            var childNodeMap = node.getChildNodeMap();
-            for (TAction nextAction : allPossibleActions) {
-                var stateRewardReturn = stateOrder.pop();
-                var childNode = createChildNode(node, nextAction, stateRewardReturn, predictionBatch[processedNodeCount]);
-                childNodeMap.put(nextAction, childNode);
-                queue.add(childNode);
-                processedNodeCount++;
+            node.getSearchNodeMetadata().setEvaluated();
+            if(!node.isFinalNode()) {
+                TAction[] allPossibleActions = node.getAllPossibleActions();
+                var childNodeMap = node.getChildNodeMap();
+                for (TAction nextAction : allPossibleActions) {
+                    if(processedNodeCount >= predictionBatch.length) {
+                        throw new IllegalStateException("There are still children to fill, but not enough predictions");
+                    }
+                    var stateRewardReturn = stateOrder.pop();
+                    var childNode = createChildNode(node, nextAction, stateRewardReturn, predictionBatch[processedNodeCount]);
+                    childNodeMap.put(nextAction, childNode);
+                    queue.add(childNode);
+                    processedNodeCount++;
+                }
             }
+
         }
     }
 
@@ -105,12 +121,15 @@ public class PaperBatchNodeEvaluator<
             var stateTuple = queue.pop();
             var depth = stateTuple.getSecond();
             var state = stateTuple.getFirst();
-            TAction[] allPossibleActions = state.getAllPossibleActions();
-            for (TAction nextAction : allPossibleActions) {
-                var childStateReward = state.applyAction(nextAction);
-                nodeOrder.add(childStateReward);
-                if(depth + 1 <= maximalEvaluationDepth) {
-                    queue.add(new ImmutableTuple<>(childStateReward.getState(), depth + 1));
+
+            if(!state.isFinalState()) {
+                TAction[] allPossibleActions = state.getAllPossibleActions();
+                for (TAction nextAction : allPossibleActions) {
+                    var childStateReward = state.applyAction(nextAction);
+                    nodeOrder.add(childStateReward);
+                    if(depth + 1 <= maximalEvaluationDepth) {
+                        queue.add(new ImmutableTuple<>(childStateReward.getState(), depth + 1));
+                    }
                 }
             }
         }

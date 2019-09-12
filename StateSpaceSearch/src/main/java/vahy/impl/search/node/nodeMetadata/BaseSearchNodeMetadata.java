@@ -8,6 +8,7 @@ public class BaseSearchNodeMetadata implements SearchNodeMetadata {
     private final double gainedReward;
     private double predictedReward;
     private double expectedReward;
+    private boolean isEvaluated;
 
     public BaseSearchNodeMetadata(double cumulativeReward, double gainedReward, double predictedReward) {
         this.cumulativeReward = cumulativeReward;
@@ -44,6 +45,16 @@ public class BaseSearchNodeMetadata implements SearchNodeMetadata {
     @Override
     public void setExpectedReward(double expectedReward) {
         this.expectedReward = expectedReward;
+    }
+
+    @Override
+    public boolean isEvaluated() {
+        return this.isEvaluated;
+    }
+
+    @Override
+    public void setEvaluated() {
+        this.isEvaluated = true;
     }
 
     @Override

@@ -35,6 +35,8 @@ public interface SearchNode<
 
     boolean isLeaf();
 
+    void unmakeLeaf();
+
     boolean isOpponentTurn();
 
     void makeRoot();

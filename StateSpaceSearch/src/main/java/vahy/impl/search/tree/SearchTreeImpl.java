@@ -208,7 +208,7 @@ public class SearchTreeImpl<
         if(root.isFinalNode()) {
             throw new IllegalArgumentException("Cannot expand final node");
         }
-        if(root.getChildNodeMap().size() == 0) {
+        if(root.isLeaf()) {
             logger.debug("Expanding root since it is not final node and has no children expanded");
             expandAndEvaluateNode(root);
             treeUpdater.updateTree(root);
@@ -216,9 +216,9 @@ public class SearchTreeImpl<
         var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(LinkedList::new));
         while(!queue.isEmpty()) {
             var node = queue.pop();
-            if(!node.isFinalNode() && node.getChildNodeMap().size() == 0) {
+            if(node.isLeaf() && !node.isFinalNode()) {
                 expandAndEvaluateNode(node);
-                treeUpdater.updateTree(node);
+                treeUpdater.updateTree(node);;
             }
             queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
         }

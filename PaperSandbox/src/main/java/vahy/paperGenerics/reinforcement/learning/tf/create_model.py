@@ -1,10 +1,10 @@
 import tensorflow as tf
 
-benchmark_name = 'BENCHMARK_13'
-input_count = 26
-hidden_count_1 = 100
-hidden_count_2 = 100
-hidden_count_3 = 10
+benchmark_name = 'BENCHMARK_05'
+input_count = 9
+hidden_count_1 = 10
+# hidden_count_2 = 100
+# hidden_count_3 = 10
 Q_output_count = 1
 risk_output_count = 1
 action_output_count = 3
@@ -28,12 +28,12 @@ risk_target = tf.slice(target, [0, Q_output_count], [-1, risk_output_count], nam
 action_target = tf.slice(target, [0, Q_output_count + risk_output_count], [-1, action_output_count], name = "action_slice_node")
 
 hidden_1 = Dense(x,        hidden_count_1, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_1") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
-hidden_2 = Dense(hidden_1, hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
+# hidden_2 = Dense(hidden_1, hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
 # hidden_3 = Dense(hidden_2, hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
 
-Q_output      = tf.layers.dense(hidden_2, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
-risk_output   = tf.layers.dense(hidden_2, risk_output_count, tf.nn.relu, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "risk_output_node")
-action_output = tf.layers.dense(hidden_2, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
+Q_output      = tf.layers.dense(hidden_1, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
+risk_output   = tf.layers.dense(hidden_1, risk_output_count, tf.nn.relu, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "risk_output_node")
+action_output = tf.layers.dense(hidden_1, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
 
 prediction = tf.concat([Q_output, risk_output, action_output], 1, name = "concat_node")
 prediction_identity = tf.identity(prediction, name = "prediction_node")
@@ -43,7 +43,7 @@ risk_loss = tf.keras.losses.binary_crossentropy(y_true = risk_target, y_pred = r
 policy_loss = tf.keras.losses.categorical_crossentropy(y_true = action_target, y_pred = action_output)
 
 total_loss = Q_loss + risk_loss + policy_loss
-train_op = tf.train.AdamOptimizer(learning_rate = 0.01, name = "Optimizer").minimize(total_loss, name = 'optimize_node')
+train_op = tf.train.AdamOptimizer(learning_rate = 0.001, name = "Optimizer").minimize(total_loss, name = 'optimize_node')
 
 init = tf.global_variables_initializer()
 

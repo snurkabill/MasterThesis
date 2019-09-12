@@ -59,6 +59,9 @@ public class PaperNodeEvaluator<
         for (TAction nextAction : allPossibleActions) {
             childNodeMap.put(nextAction, evaluateChildNode(selectedNode, nextAction));
         }
+        if(!selectedNode.isFinalNode()) {
+            selectedNode.unmakeLeaf();
+        }
     }
 
     protected void fillNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, double[] prediction) {
@@ -76,6 +79,7 @@ public class PaperNodeEvaluator<
         } else {
             evaluateOpponentNode(node, childPriorProbabilities);
         }
+        searchMetadata.setEvaluated();
     }
 
     protected void innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {

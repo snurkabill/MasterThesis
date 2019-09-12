@@ -51,6 +51,8 @@ public class AlgorithmConfig {
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
+    private final int batchedEvaluationSize;
+
     public AlgorithmConfig(double cpuctParameter,
                            TreeUpdateConditionFactory treeUpdateConditionFactory,
                            double discountFactor,
@@ -75,7 +77,7 @@ public class AlgorithmConfig {
                            ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
                            FlowOptimizerType flowOptimizerType,
                            SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
+                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize) {
 
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
@@ -102,6 +104,7 @@ public class AlgorithmConfig {
         this.flowOptimizerType = flowOptimizerType;
         this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
+        this.batchedEvaluationSize = batchedEvaluationSize;
     }
 
     public double getCpuctParameter() {
@@ -204,6 +207,10 @@ public class AlgorithmConfig {
         return subTreeRiskCalculatorTypeForUnknownFlow;
     }
 
+    public int getBatchedEvaluationSize() {
+        return batchedEvaluationSize;
+    }
+
     @Override
     public String toString() {
         return "AlgorithmConfig{" +
@@ -232,6 +239,7 @@ public class AlgorithmConfig {
             ", flowOptimizerType=" + flowOptimizerType +
             ", subTreeRiskCalculatorTypeForKnownFlow=" + subTreeRiskCalculatorTypeForKnownFlow +
             ", subTreeRiskCalculatorTypeForUnknownFlow=" + subTreeRiskCalculatorTypeForUnknownFlow +
+            ", batchedEvaluationSize=" + batchedEvaluationSize +
             '}';
     }
 }

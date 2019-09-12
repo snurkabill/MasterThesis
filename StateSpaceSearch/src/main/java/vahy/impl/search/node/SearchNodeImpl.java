@@ -38,7 +38,6 @@ public class SearchNodeImpl<
         TAction appliedAction) {
         super(wrappedState, parent, appliedAction, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
-
     }
 
     @Override
@@ -49,11 +48,6 @@ public class SearchNodeImpl<
     @Override
     public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         return wrappedState.applyAction(action);
-    }
-
-    @Override
-    public boolean isLeaf() {
-        return childNodeMap.isEmpty() || isFinalState;
     }
 
     @Override
