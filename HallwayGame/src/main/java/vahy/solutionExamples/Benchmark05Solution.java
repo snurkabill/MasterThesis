@@ -51,7 +51,7 @@ public class Benchmark05Solution {
             .randomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(7)
+            .setParallelThreadsCount(1)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
@@ -59,7 +59,7 @@ public class Benchmark05Solution {
 
         var algorithmConfig = new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(3)
+            .cpuctParameter(1)
 
             //.mcRolloutCount(1)
             //NN
@@ -67,13 +67,14 @@ public class Benchmark05Solution {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(100)
+            .batchEpisodeCount(1000)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(100)
-            .evaluatorType(EvaluatorType.RALF)
-            .maximalStepCountBound(1000)
+            .evaluatorType(EvaluatorType.RALF_BATCHED)
+            .setBatchedEvaluationSize(1)
+            .maximalStepCountBound(500)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .approximatorType(ApproximatorType.NN)
             .globalRiskAllowed(1.00)
             .riskSupplier(() -> 1.00)
             .learningRate(0.1)

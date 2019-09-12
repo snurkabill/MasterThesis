@@ -24,6 +24,8 @@ public abstract class AbstractLinearProgramOnTree<
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTree.class.getName());
 
+    private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -10);
+
     private static final double LOWER_BOUND = 0.0;
     private static final double UPPER_BOUND = 1.0;
     private static final double CHILD_VARIABLE_COEFFICIENT = 1.0;
@@ -80,11 +82,11 @@ public abstract class AbstractLinearProgramOnTree<
             logger.debug("Optimal solution was not found.");
             return false;
         }
-        if(root.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() < 0.99999999) {
+        if(root.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1");
         }
 
-        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < 0.999999) {
+        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1");
         }
 

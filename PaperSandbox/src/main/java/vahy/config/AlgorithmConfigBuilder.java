@@ -51,6 +51,8 @@ public class AlgorithmConfigBuilder {
     private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
     private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
+    private int batchedEvaluationSize;
+
 
     public AlgorithmConfigBuilder cpuctParameter(double cpuctParameter) {
         this.cpuctParameter = cpuctParameter;
@@ -162,6 +164,11 @@ public class AlgorithmConfigBuilder {
         return this;
     }
 
+    public AlgorithmConfigBuilder setBatchedEvaluationSize(int batchedEvaluationSize) {
+        this.batchedEvaluationSize = batchedEvaluationSize;
+        return this;
+    }
+
     public AlgorithmConfig buildAlgorithmConfig() {
         return new AlgorithmConfig(
             cpuctParameter,
@@ -188,7 +195,8 @@ public class AlgorithmConfigBuilder {
             explorationNonExistingFlowStrategy,
             flowOptimizerType,
             subTreeRiskCalculatorTypeForKnownFlow,
-            subTreeRiskCalculatorTypeForUnknownFlow);
+            subTreeRiskCalculatorTypeForUnknownFlow,
+            batchedEvaluationSize);
     }
 
 }

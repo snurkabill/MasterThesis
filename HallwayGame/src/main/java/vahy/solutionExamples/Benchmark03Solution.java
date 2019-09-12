@@ -35,7 +35,7 @@ public class Benchmark03Solution {
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
-            .trapProbability(0.2)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
             .buildConfig();
 
@@ -52,7 +52,7 @@ public class Benchmark03Solution {
             .randomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(7)
+            .setParallelThreadsCount(1)
             .setSingleThreadedEvaluation(true)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
@@ -72,13 +72,14 @@ public class Benchmark03Solution {
             .maximalStepCountBound(1000)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
+            .setBatchedEvaluationSize(1)
 
 
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
             .stageCount(50)
-            .evaluatorType(EvaluatorType.RALF)
-            .globalRiskAllowed(0.00)
-            .riskSupplier(() -> 0.00)
+            .evaluatorType(EvaluatorType.RALF_BATCHED)
+            .globalRiskAllowed(0.0)
+            .riskSupplier(() -> 0.0)
 
             .selectorType(SelectorType.UCB)
 

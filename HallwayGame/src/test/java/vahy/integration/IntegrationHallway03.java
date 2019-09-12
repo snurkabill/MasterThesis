@@ -62,7 +62,7 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .selectorType(SelectorType.UCB)
-            .evaluatorType(EvaluatorType.RALF)
+            .evaluatorType(EvaluatorType.RALF_BATCHED)
             .globalRiskAllowed(0.00)
             .riskSupplier(() -> 0.00)
             .explorationConstantSupplier(() -> 0.2)

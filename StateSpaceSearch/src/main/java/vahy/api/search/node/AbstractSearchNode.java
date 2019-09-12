@@ -20,6 +20,8 @@ public abstract class AbstractSearchNode<
     private SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent;
     private TAction appliedParentAction;
 
+    private boolean isLeaf = true;
+
     protected AbstractSearchNode(
         TState wrappedState,
         SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
@@ -32,6 +34,19 @@ public abstract class AbstractSearchNode<
         this.isFinalState = wrappedState.isFinalState();
         this.isOpponentTurn = wrappedState.isOpponentTurn();
         this.allPossibleActions = wrappedState.getAllPossibleActions();
+    }
+
+    @Override
+    public void unmakeLeaf() {
+        this.isLeaf = false;
+    }
+
+    @Override
+    public boolean isLeaf() {
+        if(isFinalState && !isLeaf) {
+            throw new IllegalStateException("Final state must be leaf");
+        }
+        return isLeaf;
     }
 
     @Override

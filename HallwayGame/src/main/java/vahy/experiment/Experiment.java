@@ -1,5 +1,6 @@
 package vahy.experiment;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.PaperGenericsPrototype;
@@ -24,6 +25,7 @@ import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.benchmark.PaperBenchmark;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
 import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
+import vahy.paperGenerics.evaluator.PaperBatchNodeEvaluator;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
@@ -162,12 +164,12 @@ public class Experiment {
         if(tfModel != null) { // dirty // TODO: better resources handling
             final TFModel tfModelFinal = tfModel;
             try(tfModelFinal) {
-                resolveEvaluator();
+                resolveEvaluatorAndRun(gameConfig);
             }
         } else {
-            resolveEvaluator();
+            resolveEvaluatorAndRun(gameConfig);
         }
-        createPolicyAndRunProcess(gameConfig);
+
     }
 
     private TrainablePredictor<DoubleVector> initializePredictor(String modelName) throws IOException {
@@ -203,9 +205,10 @@ public class Experiment {
         }
     }
 
-    private void createPolicyAndRunProcess(GameConfig gameConfig) {
+    private void createPolicyAndRunProcess(
+        GameConfig gameConfig,
+        PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> evaluator) {
         Supplier<NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> nodeSelector = this::createNodeSelector;
-        var evaluator = resolveEvaluator();
 
         var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
             clazz,
@@ -425,10 +428,18 @@ public class Experiment {
         }
     }
 
-    private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> resolveEvaluator()
+    private void resolveEvaluatorAndRun(GameConfig gameConfig)
     {
+        var evaluator = resolveEvaluator();
+
+        createPolicyAndRunProcess(gameConfig, evaluator);
+    }
+
+    @NotNull
+    private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> resolveEvaluator() {
         var evaluatorType = algorithmConfig.getEvaluatorType();
         var discountFactor = algorithmConfig.getDiscountFactor();
+        var batchedEvaluationSize = algorithmConfig.getBatchedEvaluationSize();
         switch (evaluatorType) {
             case RALF:
                 return new PaperNodeEvaluator<>(
@@ -437,6 +448,14 @@ public class Experiment {
                     EnvironmentProbabilities::getProbabilities,
                     HallwayAction.playerActions,
                     HallwayAction.environmentActions);
+            case RALF_BATCHED:
+                return new PaperBatchNodeEvaluator<>(
+                    searchNodeFactory,
+                    approximator,
+                    EnvironmentProbabilities::getProbabilities,
+                    HallwayAction.playerActions,
+                    HallwayAction.environmentActions,
+                    batchedEvaluationSize);
             case MONTE_CARLO:
                 return new MonteCarloNodeEvaluator<>(
                     searchNodeFactory,
@@ -446,7 +465,6 @@ public class Experiment {
                     masterRandom.split(),
                     rewardAggregator,
                     discountFactor);
-
             case RAMCP:
                 return new RamcpNodeEvaluator<>(
                     searchNodeFactory,

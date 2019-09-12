@@ -14,4 +14,8 @@ public interface SearchNodeMetadata {
 
     void setExpectedReward(double expectedReward);
 
+    boolean isEvaluated();
+
+    void setEvaluated();
+
 }
