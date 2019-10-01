@@ -37,6 +37,8 @@ import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
 import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.api.predictor.TrainablePredictor;
+import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
+import vahy.paperGenerics.reinforcement.episode.EpisodeStepRecord;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
@@ -62,6 +64,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class Experiment {
 
@@ -280,15 +283,51 @@ public class Experiment {
         File resultSubfolder = new File(resultFolder, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")));
         resultSubfolder.mkdir();
 
-        File experimentSetuFile = new File(resultSubfolder, "algorithmConfig");
-        PrintWriter out = new PrintWriter(experimentSetuFile);
+        File experimentSetupFile = new File(resultSubfolder, "algorithmConfig");
+        PrintWriter out = new PrintWriter(experimentSetupFile);
         out.print("AlgorithmConfig: " + algorithmConfig.toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + gameConfig.toString());
         out.close();
-        File resultFile = new File(resultSubfolder.getAbsolutePath(), "Rewards");
-        writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());
+        File resultFile = new File(resultSubfolder.getAbsolutePath(), "episodes_log");
+//        writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());
+        writeEpisodeResultsToFile2(resultFile.getAbsolutePath(), policyResult);
+        logger.info("PROCESS DONE");
     }
 
-    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException{
+    public static void writeEpisodeResultsToFile2(String filename, PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> results) throws IOException {
+        List<EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>> episodeList = results.getEpisodeList();
+        File epochFolder = new File(filename);
+        if(!epochFolder.exists()) {
+            epochFolder.mkdir();
+        }
+        for (int i = 0; i < episodeList.size(); i++) {
+            dumpSingleEpisode(filename + "/episode_" + i, episodeList.get(i));
+        }
+    }
+
+    public static void dumpSingleEpisode(String filename, EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> episodeResults) throws IOException {
+        writeEpisodeMetadata(filename, episodeResults);
+        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
+        outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getCsvHeader()) + System.lineSeparator());
+        for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
+            outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getCsvRecord()) + System.lineSeparator());
+        }
+        outputWriter.flush();
+        outputWriter.close();
+    }
+
+    private static void writeEpisodeMetadata(String filename, EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> episodeResults) throws IOException {
+        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "_metadata"));
+
+        outputWriter.write("Total step count, " + episodeResults.getTotalStepCount() + System.lineSeparator());
+        outputWriter.write("Player step count, " + episodeResults.getPlayerStepCount() + System.lineSeparator());
+        outputWriter.write("duration [ms], " + episodeResults.getMillisecondDuration() + System.lineSeparator());
+        outputWriter.write("Total Payoff, " + episodeResults.getTotalPayoff() + System.lineSeparator());
+
+        outputWriter.flush();
+        outputWriter.close();
+    }
+
+    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException {
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
         outputWriter.write("Reward,Risk");
         outputWriter.newLine();

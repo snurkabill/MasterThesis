@@ -4,6 +4,9 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.paperGenerics.PaperState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class EpisodeStepRecord<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
@@ -48,5 +51,39 @@ public class EpisodeStepRecord<
 
     public double getReward() {
         return reward;
+    }
+
+    @Override
+    public String toString() {
+        return "EpisodeStepRecord{" +
+                "isPlayerMove=" + isPlayerMove +
+                ", playedAction=" + playedAction +
+                ", policyStepRecord=" + policyStepRecord.toString() +
+                ", fromState=" + fromState +
+                ", toState=" + toState +
+                ", reward=" + reward +
+                '}';
+    }
+
+    public List<String> getCsvHeader() {
+        var list = new ArrayList<String>();
+        list.add("Is player move");
+        list.add("Action played");
+        list.add("Obtained reward");
+        if(isPlayerMove) {
+            list.addAll(policyStepRecord.getCsvHeader());
+        }
+        return list;
+    }
+
+    public List<String> getCsvRecord() {
+        var list = new ArrayList<String>();
+        list.add(Boolean.toString(isPlayerMove));
+        list.add(playedAction.toString());
+        list.add(Double.toString(reward));
+        if(isPlayerMove) {
+            list.addAll(policyStepRecord.getCsvRecord());
+        }
+        return list;
     }
 }
