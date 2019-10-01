@@ -6,6 +6,7 @@
         <artifactId>master-thesis-parent</artifactId>
         <groupId>vahy</groupId>
         <version>1.0-SNAPSHOT</version>
+	<relativePath>../Parent/pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
