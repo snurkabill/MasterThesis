@@ -57,7 +57,7 @@ public abstract class AbstractTrainer<
             if(previous.isPlayerMove()) {
                 mutableDataSampleList.add(new ImmutableTuple<>(
                     previous.getFromState().getPlayerObservation(),
-                    new MutableDataSample(previous.getPolicyStepRecord().getPolicyProbabilities(), aggregatedTotalPayoff, aggregatedRisk)));
+                    new MutableDataSample(previous.getPaperPolicyStepRecord().getPolicyProbabilities(), aggregatedTotalPayoff, aggregatedRisk)));
             }
         }
         Collections.reverse(mutableDataSampleList);

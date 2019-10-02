@@ -35,6 +35,11 @@ public class RandomWalkPolicy implements PaperPolicy<RandomWalkAction, DoubleVec
     }
 
     @Override
+    public double getInnerRiskAllowed() {
+        return 0;
+    }
+
+    @Override
     public double[] getActionProbabilityDistribution(RandomWalkState gameState) {
         ImmutableTuple<List<RandomWalkAction>, List<Double>> actions = gameState.getOpponentObservation().getProbabilities();
         return actions.getSecond().stream().mapToDouble(value -> value).toArray();

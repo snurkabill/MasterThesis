@@ -128,6 +128,10 @@ public class RiskAverseSearchTree<
         return totalRiskAllowed >= 1.0;
     }
 
+    public double getTotalRiskAllowed() {
+        return totalRiskAllowed;
+    }
+
     private boolean tryOptimizeFlow() {
         if(isRiskIgnored()) {
             isFlowOptimized = false;

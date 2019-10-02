@@ -5,11 +5,12 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 
 public interface PolicySupplier<
-    TAction extends Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+        TAction extends Action,
+        TPlayerObservation extends Observation,
+        TOpponentObservation extends Observation,
+        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+        TPolicyRecord> {
 
-    Policy<TAction, TPlayerObservation, TOpponentObservation, TState> initializePolicy(TState initialState);
+    Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy(TState initialState);
 
 }

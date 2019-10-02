@@ -1,21 +1,25 @@
 package vahy.paperGenerics.reinforcement.episode;
 
+import vahy.api.policy.PolicyRecord;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PolicyStepRecord {
+public class PaperPolicyStepRecord implements PolicyRecord {
 
     private final double[] priorProbabilities;
     private final double[] policyProbabilities;
-    private final double rewardPredicted;
-    private final double risk;
+    private final double predictedReward;
+    private final double predictedRisk;
+    private final double totalRiskAllowed;
 
-    public PolicyStepRecord(double[] priorProbabilities, double[] policyProbabilities, double rewardPredicted, double risk) {
+    public PaperPolicyStepRecord(double[] priorProbabilities, double[] policyProbabilities, double predictedReward, double predictedRisk, double totalRiskAllowed) {
         this.priorProbabilities = priorProbabilities;
         this.policyProbabilities = policyProbabilities;
-        this.rewardPredicted = rewardPredicted;
-        this.risk = risk;
+        this.predictedReward = predictedReward;
+        this.predictedRisk = predictedRisk;
+        this.totalRiskAllowed = totalRiskAllowed;
     }
 
     public double[] getPriorProbabilities() {
@@ -26,12 +30,16 @@ public class PolicyStepRecord {
         return policyProbabilities;
     }
 
-    public double getRewardPredicted() {
-        return rewardPredicted;
+    public double getPredictedReward() {
+        return predictedReward;
     }
 
-    public double getRisk() {
-        return risk;
+    public double getPredictedRisk() {
+        return predictedRisk;
+    }
+
+    public double getTotalRiskAllowed() {
+        return totalRiskAllowed;
     }
 
     @Override
@@ -39,8 +47,9 @@ public class PolicyStepRecord {
         return "PolicyStepRecord{" +
                 "priorProbabilities=" + Arrays.toString(priorProbabilities) +
                 ", policyProbabilities=" + Arrays.toString(policyProbabilities) +
-                ", rewardPredicted=" + rewardPredicted +
-                ", risk=" + risk +
+                ", predictedReward=" + predictedReward +
+                ", riskPredicted=" + predictedRisk +
+                ", totalRiskAllowed=" + totalRiskAllowed +
                 '}';
     }
 
@@ -54,6 +63,7 @@ public class PolicyStepRecord {
         }
         list.add("Predicted reward");
         list.add("Predicted risk");
+        list.add("Total risk allowed");
         return list;
     }
 
@@ -65,8 +75,9 @@ public class PolicyStepRecord {
         for (int i = 0; i < policyProbabilities.length; i++) {
             list.add(Double.toString(policyProbabilities[i]));
         }
-        list.add(Double.toString(rewardPredicted));
-        list.add(Double.toString(risk));
+        list.add(Double.toString(predictedReward));
+        list.add(Double.toString(predictedRisk));
+        list.add(Double.toString(totalRiskAllowed));
         return list;
     }
 }

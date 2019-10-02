@@ -14,6 +14,7 @@ import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.paperGenerics.reinforcement.episode.PaperPolicyStepRecord;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
@@ -25,7 +26,7 @@ public class PaperPolicySupplier<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    implements PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyStepRecord> {
 
     private final Class<TAction> actionClass;
     private final SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;

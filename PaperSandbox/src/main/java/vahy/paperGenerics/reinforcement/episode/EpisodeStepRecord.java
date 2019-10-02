@@ -15,15 +15,15 @@ public class EpisodeStepRecord<
 
     private final boolean isPlayerMove;
     private final TAction playedAction;
-    private final PolicyStepRecord policyStepRecord;
+    private final PaperPolicyStepRecord paperPolicyStepRecord;
     private final TState fromState;
     private final TState toState;
     private final double reward;
 
-    public EpisodeStepRecord(boolean isPlayerMove, TAction playedAction, PolicyStepRecord policyStepRecord, TState fromState, TState toState, double reward) {
+    public EpisodeStepRecord(boolean isPlayerMove, TAction playedAction, PaperPolicyStepRecord paperPolicyStepRecord, TState fromState, TState toState, double reward) {
         this.isPlayerMove = isPlayerMove;
         this.playedAction = playedAction;
-        this.policyStepRecord = policyStepRecord;
+        this.paperPolicyStepRecord = paperPolicyStepRecord;
         this.fromState = fromState;
         this.toState = toState;
         this.reward = reward;
@@ -37,8 +37,8 @@ public class EpisodeStepRecord<
         return playedAction;
     }
 
-    public PolicyStepRecord getPolicyStepRecord() {
-        return policyStepRecord;
+    public PaperPolicyStepRecord getPaperPolicyStepRecord() {
+        return paperPolicyStepRecord;
     }
 
     public TState getFromState() {
@@ -58,7 +58,7 @@ public class EpisodeStepRecord<
         return "EpisodeStepRecord{" +
                 "isPlayerMove=" + isPlayerMove +
                 ", playedAction=" + playedAction +
-                ", policyStepRecord=" + policyStepRecord.toString() +
+                ", policyStepRecord=" + paperPolicyStepRecord.toString() +
                 ", fromState=" + fromState +
                 ", toState=" + toState +
                 ", reward=" + reward +
@@ -71,7 +71,7 @@ public class EpisodeStepRecord<
         list.add("Action played");
         list.add("Obtained reward");
         if(isPlayerMove) {
-            list.addAll(policyStepRecord.getCsvHeader());
+            list.addAll(paperPolicyStepRecord.getCsvHeader());
         }
         return list;
     }
@@ -82,7 +82,7 @@ public class EpisodeStepRecord<
         list.add(playedAction.toString());
         list.add(Double.toString(reward));
         if(isPlayerMove) {
-            list.addAll(policyStepRecord.getCsvRecord());
+            list.addAll(paperPolicyStepRecord.getCsvRecord());
         }
         return list;
     }

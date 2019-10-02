@@ -8,11 +8,12 @@ import vahy.api.policy.Policy;
 import java.util.SplittableRandom;
 
 public abstract class AbstractRandomWalkPolicy<
-    TAction extends Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState> {
+        TAction extends Action,
+        TPlayerObservation extends Observation,
+        TOpponentObservation extends Observation,
+        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+        TPolicyRecord>
+    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private final SplittableRandom random;
 

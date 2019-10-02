@@ -6,17 +6,18 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 
 public interface EpisodeSetup<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+        TAction extends Enum<TAction> & Action,
+        TPlayerObservation extends Observation,
+        TOpponentObservation extends Observation,
+        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+        TPolicyRecord> {
 
     int getStepCountLimit();
 
     TState getInitialState();
 
-    Policy<TAction, TPlayerObservation, TOpponentObservation, TState> getPlayerPaperPolicy();
+    Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getPlayerPaperPolicy();
 
-    Policy<TAction, TPlayerObservation, TOpponentObservation, TState> getOpponentPolicy();
+    Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getOpponentPolicy();
 
 }

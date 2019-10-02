@@ -3,16 +3,17 @@ package vahy.impl.policy.random;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PolicyRecordBase;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 
 public class UniformRandomWalkPolicy<TAction extends Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractRandomWalkPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> {
+        TPlayerObservation extends Observation,
+        TOpponentObservation extends Observation,
+        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
+    extends AbstractRandomWalkPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, PolicyRecordBase> {
 
     public UniformRandomWalkPolicy(SplittableRandom random) {
         super(random);
@@ -34,5 +35,10 @@ public class UniformRandomWalkPolicy<TAction extends Action,
     @Override
     public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
         // this is it
+    }
+
+    @Override
+    public PolicyRecordBase getPolicyRecord(TState gameState) {
+        return null;
     }
 }

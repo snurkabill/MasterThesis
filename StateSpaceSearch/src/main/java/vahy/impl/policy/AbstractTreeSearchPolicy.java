@@ -15,12 +15,13 @@ import java.util.List;
 
 
 public abstract class AbstractTreeSearchPolicy<
-    TAction extends Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState> {
+        TAction extends Action,
+        TPlayerObservation extends Observation,
+        TOpponentObservation extends Observation,
+        TSearchNodeMetadata extends SearchNodeMetadata,
+        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+        TPolicyRecord>
+    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
 

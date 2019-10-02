@@ -11,13 +11,14 @@ import vahy.utils.ImmutableTuple;
 import java.util.List;
 
 public interface TrainablePolicySupplier<
-    TAction extends Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState> {
+        TAction extends Action,
+        TPlayerObservation extends DoubleVector,
+        TOpponentObservation extends Observation,
+        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+        TPolicyRecord>
+    extends PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
-    Policy<TAction, TPlayerObservation, TOpponentObservation, TState> initializePolicyWithExploration(State<TAction, TPlayerObservation, TOpponentObservation, TState> initialState);
+    Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicyWithExploration(State<TAction, TPlayerObservation, TOpponentObservation, TState> initialState);
 
     void train(List<ImmutableTuple<TPlayerObservation, Double>> episodeData);
 }

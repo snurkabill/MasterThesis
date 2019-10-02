@@ -10,6 +10,7 @@ import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyMode;
+import vahy.paperGenerics.reinforcement.episode.PaperPolicyStepRecord;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class PaperPolicyImpl<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
+    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState, PaperPolicyStepRecord>
     implements PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
@@ -81,19 +82,23 @@ public class PaperPolicyImpl<
     @Override
     public double getEstimatedReward(TState gameState) {
         checkStateRoot(gameState);
-        return searchTree.getRoot().getSearchNodeMetadata().getExpectedReward();
+        return riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward();
     }
 
     @Override
     public double getEstimatedRisk(TState gameState) {
         checkStateRoot(gameState);
-        return searchTree.getRoot().getSearchNodeMetadata().getPredictedRisk();
+        return riskAverseSearchTree.getRoot().getSearchNodeMetadata().getPredictedRisk();
     }
 
     @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
 
+        return innerActionProbability();
+    }
+
+    private double[] innerActionProbability() {
         if(!hasActionChanged) {
             throw new IllegalStateException("Action probability distribution second time without changing state");
         }
@@ -126,11 +131,15 @@ public class PaperPolicyImpl<
     @Override
     public double[] getPriorActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
+        return innerPriorProbabilityDistribution(gameState);
+    }
+
+    private double[] innerPriorProbabilityDistribution(TState gameState) {
         if(gameState.isOpponentTurn()) {
             throw new IllegalStateException("Can't sample opponent's distribution from player's policy");
         }
         double[] priorProbabilities = new double[playerActions.size()];
-        List<ImmutableTuple<TAction, Double>> actionDoubleList = this.searchTree
+        List<ImmutableTuple<TAction, Double>> actionDoubleList = this.riskAverseSearchTree
             .getRoot()
             .getChildNodeStream()
             .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
@@ -140,5 +149,21 @@ public class PaperPolicyImpl<
             priorProbabilities[actionIndex] = entry.getSecond();
         }
         return priorProbabilities;
+    }
+
+    @Override
+    public double getInnerRiskAllowed() {
+        return this.riskAverseSearchTree.getTotalRiskAllowed();
+    }
+
+    @Override
+    public PaperPolicyStepRecord getPolicyRecord(TState gameState) {
+        checkStateRoot(gameState);
+        return new PaperPolicyStepRecord(
+                innerPriorProbabilityDistribution(gameState),
+                innerActionProbability(),
+                riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward(),
+                riskAverseSearchTree.getRoot().getSearchNodeMetadata().getSumOfRisk(),
+                riskAverseSearchTree.getTotalRiskAllowed());
     }
 }

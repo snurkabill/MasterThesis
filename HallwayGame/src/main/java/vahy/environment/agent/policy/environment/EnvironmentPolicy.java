@@ -1,6 +1,8 @@
 package vahy.environment.agent.policy.environment;
 
 import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyRecord;
+import vahy.api.policy.PolicyRecordBase;
 import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
@@ -11,7 +13,7 @@ import vahy.utils.RandomDistributionUtils;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicy implements Policy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class EnvironmentPolicy<TPolicyRecord> implements Policy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, TPolicyRecord> {
 
     private final SplittableRandom random;
 
@@ -34,5 +36,10 @@ public class EnvironmentPolicy implements Policy<HallwayAction, DoubleVector, En
     @Override
     public void updateStateOnPlayedActions(List<HallwayAction> opponentActionList) {
         // this is it
+    }
+
+    @Override
+    public TPolicyRecord getPolicyRecord(HallwayStateImpl gameState) {
+        return null;
     }
 }

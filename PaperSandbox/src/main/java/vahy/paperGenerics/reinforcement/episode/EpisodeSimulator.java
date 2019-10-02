@@ -77,19 +77,11 @@ public class EpisodeSimulator<
         PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> otherPolicy,
         boolean isPlayerMove) {
         TAction action = onTurnPolicy.getDiscreteAction(state);
-        PolicyStepRecord playerPolicyStepRecord = createStepRecord(state, onTurnPolicy);
+        var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(state);
         onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         otherPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = state.applyAction(action);
-        return new EpisodeStepRecord<>(isPlayerMove, action, playerPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward());
-    }
-
-    private PolicyStepRecord createStepRecord(TState state, PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> playerPolicy) {
-        double[] actionProbabilities = playerPolicy.getActionProbabilityDistribution(state);
-        double[] priorProbabilities = playerPolicy.getPriorActionProbabilityDistribution(state);
-        double estimatedReward = playerPolicy.getEstimatedReward(state);
-        double estimatedRisk = playerPolicy.getEstimatedRisk(state);
-        return new PolicyStepRecord(priorProbabilities, actionProbabilities, estimatedReward, estimatedRisk);
+        return new EpisodeStepRecord<>(isPlayerMove, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward());
     }
 
     private void makeStepLog(EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState> step) {
@@ -97,10 +89,10 @@ public class EpisodeSimulator<
             playerStepsDone,
             step.getPlayedAction(),
             step.getReward(),
-            step.getPolicyStepRecord().getRewardPredicted(),
-            step.getPolicyStepRecord().getRisk(),
-            Arrays.toString(step.getPolicyStepRecord().getPolicyProbabilities()),
-            Arrays.toString(step.getPolicyStepRecord().getPriorProbabilities()));
+            step.getPaperPolicyStepRecord().getPredictedReward(),
+            step.getPaperPolicyStepRecord().getPredictedRisk(),
+            Arrays.toString(step.getPaperPolicyStepRecord().getPolicyProbabilities()),
+            Arrays.toString(step.getPaperPolicyStepRecord().getPriorProbabilities()));
     }
 
     private String createErrorMsg(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeHistoryList) {
@@ -127,19 +119,19 @@ public class EpisodeSimulator<
                             .append(System.lineSeparator())
                             .append("Policy probabilities: ")
                             .append(System.lineSeparator())
-                            .append(Arrays.toString(x.getPolicyStepRecord().getPolicyProbabilities()))
+                            .append(Arrays.toString(x.getPaperPolicyStepRecord().getPolicyProbabilities()))
                             .append(System.lineSeparator())
                             .append("Prior probabilities: ")
                             .append(System.lineSeparator())
-                            .append(Arrays.toString(x.getPolicyStepRecord().getPriorProbabilities()))
+                            .append(Arrays.toString(x.getPaperPolicyStepRecord().getPriorProbabilities()))
                             .append(System.lineSeparator())
                             .append("Policy reward : ")
                             .append(System.lineSeparator())
-                            .append(x.getPolicyStepRecord().getRewardPredicted())
+                            .append(x.getPaperPolicyStepRecord().getPredictedReward())
                             .append(System.lineSeparator())
                             .append("Policy risk : ")
                             .append(System.lineSeparator())
-                            .append(x.getPolicyStepRecord().getRisk())
+                            .append(x.getPaperPolicyStepRecord().getPredictedRisk())
                             .append(System.lineSeparator())
                             .append("Applied action: ")
                             .append(System.lineSeparator())
