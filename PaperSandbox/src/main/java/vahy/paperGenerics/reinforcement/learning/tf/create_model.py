@@ -22,6 +22,8 @@ Dropout = tf.nn.dropout
 
 x = tf.placeholder(tf.float64, [None, input_count], name= 'input_node')
 target = tf.placeholder(tf.float64, [None, output_count], name = "target_node")
+keep_prob = tf.placeholder(tf.float64, [], name = "keep_prob_node")
+learning_rate = tf.placeholder(tf.float64, [], name = "learning_rate_node")
 
 Q_target = tf.slice(target, [0, 0], [-1, Q_output_count], name = "Q_slice_node")
 risk_target = tf.slice(target, [0, Q_output_count], [-1, risk_output_count], name = "risk_slice_node")
@@ -32,7 +34,7 @@ hidden_1 = Dense(x,        hidden_count_1, tf.nn.relu, use_bias = True, kernel_i
 # hidden_3 = Dense(hidden_2, hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
 
 Q_output      = tf.layers.dense(hidden_1, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
-risk_output   = tf.layers.dense(hidden_1, risk_output_count, tf.nn.relu, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "risk_output_node")
+risk_output   = tf.layers.dense(hidden_1, risk_output_count, tf.nn.tanh, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "risk_output_node")
 action_output = tf.layers.dense(hidden_1, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
 
 prediction = tf.concat([Q_output, risk_output, action_output], 1, name = "concat_node")

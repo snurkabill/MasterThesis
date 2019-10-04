@@ -57,6 +57,7 @@ public class Benchmark05Solution {
             .buildSystemConfig();
 
 
+
         var algorithmConfig = new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
@@ -67,17 +68,21 @@ public class Benchmark05Solution {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(100)
+            .batchEpisodeCount(1000)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
-//            .setBatchedEvaluationSize(2)
+//            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
             .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+                .replayBufferSize(100_000)
+                .trainingBatchSize(1)
+                .learningRate(0.01)
+
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .globalRiskAllowed(0.10)
-            .riskSupplier(() -> 0.10)
-            .learningRate(0.1)
+            .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
+
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
