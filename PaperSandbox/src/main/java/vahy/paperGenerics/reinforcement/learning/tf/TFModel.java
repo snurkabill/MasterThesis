@@ -11,6 +11,7 @@ import vahy.paperGenerics.PaperModel;
 import vahy.timer.SimpleTimer;
 
 import java.nio.DoubleBuffer;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
@@ -29,7 +30,7 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
     private final double[][] trainTargetBatch;
     private final SimpleTimer timer = new SimpleTimer();
 
-    private double[][] inputMatrixForOneVector;
+//    private double[][] inputMatrixForOneVector;
     private Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
 
     public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random) {
@@ -45,7 +46,7 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
             trainTargetBatch[i] = new double[outputDimension];
         }
 
-        this.inputMatrixForOneVector = new double[1][inputDimension];
+//        this.inputMatrixForOneVector = new double[1][inputDimension];
 
         Graph graph = new Graph();
         this.sess = new Session(graph);
@@ -110,7 +111,8 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
     public double[] predict(double[] input) {
         var matrix = new double[1][input.length]; // TODO: get rid of allocation
         System.arraycopy(input, 0, matrix[0], 0, inputDimension);
-        try (Tensor<Double> tfInput = Tensors.create(inputMatrixForOneVector)) {
+//        System.arraycopy(input, 0, inputMatrixForOneVector[0], 0, inputDimension);
+        try (Tensor<Double> tfInput = Tensors.create(matrix)) {
             Tensor<?> output = sess
                 .runner()
                 .feed("input_node", tfInput)
