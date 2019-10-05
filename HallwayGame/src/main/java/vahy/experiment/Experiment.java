@@ -80,7 +80,6 @@ public class Experiment {
     private final long finalRandomSeed;
 
     // general
-    private DoubleScalarRewardAggregator rewardAggregator = new DoubleScalarRewardAggregator();
     private ProgressTrackerSettings progressTrackerSettings;
 
 
@@ -129,7 +128,7 @@ public class Experiment {
 
     private void initializeHelperClasses() {
         paperTreeUpdater = new PaperTreeUpdater<>();
-        searchNodeMetadataFactory = new PaperMetadataFactory<>(rewardAggregator);
+        searchNodeMetadataFactory = new PaperMetadataFactory<>();
         searchNodeFactory = new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory);
         progressTrackerSettings = new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false);
         strategiesProvider = new StrategiesProvider<>(
@@ -387,7 +386,7 @@ public class Experiment {
             case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
             case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         };
-        return new PaperTrainer<>(gameSampler, approximator, discountFactor, rewardAggregator, dataAggregator);
+        return new PaperTrainer<>(gameSampler, approximator, discountFactor, dataAggregator);
     }
 
     private NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> createNodeSelector()
@@ -445,7 +444,6 @@ public class Experiment {
                     HallwayAction.playerActions,
                     HallwayAction.environmentActions,
                     masterRandom.split(),
-                    rewardAggregator,
                     discountFactor);
             case RAMCP:
                 return new RamcpNodeEvaluator<>(
@@ -454,7 +452,6 @@ public class Experiment {
                     HallwayAction.playerActions,
                     HallwayAction.environmentActions,
                     masterRandom.split(),
-                    rewardAggregator,
                     discountFactor);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(evaluatorType);

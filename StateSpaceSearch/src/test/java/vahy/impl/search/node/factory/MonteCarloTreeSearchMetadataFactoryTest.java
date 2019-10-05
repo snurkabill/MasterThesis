@@ -21,8 +21,7 @@ public class MonteCarloTreeSearchMetadataFactoryTest extends AbstractStateSpaceS
 
     @Test
     public void testBaseSearchNodeMetadataFactory() {
-        RewardAggregator rewardAggregator = new DoubleScalarRewardAggregator();
-        SearchNodeMetadataFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> factory = new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
+        SearchNodeMetadataFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> factory = new MonteCarloTreeSearchMetadataFactory<>();
         double parentCumulativeReward = 50.0;
         TestSearchNodeImpl<MonteCarloTreeSearchMetadata> node = new TestSearchNodeImpl<>(
             new TestState(Collections.singletonList('A')),

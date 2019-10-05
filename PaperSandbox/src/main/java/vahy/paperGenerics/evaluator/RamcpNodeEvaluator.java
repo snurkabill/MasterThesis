@@ -5,12 +5,12 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -33,9 +33,8 @@ public class RamcpNodeEvaluator<
                               TAction[] allPlayerActions,
                               TAction[] allOpponentActions,
                               SplittableRandom random,
-                              RewardAggregator rewardAggregator,
                               double discountFactor) {
-        super(searchNodeFactory, opponentApproximator, allPlayerActions, allOpponentActions, random, rewardAggregator, discountFactor);
+        super(searchNodeFactory, opponentApproximator, allPlayerActions, allOpponentActions, random, discountFactor);
     }
 
     @Override
@@ -63,7 +62,7 @@ public class RamcpNodeEvaluator<
             node.getChildNodeMap().clear();
             node.getSearchNodeMetadata().getChildPriorProbabilities().clear();
         }
-        return new ImmutableTuple<>(rewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit());
+        return new ImmutableTuple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit());
     }
 
     private void initializeChildNodePrioriProbabilityMap(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {

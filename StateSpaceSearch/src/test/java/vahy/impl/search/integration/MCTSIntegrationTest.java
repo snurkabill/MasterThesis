@@ -30,7 +30,6 @@ public class MCTSIntegrationTest {
 
         SplittableRandom random = new SplittableRandom(0);
 
-        RewardAggregator rewardAggregator = new DoubleScalarRewardAggregator();
         SearchNode<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> root = new SearchNodeImpl<>(
             new TestState(Arrays.asList('Z')),
             new MonteCarloTreeSearchMetadata(0.0, 0.0, 0.0),
@@ -38,12 +37,12 @@ public class MCTSIntegrationTest {
         );
 
         SearchNodeMetadataFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> metadataFactory =
-            new MonteCarloTreeSearchMetadataFactory<>(rewardAggregator);
+            new MonteCarloTreeSearchMetadataFactory<>();
         SearchNodeFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeFactory =
             new SearchNodeBaseFactoryImpl<>(metadataFactory);
 
         NodeEvaluator<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeEvaluator =
-            new MonteCarloEvaluator<>(nodeFactory, random, rewardAggregator, 1.0, 1);
+            new MonteCarloEvaluator<>(nodeFactory, random, 1.0, 1);
 
         SearchTreeImpl<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> searchTree = new SearchTreeImpl<>(
             root,

@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import vahy.Analyzer;
 import vahy.RandomWalkExample;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.nodeSelector.NodeSelector;
@@ -19,7 +18,6 @@ import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.predictor.TrainableApproximator;
@@ -122,9 +120,8 @@ public class Experiment {
                                            RandomWalkInitialInstanceSupplier RandomWalkGameInitialInstanceSupplier,
                                            TrainablePredictor predictor) {
         var experimentSetup = setup.getSecond();
-        var rewardAggregator = new DoubleScalarRewardAggregator();
         var clazz = RandomWalkAction.class;
-        var searchNodeMetadataFactory = new PaperMetadataFactory<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>(rewardAggregator);
+        var searchNodeMetadataFactory = new PaperMetadataFactory<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>();
         var paperTreeUpdater = new PaperTreeUpdater<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>();
         var nodeSelector = new PaperNodeSelector<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState>(setup.getSecond().getCpuctParameter(), random);
 
@@ -132,7 +129,7 @@ public class Experiment {
             () -> new PaperNodeSelector<>(setup.getSecond().getCpuctParameter(), random);
 
 
-        var evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random.split(), setup.getSecond(), rewardAggregator, new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), predictor);
+        var evaluator = resolveEvaluator(setup.getSecond().getEvaluatorType(), random.split(), setup.getSecond(), new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory), predictor);
 //
 //        var evaluator = new PaperNodeEvaluator<>(
 //            new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
@@ -184,7 +181,6 @@ public class Experiment {
             predictor,
             paperPolicySupplier,
             experimentSetup.getReplayBufferSize(),
-            rewardAggregator,
             progressTrackerSettings);
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
@@ -297,7 +293,6 @@ public class Experiment {
         TrainablePredictor predictor,
         PaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> paperPolicySupplier,
         int replayBufferSize,
-        RewardAggregator rewardAggregator,
         ProgressTrackerSettings progressTrackerSettings) {
 
         var gameSampler = new PaperRolloutGameSampler<>(
@@ -314,14 +309,12 @@ public class Experiment {
             case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
             case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         };
-
-        return new PaperTrainer<>(gameSampler, predictor, discountFactor, rewardAggregator, dataAggregator);
+        return new PaperTrainer<>(gameSampler, predictor, discountFactor, dataAggregator);
     }
 
     private PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> resolveEvaluator(EvaluatorType evaluatorType,
                                                                                                                                              SplittableRandom random,
                                                                                                                                              ExperimentSetup experimentSetup,
-                                                                                                                                             DoubleScalarRewardAggregator rewardAggregator,
                                                                                                                                              SearchNodeBaseFactoryImpl<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> searchNodeFactory,
                                                                                                                                              TrainablePredictor predictor) {
         switch (evaluatorType) {
@@ -332,7 +325,6 @@ public class Experiment {
                     RandomWalkAction.playerActions,
                     RandomWalkAction.environmentActions,
                     random.split(),
-                    rewardAggregator,
                     experimentSetup.getDiscountFactor());
             case RALF:
                 return new PaperNodeEvaluator<>(
@@ -348,7 +340,6 @@ public class Experiment {
                     RandomWalkAction.playerActions,
                     RandomWalkAction.environmentActions,
                     random.split(),
-                    rewardAggregator,
                     experimentSetup.getDiscountFactor());
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(evaluatorType);

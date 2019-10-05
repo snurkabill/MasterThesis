@@ -3,12 +3,12 @@ package vahy.paperGenerics.evaluator;
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
@@ -26,7 +26,6 @@ public class MonteCarloNodeEvaluator<
     extends PaperNodeEvaluator<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     protected final SplittableRandom random;
-    protected final RewardAggregator rewardAggregator;
     protected final double discountFactor;
     protected final double[] priorProbabilities;
 
@@ -35,11 +34,9 @@ public class MonteCarloNodeEvaluator<
                                    TAction[] allPlayerActions,
                                    TAction[] allOpponentActions,
                                    SplittableRandom random,
-                                   RewardAggregator rewardAggregator,
                                    double discountFactor) {
         super(searchNodeFactory, null, opponentApproximator, allPlayerActions, allOpponentActions);
         this.random = random;
-        this.rewardAggregator = rewardAggregator;
         this.discountFactor = discountFactor;
         this.priorProbabilities = new double[allPlayerActions.length];
         for (int i = 0; i < priorProbabilities.length; i++) {
@@ -79,7 +76,7 @@ public class MonteCarloNodeEvaluator<
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
         }
-        return new ImmutableTuple<>(rewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit());
+        return new ImmutableTuple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit());
     }
 
     protected TAction getNextAction(TState wrappedState) {

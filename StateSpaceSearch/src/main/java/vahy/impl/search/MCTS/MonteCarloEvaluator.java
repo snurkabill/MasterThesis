@@ -6,10 +6,10 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
+import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,18 +29,15 @@ public class MonteCarloEvaluator<
 
     private final SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
-    private final RewardAggregator rewardAggregator;
     private final double discountFactor;
     private final int rolloutCount;
 
     public MonteCarloEvaluator(SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                SplittableRandom random,
-                               RewardAggregator rewardAggregator,
                                double discountFactor,
                                int rolloutCount) {
         this.searchNodeFactory = searchNodeFactory;
         this.random = random;
-        this.rewardAggregator = rewardAggregator;
         this.discountFactor = discountFactor;
         this.rolloutCount = rolloutCount;
     }
@@ -67,7 +64,7 @@ public class MonteCarloEvaluator<
         for (int i = 0; i < rolloutCount; i++) {
             rewardList.add(runRandomWalkSimulation(node));
         }
-        return rewardAggregator.averageReward(rewardList);
+        return DoubleScalarRewardAggregator.averageReward(rewardList);
     }
 
     private double runRandomWalkSimulation(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
@@ -80,6 +77,6 @@ public class MonteCarloEvaluator<
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
         }
-        return rewardAggregator.aggregateDiscount(rewardList, discountFactor);
+        return DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor);
     }
 }

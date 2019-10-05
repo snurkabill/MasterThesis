@@ -19,8 +19,7 @@ public class BaseSearchNodeMetadataFactoryTest extends AbstractStateSpaceSearchT
 
     @Test
     public void testBaseSearchNodeMetadataFactory() {
-        RewardAggregator rewardAggregator = new DoubleScalarRewardAggregator();
-        BaseSearchNodeMetadataFactory<TestAction, DoubleVector, TestState, TestState> factory = new BaseSearchNodeMetadataFactory<>(rewardAggregator);
+        BaseSearchNodeMetadataFactory<TestAction, DoubleVector, TestState, TestState> factory = new BaseSearchNodeMetadataFactory<>();
 
         double parentCumulativeReward = 50.0;
 

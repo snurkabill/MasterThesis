@@ -7,12 +7,12 @@ import vahy.api.episode.GameSampler;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.learning.trainer.AbstractTrainer;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
@@ -31,16 +31,13 @@ public class PaperTrainer<
     private static final Logger logger = LoggerFactory.getLogger(PaperTrainer.class.getName());
 
     private final double discountFactor;
-    protected final RewardAggregator rewardAggregator;
 
     public PaperTrainer(GameSampler<TAction, DoubleVector, TOpponentObservation, TState, TPolicyRecord> gameSampler,
                         TrainablePredictor trainablePredictor,
                         double discountFactor,
-                        RewardAggregator rewardAggregator,
                         DataAggregator dataAggregator) {
         super(trainablePredictor, gameSampler, dataAggregator);
         this.discountFactor = discountFactor;
-        this.rewardAggregator = rewardAggregator;
     }
 
     @Override
@@ -53,7 +50,7 @@ public class PaperTrainer<
         var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>();
         while(iterator.hasPrevious()) {
             var previous = iterator.previous();
-            aggregatedTotalPayoff = rewardAggregator.aggregateDiscount(previous.getReward(), aggregatedTotalPayoff, discountFactor);
+            aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getReward(), aggregatedTotalPayoff, discountFactor);
             if(previous.isPlayerMove()) {
                 var policyArray = previous.getPolicyStepRecord().getPolicyProbabilities();
                 var doubleArray = new double[policyArray.length + PaperModel.POLICY_START_INDEX];
