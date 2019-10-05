@@ -40,12 +40,12 @@ import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
-import vahy.paperGenerics.reinforcement.episode.EpisodeStepRecord;
 import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
 import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
 import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
+import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.selector.RiskBasedSelector;
@@ -66,7 +66,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class Experiment {
 
@@ -191,7 +190,7 @@ public class Experiment {
                 return new DataTablePredictor<>(defaultPrediction);
             case HASHMAP_LR:
                 return new DataTablePredictorWithLr<>(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
-            case NN:
+            case TF_NN:
                 tfModel = new TFModel(
                     inputLenght,
                     PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
@@ -200,6 +199,16 @@ public class Experiment {
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream(modelName).readAllBytes(),
                     masterRandom.split());
                 return new TrainableApproximator<>(tfModel);
+            case DL4J_NN:
+                var model = new Dl4jModel(
+                    inputLenght,
+                    PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
+                    null,
+                    finalRandomSeed,
+                    algorithmConfig.getLearningRate(),
+                    algorithmConfig.getTrainingEpochCount(),
+                    algorithmConfig.getTrainingBatchSize());
+                return new TrainableApproximator<>(model);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
         }

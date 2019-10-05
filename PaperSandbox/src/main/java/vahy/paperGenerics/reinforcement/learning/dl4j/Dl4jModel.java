@@ -4,7 +4,6 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.ComputationGraphConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.WorkspaceMode;
-import org.deeplearning4j.nn.conf.layers.DenseLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.graph.ComputationGraph;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -50,6 +49,7 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
 
     private final double learningRate;
     private final int trainingEpochCount;
+    private final int batchSize;
 
     private final ComputationGraph model;
     private final INDArray feedForwardInputArray;
@@ -59,13 +59,14 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
     private long totalMillisCount;
     private long totalCallsCount;
 
-    public Dl4jModel(int inputDimension, int outputDimension, List<Integer> hiddenLayerSizeList, long seed, double learningRate, int trainingEpochCount) {
+    public Dl4jModel(int inputDimension, int outputDimension, List<Integer> hiddenLayerSizeList, long seed, double learningRate, int trainingEpochCount, int batchSize) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.hiddenLayerSizeList = hiddenLayerSizeList;
         this.seed = seed;
         this.learningRate = learningRate;
         this.trainingEpochCount = trainingEpochCount;
+        this.batchSize = batchSize;
         this.model = initModel();
         this.feedForwardInputArray = Nd4j.create(new int[] {inputDimension});
         this.policyArray = Nd4j.create(new int[] {outputDimension - POLICY_START_INDEX});
@@ -86,51 +87,27 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
 //            .dropOut(0.2)
             .graphBuilder();
 
-
-
-        graph
-            .addInputs(INPUT_NAME) // .setInputTypes(InputType.feedForward(inputDimension))
-            .addLayer(
-                FIRST_HIDDEN_NAME,
-                new DenseLayer.Builder()
-                    .nIn(inputDimension)
-                    .nOut(FIRST_HIDDEN_SIZE)
-                    .activation(Activation.RELU)
-                    .hasBias(true)
-                    .build(),
-                INPUT_NAME)
-            .addLayer(
-                SECOND_HIDDEN_NAME,
-                new DenseLayer.Builder()
-                    .nIn(FIRST_HIDDEN_SIZE)
-                    .nOut(SECOND_HIDDEN_SIZE)
-                    .activation(Activation.RELU)
-                    .hasBias(true)
-                    .build(),
-                FIRST_HIDDEN_NAME)
+        graph.addInputs(INPUT_NAME) // .setInputTypes(InputType.feedForward(inputDimension))
 //            .addLayer(
-//                THIRD_HIDDEN_NAME,
+//                FIRST_HIDDEN_NAME,
 //                new DenseLayer.Builder()
-//                    .nIn(SECOND_HIDDEN_SIZE)
-//                    .nOut(THIRD_HIDDEN_SIZE)
+//                    .nIn(inputDimension)
+//                    .nOut(FIRST_HIDDEN_SIZE)
 //                    .activation(Activation.RELU)
 //                    .hasBias(true)
 //                    .build(),
-//                SECOND_HIDDEN_NAME)
+//                INPUT_NAME)
             .addLayer(
-            POLICY_NAME,
-            new OutputLayer.Builder()
-                .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                .nIn(SECOND_HIDDEN_SIZE)
-//                .nIn(inputDimension)
-                .nOut(outputDimension - POLICY_START_INDEX)
-                .activation(Activation.SOFTMAX)
-                .weightInit(WeightInit.ZERO)
-                .hasBias(true)
-                .build(),
-            // LAST_HIDDEN_LAYER
-                SECOND_HIDDEN_NAME)
-//            INPUT_NAME)
+                POLICY_NAME,
+                new OutputLayer.Builder()
+                    .lossFunction(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                    .nIn(inputDimension)
+                    .nOut(outputDimension - POLICY_START_INDEX)
+                    .activation(Activation.SOFTMAX)
+                    .weightInit(WeightInit.ZERO)
+                    .hasBias(true)
+                    .build(),
+                INPUT_NAME)
 
             .addLayer(
                 Q_VALUE_NAME,
@@ -139,29 +116,23 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
                     .activation(Activation.IDENTITY)
                     .weightInit(WeightInit.ZERO)
                     .hasBias(true)
-                    .nIn(SECOND_HIDDEN_SIZE)
-//                    .nIn(inputDimension)
+                    .nIn(inputDimension)
                     .nOut(1)
                     .build(),
-                // LAST_HIDDEN_LAYER
-                SECOND_HIDDEN_NAME)
-//            INPUT_NAME)
+                INPUT_NAME)
 
             .addLayer(
                 RISK_VALUE_NAME,
                 new OutputLayer.Builder()
-                    // .lossFunction(LossFunctions.LossFunction.XENT)
                     .lossFunction(LossFunctions.LossFunction.MSE)
                     .activation(Activation.SIGMOID)
                     .weightInit(WeightInit.ZERO)
                     .hasBias(true)
-                    .nIn(SECOND_HIDDEN_SIZE)
-//                    .nIn(inputDimension)
+                    .nIn(inputDimension)
                     .nOut(1)
                     .build(),
-                // LAST_HIDDEN_LAYER
-                SECOND_HIDDEN_NAME)
-//            INPUT_NAME)
+                INPUT_NAME)
+
             .setOutputs(POLICY_NAME, Q_VALUE_NAME, RISK_VALUE_NAME)
             .backprop(true)
             .pretrain(false);
@@ -177,7 +148,7 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
         MultiDataSetIterator iterator = new MultiDataSetIterator() {
 
             int cursor = 0;
-            int order[] = IntStream.range(0, target.length).toArray();
+            int[] order = IntStream.range(0, target.length).toArray();
 
             @Override
             public MultiDataSet next(int num) {
@@ -243,7 +214,7 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
 
     @Override
     public double[] predict(double[] input) {
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         for (int i = 0; i < input.length; i++) {
             feedForwardInputArray.put(0, i, input[i]);
         }
@@ -252,13 +223,13 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
         double[] probabilities = output.get(POLICY_NAME).toDoubleVector();
         double[] qValueArray = output.get(Q_VALUE_NAME).toDoubleVector();
         double[] riskValueArray = output.get(RISK_VALUE_NAME).toDoubleVector();
-        long end = System.currentTimeMillis();
-        totalMillisCount += end - start;
-        totalCallsCount++;
-
-        if(totalCallsCount % 1000 == 0) {
-            logger.info("Evaluation of single vector took: [{}) ms", totalMillisCount / (double) totalCallsCount);
-        }
+//        long end = System.currentTimeMillis();
+//        totalMillisCount += end - start;
+//        totalCallsCount++;
+//
+//        if(totalCallsCount % 1000 == 0) {
+//            logger.info("Evaluation of single vector took: [{}) ms", totalMillisCount / (double) totalCallsCount);
+//        }
 
 
         if(qValueArray.length != 1) {

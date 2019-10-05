@@ -59,6 +59,6 @@ public class RandomWalkPolicy implements PaperPolicy<RandomWalkAction, DoubleVec
 
     @Override
     public PaperPolicyStepRecord getPolicyRecord(RandomWalkState gameState) {
-        return new PaperPolicyStepRecord(null, null, 0, 0, 0);
+        return new PaperPolicyStepRecord(null, null, 0.0, 0.0, 0.0);
     }
 }

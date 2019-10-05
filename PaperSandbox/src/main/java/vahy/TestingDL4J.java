@@ -46,7 +46,7 @@ public class TestingDL4J {
 
         File tfGraphFile = new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile());
 
-        Dl4jModel asdf = new Dl4jModel(4, 5, null, 0, 0.01, 100);
+        Dl4jModel asdf = new Dl4jModel(4, 5, null, 0, 0.01, 100, 1);
         // TFModel asdf = new TFModel(4, 5, 100, 1, tfGraphFile, new SplittableRandom());
 
         for (int i = 0; i < 100; i++) {
