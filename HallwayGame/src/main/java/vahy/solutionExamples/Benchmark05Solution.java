@@ -51,7 +51,7 @@ public class Benchmark05Solution {
             .randomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(7)
+            .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
