@@ -23,7 +23,6 @@ import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.predictor.TrainableApproximator;
