@@ -11,8 +11,6 @@ import vahy.paperGenerics.PaperModel;
 import vahy.timer.SimpleTimer;
 
 import java.nio.DoubleBuffer;
-import java.util.Arrays;
-import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 
@@ -77,7 +75,7 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
         timer.startTimer();
         int[] order = IntStream.range(0, input.length).toArray();
         for (int i = 0; i < trainingIterations; i++) {
-            shuffleArray(order, new Random(random.nextInt()));
+            shuffleArray(order);
             for (int j = 0; j < (target.length / batchSize) + 1; j++) {
                 fillBatch(j, order, input, target);
                 try (
@@ -99,9 +97,9 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
     }
 
 
-    private static void shuffleArray(int[] array, Random rng) {
+    private void shuffleArray(int[] array) {
         for(int i = array.length - 1; i > 0; --i) {
-            int j = rng.nextInt(i + 1);
+            int j = random.nextInt(i + 1);
             int temp = array[j];
             array[j] = array[i];
             array[i] = temp;

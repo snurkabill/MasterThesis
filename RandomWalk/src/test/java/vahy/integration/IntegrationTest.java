@@ -89,7 +89,7 @@ public class IntegrationTest {
 //            () -> 0.1,
 //            () -> 2.0,
             DataAggregationAlgorithm.EVERY_VISIT_MC,
-            ApproximatorType.NN,
+            ApproximatorType.TF_NN,
             EvaluatorType.RALF,
 //            ApproximatorType.HASHMAP,
             4,

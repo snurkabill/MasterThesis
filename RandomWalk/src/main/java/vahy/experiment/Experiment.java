@@ -97,8 +97,9 @@ public class Experiment {
             case HASHMAP_LR:
                 createPolicyAndRunProcess(setup, random, provider, new DataTablePredictorWithLr(defaultPrediction, setup.getSecond().getLearningRate(), RandomWalkAction.playerActions.length));
                 break;
-            case NN: {
-                try (TFModel model = new TFModel(
+            case TF_NN:
+            {
+                try(TFModel model = new TFModel(
                     inputLength,
                     PaperModel.POLICY_START_INDEX + RandomWalkAction.playerActions.length,
                     setup.getSecond().getTrainingEpochCount(),

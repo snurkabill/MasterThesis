@@ -47,6 +47,7 @@ import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
+import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.selector.RiskBasedSelector;
@@ -191,7 +192,7 @@ public class Experiment {
                 return new DataTablePredictor(defaultPrediction);
             case HASHMAP_LR:
                 return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
-            case NN:
+            case TF_NN:
                 tfModel = new TFModel(
                     inputLenght,
                     PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
@@ -200,6 +201,16 @@ public class Experiment {
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream(modelName).readAllBytes(),
                     masterRandom.split());
                 return new TrainableApproximator(tfModel);
+            case DL4J_NN:
+                var model = new Dl4jModel(
+                    inputLenght,
+                    PaperModel.POLICY_START_INDEX + HallwayAction.playerActions.length,
+                    null,
+                    finalRandomSeed,
+                    algorithmConfig.getLearningRate(),
+                    algorithmConfig.getTrainingEpochCount(),
+                    algorithmConfig.getTrainingBatchSize());
+                return new TrainableApproximator(model);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
         }
