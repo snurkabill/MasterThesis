@@ -51,7 +51,7 @@ public class Benchmark05Solution {
             .randomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(1)
+            .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
@@ -80,8 +80,8 @@ public class Benchmark05Solution {
                 .learningRate(0.01)
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .globalRiskAllowed(0.00)
-            .riskSupplier(() -> 0.00)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(() -> 1.00)
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)

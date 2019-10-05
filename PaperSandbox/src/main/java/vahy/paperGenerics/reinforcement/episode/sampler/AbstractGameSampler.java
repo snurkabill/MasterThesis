@@ -6,10 +6,11 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
+import vahy.paperGenerics.reinforcement.episode.BatchDurationDataPointGenerator;
 import vahy.paperGenerics.reinforcement.episode.EpisodeImmutableSetup;
 import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.EpisodeSimulator;
@@ -42,6 +43,7 @@ public abstract class AbstractGameSampler<
 
     private final ProgressTracker progressTracker;
     private final List<FromEpisodesDataPointGenerator<TAction, TPlayerObservation, TOpponentObservation, TState>> dataPointGeneratorList = new ArrayList<>();
+    private final BatchDurationDataPointGenerator dataPointGenerator = new BatchDurationDataPointGenerator();
     private int batchCounter = 0;
     private final int processingUnitCount;
 
@@ -62,6 +64,7 @@ public abstract class AbstractGameSampler<
         for (FromEpisodesDataPointGenerator fromEpisodesDataPointGenerator : dataPointGeneratorList) {
             progressTracker.registerDataCollector(fromEpisodesDataPointGenerator);
         }
+        progressTracker.registerDataCollector(dataPointGenerator);
     }
 
     private void createDataGenerators() {
@@ -88,6 +91,8 @@ public abstract class AbstractGameSampler<
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
 
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
+        long startExecutors = System.currentTimeMillis();
+
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
 
         var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>>>(episodeBatchSize);
@@ -108,13 +113,15 @@ public abstract class AbstractGameSampler<
                     throw new IllegalStateException("Parallel episodes were interrupted.", e);
                 }
             }).collect(Collectors.toList());
+            executorService.shutdown();
 
+            long endExecutors = System.currentTimeMillis();
             for (FromEpisodesDataPointGenerator<TAction, TPlayerObservation, TOpponentObservation, TState> fromEpisodesDataPointGenerator : dataPointGeneratorList) {
                 fromEpisodesDataPointGenerator.addNewValue(paperEpisodeHistoryList, batchCounter);
             }
+            dataPointGenerator.addNewValue(batchCounter, (endExecutors - startExecutors) / (double)episodeBatchSize);
             progressTracker.onNextLog();
             batchCounter++;
-            executorService.shutdown();
             return paperEpisodeHistoryList;
         } catch (InterruptedException e) {
             throw new IllegalStateException("Parallel episodes were interrupted.", e);
