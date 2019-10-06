@@ -38,7 +38,7 @@
         <logback.version>1.1.11</logback.version>
         <slf4j.version>1.7.12</slf4j.version>
         <testng.version>6.14.3</testng.version>
-
+        <micrometer.version>1.3.0</micrometer.version>
     </properties>
 
     <dependencies>
@@ -60,6 +60,12 @@
             <artifactId>testng</artifactId>
             <version>${testng.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-elastic</artifactId>
+            <version>${micrometer.version}</version>
         </dependency>
 
     </dependencies>
