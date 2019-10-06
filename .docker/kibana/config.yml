@@ -1,0 +1,9 @@
+server:
+  host: 0.0.0.0
+
+elasticsearch:
+  url: http://elasticsearch:9200
+
+xpack:
+  reporting:
+    encryptionKey: "19088f78-6e26-453d-a832-2d88e2b44752"
