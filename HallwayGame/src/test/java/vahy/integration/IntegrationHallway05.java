@@ -1,7 +1,7 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
@@ -68,7 +68,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
             .evaluatorType(EvaluatorType.RALF)
 
             .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .globalRiskAllowed(1.0)
             .riskSupplier(() -> 1.0)

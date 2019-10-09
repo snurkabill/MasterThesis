@@ -1,6 +1,6 @@
 package vahy.basicExamples;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
@@ -73,7 +73,7 @@ public class TestingRAMCP {
             .stageCount(100)
 
             .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .evaluatorType(EvaluatorType.RAMCP)
             .learningRate(0.1)

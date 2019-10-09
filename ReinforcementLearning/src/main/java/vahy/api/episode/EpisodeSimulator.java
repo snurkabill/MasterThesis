@@ -12,6 +12,6 @@ public interface EpisodeSimulator<
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> calculateEpisode(EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeImmutableSetup);
+    EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> calculateEpisode(EpisodeSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeSetup);
 
 }

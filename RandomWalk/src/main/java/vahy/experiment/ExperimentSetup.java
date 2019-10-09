@@ -1,6 +1,6 @@
 package vahy.experiment;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.config.EvaluatorType;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -35,7 +35,7 @@ public class ExperimentSetup {
     private final Supplier<Double> temperatureSupplier;
     private final Supplier<Double> riskSupplier;
 
-    private final TrainerAlgorithm trainerAlgorithm;
+    private final DataAggregationAlgorithm dataAggregationAlgorithm;
     private final ApproximatorType approximatorType;
     private final EvaluatorType evaluatorType;
 
@@ -58,7 +58,7 @@ public class ExperimentSetup {
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
     private final boolean omitProbabilities;
 
-    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, Supplier<Double> riskSupplier, TrainerAlgorithm trainerAlgorithm, ApproximatorType approximatorType, EvaluatorType evaluatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, boolean omitProbabilities) {
+    public ExperimentSetup(long randomSeed, double cpuctParameter, double mcRolloutCount, TreeUpdateConditionFactory treeUpdateConditionFactory, double discountFactor, int batchEpisodeCount, int replayBufferSize, int maximalStepCountBound, int stageCount, Supplier<Double> explorationConstantSupplier, Supplier<Double> temperatureSupplier, Supplier<Double> riskSupplier, DataAggregationAlgorithm dataAggregationAlgorithm, ApproximatorType approximatorType, EvaluatorType evaluatorType, int trainingBatchSize, int trainingEpochCount, int evalEpisodeCount, double globalRiskAllowed, double learningRate, InferenceExistingFlowStrategy inferenceExistingFlowStrategy, InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy, ExplorationExistingFlowStrategy explorationExistingFlowStrategy, ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy, FlowOptimizerType flowOptimizerType, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow, SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, boolean omitProbabilities) {
         this.randomSeed = randomSeed;
         this.cpuctParameter = cpuctParameter;
         this.mcRolloutCount = mcRolloutCount;
@@ -71,7 +71,7 @@ public class ExperimentSetup {
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
         this.riskSupplier = riskSupplier;
-        this.trainerAlgorithm = trainerAlgorithm;
+        this.dataAggregationAlgorithm = dataAggregationAlgorithm;
         this.approximatorType = approximatorType;
         this.evaluatorType = evaluatorType;
         this.trainingBatchSize = trainingBatchSize;
@@ -129,8 +129,8 @@ public class ExperimentSetup {
         return riskSupplier;
     }
 
-    public TrainerAlgorithm getTrainerAlgorithm() {
-        return trainerAlgorithm;
+    public DataAggregationAlgorithm getDataAggregationAlgorithm() {
+        return dataAggregationAlgorithm;
     }
 
     public ApproximatorType getApproximatorType() {

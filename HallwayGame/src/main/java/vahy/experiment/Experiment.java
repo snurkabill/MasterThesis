@@ -360,7 +360,7 @@ public class Experiment {
         PaperPolicySupplier<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> paperPolicySupplier)
     {
         var discountFactor = algorithmConfig.getDiscountFactor();
-        var trainerAlgorithm = algorithmConfig.getTrainerAlgorithm();
+        var trainerAlgorithm = algorithmConfig.getDataAggregationAlgorithm();
 
         var gameSampler = new PaperRolloutGameSampler<>(
             hallwayGameInitialInstanceSupplier,

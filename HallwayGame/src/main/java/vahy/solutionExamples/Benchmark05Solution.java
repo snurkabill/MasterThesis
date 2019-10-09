@@ -1,6 +1,6 @@
 package vahy.solutionExamples;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
@@ -74,7 +74,7 @@ public class Benchmark05Solution {
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
                 .replayBufferSize(100_000)
                 .trainingBatchSize(1)
                 .learningRate(0.01)

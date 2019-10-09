@@ -1,6 +1,6 @@
 package vahy.experiment;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.game.HallwayInstance;
 import vahy.config.EvaluatorType;
@@ -37,7 +37,7 @@ public class ExperimentSetupBuilder {
     private Supplier<Double> temperatureSupplier;
     private Supplier<Double> riskSupplier;
 
-    private TrainerAlgorithm trainerAlgorithm;
+    private DataAggregationAlgorithm dataAggregationAlgorithm;
     private ApproximatorType approximatorType;
     private EvaluatorType evaluatorType;
 
@@ -119,8 +119,8 @@ public class ExperimentSetupBuilder {
         this.riskSupplier = riskSupplier; return this;
     }
 
-    public ExperimentSetupBuilder trainerAlgorithm(TrainerAlgorithm trainerAlgorithm) {
-        this.trainerAlgorithm = trainerAlgorithm; return this;
+    public ExperimentSetupBuilder trainerAlgorithm(DataAggregationAlgorithm dataAggregationAlgorithm) {
+        this.dataAggregationAlgorithm = dataAggregationAlgorithm; return this;
     }
 
     public ExperimentSetupBuilder approximatorType(ApproximatorType approximatorType) {
@@ -216,7 +216,7 @@ public class ExperimentSetupBuilder {
             explorationConstantSupplier,
             temperatureSupplier,
             riskSupplier,
-            trainerAlgorithm,
+            dataAggregationAlgorithm,
             approximatorType,
             evaluatorType,
             trainingBatchSize,

@@ -2,7 +2,7 @@ package vahy.impl.episode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.episode.EpisodeImmutableSetup;
+import vahy.api.episode.EpisodeSetup;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.EpisodeSimulator;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EpisodeSimulatorGeneric<
+public class EpisodeSimulatorImpl<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
@@ -35,30 +35,30 @@ public class EpisodeSimulatorGeneric<
 
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
 
-    public EpisodeSimulatorGeneric(EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory) {
+    public EpisodeSimulatorImpl(EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory) {
         this.resultsFactory = resultsFactory;
     }
 
     public EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> calculateEpisode(
-        EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeImmutableSetup)
+        EpisodeSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeSetup)
     {
-        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy = episodeImmutableSetup.getPlayerPaperPolicy();
-        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy = episodeImmutableSetup.getOpponentPolicy();
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy = episodeSetup.getPlayerPaperPolicy();
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy = episodeSetup.getOpponentPolicy();
 
-        TState state = episodeImmutableSetup.getInitialState();
+        TState state = episodeSetup.getInitialState();
         logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
-        return episodeRun(episodeImmutableSetup, playerPolicy, opponentPolicy, state);
+        return episodeRun(episodeSetup, playerPolicy, opponentPolicy, state);
     }
 
     private EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeRun(
-        EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeImmutableSetup,
+        EpisodeSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeSetup,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy,
         TState state) {
         var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>();
         try {
             long start = System.currentTimeMillis();
-            while(!state.isFinalState() && playerStepsDone < episodeImmutableSetup.getStepCountLimit()) {
+            while(!state.isFinalState() && playerStepsDone < episodeSetup.getStepCountLimit()) {
                 var step = makePolicyStep(state, playerPolicy, opponentPolicy, true);
                 totalCumulativePayoff += step.getReward();
                 playerStepsDone++;
@@ -95,7 +95,7 @@ public class EpisodeSimulatorGeneric<
         onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         otherPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = state.applyAction(action);
-        return new EpisodeStepRecordGeneric<>(isPlayerMove, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward());
+        return new EpisodeStepRecordImpl<>(isPlayerMove, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward());
     }
 
     private void makeStepLog(EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> step) {

@@ -5,7 +5,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.environment.RandomWalkSetup;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
@@ -88,7 +88,7 @@ public class IntegrationTest {
             () -> 0.3,
 //            () -> 0.1,
 //            () -> 2.0,
-            TrainerAlgorithm.EVERY_VISIT_MC,
+            DataAggregationAlgorithm.EVERY_VISIT_MC,
             ApproximatorType.NN,
             EvaluatorType.RALF,
 //            ApproximatorType.HASHMAP,

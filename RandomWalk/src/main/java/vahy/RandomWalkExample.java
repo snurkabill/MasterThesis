@@ -2,7 +2,7 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.environment.RandomWalkSetup;
 import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
@@ -83,7 +83,7 @@ public class RandomWalkExample {
             () -> riskAllowed,
 //            () -> 0.1,
 //            () -> 2.0,
-            TrainerAlgorithm.EVERY_VISIT_MC,
+            DataAggregationAlgorithm.EVERY_VISIT_MC,
 //            ApproximatorType.NN,
             ApproximatorType.HASHMAP_LR,
             EvaluatorType.RALF,

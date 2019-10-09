@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.Analyzer;
 import vahy.RandomWalkExample;
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
@@ -176,7 +176,7 @@ public class Experiment {
         var progressTrackerSettings = new ProgressTrackerSettings(true, false, false, false);
 
         var trainer = getAbstractTrainer(
-            experimentSetup.getTrainerAlgorithm(),
+            experimentSetup.getDataAggregationAlgorithm(),
             random,
             RandomWalkGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
@@ -289,7 +289,7 @@ public class Experiment {
     }
 
     private PaperTrainer<RandomWalkAction, RandomWalkProbabilities, RandomWalkState, PaperPolicyRecord> getAbstractTrainer(
-        TrainerAlgorithm trainerAlgorithm,
+        DataAggregationAlgorithm dataAggregationAlgorithm,
         SplittableRandom random,
         RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
         double discountFactor,
@@ -308,7 +308,7 @@ public class Experiment {
             progressTrackerSettings,
             1);
 
-        var dataAggregator = switch (trainerAlgorithm) {
+        var dataAggregator = switch (dataAggregationAlgorithm) {
             case REPLAY_BUFFER -> new ReplayBufferDataAggregator(replayBufferSize, new LinkedList<>());
             case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
             case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());

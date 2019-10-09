@@ -1,6 +1,6 @@
 package vahy.experiment;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.game.HallwayInstance;
 import vahy.config.EvaluatorType;
@@ -38,7 +38,7 @@ public class ExperimentSetup {
     private final Supplier<Double> temperatureSupplier;
     private final Supplier<Double> riskSupplier;
 
-    private final TrainerAlgorithm trainerAlgorithm;
+    private final DataAggregationAlgorithm dataAggregationAlgorithm;
     private final ApproximatorType approximatorType;
 
     private final EvaluatorType evaluatorType;
@@ -78,7 +78,7 @@ public class ExperimentSetup {
                            Supplier<Double> explorationConstantSupplier,
                            Supplier<Double> temperatureSupplier,
                            Supplier<Double> riskSupplier,
-                           TrainerAlgorithm trainerAlgorithm,
+                           DataAggregationAlgorithm dataAggregationAlgorithm,
                            ApproximatorType approximatorType,
                            EvaluatorType evaluatorType,
                            int trainingBatchSize,
@@ -108,7 +108,7 @@ public class ExperimentSetup {
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
         this.riskSupplier = riskSupplier;
-        this.trainerAlgorithm = trainerAlgorithm;
+        this.dataAggregationAlgorithm = dataAggregationAlgorithm;
         this.approximatorType = approximatorType;
         this.evaluatorType = evaluatorType;
         this.trainingBatchSize = trainingBatchSize;
@@ -167,8 +167,8 @@ public class ExperimentSetup {
         return riskSupplier;
     }
 
-    public TrainerAlgorithm getTrainerAlgorithm() {
-        return trainerAlgorithm;
+    public DataAggregationAlgorithm getDataAggregationAlgorithm() {
+        return dataAggregationAlgorithm;
     }
 
     public ApproximatorType getApproximatorType() {
@@ -263,7 +263,7 @@ public class ExperimentSetup {
             ", explorationConstantSupplier=" + explorationConstantSupplier +
             ", temperatureSupplier=" + temperatureSupplier +
             ", riskSupplier=" + riskSupplier +
-            ", trainerAlgorithm=" + trainerAlgorithm +
+            ", trainerAlgorithm=" + dataAggregationAlgorithm +
             ", approximatorType=" + approximatorType +
             ", evaluatorType=" + evaluatorType +
             ", trainingBatchSize=" + trainingBatchSize +

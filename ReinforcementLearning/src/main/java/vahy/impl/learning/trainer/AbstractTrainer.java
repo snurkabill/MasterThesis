@@ -14,7 +14,7 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.List;
 
-public abstract class AbstractTrainerGeneric<
+public abstract class AbstractTrainer<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
@@ -25,9 +25,9 @@ public abstract class AbstractTrainerGeneric<
     private final GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler;
     private final DataAggregator dataAggregator;
 
-    protected AbstractTrainerGeneric(TrainablePredictor trainablePredictor,
-                                     GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler,
-                                     DataAggregator dataAggregator) {
+    protected AbstractTrainer(TrainablePredictor trainablePredictor,
+                              GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler,
+                              DataAggregator dataAggregator) {
         this.trainablePredictor = trainablePredictor;
         this.gameSampler = gameSampler;
         this.dataAggregator = dataAggregator;

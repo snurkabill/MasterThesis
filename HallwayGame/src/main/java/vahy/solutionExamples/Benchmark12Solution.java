@@ -1,6 +1,6 @@
 package vahy.solutionExamples;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.SelectorType;
@@ -70,7 +70,7 @@ public class Benchmark12Solution {
             .batchEpisodeCount(100)
             .stageCount(100)
             .maximalStepCountBound(100)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)

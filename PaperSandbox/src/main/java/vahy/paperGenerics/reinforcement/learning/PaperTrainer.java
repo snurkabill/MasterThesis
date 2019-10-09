@@ -11,7 +11,7 @@ import vahy.api.model.reward.RewardAggregator;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.learning.model.MutableDoubleArray;
-import vahy.impl.learning.trainer.AbstractTrainerGeneric;
+import vahy.impl.learning.trainer.AbstractTrainer;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperState;
@@ -26,7 +26,7 @@ public class PaperTrainer<
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecordBase>
-    extends AbstractTrainerGeneric<TAction, DoubleVector, TOpponentObservation, TState, TPolicyRecord> {
+    extends AbstractTrainer<TAction, DoubleVector, TOpponentObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperTrainer.class.getName());
 

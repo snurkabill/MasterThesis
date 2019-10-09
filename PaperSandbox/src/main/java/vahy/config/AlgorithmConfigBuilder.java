@@ -1,6 +1,6 @@
 package vahy.config;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
@@ -30,7 +30,7 @@ public class AlgorithmConfigBuilder {
     private Supplier<Double> temperatureSupplier;
     private Supplier<Double> riskSupplier;
 
-    private TrainerAlgorithm trainerAlgorithm;
+    private DataAggregationAlgorithm dataAggregationAlgorithm;
     private ApproximatorType approximatorType;
     private EvaluatorType evaluatorType;
     private SelectorType selectorType;
@@ -91,8 +91,8 @@ public class AlgorithmConfigBuilder {
         this.riskSupplier = riskSupplier; return this;
     }
 
-    public AlgorithmConfigBuilder trainerAlgorithm(TrainerAlgorithm trainerAlgorithm) {
-        this.trainerAlgorithm = trainerAlgorithm; return this;
+    public AlgorithmConfigBuilder trainerAlgorithm(DataAggregationAlgorithm dataAggregationAlgorithm) {
+        this.dataAggregationAlgorithm = dataAggregationAlgorithm; return this;
     }
 
     public AlgorithmConfigBuilder approximatorType(ApproximatorType approximatorType) {
@@ -181,7 +181,7 @@ public class AlgorithmConfigBuilder {
             explorationConstantSupplier,
             temperatureSupplier,
             riskSupplier,
-            trainerAlgorithm,
+            dataAggregationAlgorithm,
             approximatorType,
             evaluatorType,
             selectorType,

@@ -2,7 +2,7 @@ package vahy.solutionExamples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.SelectorType;
@@ -79,7 +79,7 @@ public class Benchmark13Solution {
 
             .maximalStepCountBound(500)
 
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .replayBufferSize(2000)
             .selectorType(SelectorType.UCB)

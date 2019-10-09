@@ -1,6 +1,6 @@
 package vahy;
 
-import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.SelectorType;
@@ -61,7 +61,7 @@ public class PaperGenericsPrototype {
             .batchEpisodeCount(10)
             .stageCount(100)
             .maximalStepCountBound(1000)
-            .trainerAlgorithm(TrainerAlgorithm.EVERY_VISIT_MC)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .selectorType(SelectorType.UCB)
             // .replayBufferSize(200)
             .globalRiskAllowed(0.15)

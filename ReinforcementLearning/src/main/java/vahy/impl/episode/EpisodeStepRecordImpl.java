@@ -9,7 +9,7 @@ import vahy.api.policy.PolicyRecord;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EpisodeStepRecordGeneric<
+public class EpisodeStepRecordImpl<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -24,12 +24,12 @@ public class EpisodeStepRecordGeneric<
     private final TState toState;
     private final double reward;
 
-    public EpisodeStepRecordGeneric(boolean isPlayerMove,
-                                    TAction playedAction,
-                                    TPolicyRecord policyStepRecord,
-                                    TState fromState,
-                                    TState toState,
-                                    double reward) {
+    public EpisodeStepRecordImpl(boolean isPlayerMove,
+                                 TAction playedAction,
+                                 TPolicyRecord policyStepRecord,
+                                 TState fromState,
+                                 TState toState,
+                                 double reward) {
         this.isPlayerMove = isPlayerMove;
         this.playedAction = playedAction;
         this.policyStepRecord = policyStepRecord;

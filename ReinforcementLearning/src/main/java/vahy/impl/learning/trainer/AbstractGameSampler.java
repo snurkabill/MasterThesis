@@ -12,8 +12,8 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
-import vahy.impl.episode.EpisodeImmutableSetupGeneric;
-import vahy.impl.episode.EpisodeSimulatorGeneric;
+import vahy.impl.episode.EpisodeSetupImpl;
+import vahy.impl.episode.EpisodeSimulatorImpl;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.vizualiation.ProgressTracker;
@@ -28,7 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public abstract class AbstractGameSamplerGeneric<
+public abstract class AbstractGameSampler<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
@@ -36,7 +36,7 @@ public abstract class AbstractGameSamplerGeneric<
     TPolicyRecord extends PolicyRecord>
     implements GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>  {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractGameSamplerGeneric.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(AbstractGameSampler.class.getName());
 
     private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
@@ -48,7 +48,7 @@ public abstract class AbstractGameSamplerGeneric<
     private int batchCounter = 0;
     private final PolicyMode policyMode;
 
-    public AbstractGameSamplerGeneric(
+    public AbstractGameSampler(
         InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
         PolicyMode policyMode,
@@ -84,8 +84,8 @@ public abstract class AbstractGameSamplerGeneric<
             TState initialGameState = initialStateSupplier.createInitialState();
             var paperPolicy = supplyPlayerPolicy(initialGameState, policyMode);
             var opponentPolicy = supplyOpponentPolicy(initialGameState, policyMode);
-            var paperEpisode = new EpisodeImmutableSetupGeneric<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
-            var episodeSimulator = new EpisodeSimulatorGeneric<>(resultsFactory);
+            var paperEpisode = new EpisodeSetupImpl<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
+            var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
             episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }
         try {

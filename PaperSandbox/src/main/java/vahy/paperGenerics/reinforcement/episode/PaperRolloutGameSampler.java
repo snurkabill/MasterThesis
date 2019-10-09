@@ -8,7 +8,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
-import vahy.impl.learning.trainer.AbstractGameSamplerGeneric;
+import vahy.impl.learning.trainer.AbstractGameSampler;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
@@ -25,7 +25,7 @@ public class PaperRolloutGameSampler<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractGameSamplerGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> {
+    extends AbstractGameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> {
 
     private final PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier;
     private final PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier;
