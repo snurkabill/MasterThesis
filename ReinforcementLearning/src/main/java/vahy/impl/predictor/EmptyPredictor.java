@@ -7,7 +7,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.Arrays;
 import java.util.List;
 
-public class EmptyPredictor<TObservation extends DoubleVector> implements TrainablePredictor<TObservation> {
+public class EmptyPredictor implements TrainablePredictor {
 
     private final double[] defaultPrediction;
 
@@ -16,17 +16,21 @@ public class EmptyPredictor<TObservation extends DoubleVector> implements Traina
     };
 
     @Override
-    public void train(List<ImmutableTuple<TObservation, double[]>> episodeData) {
+    public void train(List<ImmutableTuple<DoubleVector, double[]>> data) {
     }
 
     @Override
-    public double[] apply(TObservation doubleVectorialObservation) {
+    public void train(ImmutableTuple<DoubleVector[], double[][]> data) {
+    }
+
+    @Override
+    public double[] apply(DoubleVector doubleObservation) {
         return defaultPrediction;
     }
 
     @Override
-    public double[][] apply(TObservation[] doubleVectorialObservationArray) {
-        var output = new double[doubleVectorialObservationArray.length][];
+    public double[][] apply(DoubleVector[] doubleObservationArray) {
+        var output = new double[doubleObservationArray.length][];
         Arrays.fill(output, defaultPrediction);
         return output;
     }

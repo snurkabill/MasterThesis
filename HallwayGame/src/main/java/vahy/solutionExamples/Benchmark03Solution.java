@@ -78,8 +78,8 @@ public class Benchmark03Solution {
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
             .stageCount(50)
             .evaluatorType(EvaluatorType.RALF_BATCHED)
-            .globalRiskAllowed(0.05)
-            .riskSupplier(() -> 0.05)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(() -> 1.00)
 
             .selectorType(SelectorType.UCB)
 

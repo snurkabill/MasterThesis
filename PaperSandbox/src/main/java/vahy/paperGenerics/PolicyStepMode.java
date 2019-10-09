@@ -1,6 +1,6 @@
 package vahy.paperGenerics;
 
-public enum PolicyMode {
+public enum PolicyStepMode {
 
     EXPLORATION,
     EXPLOITATION;

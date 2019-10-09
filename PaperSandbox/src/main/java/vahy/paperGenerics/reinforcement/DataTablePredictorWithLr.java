@@ -7,7 +7,7 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.List;
 
-public class DataTablePredictorWithLr<TObservation extends DoubleVector> extends DataTablePredictor<TObservation> {
+public class DataTablePredictorWithLr extends DataTablePredictor {
 
     private final int actionCount;
     private final double learningRate;
@@ -22,8 +22,8 @@ public class DataTablePredictorWithLr<TObservation extends DoubleVector> extends
     }
 
     @Override
-    public void train(List<ImmutableTuple<TObservation, double[]>> episodeData) {
-        for (ImmutableTuple<TObservation, double[]> entry : episodeData) {
+    public void train(List<ImmutableTuple<DoubleVector, double[]>> data) {
+        for (ImmutableTuple<DoubleVector, double[]> entry : data) {
             double[] newSampledPrediction = entry.getSecond();
 
             double[] defaultPredictionCopy = new double[defaultPrediction.length];

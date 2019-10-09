@@ -9,8 +9,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.PolicyMode;
-import vahy.paperGenerics.reinforcement.episode.PaperPolicyStepRecord;
+import vahy.paperGenerics.PolicyStepMode;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class PaperPolicyImpl<
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState, PaperPolicyStepRecord>
+    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState, PaperPolicyRecord>
     implements PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
@@ -114,7 +113,7 @@ public class PaperPolicyImpl<
 
         var actionDistributionAndDiscreteAction = riskAverseSearchTree.getActionDistributionAndDiscreteAction(
             gameState,
-            exploitation ? PolicyMode.EXPLOITATION : PolicyMode.EXPLORATION,
+            exploitation ? PolicyStepMode.EXPLOITATION : PolicyStepMode.EXPLORATION,
             temperature);
         var action = actionDistributionAndDiscreteAction.getFirst();
         actionDistribution = actionDistributionAndDiscreteAction.getSecond();
@@ -157,9 +156,9 @@ public class PaperPolicyImpl<
     }
 
     @Override
-    public PaperPolicyStepRecord getPolicyRecord(TState gameState) {
+    public PaperPolicyRecord getPolicyRecord(TState gameState) {
         checkStateRoot(gameState);
-        return new PaperPolicyStepRecord(
+        return new PaperPolicyRecord(
                 innerPriorProbabilityDistribution(gameState),
                 innerActionProbability(),
                 riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward(),

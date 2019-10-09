@@ -8,4 +8,6 @@ public interface DataPointGenerator extends Supplier<ImmutableTuple<Double, Doub
 
     String getDataTitle();
 
+//    void addDataPoint(Double x, Double y);
+
 }

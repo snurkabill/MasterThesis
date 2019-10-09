@@ -7,7 +7,7 @@ import vahy.paperGenerics.PaperState;
 
 import java.util.List;
 
-public class EpisodeResults<
+public class EpisodeResults_deprecated<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
@@ -20,8 +20,8 @@ public class EpisodeResults<
     private final boolean isRiskHit;
     private final long millisecondDuration;
 
-    public EpisodeResults(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeHistory,
-                          int playerStepCount, int totalStepCount, double totalPayoff, boolean isRiskHit, long millisecondDuration) {
+    public EpisodeResults_deprecated(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeHistory,
+                                     int playerStepCount, int totalStepCount, double totalPayoff, boolean isRiskHit, long millisecondDuration) {
         this.episodeHistory = episodeHistory;
         this.playerStepCount = playerStepCount;
         this.totalStepCount = totalStepCount;

@@ -12,7 +12,7 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.PolicyMode;
+import vahy.paperGenerics.PolicyStepMode;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.utils.EnumUtils;
@@ -85,23 +85,23 @@ public class RiskAverseSearchTree<
     }
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state,
-                                                                                                                                                      PolicyMode policyMode,
+                                                                                                                                                      PolicyStepMode policyStepMode,
                                                                                                                                                       double temperature) {
-        switch (policyMode) {
+        switch (policyStepMode) {
             case EXPLOITATION:
                 return inferencePolicyBranch(state);
             case EXPLORATION:
                 return explorationPolicyBranch(state, temperature);
-            default: throw EnumUtils.createExceptionForUnknownEnumValue(policyMode);
+            default: throw EnumUtils.createExceptionForUnknownEnumValue(policyStepMode);
         }
     }
 
-    public ImmutableTuple<TAction, double[]> getActionDistributionAndDiscreteAction(TState state, PolicyMode policyMode, double temperature) {
+    public ImmutableTuple<TAction, double[]> getActionDistributionAndDiscreteAction(TState state, PolicyStepMode policyStepMode, double temperature) {
         if(state.isOpponentTurn()) {
             throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
         }
         try {
-            this.playingDistribution = createActionWithDistribution(state, policyMode, temperature);
+            this.playingDistribution = createActionWithDistribution(state, policyStepMode, temperature);
         return new ImmutableTuple<>(playingDistribution.getExpectedPlayerAction(), playingDistribution.getPlayerDistribution());
         } catch(Exception e) {
             dumpTreeWithFlow();

@@ -7,12 +7,28 @@ import vahy.api.policy.PolicyRecord;
 
 import java.util.List;
 
-public interface GameSampler<
+public interface EpisodeStepRecord<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit);
+    boolean isPlayerMove();
+
+    TAction getPlayedAction();
+
+    TPolicyRecord getPolicyStepRecord();
+
+    TState getFromState();
+
+    TState getToState();
+
+    double getReward();
+
+    String toLogString();
+
+    List<String> getCsvHeader();
+
+    List<String> getCsvRecord();
 }

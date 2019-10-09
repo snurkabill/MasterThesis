@@ -1,11 +1,13 @@
 package vahy.opponent;
 
+import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyMode;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.PaperPolicy;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 
 import java.util.SplittableRandom;
@@ -15,12 +17,12 @@ public class RandomWalkOpponentSupplier extends PaperPolicySupplier<RandomWalkAc
     public final SplittableRandom random;
 
     public RandomWalkOpponentSupplier(SplittableRandom random) {
-        super(null, null, 0.0, random, null, null, null, null, null);
+        super(null, null, 0.0, random, null, null, null, null, null, null, null, null);
         this.random = random;
     }
 
     @Override
-    public PaperPolicy<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> initializePolicy(RandomWalkState initialState) {
-        return new RandomWalkPolicy(random);
+    public Policy<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState, PaperPolicyRecord> initializePolicy(RandomWalkState initialState, PolicyMode policyMode) {
+        return new RandomWalkPolicy(random.split());
     }
 }

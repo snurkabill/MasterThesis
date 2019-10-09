@@ -1,47 +1,61 @@
-package vahy.paperGenerics.reinforcement.episode;
+package vahy.impl.episode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.episode.EpisodeImmutableSetup;
+import vahy.api.episode.EpisodeResults;
+import vahy.api.episode.EpisodeResultsFactory;
+import vahy.api.episode.EpisodeSimulator;
+import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.model.Action;
+import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyRecord;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicy;
 
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class EpisodeSimulator<
+public class EpisodeSimulatorGeneric<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TPolicyRecord extends PolicyRecord>
+    implements EpisodeSimulator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(EpisodeSimulator.class.getName());
     private int totalStepsDone = 0;
     private int playerStepsDone = 0;
     private double totalCumulativePayoff = 0.0;
 
-    public EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState> calculateEpisode(
-        EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState> episodeImmutableSetup)
+    private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
+
+    public EpisodeSimulatorGeneric(EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory) {
+        this.resultsFactory = resultsFactory;
+    }
+
+    public EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> calculateEpisode(
+        EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeImmutableSetup)
     {
-        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> playerPolicy = episodeImmutableSetup.getPlayerPaperPolicy();
-        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> opponentPolicy = episodeImmutableSetup.getOpponentPolicy();
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy = episodeImmutableSetup.getPlayerPaperPolicy();
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy = episodeImmutableSetup.getOpponentPolicy();
 
         TState state = episodeImmutableSetup.getInitialState();
         logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         return episodeRun(episodeImmutableSetup, playerPolicy, opponentPolicy, state);
     }
 
-    private EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState> episodeRun(
-        EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState> episodeImmutableSetup,
-        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> playerPolicy,
-        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> opponentPolicy,
+    private EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeRun(
+        EpisodeImmutableSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeImmutableSetup,
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy,
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy,
         TState state) {
-        var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>>();
+        var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>();
         try {
             long start = System.currentTimeMillis();
             while(!state.isFinalState() && playerStepsDone < episodeImmutableSetup.getStepCountLimit()) {
@@ -65,37 +79,32 @@ public class EpisodeSimulator<
                 logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
             }
             long end = System.currentTimeMillis();
-            return new EpisodeResults<>(episodeHistoryList, playerStepsDone, totalStepsDone, totalCumulativePayoff, state.isRiskHit(), end - start);
+            return resultsFactory.createResults(episodeHistoryList, playerStepsDone, totalStepsDone, totalCumulativePayoff, Duration.ofMillis(end - start));
         } catch(Exception e) {
             throw new IllegalStateException(createErrorMsg(episodeHistoryList), e);
         }
     }
 
-    private EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState> makePolicyStep(
+    private EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> makePolicyStep(
         TState state,
-        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> onTurnPolicy,
-        PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> otherPolicy,
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> onTurnPolicy,
+        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> otherPolicy,
         boolean isPlayerMove) {
         TAction action = onTurnPolicy.getDiscreteAction(state);
         var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(state);
         onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         otherPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = state.applyAction(action);
-        return new EpisodeStepRecord<>(isPlayerMove, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward());
+        return new EpisodeStepRecordGeneric<>(isPlayerMove, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward());
     }
 
-    private void makeStepLog(EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState> step) {
-        logger.debug("Player's [{}]th action: [{}] getting reward [{}]. ExpectedReward: [{}], Expected risk: [{}], PolicyProbabilities: [{}], PriorProbabilities: [{}]",
-            playerStepsDone,
-            step.getPlayedAction(),
-            step.getReward(),
-            step.getPaperPolicyStepRecord().getPredictedReward(),
-            step.getPaperPolicyStepRecord().getPredictedRisk(),
-            Arrays.toString(step.getPaperPolicyStepRecord().getPolicyProbabilities()),
-            Arrays.toString(step.getPaperPolicyStepRecord().getPriorProbabilities()));
+    private void makeStepLog(EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> step) {
+        if(logger.isDebugEnabled()) {
+            logger.debug("Player's [{}]th action. Step log: [{}] ", playerStepsDone, step.toLogString());
+        }
     }
 
-    private String createErrorMsg(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeHistoryList) {
+    private String createErrorMsg(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistoryList) {
         return "Episode simulation ended due to inner exception. Episode steps: [" +
             episodeHistoryList
                 .stream()
@@ -117,21 +126,7 @@ public class EpisodeSimulator<
                             .append(System.lineSeparator())
                             .append(x.getToState().readableStringRepresentation())
                             .append(System.lineSeparator())
-                            .append("Policy probabilities: ")
-                            .append(System.lineSeparator())
-                            .append(Arrays.toString(x.getPaperPolicyStepRecord().getPolicyProbabilities()))
-                            .append(System.lineSeparator())
-                            .append("Prior probabilities: ")
-                            .append(System.lineSeparator())
-                            .append(Arrays.toString(x.getPaperPolicyStepRecord().getPriorProbabilities()))
-                            .append(System.lineSeparator())
-                            .append("Policy reward : ")
-                            .append(System.lineSeparator())
-                            .append(x.getPaperPolicyStepRecord().getPredictedReward())
-                            .append(System.lineSeparator())
-                            .append("Policy risk : ")
-                            .append(System.lineSeparator())
-                            .append(x.getPaperPolicyStepRecord().getPredictedRisk())
+                            .append(x.toLogString())
                             .append(System.lineSeparator())
                             .append("Applied action: ")
                             .append(System.lineSeparator())

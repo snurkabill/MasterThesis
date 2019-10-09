@@ -83,8 +83,8 @@ public class Benchmark18Solution {
             .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(1.00)
-            .riskSupplier(() -> 1.00)
+            .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override

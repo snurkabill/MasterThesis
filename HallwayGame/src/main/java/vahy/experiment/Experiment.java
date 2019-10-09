@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.PaperGenericsPrototype;
 import vahy.api.model.Action;
+import vahy.api.policy.PolicyMode;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.AlgorithmConfig;
 import vahy.config.SystemConfig;
@@ -17,8 +19,14 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.HallwayGameSupplierFactory;
 import vahy.game.HallwayInstance;
 import vahy.game.NotValidGameStringRepresentationException;
+import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
+import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
+import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.predictor.DataTablePredictor;
+import vahy.impl.predictor.EmptyPredictor;
+import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperTreeUpdater;
@@ -31,21 +39,14 @@ import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
-import vahy.impl.predictor.DataTablePredictor;
 import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
-import vahy.impl.predictor.EmptyPredictor;
-import vahy.impl.predictor.TrainableApproximator;
-import vahy.api.predictor.TrainablePredictor;
-import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
-import vahy.paperGenerics.reinforcement.episode.EpisodeStepRecord;
-import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
-import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
-import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
-import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
-import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
+import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResults;
+import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
+import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
+import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.selector.RiskBasedSelector;
@@ -62,11 +63,11 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class Experiment {
 
@@ -82,7 +83,6 @@ public class Experiment {
     private ProgressTrackerSettings progressTrackerSettings;
 
 
-
     private HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier;
 
     // HEURISTICS
@@ -95,7 +95,7 @@ public class Experiment {
     private SearchNodeBaseFactoryImpl<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> searchNodeFactory;
     private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> nodeEvaluator;
 
-    private TrainablePredictor<DoubleVector> approximator;
+    private TrainablePredictor approximator;
 
     // Domain specific
     private Class<HallwayAction> clazz;
@@ -105,7 +105,7 @@ public class Experiment {
     //Dirty hack
     private TFModel tfModel;
 
-    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> results;
+    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> results;
 
     public Experiment(AlgorithmConfig algorithmConfig, SystemConfig systemConfig) {
         this.algorithmConfig = algorithmConfig;
@@ -141,7 +141,7 @@ public class Experiment {
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
     }
 
-    public List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> getResults() {
+    public List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> getResults() {
         return results;
     }
 
@@ -172,7 +172,7 @@ public class Experiment {
 
     }
 
-    private TrainablePredictor<DoubleVector> initializePredictor(String modelName) throws IOException {
+    private TrainablePredictor initializePredictor(String modelName) throws IOException {
         var inputLenght = hallwayGameInitialInstanceSupplier.createInitialState().getPlayerObservation().getObservedVector().length;
         var approximatorType = algorithmConfig.getApproximatorType();
 
@@ -186,11 +186,11 @@ public class Experiment {
 
         switch(approximatorType) {
             case EMPTY:
-                return new EmptyPredictor<>(defaultPrediction);
+                return new EmptyPredictor(defaultPrediction);
             case HASHMAP:
-                return new DataTablePredictor<>(defaultPrediction);
+                return new DataTablePredictor(defaultPrediction);
             case HASHMAP_LR:
-                return new DataTablePredictorWithLr<>(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
+                return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
             case NN:
                 tfModel = new TFModel(
                     inputLenght,
@@ -199,7 +199,7 @@ public class Experiment {
                     algorithmConfig.getTrainingBatchSize(),
                     PaperGenericsPrototype.class.getClassLoader().getResourceAsStream(modelName).readAllBytes(),
                     masterRandom.split());
-                return new TrainableApproximator<>(tfModel);
+                return new TrainableApproximator(tfModel);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
         }
@@ -210,7 +210,7 @@ public class Experiment {
         PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> evaluator) {
         Supplier<NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> nodeSelector = this::createNodeSelector;
 
-        var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
+        var paperPolicySupplier = new PaperPolicySupplier<>(
             clazz,
             searchNodeMetadataFactory,
             algorithmConfig.getGlobalRiskAllowed(),
@@ -219,25 +219,12 @@ public class Experiment {
             evaluator,
             paperTreeUpdater,
             algorithmConfig.getTreeUpdateConditionFactory(),
+            strategiesProvider,
             algorithmConfig.getExplorationConstantSupplier(),
             algorithmConfig.getTemperatureSupplier(),
-            algorithmConfig.getRiskSupplier(),
-            strategiesProvider);
+            algorithmConfig.getRiskSupplier());
 
-        var evaluationPolicySupplier = new PaperPolicySupplier<>(
-            clazz,
-            searchNodeMetadataFactory,
-            algorithmConfig.getGlobalRiskAllowed(),
-            masterRandom.split(),
-            nodeSelector,
-            evaluator,
-            paperTreeUpdater,
-            algorithmConfig.getTreeUpdateConditionFactory(),
-            strategiesProvider);
-
-
-        var trainer = getAbstractTrainer(paperTrainablePolicySupplier);
-
+        var trainer = getAbstractTrainer(paperPolicySupplier);
 
         var startTrainingMillis = System.currentTimeMillis();
         trainPolicy(trainer);
@@ -245,7 +232,7 @@ public class Experiment {
         var trainingDurationMillis = endTrainingMillis - startTrainingMillis;
 
 
-        var policyList = Arrays.asList(new PaperBenchmarkingPolicy<>(evaluator.getClass().getName(), evaluationPolicySupplier));
+        var policyList = Arrays.asList(new PaperBenchmarkingPolicy<>(evaluator.getClass().getName(), paperPolicySupplier));
         this.results = evaluatePolicy(policyList);
         printResults(policyList, trainingDurationMillis);
 
@@ -270,7 +257,7 @@ public class Experiment {
 
     }
 
-    private void dumpResults(List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> results, GameConfig gameConfig) throws IOException {
+    private void dumpResults(List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> results, GameConfig gameConfig) throws IOException {
         if(results.size() > 1) {
             throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
         }
@@ -296,8 +283,8 @@ public class Experiment {
         logger.info("PROCESS DONE");
     }
 
-    public static void writeEpisodeResultsToFile2(String filename, PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> results) throws IOException {
-        List<EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl>> episodeList = results.getEpisodeList();
+    public static void writeEpisodeResultsToFile2(String filename, PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord> results) throws IOException {
+        List<PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeList = results.getEpisodeList();
         File epochFolder = new File(filename);
         if(!epochFolder.exists()) {
             epochFolder.mkdir();
@@ -307,7 +294,7 @@ public class Experiment {
         }
     }
 
-    public static void dumpSingleEpisode(String filename, EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> episodeResults) throws IOException {
+    public static void dumpSingleEpisode(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) throws IOException {
         writeEpisodeMetadata(filename, episodeResults);
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
         outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getCsvHeader()) + System.lineSeparator());
@@ -318,13 +305,13 @@ public class Experiment {
         outputWriter.close();
     }
 
-    private static void writeEpisodeMetadata(String filename, EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> episodeResults) throws IOException {
+    private static void writeEpisodeMetadata(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResultsDeprecated) throws IOException {
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "_metadata"));
 
-        outputWriter.write("Total step count, " + episodeResults.getTotalStepCount() + System.lineSeparator());
-        outputWriter.write("Player step count, " + episodeResults.getPlayerStepCount() + System.lineSeparator());
-        outputWriter.write("duration [ms], " + episodeResults.getMillisecondDuration() + System.lineSeparator());
-        outputWriter.write("Total Payoff, " + episodeResults.getTotalPayoff() + System.lineSeparator());
+        outputWriter.write("Total step count, " + episodeResultsDeprecated.getTotalStepCount() + System.lineSeparator());
+        outputWriter.write("Player step count, " + episodeResultsDeprecated.getPlayerStepCount() + System.lineSeparator());
+        outputWriter.write("duration [ms], " + episodeResultsDeprecated.getDuration().toMillis() + System.lineSeparator());
+        outputWriter.write("Total Payoff, " + episodeResultsDeprecated.getTotalPayoff() + System.lineSeparator());
 
         outputWriter.flush();
         outputWriter.close();
@@ -342,15 +329,15 @@ public class Experiment {
         outputWriter.close();
     }
 
-    private void trainPolicy(AbstractTrainer trainer) {
+    private void trainPolicy(PaperTrainer trainer) {
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
-            trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount());
+            trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount(), algorithmConfig.getMaximalStepCountBound());
 //            trainer.printDataset();
         }
     }
 
-    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> evaluatePolicy(
+    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> evaluatePolicy(
         List<PaperBenchmarkingPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> policyList)
     {
         logger.info("PaperPolicy test starts");
@@ -358,6 +345,7 @@ public class Experiment {
             policyList,
             new EnvironmentPolicySupplier(masterRandom.split()),
             hallwayGameInitialInstanceSupplier,
+            new PaperEpisodeResultsFactory<>(),
             progressTrackerSettings
         );
         long start = System.currentTimeMillis();
@@ -368,44 +356,27 @@ public class Experiment {
         return policyResultList;
     }
 
-    private AbstractTrainer<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> getAbstractTrainer(
-        TrainablePaperPolicySupplier<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> trainablePaperPolicySupplier)
+    private PaperTrainer<HallwayAction, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> getAbstractTrainer(
+        PaperPolicySupplier<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> paperPolicySupplier)
     {
         var discountFactor = algorithmConfig.getDiscountFactor();
         var trainerAlgorithm = algorithmConfig.getTrainerAlgorithm();
 
         var gameSampler = new PaperRolloutGameSampler<>(
             hallwayGameInitialInstanceSupplier,
-            trainablePaperPolicySupplier,
+            new PaperEpisodeResultsFactory<>(),
+            paperPolicySupplier,
             new EnvironmentPolicySupplier(masterRandom.split()),
+            PolicyMode.TRAINING,
             progressTrackerSettings,
-            algorithmConfig.getMaximalStepCountBound(),
             systemConfig.getParallelThreadsCount());
 
-        switch(trainerAlgorithm) {
-            case REPLAY_BUFFER:
-                return new ReplayBufferTrainer<>(
-                    gameSampler,
-                    approximator,
-                    discountFactor,
-                    rewardAggregator,
-                    new LinkedList<>(),
-                    algorithmConfig.getReplayBufferSize());
-            case FIRST_VISIT_MC:
-                return new FirstVisitMonteCarloTrainer<>(
-                    gameSampler,
-                    approximator,
-                    discountFactor,
-                    rewardAggregator);
-            case EVERY_VISIT_MC:
-                return new EveryVisitMonteCarloTrainer<>(
-                    gameSampler,
-                    approximator,
-                    discountFactor,
-                    rewardAggregator);
-            default:
-                throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
-        }
+        var dataAggregator = switch(trainerAlgorithm) {
+            case REPLAY_BUFFER -> new ReplayBufferDataAggregator(algorithmConfig.getReplayBufferSize(), new LinkedList<>());
+            case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        };
+        return new PaperTrainer<>(gameSampler, approximator, discountFactor, rewardAggregator, dataAggregator);
     }
 
     private NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> createNodeSelector()

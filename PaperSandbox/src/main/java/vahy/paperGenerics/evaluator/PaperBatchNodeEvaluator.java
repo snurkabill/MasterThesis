@@ -26,7 +26,7 @@ public class PaperBatchNodeEvaluator<
     private final int maximalEvaluationDepth;
 
     public PaperBatchNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                                   TrainablePredictor<DoubleVector> trainablePredictor,
+                                   TrainablePredictor trainablePredictor,
                                    Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator,
                                    TAction[] allPlayerActions,
                                    TAction[] allOpponentActions,

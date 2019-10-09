@@ -35,6 +35,7 @@ public class ProgressTracker {
 
     public void onNextLog() {
         gatherData();
+
         if(progressTrackerSettings.isPrintOnNextLog()) {
             var stringBuilder = new StringBuilder();
             stringBuilder.append(System.lineSeparator());

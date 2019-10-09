@@ -5,6 +5,9 @@ import org.slf4j.LoggerFactory;
 import vahy.Analyzer;
 import vahy.RandomWalkExample;
 import vahy.api.episode.TrainerAlgorithm;
+import vahy.api.model.reward.RewardAggregator;
+import vahy.api.policy.PolicyMode;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.EvaluatorType;
 import vahy.environment.RandomWalkAction;
@@ -12,8 +15,14 @@ import vahy.environment.RandomWalkInitialInstanceSupplier;
 import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
 import vahy.environment.RandomWalkState;
+import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
+import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
+import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.predictor.DataTablePredictor;
+import vahy.impl.predictor.EmptyPredictor;
+import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.opponent.RandomWalkOpponentSupplier;
 import vahy.paperGenerics.PaperModel;
@@ -26,19 +35,13 @@ import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
 import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.paperGenerics.policy.TrainablePaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
-import vahy.impl.predictor.DataTablePredictor;
 import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
-import vahy.impl.predictor.EmptyPredictor;
-import vahy.impl.predictor.TrainableApproximator;
-import vahy.api.predictor.TrainablePredictor;
-import vahy.paperGenerics.reinforcement.episode.sampler.PaperRolloutGameSampler;
-import vahy.paperGenerics.reinforcement.learning.AbstractTrainer;
-import vahy.paperGenerics.reinforcement.learning.EveryVisitMonteCarloTrainer;
-import vahy.paperGenerics.reinforcement.learning.FirstVisitMonteCarloTrainer;
-import vahy.paperGenerics.reinforcement.learning.ReplayBufferTrainer;
+import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
+import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
+import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.utils.EnumUtils;
@@ -53,6 +56,7 @@ import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
@@ -65,9 +69,9 @@ public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> results;
+    private List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState, PaperPolicyRecord>> results;
 
-    public List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> getResults() {
+    public List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState, PaperPolicyRecord>> getResults() {
         return results;
     }
 
@@ -85,26 +89,24 @@ public class Experiment {
 
         switch (setup.getSecond().getApproximatorType()) {
             case EMPTY:
-                createPolicyAndRunProcess(setup, random, provider, new EmptyPredictor<>(defaultPrediction));
+                createPolicyAndRunProcess(setup, random, provider, new EmptyPredictor(defaultPrediction));
                 break;
             case HASHMAP:
-                createPolicyAndRunProcess(setup, random, provider, new DataTablePredictor<>(defaultPrediction));
+                createPolicyAndRunProcess(setup, random, provider, new DataTablePredictor(defaultPrediction));
                 break;
             case HASHMAP_LR:
-                createPolicyAndRunProcess(setup, random, provider, new DataTablePredictorWithLr<>(defaultPrediction, setup.getSecond().getLearningRate(), RandomWalkAction.playerActions.length));
+                createPolicyAndRunProcess(setup, random, provider, new DataTablePredictorWithLr(defaultPrediction, setup.getSecond().getLearningRate(), RandomWalkAction.playerActions.length));
                 break;
-            case NN:
-            {
-                try(TFModel model = new TFModel(
+            case NN: {
+                try (TFModel model = new TFModel(
                     inputLength,
                     PaperModel.POLICY_START_INDEX + RandomWalkAction.playerActions.length,
                     setup.getSecond().getTrainingEpochCount(),
                     setup.getSecond().getTrainingBatchSize(),
                     RandomWalkExample.class.getClassLoader().getResourceAsStream("tfModel/graph_RANDOM_WALK_LINEAR.pb").readAllBytes(),
                     random)
-                )
-                {
-                    TrainableApproximator<DoubleVector> trainableApproximator = new TrainableApproximator<>(model);
+                ) {
+                    TrainableApproximator trainableApproximator = new TrainableApproximator(model);
                     createPolicyAndRunProcess(setup, random, provider, trainableApproximator);
                 }
             }
@@ -117,7 +119,7 @@ public class Experiment {
     private void createPolicyAndRunProcess(ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup,
                                            SplittableRandom random,
                                            RandomWalkInitialInstanceSupplier RandomWalkGameInitialInstanceSupplier,
-                                           TrainablePredictor<DoubleVector> predictor) {
+                                           TrainablePredictor predictor) {
         var experimentSetup = setup.getSecond();
         var rewardAggregator = new DoubleScalarRewardAggregator();
         var clazz = RandomWalkAction.class;
@@ -156,7 +158,7 @@ public class Experiment {
             experimentSetup.getSubTreeRiskCalculatorTypeForKnownFlow(),
             experimentSetup.getSubTreeRiskCalculatorTypeForUnknownFlow());
 
-        var paperTrainablePolicySupplier = new TrainablePaperPolicySupplier<>(
+        var paperPolicySupplier = new PaperPolicySupplier<>(
             clazz,
             searchNodeMetadataFactory,
             experimentSetup.getGlobalRiskAllowed(),
@@ -165,21 +167,11 @@ public class Experiment {
             evaluator,
             paperTreeUpdater,
             experimentSetup.getTreeUpdateConditionFactory(),
+            strategiesProvider,
             experimentSetup.getExplorationConstantSupplier(),
             experimentSetup.getTemperatureSupplier(),
-            experimentSetup.getRiskSupplier(),
-            strategiesProvider);
+            experimentSetup.getRiskSupplier());
 
-        var nnBasedPolicySupplier = new PaperPolicySupplier<>(
-            clazz,
-            searchNodeMetadataFactory,
-            experimentSetup.getGlobalRiskAllowed(),
-            random,
-            nodeSelectorSupplier,
-            evaluator,
-            paperTreeUpdater,
-            experimentSetup.getTreeUpdateConditionFactory(),
-            strategiesProvider);
 
         var progressTrackerSettings = new ProgressTrackerSettings(true, false, false, false);
 
@@ -189,13 +181,13 @@ public class Experiment {
             RandomWalkGameInitialInstanceSupplier,
             experimentSetup.getDiscountFactor(),
             predictor,
-            paperTrainablePolicySupplier,
+            paperPolicySupplier,
             experimentSetup.getReplayBufferSize(),
-            experimentSetup.getMaximalStepCountBound(),
+            rewardAggregator,
             progressTrackerSettings);
 
         long trainingTimeInMs = trainPolicy(experimentSetup, trainer);
-        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, evaluator, nnBasedPolicySupplier, progressTrackerSettings, trainingTimeInMs);
+        this.results = evaluatePolicy(random, RandomWalkGameInitialInstanceSupplier, experimentSetup, evaluator, paperPolicySupplier, progressTrackerSettings, trainingTimeInMs);
         Analyzer.printStatistics(results.get(0).getRewardAndRiskList());
 
         try {
@@ -205,10 +197,10 @@ public class Experiment {
         }
     }
 
-    private void dumpResults(List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState>> results,
+    private void dumpResults(List<PaperPolicyResults<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState, PaperPolicyRecord>> results,
                              ImmutableTuple<RandomWalkSetup, ExperimentSetup> setup) throws IOException {
 
-        if(results.size() > 1) {
+        if (results.size() > 1) {
             throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
         }
         var policyResult = results.get(0);
@@ -216,7 +208,7 @@ public class Experiment {
         String resultMasterFolderName = "Results";
         File resultFolder = new File(resultMasterFolderName);
 
-        if(!resultFolder.exists()) {
+        if (!resultFolder.exists()) {
             resultFolder.mkdir();
         }
 
@@ -231,7 +223,7 @@ public class Experiment {
         writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());
     }
 
-    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException{
+    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException {
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
         outputWriter.write("Reward,Risk");
         outputWriter.newLine();
@@ -243,14 +235,15 @@ public class Experiment {
         outputWriter.close();
     }
 
-    private long trainPolicy(ExperimentSetup experimentSetup, AbstractTrainer trainer) {
+    private long trainPolicy(ExperimentSetup experimentSetup, PaperTrainer trainer) {
         long trainingStart = System.currentTimeMillis();
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
-            trainer.trainPolicy(experimentSetup.getBatchEpisodeCount());
+            trainer.trainPolicy(experimentSetup.getBatchEpisodeCount(), experimentSetup.getStageCount());
 //            trainer.printDataset();
         }
         return System.currentTimeMillis() - trainingStart;
+
     }
 
     private List<PaperPolicyResults<
@@ -258,7 +251,8 @@ public class Experiment {
         DoubleVector,
         RandomWalkProbabilities,
         PaperMetadata<RandomWalkAction>,
-        RandomWalkState>>
+        RandomWalkState,
+        PaperPolicyRecord>>
     evaluatePolicy(
         SplittableRandom random,
         RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
@@ -274,6 +268,7 @@ public class Experiment {
             Arrays.asList(new PaperBenchmarkingPolicy<>(nnBasedPolicyName, nnBasedPolicySupplier)),
             new RandomWalkOpponentSupplier(random),
             randomWalkInitialInstanceSupplier,
+            new PaperEpisodeResultsFactory<>(),
             progressTrackerSettings
         );
         long start = System.currentTimeMillis();
@@ -293,54 +288,33 @@ public class Experiment {
         return policyResultList;
     }
 
-    private AbstractTrainer<
-        RandomWalkAction,
-        RandomWalkProbabilities,
-        PaperMetadata<RandomWalkAction>,
-        RandomWalkState>
-    getAbstractTrainer(TrainerAlgorithm trainerAlgorithm,
-                       SplittableRandom random,
-                       RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
-                       double discountFactor,
-                       TrainablePredictor<DoubleVector> predictor,
-                       TrainablePaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> trainablePaperPolicySupplier,
-                       int replayBufferSize,
-                       int stepCountLimit,
-                       ProgressTrackerSettings progressTrackerSettings) {
+    private PaperTrainer<RandomWalkAction, RandomWalkProbabilities, RandomWalkState, PaperPolicyRecord> getAbstractTrainer(
+        TrainerAlgorithm trainerAlgorithm,
+        SplittableRandom random,
+        RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
+        double discountFactor,
+        TrainablePredictor predictor,
+        PaperPolicySupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> paperPolicySupplier,
+        int replayBufferSize,
+        RewardAggregator rewardAggregator,
+        ProgressTrackerSettings progressTrackerSettings) {
 
         var gameSampler = new PaperRolloutGameSampler<>(
             randomWalkInitialInstanceSupplier,
-            trainablePaperPolicySupplier,
+            new PaperEpisodeResultsFactory<>(),
+            paperPolicySupplier,
             new RandomWalkOpponentSupplier(random.split()),
+            PolicyMode.TRAINING,
             progressTrackerSettings,
-            stepCountLimit,
             1);
 
+        var dataAggregator = switch (trainerAlgorithm) {
+            case REPLAY_BUFFER -> new ReplayBufferDataAggregator(replayBufferSize, new LinkedList<>());
+            case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        };
 
-        switch(trainerAlgorithm) {
-            case REPLAY_BUFFER:
-                return new ReplayBufferTrainer<>(
-                    gameSampler,
-                    predictor,
-                    discountFactor,
-                    new DoubleScalarRewardAggregator(),
-                    new LinkedList<>(),
-                    replayBufferSize);
-            case FIRST_VISIT_MC:
-                return new FirstVisitMonteCarloTrainer<>(
-                    gameSampler,
-                    predictor,
-                    discountFactor,
-                    new DoubleScalarRewardAggregator());
-            case EVERY_VISIT_MC:
-                return new EveryVisitMonteCarloTrainer<>(
-                    gameSampler,
-                    predictor,
-                    discountFactor,
-                    new DoubleScalarRewardAggregator());
-            default:
-                throw EnumUtils.createExceptionForUnknownEnumValue(trainerAlgorithm);
-        }
+        return new PaperTrainer<>(gameSampler, predictor, discountFactor, rewardAggregator, dataAggregator);
     }
 
     private PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> resolveEvaluator(EvaluatorType evaluatorType,
@@ -348,7 +322,7 @@ public class Experiment {
                                                                                                                                              ExperimentSetup experimentSetup,
                                                                                                                                              DoubleScalarRewardAggregator rewardAggregator,
                                                                                                                                              SearchNodeBaseFactoryImpl<RandomWalkAction, DoubleVector, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> searchNodeFactory,
-                                                                                                                                             TrainablePredictor<DoubleVector> predictor) {
+                                                                                                                                             TrainablePredictor predictor) {
         switch (evaluatorType) {
             case MONTE_CARLO:
                 return new MonteCarloNodeEvaluator<>(

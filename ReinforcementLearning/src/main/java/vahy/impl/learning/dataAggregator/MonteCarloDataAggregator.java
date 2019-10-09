@@ -12,23 +12,23 @@ import java.util.stream.Collectors;
 
 public abstract class MonteCarloDataAggregator implements DataAggregator {
 
-    public MonteCarloDataAggregator() {
+    private final Map<DoubleVector, MutableDoubleArray> visitAverageRewardMap;
+
+    public MonteCarloDataAggregator(Map<DoubleVector, MutableDoubleArray> visitAverageRewardMap) {
+        this.visitAverageRewardMap = visitAverageRewardMap;
     }
 
-    private final Map<DoubleVector, MutableDoubleArray> visitAverageRewardMap = new LinkedHashMap<>();
-
     @Override
-    public ImmutableTuple<double[][], double[][]> getTrainingDataset() {
-
-        double[][] input = new double[visitAverageRewardMap.size()][];
+    public ImmutableTuple<DoubleVector[], double[][]> getTrainingDataset() {
+        DoubleVector[] input = new DoubleVector[visitAverageRewardMap.size()];
         double[][] output = new double[visitAverageRewardMap.size()][];
-        List<ImmutableTuple<double[], double[]>> collect = visitAverageRewardMap
+        List<ImmutableTuple<DoubleVector, double[]>> collect = visitAverageRewardMap
             .entrySet()
             .stream()
-            .map(x -> new ImmutableTuple<>(x.getKey().getObservedVector(), x.getValue().getDoubleArray()))
+            .map(x -> new ImmutableTuple<>(x.getKey(), x.getValue().getDoubleArray()))
             .collect(Collectors.toList());
         int index = 0;
-        for (ImmutableTuple<double[], double[]> immutableTuple : collect) {
+        for (ImmutableTuple<DoubleVector, double[]> immutableTuple : collect) {
             input[index] = immutableTuple.getFirst();
             output[index] = immutableTuple.getSecond();
             index++;
@@ -37,11 +37,20 @@ public abstract class MonteCarloDataAggregator implements DataAggregator {
     }
 
     @Override
-    public void addEpisodeSamples(List<ImmutableTuple<DoubleVector, double[]>> episodeHistory) {
+    public void addEpisodeSamples(List<ImmutableTuple<DoubleVector, MutableDoubleArray>> episodeHistory) {
         addVisitedRewards(calculatedVisitedRewards(episodeHistory));
     }
 
-    protected abstract Map<DoubleVector, MutableDoubleArray> calculatedVisitedRewards(List<ImmutableTuple<DoubleVector, double[]>> episodeHistory);
+    protected abstract void putDataSample(Map<DoubleVector, MutableDoubleArray> firstVisitSet, MutableDoubleArray dataSample, DoubleVector observation);
+
+    protected Map<DoubleVector, MutableDoubleArray> calculatedVisitedRewards(List<ImmutableTuple<DoubleVector, MutableDoubleArray>> episodeHistory) {
+        Map<DoubleVector, MutableDoubleArray> visitSet = new LinkedHashMap<>();
+        for (int i = 0; i < episodeHistory.size(); i++) {
+            var dataSample = episodeHistory.get(i);
+            putDataSample(visitSet, dataSample.getSecond(), dataSample.getFirst());
+        }
+        return visitSet;
+    }
 
     protected void addVisitedRewards(Map<DoubleVector, MutableDoubleArray> sampledStateVisitMap) {
         for (Map.Entry<DoubleVector, MutableDoubleArray> entry : sampledStateVisitMap.entrySet()) {

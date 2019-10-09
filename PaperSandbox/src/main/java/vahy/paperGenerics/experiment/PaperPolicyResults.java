@@ -3,10 +3,11 @@ package vahy.paperGenerics.experiment;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
-import vahy.paperGenerics.reinforcement.episode.EpisodeResults;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
+import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResults;
 import vahy.utils.ImmutableTuple;
 
 import java.io.BufferedWriter;
@@ -21,15 +22,16 @@ public class PaperPolicyResults<
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TPolicyRecord extends PaperPolicyRecord> {
 
     private final PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy;
-    private final List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeList;
+    private final List<PaperEpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeList;
     private final CalculatedResultStatistics calculatedResultStatistics;
     private final long benchmarkingMilliseconds;
 
     public PaperPolicyResults(PaperBenchmarkingPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> benchmarkingPolicy,
-                              List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> episodeList,
+                              List<PaperEpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeList,
                               CalculatedResultStatistics calculatedResultStatistics,
                               long benchmarkingMilliseconds) {
         this.benchmarkingPolicy = benchmarkingPolicy;
@@ -42,7 +44,7 @@ public class PaperPolicyResults<
         return benchmarkingPolicy;
     }
 
-    public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> getEpisodeList() {
+    public List<PaperEpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> getEpisodeList() {
         return episodeList;
     }
 
@@ -57,10 +59,10 @@ public class PaperPolicyResults<
     public List<ImmutableTuple<Double, Boolean>> getRewardAndRiskList() {
 
         double[] totalRewardList = this.episodeList.stream()
-            .mapToDouble(EpisodeResults::getTotalPayoff)
+            .mapToDouble(PaperEpisodeResults::getTotalPayoff)
             .toArray();
         var totalRiskList = this.episodeList.stream()
-            .map(EpisodeResults::isRiskHit)
+            .map(PaperEpisodeResults::isRiskHit)
             .toArray();
         var returnList = new ArrayList<ImmutableTuple<Double, Boolean>>(totalRewardList.length);
         for (int i = 0; i < totalRewardList.length; i++) {

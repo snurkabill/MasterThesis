@@ -1,28 +1,34 @@
-package vahy.paperGenerics.reinforcement.episode;
+package vahy.impl.episode;
 
+import vahy.api.episode.EpisodeResults;
 import vahy.api.model.Action;
+import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PolicyRecord;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.DataPointGenerator;
 
 import java.util.List;
 import java.util.function.Function;
 
-public class FromEpisodesDataPointGenerator<
+public class FromEpisodesDataPointGeneratorGeneric<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> implements DataPointGenerator {
+    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TPolicyRecord extends PolicyRecord> implements DataPointGenerator {
 
     private final String dataTitle;
-    private final Function<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>>, Double> function;
+    private final Function<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, Double> function;
 
     private int counter = 0;
     private double value = Double.NaN;
 
-    public FromEpisodesDataPointGenerator(String dataTitle, Function<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>>, Double> function) {
+    public FromEpisodesDataPointGeneratorGeneric(
+        String dataTitle,
+        Function<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, Double> function)
+    {
         this.dataTitle = dataTitle;
         this.function = function;
     }
@@ -37,9 +43,8 @@ public class FromEpisodesDataPointGenerator<
         return new ImmutableTuple<>((double) counter, value);
     }
 
-    public void addNewValue(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState>> paperEpisodeHistoryList, int episode) {
+    public void addNewValue(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> paperEpisodeHistoryList, int episode) {
         counter = episode;
         value = function.apply(paperEpisodeHistoryList);
     }
-
 }

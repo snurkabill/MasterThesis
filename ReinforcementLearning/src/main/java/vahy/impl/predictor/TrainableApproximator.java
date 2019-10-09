@@ -8,7 +8,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.Iterator;
 import java.util.List;
 
-public class TrainableApproximator<TObservation extends DoubleVector> implements TrainablePredictor<TObservation> {
+public class TrainableApproximator implements TrainablePredictor {
 
     private final SupervisedTrainableModel supervisedTrainableModel;
 
@@ -17,12 +17,12 @@ public class TrainableApproximator<TObservation extends DoubleVector> implements
     }
 
     @Override
-    public void train(List<ImmutableTuple<TObservation, double[]>> episodeData) {
-        double[][] input = new double[episodeData.size()][];
-        double[][] target = new double[episodeData.size()][];
-        Iterator<ImmutableTuple<TObservation, double[]>> iterator = episodeData.iterator();
+    public void train(List<ImmutableTuple<DoubleVector, double[]>> data) {
+        double[][] input = new double[data.size()][];
+        double[][] target = new double[data.size()][];
+        Iterator<ImmutableTuple<DoubleVector, double[]>> iterator = data.iterator();
         for (int i = 0; iterator.hasNext(); i++) {
-            ImmutableTuple<TObservation, double[]> next = iterator.next();
+            ImmutableTuple<DoubleVector, double[]> next = iterator.next();
             input[i] = next.getFirst().getObservedVector();
             target[i] = next.getSecond();
         }
@@ -30,12 +30,22 @@ public class TrainableApproximator<TObservation extends DoubleVector> implements
     }
 
     @Override
-    public double[] apply(TObservation doubleVectorialObservation) {
+    public void train(ImmutableTuple<DoubleVector[], double[][]> data) {
+        var inputArray = data.getFirst();
+        double[][] input = new double[inputArray.length][];
+        for (int i = 0; i < input.length; i++) {
+            input[i] = inputArray[i].getObservedVector();
+        }
+        supervisedTrainableModel.fit(input, data.getSecond());
+    }
+
+    @Override
+    public double[] apply(DoubleVector doubleVectorialObservation) {
         return supervisedTrainableModel.predict(doubleVectorialObservation.getObservedVector());
     }
 
     @Override
-    public double[][] apply(TObservation[] doubleVectorialObservationArray) {
+    public double[][] apply(DoubleVector[] doubleVectorialObservationArray) {
         double[][] input = new double[doubleVectorialObservationArray.length][];
         for (int i = 0; i < doubleVectorialObservationArray.length; i++) {
             input[i] = doubleVectorialObservationArray[i].getObservedVector();

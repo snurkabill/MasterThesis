@@ -5,7 +5,7 @@ import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.policy.PaperPolicy;
-import vahy.paperGenerics.reinforcement.episode.PaperPolicyStepRecord;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
@@ -58,7 +58,7 @@ public class RandomWalkPolicy implements PaperPolicy<RandomWalkAction, DoubleVec
     }
 
     @Override
-    public PaperPolicyStepRecord getPolicyRecord(RandomWalkState gameState) {
-        return new PaperPolicyStepRecord(null, null, 0, 0, 0);
+    public PaperPolicyRecord getPolicyRecord(RandomWalkState gameState) {
+        return new PaperPolicyRecord(null, null, 0, 0, 0);
     }
 }

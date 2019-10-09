@@ -11,6 +11,6 @@ public interface PolicySupplier<
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
         TPolicyRecord> {
 
-    Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy(TState initialState);
+    Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode);
 
 }

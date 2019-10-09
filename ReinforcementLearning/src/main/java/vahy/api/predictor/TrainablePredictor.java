@@ -5,11 +5,13 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.List;
 
-public interface TrainablePredictor<TObservation extends DoubleVector> {
+public interface TrainablePredictor {
 
-    void train(List<ImmutableTuple<TObservation, double[]>> episodeData);
+    void train(List<ImmutableTuple<DoubleVector, double[]>> data);
 
-    double[] apply(TObservation doubleVectorialObservation);
+    void train(ImmutableTuple<DoubleVector[], double[][]> data);
 
-    double[][] apply(TObservation[] doubleVectorialObservationArray);
+    double[] apply(DoubleVector observation);
+
+    double[][] apply(DoubleVector[] observationArray);
 }

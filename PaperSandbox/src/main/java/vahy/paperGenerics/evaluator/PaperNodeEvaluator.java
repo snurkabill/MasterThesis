@@ -30,13 +30,13 @@ public class PaperNodeEvaluator<
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
 
     protected final SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
-    protected final TrainablePredictor<DoubleVector> trainablePredictor;
+    protected final TrainablePredictor trainablePredictor;
     protected final Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentpredictor;
     protected final TAction[] allPlayerActions;
     protected final TAction[] allOpponentActions;
 
     public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                              TrainablePredictor<DoubleVector> trainablePredictor,
+                              TrainablePredictor trainablePredictor,
                               Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentpredictor,
                               TAction[] allPlayerActions,
                               TAction[] allOpponentActions) {
