@@ -2,6 +2,8 @@ package vahy.api.model;
 
 import vahy.api.model.observation.Observation;
 
+import java.util.List;
+
 public interface State<
     TAction extends Action,
     TPlayerObservation extends Observation,
@@ -19,6 +21,10 @@ public interface State<
     TOpponentObservation getOpponentObservation();
 
     String readableStringRepresentation();
+
+    List<String> getCsvHeader();
+
+    List<String> getCsvRecord();
 
     boolean isOpponentTurn();
 
