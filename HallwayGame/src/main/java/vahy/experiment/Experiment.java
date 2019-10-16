@@ -312,15 +312,26 @@ public class Experiment {
         }
         outputWriter.flush();
         outputWriter.close();
+
+        BufferedWriter outputWriterStates = new BufferedWriter(new FileWriter(filename + "_stateDump"));
+        outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getFromState().getCsvHeader()) + System.lineSeparator());
+        for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
+            outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getFromState().getCsvRecord()) + System.lineSeparator());
+        }
+        outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(episodeResults.getEpisodeHistory().size() - 1).getToState().getCsvRecord()) + System.lineSeparator());
+        outputWriterStates.flush();
+        outputWriterStates.close();
     }
 
-    private static void writeEpisodeMetadata(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResultsDeprecated) throws IOException {
+    private static void writeEpisodeMetadata(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) throws IOException {
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "_metadata"));
 
-        outputWriter.write("Total step count, " + episodeResultsDeprecated.getTotalStepCount() + System.lineSeparator());
-        outputWriter.write("Player step count, " + episodeResultsDeprecated.getPlayerStepCount() + System.lineSeparator());
-        outputWriter.write("duration [ms], " + episodeResultsDeprecated.getDuration().toMillis() + System.lineSeparator());
-        outputWriter.write("Total Payoff, " + episodeResultsDeprecated.getTotalPayoff() + System.lineSeparator());
+        outputWriter.write("Total step count, " + episodeResults.getTotalStepCount() + System.lineSeparator());
+        outputWriter.write("Player step count, " + episodeResults.getPlayerStepCount() + System.lineSeparator());
+        outputWriter.write("Duration [ms], " + episodeResults.getDuration().toMillis() + System.lineSeparator());
+        outputWriter.write("Total Payoff, " + episodeResults.getTotalPayoff() + System.lineSeparator());
+        outputWriter.write("Risk Hit, " + episodeResults.isRiskHit() + System.lineSeparator());
+
 
         outputWriter.flush();
         outputWriter.close();

@@ -8,7 +8,9 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ImmutableTuple;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
 
@@ -98,6 +100,16 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
     public String readableStringRepresentation() {
         StringBuilder sb = new StringBuilder();
         return sb.append("Actual level: ").append(level).toString();
+    }
+
+    @Override
+    public List<String> getCsvHeader() {
+        return Collections.singletonList("Level");
+    }
+
+    @Override
+    public List<String> getCsvRecord() {
+        return Collections.singletonList(String.valueOf(level));
     }
 
     @Override
