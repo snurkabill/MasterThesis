@@ -52,6 +52,7 @@ public class ForExperimenting {
             .setParallelThreadsCount(4)   // ideally count of CPU cores (or CPU cores -1 if other applications are present)
             .setSingleThreadedEvaluation(false)  // when true, only one thread is used for evaluation (leave it as is for time measurements)
             .setEvalEpisodeCount(1000)  // how many times evaluation of trained policy is performed
+            .setDumpTrainingData(true) // true for dumping training episodes as well
             .buildSystemConfig();
 
 
@@ -95,8 +96,6 @@ public class ForExperimenting {
             })
 
 
-
-
             .explorationConstantSupplier(new Supplier<Double>() {  // exploration constant supplier  during training. see other BenchmarkSolutions for example
                 @Override
                 public Double get() {
@@ -116,7 +115,7 @@ public class ForExperimenting {
 
                 @Override
                 public String toString() {
-                    return "() -> 1.05";
+                    return "() -> 1.50";
                 }
             })
 

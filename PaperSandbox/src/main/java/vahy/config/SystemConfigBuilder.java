@@ -20,6 +20,8 @@ public class SystemConfigBuilder {
     // Evaluation
     private int evalEpisodeCount;
 
+    private boolean dumpTrainingData;
+
 
     public SystemConfigBuilder randomSeed(long randomSeed) {
         this.randomSeed = randomSeed;
@@ -51,8 +53,13 @@ public class SystemConfigBuilder {
         return this;
     }
 
+    public SystemConfigBuilder setDumpTrainingData(boolean dumpTrainingData) {
+        this.dumpTrainingData = dumpTrainingData;
+        return this;
+    }
+
     public SystemConfig buildSystemConfig() {
-        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount);
+        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, dumpTrainingData);
     }
 
     private long resolveRandomSeed() {

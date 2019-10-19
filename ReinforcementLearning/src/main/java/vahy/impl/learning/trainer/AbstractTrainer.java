@@ -36,13 +36,17 @@ public abstract class AbstractTrainer<
     protected abstract List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(
         EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResults);
 
-    public void trainPolicy(int episodeBatchSize, int stepCountLimit) {
+    public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainPolicy(
+        int episodeBatchSize,
+        int stepCountLimit)
+    {
         var episodes = gameSampler.sampleEpisodes(episodeBatchSize, stepCountLimit);
         for (var episode : episodes) {
             var dataSamples = createEpisodeDataSamples(episode);
             dataAggregator.addEpisodeSamples(dataSamples);
         }
         trainablePredictor.train(dataAggregator.getTrainingDataset());
+        return episodes;
     }
 
     protected double[] evaluatePolicy(DoubleVector observation) {
