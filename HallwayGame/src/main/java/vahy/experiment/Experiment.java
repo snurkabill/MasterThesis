@@ -284,7 +284,7 @@ public class Experiment {
 
         File experimentSetupFile = new File(resultSubfolder, "algorithmConfig");
         PrintWriter out = new PrintWriter(experimentSetupFile);
-        out.print("AlgorithmConfig: " + algorithmConfig.toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + gameConfig.toString());
+        out.print("AlgorithmConfig: " + System.lineSeparator() + algorithmConfig.toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + System.lineSeparator() + gameConfig.toString());
         out.close();
         File resultFile = new File(resultSubfolder.getAbsolutePath(), "episodes_log");
 //        writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());

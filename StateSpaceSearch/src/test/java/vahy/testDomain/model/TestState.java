@@ -67,6 +67,16 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
     }
 
     @Override
+    public List<String> getCsvHeader() {
+        return null;
+    }
+
+    @Override
+    public List<String> getCsvRecord() {
+        return null;
+    }
+
+    @Override
     public boolean isOpponentTurn() {
         char c = internalState.get(internalState.size() - 1);
         if(Arrays.stream(TestAction.opponentActions).anyMatch(testAction -> c == testAction.getCharRepresentation())) {

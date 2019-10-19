@@ -15,4 +15,12 @@ public class FixedUpdateCountTreeConditionFactory implements TreeUpdateCondition
     public TreeUpdateCondition create() {
         return new TreeUpdateConditionSuplierCountBased(countOfEnabledUpdates);
     }
+
+
+    @Override
+    public String toString() {
+        return "FixedUpdateCountTreeConditionFactory{" +
+            "countOfEnabledUpdates=" + countOfEnabledUpdates +
+            '}';
+    }
 }

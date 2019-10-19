@@ -44,15 +44,24 @@ public class SystemConfig {
         return evalEpisodeCount;
     }
 
+//    @Override
+//    public String toString() {
+//        return "SystemConfig{" +
+//            "randomSeed=" + randomSeed +
+//            ", singleThreadedEvaluation=" + singleThreadedEvaluation +
+//            ", parallelThreadsCount=" + parallelThreadsCount +
+//            ", drawWindow=" + drawWindow +
+//            ", evalEpisodeCount=" + evalEpisodeCount +
+//
+//            '}';
+//    }
+
     @Override
     public String toString() {
-        return "SystemConfig{" +
-            "randomSeed=" + randomSeed +
-            ", singleThreadedEvaluation=" + singleThreadedEvaluation +
-            ", parallelThreadsCount=" + parallelThreadsCount +
-            ", drawWindow=" + drawWindow +
-            ", evalEpisodeCount=" + evalEpisodeCount +
-
-            '}';
+        return "randomSeed," + randomSeed + System.lineSeparator() +
+            "singleThreadedEvaluation," + singleThreadedEvaluation + System.lineSeparator() +
+            "parallelThreadsCount," + parallelThreadsCount + System.lineSeparator() +
+            "drawWindow," + drawWindow + System.lineSeparator() +
+            "evalEpisodeCount," + evalEpisodeCount + System.lineSeparator();
     }
 }

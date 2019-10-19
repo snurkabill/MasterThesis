@@ -25,6 +25,7 @@ import vahy.utils.ImmutableTuple;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -124,6 +125,16 @@ public class SearchTreeImpl<
     @Override
     public String readableStringRepresentation() {
         return root.getWrappedState().readableStringRepresentation();
+    }
+
+    @Override
+    public List<String> getCsvHeader() {
+        return root.getWrappedState().getCsvHeader();
+    }
+
+    @Override
+    public List<String> getCsvRecord() {
+        return root.getWrappedState().getCsvRecord();
     }
 
     @Override

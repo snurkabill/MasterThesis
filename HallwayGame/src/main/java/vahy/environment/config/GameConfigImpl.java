@@ -41,12 +41,10 @@ public class GameConfigImpl implements GameConfig {
 
     @Override
     public String toString() {
-        return "GameConfigImpl{" +
-            "goalReward=" + goalReward +
-            ", stepPenalty=" + stepPenalty +
-            ", trapProbability=" + trapProbability +
-            ", noisyMoveProbability=" + noisyMoveProbability +
-            ", stateRepresentation=" + stateRepresentation +
-            '}';
+        return "goalReward," + goalReward + System.lineSeparator() +
+            "stepPenalty," + stepPenalty + System.lineSeparator() +
+            "trapProbability," + trapProbability + System.lineSeparator() +
+            "noisyMoveProbability," + noisyMoveProbability + System.lineSeparator() +
+            "stateRepresentation," + stateRepresentation + System.lineSeparator();
     }
 }
