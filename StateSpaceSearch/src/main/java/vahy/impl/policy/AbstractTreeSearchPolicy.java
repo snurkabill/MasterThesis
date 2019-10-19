@@ -54,22 +54,9 @@ public abstract class AbstractTreeSearchPolicy<
         treeUpdateCondition.treeUpdateFinished();
         timer.stopTimer();
 
-        if (searchTree.getTotalNodesExpanded() == 0) {
-            logger.debug("Finished updating search tree. No node was expanded - there is likely strong existing path to final state");
-        } else {
-            logger.debug(
-                "Finished updating search tree with total expanded node count: [{}], " +
-                    "total created node count: [{}], " +
-                    "max branch factor: [{}], " +
-                    "average branch factor [{}] in [{}] seconds, expanded nodes per second: [{}]",
-                searchTree.getTotalNodesExpanded(),
-                searchTree.getTotalNodesCreated(),
-                searchTree.getMaxBranchingFactor(),
-                searchTree.calculateAverageBranchingFactor(),
-                timer.getTotalTimeInSeconds(),
-                timer.samplesPerSec(searchTree.getTotalNodesExpanded()));
-        }
     }
+
+    public abstract int getExpandedNodeCountSoFar();
 
     protected void checkStateRoot(TState gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {

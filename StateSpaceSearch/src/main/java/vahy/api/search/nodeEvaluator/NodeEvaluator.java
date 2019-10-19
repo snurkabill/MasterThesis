@@ -13,5 +13,5 @@ public interface NodeEvaluator<
     TSearchNodeMetadata extends SearchNodeMetadata,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
-    void evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode);
+    int evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode);
 }

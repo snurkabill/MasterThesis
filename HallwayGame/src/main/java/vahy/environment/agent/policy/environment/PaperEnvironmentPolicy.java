@@ -38,6 +38,6 @@ public class PaperEnvironmentPolicy extends EnvironmentPolicy<PaperPolicyRecord>
     @Override
     public PaperPolicyRecord getPolicyRecord(HallwayStateImpl gameState) {
         var probs = this.getActionProbabilityDistribution(gameState);
-        return new PaperPolicyRecord(probs, probs, 0.0, 0.0, 0.0);
+        return new PaperPolicyRecord(probs, probs, 0.0, 0.0, 0.0, 0);
     }
 }

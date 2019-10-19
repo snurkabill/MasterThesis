@@ -11,6 +11,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.utils.ImmutableTriple;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -38,9 +39,11 @@ public class RamcpNodeEvaluator<
     }
 
     @Override
-    protected ImmutableTuple<Double, Boolean> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected ImmutableTriple<Double, Boolean, Integer> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         var parent = node;
+
         List<Double> rewardList = new ArrayList<>();
+        var nodeCounter = 0;
         List<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList = new ArrayList<>();
         TState wrappedState = node.getWrappedState();
         while (!parent.isFinalNode()) {
@@ -55,14 +58,15 @@ public class RamcpNodeEvaluator<
 
             wrappedState = nextNode.getWrappedState();
             parent = nextNode;
+            nodeCounter++;
         }
         if(!parent.getWrappedState().isRiskHit()) {
-            createSuccessfulBranch(node, nodeList);
+            nodeCounter += createSuccessfulBranch(node, nodeList);
         }  else {
             node.getChildNodeMap().clear();
             node.getSearchNodeMetadata().getChildPriorProbabilities().clear();
         }
-        return new ImmutableTuple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit());
+        return new ImmutableTriple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit(), nodeCounter);
     }
 
     private void initializeChildNodePrioriProbabilityMap(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
@@ -81,14 +85,15 @@ public class RamcpNodeEvaluator<
         }
     }
 
-    private void createSuccessfulBranch(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                        List<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList) {
+    private int createSuccessfulBranch(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node,
+                                       List<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList) {
         if(node.isFinalNode()) {
-            return;
+            return 0;
         }
+        var nodeCounter = 0;
         var parent = node;
         for (SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> entryNode : nodeList) {
-            addNextNode(parent, entryNode, entryNode.getAppliedAction());
+            nodeCounter += addNextNode(parent, entryNode, entryNode.getAppliedAction());
             parent = entryNode;
         }
 
@@ -101,16 +106,20 @@ public class RamcpNodeEvaluator<
                 parent = parent.getParent();
             }
         }
+        return nodeCounter;
     }
 
-    private void addNextNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+    private int addNextNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> parent,
                              SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> child,
                              TAction action) {
         TAction[] allPossibleActions = parent.getAllPossibleActions();
         Map<TAction, SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = parent.getChildNodeMap();
+        int nodeCounter = 0;
         for (TAction nextAction : allPossibleActions) {
             childNodeMap.put(nextAction, action.equals(nextAction) ? child : createSideNode(parent, nextAction));
+            nodeCounter++;
         }
+        return nodeCounter;
     }
 
     private void updateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> updatedNode,

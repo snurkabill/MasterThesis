@@ -9,6 +9,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.utils.ImmutableTriple;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
@@ -45,9 +46,9 @@ public class MonteCarloNodeEvaluator<
     }
 
     @Override
-    protected void innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected int innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
 
-        ImmutableTuple<Double, Boolean> sampledRewardWithRisk = runRandomWalkSimulation(node);
+        ImmutableTriple<Double, Boolean, Integer> sampledRewardWithRisk = runRandomWalkSimulation(node);
         node.getSearchNodeMetadata().increaseVisitCounter();
         node.getSearchNodeMetadata().setPredictedReward(sampledRewardWithRisk.getFirst());
         node.getSearchNodeMetadata().setExpectedReward(sampledRewardWithRisk.getFirst());
@@ -65,18 +66,21 @@ public class MonteCarloNodeEvaluator<
         } else {
             evaluateOpponentNode(node, childPriorProbabilities);
         }
+        return sampledRewardWithRisk.getThird();
     }
 
-    protected ImmutableTuple<Double, Boolean> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected ImmutableTriple<Double, Boolean, Integer> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
         TState wrappedState = node.getWrappedState();
+        var nodeCounter = 0;
         while (!wrappedState.isFinalState()) {
             TAction action = getNextAction(wrappedState);
             StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(action);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
+            nodeCounter++;
         }
-        return new ImmutableTuple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit());
+        return new ImmutableTriple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit(), nodeCounter);
     }
 
     protected TAction getNextAction(TState wrappedState) {

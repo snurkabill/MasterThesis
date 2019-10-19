@@ -49,8 +49,6 @@ public class SearchTreeImpl<
     private final TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
 
     private int totalNodesExpanded = 0;
-    private int totalNodesCreated = 0; // should be 1 for root
-    private int maxBranchingFactor = 0;
 
     public SearchTreeImpl(
         SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
@@ -64,22 +62,6 @@ public class SearchTreeImpl<
         this.nodeSelector.setNewRoot(root);
 
         expandTreeToNextPlayerLevel();
-    }
-
-    public int getTotalNodesExpanded() {
-        return totalNodesExpanded;
-    }
-
-    public int getTotalNodesCreated() {
-        return totalNodesCreated;
-    }
-
-    public int getMaxBranchingFactor() {
-        return maxBranchingFactor;
-    }
-
-    public double calculateAverageBranchingFactor() {
-        return totalNodesCreated / (double) totalNodesExpanded;
     }
 
     @Override
@@ -135,6 +117,10 @@ public class SearchTreeImpl<
     @Override
     public List<String> getCsvRecord() {
         return root.getWrappedState().getCsvRecord();
+    }
+
+    public int getTotalNodesExpanded() {
+        return totalNodesExpanded;
     }
 
     @Override
@@ -208,7 +194,6 @@ public class SearchTreeImpl<
         root = root.getChildNodeMap().get(action);
         root.makeRoot();
         nodeSelector.setNewRoot(root);
-        resetTreeStatistics();
         if(!root.isFinalNode()) {
             expandTreeToNextPlayerLevel();
         }
@@ -284,18 +269,7 @@ public class SearchTreeImpl<
     }
 
     private void expandAndEvaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
-        nodeEvaluator.evaluateNode(selectedNodeForExpansion);
-        totalNodesExpanded++;
-        int branchingNodesCount = selectedNodeForExpansion.getChildNodeMap().size();
-        if(branchingNodesCount > maxBranchingFactor) {
-            maxBranchingFactor = branchingNodesCount;
-        }
-        totalNodesCreated += branchingNodesCount;
+        totalNodesExpanded += nodeEvaluator.evaluateNode(selectedNodeForExpansion);
     }
 
-    private void resetTreeStatistics() {
-        totalNodesCreated = 0;
-        totalNodesExpanded = 0;
-        maxBranchingFactor = Integer.MIN_VALUE;
-    }
 }

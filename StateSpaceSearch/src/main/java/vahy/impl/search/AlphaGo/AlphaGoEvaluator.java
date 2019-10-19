@@ -30,7 +30,7 @@ public class AlphaGoEvaluator<
     }
 
     @Override
-    public void evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         throw new UnsupportedOperationException(); // TODO: finish it
     }
 }

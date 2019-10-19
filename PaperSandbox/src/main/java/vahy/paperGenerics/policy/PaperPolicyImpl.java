@@ -159,10 +159,16 @@ public class PaperPolicyImpl<
     public PaperPolicyRecord getPolicyRecord(TState gameState) {
         checkStateRoot(gameState);
         return new PaperPolicyRecord(
-                innerPriorProbabilityDistribution(gameState),
-                innerActionProbability(),
-                riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward(),
-                riskAverseSearchTree.getRoot().getSearchNodeMetadata().getSumOfRisk(),
-                riskAverseSearchTree.getTotalRiskAllowed());
+            innerPriorProbabilityDistribution(gameState),
+            innerActionProbability(),
+            riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward(),
+            riskAverseSearchTree.getRoot().getSearchNodeMetadata().getSumOfRisk(),
+            riskAverseSearchTree.getTotalRiskAllowed(),
+            riskAverseSearchTree.getTotalNodesExpanded());
+    }
+
+    @Override
+    public int getExpandedNodeCountSoFar() {
+        return this.riskAverseSearchTree.getTotalNodesExpanded();
     }
 }

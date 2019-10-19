@@ -36,22 +36,24 @@ public class PaperBatchNodeEvaluator<
     }
 
     @Override
-    public void evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
-            createSubtree(selectedNode);
+            return createSubtree(selectedNode);
         } else if(selectedNode.getChildNodeMap().isEmpty() && !selectedNode.isFinalNode()) { // TODO: .isempty should not be used. Instead alternate algo so it expands and not evaluates leaves.
-            createSubtree(selectedNode);
+            return createSubtree(selectedNode);
         }
         if(!selectedNode.isFinalNode()) {
             selectedNode.unmakeLeaf();
         }
+        return 0;
     }
 
-    private void createSubtree(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> rootNode) {
+    private int createSubtree(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> rootNode) {
         var stateRewardOrder = createTreeStateSkeleton(rootNode.getWrappedState());
         var observationBatch = createObservationBatch(stateRewardOrder);
         var predictions = trainablePredictor.apply(observationBatch);
         finalizeTreeState(rootNode, stateRewardOrder, predictions);
+        return stateRewardOrder.size();
     }
 
     private SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> createChildNode(
