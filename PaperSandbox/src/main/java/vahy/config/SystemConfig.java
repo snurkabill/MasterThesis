@@ -15,13 +15,15 @@ public class SystemConfig {
     // Evaluation
     private final int evalEpisodeCount;
 
+    private final boolean dumpTrainingData;
 
-    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount) {
+    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData) {
         this.randomSeed = randomSeed;
         this.singleThreadedEvaluation = singleThreadedEvaluation;
         this.parallelThreadsCount = parallelThreadsCount;
         this.drawWindow = drawWindow;
         this.evalEpisodeCount = evalEpisodeCount;
+        this.dumpTrainingData = dumpTrainingData;
     }
 
     public long getRandomSeed() {
@@ -44,15 +46,29 @@ public class SystemConfig {
         return evalEpisodeCount;
     }
 
+    public boolean dumpTrainingData() {
+        return dumpTrainingData;
+    }
+
+    //    @Override
+//    public String toString() {
+//        return "SystemConfig{" +
+//            "randomSeed=" + randomSeed +
+//            ", singleThreadedEvaluation=" + singleThreadedEvaluation +
+//            ", parallelThreadsCount=" + parallelThreadsCount +
+//            ", drawWindow=" + drawWindow +
+//            ", evalEpisodeCount=" + evalEpisodeCount +
+//
+//            '}';
+//    }
+
     @Override
     public String toString() {
-        return "SystemConfig{" +
-            "randomSeed=" + randomSeed +
-            ", singleThreadedEvaluation=" + singleThreadedEvaluation +
-            ", parallelThreadsCount=" + parallelThreadsCount +
-            ", drawWindow=" + drawWindow +
-            ", evalEpisodeCount=" + evalEpisodeCount +
-
-            '}';
+        return "randomSeed," + randomSeed + System.lineSeparator() +
+            "singleThreadedEvaluation," + singleThreadedEvaluation + System.lineSeparator() +
+            "parallelThreadsCount," + parallelThreadsCount + System.lineSeparator() +
+            "drawWindow," + drawWindow + System.lineSeparator() +
+            "evalEpisodeCount," + evalEpisodeCount + System.lineSeparator() +
+            "dumpTrainingData," + dumpTrainingData + System.lineSeparator();
     }
 }

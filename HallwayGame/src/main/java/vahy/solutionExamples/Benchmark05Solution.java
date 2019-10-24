@@ -81,21 +81,41 @@ public class Benchmark05Solution {
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .globalRiskAllowed(1.00)
-            .riskSupplier(() -> 1.00)
+            .riskSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.00";
+                }
+            })
 
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
-            .explorationConstantSupplier(new Supplier<>() {
+            .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
                     return 0.2;
                 }
+
+                @Override
+                public String toString() {
+                    return "() -> 0.20";
+                }
             })
-            .temperatureSupplier(new Supplier<>() {
+            .temperatureSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 1.5;
+                    return 1.50;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.05";
                 }
             })
 

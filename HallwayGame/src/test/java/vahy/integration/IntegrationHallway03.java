@@ -33,7 +33,7 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false);
     }
 
     public static GameConfig createGameConfig() {

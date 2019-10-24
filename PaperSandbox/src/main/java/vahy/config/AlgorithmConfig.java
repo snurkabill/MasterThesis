@@ -211,35 +211,65 @@ public class AlgorithmConfig {
         return batchedEvaluationSize;
     }
 
+//    @Override
+//    public String toString() {
+//        return "AlgorithmConfig{" +
+//            "cpuctParameter=" + cpuctParameter +
+//            ", treeUpdateConditionFactory=" + treeUpdateConditionFactory +
+//            ", discountFactor=" + discountFactor +
+//            ", batchEpisodeCount=" + batchEpisodeCount +
+//            ", replayBufferSize=" + replayBufferSize +
+//            ", maximalStepCountBound=" + maximalStepCountBound +
+//            ", stageCount=" + stageCount +
+//            ", explorationConstantSupplier=" + explorationConstantSupplier +
+//            ", temperatureSupplier=" + temperatureSupplier +
+//            ", riskSupplier=" + riskSupplier +
+//            ", trainerAlgorithm=" + dataAggregationAlgorithm +
+//            ", approximatorType=" + approximatorType +
+//            ", evaluatorType=" + evaluatorType +
+//            ", selectorType=" + selectorType +
+//            ", trainingBatchSize=" + trainingBatchSize +
+//            ", trainingEpochCount=" + trainingEpochCount +
+//            ", learningRate=" + learningRate +
+//            ", globalRiskAllowed=" + globalRiskAllowed +
+//            ", inferenceExistingFlowStrategy=" + inferenceExistingFlowStrategy +
+//            ", inferenceNonExistingFlowStrategy=" + inferenceNonExistingFlowStrategy +
+//            ", explorationExistingFlowStrategy=" + explorationExistingFlowStrategy +
+//            ", explorationNonExistingFlowStrategy=" + explorationNonExistingFlowStrategy +
+//            ", flowOptimizerType=" + flowOptimizerType +
+//            ", subTreeRiskCalculatorTypeForKnownFlow=" + subTreeRiskCalculatorTypeForKnownFlow +
+//            ", subTreeRiskCalculatorTypeForUnknownFlow=" + subTreeRiskCalculatorTypeForUnknownFlow +
+//            ", batchedEvaluationSize=" + batchedEvaluationSize +
+//            '}';
+//    }
+
     @Override
     public String toString() {
-        return "AlgorithmConfig{" +
-            "cpuctParameter=" + cpuctParameter +
-            ", treeUpdateConditionFactory=" + treeUpdateConditionFactory +
-            ", discountFactor=" + discountFactor +
-            ", batchEpisodeCount=" + batchEpisodeCount +
-            ", replayBufferSize=" + replayBufferSize +
-            ", maximalStepCountBound=" + maximalStepCountBound +
-            ", stageCount=" + stageCount +
-            ", explorationConstantSupplier=" + explorationConstantSupplier +
-            ", temperatureSupplier=" + temperatureSupplier +
-            ", riskSupplier=" + riskSupplier +
-            ", trainerAlgorithm=" + dataAggregationAlgorithm +
-            ", approximatorType=" + approximatorType +
-            ", evaluatorType=" + evaluatorType +
-            ", selectorType=" + selectorType +
-            ", trainingBatchSize=" + trainingBatchSize +
-            ", trainingEpochCount=" + trainingEpochCount +
-            ", learningRate=" + learningRate +
-            ", globalRiskAllowed=" + globalRiskAllowed +
-            ", inferenceExistingFlowStrategy=" + inferenceExistingFlowStrategy +
-            ", inferenceNonExistingFlowStrategy=" + inferenceNonExistingFlowStrategy +
-            ", explorationExistingFlowStrategy=" + explorationExistingFlowStrategy +
-            ", explorationNonExistingFlowStrategy=" + explorationNonExistingFlowStrategy +
-            ", flowOptimizerType=" + flowOptimizerType +
-            ", subTreeRiskCalculatorTypeForKnownFlow=" + subTreeRiskCalculatorTypeForKnownFlow +
-            ", subTreeRiskCalculatorTypeForUnknownFlow=" + subTreeRiskCalculatorTypeForUnknownFlow +
-            ", batchedEvaluationSize=" + batchedEvaluationSize +
-            '}';
+        return "cpuctParameter," + cpuctParameter + System.lineSeparator() +
+            "treeUpdateConditionFactory," + treeUpdateConditionFactory + System.lineSeparator() +
+            "discountFactor," + discountFactor + System.lineSeparator() +
+            "batchEpisodeCount," + batchEpisodeCount + System.lineSeparator() +
+            "replayBufferSize," + replayBufferSize + System.lineSeparator() +
+            "maximalStepCountBound," + maximalStepCountBound + System.lineSeparator() +
+            "stageCount," + stageCount + System.lineSeparator() +
+            "explorationConstantSupplier," + explorationConstantSupplier + System.lineSeparator() +
+            "temperatureSupplier," + temperatureSupplier + System.lineSeparator() +
+            "riskSupplier," + riskSupplier + System.lineSeparator() +
+            "trainerAlgorithm," + dataAggregationAlgorithm + System.lineSeparator() +
+            "approximatorType," + approximatorType + System.lineSeparator() +
+            "evaluatorType," + evaluatorType + System.lineSeparator() +
+            "selectorType," + selectorType + System.lineSeparator() +
+            "trainingBatchSize," + trainingBatchSize + System.lineSeparator() +
+            "trainingEpochCount," + trainingEpochCount + System.lineSeparator() +
+            "learningRate," + learningRate + System.lineSeparator() +
+            "globalRiskAllowed," + globalRiskAllowed + System.lineSeparator() +
+            "inferenceExistingFlowStrategy," + inferenceExistingFlowStrategy + System.lineSeparator() +
+            "inferenceNonExistingFlowStrategy," + inferenceNonExistingFlowStrategy + System.lineSeparator() +
+            "explorationExistingFlowStrategy," + explorationExistingFlowStrategy + System.lineSeparator() +
+            "explorationNonExistingFlowStrategy," + explorationNonExistingFlowStrategy + System.lineSeparator() +
+            "flowOptimizerType," + flowOptimizerType + System.lineSeparator() +
+            "subTreeRiskCalculatorTypeForKnownFlow," + subTreeRiskCalculatorTypeForKnownFlow + System.lineSeparator() +
+            "subTreeRiskCalculatorTypeForUnknownFlow," + subTreeRiskCalculatorTypeForUnknownFlow + System.lineSeparator() +
+            "batchedEvaluationSize," + batchedEvaluationSize + System.lineSeparator();
     }
 }

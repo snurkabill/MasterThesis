@@ -42,7 +42,6 @@ import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
-import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResults;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
 import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
 import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
@@ -52,16 +51,9 @@ import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.selector.RiskBasedSelector;
 import vahy.paperGenerics.selector.RiskBasedSelectorVahy;
 import vahy.utils.EnumUtils;
-import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTrackerSettings;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -104,6 +96,9 @@ public class Experiment {
     //Dirty hack
     private TFModel tfModel;
 
+    // Writer
+    private EpisodeWriter episodeWriter;
+
     private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> results;
 
     public Experiment(AlgorithmConfig algorithmConfig, SystemConfig systemConfig) {
@@ -125,7 +120,8 @@ public class Experiment {
         this.hallwayGameInitialInstanceSupplier = provider.getInstanceProvider(instance, gameConfig, masterRandom.split());
     }
 
-    private void initializeHelperClasses() {
+    private void initializeHelperClasses(GameConfig gameConfig) {
+        episodeWriter = new EpisodeWriter(gameConfig, algorithmConfig);
         paperTreeUpdater = new PaperTreeUpdater<>();
         searchNodeMetadataFactory = new PaperMetadataFactory<>();
         searchNodeFactory = new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory);
@@ -151,7 +147,7 @@ public class Experiment {
         } catch (IOException | NotValidGameStringRepresentationException e) {
             throw new RuntimeException("HallwayGame instance was not created.", e);
         }
-        initializeHelperClasses();
+        initializeHelperClasses(gameConfig);
         initializeDomainClasses();
 
         try {
@@ -163,10 +159,10 @@ public class Experiment {
         if(tfModel != null) { // dirty // TODO: better resources handling
             final TFModel tfModelFinal = tfModel;
             try(tfModelFinal) {
-                resolveEvaluatorAndRun(gameConfig);
+                resolveEvaluatorAndRun();
             }
         } else {
-            resolveEvaluatorAndRun(gameConfig);
+            resolveEvaluatorAndRun();
         }
 
     }
@@ -215,7 +211,6 @@ public class Experiment {
     }
 
     private void createPolicyAndRunProcess(
-        GameConfig gameConfig,
         PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> evaluator) {
         Supplier<NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> nodeSelector = this::createNodeSelector;
 
@@ -245,11 +240,10 @@ public class Experiment {
         this.results = evaluatePolicy(policyList);
         printResults(policyList, trainingDurationMillis);
 
-        try {
-            dumpResults(results, gameConfig);
-        } catch (IOException e) {
-            logger.error("Results dump failed. ", e);
+        if(results.size() > 1) {
+            throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
         }
+        episodeWriter.writeEvaluationEpisode(results.get(0).getEpisodeList());
     }
 
     private void printResults(List<PaperBenchmarkingPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> policyList, long trainingTimeInMs) {
@@ -266,83 +260,13 @@ public class Experiment {
 
     }
 
-    private void dumpResults(List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> results, GameConfig gameConfig) throws IOException {
-        if(results.size() > 1) {
-            throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
-        }
-        var policyResult = results.get(0);
-
-        String resultMasterFolderName = "Results";
-        File resultFolder = new File(resultMasterFolderName);
-
-        if(!resultFolder.exists()) {
-            resultFolder.mkdir();
-        }
-
-        File resultSubfolder = new File(resultFolder, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss")));
-        resultSubfolder.mkdir();
-
-        File experimentSetupFile = new File(resultSubfolder, "algorithmConfig");
-        PrintWriter out = new PrintWriter(experimentSetupFile);
-        out.print("AlgorithmConfig: " + algorithmConfig.toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + gameConfig.toString());
-        out.close();
-        File resultFile = new File(resultSubfolder.getAbsolutePath(), "episodes_log");
-//        writeEpisodeResultsToFile(resultFile.getAbsolutePath(), policyResult.getRewardAndRiskList());
-        writeEpisodeResultsToFile2(resultFile.getAbsolutePath(), policyResult);
-        logger.info("PROCESS DONE");
-    }
-
-    public static void writeEpisodeResultsToFile2(String filename, PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord> results) throws IOException {
-        List<PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeList = results.getEpisodeList();
-        File epochFolder = new File(filename);
-        if(!epochFolder.exists()) {
-            epochFolder.mkdir();
-        }
-        for (int i = 0; i < episodeList.size(); i++) {
-            dumpSingleEpisode(filename + "/episode_" + i, episodeList.get(i));
-        }
-    }
-
-    public static void dumpSingleEpisode(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) throws IOException {
-        writeEpisodeMetadata(filename, episodeResults);
-        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
-        outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getCsvHeader()) + System.lineSeparator());
-        for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
-            outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getCsvRecord()) + System.lineSeparator());
-        }
-        outputWriter.flush();
-        outputWriter.close();
-    }
-
-    private static void writeEpisodeMetadata(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResultsDeprecated) throws IOException {
-        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "_metadata"));
-
-        outputWriter.write("Total step count, " + episodeResultsDeprecated.getTotalStepCount() + System.lineSeparator());
-        outputWriter.write("Player step count, " + episodeResultsDeprecated.getPlayerStepCount() + System.lineSeparator());
-        outputWriter.write("duration [ms], " + episodeResultsDeprecated.getDuration().toMillis() + System.lineSeparator());
-        outputWriter.write("Total Payoff, " + episodeResultsDeprecated.getTotalPayoff() + System.lineSeparator());
-
-        outputWriter.flush();
-        outputWriter.close();
-    }
-
-    public static void writeEpisodeResultsToFile(String filename, List<ImmutableTuple<Double, Boolean>> list) throws IOException {
-        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename));
-        outputWriter.write("Reward,Risk");
-        outputWriter.newLine();
-        for (int i = 0; i < list.size(); i++) {
-            outputWriter.write(list.get(i).getFirst() + "," + list.get(i).getSecond());
-            outputWriter.newLine();
-        }
-        outputWriter.flush();
-        outputWriter.close();
-    }
-
     private void trainPolicy(PaperTrainer trainer) {
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
-            trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount(), algorithmConfig.getMaximalStepCountBound());
-//            trainer.printDataset();
+            var episodes = trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount(), algorithmConfig.getMaximalStepCountBound());
+            if(systemConfig.dumpTrainingData()) {
+                episodeWriter.writeTrainingEpisode(i, episodes);
+            }
         }
     }
 
@@ -408,11 +332,9 @@ public class Experiment {
         }
     }
 
-    private void resolveEvaluatorAndRun(GameConfig gameConfig)
-    {
-        var evaluator = resolveEvaluator();
-
-        createPolicyAndRunProcess(gameConfig, evaluator);
+    private void resolveEvaluatorAndRun(){
+        createPolicyAndRunProcess(resolveEvaluator());
+        logger.info("DONE!!!");
     }
 
     @NotNull

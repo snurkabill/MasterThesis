@@ -11,16 +11,19 @@ public class PaperPolicyRecord extends PolicyRecordBase {
     private final double[] priorProbabilities;
     private final double predictedRisk;
     private final double totalRiskAllowed;
+    private final int expandedNodeCountSoFar;
 
     public PaperPolicyRecord(double[] priorProbabilities,
                              double[] policyProbabilities,
                              double predictedReward,
                              double predictedRisk,
-                             double totalRiskAllowed) {
+                             double totalRiskAllowed,
+                             int expandedNodeCountSoFar) {
         super(policyProbabilities, predictedReward);
         this.priorProbabilities = priorProbabilities;
         this.predictedRisk = predictedRisk;
         this.totalRiskAllowed = totalRiskAllowed;
+        this.expandedNodeCountSoFar = expandedNodeCountSoFar;
     }
 
     public double[] getPriorProbabilities() {
@@ -52,6 +55,7 @@ public class PaperPolicyRecord extends PolicyRecordBase {
         }
         list.add("Predicted risk");
         list.add("Total risk allowed");
+        list.add("Expanded nodes so far");
         return list;
     }
 
@@ -62,6 +66,7 @@ public class PaperPolicyRecord extends PolicyRecordBase {
         }
         list.add(Double.toString(predictedRisk));
         list.add(Double.toString(totalRiskAllowed));
+        list.add(Integer.toString(expandedNodeCountSoFar));
         return list;
     }
 }

@@ -48,20 +48,24 @@ public class PaperNodeEvaluator<
     }
 
     @Override
-    public void evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+        var nodesExpanded = 0;
         if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
             logger.trace("Expanding root since it is freshly created without evaluation");
-            innerEvaluation(selectedNode);
+            nodesExpanded += innerEvaluation(selectedNode);
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
         logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         Map<TAction, SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
-            childNodeMap.put(nextAction, evaluateChildNode(selectedNode, nextAction));
+            var nodeAndExpansions = evaluateChildNode(selectedNode, nextAction);
+            childNodeMap.put(nextAction, nodeAndExpansions.getFirst());
+            nodesExpanded += nodeAndExpansions.getSecond();
         }
         if(!selectedNode.isFinalNode()) {
             selectedNode.unmakeLeaf();
         }
+        return nodesExpanded;
     }
 
     protected void fillNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, double[] prediction) {
@@ -82,8 +86,9 @@ public class PaperNodeEvaluator<
         searchMetadata.setEvaluated();
     }
 
-    protected void innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected int innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()));
+        return 1;
     }
 
     protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities) {
@@ -93,13 +98,13 @@ public class PaperNodeEvaluator<
         }
     }
 
-    private SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> evaluateChildNode(
+    private ImmutableTuple<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>, Integer> evaluateChildNode(
         SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> parent,
         TAction nextAction) {
         StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState> stateRewardReturn = parent.applyAction(nextAction);
         SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> childNode = searchNodeFactory.createNode(stateRewardReturn, parent, nextAction);
-        innerEvaluation(childNode);
-        return childNode;
+        var nodesExpanded = innerEvaluation(childNode);
+        return new ImmutableTuple<>(childNode, nodesExpanded);
     }
 
 }

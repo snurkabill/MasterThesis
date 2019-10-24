@@ -10,6 +10,7 @@ import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -481,6 +482,44 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
         builder.append(isAgentStandingOnTrap() ? "T " : "N ");
         builder.append(agentHeading.getHeadingReadableRepresentation());
         return builder.toString();
+    }
+
+    @Override
+    public List<String> getCsvHeader() {
+
+//        private final double[][] rewards;
+//        private final int rewardsLeft;
+
+
+        var list = new ArrayList<String>();
+        list.add("Agent coordinate X");
+        list.add("Agent coordinate Y");
+        list.add("Is agent killed");
+        list.add("Agent heading");
+        list.add("Is agent turn");
+        list.add("Has agent moved");
+        list.add("Total risk allowed");
+        var rewardVector = staticGamePart.getLeftRewardsAsVector(this.rewards);
+        for (int i = 0; i < rewardVector.length; i++) {
+            list.add("Reward_" + i);
+        }
+        return list;
+    }
+
+    @Override
+    public List<String> getCsvRecord() {
+        var list = new ArrayList<String>();
+        list.add(String.valueOf(agentXCoordination));
+        list.add(String.valueOf(agentYCoordination));
+        list.add(String.valueOf(isAgentKilled));
+        list.add(agentHeading.name());
+        list.add(String.valueOf(isAgentTurn));
+        list.add(String.valueOf(hasAgentMoved));
+        var rewardVector = staticGamePart.getLeftRewardsAsVector(this.rewards);
+        for (int i = 0; i < rewardVector.length; i++) {
+            list.add(String.valueOf(rewardVector[i]));
+        }
+        return list;
     }
 
     @Override
