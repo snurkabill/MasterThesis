@@ -68,7 +68,7 @@ public class Benchmark05Solution {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(100)
+            .batchEpisodeCount(1000)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)

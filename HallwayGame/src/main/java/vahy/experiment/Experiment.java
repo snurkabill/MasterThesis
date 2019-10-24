@@ -163,6 +163,7 @@ public class Experiment {
             }
         } else {
             resolveEvaluatorAndRun();
+
         }
 
     }

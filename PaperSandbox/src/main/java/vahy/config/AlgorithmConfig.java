@@ -271,5 +271,6 @@ public class AlgorithmConfig {
             "subTreeRiskCalculatorTypeForKnownFlow," + subTreeRiskCalculatorTypeForKnownFlow + System.lineSeparator() +
             "subTreeRiskCalculatorTypeForUnknownFlow," + subTreeRiskCalculatorTypeForUnknownFlow + System.lineSeparator() +
             "batchedEvaluationSize," + batchedEvaluationSize + System.lineSeparator();
+
     }
 }
