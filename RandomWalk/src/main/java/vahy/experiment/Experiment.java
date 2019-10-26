@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.Analyzer;
 import vahy.RandomWalkExample;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.nodeSelector.NodeSelector;
@@ -304,12 +305,20 @@ public class Experiment {
             progressTrackerSettings,
             1);
 
-        var dataAggregator = switch (dataAggregationAlgorithm) {
-            case REPLAY_BUFFER -> new ReplayBufferDataAggregator(replayBufferSize, new LinkedList<>());
-            case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-            case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        };
+        var dataAggregator =  resolveDataAggerator(dataAggregationAlgorithm, replayBufferSize);
         return new PaperTrainer<>(gameSampler, predictor, discountFactor, dataAggregator);
+    }
+
+    private DataAggregator resolveDataAggerator(DataAggregationAlgorithm trainerAlgorithm, int replayBufferSize) {
+        switch(trainerAlgorithm) {
+            case REPLAY_BUFFER:
+                return new ReplayBufferDataAggregator(replayBufferSize, new LinkedList<>());
+            case FIRST_VISIT_MC:
+                return new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            case EVERY_VISIT_MC:
+                return new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            default: throw EnumUtils.createExceptionForNotExpectedEnumValue(trainerAlgorithm);
+        }
     }
 
     private PaperNodeEvaluator<RandomWalkAction, RandomWalkProbabilities, PaperMetadata<RandomWalkAction>, RandomWalkState> resolveEvaluator(EvaluatorType evaluatorType,

@@ -30,6 +30,7 @@
         <maven.compiler.source>13</maven.compiler.source>
         <maven.compiler.target>13</maven.compiler.target>
         <maven.compiler.release>13</maven.compiler.release>
+<!--        <argLine>&#45;&#45;enable-preview</argLine>-->
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -75,7 +76,7 @@
                         <source>13</source>
                         <target>13</target>
                         <release>13</release>
-                        <compilerArgs>--enable-preview</compilerArgs>
+<!--                        <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
                     </configuration>
                 </plugin>
             </plugins>

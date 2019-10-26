@@ -4,6 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.PaperGenericsPrototype;
+import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
+import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.Action;
 import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
@@ -304,12 +306,21 @@ public class Experiment {
             progressTrackerSettings,
             systemConfig.getParallelThreadsCount());
 
-        var dataAggregator = switch(trainerAlgorithm) {
-            case REPLAY_BUFFER -> new ReplayBufferDataAggregator(algorithmConfig.getReplayBufferSize(), new LinkedList<>());
-            case FIRST_VISIT_MC -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-            case EVERY_VISIT_MC -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        };
+        var dataAggregator = resolveDataAggerator(trainerAlgorithm);
         return new PaperTrainer<>(gameSampler, approximator, discountFactor, dataAggregator);
+    }
+
+
+    private DataAggregator resolveDataAggerator(DataAggregationAlgorithm trainerAlgorithm) {
+        switch(trainerAlgorithm) {
+            case REPLAY_BUFFER:
+                return new ReplayBufferDataAggregator(algorithmConfig.getReplayBufferSize(), new LinkedList<>());
+            case FIRST_VISIT_MC:
+                return new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            case EVERY_VISIT_MC:
+                return new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            default: throw EnumUtils.createExceptionForNotExpectedEnumValue(trainerAlgorithm);
+        }
     }
 
     private NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> createNodeSelector()

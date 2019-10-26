@@ -18,6 +18,7 @@ import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.utils.EnumUtils;
 
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
@@ -75,10 +76,14 @@ public class PaperPolicySupplier<
 
     @Override
     public Policy<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
-        return switch(policyMode) {
-            case INFERENCE -> createPolicy(initialState);
-            case TRAINING  -> createPolicy(initialState, explorationConstantSupplier.get(), temperatureSupplier.get(), riskSupplier.get());
-        };
+
+        switch(policyMode) {
+            case INFERENCE:
+                return createPolicy(initialState);
+            case TRAINING:
+                return createPolicy(initialState, explorationConstantSupplier.get(), temperatureSupplier.get(), riskSupplier.get());
+            default: throw EnumUtils.createExceptionForNotExpectedEnumValue(policyMode);
+        }
     }
 
     protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState) {
