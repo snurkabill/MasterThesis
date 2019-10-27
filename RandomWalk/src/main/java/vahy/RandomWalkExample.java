@@ -49,7 +49,7 @@ public class RandomWalkExample {
             0,
             2,
             1,
-            new FixedUpdateCountTreeConditionFactory(1),
+            new FixedUpdateCountTreeConditionFactory(1000),
             1.0,
             batchSize,
             20000,

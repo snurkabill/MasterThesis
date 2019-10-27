@@ -1,5 +1,6 @@
 package vahy.experiment;
 
+import vahy.api.episode.EpisodeResults;
 import vahy.config.AlgorithmConfig;
 import vahy.environment.HallwayAction;
 import vahy.environment.config.GameConfig;
@@ -7,7 +8,6 @@ import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
-import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResults;
 import vahy.utils.ImmutableTuple;
 
 import java.io.BufferedWriter;
@@ -48,7 +48,7 @@ public class EpisodeWriter {
         out.close();
     }
 
-    public void writeTrainingEpisode(int stageId, List<PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeResults)  {
+    public void writeTrainingEpisode(int stageId, List<EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeResults)  {
         for (int i = 0; i < episodeResults.size(); i++) {
             String path = masterPath + "/training/stageId_" + stageId + "/episodeId_" + i;
             createDirAndWriteData(episodeResults.get(i), path);
@@ -57,14 +57,14 @@ public class EpisodeWriter {
 
     }
 
-    public void writeEvaluationEpisode(List<PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeResultsList) {
+    public void writeEvaluationEpisode(List<EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeResultsList) {
         for (int i = 0; i < episodeResultsList.size(); i++) {
             String path = masterPath + "/evaluation/" + "/episodeId_" + i;
             createDirAndWriteData(episodeResultsList.get(i), path);
         }
     }
 
-    private void createDirAndWriteData(PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults, String path) {
+    private void createDirAndWriteData(EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults, String path) {
         File file = new File(path);
         if(!file.exists()) {
             var created = file.mkdirs();
@@ -75,7 +75,7 @@ public class EpisodeWriter {
         dumpSingleEpisode(file.getAbsolutePath(), episodeResults);
     }
 
-    public static void dumpSingleEpisode(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) {
+    public static void dumpSingleEpisode(String filename, EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) {
         try {
             writeEpisodeMetadata(filename, episodeResults);
             BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/data"));
@@ -99,14 +99,14 @@ public class EpisodeWriter {
         }
     }
 
-    private static void writeEpisodeMetadata(String filename, PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) throws IOException {
+    private static void writeEpisodeMetadata(String filename, EpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> episodeResults) throws IOException {
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/metadata"));
 
         outputWriter.write("Total step count, " + episodeResults.getTotalStepCount() + System.lineSeparator());
         outputWriter.write("Player step count, " + episodeResults.getPlayerStepCount() + System.lineSeparator());
         outputWriter.write("Duration [ms], " + episodeResults.getDuration().toMillis() + System.lineSeparator());
         outputWriter.write("Total Payoff, " + episodeResults.getTotalPayoff() + System.lineSeparator());
-        outputWriter.write("Risk Hit, " + episodeResults.isRiskHit() + System.lineSeparator());
+        outputWriter.write("Risk Hit, " + episodeResults.getFinalState().isRiskHit() + System.lineSeparator());
 
 
         outputWriter.flush();

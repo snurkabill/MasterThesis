@@ -23,6 +23,6 @@ public class PaperEpisodeResultsFactory<
     @Override
     public EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> createResults(
         List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory, int playerStepCount, int totalStepCount, double totalCumulativePayoff, Duration duration) {
-        return new PaperEpisodeResultsImpl<>(episodeHistory, playerStepCount, totalStepCount, totalCumulativePayoff, duration);
+        return new PaperEpisodeResults<>(episodeHistory, playerStepCount, totalStepCount, totalCumulativePayoff, duration);
     }
 }

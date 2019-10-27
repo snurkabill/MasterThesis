@@ -11,6 +11,7 @@ import vahy.experiment.Experiment;
 import vahy.experiment.ExperimentSetup;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.config.EvaluatorType;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -50,7 +51,7 @@ public class IntegrationTest {
 
         var results = experiment.getResults().get(0);
 
-        var statistics = results.getCalculatedResultStatistics();
+        var statistics = (PaperEpisodeStatistics) results.getEpisodeStatistics();
 
         Assert.assertTrue(statistics.getTotalPayoffAverage() >= minExpectedReward, "Avg reward is: [" + statistics.getTotalPayoffAverage() + "] but expected at least: [" + minExpectedReward + "]");
         Assert.assertTrue(statistics.getRiskHitRatio() <= maxRiskHitRatio, "Risk hit ratio is: [" + statistics.getRiskHitRatio() + "] but expected at most: [" + maxRiskHitRatio + "]");

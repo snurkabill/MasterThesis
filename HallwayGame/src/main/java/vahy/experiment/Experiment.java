@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.PaperGenericsPrototype;
+import vahy.api.benchmark.BenchmarkedPolicy;
+import vahy.api.benchmark.PolicyBenchmark;
+import vahy.api.benchmark.PolicyResults;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.Action;
@@ -31,13 +34,11 @@ import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.paperGenerics.PaperModel;
 import vahy.paperGenerics.PaperTreeUpdater;
-import vahy.paperGenerics.benchmark.PaperBenchmark;
-import vahy.paperGenerics.benchmark.PaperBenchmarkingPolicy;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
 import vahy.paperGenerics.evaluator.MonteCarloNodeEvaluator;
 import vahy.paperGenerics.evaluator.PaperBatchNodeEvaluator;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.evaluator.RamcpNodeEvaluator;
-import vahy.paperGenerics.experiment.PaperPolicyResults;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
@@ -45,7 +46,7 @@ import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
-import vahy.paperGenerics.reinforcement.episode.PaperRolloutGameSampler;
+import vahy.paperGenerics.reinforcement.episode.PaperGameSampler;
 import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
 import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
@@ -101,7 +102,7 @@ public class Experiment {
     // Writer
     private EpisodeWriter episodeWriter;
 
-    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> results;
+    private List<PolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> results;
 
     public Experiment(AlgorithmConfig algorithmConfig, SystemConfig systemConfig) {
         this.algorithmConfig = algorithmConfig;
@@ -138,7 +139,7 @@ public class Experiment {
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
     }
 
-    public List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> getResults() {
+    public List<PolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> getResults() {
         return results;
     }
 
@@ -238,7 +239,7 @@ public class Experiment {
         var trainingDurationMillis = endTrainingMillis - startTrainingMillis;
 
 
-        var policyList = Arrays.asList(new PaperBenchmarkingPolicy<>(evaluator.getClass().getName(), paperPolicySupplier));
+        var policyList = Arrays.asList(new BenchmarkedPolicy<>(evaluator.getClass().getName(), paperPolicySupplier));
         this.results = evaluatePolicy(policyList);
         printResults(policyList, trainingDurationMillis);
 
@@ -248,18 +249,17 @@ public class Experiment {
         episodeWriter.writeEvaluationEpisode(results.get(0).getEpisodeList());
     }
 
-    private void printResults(List<PaperBenchmarkingPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> policyList, long trainingTimeInMs) {
+    private void printResults(List<BenchmarkedPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> policyList, long trainingTimeInMs) {
         for (var policyEntry : policyList) {
             var nnResults = results
                 .stream()
-                .filter(x -> x.getBenchmarkingPolicy().getPolicyName().equals(policyEntry.getPolicyName()))
+                .filter(x -> x.getPolicy().getPolicyName().equals(policyEntry.getPolicyName()))
                 .findFirst()
                 .get();
-            logger.info("[{}]", nnResults.getCalculatedResultStatistics().printToLog());
+            logger.info("[{}]", nnResults.getEpisodeStatistics().printToLog());
             logger.info("Training time: [{}]ms", trainingTimeInMs);
             logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getBenchmarkingMilliseconds());
         }
-
     }
 
     private void trainPolicy(PaperTrainer trainer) {
@@ -272,15 +272,16 @@ public class Experiment {
         }
     }
 
-    private List<PaperPolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl, PaperPolicyRecord>> evaluatePolicy(
-        List<PaperBenchmarkingPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> policyList)
+    private List<PolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> evaluatePolicy(
+        List<BenchmarkedPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> policyList)
     {
         logger.info("PaperPolicy test starts");
-        var benchmark = new PaperBenchmark<>(
+        var benchmark = new PolicyBenchmark<>(
             policyList,
             new EnvironmentPolicySupplier(masterRandom.split()),
             hallwayGameInitialInstanceSupplier,
             new PaperEpisodeResultsFactory<>(),
+            new PaperEpisodeStatisticsCalculator<>(),
             progressTrackerSettings
         );
         long start = System.currentTimeMillis();
@@ -297,7 +298,7 @@ public class Experiment {
         var discountFactor = algorithmConfig.getDiscountFactor();
         var trainerAlgorithm = algorithmConfig.getDataAggregationAlgorithm();
 
-        var gameSampler = new PaperRolloutGameSampler<>(
+        var gameSampler = new PaperGameSampler<>(
             hallwayGameInitialInstanceSupplier,
             new PaperEpisodeResultsFactory<>(),
             paperPolicySupplier,

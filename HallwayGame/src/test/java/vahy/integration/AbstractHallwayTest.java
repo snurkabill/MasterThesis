@@ -11,7 +11,7 @@ import vahy.config.SystemConfig;
 import vahy.environment.config.GameConfig;
 import vahy.experiment.Experiment;
 import vahy.game.HallwayInstance;
-import vahy.paperGenerics.experiment.CalculatedResultStatistics;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
 
 public abstract class AbstractHallwayTest {
@@ -33,7 +33,7 @@ public abstract class AbstractHallwayTest {
         var experiment = new Experiment(algorithmConfig, systemConfig);
         experiment.run(gameConfig, instance);
         var results = experiment.getResults().get(0);
-        CalculatedResultStatistics stats = results.getCalculatedResultStatistics();
+        PaperEpisodeStatistics stats = ((PaperEpisodeStatistics) results.getEpisodeStatistics());
 
         double totalPayoffAverage = stats.getTotalPayoffAverage();
         double riskHitRatio = stats.getRiskHitRatio();

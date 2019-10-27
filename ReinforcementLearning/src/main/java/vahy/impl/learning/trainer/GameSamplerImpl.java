@@ -12,10 +12,12 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
+import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.EpisodeSetupImpl;
 import vahy.impl.episode.EpisodeSimulatorImpl;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -25,18 +27,17 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-public abstract class AbstractGameSampler<
+public class GameSamplerImpl<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord>
-    implements GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>  {
+    implements GameSampler {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractGameSampler.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
     private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
@@ -48,18 +49,44 @@ public abstract class AbstractGameSampler<
     private int batchCounter = 0;
     private final PolicyMode policyMode;
 
-    public AbstractGameSampler(
+    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier;
+    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
+
+    public GameSamplerImpl(
         InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
         PolicyMode policyMode,
         ProgressTrackerSettings progressTrackerSettings,
-        int processingUnitCount)
+        int processingUnitCount,
+        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier,
+        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier)
     {
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
         this.policyMode = policyMode;
         this.processingUnitCount = processingUnitCount;
         this.progressTracker = new ProgressTracker(progressTrackerSettings);
+        this.playerPolicySupplier = playerPolicySupplier;
+        this.opponentPolicySupplier = opponentPolicySupplier;
+        createDataGenerators();
+    }
+
+    private void createDataGenerators() {
+        var dataPointGeneratorList = new ArrayList<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>();
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+            "Avg Player Step Count",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getPlayerStepCount)));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+            "Avg Total Payoff",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getTotalPayoff)));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+            "Avg episode duration [ms]",
+            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, (x) -> x.getDuration().toMillis())));
+
+        registerDataGenerators(dataPointGeneratorList);
     }
 
     protected void registerDataGenerators(List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> dataPointGeneratorList) {
@@ -69,9 +96,13 @@ public abstract class AbstractGameSampler<
         }
     }
 
-    protected abstract Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> supplyPlayerPolicy(TState initialState, PolicyMode policyMode);
+    private Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> supplyPlayerPolicy(TState initialState, PolicyMode policyMode) {
+        return playerPolicySupplier.initializePolicy(initialState, policyMode);
+    }
 
-    protected abstract Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> supplyOpponentPolicy(TState initialState, PolicyMode policyMode);
+    private Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> supplyOpponentPolicy(TState initialState, PolicyMode policyMode) {
+        return opponentPolicySupplier.initializePolicy(initialState, policyMode);
+    }
 
     public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit) {
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
@@ -89,7 +120,7 @@ public abstract class AbstractGameSampler<
             episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }
         try {
-            List<Future<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>> results = executorService.invokeAll(episodesToSample);
+            var results = executorService.invokeAll(episodesToSample);
             var paperEpisodeHistoryList = results.stream().map(x -> {
                 try {
                     return x.get();
@@ -98,7 +129,7 @@ public abstract class AbstractGameSampler<
                 }
             }).collect(Collectors.toList());
 
-            for (FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> fromEpisodesDataPointGenerator : dataPointGeneratorList) {
+            for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
                 fromEpisodesDataPointGenerator.addNewValue(paperEpisodeHistoryList, batchCounter);
             }
             progressTracker.onNextLog();
