@@ -1,6 +1,7 @@
 package vahy.environment.config;
 
 import vahy.environment.state.StateRepresentation;
+import vahy.game.HallwayInstance;
 
 public interface GameConfig {
 
@@ -9,4 +10,5 @@ public interface GameConfig {
     double getTrapProbability();
     double getNoisyMoveProbability();
     StateRepresentation getStateRepresentation();
+    HallwayInstance getHallwayInstance();
 }

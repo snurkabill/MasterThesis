@@ -10,7 +10,6 @@ import vahy.config.AlgorithmConfig;
 import vahy.config.SystemConfig;
 import vahy.environment.config.GameConfig;
 import vahy.experiment.Experiment;
-import vahy.game.HallwayInstance;
 import vahy.paperGenerics.experiment.CalculatedResultStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
 
@@ -29,9 +28,9 @@ public abstract class AbstractHallwayTest {
     public abstract Object[][] experimentSettings();
 
     @Test(dataProvider = "TestDataProviderMethod")
-    public void benchmarkSolutionTest(AlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, HallwayInstance instance, double minExpectedReward, double maxRiskHitRatio) {
+    public void benchmarkSolutionTest(AlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, double minExpectedReward, double maxRiskHitRatio) {
         var experiment = new Experiment(algorithmConfig, systemConfig);
-        experiment.run(gameConfig, instance);
+        experiment.run(gameConfig);
         var results = experiment.getResults().get(0);
         CalculatedResultStatistics stats = results.getCalculatedResultStatistics();
 

@@ -37,13 +37,14 @@ public class Benchmark07Solution {
             .stepPenalty(1)
             .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .hallwayInstance(HallwayInstance.BENCHMARK_07)
             .buildConfig();
 
 
 //        //  EXAMPLE 1
         var setup = createExperiment();
         var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_07);
+        experiment.run(gameConfig);
     }
 
     public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {

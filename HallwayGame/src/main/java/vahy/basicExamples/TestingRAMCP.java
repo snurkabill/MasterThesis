@@ -37,12 +37,13 @@ public class TestingRAMCP {
             .stepPenalty(1)
             .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .hallwayInstance(HallwayInstance.BENCHMARK_05)
             .buildConfig();
 
         //  EXAMPLE 1
         var setup = createExperiment();
         var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_05);
+        experiment.run(gameConfig);
 
     }
 

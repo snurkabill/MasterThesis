@@ -28,9 +28,9 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 279.0, 0.010},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_05, 280.000, 0.010}
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 279.0, 0.010},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 280.000, 0.010}
         };
     }
 
@@ -46,6 +46,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
             .stepPenalty(1)
             .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .hallwayInstance(HallwayInstance.BENCHMARK_05)
             .buildConfig();
     }
 

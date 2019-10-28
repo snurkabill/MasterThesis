@@ -30,7 +30,7 @@ public class IntegrationHallway18 extends AbstractHallwayTest {
         return new Object[][] {
 //            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.0},
 //            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.105}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.105}
         };
     }
 
@@ -46,6 +46,7 @@ public class IntegrationHallway18 extends AbstractHallwayTest {
             .stepPenalty(10)
             .trapProbability(0.05)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .hallwayInstance(HallwayInstance.BENCHMARK_18)
             .buildConfig();
     }
 

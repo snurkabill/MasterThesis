@@ -36,11 +36,12 @@ public class Benchmark12Solution {
             .stepPenalty(2)
             .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .hallwayInstance(HallwayInstance.BENCHMARK_12)
             .buildConfig();
 
         var setup = createExperiment();
         var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_12);
+        experiment.run(gameConfig);
 
 
     }

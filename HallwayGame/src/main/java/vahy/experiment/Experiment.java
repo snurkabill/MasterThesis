@@ -123,7 +123,7 @@ public class Experiment {
     }
 
     private void initializeHelperClasses(GameConfig gameConfig) {
-        episodeWriter = new EpisodeWriter(gameConfig, algorithmConfig);
+        episodeWriter = new EpisodeWriter(gameConfig, algorithmConfig, hallwayGameInitialInstanceSupplier);
         paperTreeUpdater = new PaperTreeUpdater<>();
         searchNodeMetadataFactory = new PaperMetadataFactory<>();
         searchNodeFactory = new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory);
@@ -143,9 +143,9 @@ public class Experiment {
     }
 
 
-    public void run(GameConfig gameConfig, HallwayInstance gameInstance) {
+    public void run(GameConfig gameConfig) {
         try {
-            initializeInstanceSupplier(gameConfig, gameInstance);
+            initializeInstanceSupplier(gameConfig, gameConfig.getHallwayInstance());
         } catch (IOException | NotValidGameStringRepresentationException e) {
             throw new RuntimeException("HallwayGame instance was not created.", e);
         }
@@ -153,7 +153,7 @@ public class Experiment {
         initializeDomainClasses();
 
         try {
-            approximator = initializePredictor("tfModel/graph_" + gameInstance.toString() + ".pb");
+            approximator = initializePredictor("tfModel/graph_" + gameConfig.getHallwayInstance().toString() + ".pb");
         } catch (IOException e) {
             throw new RuntimeException("TF model instance was not created.", e);
         }

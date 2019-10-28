@@ -1,6 +1,7 @@
 package vahy.environment.config;
 
 import vahy.environment.state.StateRepresentation;
+import vahy.game.HallwayInstance;
 
 public class DefaultGameConfig implements GameConfig {
 
@@ -33,6 +34,11 @@ public class DefaultGameConfig implements GameConfig {
     @Override
     public StateRepresentation getStateRepresentation() {
         return stateRepresentation;
+    }
+
+    @Override
+    public HallwayInstance getHallwayInstance() {
+        return HallwayInstance.BENCHMARK_03;
     }
 
     @Override

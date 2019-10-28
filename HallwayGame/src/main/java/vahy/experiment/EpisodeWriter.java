@@ -5,6 +5,7 @@ import vahy.environment.HallwayAction;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
+import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResults;
@@ -24,7 +25,7 @@ public class EpisodeWriter {
 
     private final String masterPath;
 
-    public EpisodeWriter(GameConfig gameConfig, AlgorithmConfig algorithmConfig) {
+    public EpisodeWriter(GameConfig gameConfig, AlgorithmConfig algorithmConfig, HallwayGameInitialInstanceSupplier hallwayGameInitialInstanceSupplier) {
         String resultMasterFolderName = "Results";
         File resultFolder = new File(resultMasterFolderName);
 
@@ -38,14 +39,26 @@ public class EpisodeWriter {
         masterPath = resultSubfolder.getAbsolutePath();
 
         File experimentSetupFile = new File(resultSubfolder, "algorithmConfig");
-        PrintWriter out = null;
         try {
-            out = new PrintWriter(experimentSetupFile);
+            var out = new PrintWriter(experimentSetupFile);
+            out.print("AlgorithmConfig: " + System.lineSeparator() + algorithmConfig.toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + System.lineSeparator() + gameConfig.toString());
+            out.flush();
+            out.close();
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        out.print("AlgorithmConfig: " + System.lineSeparator() + algorithmConfig.toString() + System.lineSeparator() + System.lineSeparator() + "GameSetup: " + System.lineSeparator() + gameConfig.toString());
-        out.close();
+
+        File hallwayInstanceFile = new File(resultSubfolder, "hallwayInstance");
+        var initialState = hallwayGameInitialInstanceSupplier.createInitialState(); // TODO. all this class is shitty. dump instance per episode, not per whole experiment
+        try {
+            var out = new PrintWriter(hallwayInstanceFile);
+            out.print(initialState.readableStringRepresentation());
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public void writeTrainingEpisode(int stageId, List<PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeResults)  {
@@ -53,8 +66,6 @@ public class EpisodeWriter {
             String path = masterPath + "/training/stageId_" + stageId + "/episodeId_" + i;
             createDirAndWriteData(episodeResults.get(i), path);
         }
-
-
     }
 
     public void writeEvaluationEpisode(List<PaperEpisodeResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> episodeResultsList) {

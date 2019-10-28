@@ -36,10 +36,11 @@ public class ForExperimenting {
             .stepPenalty(1) // penalty per one agent action
             .trapProbability(1) // probability of killing the agent when on trap
             .stateRepresentation(StateRepresentation.COMPACT) // don't change this.
+            .hallwayInstance(HallwayInstance.BENCHMARK_05) // experiment examples are in /resources/examples/benchmark/
             .buildConfig();
         var setup = createExperiment();
         var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_05); // experiment examples are in /resources/examples/benchmark/
+        experiment.run(gameConfig);
 
     }
 

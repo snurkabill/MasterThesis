@@ -1,6 +1,7 @@
 package vahy.environment.config;
 
 import vahy.environment.state.StateRepresentation;
+import vahy.game.HallwayInstance;
 
 public class ConfigBuilder {
 
@@ -9,6 +10,7 @@ public class ConfigBuilder {
     private double trapProbability;
     private double noisyMoveProbability;
     private StateRepresentation stateRepresentation;
+    private HallwayInstance hallwayInstance;
 
     public ConfigBuilder() {
         GameConfig defaultGameConfig = new DefaultGameConfig();
@@ -17,6 +19,7 @@ public class ConfigBuilder {
         trapProbability = defaultGameConfig.getTrapProbability();
         noisyMoveProbability = defaultGameConfig.getNoisyMoveProbability();
         stateRepresentation = defaultGameConfig.getStateRepresentation();
+        hallwayInstance = defaultGameConfig.getHallwayInstance();
     }
 
     public ConfigBuilder reward(double goalReward) {
@@ -44,8 +47,13 @@ public class ConfigBuilder {
         return this;
     }
 
+    public ConfigBuilder hallwayInstance(HallwayInstance hallwayInstance) {
+        this.hallwayInstance = hallwayInstance;
+        return this;
+    }
+
     public GameConfig buildConfig() {
-        return new GameConfigImpl(goalReward, stepPenalty, trapProbability, noisyMoveProbability, stateRepresentation);
+        return new GameConfigImpl(goalReward, stepPenalty, trapProbability, noisyMoveProbability, stateRepresentation, hallwayInstance);
     }
 
 }
