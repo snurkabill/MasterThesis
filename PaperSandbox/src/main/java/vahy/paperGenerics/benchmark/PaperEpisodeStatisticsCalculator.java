@@ -29,6 +29,6 @@ public class PaperEpisodeStatisticsCalculator<
         var averageMillisPerEpisode = MathStreamUtils.calculateAverage(episodeResultsList, (x) -> x.getDuration().toMillis());
         var riskHitCounter = episodeResultsList.stream().filter(x -> x.getFinalState().isRiskHit()).count();
         var riskHitRatio = riskHitCounter / (double) episodeResultsList.size();
-        return new PaperEpisodeStatistics(averageMillisPerEpisode, stdevPlayerStepCount, averageMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio);
+        return new PaperEpisodeStatistics(averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio);
     }
 }
