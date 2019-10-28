@@ -498,7 +498,6 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
         list.add("Agent heading");
         list.add("Is agent turn");
         list.add("Has agent moved");
-        list.add("Total risk allowed");
         var rewardVector = staticGamePart.getLeftRewardsAsVector(this.rewards);
         for (int i = 0; i < rewardVector.length; i++) {
             list.add("Reward_" + i);
@@ -515,6 +514,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
         list.add(agentHeading.name());
         list.add(String.valueOf(isAgentTurn));
         list.add(String.valueOf(hasAgentMoved));
+
         var rewardVector = staticGamePart.getLeftRewardsAsVector(this.rewards);
         for (int i = 0; i < rewardVector.length; i++) {
             list.add(String.valueOf(rewardVector[i]));
