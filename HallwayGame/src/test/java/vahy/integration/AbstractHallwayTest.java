@@ -7,7 +7,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import vahy.config.AlgorithmConfig;
-import vahy.config.SystemConfig;
+import vahy.api.experiment.SystemConfig;
 import vahy.environment.config.GameConfig;
 import vahy.experiment.Experiment;
 import vahy.game.HallwayInstance;

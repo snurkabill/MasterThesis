@@ -16,7 +16,7 @@ import java.util.List;
 
 public abstract class AbstractTrainer<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
+    TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {

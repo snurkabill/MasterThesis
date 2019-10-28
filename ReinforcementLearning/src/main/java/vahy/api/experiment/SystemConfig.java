@@ -1,6 +1,6 @@
-package vahy.config;
+package vahy.api.experiment;
 
-public class SystemConfig {
+public class SystemConfig implements Config {
 
     // STOCHASTICITY
     private final long randomSeed;
@@ -50,18 +50,6 @@ public class SystemConfig {
         return dumpTrainingData;
     }
 
-    //    @Override
-//    public String toString() {
-//        return "SystemConfig{" +
-//            "randomSeed=" + randomSeed +
-//            ", singleThreadedEvaluation=" + singleThreadedEvaluation +
-//            ", parallelThreadsCount=" + parallelThreadsCount +
-//            ", drawWindow=" + drawWindow +
-//            ", evalEpisodeCount=" + evalEpisodeCount +
-//
-//            '}';
-//    }
-
     @Override
     public String toString() {
         return "randomSeed," + randomSeed + System.lineSeparator() +
@@ -70,5 +58,15 @@ public class SystemConfig {
             "drawWindow," + drawWindow + System.lineSeparator() +
             "evalEpisodeCount," + evalEpisodeCount + System.lineSeparator() +
             "dumpTrainingData," + dumpTrainingData + System.lineSeparator();
+    }
+
+    @Override
+    public String toLog() {
+        return toString();
+    }
+
+    @Override
+    public String toFile() {
+        return toString();
     }
 }

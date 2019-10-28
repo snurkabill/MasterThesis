@@ -30,4 +30,12 @@ public class PaperEpisodeResults<
     public boolean isRiskHit() {
         return getFinalState().isRiskHit();
     }
+
+    @Override
+    public String episodeMetadataToFile() {
+        String super_ =  super.episodeMetadataToFile();
+        var sb = new StringBuilder(super_);
+        appendLine(sb, "Risk Hit", String.valueOf(getFinalState().isRiskHit()));
+        return sb.toString();
+    }
 }

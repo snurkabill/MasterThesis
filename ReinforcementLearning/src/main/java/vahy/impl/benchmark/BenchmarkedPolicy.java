@@ -1,4 +1,4 @@
-package vahy.api.benchmark;
+package vahy.impl.benchmark;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;

@@ -1,4 +1,4 @@
-package vahy.paperGenerics.reinforcement.learning;
+package vahy.api.learning;
 
 public enum ApproximatorType {
 

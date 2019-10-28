@@ -1,4 +1,4 @@
-package vahy.config;
+package vahy.impl.config;
 
 public enum StochasticStrategy {
 

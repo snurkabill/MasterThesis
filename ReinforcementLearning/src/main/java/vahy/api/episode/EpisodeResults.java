@@ -27,4 +27,6 @@ public interface EpisodeResults<
 
     TState getFinalState();
 
+    String episodeMetadataToFile();
+
 }

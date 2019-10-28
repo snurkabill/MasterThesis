@@ -1,5 +1,6 @@
-package vahy.api.benchmark;
+package vahy.impl.benchmark;
 
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.model.Action;
 import vahy.api.model.State;

@@ -10,7 +10,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
+import vahy.api.learning.ApproximatorType;
 import vahy.config.SelectorType;
 
 import java.util.function.Supplier;

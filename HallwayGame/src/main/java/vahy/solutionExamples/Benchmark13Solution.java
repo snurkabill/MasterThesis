@@ -6,9 +6,9 @@ import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.SelectorType;
-import vahy.config.StochasticStrategy;
-import vahy.config.SystemConfig;
-import vahy.config.SystemConfigBuilder;
+import vahy.impl.config.StochasticStrategy;
+import vahy.api.experiment.SystemConfig;
+import vahy.api.experiment.SystemConfigBuilder;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
@@ -21,7 +21,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
+import vahy.api.learning.ApproximatorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
 

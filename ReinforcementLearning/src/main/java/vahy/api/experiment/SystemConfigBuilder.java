@@ -1,5 +1,6 @@
-package vahy.config;
+package vahy.api.experiment;
 
+import vahy.impl.config.StochasticStrategy;
 import vahy.utils.EnumUtils;
 
 import java.util.SplittableRandom;

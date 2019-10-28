@@ -1,7 +1,8 @@
-package vahy.api.benchmark;
+package vahy.impl.benchmark;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.model.Action;
