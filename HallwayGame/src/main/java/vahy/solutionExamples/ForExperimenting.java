@@ -24,6 +24,7 @@ import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ThirdPartBinaryUtils;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 public class ForExperimenting {
@@ -38,20 +39,25 @@ public class ForExperimenting {
             .stateRepresentation(StateRepresentation.COMPACT) // don't change this.
             .hallwayInstance(HallwayInstance.BENCHMARK_05) // experiment examples are in /resources/examples/benchmark/
             .buildConfig();
-        var setup = createExperiment();
-        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig);
+
+        var riskList = Arrays.asList(0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0);
+
+        for (int i = 0; i < riskList.size(); i++) {
+            var setup = createExperimentSetup(riskList.get(i));
+            var experiment = new Experiment(setup.getFirst(), setup.getSecond());
+            experiment.run(gameConfig);
+        }
 
     }
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperimentSetup(double globalRiskParameter) {
 
         var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)  // when REPRODUCIBlE, randomSeed is used, otherwise randomSeed is randomly generated from time seed, keep as is, since linear program is not reproducible anyway ...
-            .setDrawWindow(true)  // drawing progress windows during training process
+            .setDrawWindow(false)  // drawing progress windows during training process
             .setParallelThreadsCount(4)   // ideally count of CPU cores (or CPU cores -1 if other applications are present)
-            .setSingleThreadedEvaluation(false)  // when true, only one thread is used for evaluation (leave it as is for time measurements)
+            .setSingleThreadedEvaluation(false)  // when true, only one thread is used for evaluation (set true for time measurements)
             .setEvalEpisodeCount(1000)  // how many times evaluation of trained policy is performed
             .setDumpTrainingData(true) // true for dumping training episodes as well
             .buildSystemConfig();
@@ -80,19 +86,19 @@ public class ForExperimenting {
 
             .approximatorType(ApproximatorType.HASHMAP_LR)  // don't  change. very relevant. very experimental. very unstable. requires NN models as well. keep as is.
 
-            .globalRiskAllowed(1.00) // risk threshold. by far most important parameter. Delta in paper. when equals to 0, no risk is allowed. when equals to 1, no linear program optimization is performed.
+            .globalRiskAllowed(globalRiskParameter) // risk threshold. by far most important parameter. Delta in paper. when equals to 0, no risk is allowed. when equals to 1, no linear program optimization is performed.
 
             .selectorType(SelectorType.UCB) // not relevant. keep as is.
 
             .riskSupplier(new Supplier<Double>() {  // risk supplier during training. called when new policy is created to be sampled for episode. check different BenchmarkSolutions for modeling function of call count.
                 @Override
                 public Double get() {
-                    return 1.00;
+                    return globalRiskParameter;
                 }
 
                 @Override
                 public String toString() {
-                    return "() -> 1.00";
+                    return "globalRiskParameter";
                 }
             })
 
