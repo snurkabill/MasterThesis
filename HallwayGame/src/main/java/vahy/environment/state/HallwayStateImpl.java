@@ -335,7 +335,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
 
     @Override
     public boolean isFinalState() {
-        return isAgentKilled || rewardsLeft == 0 || hasAgentResigned;
+        return isAgentKilled || (rewardsLeft == 0 && isAgentTurn) || hasAgentResigned;
     }
 
     public boolean isAgentKilled() {
