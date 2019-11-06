@@ -1,20 +1,17 @@
 package vahy.experiment;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.PaperGenericsPrototype;
-import vahy.impl.benchmark.BenchmarkedPolicy;
-import vahy.impl.benchmark.PolicyBenchmark;
-import vahy.impl.benchmark.PolicyResults;
+import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.Action;
 import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
+import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.AlgorithmConfig;
-import vahy.api.experiment.SystemConfig;
 import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.EnvironmentPolicySupplier;
 import vahy.environment.config.GameConfig;
@@ -24,6 +21,10 @@ import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.HallwayGameSupplierFactory;
 import vahy.game.HallwayInstance;
 import vahy.game.NotValidGameStringRepresentationException;
+import vahy.impl.benchmark.BenchmarkedPolicy;
+import vahy.impl.benchmark.PolicyBenchmark;
+import vahy.impl.benchmark.PolicyResults;
+import vahy.impl.experiment.PolicyTrainingCycle;
 import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
@@ -56,7 +57,9 @@ import vahy.paperGenerics.selector.RiskBasedSelectorVahy;
 import vahy.utils.EnumUtils;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -72,6 +75,7 @@ public class Experiment {
     private final SystemConfig systemConfig;
     private final SplittableRandom masterRandom;
     private final long finalRandomSeed;
+    private GameConfig gameConfig;
 
     // general
     private ProgressTrackerSettings progressTrackerSettings;
@@ -145,6 +149,7 @@ public class Experiment {
 
 
     public void run(GameConfig gameConfig, HallwayInstance gameInstance) {
+        this.gameConfig = gameConfig;
         try {
             initializeInstanceSupplier(gameConfig, gameInstance);
         } catch (IOException | NotValidGameStringRepresentationException e) {
@@ -214,7 +219,7 @@ public class Experiment {
     }
 
     private void createPolicyAndRunProcess(
-        PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> evaluator) {
+        NodeEvaluator<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> evaluator) {
         Supplier<NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl>> nodeSelector = this::createNodeSelector;
 
         var paperPolicySupplier = new PaperPolicySupplier<>(
@@ -233,15 +238,20 @@ public class Experiment {
 
         var trainer = getAbstractTrainer(paperPolicySupplier);
 
-        var startTrainingMillis = System.currentTimeMillis();
-        trainPolicy(trainer);
-        var endTrainingMillis = System.currentTimeMillis();
-        var trainingDurationMillis = endTrainingMillis - startTrainingMillis;
+        String resultMasterFolderName = "Results";
+        File tempPathDeleteMe = new File(resultMasterFolderName, resultMasterFolderName);
 
+        var masterPolicyTrainer = new PolicyTrainingCycle<>(
+            systemConfig,
+            algorithmConfig,
+            new vahy.impl.experiment.EpisodeWriter<>(gameConfig, algorithmConfig, systemConfig, tempPathDeleteMe.toPath()),
+            trainer
+        );
+        var trainingDuration = masterPolicyTrainer.executeTrainingPolicy();
 
         var policyList = Arrays.asList(new BenchmarkedPolicy<>(evaluator.getClass().getName(), paperPolicySupplier));
         this.results = evaluatePolicy(policyList);
-        printResults(policyList, trainingDurationMillis);
+        printResults(policyList, trainingDuration);
 
         if(results.size() > 1) {
             throw new IllegalStateException("It is not implemented to benchmark multiple policies at the same time");
@@ -249,7 +259,7 @@ public class Experiment {
         episodeWriter.writeEvaluationEpisode(results.get(0).getEpisodeList());
     }
 
-    private void printResults(List<BenchmarkedPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> policyList, long trainingTimeInMs) {
+    private void printResults(List<BenchmarkedPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> policyList, Duration trainingDuration) {
         for (var policyEntry : policyList) {
             var nnResults = results
                 .stream()
@@ -257,8 +267,8 @@ public class Experiment {
                 .findFirst()
                 .get();
             logger.info("[{}]", nnResults.getEpisodeStatistics().printToLog());
-            logger.info("Training time: [{}]ms", trainingTimeInMs);
-            logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getBenchmarkingMilliseconds());
+            logger.info("Training time: [{}]ms", trainingDuration.toMillis());
+            logger.info("Total time: [{}]ms", trainingDuration.toMillis() + nnResults.getBenchmarkingMilliseconds());
         }
     }
 
@@ -349,8 +359,7 @@ public class Experiment {
         logger.info("DONE!!!");
     }
 
-    @NotNull
-    private PaperNodeEvaluator<HallwayAction, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> resolveEvaluator() {
+    private NodeEvaluator<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> resolveEvaluator() {
         var evaluatorType = algorithmConfig.getEvaluatorType();
         var discountFactor = algorithmConfig.getDiscountFactor();
         var batchedEvaluationSize = algorithmConfig.getBatchedEvaluationSize();

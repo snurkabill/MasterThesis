@@ -39,7 +39,7 @@ public class PaperGameSampler<
     private void createDataGenerators() {
         var dataPointGeneratorList = new ArrayList<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord>>();
         dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
-            "Avt risk ratio",
+            "Avg risk ratio",
             episodeResults -> MathStreamUtils.calculateAverage(episodeResults, x -> x.getFinalState().isRiskHit() ? 1.0 : 0.0)));
         registerDataGenerators(dataPointGeneratorList);
     }

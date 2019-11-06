@@ -12,7 +12,7 @@ import vahy.api.learning.ApproximatorType;
 
 import java.util.function.Supplier;
 
-public class AlgorithmConfig {
+public class AlgorithmConfig implements vahy.api.experiment.AlgorithmConfig {
 
     // MCTS
     private final double cpuctParameter;
@@ -271,5 +271,15 @@ public class AlgorithmConfig {
             "subTreeRiskCalculatorTypeForKnownFlow," + subTreeRiskCalculatorTypeForKnownFlow + System.lineSeparator() +
             "subTreeRiskCalculatorTypeForUnknownFlow," + subTreeRiskCalculatorTypeForUnknownFlow + System.lineSeparator() +
             "batchedEvaluationSize," + batchedEvaluationSize + System.lineSeparator();
+    }
+
+    @Override
+    public String toLog() {
+        return toString();
+    }
+
+    @Override
+    public String toFile() {
+        return toString();
     }
 }
