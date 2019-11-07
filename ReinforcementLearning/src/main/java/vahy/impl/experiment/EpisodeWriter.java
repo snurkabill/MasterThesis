@@ -29,16 +29,10 @@ public class EpisodeWriter<
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    private final ProblemConfig problemConfig;
-    private final AlgorithmConfig algorithmConfig;
-    private final SystemConfig systemConfig;
     private final Path rootPath;
     private final Path fullPath;
 
     public EpisodeWriter(ProblemConfig problemConfig, AlgorithmConfig algorithmConfig, SystemConfig systemConfig, Path path) {
-        this.problemConfig = problemConfig;
-        this.algorithmConfig = algorithmConfig;
-        this.systemConfig = systemConfig;
         this.rootPath = path;
 
         File resultFolder = this.rootPath.toFile();

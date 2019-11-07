@@ -2,7 +2,7 @@ package vahy.integration;
 
 import org.testng.annotations.DataProvider;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigImpl;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
@@ -100,7 +100,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
     }
 
 
-    public static AlgorithmConfig createExperiment_SAFE() {
+    public static AlgorithmConfigImpl createExperiment_SAFE() {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
@@ -108,7 +108,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
             .buildAlgorithmConfig();
     }
 
-    public static AlgorithmConfig createExperiment_TOTAL_RISK() {
+    public static AlgorithmConfigImpl createExperiment_TOTAL_RISK() {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
@@ -116,7 +116,7 @@ public class IntegrationHallway05 extends AbstractHallwayTest {
             .buildAlgorithmConfig();
     }
 
-    public static AlgorithmConfig createExperiment_MIDDLE_RISK() {
+    public static AlgorithmConfigImpl createExperiment_MIDDLE_RISK() {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)

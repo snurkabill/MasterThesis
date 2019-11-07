@@ -12,10 +12,9 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.PaperPolicySupplier;
-import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTrackerSettings;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class PaperGameSampler<
     TAction extends Enum<TAction> & Action,
@@ -31,17 +30,18 @@ public class PaperGameSampler<
                             PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,
                             PolicyMode policyMode,
                             ProgressTrackerSettings progressTrackerSettings,
-                            int processingUnitCount) {
-        super(initialStateSupplier, resultsFactory, policyMode, progressTrackerSettings, processingUnitCount, playerPolicySupplier, opponentPolicySupplier);
-        createDataGenerators();
+                            int processingUnitCount,
+                            List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord>> additionalDataPointGeneratorList) {
+        super(initialStateSupplier, resultsFactory, policyMode, progressTrackerSettings, processingUnitCount, playerPolicySupplier, opponentPolicySupplier, additionalDataPointGeneratorList);
+//        createDataGenerators();
     }
 
-    private void createDataGenerators() {
-        var dataPointGeneratorList = new ArrayList<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord>>();
-        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
-            "Avg risk ratio",
-            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, x -> x.getFinalState().isRiskHit() ? 1.0 : 0.0)));
-        registerDataGenerators(dataPointGeneratorList);
-    }
+//    private void createDataGenerators() {
+//        var dataPointGeneratorList = new ArrayList<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord>>();
+//        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+//            "Avg risk ratio",
+//            episodeResults -> MathStreamUtils.calculateAverage(episodeResults, x -> x.getFinalState().isRiskHit() ? 1.0 : 0.0)));
+//        registerDataGenerators(dataPointGeneratorList);
+//    }
 
 }

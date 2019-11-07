@@ -3,9 +3,6 @@ package vahy.experiment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.RandomWalkExample;
-import vahy.impl.benchmark.BenchmarkedPolicy;
-import vahy.impl.benchmark.PolicyBenchmark;
-import vahy.impl.benchmark.PolicyResults;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.policy.PolicyMode;
@@ -17,9 +14,14 @@ import vahy.environment.RandomWalkInitialInstanceSupplier;
 import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
 import vahy.environment.RandomWalkState;
+import vahy.impl.benchmark.BenchmarkedPolicy;
+import vahy.impl.benchmark.PolicyBenchmark;
+import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
+import vahy.impl.learning.trainer.GameSamplerImpl;
+import vahy.impl.learning.trainer.Trainer;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.EmptyPredictor;
@@ -39,8 +41,7 @@ import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
-import vahy.paperGenerics.reinforcement.episode.PaperGameSampler;
-import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
+import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.utils.EnumUtils;
@@ -233,7 +234,7 @@ public class Experiment {
         outputWriter.close();
     }
 
-    private long trainPolicy(ExperimentSetup experimentSetup, PaperTrainer trainer) {
+    private long trainPolicy(ExperimentSetup experimentSetup, Trainer trainer) {
         long trainingStart = System.currentTimeMillis();
         for (int i = 0; i < experimentSetup.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
@@ -267,7 +268,8 @@ public class Experiment {
             randomWalkInitialInstanceSupplier,
             new PaperEpisodeResultsFactory<>(),
             new PaperEpisodeStatisticsCalculator<>(),
-            progressTrackerSettings
+            progressTrackerSettings,
+            null
         );
         long start = System.currentTimeMillis();
         var policyResultList = benchmark.runBenchmark(experimentSetup.getEvalEpisodeCount(), experimentSetup.getMaximalStepCountBound(), 1);
@@ -281,12 +283,12 @@ public class Experiment {
             .get();
         logger.info("[{}]", nnResults.getEpisodeStatistics().printToLog());
         logger.info("Training time: [{}]ms", trainingTimeInMs);
-        logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getBenchmarkingMilliseconds());
+        logger.info("Total time: [{}]ms", trainingTimeInMs + nnResults.getBenchmarkingDuration().toMillis());
 
         return policyResultList;
     }
 
-    private PaperTrainer<RandomWalkAction, RandomWalkProbabilities, RandomWalkState, PaperPolicyRecord> getAbstractTrainer(
+    private Trainer<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState, PaperPolicyRecord> getAbstractTrainer(
         DataAggregationAlgorithm dataAggregationAlgorithm,
         SplittableRandom random,
         RandomWalkInitialInstanceSupplier randomWalkInitialInstanceSupplier,
@@ -296,17 +298,18 @@ public class Experiment {
         int replayBufferSize,
         ProgressTrackerSettings progressTrackerSettings) {
 
-        var gameSampler = new PaperGameSampler<>(
+        var gameSampler = new GameSamplerImpl<>(
             randomWalkInitialInstanceSupplier,
             new PaperEpisodeResultsFactory<>(),
-            paperPolicySupplier,
-            new RandomWalkOpponentSupplier(random.split()),
             PolicyMode.TRAINING,
             progressTrackerSettings,
-            1);
+            1,
+            paperPolicySupplier,
+            new RandomWalkOpponentSupplier(random.split()),
+            null);
 
         var dataAggregator =  resolveDataAggerator(dataAggregationAlgorithm, replayBufferSize);
-        return new PaperTrainer<>(gameSampler, predictor, discountFactor, dataAggregator);
+        return new Trainer<>(predictor, gameSampler, dataAggregator, new PaperEpisodeDataMaker<>(discountFactor));
     }
 
     private DataAggregator resolveDataAggerator(DataAggregationAlgorithm trainerAlgorithm, int replayBufferSize) {

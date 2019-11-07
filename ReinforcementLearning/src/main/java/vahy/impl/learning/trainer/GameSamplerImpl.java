@@ -16,7 +16,6 @@ import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.EpisodeSetupImpl;
 import vahy.impl.episode.EpisodeSimulatorImpl;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
@@ -31,11 +30,11 @@ import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
+    TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord>
-    implements GameSampler {
+    implements GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
@@ -59,7 +58,8 @@ public class GameSamplerImpl<
         ProgressTrackerSettings progressTrackerSettings,
         int processingUnitCount,
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier,
-        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier)
+        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
+        List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList)
     {
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
@@ -68,11 +68,11 @@ public class GameSamplerImpl<
         this.progressTracker = new ProgressTracker(progressTrackerSettings);
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
-        createDataGenerators();
+        createDataGenerators(additionalDataPointGeneratorList);
     }
 
-    private void createDataGenerators() {
-        var dataPointGeneratorList = new ArrayList<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>();
+    private void createDataGenerators(List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList) {
+        var dataPointGeneratorList = new ArrayList<>(additionalDataPointGeneratorList == null ? new ArrayList<>() : additionalDataPointGeneratorList);
 
         dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
             "Avg Player Step Count",

@@ -4,6 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyRecord;
 
 import java.util.SplittableRandom;
 
@@ -12,7 +13,7 @@ public abstract class AbstractRandomWalkPolicy<
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-        TPolicyRecord>
+        TPolicyRecord extends PolicyRecord>
     implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private final SplittableRandom random;

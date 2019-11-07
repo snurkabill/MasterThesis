@@ -1,7 +1,7 @@
 package vahy.solutionExamples;
 
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigImpl;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.SelectorType;
 import vahy.impl.config.StochasticStrategy;
@@ -45,7 +45,7 @@ public class Benchmark12Solution {
 
     }
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+    public static ImmutableTuple<AlgorithmConfigImpl, SystemConfig> createExperiment() {
 
         var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)

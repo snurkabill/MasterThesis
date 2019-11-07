@@ -47,4 +47,14 @@ public class GameConfigImpl implements GameConfig {
             "noisyMoveProbability," + noisyMoveProbability + System.lineSeparator() +
             "stateRepresentation," + stateRepresentation + System.lineSeparator();
     }
+
+    @Override
+    public String toLog() {
+        return toString();
+    }
+
+    @Override
+    public String toFile() {
+        return toString();
+    }
 }

@@ -3,6 +3,8 @@ package vahy.api.experiment;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 
+import java.util.function.Supplier;
+
 public interface AlgorithmConfig extends Config {
 
     double getDiscountFactor();
@@ -15,9 +17,9 @@ public interface AlgorithmConfig extends Config {
 
     int getStageCount();
 
-    ParameterSupplier<Double> getExplorationConstantSupplier();
+    Supplier<Double> getExplorationConstantSupplier();
 
-    ParameterSupplier<Double> getTemperatureSupplier();
+    Supplier<Double> getTemperatureSupplier();
 
     DataAggregationAlgorithm getDataAggregationAlgorithm();
 

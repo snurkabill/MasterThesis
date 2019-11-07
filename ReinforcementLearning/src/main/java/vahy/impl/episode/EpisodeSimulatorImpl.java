@@ -2,9 +2,9 @@ package vahy.impl.episode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.episode.EpisodeSetup;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
+import vahy.api.episode.EpisodeSetup;
 import vahy.api.episode.EpisodeSimulator;
 import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.model.Action;
@@ -13,7 +13,6 @@ import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
-import vahy.impl.model.observation.DoubleVector;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import java.util.List;
 
 public class EpisodeSimulatorImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
+    TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord>

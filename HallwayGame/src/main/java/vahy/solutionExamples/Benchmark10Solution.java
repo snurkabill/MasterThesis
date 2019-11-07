@@ -3,7 +3,7 @@ package vahy.solutionExamples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigImpl;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
@@ -48,7 +48,7 @@ public class Benchmark10Solution {
         experiment.run(gameConfig, HallwayInstance.BENCHMARK_10);
     }
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+    public static ImmutableTuple<AlgorithmConfigImpl, SystemConfig> createExperiment() {
 
         var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)
@@ -62,7 +62,7 @@ public class Benchmark10Solution {
 
         int batchSize = 100;
 
-        AlgorithmConfig algorithmConfig = new AlgorithmConfigBuilder()
+        AlgorithmConfigImpl algorithmConfig = new AlgorithmConfigBuilder()
 
             //MCTS
             .cpuctParameter(3)

@@ -8,6 +8,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
 import vahy.impl.model.observation.DoubleVector;
 
+import java.time.Duration;
 import java.util.List;
 
 public class PolicyResults<
@@ -20,16 +21,16 @@ public class PolicyResults<
     private final BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy;
     private final List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeList;
     private final EpisodeStatistics episodeStatistics;
-    private final long benchmarkingMilliseconds;
+    private final Duration benchmarkingDuration;
 
     public PolicyResults(BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy,
                          List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeList,
                          EpisodeStatistics episodeStatistics,
-                         long benchmarkingMilliseconds) {
+                         Duration benchmarkingDuration) {
         this.policy = policy;
         this.episodeList = episodeList;
         this.episodeStatistics = episodeStatistics;
-        this.benchmarkingMilliseconds = benchmarkingMilliseconds;
+        this.benchmarkingDuration = benchmarkingDuration;
     }
 
     public BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getPolicy() {
@@ -40,8 +41,8 @@ public class PolicyResults<
         return episodeList;
     }
 
-    public long getBenchmarkingMilliseconds() {
-        return benchmarkingMilliseconds;
+    public Duration getBenchmarkingDuration() {
+        return benchmarkingDuration;
     }
 
     public EpisodeStatistics getEpisodeStatistics() {

@@ -45,4 +45,14 @@ public class DefaultGameConfig implements GameConfig {
             ", stateRepresentation=" + stateRepresentation +
             '}';
     }
+
+    @Override
+    public String toLog() {
+        return toString();
+    }
+
+    @Override
+    public String toFile() {
+        return toString();
+    }
 }

@@ -4,14 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.PaperGenericsPrototype;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.Action;
 import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
-import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigImpl;
 import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.EnvironmentPolicySupplier;
 import vahy.environment.config.GameConfig;
@@ -25,9 +23,8 @@ import vahy.impl.benchmark.BenchmarkedPolicy;
 import vahy.impl.benchmark.PolicyBenchmark;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.experiment.PolicyTrainingCycle;
-import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
-import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
-import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
+import vahy.impl.learning.trainer.GameSamplerImpl;
+import vahy.impl.learning.trainer.Trainer;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.EmptyPredictor;
@@ -47,8 +44,7 @@ import vahy.paperGenerics.policy.PaperPolicySupplier;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
-import vahy.paperGenerics.reinforcement.episode.PaperGameSampler;
-import vahy.paperGenerics.reinforcement.learning.PaperTrainer;
+import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker;
 import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.selector.PaperNodeSelector;
@@ -61,8 +57,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
@@ -71,7 +65,7 @@ public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private final AlgorithmConfig algorithmConfig;
+    private final AlgorithmConfigImpl algorithmConfig;
     private final SystemConfig systemConfig;
     private final SplittableRandom masterRandom;
     private final long finalRandomSeed;
@@ -108,7 +102,7 @@ public class Experiment {
 
     private List<PolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> results;
 
-    public Experiment(AlgorithmConfig algorithmConfig, SystemConfig systemConfig) {
+    public Experiment(AlgorithmConfigImpl algorithmConfig, SystemConfig systemConfig) {
         this.algorithmConfig = algorithmConfig;
         this.systemConfig = systemConfig;
         var finalRandomSeed = systemConfig.getRandomSeed();
@@ -268,19 +262,19 @@ public class Experiment {
                 .get();
             logger.info("[{}]", nnResults.getEpisodeStatistics().printToLog());
             logger.info("Training time: [{}]ms", trainingDuration.toMillis());
-            logger.info("Total time: [{}]ms", trainingDuration.toMillis() + nnResults.getBenchmarkingMilliseconds());
+            logger.info("Total time: [{}]ms", trainingDuration.toMillis() + nnResults.getBenchmarkingDuration().toMillis());
         }
     }
 
-    private void trainPolicy(PaperTrainer trainer) {
-        for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
-            logger.info("Training policy for [{}]th iteration", i);
-            var episodes = trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount(), algorithmConfig.getMaximalStepCountBound());
-            if(systemConfig.dumpTrainingData()) {
-                episodeWriter.writeTrainingEpisode(i, episodes);
-            }
-        }
-    }
+//    private void trainPolicy(PaperTrainer trainer) {
+//        for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
+//            logger.info("Training policy for [{}]th iteration", i);
+//            var episodes = trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount(), algorithmConfig.getMaximalStepCountBound());
+//            if(systemConfig.dumpTrainingData()) {
+//                episodeWriter.writeTrainingEpisode(i, episodes);
+//            }
+//        }
+//    }
 
     private List<PolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> evaluatePolicy(
         List<BenchmarkedPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> policyList)
@@ -292,46 +286,36 @@ public class Experiment {
             hallwayGameInitialInstanceSupplier,
             new PaperEpisodeResultsFactory<>(),
             new PaperEpisodeStatisticsCalculator<>(),
-            progressTrackerSettings
+            progressTrackerSettings,
+            null
         );
         long start = System.currentTimeMillis();
         var policyResultList = benchmark.runBenchmark(systemConfig.getEvalEpisodeCount(), algorithmConfig.getMaximalStepCountBound(), systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount());
         long end = System.currentTimeMillis();
         var benchmarkingTime = end - start;
-        logger.info("Benchmarking took [{}] milliseconds", benchmarkingTime);
+        logger.info("Benchmarking out-of-the-box took [{}] milliseconds", benchmarkingTime);
         return policyResultList;
     }
 
-    private PaperTrainer<HallwayAction, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> getAbstractTrainer(
+    private Trainer<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord> getAbstractTrainer(
         PaperPolicySupplier<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> paperPolicySupplier)
     {
         var discountFactor = algorithmConfig.getDiscountFactor();
         var trainerAlgorithm = algorithmConfig.getDataAggregationAlgorithm();
 
-        var gameSampler = new PaperGameSampler<>(
+        var gameSampler = new GameSamplerImpl<>(
             hallwayGameInitialInstanceSupplier,
             new PaperEpisodeResultsFactory<>(),
-            paperPolicySupplier,
-            new EnvironmentPolicySupplier(masterRandom.split()),
             PolicyMode.TRAINING,
             progressTrackerSettings,
-            systemConfig.getParallelThreadsCount());
+            systemConfig.getParallelThreadsCount(),
+            paperPolicySupplier,
+            new EnvironmentPolicySupplier(masterRandom.split()),
+            null
+        );
 
-        var dataAggregator = resolveDataAggerator(trainerAlgorithm);
-        return new PaperTrainer<>(gameSampler, approximator, discountFactor, dataAggregator);
-    }
-
-
-    private DataAggregator resolveDataAggerator(DataAggregationAlgorithm trainerAlgorithm) {
-        switch(trainerAlgorithm) {
-            case REPLAY_BUFFER:
-                return new ReplayBufferDataAggregator(algorithmConfig.getReplayBufferSize(), new LinkedList<>());
-            case FIRST_VISIT_MC:
-                return new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-            case EVERY_VISIT_MC:
-                return new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-            default: throw EnumUtils.createExceptionForNotExpectedEnumValue(trainerAlgorithm);
-        }
+        var dataAggregator = trainerAlgorithm.resolveDataAggregator(algorithmConfig);
+        return new Trainer<>(approximator, gameSampler, dataAggregator, new PaperEpisodeDataMaker<>(discountFactor));
     }
 
     private NodeSelector<HallwayAction, DoubleVector, EnvironmentProbabilities, PaperMetadata<HallwayAction>, HallwayStateImpl> createNodeSelector()

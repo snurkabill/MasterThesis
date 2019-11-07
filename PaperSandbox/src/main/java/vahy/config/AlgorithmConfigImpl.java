@@ -1,5 +1,7 @@
 package vahy.config;
 
+import vahy.api.experiment.AlgorithmConfig;
+import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -8,11 +10,10 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.api.learning.ApproximatorType;
 
 import java.util.function.Supplier;
 
-public class AlgorithmConfig implements vahy.api.experiment.AlgorithmConfig {
+public class AlgorithmConfigImpl implements AlgorithmConfig {
 
     // MCTS
     private final double cpuctParameter;
@@ -53,31 +54,31 @@ public class AlgorithmConfig implements vahy.api.experiment.AlgorithmConfig {
 
     private final int batchedEvaluationSize;
 
-    public AlgorithmConfig(double cpuctParameter,
-                           TreeUpdateConditionFactory treeUpdateConditionFactory,
-                           double discountFactor,
-                           int batchEpisodeCount,
-                           int replayBufferSize,
-                           int maximalStepCountBound,
-                           int stageCount,
-                           Supplier<Double> explorationConstantSupplier,
-                           Supplier<Double> temperatureSupplier,
-                           Supplier<Double> riskSupplier,
-                           DataAggregationAlgorithm dataAggregationAlgorithm,
-                           ApproximatorType approximatorType,
-                           EvaluatorType evaluatorType,
-                           SelectorType selectorType,
-                           int trainingBatchSize,
-                           int trainingEpochCount,
-                           double learningRate,
-                           double globalRiskAllowed,
-                           InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
-                           InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
-                           ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
-                           ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
-                           FlowOptimizerType flowOptimizerType,
-                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                           SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize) {
+    public AlgorithmConfigImpl(double cpuctParameter,
+                               TreeUpdateConditionFactory treeUpdateConditionFactory,
+                               double discountFactor,
+                               int batchEpisodeCount,
+                               int replayBufferSize,
+                               int maximalStepCountBound,
+                               int stageCount,
+                               Supplier<Double> explorationConstantSupplier,
+                               Supplier<Double> temperatureSupplier,
+                               Supplier<Double> riskSupplier,
+                               DataAggregationAlgorithm dataAggregationAlgorithm,
+                               ApproximatorType approximatorType,
+                               EvaluatorType evaluatorType,
+                               SelectorType selectorType,
+                               int trainingBatchSize,
+                               int trainingEpochCount,
+                               double learningRate,
+                               double globalRiskAllowed,
+                               InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
+                               InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
+                               ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
+                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
+                               FlowOptimizerType flowOptimizerType,
+                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
+                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize) {
 
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;

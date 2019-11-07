@@ -11,7 +11,7 @@ public interface Policy<
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-        TPolicyRecord> {
+        TPolicyRecord extends PolicyRecord> {
 
     double[] getActionProbabilityDistribution(TState gameState);
 

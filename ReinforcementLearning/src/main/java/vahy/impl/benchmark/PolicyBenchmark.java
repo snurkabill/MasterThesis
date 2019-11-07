@@ -11,10 +11,12 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
+import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,20 +35,22 @@ public class PolicyBenchmark<
     private final ProgressTrackerSettings progressTrackerSettings;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
     private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator;
-
+    private final List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList;
 
     public PolicyBenchmark(List<BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> policyList,
                            PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> environmentPolicySupplier,
                            InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                            EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
                            EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
-                           ProgressTrackerSettings progressTrackerSettings) {
+                           ProgressTrackerSettings progressTrackerSettings,
+                           List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList) {
         this.policyList = policyList;
         this.environmentPolicySupplier = environmentPolicySupplier;
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
         this.progressTrackerSettings = progressTrackerSettings;
         this.episodeStatisticsCalculator = episodeStatisticsCalculator;
+        this.additionalDataPointGeneratorList = additionalDataPointGeneratorList;
     }
 
     public List<PolicyResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> runBenchmark(
@@ -65,12 +69,13 @@ public class PolicyBenchmark<
                 progressTrackerSettings,
                 threadCount,
                 benchmarkingPolicy.getPolicySupplier(),
-                environmentPolicySupplier);
+                environmentPolicySupplier,
+                additionalDataPointGeneratorList);
             long start = System.currentTimeMillis();
             var episodeList = gameSampler.sampleEpisodes(episodeCount, stepCountLimit);
             long end = System.currentTimeMillis();
-            logger.info("Benchmarking [{}] policy took [{}] nanosecond", benchmarkingPolicy.getPolicyName(), end - start);
-            results.add(new PolicyResults<>(benchmarkingPolicy, episodeList, episodeStatisticsCalculator.calculateStatistics(episodeList), (end - start)));
+            logger.info("Benchmarking [{}] policy took [{}] milliseconds", benchmarkingPolicy.getPolicyName(), end - start);
+            results.add(new PolicyResults<>(benchmarkingPolicy, episodeList, episodeStatisticsCalculator.calculateStatistics(episodeList), Duration.ofMillis(end - start)));
         }
         return results;
     }

@@ -8,7 +8,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
-import vahy.impl.learning.trainer.AbstractTrainer;
+import vahy.impl.learning.trainer.Trainer;
 
 import java.time.Duration;
 
@@ -24,13 +24,13 @@ public class PolicyTrainingCycle<
     private final SystemConfig systemConfig;
     private final AlgorithmConfig algorithmConfig;
     private final EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
-    private final AbstractTrainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> trainer;
+    private final Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> trainer;
 
 
     public PolicyTrainingCycle(SystemConfig systemConfig,
                                AlgorithmConfig algorithmConfig,
                                EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter,
-                               AbstractTrainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> trainer) {
+                               Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> trainer) {
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
         this.episodeWriter = episodeWriter;

@@ -1,7 +1,7 @@
 package vahy.solutionExamples;
 
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfig;
+import vahy.config.AlgorithmConfigImpl;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
@@ -46,7 +46,7 @@ public class Benchmark07Solution {
         experiment.run(gameConfig, HallwayInstance.BENCHMARK_07);
     }
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
+    public static ImmutableTuple<AlgorithmConfigImpl, SystemConfig> createExperiment() {
 
         var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)

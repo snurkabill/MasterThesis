@@ -9,7 +9,7 @@ public interface PolicySupplier<
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-        TPolicyRecord> {
+        TPolicyRecord extends PolicyRecord> {
 
     Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode);
 

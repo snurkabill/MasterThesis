@@ -2,7 +2,6 @@ package vahy.environment.agent.policy.environment;
 
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
@@ -13,7 +12,7 @@ import vahy.utils.RandomDistributionUtils;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicy<TPolicyRecord> implements Policy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, TPolicyRecord> {
+public class EnvironmentPolicy<TPolicyRecord extends PolicyRecord> implements Policy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, TPolicyRecord> {
 
     private final SplittableRandom random;
 
