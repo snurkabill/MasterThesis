@@ -13,7 +13,6 @@ import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.learning.trainer.GameSamplerImpl;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.time.Duration;
@@ -22,7 +21,7 @@ import java.util.List;
 
 public class PolicyBenchmark<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
+    TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {

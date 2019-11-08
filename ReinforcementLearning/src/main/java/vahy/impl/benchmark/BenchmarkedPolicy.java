@@ -5,11 +5,10 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
-import vahy.impl.model.observation.DoubleVector;
 
 public class BenchmarkedPolicy<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
+    TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {

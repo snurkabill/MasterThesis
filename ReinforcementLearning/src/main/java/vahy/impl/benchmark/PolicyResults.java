@@ -6,14 +6,13 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
-import vahy.impl.model.observation.DoubleVector;
 
 import java.time.Duration;
 import java.util.List;
 
 public class PolicyResults<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
+    TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
