@@ -30,6 +30,16 @@ public enum TestAction implements Action {
         return charRepresentation;
     }
 
+    @Override
+    public Action[] getAllPlayerActions() {
+        return playerActions;
+    }
+
+    @Override
+    public Action[] getAllOpponentActions() {
+        return opponentActions;
+    }
+
     public boolean isPlayerAction() {
         return isPlayerAction;
     }
@@ -55,5 +65,7 @@ public enum TestAction implements Action {
     public double getReward() {
         return reward;
     }
+
+
 
 }

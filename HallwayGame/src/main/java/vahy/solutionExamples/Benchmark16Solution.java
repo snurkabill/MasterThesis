@@ -3,7 +3,7 @@ package vahy.solutionExamples;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfigImpl;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.SelectorType;
 import vahy.impl.config.StochasticStrategy;
@@ -50,7 +50,7 @@ public class Benchmark16Solution {
     }
 
 
-    public static ImmutableTuple<AlgorithmConfigImpl, SystemConfig> createExperiment() {
+    public static ImmutableTuple<PaperAlgorithmConfig, SystemConfig> createExperiment() {
 
         var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)

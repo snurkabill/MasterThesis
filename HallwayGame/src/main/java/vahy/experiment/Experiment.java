@@ -9,7 +9,7 @@ import vahy.api.policy.PolicyMode;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
-import vahy.config.AlgorithmConfigImpl;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.EnvironmentPolicySupplier;
 import vahy.environment.config.GameConfig;
@@ -65,7 +65,7 @@ public class Experiment {
 
     private final Logger logger = LoggerFactory.getLogger(Experiment.class);
 
-    private final AlgorithmConfigImpl algorithmConfig;
+    private final PaperAlgorithmConfig algorithmConfig;
     private final SystemConfig systemConfig;
     private final SplittableRandom masterRandom;
     private final long finalRandomSeed;
@@ -102,7 +102,7 @@ public class Experiment {
 
     private List<PolicyResults<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, PaperPolicyRecord>> results;
 
-    public Experiment(AlgorithmConfigImpl algorithmConfig, SystemConfig systemConfig) {
+    public Experiment(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig) {
         this.algorithmConfig = algorithmConfig;
         this.systemConfig = systemConfig;
         var finalRandomSeed = systemConfig.getRandomSeed();

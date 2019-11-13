@@ -2,6 +2,7 @@ package vahy.paperGenerics.reinforcement.episode;
 
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
@@ -17,14 +18,15 @@ import vahy.vizualiation.ProgressTrackerSettings;
 import java.util.List;
 
 public class PaperGameSampler<
+    TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends GameSamplerImpl<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> {
+    extends GameSamplerImpl<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> {
 
-    public PaperGameSampler(InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+    public PaperGameSampler(InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                             EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> resultsFactory,
                             PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playerPolicySupplier,
                             PaperPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentPolicySupplier,

@@ -1,23 +1,21 @@
 package vahy.environment.agent.policy.environment;
 
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
 import vahy.environment.HallwayAction;
 import vahy.environment.state.EnvironmentProbabilities;
 import vahy.environment.state.HallwayStateImpl;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.policy.RandomizedPolicy;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EnvironmentPolicy<TPolicyRecord extends PolicyRecord> implements Policy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, TPolicyRecord> {
-
-    private final SplittableRandom random;
+public class EnvironmentPolicy<TPolicyRecord extends PolicyRecord> extends RandomizedPolicy<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl, TPolicyRecord> {
 
     public EnvironmentPolicy(SplittableRandom random) {
-        this.random = random;
+        super(random);
     }
 
     @Override

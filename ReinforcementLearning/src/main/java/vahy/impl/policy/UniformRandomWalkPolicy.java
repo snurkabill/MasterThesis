@@ -1,4 +1,4 @@
-package vahy.impl.policy.random;
+package vahy.impl.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -13,7 +13,7 @@ public class UniformRandomWalkPolicy<TAction extends Action,
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractRandomWalkPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, PolicyRecordBase> {
+    extends RandomizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, PolicyRecordBase> {
 
     public UniformRandomWalkPolicy(SplittableRandom random) {
         super(random);
@@ -29,7 +29,7 @@ public class UniformRandomWalkPolicy<TAction extends Action,
     @Override
     public TAction getDiscreteAction(TState gameState) {
         TAction[] actions = gameState.getAllPossibleActions();
-        return actions[getRandom().nextInt(actions.length)];
+        return actions[random.nextInt(actions.length)];
     }
 
     @Override

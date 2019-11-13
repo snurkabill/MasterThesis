@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PolicyBenchmark<
+    TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -30,7 +32,7 @@ public class PolicyBenchmark<
 
     private final List<BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> policyList;
     private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> environmentPolicySupplier;
-    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
+    private final InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
     private final ProgressTrackerSettings progressTrackerSettings;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
     private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator;
@@ -38,7 +40,7 @@ public class PolicyBenchmark<
 
     public PolicyBenchmark(List<BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> policyList,
                            PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> environmentPolicySupplier,
-                           InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                           InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                            EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
                            EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
                            ProgressTrackerSettings progressTrackerSettings,

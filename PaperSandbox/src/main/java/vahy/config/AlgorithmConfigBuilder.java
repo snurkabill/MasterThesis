@@ -169,8 +169,8 @@ public class AlgorithmConfigBuilder {
         return this;
     }
 
-    public AlgorithmConfigImpl buildAlgorithmConfig() {
-        return new AlgorithmConfigImpl(
+    public PaperAlgorithmConfig buildAlgorithmConfig() {
+        return new PaperAlgorithmConfig(
             cpuctParameter,
             treeUpdateConditionFactory,
             discountFactor,

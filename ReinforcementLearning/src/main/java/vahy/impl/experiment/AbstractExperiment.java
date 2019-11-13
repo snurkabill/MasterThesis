@@ -15,20 +15,20 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.benchmark.BenchmarkedPolicy;
 import vahy.impl.benchmark.PolicyBenchmark;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.impl.learning.trainer.Trainer;
-import vahy.impl.predictor.TrainableApproximator;
 import vahy.vizualiation.ProgressTrackerSettings;
 
-import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
 public class AbstractExperiment<
+    TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -40,18 +40,16 @@ public class AbstractExperiment<
     public void run(PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier,
                     PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
                     EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
-                    InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                    InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                     ProgressTrackerSettings progressTrackerSettings,
                     List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList,
-                    TrainableApproximator trainableApproximator,
+                    TrainablePredictor trainablePredictor,
                     EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
                     EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
-                    Path path,
+                    EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter,
                     SystemConfig systemConfig,
-                    AlgorithmConfig algorithmConfig,
-                    ProblemConfig problemConfig)
+                    AlgorithmConfig algorithmConfig)
     {
-        var episodeWriter = new EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>(problemConfig, algorithmConfig, systemConfig, path);
 
         var trainer = getAbstractTrainer(
             policySupplier,
@@ -60,7 +58,7 @@ public class AbstractExperiment<
             initialStateSupplier,
             episodeDataMaker,
             additionalDataPointGeneratorList,
-            trainableApproximator,
+            trainablePredictor,
             algorithmConfig,
             systemConfig,
             progressTrackerSettings
@@ -102,10 +100,10 @@ public class AbstractExperiment<
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier,
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
-        InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+        InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
         List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList,
-        TrainableApproximator approximator,
+        TrainablePredictor predictor,
         AlgorithmConfig algorithmConfig,
         SystemConfig systemConfig,
         ProgressTrackerSettings progressTrackerSettings
@@ -124,7 +122,7 @@ public class AbstractExperiment<
             );
 
         var dataAggregator = trainerAlgorithm.resolveDataAggregator(algorithmConfig);
-        return new Trainer<>(approximator, gameSampler, dataAggregator, episodeDataMaker);
+        return new Trainer<>(predictor, gameSampler, dataAggregator, episodeDataMaker);
     }
 
 

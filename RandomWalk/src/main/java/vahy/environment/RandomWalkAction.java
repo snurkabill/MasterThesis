@@ -33,4 +33,14 @@ public enum RandomWalkAction implements Action {
             return this == UP ? 0 : 1;
         }
     }
+
+    @Override
+    public Action[] getAllPlayerActions() {
+        return playerActions;
+    }
+
+    @Override
+    public Action[] getAllOpponentActions() {
+        return environmentActions;
+    }
 }

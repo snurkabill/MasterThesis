@@ -6,6 +6,7 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.GameSampler;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -29,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
+    TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -38,7 +40,7 @@ public class GameSamplerImpl<
 
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
-    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
+    private final InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
     private final int processingUnitCount;
 
@@ -52,7 +54,7 @@ public class GameSamplerImpl<
     private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
 
     public GameSamplerImpl(
-        InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+        InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
         PolicyMode policyMode,
         ProgressTrackerSettings progressTrackerSettings,

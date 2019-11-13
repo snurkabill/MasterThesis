@@ -4,6 +4,7 @@ import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,5 +53,10 @@ public class DataTablePredictor implements TrainablePredictor {
             input[i] = predictionMap.getOrDefault(doubleObservationArray[i], defaultPrediction);
         }
         return input;
+    }
+
+    @Override
+    public void close() throws IOException {
+
     }
 }

@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class HallwayGameInitialInstanceSupplier implements InitialStateSupplier<GameConfig, HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
 
     private final GameConfig gameConfig;
     private final SplittableRandom random;

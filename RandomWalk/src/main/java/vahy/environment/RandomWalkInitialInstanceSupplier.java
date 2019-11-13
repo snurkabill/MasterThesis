@@ -3,7 +3,7 @@ package vahy.environment;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 
-public class RandomWalkInitialInstanceSupplier implements InitialStateSupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
+public class RandomWalkInitialInstanceSupplier implements InitialStateSupplier<RandomWalkSetup, RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
 
     private final RandomWalkSetup randomWalkSetup;
 

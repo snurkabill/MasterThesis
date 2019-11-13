@@ -1,7 +1,6 @@
 package vahy.paperGenerics.evaluator;
 
 import vahy.api.model.Action;
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.TrainablePredictor;
@@ -9,6 +8,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTuple;
 
@@ -20,7 +20,7 @@ public class PaperBatchNodeEvaluator<
     TAction extends Action,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends State<TAction, DoubleVector, TOpponentObservation, TState>>
+    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     extends PaperNodeEvaluator<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private final int maximalEvaluationDepth;

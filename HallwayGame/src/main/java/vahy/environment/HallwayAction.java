@@ -51,6 +51,16 @@ public enum HallwayAction implements Action {
     }
 
     @Override
+    public Action[] getAllPlayerActions() {
+        return playerActions;
+    }
+
+    @Override
+    public Action[] getAllOpponentActions() {
+        return environmentActions;
+    }
+
+    @Override
     public boolean isPlayerAction() {
         return isPlayerAction;
     }
@@ -72,5 +82,7 @@ public enum HallwayAction implements Action {
         }
         throw new IllegalStateException("Not expected state. Called on action: [" + this.toString() + "]");
     }
+
+
 
 }

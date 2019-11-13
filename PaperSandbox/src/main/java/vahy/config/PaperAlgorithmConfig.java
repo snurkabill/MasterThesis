@@ -13,7 +13,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 
 import java.util.function.Supplier;
 
-public class AlgorithmConfigImpl implements AlgorithmConfig {
+public class PaperAlgorithmConfig implements AlgorithmConfig {
 
     // MCTS
     private final double cpuctParameter;
@@ -54,31 +54,31 @@ public class AlgorithmConfigImpl implements AlgorithmConfig {
 
     private final int batchedEvaluationSize;
 
-    public AlgorithmConfigImpl(double cpuctParameter,
-                               TreeUpdateConditionFactory treeUpdateConditionFactory,
-                               double discountFactor,
-                               int batchEpisodeCount,
-                               int replayBufferSize,
-                               int maximalStepCountBound,
-                               int stageCount,
-                               Supplier<Double> explorationConstantSupplier,
-                               Supplier<Double> temperatureSupplier,
-                               Supplier<Double> riskSupplier,
-                               DataAggregationAlgorithm dataAggregationAlgorithm,
-                               ApproximatorType approximatorType,
-                               EvaluatorType evaluatorType,
-                               SelectorType selectorType,
-                               int trainingBatchSize,
-                               int trainingEpochCount,
-                               double learningRate,
-                               double globalRiskAllowed,
-                               InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
-                               InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
-                               ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
-                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
-                               FlowOptimizerType flowOptimizerType,
-                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize) {
+    public PaperAlgorithmConfig(double cpuctParameter,
+                                TreeUpdateConditionFactory treeUpdateConditionFactory,
+                                double discountFactor,
+                                int batchEpisodeCount,
+                                int replayBufferSize,
+                                int maximalStepCountBound,
+                                int stageCount,
+                                Supplier<Double> explorationConstantSupplier,
+                                Supplier<Double> temperatureSupplier,
+                                Supplier<Double> riskSupplier,
+                                DataAggregationAlgorithm dataAggregationAlgorithm,
+                                ApproximatorType approximatorType,
+                                EvaluatorType evaluatorType,
+                                SelectorType selectorType,
+                                int trainingBatchSize,
+                                int trainingEpochCount,
+                                double learningRate,
+                                double globalRiskAllowed,
+                                InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
+                                InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
+                                ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
+                                ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
+                                FlowOptimizerType flowOptimizerType,
+                                SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
+                                SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize) {
 
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;

@@ -1,7 +1,7 @@
 package vahy.experiment;
 
 import vahy.api.episode.EpisodeResults;
-import vahy.config.AlgorithmConfigImpl;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.environment.HallwayAction;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.EnvironmentProbabilities;
@@ -24,7 +24,7 @@ public class EpisodeWriter {
 
     private final String masterPath;
 
-    public EpisodeWriter(GameConfig gameConfig, AlgorithmConfigImpl algorithmConfig) {
+    public EpisodeWriter(GameConfig gameConfig, PaperAlgorithmConfig algorithmConfig) {
         String resultMasterFolderName = "Results";
         File resultFolder = new File(resultMasterFolderName);
 

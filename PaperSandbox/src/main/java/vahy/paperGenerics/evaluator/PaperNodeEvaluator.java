@@ -3,16 +3,16 @@ package vahy.paperGenerics.evaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperModel;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.api.predictor.TrainablePredictor;
 import vahy.utils.ImmutableTuple;
 
 import java.util.Arrays;
@@ -24,7 +24,7 @@ public class PaperNodeEvaluator<
     TAction extends Action,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends State<TAction, DoubleVector, TOpponentObservation, TState>>
+    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     implements NodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);

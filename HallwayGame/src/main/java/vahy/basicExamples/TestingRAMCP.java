@@ -1,7 +1,7 @@
 package vahy.basicExamples;
 
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfigImpl;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
@@ -46,7 +46,7 @@ public class TestingRAMCP {
 
     }
 
-    public static ImmutableTuple<AlgorithmConfigImpl, SystemConfig> createExperiment() {
+    public static ImmutableTuple<PaperAlgorithmConfig, SystemConfig> createExperiment() {
 
         var systemConfig = new SystemConfigBuilder()
             .randomSeed(0)

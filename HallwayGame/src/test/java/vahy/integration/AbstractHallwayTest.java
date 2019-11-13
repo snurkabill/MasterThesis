@@ -6,7 +6,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import vahy.config.AlgorithmConfigImpl;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.environment.config.GameConfig;
 import vahy.experiment.Experiment;
@@ -29,7 +29,7 @@ public abstract class AbstractHallwayTest {
     public abstract Object[][] experimentSettings();
 
     @Test(dataProvider = "TestDataProviderMethod")
-    public void benchmarkSolutionTest(AlgorithmConfigImpl algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, HallwayInstance instance, double minExpectedReward, double maxRiskHitRatio) {
+    public void benchmarkSolutionTest(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, HallwayInstance instance, double minExpectedReward, double maxRiskHitRatio) {
         var experiment = new Experiment(algorithmConfig, systemConfig);
         experiment.run(gameConfig, instance);
         var results = experiment.getResults().get(0);

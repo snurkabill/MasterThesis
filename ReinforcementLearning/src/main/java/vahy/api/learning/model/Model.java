@@ -1,6 +1,8 @@
 package vahy.api.learning.model;
 
-public interface Model {
+import java.io.Closeable;
+
+public interface Model extends Closeable {
 
     double[] predict(double[] input);
 

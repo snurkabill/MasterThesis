@@ -5,7 +5,7 @@ import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
-import vahy.config.AlgorithmConfigImpl;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.EvaluatorType;
 import vahy.config.SelectorType;
 import vahy.environment.HallwayAction;
@@ -70,7 +70,7 @@ public class Prototype {
             .buildSystemConfig();
     }
 
-    private static AlgorithmConfigImpl getAlgorithmConfig() {
+    private static PaperAlgorithmConfig getAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
