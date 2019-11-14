@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.paperGenerics.PaperModel;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -281,5 +282,10 @@ public class Dl4jModel extends PaperModel implements SupervisedTrainableModel {
     @Override
     public int getOutputDimension() {
         return outputDimension;
+    }
+
+    @Override
+    public void close() throws IOException {
+        // this is it
     }
 }

@@ -5,10 +5,11 @@ import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
-import vahy.config.PaperAlgorithmConfig;
 import vahy.config.EvaluatorType;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.environment.HallwayAction;
+import vahy.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.EnvironmentProbabilities;
@@ -16,10 +17,8 @@ import vahy.environment.state.HallwayStateImpl;
 import vahy.environment.state.StateRepresentation;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.impl.config.StochasticStrategy;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -37,13 +36,24 @@ public class Prototype {
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
 
+
+//        PaperExperimentEntryPoint.createExperimentAndRun(
+//            HallwayAction.class,
+//            EnvironmentProbabilities.class,
+//            HallwayStateImpl.class,
+//            PaperPolicyRecord.class,
+//            HallwayGameInitialInstanceSupplier.class,
+//            algorithmConfig,
+//            systemConfig,
+//            problemConfig);
+
+
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
-            DoubleVector.class,
             EnvironmentProbabilities.class,
             HallwayStateImpl.class,
-            PaperPolicyRecord.class,
             HallwayGameInitialInstanceSupplier.class,
+            PaperEnvironmentPolicy.class,
             algorithmConfig,
             systemConfig,
             problemConfig);

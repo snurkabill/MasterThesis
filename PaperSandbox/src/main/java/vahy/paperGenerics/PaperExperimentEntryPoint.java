@@ -139,11 +139,11 @@ public class PaperExperimentEntryPoint {
 //            }
 
             var initialStateSupplier = ReflectionHacks.createTypeInstance(initialInstanceSupplierClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
+            PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
 
             experiment.run(
                 policySupplier,
-//                    opponentSupplier,
-                null,
+                opponentPolicySupplier,
                 new PaperEpisodeResultsFactory<>(),
                 initialStateSupplier,
                 new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false),
@@ -166,12 +166,9 @@ public class PaperExperimentEntryPoint {
         String playerActionsMethodName = "getAllPlayerActions";
         String opponentActionsMethodName = "getAllOpponentActions";
         try {
-
-            actionClass.
-
-            Action action =
-            TAction[] playerActions = ReflectionHacks.<TAction, TAction[]>invokeMethod(action, playerActionsMethodName, null,null);
-            TAction[] opponentActions = (TAction[]) actionClass.getMethod(opponentActionsMethodName, null).invoke(null);
+            TAction[] values = (TAction[]) actionClass.getMethod("values", null).invoke(null, null);
+            TAction[] playerActions = ReflectionHacks.invokeMethod(values[0], playerActionsMethodName, null,null);
+            TAction[] opponentActions = ReflectionHacks.invokeMethod(values[0], opponentActionsMethodName, null,null);
             return new ImmutableTuple<>(playerActions, opponentActions);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
