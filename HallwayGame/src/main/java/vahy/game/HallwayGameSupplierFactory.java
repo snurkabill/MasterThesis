@@ -12,9 +12,9 @@ public class HallwayGameSupplierFactory {
 
     public HallwayGameInitialInstanceSupplier getInstanceProvider(HallwayInstance hallwayInstance,
                                                                   GameConfig gameConfig,
-                                                                  SplittableRandom random) throws IOException, NotValidGameStringRepresentationException {
+                                                                  SplittableRandom random) throws IOException {
         InputStream resourceAsStream = classLoader.getResourceAsStream(hallwayInstance.getPath());
         byte[] bytes = resourceAsStream.readAllBytes();
-        return new HallwayGameInitialInstanceSupplier(gameConfig, random, new String(bytes));
+        return new HallwayGameInitialInstanceSupplier(gameConfig, random);
     }
 }

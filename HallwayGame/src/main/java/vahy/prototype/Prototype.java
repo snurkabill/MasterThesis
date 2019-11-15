@@ -12,10 +12,9 @@ import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
-import vahy.environment.state.EnvironmentProbabilities;
-import vahy.environment.state.HallwayStateImpl;
 import vahy.environment.state.StateRepresentation;
 import vahy.game.HallwayGameInitialInstanceSupplier;
+import vahy.game.HallwayInstance;
 import vahy.impl.config.StochasticStrategy;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
@@ -26,6 +25,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class Prototype {
@@ -36,27 +36,16 @@ public class Prototype {
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
 
-
-//        PaperExperimentEntryPoint.createExperimentAndRun(
-//            HallwayAction.class,
-//            EnvironmentProbabilities.class,
-//            HallwayStateImpl.class,
-//            PaperPolicyRecord.class,
-//            HallwayGameInitialInstanceSupplier.class,
-//            algorithmConfig,
-//            systemConfig,
-//            problemConfig);
-
-
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
-            EnvironmentProbabilities.class,
-            HallwayStateImpl.class,
-            HallwayGameInitialInstanceSupplier.class,
+            HallwayGameInitialInstanceSupplier::new,
             PaperEnvironmentPolicy.class,
             algorithmConfig,
             systemConfig,
-            problemConfig);
+            problemConfig,
+            Path.of("Results")
+
+        );
     }
 
     private static GameConfig getGameConfig() {
@@ -66,6 +55,7 @@ public class Prototype {
             .stepPenalty(1)
             .trapProbability(1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .gameStringRepresentation(HallwayInstance.BENCHMARK_05)
             .buildConfig();
     }
 

@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 
 import java.util.Arrays;
 
-public enum TestAction implements Action {
+public enum TestAction implements Action<TestAction> {
 
     A(true, 'A', 1),
     B(true, 'B', 2),
@@ -31,12 +31,12 @@ public enum TestAction implements Action {
     }
 
     @Override
-    public Action[] getAllPlayerActions() {
+    public TestAction[] getAllPlayerActions() {
         return playerActions;
     }
 
     @Override
-    public Action[] getAllOpponentActions() {
+    public TestAction[] getAllOpponentActions() {
         return opponentActions;
     }
 

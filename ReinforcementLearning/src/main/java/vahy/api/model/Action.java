@@ -1,10 +1,10 @@
 package vahy.api.model;
 
-public interface Action {
+public interface Action<TAction extends Action> {
 
-    Action[] getAllPlayerActions();
+    TAction[] getAllPlayerActions();
 
-    Action[] getAllOpponentActions();
+    TAction[] getAllOpponentActions();
 
     boolean isPlayerAction();
 

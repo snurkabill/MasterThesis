@@ -27,6 +27,14 @@ public class ReflectionHacks {
         }
     }
 
+    public static <EnumType> EnumType[] getEnumValues(Class<EnumType> enumClass) {
+        try {
+            return ((EnumType[]) enumClass.getMethod("values", null).invoke(null, null));
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static <TInvokedOn, TReturnValue> TReturnValue invokeMethod(final TInvokedOn object,
                                              final String methodName,
                                              final Class<?>[] argumentTypeArray,

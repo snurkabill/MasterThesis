@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 
 import java.util.Arrays;
 
-public enum HallwayAction implements Action {
+public enum HallwayAction implements Action<HallwayAction> {
 
     FORWARD(true, false),
     TURN_RIGHT(true, false),
@@ -51,12 +51,12 @@ public enum HallwayAction implements Action {
     }
 
     @Override
-    public Action[] getAllPlayerActions() {
+    public HallwayAction[] getAllPlayerActions() {
         return playerActions;
     }
 
     @Override
-    public Action[] getAllOpponentActions() {
+    public HallwayAction[] getAllOpponentActions() {
         return environmentActions;
     }
 

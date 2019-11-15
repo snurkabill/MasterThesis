@@ -1,11 +1,12 @@
 package vahy.paperGenerics;
 
-import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.observation.FixedModelObservation;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.TrainablePredictor;
@@ -13,6 +14,7 @@ import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.PaperAlgorithmConfig;
+import vahy.impl.episode.InstanceInitializerInitializer;
 import vahy.impl.experiment.AbstractExperiment;
 import vahy.impl.experiment.EpisodeWriter;
 import vahy.impl.model.observation.DoubleVector;
@@ -44,7 +46,6 @@ import vahy.utils.ReflectionHacks;
 import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.SplittableRandom;
@@ -55,17 +56,16 @@ public class PaperExperimentEntryPoint {
 
     public static <
         TConfig extends ProblemConfig,
-        TAction extends Enum<TAction> & Action,
+        TAction extends Enum<TAction> & Action<TAction>,
         TOpponentObservation extends FixedModelObservation<TAction>,
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     void createExperimentAndRun(Class<TAction> actionClass,
-                                Class<TOpponentObservation> opponentObservationClass,
-                                Class<TState> stateClass,
-                                Class<InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> initialInstanceSupplierClass,
+                                InstanceInitializerInitializer<TConfig, TAction, DoubleVector, TOpponentObservation, TState> instanceInitializerInitializer,
                                 Class opponentPolicyClass,
                                 PaperAlgorithmConfig algorithmConfig,
                                 SystemConfig systemConfig,
-                                TConfig problemConfig) {
+                                TConfig problemConfig,
+                                Path resultPath) {
 
         var finalRandomSeed = systemConfig.getRandomSeed();
         var masterRandom = new SplittableRandom(finalRandomSeed);
@@ -78,12 +78,13 @@ public class PaperExperimentEntryPoint {
             algorithmConfig.getSubTreeRiskCalculatorTypeForKnownFlow(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
 
-        AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> experiment = createExperimentInstance();
+        var experiment = (AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(AbstractExperiment.class, null, null);
         ImmutableTuple<TAction[], TAction[]> playerOpponentActions = getPlayerOpponentActions(actionClass);
+        var initialStateSupplier = instanceInitializerInitializer.createInitialStateSupplier(problemConfig, masterRandom.split());
 
         try {
             TrainablePredictor approximator = initializePredictor(
-                0,
+                initialStateSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
                 algorithmConfig,
                 playerOpponentActions.getFirst().length,
                 null,
@@ -116,30 +117,14 @@ public class PaperExperimentEntryPoint {
                 algorithmConfig.getTemperatureSupplier(),
                 algorithmConfig.getRiskSupplier()
             );
-//
-//            Supplier<PolicySupplier> opponentSupplier = () -> {
-//                try {
-//                    return opponentPolicyClass.getConstructor().newInstance(masterRandom.split());
-//                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException k) {
-//                    throw new RuntimeException(k);
-//                };
-//            };
 
-
-//            try {
-//                var initialStateSupplier = ;
-//            } catch (InstantiationException e) {
-//                e.printStackTrace();
-//            } catch (IllegalAccessException e) {
-//                e.printStackTrace();
-//            } catch (InvocationTargetException e) {
-//                e.printStackTrace();
-//            } catch (NoSuchMethodException e) {
-//                e.printStackTrace();
-//            }
-
-            var initialStateSupplier = ReflectionHacks.createTypeInstance(initialInstanceSupplierClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
-            PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
+            // TODO: this is dirty.
+            var opponentPolicySupplier = new PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>() {
+                @Override
+                public Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
+                    return (Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
+                }
+            };
 
             experiment.run(
                 policySupplier,
@@ -151,9 +136,9 @@ public class PaperExperimentEntryPoint {
                 approximator,
                 new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
                 new PaperEpisodeStatisticsCalculator<>(),
-                new EpisodeWriter<>(problemConfig, algorithmConfig, systemConfig, Path.of("Results")),
+                new EpisodeWriter<>(problemConfig, algorithmConfig, systemConfig, resultPath),
                 systemConfig,
-                    algorithmConfig
+                algorithmConfig
                 );
 
             approximator.close();
@@ -162,17 +147,9 @@ public class PaperExperimentEntryPoint {
         }
     }
 
-    private static <TAction> ImmutableTuple<TAction[], TAction[]> getPlayerOpponentActions(Class<TAction> actionClass) {
-        String playerActionsMethodName = "getAllPlayerActions";
-        String opponentActionsMethodName = "getAllOpponentActions";
-        try {
-            TAction[] values = (TAction[]) actionClass.getMethod("values", null).invoke(null, null);
-            TAction[] playerActions = ReflectionHacks.invokeMethod(values[0], playerActionsMethodName, null,null);
-            TAction[] opponentActions = ReflectionHacks.invokeMethod(values[0], opponentActionsMethodName, null,null);
-            return new ImmutableTuple<>(playerActions, opponentActions);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+    private static <TAction extends Action<TAction>> ImmutableTuple<TAction[], TAction[]> getPlayerOpponentActions(Class<TAction> actionClass) {
+        TAction[] values = ReflectionHacks.getEnumValues(actionClass);
+        return new ImmutableTuple<>(values[0].getAllPlayerActions(), values[0].getAllOpponentActions());
     }
 
     private static <
@@ -188,14 +165,11 @@ public class PaperExperimentEntryPoint {
 
     private static TrainablePredictor initializePredictor(int modelInputSize,
                                                           PaperAlgorithmConfig algorithmConfig,
-                                                          int allPlayerActionCount,
+                                                          int actionCount,
                                                           byte[] tfModelAsByes,
                                                           SplittableRandom masterRandom,
                                                           long finalRandomSeed) {
-        var inputLenght = modelInputSize;
         var approximatorType = algorithmConfig.getApproximatorType();
-
-        var actionCount = allPlayerActionCount;
         var defaultPrediction = new double[2 + actionCount];
         defaultPrediction[0] = 0;
         defaultPrediction[1] = 0.0;
@@ -212,7 +186,7 @@ public class PaperExperimentEntryPoint {
                 return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
             case TF_NN:
                 var tfModel = new TFModel(
-                    inputLenght,
+                    modelInputSize,
                     PaperModel.POLICY_START_INDEX + actionCount,
                     algorithmConfig.getTrainingEpochCount(),
                     algorithmConfig.getTrainingBatchSize(),
@@ -221,7 +195,7 @@ public class PaperExperimentEntryPoint {
                 return new TrainableApproximator(tfModel);
             case DL4J_NN:
                 var model = new Dl4jModel(
-                    inputLenght,
+                    modelInputSize,
                     PaperModel.POLICY_START_INDEX + actionCount,
                     null,
                     finalRandomSeed,
@@ -313,4 +287,16 @@ public class PaperExperimentEntryPoint {
                 throw EnumUtils.createExceptionForUnknownEnumValue(evaluatorType);
         }
     }
+
+//    public static void createExperimentAndRun(
+//        Class<vahy.environment.HallwayAction> hallwayActionClass,
+//        Class<vahy.environment.state.EnvironmentProbabilities> environmentProbabilitiesClass,
+//        Class<vahy.environment.state.HallwayStateImpl> hallwayStateClass,
+//        Class<vahy.game.HallwayGameInitialInstanceSupplier> hallwayGameInitialInstanceSupplierClass,
+//        Class<vahy.environment.agent.policy.environment.PaperEnvironmentPolicy> opponentPolicyClass,
+//        PaperAlgorithmConfig algorithmConfig,
+//        SystemConfig systemConfig,
+//        vahy.environment.config.GameConfig problemConfig) {
+//    }
 }
+
