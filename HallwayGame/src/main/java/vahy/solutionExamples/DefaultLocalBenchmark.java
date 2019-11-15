@@ -1,5 +1,7 @@
 package vahy.solutionExamples;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
@@ -24,13 +26,17 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.utils.ThirdPartBinaryUtils;
 
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
-public class ForExperimenting {
+public class DefaultLocalBenchmark {
 
-    public static void main(String[] args) {
+    public static final Logger logger = LoggerFactory.getLogger(DefaultLocalBenchmark.class.getName());
+
+    public void runBenchmark() {
+        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
 
         var algorithmConfig = createAlgorithmConfig();
         var systemConfig = createSystemConfig();
@@ -45,9 +51,10 @@ public class ForExperimenting {
             problemConfig,
             Path.of("Results")
         );
+
     }
 
-    private static PaperAlgorithmConfig createAlgorithmConfig() {
+    protected PaperAlgorithmConfig createAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
@@ -119,7 +126,7 @@ public class ForExperimenting {
             .buildAlgorithmConfig();
     }
 
-    private static SystemConfig createSystemConfig() {
+    protected SystemConfig createSystemConfig() {
         return new SystemConfigBuilder()
             .randomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
@@ -130,7 +137,7 @@ public class ForExperimenting {
             .buildSystemConfig();
     }
 
-    private static GameConfig createGameConfig() {
+    protected GameConfig createGameConfig() {
         return new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.1)
@@ -140,4 +147,5 @@ public class ForExperimenting {
             .gameStringRepresentation(HallwayInstance.BENCHMARK_05)
             .buildConfig();
     }
+
 }

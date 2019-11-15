@@ -18,6 +18,7 @@ import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.benchmark.BenchmarkedPolicy;
 import vahy.impl.benchmark.PolicyBenchmark;
+import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.impl.learning.trainer.Trainer;
@@ -37,18 +38,19 @@ public class AbstractExperiment<
 
     private final Logger logger = LoggerFactory.getLogger(AbstractExperiment.class);
 
-    public void run(PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier,
-                    PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
-                    EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
-                    InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
-                    ProgressTrackerSettings progressTrackerSettings,
-                    List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList,
-                    TrainablePredictor trainablePredictor,
-                    EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
-                    EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
-                    EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter,
-                    SystemConfig systemConfig,
-                    AlgorithmConfig algorithmConfig)
+    public List<PolicyResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> run(
+        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier,
+        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
+        EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
+        InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+        ProgressTrackerSettings progressTrackerSettings,
+        List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList,
+        TrainablePredictor trainablePredictor,
+        EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
+        EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
+        EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter,
+        SystemConfig systemConfig,
+        AlgorithmConfig algorithmConfig)
     {
 
         var trainer = getAbstractTrainer(
@@ -93,7 +95,7 @@ public class AbstractExperiment<
         logger.info("Benchmarking out-of-the-box took [{}] milliseconds", benchmarkingTime);
 
         episodeWriter.writeEvaluationEpisode(policyResultList.get(0).getEpisodeList());
-
+        return policyResultList;
     }
 
     private Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getAbstractTrainer(
