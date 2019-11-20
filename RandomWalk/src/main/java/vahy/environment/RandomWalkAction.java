@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 
 import java.util.Arrays;
 
-public enum RandomWalkAction implements Action {
+public enum RandomWalkAction implements Action<RandomWalkAction> {
 
     SAFE(true),
     UNSAFE(true),
@@ -35,12 +35,12 @@ public enum RandomWalkAction implements Action {
     }
 
     @Override
-    public Action[] getAllPlayerActions() {
+    public RandomWalkAction[] getAllPlayerActions() {
         return playerActions;
     }
 
     @Override
-    public Action[] getAllOpponentActions() {
+    public RandomWalkAction[] getAllOpponentActions() {
         return environmentActions;
     }
 }

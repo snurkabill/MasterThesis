@@ -1,7 +1,5 @@
 package vahy.solutionExamples;
 
-import vahy.api.experiment.SystemConfig;
-import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
@@ -12,7 +10,6 @@ import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
 import vahy.game.HallwayInstance;
-import vahy.impl.config.StochasticStrategy;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
@@ -20,7 +17,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.utils.ImmutableTuple;
 
 import java.util.function.Supplier;
 
@@ -43,20 +39,12 @@ public class Benchmark19Solution extends DefaultLocalBenchmark {
             .buildConfig();
     }
 
-    public static ImmutableTuple<PaperAlgorithmConfig, SystemConfig> createExperiment() {
 
-        var systemConfig = new SystemConfigBuilder()
-            .randomSeed(0)
-            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
-            .setParallelThreadsCount(7)
-            .setSingleThreadedEvaluation(true)
-            .setEvalEpisodeCount(1000)
-            .buildSystemConfig();
-
+    @Override
+    protected PaperAlgorithmConfig createAlgorithmConfig() {
         int batchSize = 100;
 
-        var algorithmConfig = new AlgorithmConfigBuilder()
+        return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
@@ -113,7 +101,6 @@ public class Benchmark19Solution extends DefaultLocalBenchmark {
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
-        return new ImmutableTuple<>(algorithmConfig, systemConfig);
     }
 
 }

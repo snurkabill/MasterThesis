@@ -1,12 +1,13 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.SystemConfig;
+import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.PaperAlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
-import vahy.api.experiment.SystemConfig;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
@@ -18,19 +19,18 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.api.learning.ApproximatorType;
 
 import java.util.function.Supplier;
 
-public class IntegrationHallway18 extends AbstractHallwayTest {
+public class IntegrationHallway18Test extends AbstractHallwayTest {
 
     @DataProvider(name = "TestDataProviderMethod")
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-//            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.0},
-//            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_18, 1270.0, 0.105}
+//            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
+//            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.105}
         };
     }
 
@@ -46,6 +46,7 @@ public class IntegrationHallway18 extends AbstractHallwayTest {
             .stepPenalty(10)
             .trapProbability(0.05)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .gameStringRepresentation(HallwayInstance.BENCHMARK_18)
             .buildConfig();
     }
 

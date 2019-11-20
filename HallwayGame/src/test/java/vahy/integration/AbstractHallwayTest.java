@@ -12,7 +12,6 @@ import vahy.environment.HallwayAction;
 import vahy.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.environment.config.GameConfig;
 import vahy.game.HallwayGameInitialInstanceSupplier;
-import vahy.game.HallwayInstance;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
@@ -34,7 +33,7 @@ public abstract class AbstractHallwayTest {
     public abstract Object[][] experimentSettings();
 
     @Test(dataProvider = "TestDataProviderMethod")
-    public void benchmarkSolutionTest(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, HallwayInstance instance, double minExpectedReward, double maxRiskHitRatio) {
+    public void benchmarkSolutionTest(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, double minExpectedReward, double maxRiskHitRatio) {
 
         var results = PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
@@ -43,7 +42,7 @@ public abstract class AbstractHallwayTest {
             algorithmConfig,
             systemConfig,
             gameConfig,
-            Path.of("Results")
+            Path.of("../Results")
         );
 
         PaperEpisodeStatistics stats = ((PaperEpisodeStatistics) results.get(0).getEpisodeStatistics());

@@ -20,15 +20,15 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.api.learning.ApproximatorType;
 
-public class IntegrationHallway03 extends  AbstractHallwayTest {
+public class IntegrationHallway03Test extends AbstractHallwayTest {
 
     @DataProvider(name = "TestDataProviderMethod")
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 40, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 50.5, 0.05},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), HallwayInstance.BENCHMARK_03, 61, 0.1}
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 40, 0.0},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 50.4, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 61, 0.1}
         };
     }
 
@@ -43,6 +43,7 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
             .stepPenalty(10)
             .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .gameStringRepresentation(HallwayInstance.BENCHMARK_03)
             .buildConfig();
     }
 
@@ -57,12 +58,13 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .stageCount(10)
+            .stageCount(20)
             .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
+            .setBatchedEvaluationSize(1)
             .selectorType(SelectorType.UCB)
-            .evaluatorType(EvaluatorType.RALF_BATCHED)
+            .evaluatorType(EvaluatorType.RALF)
             .globalRiskAllowed(0.00)
             .riskSupplier(() -> 0.00)
             .explorationConstantSupplier(() -> 0.2)
@@ -73,7 +75,8 @@ public class IntegrationHallway03 extends  AbstractHallwayTest {
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.PRIOR_SUM);
+//            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.PRIOR_SUM);
+        .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
     }
 
 

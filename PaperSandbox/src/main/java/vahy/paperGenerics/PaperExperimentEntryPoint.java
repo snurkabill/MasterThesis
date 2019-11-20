@@ -14,6 +14,7 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.PolicyResults;
+import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.impl.episode.InstanceInitializerInitializer;
 import vahy.impl.experiment.AbstractExperiment;
 import vahy.impl.experiment.EpisodeWriter;
@@ -47,6 +48,7 @@ import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Function;
@@ -133,7 +135,7 @@ public class PaperExperimentEntryPoint {
                 new PaperEpisodeResultsFactory<>(),
                 initialStateSupplier,
                 new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false),
-                null,
+                Collections.singletonList(new FromEpisodesDataPointGeneratorGeneric<>("Risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow())),
                 approximator,
                 new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
                 new PaperEpisodeStatisticsCalculator<>(),
