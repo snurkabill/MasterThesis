@@ -7,7 +7,7 @@ import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
 
 public interface EpisodeSetup<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

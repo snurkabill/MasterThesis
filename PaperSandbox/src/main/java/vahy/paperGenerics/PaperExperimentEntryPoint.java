@@ -202,7 +202,7 @@ public class PaperExperimentEntryPoint {
     }
 
     private static <
-        TAction extends Enum<TAction> & Action,
+        TAction extends Enum<TAction> & Action<TAction>,
         TOpponentObservation extends Observation,
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     Supplier<NodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>>
@@ -227,7 +227,7 @@ public class PaperExperimentEntryPoint {
     }
 
     private static <
-        TAction extends Enum<TAction> & Action,
+        TAction extends Enum<TAction> & Action<TAction>,
         TOpponentObservation extends FixedModelObservation<TAction>,
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     NodeEvaluator<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState> resolveEvaluator(

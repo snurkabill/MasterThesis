@@ -10,7 +10,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
 
 public class MinimalRiskReachAbilityCalculator<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

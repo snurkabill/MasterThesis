@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 
 public class UcbValueDistributionProvider<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

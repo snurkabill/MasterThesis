@@ -25,7 +25,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class RiskAverseSearchTree<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

@@ -1,6 +1,6 @@
 package vahy.api.model;
 
-public interface Action<TAction extends Action> {
+public interface Action<TAction extends Action<TAction>> {
 
     TAction[] getAllPlayerActions();
 

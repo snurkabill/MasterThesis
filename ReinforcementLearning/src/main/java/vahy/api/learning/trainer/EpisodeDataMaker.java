@@ -12,7 +12,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.List;
 
 public interface EpisodeDataMaker<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

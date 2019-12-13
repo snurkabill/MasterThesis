@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class PaperNodeEvaluator<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>

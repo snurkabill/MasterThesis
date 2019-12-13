@@ -5,7 +5,7 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.List;
 
-public interface FixedModelObservation<TAction extends Enum<TAction> & Action> extends Observation {
+public interface FixedModelObservation<TAction extends Enum<TAction> & Action<TAction>> extends Observation {
 
     ImmutableTuple<List<TAction>, List<Double>> getProbabilities();
 

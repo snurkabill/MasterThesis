@@ -11,7 +11,7 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import java.util.LinkedHashMap;
 
 public class AlphaGoNodeMetadataFactory<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
@@ -19,14 +19,14 @@ public class AlphaGoNodeMetadataFactory<
 
     @Override
     public AlphaGoNodeMetadata<TAction> createEmptyNodeMetadata() {
-        return new AlphaGoNodeMetadata<>(DoubleScalarRewardAggregator.emptyReward(), DoubleScalarRewardAggregator.emptyReward(), DoubleScalarRewardAggregator.emptyReward(), 0.0d, new LinkedHashMap<>());
+        return new AlphaGoNodeMetadata<TAction>(DoubleScalarRewardAggregator.emptyReward(), DoubleScalarRewardAggregator.emptyReward(), DoubleScalarRewardAggregator.emptyReward(), 0.0d, new LinkedHashMap<>());
     }
 
     @Override
     public AlphaGoNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> parent,
                                                                  StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
                                                                  TAction appliedAction) {
-        return new AlphaGoNodeMetadata<>(
+        return new AlphaGoNodeMetadata<TAction>(
             parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
             stateRewardReturn.getReward(),
             DoubleScalarRewardAggregator.emptyReward(),

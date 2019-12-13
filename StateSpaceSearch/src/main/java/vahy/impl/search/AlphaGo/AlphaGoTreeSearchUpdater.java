@@ -9,7 +9,7 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
 
 public class AlphaGoTreeSearchUpdater<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

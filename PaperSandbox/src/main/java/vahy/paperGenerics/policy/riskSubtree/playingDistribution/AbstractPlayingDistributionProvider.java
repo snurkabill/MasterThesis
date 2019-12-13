@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public abstract class AbstractPlayingDistributionProvider<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

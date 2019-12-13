@@ -7,7 +7,7 @@ import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
 
 public interface PolicySupplierBuilder<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

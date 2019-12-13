@@ -8,7 +8,7 @@ import vahy.api.search.node.SearchNodeMetadata;
 import vahy.api.search.nodeSelector.NodeSelector;
 
 public abstract class AbstractTreeBasedNodeSelector<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

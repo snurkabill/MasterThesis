@@ -10,7 +10,7 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 
 public class BaseSearchNodeMetadataFactory<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

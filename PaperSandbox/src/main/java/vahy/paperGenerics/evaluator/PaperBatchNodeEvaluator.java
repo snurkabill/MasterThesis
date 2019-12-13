@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class PaperBatchNodeEvaluator<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>

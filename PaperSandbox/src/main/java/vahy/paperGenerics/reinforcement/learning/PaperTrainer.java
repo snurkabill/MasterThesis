@@ -2,7 +2,7 @@ package vahy.paperGenerics.reinforcement.learning;
 
 //
 //public class PaperTrainer<
-//    TAction extends Enum<TAction> & Action,
+//    TAction extends Enum<TAction> & Action<TAction>,
 //    TOpponentObservation extends Observation,
 //    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>,
 //    TPolicyRecord extends PolicyRecordBase>

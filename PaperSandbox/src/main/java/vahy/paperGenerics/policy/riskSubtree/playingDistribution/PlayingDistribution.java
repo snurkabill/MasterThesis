@@ -9,7 +9,7 @@ import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import java.util.function.Supplier;
 
 public class PlayingDistribution<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

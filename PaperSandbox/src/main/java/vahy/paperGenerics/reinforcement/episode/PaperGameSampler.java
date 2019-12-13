@@ -19,7 +19,7 @@ import java.util.List;
 
 public class PaperGameSampler<
     TConfig extends ProblemConfig,
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

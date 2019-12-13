@@ -11,7 +11,7 @@ import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.api.search.update.TreeUpdater;
 
 public class TraversingTreeUpdater<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

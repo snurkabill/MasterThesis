@@ -17,7 +17,7 @@ import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
 public class PaperNodeSelector<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

@@ -13,7 +13,7 @@ import vahy.utils.MathStreamUtils;
 import java.util.List;
 
 public class PaperEpisodeStatisticsCalculator<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
