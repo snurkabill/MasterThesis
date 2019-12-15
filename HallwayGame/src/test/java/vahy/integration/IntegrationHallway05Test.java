@@ -28,9 +28,9 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-//            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  279.0, 0.010},
-//            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 280.000, 0.010}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 272.000, 0.050}
         };
     }
 
@@ -53,7 +53,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         return new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(3)
+            .cpuctParameter(1)
 
             //.mcRolloutCount(1)
             //NN
@@ -65,7 +65,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .batchEpisodeCount(100)
 
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            .stageCount(300)
+            .stageCount(50)
             .evaluatorType(EvaluatorType.RALF)
 
             .maximalStepCountBound(1000)
@@ -105,7 +105,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
-            .stageCount(50)
+//            .stageCount(50)
             .buildAlgorithmConfig();
     }
 
@@ -121,7 +121,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
-            .stageCount(200)
+//            .stageCount(200)
             .buildAlgorithmConfig();
     }
 }
