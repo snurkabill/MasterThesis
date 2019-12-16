@@ -13,7 +13,7 @@ import vahy.config.SelectorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
 import vahy.environment.RandomWalkSetup;
-import vahy.impl.config.StochasticStrategy;
+import vahy.api.experiment.StochasticStrategy;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.opponent.RandomWalkPolicy;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
@@ -128,7 +128,7 @@ public class RandomWalkExample {
 
     public static SystemConfig createSystemConfig() {
         return new SystemConfigBuilder()
-            .randomSeed(0)
+            .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
             .setParallelThreadsCount(4)

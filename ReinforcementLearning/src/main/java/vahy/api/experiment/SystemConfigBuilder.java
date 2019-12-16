@@ -1,6 +1,5 @@
 package vahy.api.experiment;
 
-import vahy.impl.config.StochasticStrategy;
 import vahy.utils.EnumUtils;
 
 import java.util.SplittableRandom;
@@ -24,7 +23,7 @@ public class SystemConfigBuilder {
     private boolean dumpTrainingData;
 
 
-    public SystemConfigBuilder randomSeed(long randomSeed) {
+    public SystemConfigBuilder setRandomSeed(long randomSeed) {
         this.randomSeed = randomSeed;
         return this;
     }

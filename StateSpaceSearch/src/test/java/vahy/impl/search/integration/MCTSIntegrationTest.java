@@ -1,21 +1,19 @@
 package vahy.impl.search.integration;
 
 import org.testng.annotations.Test;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.search.MCTS.MonteCarloEvaluator;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
+import vahy.impl.search.MCTS.MonteCarloTreeSearchUpdater;
+import vahy.impl.search.MCTS.ucb1.Ucb1NodeSelector;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
-import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
-import vahy.impl.search.MCTS.MonteCarloEvaluator;
-import vahy.impl.search.MCTS.ucb1.Ucb1NodeSelector;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.search.MCTS.MonteCarloTreeSearchUpdater;
 import vahy.testDomain.model.TestAction;
 import vahy.testDomain.model.TestState;
 

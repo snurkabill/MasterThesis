@@ -15,7 +15,7 @@ import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
 import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.HallwayInstance;
-import vahy.impl.config.StochasticStrategy;
+import vahy.api.experiment.StochasticStrategy;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -121,7 +121,7 @@ public class ForExperimenting {
 
     private static SystemConfig createSystemConfig() {
         return new SystemConfigBuilder()
-            .randomSeed(0)
+            .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
             .setParallelThreadsCount(4)
