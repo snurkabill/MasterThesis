@@ -1,4 +1,4 @@
-package vahy.testDomain.model;
+package vahy.impl.testdata.model;
 
 import vahy.api.model.Action;
 

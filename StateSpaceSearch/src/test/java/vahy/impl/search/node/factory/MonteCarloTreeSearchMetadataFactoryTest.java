@@ -8,8 +8,8 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.AbstractStateSpaceSearchTest;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
-import vahy.testDomain.model.TestAction;
-import vahy.testDomain.model.TestState;
+import vahy.impl.testdata.model.TestAction;
+import vahy.impl.testdata.model.TestState;
 import vahy.testDomain.search.TestSearchNodeImpl;
 
 import java.util.Collections;
