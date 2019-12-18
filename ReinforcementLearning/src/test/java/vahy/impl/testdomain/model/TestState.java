@@ -1,4 +1,4 @@
-package vahy.impl.testdata.model;
+package vahy.impl.testdomain.model;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;

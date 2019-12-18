@@ -6,8 +6,8 @@ import vahy.api.model.StateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.AbstractStateSpaceSearchTest;
 import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
-import vahy.impl.testdata.model.TestAction;
-import vahy.impl.testdata.model.TestState;
+import vahy.impl.testdomain.model.TestAction;
+import vahy.impl.testdomain.model.TestState;
 import vahy.testDomain.search.TestSearchNodeImpl;
 
 import java.util.Collections;

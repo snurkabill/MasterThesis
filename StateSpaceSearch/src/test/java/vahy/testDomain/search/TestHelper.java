@@ -5,8 +5,8 @@ import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 import vahy.impl.search.node.SearchNodeImpl;
-import vahy.impl.testdata.model.TestAction;
-import vahy.impl.testdata.model.TestState;
+import vahy.impl.testdomain.model.TestAction;
+import vahy.impl.testdomain.model.TestState;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
