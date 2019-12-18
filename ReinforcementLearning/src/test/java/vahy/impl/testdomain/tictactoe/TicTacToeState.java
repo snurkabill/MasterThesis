@@ -27,7 +27,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         }
     }
 
-    private enum Symbol {
+    public enum Symbol {
         PLAYER(1),
         OPPONENT(2),
         EMPTY(0);
