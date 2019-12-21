@@ -8,6 +8,11 @@ public interface Action<TAction extends Action<TAction>> {
 
     boolean isPlayerAction();
 
-    int getActionIndexInPossibleActions();
+    boolean isOpponentAction();
 
+    int getGlobalIndex();
+
+    int getActionIndexInPlayerActions();
+
+    int getActionIndexInOpponentActions();
 }

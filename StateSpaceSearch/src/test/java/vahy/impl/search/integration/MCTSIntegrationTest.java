@@ -14,8 +14,8 @@ import vahy.impl.search.MCTS.ucb1.Ucb1NodeSelector;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.testDomain.model.TestAction;
-import vahy.testDomain.model.TestState;
+import vahy.impl.testdomain.model.TestAction;
+import vahy.impl.testdomain.model.TestState;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;

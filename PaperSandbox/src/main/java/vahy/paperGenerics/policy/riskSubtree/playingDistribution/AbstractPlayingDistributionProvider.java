@@ -58,7 +58,7 @@ public abstract class AbstractPlayingDistributionProvider<
         var riskVector = new double[playerActions.size()];
         var actionList = new ArrayList<TAction>(playerActions.size());
         for (ImmutableTriple<TAction, Double, Double> entry : actionDistribution) {
-            int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
+            int actionIndex = entry.getFirst().getActionIndexInPlayerActions();
             actionList.add(actionIndex, entry.getFirst());
             actionVector[actionIndex] = entry.getSecond();
             riskVector[actionIndex] = entry.getThird();

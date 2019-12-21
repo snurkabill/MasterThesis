@@ -3,51 +3,38 @@ package vahy.environment;
 import vahy.api.model.Action;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 public enum HallwayAction implements Action<HallwayAction> {
 
-    FORWARD(true, false),
-    TURN_RIGHT(true, false),
-    TURN_LEFT(true, false),
+    FORWARD(true, false, 0, 0),
+    TURN_RIGHT(true, false, 1, 1),
+    TURN_LEFT(true, false, 2, 2),
 //    RESIGN(true, false),
 
-    NOISY_RIGHT(false, false),
-    NOISY_LEFT(false, false),
-    TRAP(false, true),
-    NOISY_RIGHT_TRAP(false, true),
-    NOISY_LEFT_TRAP(false, true),
-    NO_ACTION(false, false);
+    NOISY_RIGHT(false, false, 0, 3),
+    NOISY_LEFT(false, false, 1, 4),
+    TRAP(false, true, 2, 5),
+    NOISY_RIGHT_TRAP(false, true, 3, 6),
+    NOISY_LEFT_TRAP(false, true, 4, 7),
+    NO_ACTION(false, false, 5, 8);
 
-    public static HallwayAction[] playerActions = Arrays.stream(HallwayAction.values()).filter(HallwayAction::isPlayerAction).toArray(HallwayAction[]::new);
-    public static HallwayAction[] environmentActions = Arrays.stream(HallwayAction.values()).filter(actionType -> !actionType.isPlayerAction).toArray(HallwayAction[]::new);
+    public static HallwayAction[] playerActions = Arrays.stream(HallwayAction.values()).filter(HallwayAction::isPlayerAction).sorted(Comparator.comparing(HallwayAction::getActionIndexInPlayerActions)).toArray(HallwayAction[]::new);
+    public static HallwayAction[] environmentActions = Arrays.stream(HallwayAction.values()).filter(HallwayAction::isOpponentAction).sorted(Comparator.comparing(HallwayAction::getActionIndexInPlayerActions)).toArray(HallwayAction[]::new);
     private final boolean isPlayerAction;
     private final boolean isTrap;
+    private final int localIndex;
+    private final int globalIndex;
 
-    HallwayAction(boolean isPlayerAction, boolean isTrap) {
+    HallwayAction(boolean isPlayerAction, boolean isTrap, int localIndex, int globalIndex) {
         this.isPlayerAction = isPlayerAction;
         this.isTrap = isTrap;
+        this.localIndex = localIndex;
+        this.globalIndex = globalIndex;
     }
 
     public boolean isTrap() {
         return isTrap;
-    }
-
-    public int getActionIndexAsPlayerAction() {
-        for (int i = 0; i < playerActions.length; i++) {
-            if(this.equals(playerActions[i])) {
-                return i;
-            }
-        }
-        throw new IllegalStateException("Not expected state");
-    }
-
-    public int getActionIndexAsEnvironmentAction() {
-        for (int i = 0; i < environmentActions.length; i++) {
-            if(this.equals(environmentActions[i])) {
-                return i;
-            }
-        }
-        throw new IllegalStateException("Not expected state");
     }
 
     @Override
@@ -66,23 +53,30 @@ public enum HallwayAction implements Action<HallwayAction> {
     }
 
     @Override
-    public int getActionIndexInPossibleActions() {
-        if(this.isPlayerAction) {
-            for (int i = 0; i < playerActions.length; i++) {
-                if(this.equals(playerActions[i])) {
-                    return i;
-                }
-            }
-        } else {
-            for (int i = 0; i < environmentActions.length; i++) {
-                if(this.equals(environmentActions[i])) {
-                    return i;
-                }
-            }
-        }
-        throw new IllegalStateException("Not expected state. Called on action: [" + this.toString() + "]");
+    public boolean isOpponentAction() {
+        return !isPlayerAction;
     }
 
+    @Override
+    public int getGlobalIndex() {
+        return globalIndex;
+    }
+
+    @Override
+    public int getActionIndexInPlayerActions() {
+        if(isPlayerAction) {
+            return localIndex;
+        }
+        return -1;
+    }
+
+    @Override
+    public int getActionIndexInOpponentActions() {
+        if(!isPlayerAction) {
+            return localIndex;
+        }
+        return -1;
+    }
 
 
 }

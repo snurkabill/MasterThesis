@@ -144,7 +144,7 @@ public class PaperPolicyImpl<
             .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
             .collect(Collectors.toList());
         for (ImmutableTuple<TAction, Double> entry : actionDoubleList) {
-            int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
+            int actionIndex = entry.getFirst().getActionIndexInPlayerActions();
             priorProbabilities[actionIndex] = entry.getSecond();
         }
         return priorProbabilities;
