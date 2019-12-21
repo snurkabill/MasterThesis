@@ -25,7 +25,6 @@ import vahy.utils.ImmutableTuple;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -79,68 +78,13 @@ public class SearchTreeImpl<
     }
 
     @Override
-    public TAction[] getAllPossibleActions() {
-        return this.root.getWrappedState().getAllPossibleActions();
-    }
-
-    @Override
-    public TAction[] getPossiblePlayerActions() {
-        return this.root.getWrappedState().getPossiblePlayerActions();
-    }
-
-    @Override
-    public TAction[] getPossibleOpponentActions() {
-        return this.root.getWrappedState().getPossibleOpponentActions();
-    }
-
-    @Override
     public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         checkApplicableAction(action);
         return innerApplyAction(action);
     }
 
-    @Override
-    public TState deepCopy() {
-        throw new UnsupportedOperationException("Deep copy on search tree is not yet defined nad maybe won't be since it's not really needed");
-    }
-
-    @Override
-    public TPlayerObservation getPlayerObservation() {
-        return root.getWrappedState().getPlayerObservation();
-    }
-
-    @Override
-    public TOpponentObservation getOpponentObservation() {
-        return root.getWrappedState().getOpponentObservation();
-    }
-
-    @Override
-    public String readableStringRepresentation() {
-        return root.getWrappedState().readableStringRepresentation();
-    }
-
-    @Override
-    public List<String> getCsvHeader() {
-        return root.getWrappedState().getCsvHeader();
-    }
-
-    @Override
-    public List<String> getCsvRecord() {
-        return root.getWrappedState().getCsvRecord();
-    }
-
     public int getTotalNodesExpanded() {
         return totalNodesExpanded;
-    }
-
-    @Override
-    public boolean isOpponentTurn() {
-        return root.isOpponentTurn();
-    }
-
-    @Override
-    public boolean isFinalState() {
-        return root.isFinalNode();
     }
 
     @Override
