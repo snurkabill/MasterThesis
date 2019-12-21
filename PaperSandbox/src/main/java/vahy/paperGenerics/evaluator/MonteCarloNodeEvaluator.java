@@ -89,7 +89,7 @@ public class MonteCarloNodeEvaluator<
             int actionIndex = random.nextInt(actions.length);
             return actions[actionIndex];
         } else {
-            var probabilities = opponentpredictor.apply(wrappedState.getOpponentObservation());
+            var probabilities = opponentPredictor.apply(wrappedState.getOpponentObservation());
             return probabilities.getFirst().get(RandomDistributionUtils.getRandomIndexFromDistribution(probabilities.getSecond(), random));
         }
     }
