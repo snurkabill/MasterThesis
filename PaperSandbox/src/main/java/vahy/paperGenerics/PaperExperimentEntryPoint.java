@@ -15,7 +15,7 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
-import vahy.impl.episode.InstanceInitializerInitializer;
+import vahy.api.episode.InstanceInitializerInitializer;
 import vahy.impl.experiment.AbstractExperiment;
 import vahy.impl.experiment.EpisodeWriter;
 import vahy.impl.model.observation.DoubleVector;
