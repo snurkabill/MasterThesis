@@ -1,6 +1,5 @@
-package vahy.impl.episode;
+package vahy.api.episode;
 
-import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;

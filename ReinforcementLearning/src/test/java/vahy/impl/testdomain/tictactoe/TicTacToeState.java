@@ -47,10 +47,9 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     private final boolean isAgentTurn;
     private final int turnsLeft;
 
-    private final List<TicTacToeAction> playerEnabledActions;
-    private final List<TicTacToeAction> opponentEnabledActions;
+    private final List<TicTacToeAction> enabledActions;
 
-    public TicTacToeState(Symbol[][] playground, boolean isAgentTurn, int turnsLeft, List<TicTacToeAction> playerEnabledActions, List<TicTacToeAction> opponentEnabledActions) {
+    public TicTacToeState(Symbol[][] playground, boolean isAgentTurn, int turnsLeft, List<TicTacToeAction> enabledActions) {
         for (int i = 0; i < playground.length; i++) {
             if(playground[i].length != playground.length) {
                 throw new IllegalArgumentException("Playground is not square-like");
@@ -59,8 +58,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         this.playground = playground;
         this.isAgentTurn = isAgentTurn;
         this.turnsLeft = turnsLeft;
-        this.playerEnabledActions = playerEnabledActions;
-        this.opponentEnabledActions = opponentEnabledActions;
+        this.enabledActions = enabledActions;
     }
 
     private Symbol checkVerticalLine(int verticalIndex) {
@@ -121,11 +119,17 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public TicTacToeAction[] getAllPossibleActions() {
-        if(isAgentTurn) {
-            return playerEnabledActions.toArray(new TicTacToeAction[0]);
-        } else {
-            return opponentEnabledActions.toArray(new TicTacToeAction[0]);
-        }
+        return enabledActions.toArray(new TicTacToeAction[0]);
+    }
+
+    @Override
+    public TicTacToeAction[] getPossiblePlayerActions() {
+        return getAllPossibleActions();
+    }
+
+    @Override
+    public TicTacToeAction[] getPossibleOpponentActions() {
+        return getAllPossibleActions();
     }
 
     @Override
@@ -153,16 +157,14 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                 }
             }
             newPlayground[x][y] = Symbol.PLAYER;
-            var newPlayerActions = playerEnabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
-            var newOpponentActions = opponentEnabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
-            double reward = newPlayerActions.size() + newOpponentActions.size() == 0 ? 1 : 0;
+            var newActions = enabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
+            double reward = newActions.size() == 0 ? 1 : 0;
             return new ImmutableStateRewardReturnTuple<>(
                 new TicTacToeState(
                     newPlayground,
                     false,
                     turnsLeft - 1,
-                    newPlayerActions,
-                    newOpponentActions
+                    newActions
                 ),
                 reward
             );
@@ -179,16 +181,14 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                 }
             }
             newPlayground[x][y] = Symbol.OPPONENT;
-            var newPlayerActions = playerEnabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
-            var newOpponentActions = opponentEnabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
-            double reward = newPlayerActions.size() + newOpponentActions.size() == 0 ? -1 : 0;
+            var newActions = enabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
+            double reward = newActions.size() == 0 ? -1 : 0;
             return new ImmutableStateRewardReturnTuple<>(
                 new TicTacToeState(
                     newPlayground,
                     false,
                     turnsLeft - 1,
-                    newPlayerActions,
-                    newOpponentActions
+                    newActions
                 ),
                 reward
             );

@@ -29,8 +29,8 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     public Object[][] experimentSettings() {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  279.0, 0.010},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 272.000, 0.050}
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  278.0, 0.010},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 270.000, 0.050}
         };
     }
 
@@ -65,7 +65,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .batchEpisodeCount(100)
 
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            .stageCount(50)
+            .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 
             .maximalStepCountBound(1000)

@@ -84,6 +84,16 @@ public class SearchTreeImpl<
     }
 
     @Override
+    public TAction[] getPossiblePlayerActions() {
+        return this.root.getWrappedState().getPossiblePlayerActions();
+    }
+
+    @Override
+    public TAction[] getPossibleOpponentActions() {
+        return this.root.getWrappedState().getPossibleOpponentActions();
+    }
+
+    @Override
     public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
         checkApplicableAction(action);
         return innerApplyAction(action);

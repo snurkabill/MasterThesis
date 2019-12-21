@@ -38,6 +38,24 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
     }
 
     @Override
+    public TestAction[] getPossiblePlayerActions() {
+        if(isPlayerTurn()) {
+            return TestAction.playerActions;
+        } else {
+            return new TestAction[0];
+        }
+    }
+
+    @Override
+    public TestAction[] getPossibleOpponentActions() {
+        if(isOpponentTurn()) {
+            return TestAction.opponentActions;
+        } else {
+            return new TestAction[0];
+        }
+    }
+
+    @Override
     public StateRewardReturn<TestAction, DoubleVector, TestState, TestState> applyAction(TestAction action) {
         List<Character> newInternalState = new ArrayList<>(internalState);
         newInternalState.add(action.getCharRepresentation());

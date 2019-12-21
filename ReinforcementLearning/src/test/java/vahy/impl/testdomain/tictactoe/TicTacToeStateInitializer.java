@@ -28,8 +28,7 @@ public class TicTacToeStateInitializer extends AbstractInitialStateSupplier<TicT
             },
             random.nextBoolean(),
             9,
-            Arrays.asList(TicTacToeAction.playerActions),
-            Arrays.asList(TicTacToeAction.environmentActions)
+            Arrays.asList(TicTacToeAction.playerActions)
         );
     }
 }

@@ -12,6 +12,10 @@ public interface State<
 
     TAction[] getAllPossibleActions();
 
+    TAction[] getPossiblePlayerActions();
+
+    TAction[] getPossibleOpponentActions();
+
     StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction actionType);
 
     TState deepCopy();

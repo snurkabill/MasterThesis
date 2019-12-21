@@ -169,6 +169,24 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     }
 
     @Override
+    public HallwayAction[] getPossiblePlayerActions() {
+        if(isAgentTurn) {
+            return HallwayAction.playerActions;
+        } else {
+            return new HallwayAction[0];
+        }
+    }
+
+    @Override
+    public HallwayAction[] getPossibleOpponentActions() {
+        if(isOpponentTurn()) {
+            return HallwayAction.playerActions;
+        } else {
+            return new HallwayAction[0];
+        }
+    }
+
+    @Override
     public StateRewardReturn<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> applyAction(HallwayAction hallwayAction) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
