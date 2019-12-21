@@ -29,7 +29,7 @@ public class PaperPolicyImpl<
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
 
-    private final List<TAction> playerActions;
+    private final int totalPlayerActionCount;
 
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
@@ -69,13 +69,11 @@ public class PaperPolicyImpl<
         this.riskAverseSearchTree = searchTree;
         TAction[] allActions = clazz.getEnumConstants();
 
-        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
-
+        this.totalPlayerActionCount = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new)).size();
         this.isExplorationDisabled = isExplorationDisabled;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
-
-        this.actionDistribution = new double[playerActions.size()];
+        this.actionDistribution = new double[totalPlayerActionCount];
     }
 
     @Override
@@ -116,6 +114,9 @@ public class PaperPolicyImpl<
             exploitation ? PolicyStepMode.EXPLOITATION : PolicyStepMode.EXPLORATION,
             temperature);
         var action = actionDistributionAndDiscreteAction.getFirst();
+        if(actionDistribution.length != actionDistributionAndDiscreteAction.getSecond().length) {
+            throw new IllegalStateException("SafetyCheck: policy returns distribution on actions with different count of actions");
+        }
         actionDistribution = actionDistributionAndDiscreteAction.getSecond();
         hasActionChanged = true;
 
@@ -137,7 +138,7 @@ public class PaperPolicyImpl<
         if(gameState.isOpponentTurn()) {
             throw new IllegalStateException("Can't sample opponent's distribution from player's policy");
         }
-        double[] priorProbabilities = new double[playerActions.size()];
+        double[] priorProbabilities = new double[totalPlayerActionCount];
         List<ImmutableTuple<TAction, Double>> actionDoubleList = this.riskAverseSearchTree
             .getRoot()
             .getChildNodeStream()
