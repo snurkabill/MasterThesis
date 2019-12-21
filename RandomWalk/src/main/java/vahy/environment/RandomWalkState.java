@@ -41,6 +41,24 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
         }
     }
 
+    @Override
+    public RandomWalkAction[] getPossiblePlayerActions() {
+        if(isAgentTurn) {
+            return RandomWalkAction.playerActions;
+        } else {
+            return new RandomWalkAction[0];
+        }
+    }
+
+    @Override
+    public RandomWalkAction[] getPossibleOpponentActions() {
+        if(!isAgentTurn) {
+            return RandomWalkAction.environmentActions;
+        } else {
+            return new RandomWalkAction[0];
+        }
+    }
+
     private int resolveNewLevel(RandomWalkAction appliedAction) {
         if(appliedAction == RandomWalkAction.UP) {
             return level + (previousAction == RandomWalkAction.SAFE ? randomWalkSetup.getUpSafeShift() : randomWalkSetup.getUpUnsafeShift());

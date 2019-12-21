@@ -1,89 +1,77 @@
 package vahy.solutionExamples;
 
+import vahy.api.experiment.SystemConfig;
+import vahy.api.experiment.SystemConfigBuilder;
+import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
-import vahy.config.StochasticStrategy;
-import vahy.config.SystemConfig;
-import vahy.config.SystemConfigBuilder;
+import vahy.environment.HallwayAction;
+import vahy.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
-import vahy.experiment.Experiment;
+import vahy.game.HallwayGameInitialInstanceSupplier;
 import vahy.game.HallwayInstance;
+import vahy.api.experiment.StochasticStrategy;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.utils.ImmutableTuple;
-import vahy.utils.ThirdPartBinaryUtils;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public class ForExperimenting {
 
     public static void main(String[] args) {
-        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
-        GameConfig gameConfig = new ConfigBuilder()
-            .reward(100) // reward per gold
-            .noisyMoveProbability(0.1) // probability of shifting agent after forward move
-            .stepPenalty(1) // penalty per one agent action
-            .trapProbability(1) // probability of killing the agent when on trap
-            .stateRepresentation(StateRepresentation.COMPACT) // don't change this.
-            .buildConfig();
-        var setup = createExperiment();
-        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_05); // experiment examples are in /resources/examples/benchmark/
 
+        var algorithmConfig = createAlgorithmConfig();
+        var systemConfig = createSystemConfig();
+        var problemConfig = createGameConfig();
+
+        PaperExperimentEntryPoint.createExperimentAndRun(
+            HallwayAction.class,
+            HallwayGameInitialInstanceSupplier::new,
+            PaperEnvironmentPolicy.class,
+            algorithmConfig,
+            systemConfig,
+            problemConfig,
+            Path.of("Results")
+        );
     }
 
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
-
-        var systemConfig = new SystemConfigBuilder()
-            .randomSeed(0)
-            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)  // when REPRODUCIBlE, randomSeed is used, otherwise randomSeed is randomly generated from time seed, keep as is, since linear program is not reproducible anyway ...
-            .setDrawWindow(true)  // drawing progress windows during training process
-            .setParallelThreadsCount(4)   // ideally count of CPU cores (or CPU cores -1 if other applications are present)
-            .setSingleThreadedEvaluation(false)  // when true, only one thread is used for evaluation (leave it as is for time measurements)
-            .setEvalEpisodeCount(1000)  // how many times evaluation of trained policy is performed
-            .setDumpTrainingData(true) // true for dumping training episodes as well
-            .buildSystemConfig();
-
-
-
-        var algorithmConfig = new AlgorithmConfigBuilder()
+    private static PaperAlgorithmConfig createAlgorithmConfig() {
+        return new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(1)  // exploration constant in UCB formula
+            .cpuctParameter(1)
 
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(1)    // relevant only for NN predictor. keep as is
-            .trainingEpochCount(10)  // relevant only for NN predictor. keep as is
+            .trainingBatchSize(1)
+            .trainingEpochCount(10)
             // REINFORCEMENT
-            .discountFactor(1)      // not relevant. keep as is
-            .batchEpisodeCount(100) // how many episodes are sampled in one training cycle
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50)) // strategy of updating search tree. FixedUpdateCountTreeConditionFactory updates search tree at each step N times. very important parameter
-            .stageCount(100)       // how many training cycles are performed before evaluation
-            .evaluatorType(EvaluatorType.RALF) // not relevant. keep as is
+            .discountFactor(1)
+            .batchEpisodeCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .stageCount(100)
+            .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)  // count of maximum steps done per one episode
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)  // different data aggregation strategies for training. REPLAY BUFFER relevant only for NN predictor
-            .replayBufferSize(100_000) // relevant only for REPLAY BUFFER data aggregation combined with NN predictor
-            .learningRate(0.01)  // training speed of predictor. the higher the value, the faster predictor copies sampled data.
+            .maximalStepCountBound(500)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
+            .replayBufferSize(100_000)
+            .trainingBatchSize(1)
+            .learningRate(0.01)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)  // don't  change. very relevant. very experimental. very unstable. requires NN models as well. keep as is.
-
-            .globalRiskAllowed(1.00) // risk threshold. by far most important parameter. Delta in paper. when equals to 0, no risk is allowed. when equals to 1, no linear program optimization is performed.
-
-            .selectorType(SelectorType.UCB) // not relevant. keep as is.
-
-            .riskSupplier(new Supplier<Double>() {  // risk supplier during training. called when new policy is created to be sampled for episode. check different BenchmarkSolutions for modeling function of call count.
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
                     return 1.00;
@@ -95,8 +83,10 @@ public class ForExperimenting {
                 }
             })
 
+            .replayBufferSize(10000)
+            .selectorType(SelectorType.UCB)
 
-            .explorationConstantSupplier(new Supplier<Double>() {  // exploration constant supplier  during training. see other BenchmarkSolutions for example
+            .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
                     return 0.2;
@@ -107,7 +97,7 @@ public class ForExperimenting {
                     return "() -> 0.20";
                 }
             })
-            .temperatureSupplier(new Supplier<Double>() {  // temperature supplier supplier  during training. see other BenchmarkSolutions for example
+            .temperatureSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
                     return 1.50;
@@ -115,12 +105,10 @@ public class ForExperimenting {
 
                 @Override
                 public String toString() {
-                    return "() -> 1.50";
+                    return "() -> 1.05";
                 }
             })
 
-
-            // self explanatory. in general, don't change it.
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
@@ -129,6 +117,27 @@ public class ForExperimenting {
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
-        return new ImmutableTuple<>(algorithmConfig, systemConfig);
+    }
+
+    private static SystemConfig createSystemConfig() {
+        return new SystemConfigBuilder()
+            .setRandomSeed(0)
+            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
+            .setDrawWindow(true)
+            .setParallelThreadsCount(4)
+            .setSingleThreadedEvaluation(false)
+            .setEvalEpisodeCount(1000)
+            .buildSystemConfig();
+    }
+
+    private static GameConfig createGameConfig() {
+        return new ConfigBuilder()
+            .reward(100)
+            .noisyMoveProbability(0.1)
+            .stepPenalty(1)
+            .trapProbability(1)
+            .stateRepresentation(StateRepresentation.COMPACT)
+            .gameStringRepresentation(HallwayInstance.BENCHMARK_05)
+            .buildConfig();
     }
 }

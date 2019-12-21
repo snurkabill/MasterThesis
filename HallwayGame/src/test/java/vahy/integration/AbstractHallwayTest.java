@@ -6,13 +6,17 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import vahy.config.AlgorithmConfig;
-import vahy.config.SystemConfig;
+import vahy.api.experiment.SystemConfig;
+import vahy.config.PaperAlgorithmConfig;
+import vahy.environment.HallwayAction;
+import vahy.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.environment.config.GameConfig;
-import vahy.experiment.Experiment;
-import vahy.game.HallwayInstance;
-import vahy.paperGenerics.experiment.CalculatedResultStatistics;
+import vahy.game.HallwayGameInitialInstanceSupplier;
+import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
+
+import java.nio.file.Path;
 
 public abstract class AbstractHallwayTest {
 
@@ -29,11 +33,19 @@ public abstract class AbstractHallwayTest {
     public abstract Object[][] experimentSettings();
 
     @Test(dataProvider = "TestDataProviderMethod")
-    public void benchmarkSolutionTest(AlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, HallwayInstance instance, double minExpectedReward, double maxRiskHitRatio) {
-        var experiment = new Experiment(algorithmConfig, systemConfig);
-        experiment.run(gameConfig, instance);
-        var results = experiment.getResults().get(0);
-        CalculatedResultStatistics stats = results.getCalculatedResultStatistics();
+    public void benchmarkSolutionTest(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, double minExpectedReward, double maxRiskHitRatio) {
+
+        var results = PaperExperimentEntryPoint.createExperimentAndRun(
+            HallwayAction.class,
+            HallwayGameInitialInstanceSupplier::new,
+            PaperEnvironmentPolicy.class,
+            algorithmConfig,
+            systemConfig,
+            gameConfig,
+            Path.of("../Results")
+        );
+
+        PaperEpisodeStatistics stats = ((PaperEpisodeStatistics) results.get(0).getEpisodeStatistics());
 
         double totalPayoffAverage = stats.getTotalPayoffAverage();
         double riskHitRatio = stats.getRiskHitRatio();

@@ -7,7 +7,7 @@ import vahy.api.model.observation.Observation;
 import vahy.utils.ImmutableTuple;
 
 public class ImmutableStateActionRewardTuple<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

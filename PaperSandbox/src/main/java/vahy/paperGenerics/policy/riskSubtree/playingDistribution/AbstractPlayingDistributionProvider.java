@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public abstract class AbstractPlayingDistributionProvider<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -58,7 +58,7 @@ public abstract class AbstractPlayingDistributionProvider<
         var riskVector = new double[playerActions.size()];
         var actionList = new ArrayList<TAction>(playerActions.size());
         for (ImmutableTriple<TAction, Double, Double> entry : actionDistribution) {
-            int actionIndex = entry.getFirst().getActionIndexInPossibleActions();
+            int actionIndex = entry.getFirst().getActionIndexInPlayerActions();
             actionList.add(actionIndex, entry.getFirst());
             actionVector[actionIndex] = entry.getSecond();
             riskVector[actionIndex] = entry.getThird();

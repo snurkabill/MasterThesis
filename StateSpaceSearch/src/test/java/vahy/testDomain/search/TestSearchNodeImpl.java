@@ -4,8 +4,8 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.node.SearchNodeImpl;
-import vahy.testDomain.model.TestAction;
-import vahy.testDomain.model.TestState;
+import vahy.impl.testdomain.model.TestAction;
+import vahy.impl.testdomain.model.TestState;
 
 import java.util.Map;
 

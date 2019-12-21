@@ -10,7 +10,7 @@ import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraint;
 import vahy.utils.ImmutableTuple;
 
 public class HardSoftFlowOptimizer<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

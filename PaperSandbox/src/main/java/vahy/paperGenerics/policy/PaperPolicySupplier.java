@@ -25,7 +25,7 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class PaperPolicySupplier<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -38,7 +38,7 @@ public class PaperPolicySupplier<
     private final SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
     private final double totalRiskAllowedInference;
     private final SplittableRandom random;
-    private final Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector;
+    private final Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelectorSupplier;
     private final NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
@@ -53,10 +53,11 @@ public class PaperPolicySupplier<
                                SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                double totalRiskAllowedInference,
                                SplittableRandom random,
-                               Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelector,
+                               Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelectorSupplier,
                                NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
-                               TreeUpdateConditionFactory treeUpdateConditionFactory, StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider,
+                               TreeUpdateConditionFactory treeUpdateConditionFactory,
+                               StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider,
                                Supplier<Double> explorationConstantSupplier,
                                Supplier<Double> temperatureSupplier,
                                Supplier<Double> riskSupplier) {
@@ -64,7 +65,7 @@ public class PaperPolicySupplier<
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
         this.totalRiskAllowedInference = totalRiskAllowedInference;
         this.random = random;
-        this.nodeSelector = nodeSelector;
+        this.nodeSelectorSupplier = nodeSelectorSupplier;
         this.nodeEvaluator = nodeEvaluator;
         this.treeUpdater = treeUpdater;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
@@ -96,7 +97,7 @@ public class PaperPolicySupplier<
             new RiskAverseSearchTree<>(
                 actionClass,
                 node,
-                nodeSelector.get(),
+                nodeSelectorSupplier.get(),
                 treeUpdater,
                 nodeEvaluator,
                 random.split(),
@@ -115,7 +116,7 @@ public class PaperPolicySupplier<
             new RiskAverseSearchTree<>(
                 actionClass,
                 node,
-                nodeSelector.get(),
+                nodeSelectorSupplier.get(),
                 treeUpdater,
                 nodeEvaluator,
                 random.split(),

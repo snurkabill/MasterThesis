@@ -1,6 +1,8 @@
 package vahy.environment;
 
-public class RandomWalkSetup {
+import vahy.api.experiment.ProblemConfig;
+
+public class RandomWalkSetup implements ProblemConfig {
 
     private final int goalLevel;
     private final int startLevel;
@@ -68,5 +70,15 @@ public class RandomWalkSetup {
 
     public int getStepPenalty() {
         return stepPenalty;
+    }
+
+    @Override
+    public String toLog() {
+        return "NOT IMPLEMENTED YET...";
+    }
+
+    @Override
+    public String toFile() {
+        return "NOT IMPLEMENTED YET...";
     }
 }

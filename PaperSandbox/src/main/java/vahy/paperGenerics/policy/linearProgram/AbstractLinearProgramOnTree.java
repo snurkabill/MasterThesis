@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public abstract class AbstractLinearProgramOnTree<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

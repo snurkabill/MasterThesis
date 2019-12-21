@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns = "http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation = "http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>master-thesis-parent</artifactId>
@@ -23,6 +23,7 @@
         <module>../PaperSandbox</module>
         <module>../RandomWalk</module>
         <module>../EpisodeAnalyzer</module>
+<!--        <module>../Examples</module>-->
     </modules>
 
     <properties>
@@ -30,7 +31,7 @@
         <maven.compiler.source>13</maven.compiler.source>
         <maven.compiler.target>13</maven.compiler.target>
         <maven.compiler.release>13</maven.compiler.release>
-<!--        <argLine>&#45;&#45;enable-preview</argLine>-->
+        <!--        <argLine>&#45;&#45;enable-preview</argLine>-->
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -76,7 +77,7 @@
                         <source>13</source>
                         <target>13</target>
                         <release>13</release>
-<!--                        <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
+                        <!--                        <compilerArgs>&#45;&#45;enable-preview</compilerArgs>-->
                     </configuration>
                 </plugin>
             </plugins>
@@ -123,5 +124,43 @@
             </plugin>
         </plugins>
     </reporting>
+
+    <profiles>
+        <profile>
+            <id>scrutinize</id>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <version>3.1.12.2</version>
+                        <groupId>com.github.spotbugs</groupId>
+                        <artifactId>spotbugs-maven-plugin</artifactId>
+                        <configuration>
+                            <!--                    <excludeFilterFile>${project.basedir}/src/test/resources/findbugs-exclude.xml</excludeFilterFile>-->
+                            <effort>Max</effort>
+                            <threshold>Low</threshold>
+                            <xmlOutput>true</xmlOutput>
+                            <spotbugsXmlOutputDirectory>${project.build.directory}/findbugs</spotbugsXmlOutputDirectory>
+                            <!--
+                                NullAway checks NPE's;
+                                FindUncalledPrivateMethods is broken
+                            -->
+                            <omitVisitors>FindNullDeref,InitializeNonnullFieldsInConstructor,CheckRelaxingNullnessAnnotation,LoadOfKnownNullValue,FindUncalledPrivateMethods</omitVisitors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>analyze-compile</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 
 </project>

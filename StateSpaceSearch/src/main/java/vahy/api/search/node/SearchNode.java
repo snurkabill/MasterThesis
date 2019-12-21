@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface SearchNode<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

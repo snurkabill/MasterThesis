@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Experimental
 public class RiskBasedSelectorVahy<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

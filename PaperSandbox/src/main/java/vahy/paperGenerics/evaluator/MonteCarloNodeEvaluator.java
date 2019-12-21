@@ -20,7 +20,7 @@ import java.util.SplittableRandom;
 import java.util.function.Function;
 
 public class MonteCarloNodeEvaluator<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>

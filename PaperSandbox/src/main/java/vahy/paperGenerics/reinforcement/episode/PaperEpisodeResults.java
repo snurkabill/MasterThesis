@@ -1,20 +1,41 @@
 package vahy.paperGenerics.reinforcement.episode;
 
-import vahy.api.episode.EpisodeResults;
+import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.impl.episode.EpisodeResultsImpl;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 
-public interface PaperEpisodeResults<
-    TAction extends Enum<TAction> & Action,
+import java.time.Duration;
+import java.util.List;
+
+public class PaperEpisodeResults<
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
     TPolicyRecord extends PaperPolicyRecord>
-    extends EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    extends EpisodeResultsImpl<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
-    boolean isRiskHit();
+    public PaperEpisodeResults(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory,
+                               int playerStepCount,
+                               int totalStepCount,
+                               double totalPayoff,
+                               Duration duration) {
+        super(episodeHistory, playerStepCount, totalStepCount, totalPayoff, duration);
+    }
 
+    public boolean isRiskHit() {
+        return getFinalState().isRiskHit();
+    }
+
+    @Override
+    public String episodeMetadataToFile() {
+        String super_ =  super.episodeMetadataToFile();
+        var sb = new StringBuilder(super_);
+        appendLine(sb, "Risk Hit", String.valueOf(getFinalState().isRiskHit()));
+        return sb.toString();
+    }
 }

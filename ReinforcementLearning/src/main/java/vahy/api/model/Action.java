@@ -1,9 +1,18 @@
 package vahy.api.model;
 
-public interface Action {
+public interface Action<TAction extends Action<TAction>> {
+
+    TAction[] getAllPlayerActions();
+
+    TAction[] getAllOpponentActions();
 
     boolean isPlayerAction();
 
-    int getActionIndexInPossibleActions();
+    boolean isOpponentAction();
 
+    int getGlobalIndex();
+
+    int getActionIndexInPlayerActions();
+
+    int getActionIndexInOpponentActions();
 }

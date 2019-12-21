@@ -9,7 +9,7 @@ import java.time.Duration;
 import java.util.List;
 
 public interface EpisodeResults<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
@@ -26,5 +26,7 @@ public interface EpisodeResults<
     Duration getDuration();
 
     TState getFinalState();
+
+    String episodeMetadataToFile();
 
 }

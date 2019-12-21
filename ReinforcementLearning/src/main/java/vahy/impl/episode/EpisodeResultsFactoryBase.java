@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.List;
 
 public class EpisodeResultsFactoryBase<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

@@ -5,6 +5,7 @@ import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,5 +52,10 @@ public class TrainableApproximator implements TrainablePredictor {
             input[i] = doubleVectorialObservationArray[i].getObservedVector();
         }
         return supervisedTrainableModel.predict(input);
+    }
+
+    @Override
+    public void close() throws IOException {
+        supervisedTrainableModel.close();
     }
 }

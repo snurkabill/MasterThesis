@@ -3,13 +3,11 @@ package vahy.impl.search.node.factory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.reward.RewardAggregator;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.search.AbstractStateSpaceSearchTest;
 import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
-import vahy.testDomain.model.TestAction;
-import vahy.testDomain.model.TestState;
+import vahy.impl.testdomain.model.TestAction;
+import vahy.impl.testdomain.model.TestState;
 import vahy.testDomain.search.TestSearchNodeImpl;
 
 import java.util.Collections;

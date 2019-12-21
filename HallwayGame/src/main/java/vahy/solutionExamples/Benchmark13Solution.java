@@ -1,18 +1,13 @@
 package vahy.solutionExamples;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.AlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
-import vahy.config.StochasticStrategy;
-import vahy.config.SystemConfig;
-import vahy.config.SystemConfigBuilder;
 import vahy.environment.config.ConfigBuilder;
 import vahy.environment.config.GameConfig;
 import vahy.environment.state.StateRepresentation;
-import vahy.experiment.Experiment;
 import vahy.game.HallwayInstance;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -21,49 +16,33 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.paperGenerics.reinforcement.learning.ApproximatorType;
-import vahy.utils.ImmutableTuple;
-import vahy.utils.ThirdPartBinaryUtils;
 
 import java.util.function.Supplier;
 
-public class Benchmark13Solution {
-
-    private static Logger logger = LoggerFactory.getLogger(Benchmark14Solution.class.getName());
+public class Benchmark13Solution extends DefaultLocalBenchmark {
 
     public static void main(String[] args) {
-        ThirdPartBinaryUtils.cleanUpNativeTempFiles();
+        var benchmark = new Benchmark13Solution();
+        benchmark.runBenchmark();
+    }
 
-        GameConfig gameConfig = new ConfigBuilder()
+    @Override
+    protected GameConfig createGameConfig() {
+        return new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(4)
             .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
+            .gameStringRepresentation(HallwayInstance.BENCHMARK_13)
             .buildConfig();
-
-        var setup = createExperiment();
-        var experiment = new Experiment(setup.getFirst(), setup.getSecond());
-        experiment.run(gameConfig, HallwayInstance.BENCHMARK_13);
-
     }
 
-
-    public static ImmutableTuple<AlgorithmConfig, SystemConfig> createExperiment() {
-
-        var systemConfig = new SystemConfigBuilder()
-            .randomSeed(0)
-            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
-            .setParallelThreadsCount(7)
-            .setSingleThreadedEvaluation(true)
-            .setEvalEpisodeCount(1000)
-            .buildSystemConfig();
-
-
+    @Override
+    protected PaperAlgorithmConfig createAlgorithmConfig() {
         int batchSize = 100;
 
-        var algorithmConfig = new AlgorithmConfigBuilder()
+        return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
@@ -120,6 +99,6 @@ public class Benchmark13Solution {
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
-        return new ImmutableTuple<>(algorithmConfig, systemConfig);
     }
+
 }

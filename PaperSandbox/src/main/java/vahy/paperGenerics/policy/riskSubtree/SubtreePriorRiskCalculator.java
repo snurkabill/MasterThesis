@@ -10,7 +10,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.LinkedList;
 
 public class SubtreePriorRiskCalculator<
-    TAction extends Action,
+    TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

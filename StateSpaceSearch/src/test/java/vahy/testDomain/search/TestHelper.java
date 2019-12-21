@@ -3,10 +3,10 @@ package vahy.testDomain.search;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
-import vahy.testDomain.model.TestAction;
-import vahy.testDomain.model.TestState;
+import vahy.impl.search.node.SearchNodeImpl;
+import vahy.impl.testdomain.model.TestAction;
+import vahy.impl.testdomain.model.TestState;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

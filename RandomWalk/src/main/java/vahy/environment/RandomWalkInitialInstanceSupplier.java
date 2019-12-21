@@ -1,18 +1,18 @@
 package vahy.environment;
 
-import vahy.api.episode.InitialStateSupplier;
+import vahy.impl.episode.AbstractInitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 
-public class RandomWalkInitialInstanceSupplier implements InitialStateSupplier<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
+import java.util.SplittableRandom;
 
-    private final RandomWalkSetup randomWalkSetup;
+public class RandomWalkInitialInstanceSupplier extends AbstractInitialStateSupplier<RandomWalkSetup, RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
 
-    public RandomWalkInitialInstanceSupplier(RandomWalkSetup randomWalkSetup) {
-        this.randomWalkSetup = randomWalkSetup;
+    public RandomWalkInitialInstanceSupplier(RandomWalkSetup randomWalkSetup, SplittableRandom random) {
+        super(randomWalkSetup, random);
     }
 
     @Override
-    public RandomWalkState createInitialState() {
-        return new RandomWalkState(randomWalkSetup);
+    protected RandomWalkState createState_inner(RandomWalkSetup problemConfig, SplittableRandom random) {
+        return new RandomWalkState(problemConfig);
     }
 }

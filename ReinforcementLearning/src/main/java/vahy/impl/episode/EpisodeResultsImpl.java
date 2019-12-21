@@ -11,7 +11,7 @@ import java.time.Duration;
 import java.util.List;
 
 public class EpisodeResultsImpl<
-    TAction extends Enum<TAction> & Action,
+    TAction extends Enum<TAction> & Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
@@ -65,5 +65,22 @@ public class EpisodeResultsImpl<
     @Override
     public TState getFinalState() {
         return episodeHistory.get(episodeHistory.size() - 1).getToState();
+    }
+
+    protected void appendLine(StringBuilder sb, String propertyName, String propertyValue) {
+        sb.append(propertyName);
+        sb.append(", ");
+        sb.append(propertyValue);
+        sb.append(System.lineSeparator());
+    }
+
+    @Override
+    public String episodeMetadataToFile() {
+        var sb = new StringBuilder();
+        appendLine(sb, "Total step count", String.valueOf(getTotalStepCount()));
+        appendLine(sb, "Player step count", String.valueOf(getPlayerStepCount()));
+        appendLine(sb, "Duration [ms]", String.valueOf(getDuration().toMillis()));
+        appendLine(sb, "Total Payoff", String.valueOf(getTotalPayoff()));
+        return sb.toString();
     }
 }
