@@ -1,11 +1,8 @@
-package vahy.integration;
+package vahy.original.solutionExamples;
 
-import org.testng.annotations.DataProvider;
-import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
-import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -22,40 +19,33 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 
 import java.util.function.Supplier;
 
-public class IntegrationHallway18Test extends AbstractHallwayTest {
+public class Benchmark14Solution extends DefaultLocalBenchmark {
 
-    @DataProvider(name = "TestDataProviderMethod")
+    public static void main(String[] args) {
+        var benchmark = new Benchmark14Solution();
+        benchmark.runBenchmark();
+    }
+
     @Override
-    public Object[][] experimentSettings() {
-        return new Object[][] {
-            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.105}
-        };
-    }
-
-    private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false);
-    }
-
-
-    public static GameConfig createGameConfig() {
+    protected GameConfig createGameConfig() {
         return new ConfigBuilder()
             .reward(100)
-            .noisyMoveProbability(0.0)
-            .stepPenalty(10)
-            .trapProbability(0.05)
+            .noisyMoveProbability(0.1)
+            .stepPenalty(1)
+            .trapProbability(0.1)
             .stateRepresentation(StateRepresentation.COMPACT)
-            .gameStringRepresentation(HallwayInstance.BENCHMARK_18)
+            .gameStringRepresentation(HallwayInstance.BENCHMARK_14)
             .buildConfig();
     }
 
-    private static AlgorithmConfigBuilder genericAlgoConfig() {
-        int batchSize = 100;
-        return  new AlgorithmConfigBuilder()
+    @Override
+    protected PaperAlgorithmConfig createAlgorithmConfig() {
+        int batchSize = 200;
+
+        return new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .cpuctParameter(3)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -64,64 +54,51 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(200)
+            .stageCount(2000)
 
-            .maximalStepCountBound(1000)
+            .maximalStepCountBound(500)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(1.00)
-            .riskSupplier(() -> 1.00)
+
+            .globalRiskAllowed(0.5)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 100000.0) / 5;
+                    var x = Math.exp(-callCount / 10000.0);
+                    if(callCount % batchSize == 0) {
+                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
+//                    return 1.0;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 200000.0) * 10;
+                    double x = Math.exp(-callCount / 20000.0) * 10;
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+                    }
+                    return x;
+//                    return 1.5;
                 }
-                private int callCount = 0;
             })
+            .riskSupplier(() -> 0.5)
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
-    }
-
-
-    public static PaperAlgorithmConfig createExperiment_SAFE() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 0.0)
-            .globalRiskAllowed(0.0)
-            .stageCount(50)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
     }
 
-    public static PaperAlgorithmConfig createExperiment_TOTAL_RISK() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 1.0)
-            .globalRiskAllowed(1.0)
-            .stageCount(100)
-            .buildAlgorithmConfig();
-    }
-
-    public static PaperAlgorithmConfig createExperiment_MIDDLE_RISK() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 0.05)
-            .globalRiskAllowed(0.05)
-            .stageCount(100)
-            .buildAlgorithmConfig();
-    }
 }

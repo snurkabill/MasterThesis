@@ -1,7 +1,8 @@
-package vahy.integration;
+package vahy.resignation.prototype;
 
-import org.testng.annotations.DataProvider;
+import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
@@ -13,33 +14,40 @@ import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
+import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.resignation.environment.HallwayActionWithResign;
+import vahy.resignation.environment.agent.policy.environment.PaperEnvironmentPolicy;
+import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
-public class IntegrationHallway05Test extends AbstractHallwayTest {
+public class Prototype {
 
-    @DataProvider(name = "TestDataProviderMethod")
-    @Override
-    public Object[][] experimentSettings() {
-        return new Object[][] {
-            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  278.0, 0.010},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 270.000, 0.050}
-        };
+    public static void main(String[] args) {
+
+        var algorithmConfig = getAlgorithmConfig();
+        var systemConfig = getSystemConfig();
+        var problemConfig = getGameConfig();
+
+        PaperExperimentEntryPoint.createExperimentAndRun(
+            HallwayActionWithResign.class,
+            HallwayGameWithResignationInitialInstanceSupplier::new,
+            PaperEnvironmentPolicy.class,
+            algorithmConfig,
+            systemConfig,
+            problemConfig,
+            Path.of("Results")
+        );
     }
 
-    private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false);
-    }
-
-
-    public static GameConfig createGameConfig() {
+    private static GameConfig getGameConfig() {
         return new ConfigBuilder()
             .reward(100)
             .noisyMoveProbability(0.1)
@@ -50,10 +58,21 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .buildConfig();
     }
 
-    private static AlgorithmConfigBuilder genericAlgoConfig() {
+    private static SystemConfig getSystemConfig() {
+        return new SystemConfigBuilder()
+            .setRandomSeed(0)
+            .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
+            .setDrawWindow(true)
+            .setParallelThreadsCount(4)
+            .setSingleThreadedEvaluation(false)
+            .setEvalEpisodeCount(1000)
+            .buildSystemConfig();
+    }
+
+    private static PaperAlgorithmConfig getAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(1)
+            .cpuctParameter(3)
 
             //.mcRolloutCount(1)
             //NN
@@ -61,33 +80,54 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-
-            .batchEpisodeCount(100)
-
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            .stageCount(100)
+            .batchEpisodeCount(1000)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
+            .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
-
-            .maximalStepCountBound(1000)
+//            .setBatchedEvaluationSize(1)
+            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
-            .globalRiskAllowed(1.0)
-            .riskSupplier(() -> 1.0)
+            .replayBufferSize(100_000)
+            .trainingBatchSize(1)
+            .learningRate(0.01)
 
-            .learningRate(0.1)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.00";
+                }
+            })
+
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
-            .explorationConstantSupplier(new Supplier<>() {
+            .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 0.2;
+                    return 1.0;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 0.20";
                 }
             })
-            .temperatureSupplier(new Supplier<>() {
+            .temperatureSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 1.5;
+                    return 2.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.05";
                 }
             })
 
@@ -97,31 +137,8 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
-    }
-
-
-    public static PaperAlgorithmConfig createExperiment_SAFE() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 0.0)
-            .globalRiskAllowed(0.0)
-//            .stageCount(50)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
     }
 
-    public static PaperAlgorithmConfig createExperiment_TOTAL_RISK() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 1.0)
-            .globalRiskAllowed(1.0)
-            .stageCount(100)
-            .buildAlgorithmConfig();
-    }
-
-    public static PaperAlgorithmConfig createExperiment_MIDDLE_RISK() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 0.05)
-            .globalRiskAllowed(0.05)
-//            .stageCount(200)
-            .buildAlgorithmConfig();
-    }
 }
