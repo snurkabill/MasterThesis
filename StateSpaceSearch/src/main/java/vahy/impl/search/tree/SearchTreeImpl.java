@@ -168,7 +168,7 @@ public class SearchTreeImpl<
             var node = queue.pop();
             if(node.isLeaf() && !node.isFinalNode()) {
                 expandAndEvaluateNode(node);
-                treeUpdater.updateTree(node);;
+                treeUpdater.updateTree(node);
             }
             queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
         }
