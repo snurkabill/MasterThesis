@@ -83,7 +83,7 @@ public class Prototype {
             .discountFactor(1)
             .batchEpisodeCount(100)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(100)
+            .stageCount(200)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
@@ -112,7 +112,7 @@ public class Prototype {
             .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 0.2;
+                    return 1.0;
                 }
 
                 @Override
@@ -121,9 +121,12 @@ public class Prototype {
                 }
             })
             .temperatureSupplier(new Supplier<Double>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 1.50;
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0);
+//                    return 2.00;
                 }
 
                 @Override
@@ -133,9 +136,9 @@ public class Prototype {
             })
 
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
-            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)

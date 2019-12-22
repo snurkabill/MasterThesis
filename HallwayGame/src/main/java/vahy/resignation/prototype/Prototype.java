@@ -10,12 +10,9 @@ import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
-import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -24,6 +21,9 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.resignation.environment.HallwayActionWithResign;
+import vahy.resignation.environment.agent.policy.environment.PaperEnvironmentPolicyWithResign;
+import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 
 import java.nio.file.Path;
 import java.util.function.Supplier;
@@ -37,9 +37,9 @@ public class Prototype {
         var problemConfig = getGameConfig();
 
         PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayAction.class,
-            HallwayGameInitialInstanceSupplier::new,
-            PaperEnvironmentPolicy.class,
+            HallwayActionWithResign.class,
+            HallwayGameWithResignationInitialInstanceSupplier::new,
+            PaperEnvironmentPolicyWithResign.class,
             algorithmConfig,
             systemConfig,
             problemConfig,
@@ -81,11 +81,11 @@ public class Prototype {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
+            .maximalStepCountBound(10_000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)
@@ -124,7 +124,7 @@ public class Prototype {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0) * 2;
+                    return Math.exp(-callCount / 10000.0) * 1;
 //                    return 2.00;
                 }
 
