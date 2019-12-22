@@ -1,5 +1,6 @@
 package vahy.paperGenerics;
 
+import vahy.api.episode.InstanceInitializerInitializer;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
@@ -15,7 +16,6 @@ import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
-import vahy.api.episode.InstanceInitializerInitializer;
 import vahy.impl.experiment.AbstractExperiment;
 import vahy.impl.experiment.EpisodeWriter;
 import vahy.impl.model.observation.DoubleVector;
@@ -280,16 +280,5 @@ public class PaperExperimentEntryPoint {
                 throw EnumUtils.createExceptionForUnknownEnumValue(evaluatorType);
         }
     }
-
-//    public static void createExperimentAndRun(
-//        Class<vahy.environment.HallwayAction> hallwayActionClass,
-//        Class<vahy.environment.state.EnvironmentProbabilities> environmentProbabilitiesClass,
-//        Class<vahy.environment.state.HallwayStateImpl> hallwayStateClass,
-//        Class<vahy.game.HallwayGameInitialInstanceSupplier> hallwayGameInitialInstanceSupplierClass,
-//        Class<vahy.environment.agent.policy.environment.PaperEnvironmentPolicy> opponentPolicyClass,
-//        PaperAlgorithmConfig algorithmConfig,
-//        SystemConfig systemConfig,
-//        vahy.environment.config.GameConfig problemConfig) {
-//    }
 }
 
