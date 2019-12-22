@@ -1,5 +1,7 @@
 package vahy.paperGenerics;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import vahy.api.episode.InstanceInitializerInitializer;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -46,7 +48,11 @@ import vahy.utils.ImmutableTuple;
 import vahy.utils.ReflectionHacks;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -86,67 +92,64 @@ public class PaperExperimentEntryPoint {
         var initialStateSupplier = instanceInitializerInitializer.createInitialStateSupplier(problemConfig, masterRandom.split());
 
         try {
-            TrainablePredictor approximator = initializePredictor(
+            try(TrainablePredictor approximator = initializePredictor(
                 initialStateSupplier.createInitialState().getPlayerObservation().getObservedVector().length,
                 algorithmConfig,
-                playerOpponentActions.getFirst().length,
-                null,
-                masterRandom,
-                finalRandomSeed
-            );
-            Supplier<NodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>> nodeSelectorSupplier = createNodeSelectorSupplier(masterRandom, algorithmConfig);
-            PaperMetadataFactory<TAction, DoubleVector, TOpponentObservation, TState> searchNodeMetadataFactory = new PaperMetadataFactory<>();
-            NodeEvaluator<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState> evaluator = resolveEvaluator(
-                algorithmConfig,
-                new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
-                playerOpponentActions.getFirst(),
-                playerOpponentActions.getSecond(),
-                approximator,
-                FixedModelObservation::getProbabilities,
-                masterRandom
-            );
-
-            PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> policySupplier = new PaperPolicySupplier<>(
-                actionClass,
-                searchNodeMetadataFactory,
-                algorithmConfig.getGlobalRiskAllowed(),
-                masterRandom.split(),
-                nodeSelectorSupplier,
-                evaluator,
-                new PaperTreeUpdater<>(),
-                algorithmConfig.getTreeUpdateConditionFactory(),
-                strategiesProvider,
-                algorithmConfig.getExplorationConstantSupplier(),
-                algorithmConfig.getTemperatureSupplier(),
-                algorithmConfig.getRiskSupplier()
-            );
-
-            // TODO: this is dirty.
-            var opponentPolicySupplier = new PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>() {
-                @Override
-                public Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
-                    return (Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
-                }
-            };
-
-            var results = experiment.run(
-                policySupplier,
-                opponentPolicySupplier,
-                new PaperEpisodeResultsFactory<>(),
-                initialStateSupplier,
-                new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false),
-                Collections.singletonList(new FromEpisodesDataPointGeneratorGeneric<>("Risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow())),
-                approximator,
-                new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
-                new PaperEpisodeStatisticsCalculator<>(),
-                new EpisodeWriter<>(problemConfig, algorithmConfig, systemConfig, resultPath),
                 systemConfig,
-                algorithmConfig
+                playerOpponentActions.getFirst().length,
+                masterRandom))
+            {
+                Supplier<NodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>> nodeSelectorSupplier = createNodeSelectorSupplier(masterRandom, algorithmConfig);
+                PaperMetadataFactory<TAction, DoubleVector, TOpponentObservation, TState> searchNodeMetadataFactory = new PaperMetadataFactory<>();
+                NodeEvaluator<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState> evaluator = resolveEvaluator(
+                    algorithmConfig,
+                    new SearchNodeBaseFactoryImpl<>(searchNodeMetadataFactory),
+                    playerOpponentActions.getFirst(),
+                    playerOpponentActions.getSecond(),
+                    approximator,
+                    FixedModelObservation::getProbabilities,
+                    masterRandom
                 );
 
-            approximator.close();
-            return results;
-        } catch (IOException e) {
+                PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> policySupplier = new PaperPolicySupplier<>(
+                    actionClass,
+                    searchNodeMetadataFactory,
+                    algorithmConfig.getGlobalRiskAllowed(),
+                    masterRandom.split(),
+                    nodeSelectorSupplier,
+                    evaluator,
+                    new PaperTreeUpdater<>(),
+                    algorithmConfig.getTreeUpdateConditionFactory(),
+                    strategiesProvider,
+                    algorithmConfig.getExplorationConstantSupplier(),
+                    algorithmConfig.getTemperatureSupplier(),
+                    algorithmConfig.getRiskSupplier()
+                );
+
+                // TODO: this is dirty.
+                var opponentPolicySupplier = new PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>() {
+                    @Override
+                    public Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
+                        return (Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
+                    }
+                };
+
+                return experiment.run(
+                    policySupplier,
+                    opponentPolicySupplier,
+                    new PaperEpisodeResultsFactory<>(),
+                    initialStateSupplier,
+                    new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false),
+                    Collections.singletonList(new FromEpisodesDataPointGeneratorGeneric<>("Risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow())),
+                    approximator,
+                    new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
+                    new PaperEpisodeStatisticsCalculator<>(),
+                    new EpisodeWriter<>(problemConfig, algorithmConfig, systemConfig, resultPath),
+                    systemConfig,
+                    algorithmConfig
+                );
+            }
+        } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
@@ -158,10 +161,9 @@ public class PaperExperimentEntryPoint {
 
     private static TrainablePredictor initializePredictor(int modelInputSize,
                                                           PaperAlgorithmConfig algorithmConfig,
+                                                          SystemConfig systemConfig,
                                                           int actionCount,
-                                                          byte[] tfModelAsByes,
-                                                          SplittableRandom masterRandom,
-                                                          long finalRandomSeed) {
+                                                          SplittableRandom masterRandom) throws IOException, InterruptedException {
         var approximatorType = algorithmConfig.getApproximatorType();
         var defaultPrediction = new double[2 + actionCount];
         defaultPrediction[0] = 0;
@@ -178,12 +180,13 @@ public class PaperExperimentEntryPoint {
             case HASHMAP_LR:
                 return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
             case TF_NN:
+                var tfModelAsBytes = createTensorFlowModel(algorithmConfig, systemConfig, modelInputSize, actionCount);
                 var tfModel = new TFModel(
                     modelInputSize,
                     PaperModel.POLICY_START_INDEX + actionCount,
                     algorithmConfig.getTrainingEpochCount(),
                     algorithmConfig.getTrainingBatchSize(),
-                    tfModelAsByes,
+                    tfModelAsBytes,
                     masterRandom.split());
                 return new TrainableApproximator(tfModel);
             case DL4J_NN:
@@ -191,7 +194,7 @@ public class PaperExperimentEntryPoint {
                     modelInputSize,
                     PaperModel.POLICY_START_INDEX + actionCount,
                     null,
-                    finalRandomSeed,
+                    masterRandom.nextInt(),
                     algorithmConfig.getLearningRate(),
                     algorithmConfig.getTrainingEpochCount(),
                     algorithmConfig.getTrainingBatchSize());
@@ -199,6 +202,40 @@ public class PaperExperimentEntryPoint {
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
         }
+    }
+
+    private static byte[] createTensorFlowModel(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, int inputCount, int outputActionCount) throws IOException, InterruptedException {
+        var modelName = "tfModel_" + DateTime.now().withZone(DateTimeZone.UTC);
+        Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath() +
+            " PythonScripts/tensorflow_models/" +
+            algorithmConfig.getCreatingScript() +
+            " " +
+            modelName +
+            " " +
+            inputCount +
+            " " +
+            outputActionCount +
+            " PythonScripts/generated_models");
+
+        try(BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            String line;
+            String line2;
+
+            while ((line = input.readLine()) != null) {
+                System.out.println(line);
+            }
+            while ((line2 = error.readLine()) != null) {
+                System.out.println(line2);
+            }
+        }
+        var exitValue = process.waitFor();
+        if(exitValue != 0) {
+            throw new IllegalStateException("Python process ended with non-zero exit value. Exit val: [" + exitValue + "]");
+        }
+        var dir = new File("PythonScripts/generated_models/");
+        Files.createDirectories(dir.toPath());
+        return Files.readAllBytes(new File(dir, modelName + ".pb").toPath());
     }
 
     private static <

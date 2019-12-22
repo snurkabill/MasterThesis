@@ -36,6 +36,9 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     private final EvaluatorType evaluatorType;
     private final SelectorType selectorType;
 
+    // TENSORFLOW
+    private final String creatingScript;
+
     // NN
     private final int trainingBatchSize;
     private final int trainingEpochCount;
@@ -78,7 +81,7 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
                                 ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
                                 FlowOptimizerType flowOptimizerType,
                                 SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                                SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize) {
+                                SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize, String creatingScript) {
 
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
@@ -106,6 +109,7 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
         this.batchedEvaluationSize = batchedEvaluationSize;
+        this.creatingScript = creatingScript;
     }
 
     public double getCpuctParameter() {
@@ -212,7 +216,11 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         return batchedEvaluationSize;
     }
 
-//    @Override
+    public String getCreatingScript() {
+        return creatingScript;
+    }
+
+    //    @Override
 //    public String toString() {
 //        return "AlgorithmConfig{" +
 //            "cpuctParameter=" + cpuctParameter +
