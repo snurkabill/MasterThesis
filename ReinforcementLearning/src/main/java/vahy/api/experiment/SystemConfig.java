@@ -16,14 +16,16 @@ public class SystemConfig implements Config {
     private final int evalEpisodeCount;
 
     private final boolean dumpTrainingData;
+    private final boolean dumpEvaluationData;
 
-    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData) {
+    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData, boolean dumpEvaluationData) {
         this.randomSeed = randomSeed;
         this.singleThreadedEvaluation = singleThreadedEvaluation;
         this.parallelThreadsCount = parallelThreadsCount;
         this.drawWindow = drawWindow;
         this.evalEpisodeCount = evalEpisodeCount;
         this.dumpTrainingData = dumpTrainingData;
+        this.dumpEvaluationData = dumpEvaluationData;
     }
 
     public long getRandomSeed() {
@@ -50,6 +52,10 @@ public class SystemConfig implements Config {
         return dumpTrainingData;
     }
 
+    public boolean dumpEvaluationData() {
+        return dumpEvaluationData;
+    }
+
     @Override
     public String toString() {
         return "randomSeed," + randomSeed + System.lineSeparator() +
@@ -57,7 +63,8 @@ public class SystemConfig implements Config {
             "parallelThreadsCount," + parallelThreadsCount + System.lineSeparator() +
             "drawWindow," + drawWindow + System.lineSeparator() +
             "evalEpisodeCount," + evalEpisodeCount + System.lineSeparator() +
-            "dumpTrainingData," + dumpTrainingData + System.lineSeparator();
+            "dumpTrainingData," + dumpTrainingData + System.lineSeparator() +
+            "dumpEvaluationData," + dumpEvaluationData + System.lineSeparator();
     }
 
     @Override

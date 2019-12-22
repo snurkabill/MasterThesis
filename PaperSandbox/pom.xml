@@ -118,7 +118,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>vahy.solutionExamples.ForExperimenting</mainClass>
+                            <mainClass>vahy.original.solutionExamples.ForExperimenting</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

@@ -27,7 +27,7 @@ public class InferenceFeasibleDistributionProvider<
     public InferenceFeasibleDistributionProvider(List<TAction> playerActions,
                                                  SplittableRandom random,
                                                  Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
-        super(playerActions, random);
+        super(playerActions, random, -Double.MAX_VALUE);
         this.subtreeRiskCalculatorSupplier = subtreeRiskCalculatorSupplier;
     }
 

@@ -26,7 +26,6 @@ public class ExplorationFeasibleDistributionProvider<
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow;
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow;
     private final double totalRiskAllowed;
-    private final double temperature;
 
     public ExplorationFeasibleDistributionProvider(List<TAction> playerActions,
                                                    SplittableRandom random,
@@ -34,11 +33,10 @@ public class ExplorationFeasibleDistributionProvider<
                                                    Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow,
                                                    double totalRiskAllowed,
                                                    double temperature) {
-        super(playerActions, random);
+        super(playerActions, random, temperature);
         this.subtreeRiskCalculatorSupplierForKnownFlow = subtreeRiskCalculatorSupplierForKnownFlow;
         this.subtreeRiskCalculatorSupplierForUnknownFlow = subtreeRiskCalculatorSupplierForUnknownFlow;
         this.totalRiskAllowed  = totalRiskAllowed;
-        this.temperature = temperature;
     }
 
     @Override

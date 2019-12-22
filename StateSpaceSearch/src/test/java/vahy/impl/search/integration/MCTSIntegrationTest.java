@@ -16,12 +16,48 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.testdomain.model.TestAction;
 import vahy.impl.testdomain.model.TestState;
+import vahy.impl.testdomain.tictactoe.TicTacToeAction;
+import vahy.impl.testdomain.tictactoe.TicTacToeConfig;
+import vahy.impl.testdomain.tictactoe.TicTacToeState;
+import vahy.impl.testdomain.tictactoe.TicTacToeStateInitializer;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.SplittableRandom;
 
 public class MCTSIntegrationTest {
+
+    @Test
+    public void testMCTSOnTicTacToe() {
+        SplittableRandom random = new SplittableRandom(0);
+
+        TicTacToeStateInitializer initializer = new TicTacToeStateInitializer(new TicTacToeConfig(), random);
+        var state = initializer.createInitialState();
+
+        SearchNode<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> root = new SearchNodeImpl<>(
+            state,
+            new MonteCarloTreeSearchMetadata(0.0, 0.0, 0.0),
+            new LinkedHashMap<>()
+        );
+
+        SearchNodeMetadataFactory<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> metadataFactory = new MonteCarloTreeSearchMetadataFactory<>();
+        SearchNodeFactory<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> nodeFactory = new SearchNodeBaseFactoryImpl<>(metadataFactory);
+
+        NodeEvaluator<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> nodeEvaluator = new MonteCarloEvaluator<>(nodeFactory, random, 1.0, 10);
+        SearchTreeImpl<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> searchTree = new SearchTreeImpl<>(
+            root,
+            new Ucb1NodeSelector<>(random, 1.0),
+            new MonteCarloTreeSearchUpdater<>(),
+            nodeEvaluator
+        );
+
+        for (int i = 0; i < 100; i++) {
+            searchTree.updateTree();
+        }
+
+        System.out.println("asdf");
+
+    }
 
     @Test
     public void testMCTSAlgorithm() {

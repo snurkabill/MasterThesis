@@ -18,7 +18,7 @@ public class MaxUcbValueDistributionProvider<
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public MaxUcbValueDistributionProvider(List<TAction> playerActions, SplittableRandom random) {
-        super(playerActions, random);
+        super(playerActions, random, -Double.MAX_VALUE);
     }
 
     @Override

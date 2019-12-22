@@ -18,7 +18,7 @@ public class MaxUcbVisitDistributionProvider<
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public MaxUcbVisitDistributionProvider(List<TAction> playerActions, SplittableRandom random) {
-        super(playerActions, random);
+        super(playerActions, random, -Double.MAX_VALUE);
     }
 
     @Override

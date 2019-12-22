@@ -61,7 +61,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         this.enabledActions = enabledActions;
     }
 
-    private Symbol checkVerticalLine(int verticalIndex) {
+    private Symbol checkVerticalLine(int verticalIndex, Symbol[][] playground) {
         Symbol first = playground[verticalIndex][0];
         for (int i = 0; i < playground[verticalIndex].length; i++) {
             if(playground[verticalIndex][i] != first) {
@@ -71,7 +71,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         return first;
     }
 
-    private Symbol checkHorizontalLine(int horizontalIndex) {
+    private Symbol checkHorizontalLine(int horizontalIndex, Symbol[][] playground) {
         Symbol first = playground[0][horizontalIndex];
         for (int i = 0; i < playground[0].length; i++) {
             if(playground[i][horizontalIndex] != first) {
@@ -81,7 +81,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         return first;
     }
 
-    private Symbol checkDiagonalLine() {
+    private Symbol checkDiagonalLine(Symbol[][] playground) {
         Symbol first = playground[0][0];
         for (int i = 0; i < playground[0].length; i++) {
             if(playground[i][i] != first) {
@@ -100,20 +100,20 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         return first;
     }
 
-    private boolean hasOneWin(Player_inner player) {
+    private boolean hasOneWin(Player_inner player, Symbol[][] playground) {
         for (int i = 0; i < playground[0].length; i++) {
-            var result = checkVerticalLine(i);
+            var result = checkVerticalLine(i, playground);
             if(player.getSymbol() == result) {
                 return true;
             }
         }
         for (int i = 0; i < playground[0].length; i++) {
-            var result = checkHorizontalLine(i);
+            var result = checkHorizontalLine(i, playground);
             if(player.getSymbol() == result) {
                 return true;
             }
         }
-        var result = checkDiagonalLine();
+        var result = checkDiagonalLine(playground);
         return player.getSymbol() == result;
     }
 
@@ -137,9 +137,6 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
-        if(isAgentTurn != actionType.isPlayerAction()) {
-            throw new IllegalStateException("Inconsistency between player turn and applying action");
-        }
 
         if(isAgentTurn) {
             var x = actionType.getX();
@@ -157,8 +154,8 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                 }
             }
             newPlayground[x][y] = Symbol.PLAYER;
-            var newActions = enabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
-            double reward = newActions.size() == 0 ? 1 : 0;
+            var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
+            double reward = hasOneWin(Player_inner.PLAYER, newPlayground) ? 1 : 0;
             return new ImmutableStateRewardReturnTuple<>(
                 new TicTacToeState(
                     newPlayground,
@@ -181,12 +178,12 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                 }
             }
             newPlayground[x][y] = Symbol.OPPONENT;
-            var newActions = enabledActions.stream().filter(item -> item.getX() != x && item.getY() != y).collect(Collectors.toList());
-            double reward = newActions.size() == 0 ? -1 : 0;
+            var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
+            double reward = hasOneWin(Player_inner.OPPONENT, newPlayground) ? -1 : 0;
             return new ImmutableStateRewardReturnTuple<>(
                 new TicTacToeState(
                     newPlayground,
-                    false,
+                    true,
                     turnsLeft - 1,
                     newActions
                 ),
@@ -232,6 +229,6 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public boolean isFinalState() {
-        return turnsLeft == 0 || hasOneWin(Player_inner.PLAYER) || hasOneWin(Player_inner.OPPONENT);
+        return turnsLeft == 0 || hasOneWin(Player_inner.PLAYER, playground) || hasOneWin(Player_inner.OPPONENT, playground);
     }
 }

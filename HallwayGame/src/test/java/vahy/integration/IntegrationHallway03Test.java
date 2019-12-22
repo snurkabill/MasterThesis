@@ -1,24 +1,24 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.SystemConfig;
+import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
-import vahy.config.PaperAlgorithmConfig;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
+import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
-import vahy.api.experiment.SystemConfig;
-import vahy.environment.config.ConfigBuilder;
-import vahy.environment.config.GameConfig;
-import vahy.environment.state.StateRepresentation;
-import vahy.game.HallwayInstance;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.original.environment.config.ConfigBuilder;
+import vahy.original.environment.config.GameConfig;
+import vahy.original.environment.state.StateRepresentation;
+import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.api.learning.ApproximatorType;
 
 public class IntegrationHallway03Test extends AbstractHallwayTest {
 
@@ -33,7 +33,7 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false, false);
     }
 
     public static GameConfig createGameConfig() {

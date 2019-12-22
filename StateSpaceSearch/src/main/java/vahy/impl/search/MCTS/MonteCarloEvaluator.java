@@ -58,6 +58,9 @@ public class MonteCarloEvaluator<
         var rewardPredictionNodeCounter = runRollouts(selectedNode);
         TSearchNodeMetadata searchNodeMetadata = selectedNode.getSearchNodeMetadata();
         searchNodeMetadata.setPredictedReward(rewardPredictionNodeCounter.getFirst());
+        if(!selectedNode.isFinalNode()) {
+            selectedNode.unmakeLeaf();
+        }
         return rewardPredictionNodeCounter.getSecond();
     }
 

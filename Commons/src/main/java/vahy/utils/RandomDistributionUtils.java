@@ -102,6 +102,39 @@ public class RandomDistributionUtils {
         return getRandomIndexFromDistribution(distribution, random, 0);
     }
 
+    public static void applyMaskToRandomDistribution(double[] distribution, boolean[] mask) {
+        if(mask.length != distribution.length) {
+            throw new IllegalArgumentException("Mask has different length [" + mask.length + "] from distribution length: [" + distribution.length + "]");
+        }
+        double remainingSum = 0.0;
+        int remainingElementsCount = 0;
+        for (int i = 0; i < distribution.length; i++) {
+            if(mask[i]) {
+                remainingSum += distribution[i];
+                remainingElementsCount++;
+            } else {
+                distribution[i] = 0.0;
+            }
+        }
+        if(remainingElementsCount == 0) {
+            throw new IllegalStateException("Undefined state: masked whole distribution.");
+        } else if(remainingSum == 0.0) {
+            var fraction = 1.0 / remainingElementsCount;
+            for (int i = 0; i < distribution.length; i++) {
+                if(mask[i]) {
+                    distribution[i] = fraction;
+                }
+            }
+        } else {
+            var ratio = 1.0 / remainingSum;
+            for (int i = 0; i < distribution.length; i++) {
+                if(mask[i]) {
+                    distribution[i] *= ratio;
+                }
+            }
+        }
+    }
+
     public static void applyBoltzmannNoise(double[] distribution, double temperature) {
         applyTemperatureNoise(distribution, temperature);
         applySoftmax(distribution);

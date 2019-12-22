@@ -62,7 +62,7 @@
                         <argument>--enable-preview</argument>
                         <argument>-classpath</argument>
                         <classpath />
-                        <argument>vahy.solutionExamples.ForExperimenting</argument>
+                        <argument>vahy.original.solutionExamples.ForExperimenting</argument>
                     </arguments>
                 </configuration>
             </plugin>

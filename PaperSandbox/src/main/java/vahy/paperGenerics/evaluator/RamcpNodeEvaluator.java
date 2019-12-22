@@ -78,7 +78,7 @@ public class RamcpNodeEvaluator<
                 childNodePriorProbabilitiesMap.put(possibleAction, priorProbabilities[0]);
             }
         } else {
-            var probabilities = opponentpredictor.apply(node.getWrappedState().getOpponentObservation());
+            var probabilities = opponentPredictor.apply(node.getWrappedState().getOpponentObservation());
             for (int i = 0; i < probabilities.getFirst().size(); i++) {
                 childNodePriorProbabilitiesMap.put(probabilities.getFirst().get(i), probabilities.getSecond().get(i));
             }
