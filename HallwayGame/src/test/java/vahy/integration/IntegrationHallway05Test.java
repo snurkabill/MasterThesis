@@ -30,12 +30,12 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  278.0, 0.010},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 270.000, 0.050}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 275.000, 0.050}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false);
     }
 
 
@@ -64,37 +64,39 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
 
             .batchEpisodeCount(100)
 
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            .stageCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .stageCount(50)
             .evaluatorType(EvaluatorType.RALF)
 
-            .maximalStepCountBound(1000)
+            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .globalRiskAllowed(1.0)
             .riskSupplier(() -> 1.0)
 
-            .learningRate(0.1)
+            .learningRate(0.01)
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
             .explorationConstantSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
-                    return 0.2;
+                    return 0.5;
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 1.5;
+                    callCount++;
+                    return Math.exp(-callCount / 1000.0);
                 }
             })
 
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
-            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
@@ -112,8 +114,22 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     public static PaperAlgorithmConfig createExperiment_TOTAL_RISK() {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
+            .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0);
+                }
+            })
+            .explorationConstantSupplier(new Supplier<>() {
+                @Override
+                public Double get() {
+                    return 1.0;
+                }
+            })
             .globalRiskAllowed(1.0)
-            .stageCount(100)
+            .stageCount(1000)
             .buildAlgorithmConfig();
     }
 

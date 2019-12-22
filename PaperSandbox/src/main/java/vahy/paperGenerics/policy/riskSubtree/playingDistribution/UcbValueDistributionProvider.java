@@ -18,8 +18,8 @@ public class UcbValueDistributionProvider<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    public UcbValueDistributionProvider(List<TAction> playerActions, SplittableRandom random) {
-        super(playerActions, random);
+    public UcbValueDistributionProvider(List<TAction> playerActions, SplittableRandom random, double temperature) {
+        super(playerActions, random, temperature);
     }
 
     @Override
@@ -27,6 +27,9 @@ public class UcbValueDistributionProvider<
         SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node)
     {
         var ucbDistribution = getUcbValueDistribution(node);
+        if(temperature > 0.0) {
+            RandomDistributionUtils.applyBoltzmannNoise(ucbDistribution.getSecond(), temperature);
+        }
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(ucbDistribution.getSecond(), random);
         return new PlayingDistribution<>(ucbDistribution.getFirst().get(index), index, ucbDistribution.getSecond(), ucbDistribution.getThird(), () -> subtreeRoot -> 1);
     }

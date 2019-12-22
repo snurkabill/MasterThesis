@@ -35,7 +35,7 @@ public class SoftLinearProgramDistributionProvider<
         double totalRiskAllowed,
         AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> backupDistributionProvider)
     {
-        super(playerActions, random);
+        super(playerActions, random, -Double.MAX_VALUE);
         this.totalRiskAllowed = totalRiskAllowed;
         this.subtreeRiskCalculatorSupplier = FlowSumSubtreeRiskCalculator::new;
         this.backupDistributionProvider = backupDistributionProvider;

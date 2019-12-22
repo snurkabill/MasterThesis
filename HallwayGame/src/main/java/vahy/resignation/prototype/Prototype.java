@@ -10,9 +10,12 @@ import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.original.environment.HallwayAction;
+import vahy.original.environment.agent.policy.environment.PaperEnvironmentPolicy;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
+import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
@@ -21,9 +24,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.resignation.environment.HallwayActionWithResign;
-import vahy.resignation.environment.agent.policy.environment.PaperEnvironmentPolicy;
-import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 
 import java.nio.file.Path;
 import java.util.function.Supplier;
@@ -37,8 +37,8 @@ public class Prototype {
         var problemConfig = getGameConfig();
 
         PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayActionWithResign.class,
-            HallwayGameWithResignationInitialInstanceSupplier::new,
+            HallwayAction.class,
+            HallwayGameInitialInstanceSupplier::new,
             PaperEnvironmentPolicy.class,
             algorithmConfig,
             systemConfig,
@@ -63,7 +63,7 @@ public class Prototype {
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(4)
+            .setParallelThreadsCount(7)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
@@ -72,7 +72,7 @@ public class Prototype {
     private static PaperAlgorithmConfig getAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
             //MCTS
-            .cpuctParameter(3)
+            .cpuctParameter(1)
 
             //.mcRolloutCount(1)
             //NN
@@ -80,8 +80,8 @@ public class Prototype {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(1000)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
+            .batchEpisodeCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
@@ -120,9 +120,12 @@ public class Prototype {
                 }
             })
             .temperatureSupplier(new Supplier<Double>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
-                    return 2.00;
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0) * 2;
+//                    return 2.00;
                 }
 
                 @Override
@@ -132,9 +135,9 @@ public class Prototype {
             })
 
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
-            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)

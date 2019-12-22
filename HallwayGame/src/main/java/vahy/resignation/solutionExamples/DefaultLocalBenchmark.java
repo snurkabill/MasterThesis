@@ -24,7 +24,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.resignation.environment.HallwayActionWithResign;
-import vahy.resignation.environment.agent.policy.environment.PaperEnvironmentPolicy;
+import vahy.resignation.environment.agent.policy.environment.PaperEnvironmentPolicyWithResign;
 import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 import vahy.utils.ThirdPartBinaryUtils;
 
@@ -45,7 +45,7 @@ public class DefaultLocalBenchmark {
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayActionWithResign.class,
             HallwayGameWithResignationInitialInstanceSupplier::new,
-            PaperEnvironmentPolicy.class,
+            PaperEnvironmentPolicyWithResign.class,
             algorithmConfig,
             systemConfig,
             problemConfig,

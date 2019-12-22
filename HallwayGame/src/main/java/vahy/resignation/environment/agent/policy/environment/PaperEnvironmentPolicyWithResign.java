@@ -9,9 +9,9 @@ import vahy.resignation.environment.state.HallwayStateWithResign;
 
 import java.util.SplittableRandom;
 
-public class PaperEnvironmentPolicy extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayActionWithResign,  DoubleVector, EnvironmentProbabilities, HallwayStateWithResign> {
+public class PaperEnvironmentPolicyWithResign extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayActionWithResign,  DoubleVector, EnvironmentProbabilities, HallwayStateWithResign> {
 
-    public PaperEnvironmentPolicy(SplittableRandom random) {
+    public PaperEnvironmentPolicyWithResign(SplittableRandom random) {
         super(random);
     }
 

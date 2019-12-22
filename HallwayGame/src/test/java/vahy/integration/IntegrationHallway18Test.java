@@ -35,7 +35,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false);
     }
 
 

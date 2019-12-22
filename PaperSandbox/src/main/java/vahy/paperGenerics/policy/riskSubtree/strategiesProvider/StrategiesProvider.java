@@ -68,7 +68,7 @@ public class StrategiesProvider<
         double temperature,
         SplittableRandom random) {
 
-        switch(inferenceExistingFlowStrategy){
+        switch(inferenceExistingFlowStrategy) {
             case SAMPLE_OPTIMAL_FLOW:
                 return new InferenceFeasibleDistributionProvider<>(playerActions, random, provideRiskCalculatorForKnownFlow());
             case MAX_UCB_VISIT:
@@ -87,7 +87,7 @@ public class StrategiesProvider<
         double temperature,
         SplittableRandom random) {
 
-        switch(inferenceNonExistingFlowStrategy){
+        switch(inferenceNonExistingFlowStrategy) {
             case MAX_UCB_VISIT:
                 return new MaxUcbVisitDistributionProvider<>(playerActions, random);
             case MAX_UCB_VALUE:
@@ -128,9 +128,13 @@ public class StrategiesProvider<
 
         switch(explorationNonExistingFlowStrategy){
             case SAMPLE_UCB_VALUE:
-                return new UcbValueDistributionProvider<>(playerActions, random);
+                return new UcbValueDistributionProvider<>(playerActions, random, -Double.MAX_VALUE);
+            case SAMPLE_UCB_VALUE_WITH_TEMPERATURE:
+                return new UcbValueDistributionProvider<>(playerActions, random, temperature);
             case SAMPLE_UCB_VISIT:
-                return new UcbVisitDistributionProvider<>(playerActions, random);
+                return new UcbVisitDistributionProvider<>(playerActions, random, -Double.MAX_VALUE);
+            case SAMPLE_UCB_VISIT_WITH_TEMPERATURE:
+                return new UcbVisitDistributionProvider<>(playerActions, random, temperature);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(explorationExistingFlowStrategy);
         }

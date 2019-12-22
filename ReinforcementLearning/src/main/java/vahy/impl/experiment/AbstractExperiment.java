@@ -93,8 +93,9 @@ public class AbstractExperiment<
         long end = System.currentTimeMillis();
         var benchmarkingTime = end - start;
         logger.info("Benchmarking out-of-the-box took [{}] milliseconds", benchmarkingTime);
-
-        episodeWriter.writeEvaluationEpisode(policyResultList.get(0).getEpisodeList());
+        if(systemConfig.dumpEvaluationData()) {
+            episodeWriter.writeEvaluationEpisode(policyResultList.get(0).getEpisodeList());
+        }
         return policyResultList;
     }
 
