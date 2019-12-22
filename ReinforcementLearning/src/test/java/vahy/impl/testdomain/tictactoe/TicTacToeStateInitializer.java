@@ -8,7 +8,7 @@ import java.util.SplittableRandom;
 
 public class TicTacToeStateInitializer extends AbstractInitialStateSupplier<TicTacToeConfig, TicTacToeAction, DoubleVector, TicTacToeState, TicTacToeState> {
 
-    protected TicTacToeStateInitializer(TicTacToeConfig ticTacToeConfig, SplittableRandom random) {
+    public TicTacToeStateInitializer(TicTacToeConfig ticTacToeConfig, SplittableRandom random) {
         super(ticTacToeConfig, random);
     }
 
