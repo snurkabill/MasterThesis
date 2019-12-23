@@ -53,6 +53,8 @@ public class AlgorithmConfigBuilder {
 
     private int batchedEvaluationSize;
 
+    private String creatingScriptName;
+
 
     public AlgorithmConfigBuilder cpuctParameter(double cpuctParameter) {
         this.cpuctParameter = cpuctParameter;
@@ -169,6 +171,11 @@ public class AlgorithmConfigBuilder {
         return this;
     }
 
+    public AlgorithmConfigBuilder setCreatingScriptName(String creatingScriptName) {
+        this.creatingScriptName = creatingScriptName;
+        return this;
+    }
+
     public PaperAlgorithmConfig buildAlgorithmConfig() {
         return new PaperAlgorithmConfig(
             cpuctParameter,
@@ -196,7 +203,8 @@ public class AlgorithmConfigBuilder {
             flowOptimizerType,
             subTreeRiskCalculatorTypeForKnownFlow,
             subTreeRiskCalculatorTypeForUnknownFlow,
-            batchedEvaluationSize);
+            batchedEvaluationSize,
+            creatingScriptName);
     }
 
 }

@@ -69,7 +69,7 @@ public class ForExperimenting {
             .trainingBatchSize(1)
             .learningRate(0.01)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .approximatorType(ApproximatorType.TF_NN)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -116,6 +116,8 @@ public class ForExperimenting {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+
+            .setCreatingScriptName("create_model.py")
             .buildAlgorithmConfig();
     }
 
@@ -127,6 +129,7 @@ public class ForExperimenting {
             .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
+            .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
     }
 

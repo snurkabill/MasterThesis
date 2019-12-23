@@ -1,19 +1,24 @@
+import sys
 import tensorflow as tf
 
-benchmark_name = 'BENCHMARK_05'
-input_count = 9
+
+
+model_name = sys.argv[1]
+input_count = int(sys.argv[2])
 hidden_count_1 = 10
 # hidden_count_2 = 100
 # hidden_count_3 = 10
 Q_output_count = 1
 risk_output_count = 1
-action_output_count = 3
+action_output_count = int(sys.argv[3])
+path_to_store = sys.argv[4]
 
 output_count = Q_output_count + risk_output_count + action_output_count
 
 tf.reset_default_graph()
 
 Relu = tf.nn.relu
+
 Tanh = tf.nn.tanh
 BatchNormalization = tf.layers.batch_normalization
 Dense = tf.layers.dense
@@ -51,12 +56,12 @@ init = tf.global_variables_initializer()
 
 sess = tf.Session()
 
-train_writer = tf.summary.FileWriter('myGraph', sess.graph)
+train_writer = tf.summary.FileWriter(path_to_store + "/summary", sess.graph)
 train_writer.close()
 
 sess.run(init)
 
-with open('../../../../../../resources/tfModel/graph_' + benchmark_name + '.pb', 'wb') as f:
+with open(path_to_store + "/" + model_name + '.pb', 'wb') as f:
     f.write(tf.get_default_graph().as_graph_def().SerializeToString())
 
 

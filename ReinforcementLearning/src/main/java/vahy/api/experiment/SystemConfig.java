@@ -18,7 +18,9 @@ public class SystemConfig implements Config {
     private final boolean dumpTrainingData;
     private final boolean dumpEvaluationData;
 
-    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData, boolean dumpEvaluationData) {
+    private final String pythonVirtualEnvPath;
+
+    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData, boolean dumpEvaluationData, String pythonVirtualEnvPath) {
         this.randomSeed = randomSeed;
         this.singleThreadedEvaluation = singleThreadedEvaluation;
         this.parallelThreadsCount = parallelThreadsCount;
@@ -26,6 +28,7 @@ public class SystemConfig implements Config {
         this.evalEpisodeCount = evalEpisodeCount;
         this.dumpTrainingData = dumpTrainingData;
         this.dumpEvaluationData = dumpEvaluationData;
+        this.pythonVirtualEnvPath = pythonVirtualEnvPath;
     }
 
     public long getRandomSeed() {
@@ -56,7 +59,11 @@ public class SystemConfig implements Config {
         return dumpEvaluationData;
     }
 
-    @Override
+    public String getPythonVirtualEnvPath() {
+        return pythonVirtualEnvPath;
+    }
+
+        @Override
     public String toString() {
         return "randomSeed," + randomSeed + System.lineSeparator() +
             "singleThreadedEvaluation," + singleThreadedEvaluation + System.lineSeparator() +
@@ -64,7 +71,8 @@ public class SystemConfig implements Config {
             "drawWindow," + drawWindow + System.lineSeparator() +
             "evalEpisodeCount," + evalEpisodeCount + System.lineSeparator() +
             "dumpTrainingData," + dumpTrainingData + System.lineSeparator() +
-            "dumpEvaluationData," + dumpEvaluationData + System.lineSeparator();
+            "dumpEvaluationData," + dumpEvaluationData + System.lineSeparator() +
+            "pythonVirtualEnvPath," + pythonVirtualEnvPath + System.lineSeparator();
     }
 
     @Override
