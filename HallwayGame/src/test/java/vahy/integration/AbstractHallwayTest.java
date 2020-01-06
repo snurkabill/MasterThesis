@@ -38,7 +38,8 @@ public abstract class AbstractHallwayTest {
         var results = PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
-            PaperEnvironmentPolicy.class,
+//            PaperEnvironmentPolicy.class,
+            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicy(splittableRandom),
             algorithmConfig,
             systemConfig,
             gameConfig,

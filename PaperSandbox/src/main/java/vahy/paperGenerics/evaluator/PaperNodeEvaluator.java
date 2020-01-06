@@ -88,7 +88,7 @@ public class PaperNodeEvaluator<
             } else {
                 double[] distribution = new double[allPlayerActions.length];
                 System.arraycopy(prediction, PaperModel.POLICY_START_INDEX, distribution, 0, distribution.length);
-                boolean[] mask = new boolean[allPossibleActions.length];
+                boolean[] mask = new boolean[allPlayerActions.length];
                 for (int i = 0; i < allPossibleActions.length; i++) {
                     mask[allPossibleActions[i].getActionIndexInPlayerActions()] = true;
                 }

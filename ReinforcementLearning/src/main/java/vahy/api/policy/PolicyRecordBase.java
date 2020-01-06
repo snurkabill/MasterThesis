@@ -49,9 +49,9 @@ public class PolicyRecordBase implements PolicyRecord {
         StringBuilder sb = new StringBuilder();
         sb.append("Predicted reward: [");
         sb.append(predictedReward);
-        sb.append(" ], PredictedPolicices: [");
+        sb.append("], PredictedPolicices: [");
         sb.append(Arrays.toString(policyProbabilities));
-        sb.append(" ].");
+        sb.append("].");
         return sb.toString();
     }
 }

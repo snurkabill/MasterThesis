@@ -2,14 +2,12 @@ package vahy.paperGenerics;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import vahy.api.episode.InstanceInitializerInitializer;
+import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.observation.FixedModelObservation;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.Policy;
-import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -57,6 +55,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -69,8 +68,10 @@ public class PaperExperimentEntryPoint {
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> createExperimentAndRun(
         Class<TAction> actionClass,
-        InstanceInitializerInitializer<TConfig, TAction, DoubleVector, TOpponentObservation, TState> instanceInitializerInitializer,
-        Class opponentPolicyClass,
+//        InstanceInitializerInitializer<TConfig, TAction, DoubleVector, TOpponentObservation, TState> instanceInitializerInitializer,
+        BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory,
+        Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory,
+//        Class opponentPolicyClass,
         PaperAlgorithmConfig algorithmConfig,
         SystemConfig systemConfig,
         TConfig problemConfig,
@@ -89,7 +90,8 @@ public class PaperExperimentEntryPoint {
 
         var experiment = (AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(AbstractExperiment.class, null, null);
         ImmutableTuple<TAction[], TAction[]> playerOpponentActions = getPlayerOpponentActions(actionClass);
-        var initialStateSupplier = instanceInitializerInitializer.createInitialStateSupplier(problemConfig, masterRandom.split());
+//        var initialStateSupplier = instanceInitializerInitializer.createInitialStateSupplier(problemConfig, masterRandom.split());
+        var initialStateSupplier = instanceInitializerFactory.apply(problemConfig, masterRandom.split());
 
         try {
             try(TrainablePredictor approximator = initializePredictor(
@@ -126,13 +128,15 @@ public class PaperExperimentEntryPoint {
                     algorithmConfig.getRiskSupplier()
                 );
 
+                var opponentPolicySupplier = opponentInitializerFactory.apply(masterRandom.split());
+
                 // TODO: this is dirty.
-                var opponentPolicySupplier = new PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>() {
-                    @Override
-                    public Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
-                        return (Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
-                    }
-                };
+//                var opponentPolicySupplier = new PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>() {
+//                    @Override
+//                    public Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
+//                        return (Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
+//                    }
+//                };
 
                 return experiment.run(
                     policySupplier,
