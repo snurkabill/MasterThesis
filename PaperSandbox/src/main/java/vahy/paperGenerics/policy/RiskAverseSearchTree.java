@@ -37,7 +37,7 @@ public class RiskAverseSearchTree<
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
-    public static final double ZERO_TEMPERATURE = 0.0;
+    public static final double INVALID_TEMPERATURE_VALUE = -Double.MAX_VALUE;
 
     private final SplittableRandom random;
 
@@ -70,23 +70,21 @@ public class RiskAverseSearchTree<
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE, random).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceExistingFlowStrategy().createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
         } else {
-            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE, random).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceNonExistingFlowStrategy().createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
         }
     }
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature, random).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationExistingFlowStrategy().createDistribution(getRoot(), temperature, random, totalRiskAllowed);
         } else {
-            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature, random).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationNonExistingFlowStrategy().createDistribution(getRoot(), temperature, random, totalRiskAllowed);
         }
     }
 
-    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state,
-                                                                                                                                                      PolicyStepMode policyStepMode,
-                                                                                                                                                      double temperature) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state, PolicyStepMode policyStepMode, double temperature) {
         switch (policyStepMode) {
             case EXPLOITATION:
                 return inferencePolicyBranch(state);

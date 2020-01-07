@@ -3,13 +3,12 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.utils.ImmutableTriple;
 import vahy.utils.RandomDistributionUtils;
 
-import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -24,16 +23,17 @@ public class InferenceFeasibleDistributionProvider<
 
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
 
-    public InferenceFeasibleDistributionProvider(List<TAction> playerActions,
-                                                 SplittableRandom random,
-                                                 Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
-        super(playerActions, random, -Double.MAX_VALUE);
+    public InferenceFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
+        super(true);
         this.subtreeRiskCalculatorSupplier = subtreeRiskCalculatorSupplier;
     }
 
     @Override
     public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node)
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+        double temperature,
+        SplittableRandom random,
+        double totalRiskAllowed)
     {
         var alternateDistribution = createDistributionAsArray(node
             .getChildNodeStream()

@@ -2,8 +2,8 @@ package vahy.paperGenerics.policy.riskSubtree.strategiesProvider;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.flowOptimizer.HardFlowOptimizer;
@@ -26,8 +26,6 @@ import vahy.paperGenerics.policy.riskSubtree.playingDistribution.UcbValueDistrib
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.UcbVisitDistributionProvider;
 import vahy.utils.EnumUtils;
 
-import java.util.List;
-import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class StrategiesProvider<
@@ -61,87 +59,57 @@ public class StrategiesProvider<
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
     }
 
-    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy(
-        TState state,
-        List<TAction> playerActions,
-        double totalRiskAllowed,
-        double temperature,
-        SplittableRandom random) {
-
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy() {
         switch(inferenceExistingFlowStrategy) {
             case SAMPLE_OPTIMAL_FLOW:
-                return new InferenceFeasibleDistributionProvider<>(playerActions, random, provideRiskCalculatorForKnownFlow());
+                return new InferenceFeasibleDistributionProvider<>(provideRiskCalculatorForKnownFlow());
             case MAX_UCB_VISIT:
-                return new MaxUcbVisitDistributionProvider<>(playerActions, random);
+                return new MaxUcbVisitDistributionProvider<>();
             case MAX_UCB_VALUE:
-                return new MaxUcbValueDistributionProvider<>(playerActions, random);
+                return new MaxUcbValueDistributionProvider<>();
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(inferenceExistingFlowStrategy);
         }
     }
 
-    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceNonExistingFlowStrategy(
-        TState state,
-        List<TAction> playerActions,
-        double totalRiskAllowed,
-        double temperature,
-        SplittableRandom random) {
-
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceNonExistingFlowStrategy() {
         switch(inferenceNonExistingFlowStrategy) {
             case MAX_UCB_VISIT:
-                return new MaxUcbVisitDistributionProvider<>(playerActions, random);
+                return new MaxUcbVisitDistributionProvider<>();
             case MAX_UCB_VALUE:
-                return new MaxUcbValueDistributionProvider<>(playerActions, random);
+                return new MaxUcbValueDistributionProvider<>();
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(inferenceNonExistingFlowStrategy);
         }
     }
 
-    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationExistingFlowStrategy(
-        TState state,
-        List<TAction> playerActions,
-        double totalRiskAllowed,
-        double temperature,
-        SplittableRandom random) {
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationExistingFlowStrategy() {
         switch(explorationExistingFlowStrategy){
             case SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE:
-                return new ExplorationFeasibleDistributionProvider<>(
-                    playerActions,
-                    random,
-                    provideRiskCalculatorForKnownFlow(),
-                    provideRiskCalculatorForUnknownFlow(),
-                    totalRiskAllowed,
-                    temperature);
+                return new ExplorationFeasibleDistributionProvider<>(provideRiskCalculatorForKnownFlow(), provideRiskCalculatorForUnknownFlow());
             case SAMPLE_OPTIMAL_FLOW:
-                return new InferenceFeasibleDistributionProvider<>(playerActions, random, provideRiskCalculatorForKnownFlow());
+                return new InferenceFeasibleDistributionProvider<>(provideRiskCalculatorForKnownFlow());
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(explorationExistingFlowStrategy);
         }
     }
 
-    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationNonExistingFlowStrategy(
-        TState state,
-        List<TAction> playerActions,
-        double totalRiskAllowed,
-        double temperature,
-        SplittableRandom random) {
-
+    public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideExplorationNonExistingFlowStrategy() {
         switch(explorationNonExistingFlowStrategy){
             case SAMPLE_UCB_VALUE:
-                return new UcbValueDistributionProvider<>(playerActions, random, -Double.MAX_VALUE);
+                return new UcbValueDistributionProvider<>(false);
             case SAMPLE_UCB_VALUE_WITH_TEMPERATURE:
-                return new UcbValueDistributionProvider<>(playerActions, random, temperature);
+                return new UcbValueDistributionProvider<>(true);
             case SAMPLE_UCB_VISIT:
-                return new UcbVisitDistributionProvider<>(playerActions, random, -Double.MAX_VALUE);
+                return new UcbVisitDistributionProvider<>(false);
             case SAMPLE_UCB_VISIT_WITH_TEMPERATURE:
-                return new UcbVisitDistributionProvider<>(playerActions, random, temperature);
+                return new UcbVisitDistributionProvider<>(true);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(explorationExistingFlowStrategy);
         }
     }
 
     public FlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer() {
-
         switch (flowOptimizerType) {
             case HARD:
                 return new HardFlowOptimizer<>();
