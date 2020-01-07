@@ -91,7 +91,6 @@ public class PaperPolicyImpl<
     @Override
     public double[] getActionProbabilityDistribution(TState gameState) {
         checkStateRoot(gameState);
-
         return innerActionProbability();
     }
 
@@ -113,11 +112,20 @@ public class PaperPolicyImpl<
             gameState,
             exploitation ? PolicyStepMode.EXPLOITATION : PolicyStepMode.EXPLORATION,
             temperature);
-        var action = actionDistributionAndDiscreteAction.getFirst();
-        if(actionDistribution.length != actionDistributionAndDiscreteAction.getSecond().length) {
-            throw new IllegalStateException("SafetyCheck: policy returns distribution on actions with different count of actions");
+        var action = actionDistributionAndDiscreteAction.getExpectedPlayerAction();
+        var actionList = actionDistributionAndDiscreteAction.getActionList();
+        var actionProbabilities = actionDistributionAndDiscreteAction.getPlayerDistribution();
+//        if(actionDistribution.length != actionDistributionAndDiscreteAction.getSecond().length) {
+//            throw new IllegalStateException("SafetyCheck: policy returns distribution on actions with different count of actions");
+//        }
+        for (int i = 0; i < totalPlayerActionCount; i++) {
+            actionDistribution[i] = 0.0d;
         }
-        actionDistribution = actionDistributionAndDiscreteAction.getSecond();
+        for (int i = 0; i < actionList.size(); i++) {
+            var element = actionList.get(i);
+            var probability = actionProbabilities[i];
+            actionDistribution[element.getActionIndexInPlayerActions()] = probability;
+        }
         hasActionChanged = true;
 
         if(exploitation) {

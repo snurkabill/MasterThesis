@@ -51,6 +51,7 @@ public class ExplorationFeasibleDistributionProvider<
             })
             .collect(Collectors.toList()));
 
+        var actionList = alternateDistribution.getFirst();
         double[] actionDistributionAsArray = alternateDistribution.getSecond();
         double[] originalDistributionAsArray = new double[actionDistributionAsArray.length];
         System.arraycopy(actionDistributionAsArray, 0, originalDistributionAsArray, 0, actionDistributionAsArray.length);
@@ -76,6 +77,7 @@ public class ExplorationFeasibleDistributionProvider<
                         index,
                         suitableExplorationDistribution.getSecond(),
                         alternateDistribution.getThird(),
+                        actionList,
                         subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
                 }
             }
@@ -91,7 +93,7 @@ public class ExplorationFeasibleDistributionProvider<
                 alternateDistribution.getFirst().get(index),
                 index, actionDistributionAsArray,
                 alternateDistribution.getThird(),
-                subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
+                actionList, subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
         }
     }
 }

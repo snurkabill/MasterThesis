@@ -10,13 +10,12 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.utils.EnumUtils;
-import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,13 +93,13 @@ public class RiskAverseSearchTree<
         }
     }
 
-    public ImmutableTuple<TAction, double[]> getActionDistributionAndDiscreteAction(TState state, PolicyStepMode policyStepMode, double temperature) {
+    public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getActionDistributionAndDiscreteAction(TState state, PolicyStepMode policyStepMode, double temperature) {
         if(state.isOpponentTurn()) {
             throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
         }
         try {
             this.playingDistribution = createActionWithDistribution(state, policyStepMode, temperature);
-        return new ImmutableTuple<>(playingDistribution.getExpectedPlayerAction(), playingDistribution.getPlayerDistribution());
+        return playingDistribution;
         } catch(Exception e) {
             dumpTreeWithFlow();
             throw e;

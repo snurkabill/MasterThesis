@@ -45,6 +45,7 @@ public class InferenceFeasibleDistributionProvider<
                 return new ImmutableTriple<>(x.getAppliedAction(), probabilityFlowFromGlobalOptimization, subtreeRisk);
             })
             .collect(Collectors.toList()));
+        var actionList = alternateDistribution.getFirst();
         RandomDistributionUtils.tryToRoundDistribution(alternateDistribution.getSecond());
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(alternateDistribution.getSecond(), random);
         return new PlayingDistribution<>(
@@ -52,6 +53,7 @@ public class InferenceFeasibleDistributionProvider<
             index,
             alternateDistribution.getSecond(),
             alternateDistribution.getThird(),
+            actionList,
             subtreeRiskCalculatorSupplier);
     }
 }
