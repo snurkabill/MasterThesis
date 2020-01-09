@@ -4,6 +4,7 @@ public enum HallwayInstance {
 
     DEMO_01("examples/hallway_demo0.txt"),
 
+    BENCHMARK_00("examples/benchmark/benchmark_00.txt"),
     BENCHMARK_01("examples/benchmark/benchmark_01.txt"),
     BENCHMARK_02("examples/benchmark/benchmark_02.txt"),
     BENCHMARK_03("examples/benchmark/benchmark_03.txt"),

@@ -64,7 +64,7 @@ public class MarketPrototype2 {
     }
 
     public static double dummyDataGenerator(int i) {
-        return  2* Math.sin(i/(double)10) + 3;
+        return  2* Math.sin(i/(double)1) + 3;
     }
 
     public static MarketDataProvider createMarketDataProvider() {
@@ -92,13 +92,14 @@ public class MarketPrototype2 {
         int tradeSize  = 1;
         int commission = 0; //5 / 1_000_000;
 
-        int lookbackLength = 30;
+        int lookbackLength = 5;
+        int allowedCountOfTimestampsAheadOfEndOfData = 10;
 
         var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission);
 
 //        MarketDataProvider marketDataProvider = createMarketDataProvider("d:/data_for_trading_env_testing/data");
         MarketDataProvider marketDataProvider = createMarketDataProvider();
-        return new MarketConfig(staticPart, lookbackLength, marketDataProvider);
+        return new MarketConfig(staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
 
     }
 
@@ -107,7 +108,7 @@ public class MarketPrototype2 {
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(1)
+            .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .buildSystemConfig();
@@ -124,18 +125,20 @@ public class MarketPrototype2 {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(100)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(200)
+            .batchEpisodeCount(10)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
+            .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)
             .learningRate(0.01)
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
+            .selectorType(SelectorType.UCB)
+
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -148,10 +151,6 @@ public class MarketPrototype2 {
                     return "() -> 1.00";
                 }
             })
-
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
-
             .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
@@ -160,7 +159,7 @@ public class MarketPrototype2 {
 
                 @Override
                 public String toString() {
-                    return "() -> 0.20";
+                    return "() -> 1.00";
                 }
             })
             .temperatureSupplier(new Supplier<Double>() {
@@ -168,7 +167,7 @@ public class MarketPrototype2 {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    return Math.exp(-callCount / 1000000.0) * 1;
 //                    return 2.00;
                 }
 

@@ -21,7 +21,7 @@ public class InitialMarketStateSupplier extends AbstractInitialStateSupplier<Mar
         var lookbackLength = problemConfig.getLookbackLength();
         var marketDataProvider = problemConfig.getMarketDataProvider();
         var marketEnvironmentStaticPart = problemConfig.getMarketEnvironmentStaticPart();
-        int index = random.nextInt(lookbackLength, marketDataProvider.getMarketMovementArray().length);
+        int index = random.nextInt(lookbackLength, marketDataProvider.getMarketMovementArray().length - problemConfig.getAllowedCountOfTimestampsAheadOfEndOfData());
         RealMarketAction[] direction = new RealMarketAction[lookbackLength];
         double[] lookback = new double[lookbackLength];
 

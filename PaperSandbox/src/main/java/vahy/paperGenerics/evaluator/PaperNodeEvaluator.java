@@ -53,11 +53,15 @@ public class PaperNodeEvaluator<
     public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         var nodesExpanded = 0;
         if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
-            logger.trace("Expanding root since it is freshly created without evaluation");
+            if(logger.isTraceEnabled()) {
+                logger.trace("Expanding root since it is freshly created without evaluation");
+            }
             nodesExpanded += innerEvaluation(selectedNode);
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
-        logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
+        if(logger.isTraceEnabled()) {
+            logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
+        }
         Map<TAction, SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
             var nodeAndExpansions = evaluateChildNode(selectedNode, nextAction);

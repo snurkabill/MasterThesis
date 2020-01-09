@@ -10,6 +10,7 @@ import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
+import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class PaperPolicyImpl<
         if(!hasActionChanged) {
             throw new IllegalStateException("Action probability distribution second time without changing state");
         }
-        return actionDistribution;
+        return ArrayUtils.cloneArray(actionDistribution);
     }
 
     @Override
@@ -115,9 +116,6 @@ public class PaperPolicyImpl<
         var action = actionDistributionAndDiscreteAction.getExpectedPlayerAction();
         var actionList = actionDistributionAndDiscreteAction.getActionList();
         var actionProbabilities = actionDistributionAndDiscreteAction.getPlayerDistribution();
-//        if(actionDistribution.length != actionDistributionAndDiscreteAction.getSecond().length) {
-//            throw new IllegalStateException("SafetyCheck: policy returns distribution on actions with different count of actions");
-//        }
         for (int i = 0; i < totalPlayerActionCount; i++) {
             actionDistribution[i] = 0.0d;
         }

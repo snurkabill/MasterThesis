@@ -170,7 +170,8 @@ public class SearchTreeImpl<
                 expandAndEvaluateNode(node);
             }
             treeUpdater.updateTree(node);
-            queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
+//            queue.addAll(node.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toList()));
+            node.getChildNodeStream().filter(SearchNode::isOpponentTurn).forEach(queue::add);
         }
     }
 

@@ -370,7 +370,9 @@ public class MarketState implements PaperState<MarketAction, DoubleVector, Marke
         for (int i = 0; i < lookback.length; i++) {
             observation[i] = lookback[i] / lookback.length;
         }
-        observation[lookback.length] = tradeBalance;
+
+//        observation[lookback.length] = tradeBalance;
+
         switch (this.tradingSystemState) {
             case NO_POSITION:
                 observation[lookback.length + 1] = 1.0;
