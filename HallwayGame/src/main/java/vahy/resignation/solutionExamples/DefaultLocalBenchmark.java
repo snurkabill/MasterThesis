@@ -45,7 +45,8 @@ public class DefaultLocalBenchmark {
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayActionWithResign.class,
             HallwayGameWithResignationInitialInstanceSupplier::new,
-            PaperEnvironmentPolicyWithResign.class,
+//            PaperEnvironmentPolicyWithResign.class,
+            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicyWithResign(splittableRandom),
             algorithmConfig,
             systemConfig,
             problemConfig,

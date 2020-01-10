@@ -42,7 +42,8 @@ public class RandomWalkExample {
         PaperExperimentEntryPoint.createExperimentAndRun(
             RandomWalkAction.class,
             RandomWalkInitialInstanceSupplier::new,
-            RandomWalkPolicy.class,
+//            RandomWalkPolicy.class,
+            splittableRandom -> (initialState, policyMode) -> new RandomWalkPolicy(splittableRandom),
             algorithmConfig,
             systemConfig,
             problemConfig,

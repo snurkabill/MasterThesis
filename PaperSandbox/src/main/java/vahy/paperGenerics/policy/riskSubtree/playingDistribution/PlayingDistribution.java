@@ -2,10 +2,11 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class PlayingDistribution<
@@ -20,6 +21,7 @@ public class PlayingDistribution<
 
     private final double[] playerDistribution;
     private final double[] riskOnPlayerSubNodes;
+    private final List<TAction> actionList;
 
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier;
 
@@ -27,11 +29,13 @@ public class PlayingDistribution<
                                int expectedPlayerActionIndex,
                                double[] playerDistribution,
                                double[] riskOnPlayerSubNodes,
+                               List<TAction> actionList,
                                Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier) {
         this.expectedPlayerAction = expectedPlayerAction;
         this.expectedPlayerActionIndex = expectedPlayerActionIndex;
         this.playerDistribution = playerDistribution;
         this.riskOnPlayerSubNodes = riskOnPlayerSubNodes;
+        this.actionList = actionList;
         this.usedSubTreeRiskCalculatorSupplier = usedSubTreeRiskCalculatorSupplier;
 
         if(playerDistribution.length != riskOnPlayerSubNodes.length) {
@@ -53,6 +57,10 @@ public class PlayingDistribution<
 
     public double[] getRiskOnPlayerSubNodes() {
         return riskOnPlayerSubNodes;
+    }
+
+    public List<TAction> getActionList() {
+        return actionList;
     }
 
     public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getUsedSubTreeRiskCalculatorSupplier() {

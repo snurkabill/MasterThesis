@@ -3,14 +3,13 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.utils.ImmutableTriple;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -25,23 +24,21 @@ public class ExplorationFeasibleDistributionProvider<
 
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow;
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow;
-    private final double totalRiskAllowed;
 
-    public ExplorationFeasibleDistributionProvider(List<TAction> playerActions,
-                                                   SplittableRandom random,
-                                                   Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
-                                                   Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow,
-                                                   double totalRiskAllowed,
-                                                   double temperature) {
-        super(playerActions, random, temperature);
+    public ExplorationFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
+                                                   Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow) {
+        super(true);
         this.subtreeRiskCalculatorSupplierForKnownFlow = subtreeRiskCalculatorSupplierForKnownFlow;
         this.subtreeRiskCalculatorSupplierForUnknownFlow = subtreeRiskCalculatorSupplierForUnknownFlow;
-        this.totalRiskAllowed  = totalRiskAllowed;
     }
 
     @Override
     public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+        double temperature,
+        SplittableRandom random,
+        double totalRiskAllowed)
+    {
         var alternateDistribution = createDistributionAsArray(node
             .getChildNodeStream()
             .map(x -> {
@@ -54,15 +51,13 @@ public class ExplorationFeasibleDistributionProvider<
             })
             .collect(Collectors.toList()));
 
-
+        var actionList = alternateDistribution.getFirst();
         double[] actionDistributionAsArray = alternateDistribution.getSecond();
         double[] originalDistributionAsArray = new double[actionDistributionAsArray.length];
         System.arraycopy(actionDistributionAsArray, 0, originalDistributionAsArray, 0, actionDistributionAsArray.length);
         RandomDistributionUtils.tryToRoundDistribution(actionDistributionAsArray);
         RandomDistributionUtils.applyBoltzmannNoise(actionDistributionAsArray, temperature);
         double[] actionRiskAsArray = alternateDistribution.getThird();
-
-
 
         var sum = 0.0d;
         for (int i = 0; i < actionDistributionAsArray.length; i++) {
@@ -82,6 +77,7 @@ public class ExplorationFeasibleDistributionProvider<
                         index,
                         suitableExplorationDistribution.getSecond(),
                         alternateDistribution.getThird(),
+                        actionList,
                         subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
                 }
             }
@@ -97,7 +93,7 @@ public class ExplorationFeasibleDistributionProvider<
                 alternateDistribution.getFirst().get(index),
                 index, actionDistributionAsArray,
                 alternateDistribution.getThird(),
-                subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
+                actionList, subtreeRiskCalculatorSupplierForUnknownFlow); // TODO TODO TODO TODO TODO FUCK THIS
         }
     }
 }

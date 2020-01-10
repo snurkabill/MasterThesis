@@ -3,11 +3,13 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.RandomDistributionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.SplittableRandom;
 
 public class UcbVisitDistributionProvider<
@@ -18,19 +20,41 @@ public class UcbVisitDistributionProvider<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    public UcbVisitDistributionProvider(List<TAction> playerActions, SplittableRandom random, double temperature) {
-        super(playerActions, random, temperature);
+    public UcbVisitDistributionProvider(boolean applyTemperature) {
+        super(applyTemperature);
     }
 
     @Override
     public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node)
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+        double temperature,
+        SplittableRandom random,
+        double totalRiskAllowed)
     {
-        var ucbDistribution = getUcbVisitDistribution(node);
-        if(temperature > 0.0) {
-            RandomDistributionUtils.applyBoltzmannNoise(ucbDistribution.getSecond(), temperature);
+        int childCount = node.getChildNodeMap().size();
+        double totalVisitSum = node
+            .getChildNodeStream()
+            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
+            .sum();
+
+        List<TAction> actionList = new ArrayList<>(childCount);
+        double[] rewardArray = new double[childCount];
+        double[] riskArray = new double[childCount];
+
+        int j = 0;
+        for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+            actionList.add(entry.getKey());
+            var metadata = entry.getValue().getSearchNodeMetadata();
+            rewardArray[j] = metadata.getVisitCounter() / totalVisitSum;
+            riskArray[j] = 1.0d;
+            j++;
         }
-        int index = RandomDistributionUtils.getRandomIndexFromDistribution(ucbDistribution.getSecond(), random);
-        return new PlayingDistribution<>(ucbDistribution.getFirst().get(index), index, ucbDistribution.getSecond(), ucbDistribution.getThird(), () -> subtreeRoot -> 1);
+
+        if(applyTemperature) {
+            RandomDistributionUtils.applyBoltzmannNoise(rewardArray, temperature);
+        }
+        int index = RandomDistributionUtils.getRandomIndexFromDistribution(rewardArray, random);
+        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, () -> subtreeRoot -> 1);
     }
+
 }

@@ -39,7 +39,8 @@ public class Prototype {
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayActionWithResign.class,
             HallwayGameWithResignationInitialInstanceSupplier::new,
-            PaperEnvironmentPolicyWithResign.class,
+            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicyWithResign(splittableRandom),
+//            splittableRandom -> { return new PaperEnvironmentPolicyWithResign(splittableRandom);},
             algorithmConfig,
             systemConfig,
             problemConfig,

@@ -1,5 +1,6 @@
-package vahy.original.solutionExamples;
+package vahy;
 
+import vahy.agent.environment.RealDataMarketPolicy;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -9,14 +10,11 @@ import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
+import vahy.environment.MarketAction;
+import vahy.environment.MarketDataProvider;
+import vahy.environment.MarketEnvironmentStaticPart;
+import vahy.environment.RealMarketAction;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.PaperEnvironmentPolicy;
-import vahy.original.environment.config.ConfigBuilder;
-import vahy.original.environment.config.GameConfig;
-import vahy.original.environment.state.StateRepresentation;
-import vahy.original.game.HallwayGameInitialInstanceSupplier;
-import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
@@ -25,22 +23,26 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
-public class ForExperimenting {
-
-    public static void main(String[] args) {
+public class MarketPrototype2 {
+    public static void main(String[] args) throws IOException {
 
         var algorithmConfig = getAlgorithmConfig();
         var systemConfig = getSystemConfig();
-        var problemConfig = getGameConfig();
+        MarketConfig problemConfig = getGameConfig();
 
         PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayAction.class,
-            HallwayGameInitialInstanceSupplier::new,
-//            PaperEnvironmentPolicy.class,
-            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicy(splittableRandom),
+            MarketAction.class,
+            InitialMarketStateSupplier::new,
+//            RealDataMarketPolicySupplier.class,
+            splittableRandom -> (initialState, policyMode) -> new RealDataMarketPolicy(problemConfig.getMarketDataProvider().getMarketMovementArray(), initialState.getCurrentDataIndex() + 1),
             algorithmConfig,
             systemConfig,
             problemConfig,
@@ -49,15 +51,56 @@ public class ForExperimenting {
         );
     }
 
-    private static GameConfig getGameConfig() {
-        return new ConfigBuilder()
-            .reward(100)
-            .noisyMoveProbability(0.1)
-            .stepPenalty(1)
-            .trapProbability(1)
-            .stateRepresentation(StateRepresentation.COMPACT)
-            .gameStringRepresentation(HallwayInstance.BENCHMARK_05)
-            .buildConfig();
+     public static MarketDataProvider createMarketDataProvider(String absoluteFilePath) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(absoluteFilePath));
+        List<Double> prices = new ArrayList<>();
+        List<RealMarketAction> movements = new ArrayList<>();
+        lines.forEach(x -> {
+                String[] lineParts = x.split(",");
+                prices.add(Double.parseDouble(lineParts[0]));
+                movements.add(lineParts[1].equals("Up") ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN);
+            });
+        return new MarketDataProvider(movements.toArray(new RealMarketAction[0]), prices.stream().mapToDouble(value -> value).toArray());
+    }
+
+    public static double dummyDataGenerator(int i) {
+        return  2* Math.sin(i/(double)1) + 3;
+    }
+
+    public static MarketDataProvider createMarketDataProvider() {
+        List<Double> prices = new ArrayList<>();
+        List<RealMarketAction> movements = new ArrayList<>();
+
+        var previousValue = dummyDataGenerator(-1);
+        var nextValue = dummyDataGenerator(-1);
+        for (int i = 0; i < 100000; i++) {
+            previousValue = nextValue;
+            nextValue = dummyDataGenerator(i);
+            var diff = nextValue - previousValue;
+            movements.add(diff > 0.0 ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN);
+            prices.add(nextValue);
+
+        }
+        return new MarketDataProvider(movements.toArray(new RealMarketAction[0]), prices.stream().mapToDouble(value -> value).toArray());
+    }
+
+    private static MarketConfig getGameConfig() throws IOException {
+
+        double systemStopLoss = 0.005;
+        double constantSpread = 0.0002;
+        double priceRange     = 0.0005;
+        int tradeSize  = 1;
+        int commission = 0; //5 / 1_000_000;
+
+        int lookbackLength = 5;
+        int allowedCountOfTimestampsAheadOfEndOfData = 10;
+
+        var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission);
+
+//        MarketDataProvider marketDataProvider = createMarketDataProvider("d:/data_for_trading_env_testing/data");
+        MarketDataProvider marketDataProvider = createMarketDataProvider();
+        return new MarketConfig(staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
+
     }
 
     private static SystemConfig getSystemConfig() {
@@ -67,10 +110,7 @@ public class ForExperimenting {
             .setDrawWindow(true)
             .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
-            .setDumpTrainingData(false)
-            .setDumpEvaluationData(false)
             .setEvalEpisodeCount(1000)
-            .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
     }
 
@@ -81,22 +121,24 @@ public class ForExperimenting {
 
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(256)
-            .trainingEpochCount(1)
+            .trainingBatchSize(1)
+            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(200)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(200)
-            .evaluatorType(EvaluatorType.RALF_BATCHED)
-            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
-            .trainerAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
-            .replayBufferSize(10000)
+            .batchEpisodeCount(10)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .stageCount(1000)
+            .evaluatorType(EvaluatorType.RALF)
+//            .setBatchedEvaluationSize(1)
+            .maximalStepCountBound(1000)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
+            .replayBufferSize(100_000)
             .trainingBatchSize(1)
             .learningRate(0.01)
 
-            .approximatorType(ApproximatorType.TF_NN)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .selectorType(SelectorType.UCB)
+
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -109,10 +151,6 @@ public class ForExperimenting {
                     return "() -> 1.00";
                 }
             })
-
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
-
             .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
@@ -121,7 +159,7 @@ public class ForExperimenting {
 
                 @Override
                 public String toString() {
-                    return "() -> 0.20";
+                    return "() -> 1.00";
                 }
             })
             .temperatureSupplier(new Supplier<Double>() {
@@ -129,7 +167,7 @@ public class ForExperimenting {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    return Math.exp(-callCount / 1000000.0) * 1;
 //                    return 2.00;
                 }
 
@@ -146,7 +184,8 @@ public class ForExperimenting {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setCreatingScriptName("create_model.py")
             .buildAlgorithmConfig();
     }
+
 }
+

@@ -10,13 +10,12 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.utils.EnumUtils;
-import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +36,7 @@ public class RiskAverseSearchTree<
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_ACTION_RISK_TOLERANCE = Math.pow(10, -13);
-    public static final double ZERO_TEMPERATURE = 0.0;
+    public static final double INVALID_TEMPERATURE_VALUE = -Double.MAX_VALUE;
 
     private final SplittableRandom random;
 
@@ -70,23 +69,21 @@ public class RiskAverseSearchTree<
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideInferenceExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE, random).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceExistingFlowStrategy().createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
         } else {
-            return strategiesProvider.provideInferenceNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, ZERO_TEMPERATURE, random).createDistribution(getRoot());
+            return strategiesProvider.provideInferenceNonExistingFlowStrategy().createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
         }
     }
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideExplorationExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature, random).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationExistingFlowStrategy().createDistribution(getRoot(), temperature, random, totalRiskAllowed);
         } else {
-            return strategiesProvider.provideExplorationNonExistingFlowStrategy(state, playerActions, totalRiskAllowed, temperature, random).createDistribution(getRoot());
+            return strategiesProvider.provideExplorationNonExistingFlowStrategy().createDistribution(getRoot(), temperature, random, totalRiskAllowed);
         }
     }
 
-    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state,
-                                                                                                                                                      PolicyStepMode policyStepMode,
-                                                                                                                                                      double temperature) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state, PolicyStepMode policyStepMode, double temperature) {
         switch (policyStepMode) {
             case EXPLOITATION:
                 return inferencePolicyBranch(state);
@@ -96,13 +93,13 @@ public class RiskAverseSearchTree<
         }
     }
 
-    public ImmutableTuple<TAction, double[]> getActionDistributionAndDiscreteAction(TState state, PolicyStepMode policyStepMode, double temperature) {
+    public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getActionDistributionAndDiscreteAction(TState state, PolicyStepMode policyStepMode, double temperature) {
         if(state.isOpponentTurn()) {
             throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
         }
         try {
             this.playingDistribution = createActionWithDistribution(state, policyStepMode, temperature);
-        return new ImmutableTuple<>(playingDistribution.getExpectedPlayerAction(), playingDistribution.getPlayerDistribution());
+        return playingDistribution;
         } catch(Exception e) {
             dumpTreeWithFlow();
             throw e;
@@ -257,7 +254,7 @@ public class RiskAverseSearchTree<
 
 
     private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
-        printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);
+        printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow() == null || a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);
     }
 
 }
