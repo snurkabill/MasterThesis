@@ -8,7 +8,7 @@
 
     <parent>
         <groupId>vahy</groupId>
-        <artifactId>master-thesis-parent</artifactId>
+        <artifactId>master-thesis</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../Parent/pom.xml</relativePath>
     </parent>
