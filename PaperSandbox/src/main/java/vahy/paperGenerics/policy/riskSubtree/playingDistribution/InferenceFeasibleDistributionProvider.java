@@ -6,12 +6,13 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
-import vahy.utils.ImmutableTriple;
 import vahy.utils.RandomDistributionUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class InferenceFeasibleDistributionProvider<
     TAction extends Action<TAction>,
@@ -35,25 +36,23 @@ public class InferenceFeasibleDistributionProvider<
         SplittableRandom random,
         double totalRiskAllowed)
     {
-        var alternateDistribution = createDistributionAsArray(node
-            .getChildNodeStream()
-            .map(x -> {
-                var probabilityFlowFromGlobalOptimization = x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
-                var subtreeRisk = probabilityFlowFromGlobalOptimization - TOLERANCE <= 0.0
-                    ? 1.0
-                    : subtreeRiskCalculatorSupplier.get().calculateRisk(x) / probabilityFlowFromGlobalOptimization;
-                return new ImmutableTriple<>(x.getAppliedAction(), probabilityFlowFromGlobalOptimization, subtreeRisk);
-            })
-            .collect(Collectors.toList()));
-        var actionList = alternateDistribution.getFirst();
-        RandomDistributionUtils.tryToRoundDistribution(alternateDistribution.getSecond());
-        int index = RandomDistributionUtils.getRandomIndexFromDistribution(alternateDistribution.getSecond(), random);
-        return new PlayingDistribution<>(
-            alternateDistribution.getFirst().get(index),
-            index,
-            alternateDistribution.getSecond(),
-            alternateDistribution.getThird(),
-            actionList,
-            subtreeRiskCalculatorSupplier);
+        int childCount = node.getChildNodeMap().size();
+        List<TAction> actionList = new ArrayList<>(childCount);
+        double[] distributionArray = new double[childCount];
+        double[] riskArray = new double[childCount];
+
+        int j = 0;
+        for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+            actionList.add(entry.getKey());
+            var metadata = entry.getValue().getSearchNodeMetadata();
+            distributionArray[j] = metadata.getNodeProbabilityFlow().getSolution();
+            riskArray[j] = distributionArray[j] - TOLERANCE <= 0.0 ? 1.0 : subtreeRiskCalculatorSupplier.get().calculateRisk(entry.getValue()) / distributionArray[j];
+            j++;
+        }
+
+        RandomDistributionUtils.tryToRoundDistribution(distributionArray);
+        int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionArray, random);
+        return new PlayingDistribution<>(actionList.get(index), index, distributionArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
+
     }
 }
