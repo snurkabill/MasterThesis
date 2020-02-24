@@ -68,10 +68,8 @@ public class PaperExperimentEntryPoint {
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> createExperimentAndRun(
         Class<TAction> actionClass,
-//        InstanceInitializerInitializer<TConfig, TAction, DoubleVector, TOpponentObservation, TState> instanceInitializerInitializer,
         BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory,
         Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory,
-//        Class opponentPolicyClass,
         PaperAlgorithmConfig algorithmConfig,
         SystemConfig systemConfig,
         TConfig problemConfig,
@@ -90,7 +88,6 @@ public class PaperExperimentEntryPoint {
 
         var experiment = (AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(AbstractExperiment.class, null, null);
         ImmutableTuple<TAction[], TAction[]> playerOpponentActions = getPlayerOpponentActions(actionClass);
-//        var initialStateSupplier = instanceInitializerInitializer.createInitialStateSupplier(problemConfig, masterRandom.split());
         var initialStateSupplier = instanceInitializerFactory.apply(problemConfig, masterRandom.split());
 
         try {
@@ -249,19 +246,18 @@ public class PaperExperimentEntryPoint {
     Supplier<NodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>>
     createNodeSelectorSupplier(SplittableRandom masterRandom, PaperAlgorithmConfig algorithmConfig)
     {
-        var random = masterRandom.split();
         var cpuctParameter = algorithmConfig.getCpuctParameter();
         var selectorType = algorithmConfig.getSelectorType();
         var totalRiskAllowed = algorithmConfig.getGlobalRiskAllowed();
         switch (selectorType) {
             case UCB:
-                return () -> new PaperNodeSelector<>(cpuctParameter, random);
+                return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split());
             case VAHY_1:
 //                logger.warn("Node selector: [" + RiskBasedSelectorVahy.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelectorVahy<>(cpuctParameter, random);
+                return () -> new RiskBasedSelectorVahy<>(cpuctParameter, masterRandom.split());
             case LINEAR_HARD_VS_UCB:
 //                logger.warn("Node selector: [" + RiskBasedSelector.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelector<>(cpuctParameter, random.split(), totalRiskAllowed);
+                return () -> new RiskBasedSelector<>(cpuctParameter, masterRandom.split(), totalRiskAllowed);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
         }
