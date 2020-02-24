@@ -69,7 +69,7 @@ public class DefaultLocalBenchmark {
             .discountFactor(1)
             .batchEpisodeCount(100)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(20)
+            .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
