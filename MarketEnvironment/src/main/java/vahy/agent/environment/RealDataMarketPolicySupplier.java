@@ -1,22 +1,31 @@
 package vahy.agent.environment;
 
+import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyMode;
 import vahy.environment.MarketAction;
-import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketProbabilities;
 import vahy.environment.MarketState;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.PaperPolicySupplier;
+import vahy.impl.policy.AbstractRandomizedPolicySupplier;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
 
-public class RealDataMarketPolicySupplier extends PaperPolicySupplier<MarketAction, DoubleVector, MarketProbabilities, PaperMetadata<MarketAction>, MarketState> {
+import java.util.SplittableRandom;
 
-    private final MarketDataProvider marketDataProvider;
+public class RealDataMarketPolicySupplier extends AbstractRandomizedPolicySupplier<MarketAction, DoubleVector, MarketProbabilities, MarketState, PaperPolicyRecord> {
 
-    public RealDataMarketPolicySupplier(MarketDataProvider marketDataProvider) {
-        super(null, null, 0.0, null, null, null, null, null, null, null, null, null);
-        this.marketDataProvider = marketDataProvider;
+    public RealDataMarketPolicySupplier(SplittableRandom random) {
+        super(random);
     }
 
+//    public RealDataMarketPolicySupplier(MarketDataProvider marketDataProvider) {
+//        super(null, null, 0.0, null, null, null, null, null, null, null, null, null);
+//        this.marketDataProvider = marketDataProvider;
+//    }
+
+    @Override
+    protected Policy<MarketAction, DoubleVector, MarketProbabilities, MarketState, PaperPolicyRecord> initializePolicy_inner(MarketState initialState, PolicyMode policyMode, SplittableRandom random) {
+        return new RealDataMarketPolicy(initialState.getOpponentObservation().getMarketDataProvider(), initialState.getCurrentDataIndex() + 1);
+    }
 
 
 //    @Override

@@ -1,6 +1,6 @@
 package vahy;
 
-import vahy.agent.environment.RealDataMarketPolicy;
+import vahy.agent.environment.RealDataMarketPolicySupplier;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -41,8 +41,7 @@ public class MarketPrototype2 {
         PaperExperimentEntryPoint.createExperimentAndRun(
             MarketAction.class,
             InitialMarketStateSupplier::new,
-//            RealDataMarketPolicySupplier.class,
-            splittableRandom -> (initialState, policyMode) -> new RealDataMarketPolicy(problemConfig.getMarketDataProvider().getMarketMovementArray(), initialState.getCurrentDataIndex() + 1),
+            RealDataMarketPolicySupplier.class,
             algorithmConfig,
             systemConfig,
             problemConfig,
@@ -95,12 +94,9 @@ public class MarketPrototype2 {
         int lookbackLength = 5;
         int allowedCountOfTimestampsAheadOfEndOfData = 10;
 
-        var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission);
-
-//        MarketDataProvider marketDataProvider = createMarketDataProvider("d:/data_for_trading_env_testing/data");
         MarketDataProvider marketDataProvider = createMarketDataProvider();
+        var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission, marketDataProvider);
         return new MarketConfig(staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
-
     }
 
     private static SystemConfig getSystemConfig() {

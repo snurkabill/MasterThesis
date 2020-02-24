@@ -69,11 +69,21 @@ public class PaperExperimentEntryPoint {
     List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> createExperimentAndRun(
         Class<TAction> actionClass,
         BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory,
-        Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory,
+        Class<?> environmentPolicySupplier,
+//        Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory,
         PaperAlgorithmConfig algorithmConfig,
         SystemConfig systemConfig,
         TConfig problemConfig,
         Path resultPath) {
+
+
+//        TOTO JEDE
+//        Class<Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> castedEnvironmentClass = (Class<Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>>) environmentPolicyClass;
+////        Class<PaperPolicy<TAction, DoubleVector, TOpponentObservation, TState>> castedEnvironmentClass = environmentPolicyClass.getClass();
+//
+//        Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory =
+//            splittableRandom -> (initialState, policyMode) -> ReflectionHacks.createTypeInstance(castedEnvironmentClass, new Class[] {SplittableRandom.class}, new Object[] {splittableRandom});
+
 
         var finalRandomSeed = systemConfig.getRandomSeed();
         var masterRandom = new SplittableRandom(finalRandomSeed);
@@ -85,6 +95,9 @@ public class PaperExperimentEntryPoint {
             algorithmConfig.getFlowOptimizerType(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForKnownFlow(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
+
+
+        PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>)ReflectionHacks.createTypeInstance(environmentPolicySupplier, new Class[] {SplittableRandom.class}, new Object[] {masterRandom});
 
         var experiment = (AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(AbstractExperiment.class, null, null);
         ImmutableTuple<TAction[], TAction[]> playerOpponentActions = getPlayerOpponentActions(actionClass);
@@ -125,15 +138,8 @@ public class PaperExperimentEntryPoint {
                     algorithmConfig.getRiskSupplier()
                 );
 
-                var opponentPolicySupplier = opponentInitializerFactory.apply(masterRandom.split());
 
-                // TODO: this is dirty.
-//                var opponentPolicySupplier = new PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>() {
-//                    @Override
-//                    public Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
-//                        return (Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(opponentPolicyClass, new Class[] {SplittableRandom.class}, new Object[] {masterRandom.split()});
-//                    }
-//                };
+//                PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = opponentInitializerFactory.apply(masterRandom);
 
                 return experiment.run(
                     policySupplier,

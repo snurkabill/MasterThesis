@@ -13,7 +13,7 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.PaperEnvironmentPolicy;
+import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
@@ -45,8 +45,9 @@ public class DefaultLocalBenchmark {
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
+//            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicy(splittableRandom.split()),
 //            PaperEnvironmentPolicy.class,
-            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicy(splittableRandom),
+            HallwayPolicySupplier.class,
             algorithmConfig,
             systemConfig,
             problemConfig,
@@ -68,7 +69,7 @@ public class DefaultLocalBenchmark {
             .discountFactor(1)
             .batchEpisodeCount(100)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(100)
+            .stageCount(20)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
             .maximalStepCountBound(500)
@@ -135,6 +136,7 @@ public class DefaultLocalBenchmark {
             .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
+            .setDumpTrainingData(true)
             .buildSystemConfig();
     }
 

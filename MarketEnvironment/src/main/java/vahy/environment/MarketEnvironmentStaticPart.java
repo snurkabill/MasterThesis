@@ -7,8 +7,9 @@ public class MarketEnvironmentStaticPart {
     private final double priceRange;
     private final int size;
     private final double commission;
+    private final MarketDataProvider marketDataProvider;
 
-    public MarketEnvironmentStaticPart(double systemStopLoss, double constantSpread, double priceRange, int size, double commission) {
+    public MarketEnvironmentStaticPart(double systemStopLoss, double constantSpread, double priceRange, int size, double commission, MarketDataProvider marketDataProvider) {
         this.size = size;
         this.commission = commission;
         if(systemStopLoss < 0.0) {
@@ -23,6 +24,7 @@ public class MarketEnvironmentStaticPart {
         this.priceRange= priceRange;
         this.systemStopLoss = systemStopLoss;
         this.constantSpread = constantSpread;
+        this.marketDataProvider = marketDataProvider;
     }
 
     public double getSystemStopLoss() {
@@ -43,5 +45,9 @@ public class MarketEnvironmentStaticPart {
 
     public double getCommission() {
         return commission;
+    }
+
+    public MarketDataProvider getMarketDataProvider() {
+        return marketDataProvider;
     }
 }

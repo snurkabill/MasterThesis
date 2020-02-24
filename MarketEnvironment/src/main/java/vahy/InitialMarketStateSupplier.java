@@ -19,7 +19,7 @@ public class InitialMarketStateSupplier extends AbstractInitialStateSupplier<Mar
     @Override
     protected MarketState createState_inner(MarketConfig problemConfig, SplittableRandom random) {
         var lookbackLength = problemConfig.getLookbackLength();
-        var marketDataProvider = problemConfig.getMarketDataProvider();
+        var marketDataProvider = problemConfig.getMarketEnvironmentStaticPart().getMarketDataProvider();
         var marketEnvironmentStaticPart = problemConfig.getMarketEnvironmentStaticPart();
         int index = random.nextInt(lookbackLength, marketDataProvider.getMarketMovementArray().length - problemConfig.getAllowedCountOfTimestampsAheadOfEndOfData());
         RealMarketAction[] direction = new RealMarketAction[lookbackLength];

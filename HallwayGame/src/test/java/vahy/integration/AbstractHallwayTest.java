@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 import vahy.api.experiment.SystemConfig;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.PaperEnvironmentPolicy;
+import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
@@ -38,8 +38,7 @@ public abstract class AbstractHallwayTest {
         var results = PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
-//            PaperEnvironmentPolicy.class,
-            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicy(splittableRandom),
+            HallwayPolicySupplier.class,
             algorithmConfig,
             systemConfig,
             gameConfig,

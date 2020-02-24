@@ -2,6 +2,7 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
@@ -13,9 +14,8 @@ import vahy.config.SelectorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
 import vahy.environment.RandomWalkSetup;
-import vahy.api.experiment.StochasticStrategy;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.opponent.RandomWalkPolicy;
+import vahy.opponent.RandomWalkOpponentSupplier;
 import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
@@ -42,8 +42,7 @@ public class RandomWalkExample {
         PaperExperimentEntryPoint.createExperimentAndRun(
             RandomWalkAction.class,
             RandomWalkInitialInstanceSupplier::new,
-//            RandomWalkPolicy.class,
-            splittableRandom -> (initialState, policyMode) -> new RandomWalkPolicy(splittableRandom),
+            RandomWalkOpponentSupplier.class,
             algorithmConfig,
             systemConfig,
             problemConfig,

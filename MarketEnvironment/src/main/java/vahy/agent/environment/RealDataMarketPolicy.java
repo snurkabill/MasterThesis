@@ -1,6 +1,7 @@
 package vahy.agent.environment;
 
 import vahy.environment.MarketAction;
+import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketState;
 import vahy.environment.RealMarketAction;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
@@ -11,12 +12,14 @@ public class RealDataMarketPolicy extends MarketPolicy {
 
     private static final double[] probabilities = new double[] {0.5, 0.5};
 
-    private final RealMarketAction[] realMarketActionSequence;
+    private final MarketDataProvider marketDataProvider;
+    private final RealMarketAction[] realMarketActions;
     private final int startIndex;
     private int currentIndex;
 
-    public RealDataMarketPolicy(RealMarketAction[] realMarketActionSequence, int startIndex) {
-        this.realMarketActionSequence = realMarketActionSequence;
+    public RealDataMarketPolicy(MarketDataProvider marketDataProvider, int startIndex) {
+        this.marketDataProvider = marketDataProvider;
+        this.realMarketActions = marketDataProvider.getMarketMovementArray();
         this.startIndex = startIndex;
         this.currentIndex = startIndex;
     }
@@ -28,7 +31,7 @@ public class RealDataMarketPolicy extends MarketPolicy {
 
     @Override
     public MarketAction getDiscreteAction(MarketState gameState) {
-        return realMarketActionSequence[currentIndex] == RealMarketAction.MARKET_UP ? MarketAction.UP : MarketAction.DOWN;
+        return realMarketActions[currentIndex] == RealMarketAction.MARKET_UP ? MarketAction.UP : MarketAction.DOWN;
     }
 
     @Override

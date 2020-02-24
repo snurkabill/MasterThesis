@@ -391,7 +391,7 @@ public class MarketState implements PaperState<MarketAction, DoubleVector, Marke
 
     @Override
     public MarketProbabilities getOpponentObservation() {
-        return new MarketProbabilities();
+        return new MarketProbabilities(marketEnvironmentStaticPart.getMarketDataProvider());
     }
 
     @Override

@@ -26,7 +26,7 @@ public abstract class AbstractInitialStateSupplier<
 
     @Override
     public TState createInitialState() {
-        return createState_inner(problemConfig, random);
+        return createState_inner(problemConfig, random.split());
     }
 
     protected abstract TState createState_inner(TConfig problemConfig, SplittableRandom random);
