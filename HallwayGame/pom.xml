@@ -45,108 +45,158 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <configuration>
+                        <executable>java</executable>
+                        <arguments>
+                            <argument>-XX:+UseParallelGC</argument>
+                            <argument>-classpath</argument>
+                            <classpath />
+                        </arguments>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+
                 <executions>
                     <execution>
                         <id>00</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark00Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark00Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>01</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark01Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark01Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>03</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark03Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark03Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>05</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark05Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark05Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>06</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark06Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark06Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>13</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark13Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark13Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>14</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark14Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark14Solution</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>15</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark15Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>17</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark17Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark17Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>18</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark18Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark18Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>19</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.Benchmark19Solution</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.Benchmark19Solution</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                     <execution>
                         <id>ForExperimenting</id>
                         <goals>
-                            <goal>java</goal>
+                            <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <mainClass>vahy.original.solutionExamples.ForExperimenting</mainClass>
+                            <arguments combine.children="append">
+                                <argument>vahy.original.solutionExamples.ForExperimenting</argument>
+                            </arguments>
                         </configuration>
                     </execution>
                 </executions>
