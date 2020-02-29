@@ -21,7 +21,7 @@ public class PaperMetadataFactory<
     public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> parent,
                                                                           StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
                                                                           TAction appliedAction) {
-        return new PaperMetadata<>(
+        return new PaperMetadata<TAction>(
             parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
             stateRewardReturn.getReward(),
             DoubleScalarRewardAggregator.emptyReward(),
@@ -33,7 +33,7 @@ public class PaperMetadataFactory<
 
     @Override
     public PaperMetadata<TAction> createEmptyNodeMetadata() {
-        return new PaperMetadata<>(
+        return new PaperMetadata<TAction>(
             DoubleScalarRewardAggregator.emptyReward(),
             DoubleScalarRewardAggregator.emptyReward(),
             DoubleScalarRewardAggregator.emptyReward(),
