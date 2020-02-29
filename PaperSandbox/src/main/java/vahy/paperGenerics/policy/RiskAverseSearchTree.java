@@ -162,12 +162,14 @@ public class RiskAverseSearchTree<
 
     private double roundRiskIfBelowZero(double risk, String riskName) {
         if(risk < 0.0 - NUMERICAL_RISK_DIFF_TOLERANCE) {
-//            throw new IllegalStateException("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
-            logger.debug("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
+            if(logger.isDebugEnabled()) {
+                logger.debug("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
+            }
             return 0.0;
-        } else
-            if(risk < 0.0) {
-            logger.debug("Rounding risk [{}] with value [{}] to 0.0", riskName, risk);
+        } else if(risk < 0.0) {
+            if(logger.isDebugEnabled()) {
+                logger.debug("Rounding risk [{}] with value [{}] to 0.0", riskName, risk);
+            }
             return 0.0;
         } else {
             return risk;
@@ -208,50 +210,42 @@ public class RiskAverseSearchTree<
                 riskOfOtherOpponentActions = roundRiskIfBelowZero(riskOfOtherOpponentActions, "RiskOfOtherOpponentActions");
 
                 var dividingProbability = (playerActionProbability * opponentActionProbability);
-
                 var oldRisk = totalRiskAllowed;
-
-//                if(Arrays.stream(riskEstimatedVector).sum() != 0.0) {
-//                    totalRiskAllowed = (totalRiskAllowed - (riskOfOtherPlayerActions + riskOfOtherOpponentActions)) / dividingProbability;
-//                    totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
-//                }
 
                 if(Arrays.stream(riskEstimatedVector).anyMatch(value -> value > 0.0)) {
                     totalRiskAllowed = (totalRiskAllowed - (riskOfOtherPlayerActions + riskOfOtherOpponentActions)) / dividingProbability;
                     totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
                 }
 
-//                logger.info("Global risk: [{}]", totalRiskAllowed);
-
-                logger.debug("Playing action: [{}] from actions: [{}]) with distribution: [{}] with minimalRiskReachAbility: [{}]. Risk of other player actions: [{}]. Risk of other Opponent actions: [{}], dividing probability: [{}], old risk: [{}], new risk: [{}]",
-                    playingDistribution.getExpectedPlayerAction(),
-                    playerActions.stream().map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
-                    Arrays.toString(playerActionDistribution),
-                    Arrays.toString(riskEstimatedVector),
-                    riskOfOtherPlayerActions,
-                    riskOfOtherOpponentActions,
-                    dividingProbability,
-                    oldRisk,
-                    totalRiskAllowed
+                if(logger.isDebugEnabled()) {
+                    logger.debug("Playing action: [{}] from actions: [{}]) with distribution: [{}] with minimalRiskReachAbility: [{}]. Risk of other player actions: [{}]. Risk of other Opponent actions: [{}], dividing probability: [{}], old risk: [{}], new risk: [{}]",
+                        playingDistribution.getExpectedPlayerAction(),
+                        playerActions.stream().map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
+                        Arrays.toString(playerActionDistribution),
+                        Arrays.toString(riskEstimatedVector),
+                        riskOfOtherPlayerActions,
+                        riskOfOtherOpponentActions,
+                        dividingProbability,
+                        oldRisk,
+                        totalRiskAllowed
                     );
-
-
-                if(totalRiskAllowed > 1.0 + NUMERICAL_RISK_DIFF_TOLERANCE) {
-                    logger.debug("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
-                    totalRiskAllowed = 1.0;
-//                    throw new IllegalStateException("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
                 }
-
-                logger.debug("New Global risk: [{}]", totalRiskAllowed);
+                if(totalRiskAllowed > 1.0 + NUMERICAL_RISK_DIFF_TOLERANCE) {
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
+                    }
+                    totalRiskAllowed = 1.0;
+                }
+                if(logger.isDebugEnabled()) {
+                    logger.debug("New Global risk: [{}]", totalRiskAllowed);
+                }
             }
             return innerApplyAction(action);
-
         } catch(Exception e) {
             dumpTreeWithFlow();
             throw e;
         }
     }
-
 
     private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
         printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow() == null || a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);

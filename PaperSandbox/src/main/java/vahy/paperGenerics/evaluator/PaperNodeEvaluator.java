@@ -3,7 +3,6 @@ package vahy.paperGenerics.evaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.SearchNode;
@@ -129,9 +128,10 @@ public class PaperNodeEvaluator<
 
     private ImmutableTuple<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>, Integer> evaluateChildNode(
         SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> parent,
-        TAction nextAction) {
-        StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState> stateRewardReturn = parent.applyAction(nextAction);
-        SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> childNode = searchNodeFactory.createNode(stateRewardReturn, parent, nextAction);
+        TAction nextAction)
+    {
+        var stateRewardReturn = parent.applyAction(nextAction);
+        var childNode = searchNodeFactory.createNode(stateRewardReturn, parent, nextAction);
         var nodesExpanded = innerEvaluation(childNode);
         return new ImmutableTuple<>(childNode, nodesExpanded);
     }

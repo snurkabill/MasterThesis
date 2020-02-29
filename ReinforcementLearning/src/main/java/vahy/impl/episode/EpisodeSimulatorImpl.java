@@ -45,7 +45,9 @@ public class EpisodeSimulatorImpl<
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy = episodeSetup.getOpponentPolicy();
 
         TState state = episodeSetup.getInitialState();
-        logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
+        if(logger.isTraceEnabled()) {
+            logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
+        }
         return episodeRun(episodeSetup, playerPolicy, opponentPolicy, state);
     }
 
@@ -71,11 +73,15 @@ public class EpisodeSimulatorImpl<
                     step = makePolicyStep(state, opponentPolicy, playerPolicy, false);
                     totalCumulativePayoff += step.getReward();
                     totalStepsDone++;
-                    logger.debug("Opponent's [{}]th action: [{}], getting reward [{}]", playerStepsDone, step.getPlayedAction(), step.getReward());
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("Opponent's [{}]th action: [{}], getting reward [{}]", playerStepsDone, step.getPlayedAction(), step.getReward());
+                    }
                     episodeHistoryList.add(step);
                     state = step.getToState();
                 }
-                logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
+                if(logger.isDebugEnabled()) {
+                    logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
+                }
             }
             long end = System.currentTimeMillis();
             return resultsFactory.createResults(episodeHistoryList, playerStepsDone, totalStepsDone, totalCumulativePayoff, Duration.ofMillis(end - start));

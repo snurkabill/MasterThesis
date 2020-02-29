@@ -70,7 +70,9 @@ public class SearchTreeImpl<
             return false;
         }
         if(!selectedNodeForExpansion.isFinalNode()) {
-            logger.trace("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
+            if(logger.isTraceEnabled()) {
+                logger.trace("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
+            }
             expandAndEvaluateNode(selectedNodeForExpansion);
         }
         treeUpdater.updateTree(selectedNodeForExpansion);
@@ -159,7 +161,9 @@ public class SearchTreeImpl<
             throw new IllegalArgumentException("Cannot expand final node");
         }
         if(root.isLeaf()) {
-            logger.debug("Expanding root since it is not final node and has no children expanded");
+            if(logger.isDebugEnabled()) {
+                logger.debug("Expanding root since it is not final node and has no children expanded");
+            }
             expandAndEvaluateNode(root);
             treeUpdater.updateTree(root);
         }

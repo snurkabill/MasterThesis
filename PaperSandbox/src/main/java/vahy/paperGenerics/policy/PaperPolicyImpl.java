@@ -125,11 +125,12 @@ public class PaperPolicyImpl<
             actionDistribution[element.getActionIndexInPlayerActions()] = probability;
         }
         hasActionChanged = true;
-
-        if(exploitation) {
-            logger.debug("Exploitation action [{}].", action);
-        } else {
-            logger.debug("Exploration action [{}]", action);
+        if(logger.isDebugEnabled()) {
+            if(exploitation) {
+                logger.debug("Exploitation action [{}].", action);
+            } else {
+                logger.debug("Exploration action [{}]", action);
+            }
         }
         return action;
     }

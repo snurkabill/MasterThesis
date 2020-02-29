@@ -38,7 +38,8 @@ public class TraversingTreeUpdater<
             traversingNode = traversingNodeParent;
             i++;
         } while(!traversingNode.isRoot());
-
-        logger.trace("Traversing updated traversed [{}] tree levels", i);
+        if(logger.isTraceEnabled()) {
+            logger.trace("Traversing updated traversed [{}] tree levels", i);
+        }
     }
 }

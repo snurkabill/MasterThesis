@@ -49,12 +49,13 @@ public abstract class AbstractTreeSearchPolicy<
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
         for (int i = 0; treeUpdateCondition.isConditionSatisfied(); i++) {
-            logger.trace("Performing tree update for [{}]th iteration", i);
+            if(logger.isTraceEnabled()) {
+                logger.trace("Performing tree update for [{}]th iteration", i);
+            }
             searchTree.updateTree();
         }
         treeUpdateCondition.treeUpdateFinished();
         timer.stopTimer();
-
     }
 
     public abstract int getExpandedNodeCountSoFar();

@@ -20,28 +20,20 @@ public class PaperTreeUpdater<
     @Override
     public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
-        double estimatedLeafReward =
-            expandedNode.getSearchNodeMetadata().getCumulativeReward() +
-            (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
-
-        double estimatedLeafRisk = expandedNode.isFinalNode() ?
-            (expandedNode.getWrappedState().isRiskHit() ?
-                1.0
-                : 0.0)
-            : expandedNode.getSearchNodeMetadata().getPredictedRisk();
-
+        double estimatedLeafReward = expandedNode.getSearchNodeMetadata().getCumulativeReward() + (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
+        double estimatedLeafRisk = expandedNode.isFinalNode() ? (expandedNode.getWrappedState().isRiskHit() ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
             expandedNode = expandedNode.getParent();
             i++;
         }
         updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
-        logger.trace("Traversing updated traversed [{}] tree levels", i);
+        if(logger.isTraceEnabled()) {
+            logger.trace("Traversing updated traversed [{}] tree levels", i);
+        }
     }
 
-    private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> updatedNode,
-                            double estimatedLeafReward,
-                            double estimatedRisk) {
+    private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> updatedNode, double estimatedLeafReward, double estimatedRisk) {
         PaperMetadata<TAction> searchNodeMetadata = updatedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
 
