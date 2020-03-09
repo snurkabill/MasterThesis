@@ -36,27 +36,35 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
-        double min = findExtreme(DoubleStream::min, "Minimal element was not found", node);
-        double max = findExtreme(DoubleStream::max, "Maximal element was not found", node);
-        double explorationConstant = (max + min) / 2.0;
-        return node
-            .getChildNodeStream()
-            .map(
-                childNode ->
-                {
-                    MonteCarloTreeSearchMetadata childSearchNodeMetadata = childNode.getSearchNodeMetadata();
-                    return new ImmutableTuple<>(
-                        childNode.getAppliedAction(),
-                        calculateUCBValue(
-                            (node.isPlayerTurn() ? 1 : -1) * childSearchNodeMetadata.getExpectedReward(),
-                            explorationConstant,
-                            node.getSearchNodeMetadata().getVisitCounter(),
-                            childSearchNodeMetadata.getVisitCounter())
-                    );
-                })
-            .collect(StreamUtils.toRandomizedMaxCollector(
-                Comparator.comparing(ImmutableTuple::getSecond), random))
-            .getFirst();
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
+        checkRoot();
+        var node = root;
+        while(!node.isLeaf()) {
+            double min = findExtreme(DoubleStream::min, "Minimal element was not found", node);
+            double max = findExtreme(DoubleStream::max, "Maximal element was not found", node);
+            double explorationConstant = (max + min) / 2.0;
+            var node2 = node;
+            var action = node
+                .getChildNodeStream()
+                .map(
+                    childNode ->
+                    {
+                        MonteCarloTreeSearchMetadata childSearchNodeMetadata = childNode.getSearchNodeMetadata();
+                        return new ImmutableTuple<>(
+                            childNode.getAppliedAction(),
+                            calculateUCBValue(
+                                (node2.isPlayerTurn() ? 1 : -1) * childSearchNodeMetadata.getExpectedReward(),
+                                explorationConstant,
+                                node2.getSearchNodeMetadata().getVisitCounter(),
+                                childSearchNodeMetadata.getVisitCounter())
+                        );
+                    })
+                .collect(StreamUtils.toRandomizedMaxCollector(
+                    Comparator.comparing(ImmutableTuple::getSecond), random))
+                .getFirst();
+            node = node.getChildNodeMap().get(action);
+        }
+        return node;
     }
+
 }

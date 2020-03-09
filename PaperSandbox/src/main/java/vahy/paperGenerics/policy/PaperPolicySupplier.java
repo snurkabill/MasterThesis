@@ -10,7 +10,6 @@ import vahy.api.policy.PolicySupplier;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
@@ -18,6 +17,7 @@ import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 import vahy.utils.EnumUtils;
 
 import java.util.LinkedHashMap;
@@ -38,7 +38,7 @@ public class PaperPolicySupplier<
     private final SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
     private final double totalRiskAllowedInference;
     private final SplittableRandom random;
-    private final Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelectorSupplier;
+    private final Supplier<RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelectorSupplier;
     private final NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater;
     private final TreeUpdateConditionFactory treeUpdateConditionFactory;
@@ -53,7 +53,7 @@ public class PaperPolicySupplier<
                                SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                double totalRiskAllowedInference,
                                SplittableRandom random,
-                               Supplier<NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelectorSupplier,
+                               Supplier<RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeSelectorSupplier,
                                NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                TreeUpdateConditionFactory treeUpdateConditionFactory,

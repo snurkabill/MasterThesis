@@ -55,51 +55,41 @@ public class RandomDistributionUtils {
 //        return normalizedDistribution;
 //    }
 
-    private static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random, int trialCount) {
-        if(trialCount > SAMPLING_RANDOM_INDEX_TRIAL_COUNT) {
-            throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + distribution
-                .stream()
-                .map(Objects::toString)
-                .collect(Collectors.joining(", ")) + "]");
-        }
-        double value = random.nextDouble();
-        double cumulativeSum = 0.0;
-        for (int i = 0; i < distribution.size(); i++) {
-            cumulativeSum += distribution.get(i);
-            if(value <= cumulativeSum) {
-                return i;
-            }
-        }
-        return getRandomIndexFromDistribution(distribution, random, trialCount + 1);
-    }
-
-    private static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random, int trialCount) {
-        if(trialCount > SAMPLING_RANDOM_INDEX_TRIAL_COUNT) {
-            throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + Arrays.toString(distribution) +"]");
-        }
-        double value = random.nextDouble();
-        double cumulativeSum = 0.0;
-        for (int i = 0; i < distribution.length; i++) {
-            cumulativeSum += distribution[i];
-            if(value <= cumulativeSum) {
-                return i;
-            }
-        }
-        return getRandomIndexFromDistribution(distribution, random, trialCount + 1);
-    }
-
     public static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random) {
         if(!isDistribution(distribution)) {
-            throw new IllegalArgumentException("Given array does not represent probability distribution");
+            throw new IllegalArgumentException("Given array does not represent probability distribution. Array: [" + distribution + "]");
         }
-        return getRandomIndexFromDistribution(distribution, random, 0);
+        for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
+            double value = random.nextDouble();
+            double cumulativeSum = 0.0;
+            for (int i = 0; i < distribution.size(); i++) {
+                cumulativeSum += distribution.get(i);
+                if(value <= cumulativeSum) {
+                    return i;
+                }
+            }
+        }
+        throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + distribution
+            .stream()
+            .map(Objects::toString)
+            .collect(Collectors.joining(", ")) + "]");
     }
 
     public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
 //        if(!isDistribution(distribution)) {
-//            throw new IllegalArgumentException("Given array does not represent probability distribution [" + Arrays.toString(distribution) + "]");
+//            throw new IllegalArgumentException("Given array does not represent probability distribution");
 //        }
-        return getRandomIndexFromDistribution(distribution, random, 0);
+        for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
+            double value = random.nextDouble();
+            double cumulativeSum = 0.0;
+            for (int i = 0; i < distribution.length; i++) {
+                cumulativeSum += distribution[i];
+                if (value <= cumulativeSum) {
+                    return i;
+                }
+            }
+        }
+        throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + Arrays.toString(distribution) +"]");
     }
 
     public static void applyMaskToRandomDistribution(double[] distribution, boolean[] mask) {
@@ -185,6 +175,124 @@ public class RandomDistributionUtils {
         }
     }
 
+    public static ImmutableTuple<Boolean, double[]> findProbabilityDistributionUsingLagrange(double[] rewardArray, double[] riskArray, double totalRisk) {
+        Set<Integer> negativeIndexes = new HashSet<>();
+        int iterations = 0;
+        while (iterations <= rewardArray.length) {
+            RandomDistributionUtils.logger.debug("Running [{}]th iteration of solution search for new distribution", iterations);
+            var hasNegativeElements = false;
+            var newDistribution = findSimilarSuitableDistributionByLeastSquares(rewardArray, riskArray, totalRisk, negativeIndexes);
+            for (int i = 0; i < rewardArray.length; i++) {
+                if(newDistribution[i] < 0.0) {
+                    hasNegativeElements = true;
+                    negativeIndexes.add(i);
+                }
+            }
+            if(!hasNegativeElements) {
+                return new ImmutableTuple<>(true, newDistribution);
+            } else {
+                iterations++;
+            }
+        }
+        logger.warn("System of linear equations for reward array [" + Arrays.toString(rewardArray) +
+            "] and risk array: [" + Arrays.toString(riskArray) + "] with totalRisk: [" + totalRisk + "] has no solution");
+        return new ImmutableTuple<>(false, new double[0]);
+    }
+
+    private static double[] findProbabilityDistributionUsingLagrange(double[] rewardArray, double[] riskArray, double totalRisk, Set<Integer> negativeIndexes) {
+
+        RandomDistributionUtils.logger.debug("negative indexes: [{}]", negativeIndexes.toString());
+
+        int distributionSize = rewardArray.length;
+        int helpVariableCount = 2;
+        int negativeHelpVariableCount = negativeIndexes.size();
+        int automaticColumnCount = distributionSize + negativeHelpVariableCount;
+        int totalColumnCount = helpVariableCount + automaticColumnCount;
+
+
+        double[][] lhsArray = new double[totalColumnCount][totalColumnCount];
+        double[] rhsArray = new double[totalColumnCount];
+
+        // A
+        for (int i = 0; i < distributionSize; i++) {
+            for (int j = 0; j < distributionSize; j++) {
+                lhsArray[i][j] = i == j ? 1 : 0;
+            }
+            for (int j = 0; j < negativeHelpVariableCount; j++) {
+                lhsArray[i][j + distributionSize] = negativeIndexes.contains(i) ? -1 : 0;
+            }
+            lhsArray[i][automaticColumnCount] = 1;
+            lhsArray[i][automaticColumnCount + 1] = riskArray[i];
+            rhsArray[i] = -rewardArray[i];
+        }
+
+        // D
+        int negativeIndexesAdded = 0;
+        for (Integer negativeIndex : negativeIndexes) {
+            for (int j = 0; j < distributionSize; j++) {
+                lhsArray[distributionSize + negativeIndexesAdded][negativeIndex] = 1;
+            }
+            rhsArray[distributionSize + negativeIndexesAdded] = 0;
+            negativeIndexesAdded++;
+        }
+
+
+        // B
+        for (int i = 0; i < distributionSize; i++) {
+            lhsArray[automaticColumnCount][i] = 1;
+        }
+        rhsArray[automaticColumnCount] = 1;
+
+
+        // C
+        for (int i = 0; i < distributionSize; i++) {
+            lhsArray[automaticColumnCount + 1][i] = riskArray[i];
+        }
+        rhsArray[automaticColumnCount + 1] = totalRisk;
+
+        try {
+            RealMatrix realMatrix = new BlockRealMatrix(lhsArray);
+            SingularValueDecomposition singularValueDecomposition = new SingularValueDecomposition(realMatrix);
+//            LUDecomposition luDecomposition = new LUDecomposition(realMatrix);
+//            DecompositionSolver solver = luDecomposition.getSolver();
+            DecompositionSolver solver = singularValueDecomposition.getSolver();
+            RealVector resultVector = solver.solve(new ArrayRealVector(rhsArray));
+
+            var result = resultVector.toArray();
+
+            var newDistribution = new double[distributionSize];
+            for (int i = 0; i < distributionSize; i++) {
+                newDistribution[i] = result[i];
+            }
+            hardRoundDistribution(newDistribution);
+            return newDistribution;
+        } catch(Exception e) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Error occurred during solving linear equations");
+            sb.append(System.lineSeparator());
+            sb.append("Reward array: ");
+            sb.append(Arrays.toString(rewardArray));
+            sb.append(System.lineSeparator());
+            sb.append("Risk reachability: ");
+            sb.append(Arrays.toString(riskArray));
+            sb.append(System.lineSeparator());
+            sb.append("Total risk allowed: ");
+            sb.append(totalRisk);
+            sb.append(System.lineSeparator());
+            sb.append("Indexes of negative variables: ");
+            sb.append(negativeIndexes.toString());
+            sb.append(System.lineSeparator());
+            sb.append("Right side of equations: ");
+            sb.append(Arrays.toString(rhsArray));
+            sb.append(System.lineSeparator());
+            sb.append("Left side of equations: ");
+            sb.append(Arrays.deepToString(lhsArray));
+            sb.append(System.lineSeparator());
+            throw new IllegalStateException(sb.toString(), e);
+        }
+    }
+
+
     public static ImmutableTuple<Boolean, double[]> findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk) {
         Set<Integer> negativeIndexes = new HashSet<>();
         int iterations = 0;
@@ -207,7 +315,6 @@ public class RandomDistributionUtils {
         logger.warn("System of linear equations for action distribution [" + Arrays.toString(distribution) +
             "] and risk array: [" + Arrays.toString(riskArray) + "] with totalRisk: [" + totalRisk + "] has no solution");
         return new ImmutableTuple<>(false, new double[0]);
-
     }
 
     private static double[] findSimilarSuitableDistributionByLeastSquares(double[] distribution, double[] riskArray, double totalRisk, Set<Integer> negativeIndexes) {
@@ -252,11 +359,6 @@ public class RandomDistributionUtils {
         for (int i = 0; i < distributionSize; i++) {
             lhsArray[automaticColumnCount][i] = 1;
         }
-//        for (int i = 0; i < negativeHelpVariableCount; i++) {
-//            lhsArray[automaticColumnCount][i + distributionSize] = 0;
-//        }
-//        lhsArray[automaticColumnCount][automaticColumnCount] = 0;
-//        lhsArray[automaticColumnCount][automaticColumnCount + 1] = 0;
         rhsArray[automaticColumnCount] = 1;
 
 
@@ -266,16 +368,10 @@ public class RandomDistributionUtils {
         }
         rhsArray[automaticColumnCount + 1] = totalRisk;
 
-//        Matrix lhs = new Matrix(lhsArray);
-//        Matrix rhs = new Matrix(rhsArray, totalColumnCount);
-
-
-
         try {
             RealMatrix realMatrix = new BlockRealMatrix(lhsArray);
             SingularValueDecomposition singularValueDecomposition = new SingularValueDecomposition(realMatrix);
 //            LUDecomposition luDecomposition = new LUDecomposition(realMatrix);
-
 //            DecompositionSolver solver = luDecomposition.getSolver();
             DecompositionSolver solver = singularValueDecomposition.getSolver();
             RealVector resultVector = solver.solve(new ArrayRealVector(rhsArray));
@@ -288,16 +384,7 @@ public class RandomDistributionUtils {
             }
             hardRoundDistribution(newDistribution);
             return newDistribution;
-
-//            Matrix ans = lhs.solve(rhs);
-
-//            var newDistribution = new double[distributionSize];
-//            for (int i = 0; i < distribution.length; i++) {
-//                newDistribution[i] = ans.get(i, 0);
-//            }
-//            return newDistribution;
         } catch(Exception e) {
-
             StringBuilder sb = new StringBuilder();
             sb.append("Error occurred during solving linear equations");
             sb.append(System.lineSeparator());

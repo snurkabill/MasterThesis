@@ -7,7 +7,6 @@ import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.PaperState;
@@ -15,6 +14,7 @@ import vahy.paperGenerics.PolicyStepMode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 import vahy.utils.EnumUtils;
 
 import java.util.ArrayList;
@@ -50,10 +50,11 @@ public class RiskAverseSearchTree<
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playingDistribution;
 
     private final StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
+    private final RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
 
     public RiskAverseSearchTree(Class<TAction> clazz,
                                 SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
-                                NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
+                                RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                 SplittableRandom random,
@@ -65,6 +66,7 @@ public class RiskAverseSearchTree<
         this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
         this.strategiesProvider = strategyProvider;
+        this.nodeSelector = nodeSelector;
     }
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
@@ -153,6 +155,7 @@ public class RiskAverseSearchTree<
     public boolean updateTree() {
         isFlowOptimized = false;
         try {
+            this.nodeSelector.setAllowedRiskInRoot(this.totalRiskAllowed);
             return super.updateTree();
         } catch(Exception e) {
             dumpTree();

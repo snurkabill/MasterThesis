@@ -22,8 +22,14 @@ public class RandomNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        TAction[] allPossibleActions = node.getAllPossibleActions();
-        return allPossibleActions[random.nextInt(allPossibleActions.length)];
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode() {
+        checkRoot();
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = root;
+        while(!node.isLeaf()) {
+            TAction[] allPossibleActions = node.getAllPossibleActions();
+            var action = allPossibleActions[random.nextInt(allPossibleActions.length)];
+            node = node.getChildNodeMap().get(action);
+        }
+        return node;
     }
 }
