@@ -47,60 +47,133 @@ public class Benchmark15Solution extends DefaultLocalBenchmark {
         return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(64)
-            .trainingEpochCount(100)
-            .learningRate(0.1)
-            // REINFORCEMENTs
+            .trainingBatchSize(1)
+            .trainingEpochCount(10)
+            // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(3000)
-
-            .maximalStepCountBound(1000)
-
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
-            .replayBufferSize(20000)
+//            .setBatchedEvaluationSize(1)
+            .maximalStepCountBound(500)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
+            .replayBufferSize(100_000)
+            .trainingBatchSize(1)
+            .learningRate(0.01)
+
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.00";
+                }
+            })
+
+            .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(1.0)
-            .explorationConstantSupplier(new Supplier<>() {
+
+            .explorationConstantSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.0;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 0.20";
+                }
+            })
+            .temperatureSupplier(new Supplier<Double>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    var x = Math.exp(-callCount / 100000.0);
+                    var temp = Math.exp(-callCount / 10000.0) ;
                     if(callCount % batchSize == 0) {
-                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+                        logger.info("Temperature: [{}]", temp);
                     }
-                    return x;
-//                    return 1.0;
+                    return temp;
+//                    return 2.00;
                 }
             })
-            .temperatureSupplier(new Supplier<>() {
-                private int callCount = 0;
-                @Override
-                public Double get() {
-                    callCount++;
-                    double x = Math.exp(-callCount / 200000.0) * 10;
-                    if(callCount % batchSize == 0) {
-                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
-                    }
-                    return x;
-//                    return 1.5;
-                }
-            })
-            .riskSupplier(() -> 1.0)
+
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
+
+//        return new AlgorithmConfigBuilder()
+//            //MCTS
+//            .cpuctParameter(1)
+//            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1000))
+//            //.mcRolloutCount(1)
+//            //NN
+//            .trainingBatchSize(64)
+//            .trainingEpochCount(100)
+//            .learningRate(0.1)
+//            // REINFORCEMENTs
+//            .discountFactor(1)
+//            .batchEpisodeCount(batchSize)
+//            .stageCount(3000)
+//
+//            .maximalStepCountBound(1000)
+//
+//            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
+//            .approximatorType(ApproximatorType.HASHMAP_LR)
+//            .evaluatorType(EvaluatorType.RALF)
+//            .replayBufferSize(20000)
+//            .selectorType(SelectorType.UCB)
+//            .globalRiskAllowed(1.0)
+//            .riskSupplier(() -> 1.0)
+//            .explorationConstantSupplier(new Supplier<>() {
+//                private int callCount = 0;
+//                @Override
+//                public Double get() {
+//                    callCount++;
+//                    var x = Math.exp(-callCount / 100000.0);
+//                    if(callCount % batchSize == 0) {
+//                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
+//                    }
+//                    return x;
+////                    return 1.0;
+//                }
+//            })
+//            .temperatureSupplier(new Supplier<>() {
+//                private int callCount = 0;
+//                @Override
+//                public Double get() {
+//                    callCount++;
+//                    double x = Math.exp(-callCount / 200000.0) * 10;
+//                    if(callCount % batchSize == 0) {
+//                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
+//                    }
+//                    return x;
+////                    return 1.5;
+//                }
+//            })
+//
+//            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+//            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+//            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+//            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+//            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+//            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+//            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+//            .buildAlgorithmConfig();
     }
 
 }
