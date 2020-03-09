@@ -106,7 +106,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
-//            .stageCount(50)
+            .stageCount(100)
             .buildAlgorithmConfig();
     }
 
