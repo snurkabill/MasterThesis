@@ -25,25 +25,32 @@ public class AlphaGoNodeSelector<
         this.random = random;
     }
 
-    @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> node) {
-        AlphaGoNodeMetadata<TAction> searchNodeMetadata = node.getSearchNodeMetadata();
-        int totalNodeVisitCount = searchNodeMetadata.getVisitCounter();
-        return node
-            .getChildNodeStream()
-            .collect(StreamUtils.toRandomizedMaxCollector(
-                Comparator.comparing(
-                    childNode -> {
-                        AlphaGoNodeMetadata<TAction> childMetadata = childNode.getSearchNodeMetadata();
-                        return
-                            (node.isPlayerTurn() ? 1.0 : -1.0) * childMetadata.getExpectedReward() +
-                            calculateUValue(totalNodeVisitCount, childMetadata.getPriorProbability(), childMetadata.getVisitCounter());
-                    }), random))
-            .getAppliedAction();
-    }
-
     private double calculateUValue(int nodeTotalVisitCount, double priorActionProbability, int childTotalVisitCount) {
 //        return cpuctParameter * priorActionProbability * Math.sqrt(nodeTotalVisitCount) / (1.0 + childTotalVisitCount);
         return cpuctParameter * priorActionProbability * (Math.sqrt(nodeTotalVisitCount / (double)childTotalVisitCount));
+    }
+
+    @Override
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> selectNextNode() {
+        checkRoot();
+        var node = root;
+        while(!node.isLeaf()) {
+            var searchNodeMetadata = node.getSearchNodeMetadata();
+            int totalNodeVisitCount = searchNodeMetadata.getVisitCounter();
+            var isplayerTurn = node.isPlayerTurn();
+            var action = node
+                .getChildNodeStream()
+                .collect(StreamUtils.toRandomizedMaxCollector(
+                    Comparator.comparing(
+                        childNode -> {
+                            AlphaGoNodeMetadata<TAction> childMetadata = childNode.getSearchNodeMetadata();
+                            return
+                                (isplayerTurn ? 1.0 : -1.0) * childMetadata.getExpectedReward() +
+                                calculateUValue(totalNodeVisitCount, childMetadata.getPriorProbability(), childMetadata.getVisitCounter());
+                        }), random))
+                .getAppliedAction();
+            node = node.getChildNodeMap().get(action);
+        }
+        return node;
     }
 }

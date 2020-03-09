@@ -17,8 +17,6 @@ public abstract class AbstractTreeBasedNodeSelector<
 
     protected SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root;
 
-    protected abstract TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
-
     @Override
     public void setNewRoot(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
         this.root = root;
@@ -30,13 +28,6 @@ public abstract class AbstractTreeBasedNodeSelector<
         }
     }
 
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode() {
-        checkRoot();
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = root;
-        while(!node.isLeaf()) {
-            TAction bestAction = getBestAction(node);
-            node = node.getChildNodeMap().get(bestAction);
-        }
-        return node;
-    }
+    public abstract SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode();
+
 }

@@ -9,7 +9,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import java.util.ArrayList;
 import java.util.SplittableRandom;
 
-public class PaperNodeSelector<
+public class RiskBasedSelectorVahy2<
     TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -17,19 +17,27 @@ public class PaperNodeSelector<
     extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
+    private final int playerTotalActionCount;
+    private final double[] values;
 
-    public PaperNodeSelector(double cpuctParameter, SplittableRandom random) {
+    public RiskBasedSelectorVahy2(double cpuctParameter, SplittableRandom random, int playerTotalActionCount) {
         super(random);
         this.cpuctParameter = cpuctParameter;
+        this.playerTotalActionCount = playerTotalActionCount;
+        this.values = new double[playerTotalActionCount];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node, double currentRisk) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
         double max = -Double.MAX_VALUE;
         double min = Double.MAX_VALUE;
+        double currentRiskWeight = (1 - currentRisk);
         var childNodeMap = node.getChildNodeMap();
         for (var entry : childNodeMap.values()) {
-            double value = entry.getSearchNodeMetadata().getExpectedReward() + entry.getSearchNodeMetadata().getGainedReward();
+            var metadata = entry.getSearchNodeMetadata();
+            double reward = metadata.getExpectedReward() + metadata.getGainedReward();
+            double risk = metadata.getPredictedRisk();
+            double value = reward * (1 - risk * currentRiskWeight);
             if(max < value) {
                 max = value;
             }
@@ -47,7 +55,10 @@ public class PaperNodeSelector<
 
         for (int i = 0; i < possibleActions.length; i++) {
             var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
-            var vValue = (max == min ? 0.5 : (((metadata.getExpectedReward() + metadata.getGainedReward()) - min) / (max - min)));
+            var reward = metadata.getExpectedReward() + metadata.getGainedReward();
+            var risk = metadata.getPredictedRisk();
+            var value = reward * (1 - risk * currentRiskWeight);
+            var vValue = (max == min ? 0.5 : ((value - min) / (max - min)));
             var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
             var quValue = vValue + uValue;
             if(quValue > maxValue) {
@@ -74,10 +85,12 @@ public class PaperNodeSelector<
     public SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> selectNextNode() {
         checkRoot();
         var node = root;
+        var risk = this.allowedRiskInRoot;
         while(!node.isLeaf()) {
-            var action = node.isPlayerTurn() ? getBestAction(node) : sampleOpponentAction(node);
+            var action = node.isPlayerTurn() ? getBestAction(node, allowedRiskInRoot) : sampleOpponentAction(node);
             node = node.getChildNodeMap().get(action);
         }
         return node;
     }
+
 }

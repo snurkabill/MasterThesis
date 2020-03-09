@@ -22,7 +22,6 @@ public class Ucb1NodeSelector<
 
     private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
-    protected SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> root;
     protected final SplittableRandom random;
     protected final double explorationConstant; // TODO: get rid of explorationConstant here. There are Ucb1 heuristics with changing exploration constant
 
@@ -32,19 +31,41 @@ public class Ucb1NodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
-        int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
-        return node.getChildNodeStream()
-            .collect(StreamUtils.toRandomizedMaxCollector(
-                Comparator.comparing(
-                    o -> calculateUCBValue( // TODO: optimize so calls are done only once
-                        (node.isPlayerTurn() ? 1.0 : -1.0) * o.getSearchNodeMetadata().getExpectedReward(),
-                        explorationConstant,
-                        nodeVisitCount,
-                        o.getSearchNodeMetadata().getVisitCounter())),
-                random))
-            .getAppliedAction();
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
+        checkRoot();
+        var node = root;
+        while(!node.isLeaf()) {
+            int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
+            var isPlayerTurn = node.isPlayerTurn();
+            var action = node.getChildNodeStream()
+                .collect(StreamUtils.toRandomizedMaxCollector(
+                    Comparator.comparing(
+                        o -> calculateUCBValue( // TODO: optimize so calls are done only once
+                            (isPlayerTurn ? 1.0 : -1.0) * o.getSearchNodeMetadata().getExpectedReward(),
+                            explorationConstant,
+                            nodeVisitCount,
+                            o.getSearchNodeMetadata().getVisitCounter())),
+                    random))
+                .getAppliedAction();
+            node = node.getChildNodeMap().get(action);
+        }
+        return node;
     }
+
+//    @Override
+//    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
+//        int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
+//        return node.getChildNodeStream()
+//            .collect(StreamUtils.toRandomizedMaxCollector(
+//                Comparator.comparing(
+//                    o -> calculateUCBValue( // TODO: optimize so calls are done only once
+//                        (node.isPlayerTurn() ? 1.0 : -1.0) * o.getSearchNodeMetadata().getExpectedReward(),
+//                        explorationConstant,
+//                        nodeVisitCount,
+//                        o.getSearchNodeMetadata().getVisitCounter())),
+//                random))
+//            .getAppliedAction();
+//    }
 
     protected double calculateUCBValue(double estimatedValue, double explorationConstant, int parentVisitCount, int actionVisitCount) {
         return estimatedValue + explorationConstant * Math.sqrt(Math.log(parentVisitCount) / (1.0 + actionVisitCount));

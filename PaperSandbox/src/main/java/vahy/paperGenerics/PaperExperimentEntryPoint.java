@@ -12,7 +12,6 @@ import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
@@ -37,10 +36,12 @@ import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker;
 import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
-import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
+import vahy.paperGenerics.reinforcement.learning.tf.TFModelImproved;
 import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 import vahy.paperGenerics.selector.RiskBasedSelector;
 import vahy.paperGenerics.selector.RiskBasedSelectorVahy;
+import vahy.paperGenerics.selector.RiskBasedSelectorVahy2;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ReflectionHacks;
@@ -96,7 +97,6 @@ public class PaperExperimentEntryPoint {
             algorithmConfig.getSubTreeRiskCalculatorTypeForKnownFlow(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
 
-
         PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>)ReflectionHacks.createTypeInstance(environmentPolicySupplier, new Class[] {SplittableRandom.class}, new Object[] {masterRandom});
 
         var experiment = (AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(AbstractExperiment.class, null, null);
@@ -111,7 +111,7 @@ public class PaperExperimentEntryPoint {
                 playerOpponentActions.getFirst().length,
                 masterRandom))
             {
-                Supplier<NodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>> nodeSelectorSupplier = createNodeSelectorSupplier(masterRandom, algorithmConfig);
+                Supplier<RiskAverseNodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>> nodeSelectorSupplier = createNodeSelectorSupplier(masterRandom, algorithmConfig, playerOpponentActions.getFirst().length);
                 PaperMetadataFactory<TAction, DoubleVector, TOpponentObservation, TState> searchNodeMetadataFactory = new PaperMetadataFactory<>();
                 NodeEvaluator<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState> evaluator = resolveEvaluator(
                     algorithmConfig,
@@ -188,12 +188,20 @@ public class PaperExperimentEntryPoint {
                 return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
             case TF_NN:
                 var tfModelAsBytes = createTensorFlowModel(algorithmConfig, systemConfig, modelInputSize, actionCount);
-                var tfModel = new TFModel(
+//                var tfModel = new TFModel(
+//                    modelInputSize,
+//                    PaperModel.POLICY_START_INDEX + actionCount,
+//                    algorithmConfig.getTrainingEpochCount(),
+//                    algorithmConfig.getTrainingBatchSize(),
+//                    tfModelAsBytes,
+//                    masterRandom.split());
+                var tfModel = new TFModelImproved(
                     modelInputSize,
                     PaperModel.POLICY_START_INDEX + actionCount,
-                    algorithmConfig.getTrainingEpochCount(),
                     algorithmConfig.getTrainingBatchSize(),
+                    algorithmConfig.getTrainingEpochCount(),
                     tfModelAsBytes,
+                    systemConfig.getParallelThreadsCount(),
                     masterRandom.split());
                 return new TrainableApproximator(tfModel);
             case DL4J_NN:
@@ -222,7 +230,9 @@ public class PaperExperimentEntryPoint {
             inputCount +
             " " +
             outputActionCount +
-            " PythonScripts/generated_models");
+            " PythonScripts/generated_models" +
+            " " +
+            (int)systemConfig.getRandomSeed());
 
         try(BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
             BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
@@ -245,12 +255,9 @@ public class PaperExperimentEntryPoint {
         return Files.readAllBytes(new File(dir, modelName + ".pb").toPath());
     }
 
-    private static <
-        TAction extends Enum<TAction> & Action<TAction>,
-        TOpponentObservation extends Observation,
-        TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
-    Supplier<NodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>>
-    createNodeSelectorSupplier(SplittableRandom masterRandom, PaperAlgorithmConfig algorithmConfig)
+    private static <TAction extends Enum<TAction> & Action<TAction>, TOpponentObservation extends Observation, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
+        Supplier<RiskAverseNodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>>
+    createNodeSelectorSupplier(SplittableRandom masterRandom, PaperAlgorithmConfig algorithmConfig, int playerTotalActionCount)
     {
         var cpuctParameter = algorithmConfig.getCpuctParameter();
         var selectorType = algorithmConfig.getSelectorType();
@@ -258,6 +265,8 @@ public class PaperExperimentEntryPoint {
         switch (selectorType) {
             case UCB:
                 return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split());
+            case RISK_AVERSE_UCB:
+                return () -> new RiskBasedSelectorVahy2<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case VAHY_1:
 //                logger.warn("Node selector: [" + RiskBasedSelectorVahy.class.getName() + "] is considered Experimental.");
                 return () -> new RiskBasedSelectorVahy<>(cpuctParameter, masterRandom.split());

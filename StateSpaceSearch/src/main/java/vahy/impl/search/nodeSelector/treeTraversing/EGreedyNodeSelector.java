@@ -19,6 +19,17 @@ public class EGreedyNodeSelector<
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
+    @Override
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode() {
+        checkRoot();
+        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = root;
+        while(!node.isLeaf()) {
+            var action = getAction(node);
+            node = node.getChildNodeMap().get(action);
+        }
+        return node;
+    }
+
     private class SearchNodeComparator implements Comparator<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>{
 
         @Override
@@ -36,8 +47,7 @@ public class EGreedyNodeSelector<
         this.random = random;
     }
 
-    @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    private TAction getAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         if (random.nextDouble() < epsilon) {
             TAction[] allPossibleActions = node.getAllPossibleActions();
             return allPossibleActions[random.nextInt(allPossibleActions.length)];

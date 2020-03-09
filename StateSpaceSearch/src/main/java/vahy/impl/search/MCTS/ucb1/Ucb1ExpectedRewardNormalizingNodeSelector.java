@@ -23,28 +23,37 @@ public class Ucb1ExpectedRewardNormalizingNodeSelector<
     }
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
-        double sum = node
-            .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward())
-            .sum();
-        return node
-            .getChildNodeStream()
-            .map(
-                childNode ->
-                {
-                    MonteCarloTreeSearchMetadata childSearchNodeMetadata = childNode.getSearchNodeMetadata();
-                    return new ImmutableTuple<>(
-                        childNode.getAppliedAction(),
-                        calculateUCBValue(
-                            (node.isPlayerTurn() ? 1 : -1) * childSearchNodeMetadata.getExpectedReward() / sum,
-                            explorationConstant,
-                            node.getSearchNodeMetadata().getVisitCounter(),
-                            childSearchNodeMetadata.getVisitCounter())
+    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
+        checkRoot();
+        var node = root;
+        while(!node.isLeaf()) {
+            double sum = node
+                .getChildNodeStream()
+                .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward())
+                .sum();
+
+            var node2 = node;
+            var action = node
+                .getChildNodeStream()
+                .map(
+                    childNode ->
+                    {
+                        MonteCarloTreeSearchMetadata childSearchNodeMetadata = childNode.getSearchNodeMetadata();
+                        return new ImmutableTuple<>(
+                            childNode.getAppliedAction(),
+                            calculateUCBValue(
+                                (node2.isPlayerTurn() ? 1 : -1) * childSearchNodeMetadata.getExpectedReward() / sum,
+                                explorationConstant,
+                                node2.getSearchNodeMetadata().getVisitCounter(),
+                                childSearchNodeMetadata.getVisitCounter())
                         );
-                })
-            .collect(StreamUtils.toRandomizedMaxCollector(
-                Comparator.comparing(ImmutableTuple::getSecond), random))
-            .getFirst();
+                    })
+                .collect(StreamUtils.toRandomizedMaxCollector(
+                    Comparator.comparing(ImmutableTuple::getSecond), random))
+                .getFirst();
+            node = node.getChildNodeMap().get(action);
+        }
+        return node;
     }
+
 }
