@@ -50,7 +50,8 @@ public class MarketPrototype2 {
         );
     }
 
-     public static MarketDataProvider createMarketDataProvider(String absoluteFilePath) throws IOException {
+
+     public static MarketDataProvider createMarketDataProvider_old(String absoluteFilePath) throws IOException {
         List<String> lines = Files.readAllLines(Paths.get(absoluteFilePath));
         List<Double> prices = new ArrayList<>();
         List<RealMarketAction> movements = new ArrayList<>();
@@ -59,6 +60,18 @@ public class MarketPrototype2 {
                 prices.add(Double.parseDouble(lineParts[0]));
                 movements.add(lineParts[1].equals("Up") ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN);
             });
+        return new MarketDataProvider(movements.toArray(new RealMarketAction[0]), prices.stream().mapToDouble(value -> value).toArray());
+    }
+
+    public static MarketDataProvider createMarketDataProvider_new(String absoluteFilePath) throws IOException {
+        List<String> lines = Files.readAllLines(Paths.get(absoluteFilePath));
+        List<Double> prices = new ArrayList<>();
+        List<RealMarketAction> movements = new ArrayList<>();
+        lines.forEach(x -> {
+            String[] lineParts = x.split(",");
+            prices.add(Double.parseDouble(lineParts[0]));
+            movements.add(lineParts[1].equals("Up") ? RealMarketAction.MARKET_UP : RealMarketAction.MARKET_DOWN);
+        });
         return new MarketDataProvider(movements.toArray(new RealMarketAction[0]), prices.stream().mapToDouble(value -> value).toArray());
     }
 
@@ -94,7 +107,10 @@ public class MarketPrototype2 {
         int lookbackLength = 5;
         int allowedCountOfTimestampsAheadOfEndOfData = 10;
 
-        MarketDataProvider marketDataProvider = createMarketDataProvider();
+        String pathToFile = "";
+
+        MarketDataProvider marketDataProvider = createMarketDataProvider_new(pathToFile);
+//        MarketDataProvider marketDataProvider = createMarketDataProvider();
         var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission, marketDataProvider);
         return new MarketConfig(staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
     }
@@ -103,7 +119,7 @@ public class MarketPrototype2 {
         return new SystemConfigBuilder()
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
+            .setDrawWindow(false)
             .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
@@ -121,8 +137,8 @@ public class MarketPrototype2 {
             .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
-            .batchEpisodeCount(10)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
+            .batchEpisodeCount(1000)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
