@@ -40,18 +40,6 @@ public class ExplorationFeasibleDistributionProvider<
         SplittableRandom random,
         double totalRiskAllowed)
     {
-//        var alternateDistribution = createDistributionAsArray(node
-//            .getChildNodeStream()
-//            .map(x -> {
-//                var probabilityFlowFromGlobalOptimization = x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
-//                var minimalRiskReachAbilityCalculator = probabilityFlowFromGlobalOptimization - TOLERANCE <= 0.0
-//                    ? subtreeRiskCalculatorSupplierForUnknownFlow.get()
-//                    : subtreeRiskCalculatorSupplierForKnownFlow.get();
-//                var subtreeRisk = minimalRiskReachAbilityCalculator.calculateRisk(x);
-//                return new ImmutableTriple<>(x.getAppliedAction(), probabilityFlowFromGlobalOptimization, subtreeRisk);
-//            })
-//            .collect(Collectors.toList()));
-
         int childCount = node.getChildNodeMap().size();
         List<TAction> actionList = new ArrayList<>(childCount);
         double[] distributionAsArray = new double[childCount];

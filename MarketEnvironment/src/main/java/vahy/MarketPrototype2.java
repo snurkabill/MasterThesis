@@ -109,8 +109,8 @@ public class MarketPrototype2 {
 
         String pathToFile = "";
 
-        MarketDataProvider marketDataProvider = createMarketDataProvider_new(pathToFile);
-//        MarketDataProvider marketDataProvider = createMarketDataProvider();
+//        MarketDataProvider marketDataProvider = createMarketDataProvider_new(pathToFile);
+        MarketDataProvider marketDataProvider = createMarketDataProvider();
         var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission, marketDataProvider);
         return new MarketConfig(staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
     }

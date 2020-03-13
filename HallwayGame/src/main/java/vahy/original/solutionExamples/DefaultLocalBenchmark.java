@@ -45,8 +45,6 @@ public class DefaultLocalBenchmark {
         PaperExperimentEntryPoint.createExperimentAndRun(
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
-//            splittableRandom -> (initialState, policyMode) -> new PaperEnvironmentPolicy(splittableRandom.split()),
-//            PaperEnvironmentPolicy.class,
             HallwayPolicySupplier.class,
             algorithmConfig,
             systemConfig,
@@ -61,7 +59,6 @@ public class DefaultLocalBenchmark {
             //MCTS
             .cpuctParameter(1)
 
-            //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(1)
             .trainingEpochCount(10)
@@ -132,11 +129,11 @@ public class DefaultLocalBenchmark {
         return new SystemConfigBuilder()
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
-            .setParallelThreadsCount(4)
+            .setDrawWindow(false)
+            .setParallelThreadsCount(Runtime.getRuntime().availableProcessors())
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
-            .setDumpTrainingData(true)
+            .setDumpTrainingData(false)
             .buildSystemConfig();
     }
 

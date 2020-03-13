@@ -130,10 +130,11 @@ public class DefaultLocalBenchmark {
         return new SystemConfigBuilder()
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
-            .setDrawWindow(true)
-            .setParallelThreadsCount(4)
+            .setDrawWindow(false)
+            .setParallelThreadsCount(Runtime.getRuntime().availableProcessors())
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
+            .setDumpTrainingData(false)
             .buildSystemConfig();
     }
 

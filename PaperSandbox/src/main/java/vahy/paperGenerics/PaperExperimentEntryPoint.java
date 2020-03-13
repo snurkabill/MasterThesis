@@ -71,20 +71,10 @@ public class PaperExperimentEntryPoint {
         Class<TAction> actionClass,
         BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory,
         Class<?> environmentPolicySupplier,
-//        Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory,
         PaperAlgorithmConfig algorithmConfig,
         SystemConfig systemConfig,
         TConfig problemConfig,
         Path resultPath) {
-
-
-//        TOTO JEDE
-//        Class<Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> castedEnvironmentClass = (Class<Policy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>>) environmentPolicyClass;
-////        Class<PaperPolicy<TAction, DoubleVector, TOpponentObservation, TState>> castedEnvironmentClass = environmentPolicyClass.getClass();
-//
-//        Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentInitializerFactory =
-//            splittableRandom -> (initialState, policyMode) -> ReflectionHacks.createTypeInstance(castedEnvironmentClass, new Class[] {SplittableRandom.class}, new Object[] {splittableRandom});
-
 
         var finalRandomSeed = systemConfig.getRandomSeed();
         var masterRandom = new SplittableRandom(finalRandomSeed);
@@ -97,7 +87,7 @@ public class PaperExperimentEntryPoint {
             algorithmConfig.getSubTreeRiskCalculatorTypeForKnownFlow(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
 
-        PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>)ReflectionHacks.createTypeInstance(environmentPolicySupplier, new Class[] {SplittableRandom.class}, new Object[] {masterRandom});
+        var opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>)ReflectionHacks.createTypeInstance(environmentPolicySupplier, new Class[] {SplittableRandom.class}, new Object[] {masterRandom});
 
         var experiment = (AbstractExperiment<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(AbstractExperiment.class, null, null);
         ImmutableTuple<TAction[], TAction[]> playerOpponentActions = getPlayerOpponentActions(actionClass);
