@@ -71,6 +71,8 @@ public class GameSamplerImpl<
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
         createDataGenerators(additionalDataPointGeneratorList);
+
+        progressTracker.finalizeRegistration();
     }
 
     private void createDataGenerators(List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList) {
@@ -85,8 +87,16 @@ public class GameSamplerImpl<
             episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getTotalPayoff)));
 
         dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+            "Stdev Total Payoff",
+            episodeResults -> MathStreamUtils.calculateStdev(episodeResults, EpisodeResults::getTotalPayoff)));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
             "Avg episode duration [ms]",
             episodeResults -> MathStreamUtils.calculateAverage(episodeResults, (x) -> x.getDuration().toMillis())));
+
+        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+            "Stdev episode duration [ms]",
+            episodeResults -> MathStreamUtils.calculateStdev(episodeResults, (x) -> x.getDuration().toMillis())));
 
         registerDataGenerators(dataPointGeneratorList);
     }
