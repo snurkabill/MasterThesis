@@ -4,7 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ProgressTracker {
 
@@ -12,8 +14,8 @@ public class ProgressTracker {
 
     private final List<DataPointGenerator> dataPointGeneratorList = new ArrayList<>();
     private final List<DataSeriesCollector> dataSeriesCollectorList = new ArrayList<>();
-    private final List<MyShittyFrameVisualization> visualizationList = new ArrayList<>();
     private final ProgressTrackerSettings progressTrackerSettings;
+    private MyShittyFrameVisualization visualization;
 
     public ProgressTracker(ProgressTrackerSettings progressTrackerSettings) {
         this.progressTrackerSettings = progressTrackerSettings;
@@ -22,8 +24,15 @@ public class ProgressTracker {
     public void registerDataCollector(DataPointGenerator dataPointGenerator) {
         dataPointGeneratorList.add(dataPointGenerator);
         dataSeriesCollectorList.add(new DataSeriesCollector(dataPointGenerator.getDataTitle()));
+    }
+
+    public void finalizeRegistration() {
         if(progressTrackerSettings.isDrawOnEnd() || progressTrackerSettings.isDrawOnNextLog()) {
-            visualizationList.add(new MyShittyFrameVisualization(dataPointGenerator.getDataTitle(), "Iteration", "Value"));
+            String[] iterationArr = new String[dataPointGeneratorList.size()];
+            String[] valueArr = new String[dataPointGeneratorList.size()];
+            Arrays.fill(iterationArr, "Iteration");
+            Arrays.fill(valueArr, "Value");
+            visualization = new MyShittyFrameVisualization(dataPointGeneratorList.stream().map(DataPointGenerator::getDataTitle).collect(Collectors.toList()), Arrays.asList(iterationArr), Arrays.asList(valueArr));
         }
     }
 
@@ -52,9 +61,7 @@ public class ProgressTracker {
             logger.info(stringBuilder.toString());
         }
         if(progressTrackerSettings.isDrawOnNextLog()) {
-            for (int i = 0; i < dataSeriesCollectorList.size(); i++) {
-                visualizationList.get(i).draw(XYDatasetBuilder.createDataset(dataSeriesCollectorList.get(i)));
-            }
+            visualization.draw(dataSeriesCollectorList.stream().map(XYDatasetBuilder::createDataset).collect(Collectors.toList()));
         }
     }
 
@@ -63,9 +70,7 @@ public class ProgressTracker {
             logger.error("log printing on end not implemented");
         }
         if(progressTrackerSettings.isDrawOnEnd()) {
-            for (int i = 0; i < dataSeriesCollectorList.size(); i++) {
-                visualizationList.get(i).draw(XYDatasetBuilder.createDataset(dataSeriesCollectorList.get(i)));
-            }
+            visualization.draw(dataSeriesCollectorList.stream().map(XYDatasetBuilder::createDataset).collect(Collectors.toList()));
         }
     }
 }

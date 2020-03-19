@@ -44,6 +44,7 @@ import vahy.paperGenerics.selector.RiskBasedSelectorVahy;
 import vahy.paperGenerics.selector.RiskBasedSelectorVahy2;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.MathStreamUtils;
 import vahy.utils.ReflectionHacks;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -53,7 +54,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.BiFunction;
@@ -137,7 +137,10 @@ public class PaperExperimentEntryPoint {
                     new PaperEpisodeResultsFactory<>(),
                     initialStateSupplier,
                     new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false),
-                    Collections.singletonList(new FromEpisodesDataPointGeneratorGeneric<>("Risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow())),
+                    List.of(
+                        new FromEpisodesDataPointGeneratorGeneric<>("Avg risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow()),
+                        new FromEpisodesDataPointGeneratorGeneric<>("Stdev risk Hit", episodeResults -> MathStreamUtils.calculateStdev(episodeResults, (x) -> x.getFinalState().isRiskHit() ? 1 : 0))
+                        ),
                     approximator,
                     new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
                     new PaperEpisodeStatisticsCalculator<>(),
