@@ -30,9 +30,9 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
-public class ForExperimenting {
+public class Benchmark05SolutionFunctionApproximator {
 
-    public static final Logger logger = LoggerFactory.getLogger(ForExperimenting.class.getName());
+    public static final Logger logger = LoggerFactory.getLogger(Benchmark05SolutionFunctionApproximator.class.getName());
 
     public static void main(String[] args) {
 
@@ -79,7 +79,7 @@ public class ForExperimenting {
 
     private static PaperAlgorithmConfig getAlgorithmConfig() {
 
-        var batchEpisodeSize = 50;
+        var batchEpisodeSize = 200;
 
         return new AlgorithmConfigBuilder()
             //MCTS
@@ -87,8 +87,8 @@ public class ForExperimenting {
 
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(256)
-            .trainingEpochCount(1)
+            .trainingBatchSize(1024)
+            .trainingEpochCount(100)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
@@ -101,7 +101,7 @@ public class ForExperimenting {
             .trainerAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
             .replayBufferSize(batchEpisodeSize * 10)
 
-            .learningRate(0.1)
+            .learningRate(0.01)
 
             .approximatorType(ApproximatorType.TF_NN)
             .selectorType(SelectorType.UCB)
@@ -138,7 +138,6 @@ public class ForExperimenting {
                         logger.info("Temperature: [" + x + "]");
                     }
                     return x;
-//                    return 2.00;
                 }
 
                 @Override
@@ -154,7 +153,7 @@ public class ForExperimenting {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setCreatingScriptName("create_model.py")
+            .setCreatingScriptName("create_model_solution05.py")
             .buildAlgorithmConfig();
     }
 }

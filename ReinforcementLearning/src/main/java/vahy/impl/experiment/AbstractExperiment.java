@@ -3,6 +3,7 @@ package vahy.impl.experiment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
+import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.AlgorithmConfig;
@@ -19,7 +20,7 @@ import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.benchmark.BenchmarkedPolicy;
 import vahy.impl.benchmark.PolicyBenchmark;
 import vahy.impl.benchmark.PolicyResults;
-import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
+import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.impl.learning.trainer.Trainer;
 import vahy.vizualiation.ProgressTrackerSettings;
@@ -44,7 +45,7 @@ public class AbstractExperiment<
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
         InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         ProgressTrackerSettings progressTrackerSettings,
-        List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList,
+        List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> additionalDataPointGeneratorList,
         TrainablePredictor trainablePredictor,
         EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
         EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
@@ -105,7 +106,7 @@ public class AbstractExperiment<
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
         InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
-        List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList,
+        List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> additionalDataPointGeneratorList,
         TrainablePredictor predictor,
         AlgorithmConfig algorithmConfig,
         SystemConfig systemConfig,
@@ -125,7 +126,7 @@ public class AbstractExperiment<
             );
 
         var dataAggregator = trainerAlgorithm.resolveDataAggregator(algorithmConfig);
-        return new Trainer<>(predictor, gameSampler, dataAggregator, episodeDataMaker);
+        return new Trainer<>(predictor, gameSampler, dataAggregator, episodeDataMaker, progressTrackerSettings);
     }
 
 

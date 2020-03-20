@@ -4,14 +4,17 @@ import tensorflow as tf
 
 model_name = sys.argv[1]
 input_count = int(sys.argv[2])
-hidden_count_1 = 100
-hidden_count_2 = 100
-hidden_count_3 = 100
-Q_output_count = 1
-risk_output_count = 1
 action_output_count = int(sys.argv[3])
 path_to_store = sys.argv[4]
 seed = int(sys.argv[5])
+
+hidden_count_1 = 100
+hidden_count_2 = 100
+hidden_count_3 = 100
+
+Q_output_count = 1
+risk_output_count = 1
+
 tf.random.set_random_seed(seed)
 
 output_count = Q_output_count + risk_output_count + action_output_count
@@ -36,9 +39,9 @@ Q_target = tf.slice(target, [0, 0], [-1, Q_output_count], name = "Q_slice_node")
 risk_target = tf.slice(target, [0, Q_output_count], [-1, risk_output_count], name = "risk_slice_node")
 action_target = tf.slice(target, [0, Q_output_count + risk_output_count], [-1, action_output_count], name = "action_slice_node")
 
-hidden_1 = Dense(x,        hidden_count_1, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_1") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
-hidden_2 = Dense(hidden_1, hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
-hidden_3 = Dense(hidden_2, hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3") #, kernel_regularizer= tf.contrib.layers.l2_regularizer(scale=0.0))
+hidden_1 = Dense(x,        hidden_count_1, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_1")
+hidden_2 = Dense(Dropout(hidden_1, keep_prob=0.5), hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2")
+hidden_3 = Dense(Dropout(hidden_2, keep_prob=0.5), hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3")
 
 Q_output      = tf.layers.dense(hidden_3, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
 risk_output   = tf.layers.dense(hidden_3, risk_output_count, tf.nn.tanh, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "risk_output_node")
