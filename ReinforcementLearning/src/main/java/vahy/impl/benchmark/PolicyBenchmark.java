@@ -3,6 +3,7 @@ package vahy.impl.benchmark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
+import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.ProblemConfig;
@@ -12,7 +13,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
-import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
+import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.vizualiation.ProgressTrackerSettings;
 
@@ -36,7 +37,7 @@ public class PolicyBenchmark<
     private final ProgressTrackerSettings progressTrackerSettings;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
     private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator;
-    private final List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList;
+    private final List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> additionalDataPointGeneratorList;
 
     public PolicyBenchmark(List<BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> policyList,
                            PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> environmentPolicySupplier,
@@ -44,7 +45,7 @@ public class PolicyBenchmark<
                            EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
                            EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeStatisticsCalculator,
                            ProgressTrackerSettings progressTrackerSettings,
-                           List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList) {
+                           List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> additionalDataPointGeneratorList) {
         this.policyList = policyList;
         this.environmentPolicySupplier = environmentPolicySupplier;
         this.initialStateSupplier = initialStateSupplier;

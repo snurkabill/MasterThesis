@@ -3,6 +3,7 @@ package vahy.vizualiation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,9 +17,14 @@ public class ProgressTracker {
     private final List<DataSeriesCollector> dataSeriesCollectorList = new ArrayList<>();
     private final ProgressTrackerSettings progressTrackerSettings;
     private MyShittyFrameVisualization visualization;
+    private final Color color;
+    private final String windowTitle;
+    private boolean isFinalized = false;
 
-    public ProgressTracker(ProgressTrackerSettings progressTrackerSettings) {
+    public ProgressTracker(ProgressTrackerSettings progressTrackerSettings, String windowTitle, Color color) {
         this.progressTrackerSettings = progressTrackerSettings;
+        this.color = color;
+        this.windowTitle = windowTitle;
     }
 
     public void registerDataCollector(DataPointGenerator dataPointGenerator) {
@@ -32,8 +38,16 @@ public class ProgressTracker {
             String[] valueArr = new String[dataPointGeneratorList.size()];
             Arrays.fill(iterationArr, "Iteration");
             Arrays.fill(valueArr, "Value");
-            visualization = new MyShittyFrameVisualization(dataPointGeneratorList.stream().map(DataPointGenerator::getDataTitle).collect(Collectors.toList()), Arrays.asList(iterationArr), Arrays.asList(valueArr));
+            visualization = new MyShittyFrameVisualization(
+                windowTitle,
+                dataPointGeneratorList
+                    .stream()
+                    .map(DataPointGenerator::getDataTitle)
+                    .collect(Collectors.toList()), Arrays.asList(iterationArr),
+                Arrays.asList(valueArr),
+                color);
         }
+        isFinalized = true;
     }
 
     private void gatherData() {
@@ -43,6 +57,9 @@ public class ProgressTracker {
     }
 
     public void onNextLog() {
+        if(!isFinalized) {
+            throw new IllegalStateException("Visualization window was not finalized");
+        }
         gatherData();
 
         if(progressTrackerSettings.isPrintOnNextLog()) {
@@ -66,6 +83,9 @@ public class ProgressTracker {
     }
 
     public void finalLog() {
+        if(!isFinalized) {
+            throw new IllegalStateException("Visualization window was not finalized");
+        }
         if(progressTrackerSettings.isPrintOnEnd()) {
             logger.error("log printing on end not implemented");
         }

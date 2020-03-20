@@ -14,7 +14,7 @@ import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.PolicyResults;
-import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
+import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.experiment.AbstractExperiment;
 import vahy.impl.experiment.EpisodeWriter;
 import vahy.impl.model.observation.DoubleVector;
@@ -138,8 +138,8 @@ public class PaperExperimentEntryPoint {
                     initialStateSupplier,
                     new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false),
                     List.of(
-                        new FromEpisodesDataPointGeneratorGeneric<>("Avg risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow()),
-                        new FromEpisodesDataPointGeneratorGeneric<>("Stdev risk Hit", episodeResults -> MathStreamUtils.calculateStdev(episodeResults, (x) -> x.getFinalState().isRiskHit() ? 1 : 0))
+                        new DataPointGeneratorGeneric<>("Avg risk Hit", episodeResults -> episodeResults.stream().mapToDouble(x -> x.getFinalState().isRiskHit() ? 1 : 0).average().orElseThrow()),
+                        new DataPointGeneratorGeneric<>("Stdev risk Hit", episodeResults -> MathStreamUtils.calculateStdev(episodeResults, (x) -> x.getFinalState().isRiskHit() ? 1 : 0))
                         ),
                     approximator,
                     new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),

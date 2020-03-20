@@ -14,13 +14,14 @@ import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
+import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.episode.EpisodeSetupImpl;
 import vahy.impl.episode.EpisodeSimulatorImpl;
-import vahy.impl.episode.FromEpisodesDataPointGeneratorGeneric;
 import vahy.utils.MathStreamUtils;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -45,7 +46,7 @@ public class GameSamplerImpl<
     private final int processingUnitCount;
 
     private final ProgressTracker progressTracker;
-    private final List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> dataPointGeneratorList = new ArrayList<>();
+    private final List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> dataPointGeneratorList = new ArrayList<>();
 
     private int batchCounter = 0;
     private final PolicyMode policyMode;
@@ -61,13 +62,13 @@ public class GameSamplerImpl<
         int processingUnitCount,
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier,
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
-        List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList)
+        List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> additionalDataPointGeneratorList)
     {
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
         this.policyMode = policyMode;
         this.processingUnitCount = processingUnitCount;
-        this.progressTracker = new ProgressTracker(progressTrackerSettings);
+        this.progressTracker = new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.RED);
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
         createDataGenerators(additionalDataPointGeneratorList);
@@ -75,33 +76,33 @@ public class GameSamplerImpl<
         progressTracker.finalizeRegistration();
     }
 
-    private void createDataGenerators(List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> additionalDataPointGeneratorList) {
+    private void createDataGenerators(List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> additionalDataPointGeneratorList) {
         var dataPointGeneratorList = new ArrayList<>(additionalDataPointGeneratorList == null ? new ArrayList<>() : additionalDataPointGeneratorList);
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>(
             "Avg Player Step Count",
             episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getPlayerStepCount)));
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>(
             "Avg Total Payoff",
             episodeResults -> MathStreamUtils.calculateAverage(episodeResults, EpisodeResults::getTotalPayoff)));
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>(
             "Stdev Total Payoff",
             episodeResults -> MathStreamUtils.calculateStdev(episodeResults, EpisodeResults::getTotalPayoff)));
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>(
             "Avg episode duration [ms]",
             episodeResults -> MathStreamUtils.calculateAverage(episodeResults, (x) -> x.getDuration().toMillis())));
 
-        dataPointGeneratorList.add(new FromEpisodesDataPointGeneratorGeneric<>(
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>(
             "Stdev episode duration [ms]",
             episodeResults -> MathStreamUtils.calculateStdev(episodeResults, (x) -> x.getDuration().toMillis())));
 
         registerDataGenerators(dataPointGeneratorList);
     }
 
-    protected void registerDataGenerators(List<FromEpisodesDataPointGeneratorGeneric<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> dataPointGeneratorList) {
+    protected void registerDataGenerators(List<DataPointGeneratorGeneric<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>> dataPointGeneratorList) {
         this.dataPointGeneratorList.addAll(dataPointGeneratorList);
         for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
             progressTracker.registerDataCollector(fromEpisodesDataPointGenerator);
@@ -142,7 +143,7 @@ public class GameSamplerImpl<
             }).collect(Collectors.toList());
 
             for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
-                fromEpisodesDataPointGenerator.addNewValue(paperEpisodeHistoryList, batchCounter);
+                fromEpisodesDataPointGenerator.addNewValue(paperEpisodeHistoryList);
             }
             progressTracker.onNextLog();
             batchCounter++;

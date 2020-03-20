@@ -19,14 +19,15 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
     private final List<String> yAxisLabel;
     private final int width;
     private final int heigth;
+    private final Color color;
     private final List<ChartPanel> chartPanelList = new ArrayList<>();
 
-    public MyShittyFrameVisualization(List<String> titleList, List<String> xAxisLabelList, List<String> yAxisLabelList) {
-        this(titleList, xAxisLabelList, yAxisLabelList, 400, 280);
+    public MyShittyFrameVisualization(String windowTitle, List<String> titleList, List<String> xAxisLabelList, List<String> yAxisLabelList, Color color) {
+        this(windowTitle, titleList, xAxisLabelList, yAxisLabelList, 400, 280, color);
     }
 
-    public MyShittyFrameVisualization(List<String> titleList, List<String> xAxisLabelList, List<String> yAxisLabelList, int width, int height) {
-        super("Viz window");
+    public MyShittyFrameVisualization(String windowTitle, List<String> titleList, List<String> xAxisLabelList, List<String> yAxisLabelList, int width, int height, Color color) {
+        super(windowTitle);
         if(titleList.size() != xAxisLabelList.size() || titleList.size() != yAxisLabelList.size()) {
             throw new IllegalArgumentException("Different list sizes of arguments");
         }
@@ -35,6 +36,7 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
         this.yAxisLabel = yAxisLabelList;
         this.width = width;
         this.heigth = height;
+        this.color = color;
         setLayout(new GridLayout(0, 3));
     }
 
@@ -44,6 +46,7 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
         final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, new XYLineAndShapeRenderer(true, true));
         plot.setBackgroundPaint(Color.DARK_GRAY);
         plot.setOutlinePaint(Color.DARK_GRAY);
+        plot.getRenderer(0).setSeriesPaint(0, color);
         return new JFreeChart(title.get(index), JFreeChart.DEFAULT_TITLE_FONT, plot, true);
     }
 
