@@ -14,7 +14,6 @@ import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;

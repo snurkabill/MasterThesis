@@ -15,7 +15,6 @@ import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketEnvironmentStaticPart;
 import vahy.environment.RealMarketAction;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;

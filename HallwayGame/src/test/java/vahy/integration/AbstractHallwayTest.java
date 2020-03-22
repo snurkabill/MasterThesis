@@ -12,7 +12,6 @@ import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
 import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
 
