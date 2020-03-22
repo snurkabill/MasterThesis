@@ -65,12 +65,12 @@ public class ProgressTracker {
         if(progressTrackerSettings.isPrintOnNextLog()) {
             var stringBuilder = new StringBuilder();
             stringBuilder.append(System.lineSeparator());
+            stringBuilder.append(" Iteration: [");
+            stringBuilder.append(dataSeriesCollectorList.get(0).getLatest().getFirst());
+            stringBuilder.append("] ").append(System.lineSeparator());
             for (DataSeriesCollector dataSeriesCollector : dataSeriesCollectorList) {
                 stringBuilder.append(dataSeriesCollector.getDataTitle());
-                stringBuilder.append(" X: [");
-                stringBuilder.append(dataSeriesCollector.getLatest().getFirst());
-                stringBuilder.append("] ");
-                stringBuilder.append("Y: [");
+                stringBuilder.append(" [");
                 stringBuilder.append(dataSeriesCollector.getLatest().getSecond());
                 stringBuilder.append("]");
                 stringBuilder.append(System.lineSeparator());
