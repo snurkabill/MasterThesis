@@ -5,6 +5,7 @@ import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
@@ -56,6 +57,7 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
     private final int batchedEvaluationSize;
+    private final NoiseStrategy noiseStrategy;
 
     public PaperAlgorithmConfig(double cpuctParameter,
                                 TreeUpdateConditionFactory treeUpdateConditionFactory,
@@ -81,7 +83,10 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
                                 ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
                                 FlowOptimizerType flowOptimizerType,
                                 SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                                SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow, int batchedEvaluationSize, String creatingScript) {
+                                SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
+                                int batchedEvaluationSize,
+                                String creatingScript,
+                                NoiseStrategy noiseStrategy) {
 
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
@@ -110,6 +115,7 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
         this.batchedEvaluationSize = batchedEvaluationSize;
         this.creatingScript = creatingScript;
+        this.noiseStrategy = noiseStrategy;
     }
 
     public double getCpuctParameter() {
@@ -220,6 +226,10 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         return creatingScript;
     }
 
+    public NoiseStrategy getNoiseStrategy() {
+        return noiseStrategy;
+    }
+
     //    @Override
 //    public String toString() {
 //        return "AlgorithmConfig{" +
@@ -279,7 +289,8 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
             "flowOptimizerType," + flowOptimizerType + System.lineSeparator() +
             "subTreeRiskCalculatorTypeForKnownFlow," + subTreeRiskCalculatorTypeForKnownFlow + System.lineSeparator() +
             "subTreeRiskCalculatorTypeForUnknownFlow," + subTreeRiskCalculatorTypeForUnknownFlow + System.lineSeparator() +
-            "batchedEvaluationSize," + batchedEvaluationSize + System.lineSeparator();
+            "batchedEvaluationSize," + batchedEvaluationSize + System.lineSeparator() +
+            "noiseStrategy, " + noiseStrategy + System.lineSeparator();
     }
 
     @Override
