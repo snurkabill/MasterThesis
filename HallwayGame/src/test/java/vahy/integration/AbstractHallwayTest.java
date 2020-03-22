@@ -20,7 +20,7 @@ import java.nio.file.Path;
 
 public abstract class AbstractHallwayTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(AbstractHallwayTest.class.getName());
+;    protected static final Logger logger = LoggerFactory.getLogger(AbstractHallwayTest.class.getName());
 
     public static final double TOLERANCE = Math.pow(10, -15);
 
@@ -51,6 +51,7 @@ public abstract class AbstractHallwayTest {
         double riskHitRatio = stats.getRiskHitRatio();
 
         logger.info("Avg reward: [{}], avg risk ratio: [{}]", totalPayoffAverage, riskHitRatio);
+        logger.info("Expected avg reward: [{}], expected avg risk ratio: [{}]", minExpectedReward, maxRiskHitRatio);
         Assert.assertTrue(totalPayoffAverage >= minExpectedReward, "Avg reward is: [" + totalPayoffAverage + "] but expected at least: [" + minExpectedReward + "]");
         Assert.assertTrue(riskHitRatio <= maxRiskHitRatio, "Risk hit ratio is: [" + riskHitRatio + "] but expected at most: [" + maxRiskHitRatio + "]");
     }
