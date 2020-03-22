@@ -1,6 +1,7 @@
 .idea/
 *.iml
 */target/*
+.data/
 
 ### Java template
 # Compiled class file
@@ -23,3 +24,4 @@ hs_err_pid*
 
 
 Results/
+PythonScripts/generated_models/
