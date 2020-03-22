@@ -1,4 +1,4 @@
-package vahy;
+package vahy.thirdpartyprototype;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
