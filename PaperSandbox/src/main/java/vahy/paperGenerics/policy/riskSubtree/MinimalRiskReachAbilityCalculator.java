@@ -8,6 +8,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
 public class MinimalRiskReachAbilityCalculator<
     TAction extends Action<TAction>,
@@ -26,7 +27,7 @@ public class MinimalRiskReachAbilityCalculator<
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
         }
 
-        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false) {
+        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
                 if(node.getWrappedState().isRiskHit()) {
@@ -38,7 +39,7 @@ public class MinimalRiskReachAbilityCalculator<
 
             @Override
             protected void finalizeHardConstraints() {
-                // this is is
+                // this is it
             }
         };
         var isFeasible = linProgram.optimizeFlow(subtreeRoot);

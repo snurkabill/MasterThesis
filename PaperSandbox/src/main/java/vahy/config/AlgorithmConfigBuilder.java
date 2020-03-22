@@ -3,6 +3,7 @@ package vahy.config;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
@@ -52,6 +53,7 @@ public class AlgorithmConfigBuilder {
     private SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
 
     private int batchedEvaluationSize;
+    private NoiseStrategy noiseStrategy = NoiseStrategy.NOISY_03_04;
 
     private String creatingScriptName;
 
@@ -176,6 +178,11 @@ public class AlgorithmConfigBuilder {
         return this;
     }
 
+    public AlgorithmConfigBuilder setNoiseStrategy(NoiseStrategy noiseStrategy) {
+        this.noiseStrategy = noiseStrategy;
+        return this;
+    }
+
     public PaperAlgorithmConfig buildAlgorithmConfig() {
         return new PaperAlgorithmConfig(
             cpuctParameter,
@@ -204,7 +211,8 @@ public class AlgorithmConfigBuilder {
             subTreeRiskCalculatorTypeForKnownFlow,
             subTreeRiskCalculatorTypeForUnknownFlow,
             batchedEvaluationSize,
-            creatingScriptName);
+            creatingScriptName,
+            noiseStrategy);
     }
 
 }

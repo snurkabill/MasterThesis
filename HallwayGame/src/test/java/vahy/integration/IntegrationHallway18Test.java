@@ -14,6 +14,7 @@ import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
@@ -29,15 +30,14 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     public Object[][] experimentSettings() {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.105}
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1300.0, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1295.0, 0.105}
         };
     }
 
     private SystemConfig getSystemConfig() {
         return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false, null);
     }
-
 
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
@@ -66,7 +66,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .batchEpisodeCount(batchSize)
             .stageCount(200)
 
-            .maximalStepCountBound(1000)
+            .maximalStepCountBound(500)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
@@ -75,6 +75,35 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(() -> 1.00)
+            .explorationConstantSupplier(() -> 1.0)
+            .temperatureSupplier(new Supplier<>() {
+                @Override
+                public Double get() {
+                    callCount++;
+                    var value = Math.exp(-callCount / 10000.0);
+                    if(callCount % batchSize == 0) {
+                        logger.info("Temperature [" + value + "]");
+                    }
+                    return value;
+                }
+                private int callCount = 0;
+            })
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT_WITH_TEMPERATURE)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setNoiseStrategy(NoiseStrategy.NOISY_03_04);
+    }
+
+
+    public static PaperAlgorithmConfig createExperiment_SAFE() {
+        return genericAlgoConfig()
+            .riskSupplier(() -> 0.0)
+            .globalRiskAllowed(0.0)
+            .stageCount(5)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -84,28 +113,13 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
                 }
             })
             .temperatureSupplier(new Supplier<>() {
+                private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
                     return Math.exp(-callCount / 200000.0) * 10;
                 }
-                private int callCount = 0;
             })
-            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
-            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
-            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
-            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
-    }
-
-
-    public static PaperAlgorithmConfig createExperiment_SAFE() {
-        return genericAlgoConfig()
-            .riskSupplier(() -> 0.0)
-            .globalRiskAllowed(0.0)
-            .stageCount(50)
             .buildAlgorithmConfig();
     }
 
@@ -113,7 +127,16 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
-            .stageCount(100)
+            .stageCount(300)
+            .explorationConstantSupplier(() -> 1.0)
+            .temperatureSupplier(new Supplier<>() {
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0);
+                }
+                private int callCount = 0;
+            })
             .buildAlgorithmConfig();
     }
 
@@ -122,6 +145,31 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
             .stageCount(100)
+//            .explorationConstantSupplier(new Supplier<>() {
+//                private int callCount = 0;
+//                @Override
+//                public Double get() {
+//                    callCount++;
+//                    return Math.exp(-callCount / 100000.0) / 5;
+//                }
+//            })
+//            .temperatureSupplier(new Supplier<>() {
+//                private int callCount = 0;
+//                @Override
+//                public Double get() {
+//                    callCount++;
+//                    return Math.exp(-callCount / 200000.0) * 10;
+//                }
+//            })
+            .explorationConstantSupplier(() -> 1.0)
+            .temperatureSupplier(new Supplier<>() {
+                @Override
+                public Double get() {
+                    callCount++;
+                    return Math.exp(-callCount / 10000.0);
+                }
+                private int callCount = 0;
+            })
             .buildAlgorithmConfig();
     }
 }

@@ -14,6 +14,7 @@ import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
@@ -30,7 +31,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  278.0, 0.010},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 275.000, 0.050}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 280.000, 0.050}
         };
     }
 
@@ -88,7 +89,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 1000.0);
+                    return Math.exp(-callCount / 10000.0);
                 }
             })
 
@@ -98,7 +99,8 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY);
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setNoiseStrategy(NoiseStrategy.NOISY_03_04);
     }
 
 
@@ -106,13 +108,15 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
-            .stageCount(100)
+            .stageCount(20)
             .buildAlgorithmConfig();
     }
 
     public static PaperAlgorithmConfig createExperiment_TOTAL_RISK() {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
+            .globalRiskAllowed(1.0)
+            .stageCount(100)
             .temperatureSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -127,8 +131,6 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
                     return 1.0;
                 }
             })
-            .globalRiskAllowed(1.0)
-            .stageCount(1000)
             .buildAlgorithmConfig();
     }
 
@@ -136,7 +138,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
-//            .stageCount(200)
+            .stageCount(100)
             .buildAlgorithmConfig();
     }
 }

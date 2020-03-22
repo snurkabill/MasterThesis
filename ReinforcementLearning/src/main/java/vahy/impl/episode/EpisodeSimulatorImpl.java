@@ -79,8 +79,8 @@ public class EpisodeSimulatorImpl<
                     episodeHistoryList.add(step);
                     state = step.getToState();
                 }
-                if(logger.isDebugEnabled()) {
-                    logger.debug("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
+                if(logger.isTraceEnabled()) {
+                    logger.trace("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
                 }
             }
             long end = System.currentTimeMillis();

@@ -95,7 +95,6 @@ public class PaperPolicySupplier<
             actionClass,
             treeUpdateConditionFactory.create(),
             new RiskAverseSearchTree<>(
-                actionClass,
                 node,
                 nodeSelectorSupplier.get(),
                 treeUpdater,
@@ -114,7 +113,6 @@ public class PaperPolicySupplier<
             actionClass,
             treeUpdateConditionFactory.create(),
             new RiskAverseSearchTree<>(
-                actionClass,
                 node,
                 nodeSelectorSupplier.get(),
                 treeUpdater,

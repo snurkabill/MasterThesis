@@ -54,6 +54,7 @@
                         <executable>java</executable>
                         <arguments>
                             <argument>-XX:+UseParallelGC</argument>
+                            <argument>-server</argument>
                             <argument>-classpath</argument>
                             <classpath />
                         </arguments>

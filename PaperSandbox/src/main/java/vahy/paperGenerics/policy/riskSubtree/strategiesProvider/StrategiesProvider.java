@@ -4,13 +4,14 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizer;
+import vahy.paperGenerics.policy.flowOptimizer.AbstractFlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.flowOptimizer.HardFlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.HardHardFlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.HardHardSoftFlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.HardSoftFlowOptimizer;
 import vahy.paperGenerics.policy.flowOptimizer.SoftFlowOptimizer;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.FlowSumSubtreeRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.MinimalRiskReachAbilityCalculator;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
@@ -26,6 +27,7 @@ import vahy.paperGenerics.policy.riskSubtree.playingDistribution.UcbValueDistrib
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.UcbVisitDistributionProvider;
 import vahy.utils.EnumUtils;
 
+import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class StrategiesProvider<
@@ -42,6 +44,7 @@ public class StrategiesProvider<
     private final FlowOptimizerType flowOptimizerType;
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
+    private final NoiseStrategy noiseStrategy;
 
     public StrategiesProvider(InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
                               InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
@@ -49,7 +52,8 @@ public class StrategiesProvider<
                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
                               FlowOptimizerType flowOptimizerType,
                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                              SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow) {
+                              SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
+                              NoiseStrategy noiseStrategy) {
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
@@ -57,6 +61,7 @@ public class StrategiesProvider<
         this.flowOptimizerType = flowOptimizerType;
         this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
+        this.noiseStrategy = noiseStrategy;
     }
 
     public PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy() {
@@ -109,18 +114,18 @@ public class StrategiesProvider<
         }
     }
 
-    public FlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer() {
+    public AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer(SplittableRandom random) {
         switch (flowOptimizerType) {
             case HARD:
-                return new HardFlowOptimizer<>();
+                return new HardFlowOptimizer<>(random, noiseStrategy);
             case SOFT:
-                return new SoftFlowOptimizer<>();
+                return new SoftFlowOptimizer<>(random, noiseStrategy);
             case HARD_SOFT:
-                return new HardSoftFlowOptimizer<>();
+                return new HardSoftFlowOptimizer<>(random, noiseStrategy);
             case HARD_HARD:
-                return new HardHardFlowOptimizer<>();
+                return new HardHardFlowOptimizer<>(random, noiseStrategy);
             case HARD_HARD_SOFT:
-                return new HardHardSoftFlowOptimizer<>();
+                return new HardHardSoftFlowOptimizer<>(random, noiseStrategy);
             default:
                 throw EnumUtils.createExceptionForNotExpectedEnumValue(flowOptimizerType);
         }

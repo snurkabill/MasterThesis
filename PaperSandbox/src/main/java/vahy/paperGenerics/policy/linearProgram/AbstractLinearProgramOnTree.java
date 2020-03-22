@@ -8,12 +8,13 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTree<
     TAction extends Action<TAction>,
@@ -35,11 +36,19 @@ public abstract class AbstractLinearProgramOnTree<
     protected CLP model;
     protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
     private boolean maximize;
+    protected final SplittableRandom random;
+    protected final NoiseStrategy strategy;
+    protected final double noiseUpperBound;
+    protected final double noiseLowerBound;
 
-    protected AbstractLinearProgramOnTree(boolean maximize) {
+    protected AbstractLinearProgramOnTree(boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
         this.model = new CLP();
         this.queue = new LinkedList<>();
         this.maximize = maximize;
+        this.random = random;
+        this.strategy = strategy;
+        this.noiseLowerBound = strategy.getLowerBound();
+        this.noiseUpperBound = strategy.getUpperBound();
     }
 
     protected abstract void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
@@ -75,7 +84,9 @@ public abstract class AbstractLinearProgramOnTree<
         finalizeHardConstraints();
 
         long finishBuildingLinearProgram = System.currentTimeMillis();
-        logger.debug("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
+        if(logger.isTraceEnabled()) {
+            logger.trace("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
+        }
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
         if(status != CLP.STATUS.OPTIMAL) {
@@ -89,9 +100,10 @@ public abstract class AbstractLinearProgramOnTree<
         if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1");
         }
-
         long finishOptimization = System.currentTimeMillis();
-        logger.debug("Optimizing linear program took [{}] ms", finishOptimization - startOptimization);
+        if(logger.isTraceEnabled()) {
+            logger.trace("Optimizing linear program took [{}] ms", finishOptimization - startOptimization);
+        }
         return true;
     }
 

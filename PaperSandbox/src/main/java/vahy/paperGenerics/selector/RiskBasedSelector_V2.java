@@ -24,17 +24,17 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 
 @Experimental
-public class RiskBasedSelectorVahy<
+public class RiskBasedSelector_V2<
     TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends PaperNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
-    private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector.class.getName());
+    private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector_V1.class.getName());
 
     @Experimental
-    public RiskBasedSelectorVahy(double cpuctParameter, SplittableRandom random) {
+    public RiskBasedSelector_V2(double cpuctParameter, SplittableRandom random) {
         super(cpuctParameter, random);
     }
 

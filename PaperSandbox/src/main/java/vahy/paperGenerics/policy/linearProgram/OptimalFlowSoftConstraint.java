@@ -9,6 +9,8 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
+import java.util.SplittableRandom;
+
 public class OptimalFlowSoftConstraint<
     TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
@@ -24,8 +26,8 @@ public class OptimalFlowSoftConstraint<
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
 
-    public OptimalFlowSoftConstraint(double totalRiskAllowed) {
-        super(true);
+    public OptimalFlowSoftConstraint(double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
+        super(true, random, strategy);
         this.totalRiskExpression = model.createExpression();
         this.totalRiskAllowed = totalRiskAllowed;
     }
@@ -41,6 +43,12 @@ public class OptimalFlowSoftConstraint<
         double expectedReward = node.getSearchNodeMetadata().getExpectedReward();
         double predictedRisk = node.getSearchNodeMetadata().getPredictedRisk();
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
+
+        if(strategy != NoiseStrategy.NONE) {
+            var value = random.nextDouble(noiseLowerBound, noiseUpperBound);
+            leafCoefficient = leafCoefficient + (random.nextBoolean() ? value : -value);
+        }
+
         model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);
     }
 

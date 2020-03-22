@@ -12,16 +12,15 @@ import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
 import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.policy.flowOptimizer.AbstractFlowOptimizer;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
+import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionProvider;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 import vahy.utils.EnumUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 
 public class RiskAverseSearchTree<
     TAction extends Action<TAction>,
@@ -45,15 +44,18 @@ public class RiskAverseSearchTree<
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
 
-    private final List<TAction> playerActions;
-
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playingDistribution;
 
-    private final StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategiesProvider;
     private final RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
 
-    public RiskAverseSearchTree(Class<TAction> clazz,
-                                SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
+    private final PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferenceExistingFlowDistribution;
+    private final PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferenceNonExistingFlowDistribution;
+    private final PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationExistingFlowDistribution;
+    private final PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationNonExistingFlowDistribution;
+    private final AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> flowOptimizer;
+
+
+    public RiskAverseSearchTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root,
                                 RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeEvaluator,
@@ -61,36 +63,39 @@ public class RiskAverseSearchTree<
                                 double totalRiskAllowed,
                                 StrategiesProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> strategyProvider) {
         super(root, nodeSelector, treeUpdater, nodeEvaluator);
-        TAction[] allActions = clazz.getEnumConstants();
-        this.playerActions = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new));
         this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
-        this.strategiesProvider = strategyProvider;
         this.nodeSelector = nodeSelector;
+
+        this.inferenceExistingFlowDistribution = strategyProvider.provideInferenceExistingFlowStrategy();
+        this.inferenceNonExistingFlowDistribution = strategyProvider.provideInferenceNonExistingFlowStrategy();
+        this.explorationExistingFlowDistribution = strategyProvider.provideExplorationExistingFlowStrategy();
+        this.explorationNonExistingFlowDistribution = strategyProvider.provideExplorationNonExistingFlowStrategy();
+        this.flowOptimizer = strategyProvider.provideFlowOptimizer(random);
     }
 
-    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch(TState state) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> inferencePolicyBranch() {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideInferenceExistingFlowStrategy().createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
+            return inferenceExistingFlowDistribution.createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
         } else {
-            return strategiesProvider.provideInferenceNonExistingFlowStrategy().createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
+            return inferenceNonExistingFlowDistribution.createDistribution(getRoot(), INVALID_TEMPERATURE_VALUE, random, totalRiskAllowed);
         }
     }
 
-    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch(TState state, double temperature) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> explorationPolicyBranch( double temperature) {
         if(tryOptimizeFlow()) {
-            return strategiesProvider.provideExplorationExistingFlowStrategy().createDistribution(getRoot(), temperature, random, totalRiskAllowed);
+            return explorationExistingFlowDistribution.createDistribution(getRoot(), temperature, random, totalRiskAllowed);
         } else {
-            return strategiesProvider.provideExplorationNonExistingFlowStrategy().createDistribution(getRoot(), temperature, random, totalRiskAllowed);
+            return explorationNonExistingFlowDistribution.createDistribution(getRoot(), temperature, random, totalRiskAllowed);
         }
     }
 
-    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(TState state, PolicyStepMode policyStepMode, double temperature) {
+    private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createActionWithDistribution(PolicyStepMode policyStepMode, double temperature) {
         switch (policyStepMode) {
             case EXPLOITATION:
-                return inferencePolicyBranch(state);
+                return inferencePolicyBranch();
             case EXPLORATION:
-                return explorationPolicyBranch(state, temperature);
+                return explorationPolicyBranch(temperature);
             default: throw EnumUtils.createExceptionForUnknownEnumValue(policyStepMode);
         }
     }
@@ -100,23 +105,12 @@ public class RiskAverseSearchTree<
             throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
         }
         try {
-            this.playingDistribution = createActionWithDistribution(state, policyStepMode, temperature);
+            this.playingDistribution = createActionWithDistribution(policyStepMode, temperature);
         return playingDistribution;
         } catch(Exception e) {
             dumpTreeWithFlow();
             throw e;
         }
-    }
-
-    private void dumpTreeWithFlow() {
-        if(this.latestTreeWithPlayerOnTurn != null) {
-            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
-        }
-        this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
-    }
-
-    private void dumpTree() {
-        this.printTreeToFile(this.getRoot(), "TreeDump_FULL", 1000);
     }
 
     public boolean isFlowOptimized() {
@@ -137,7 +131,7 @@ public class RiskAverseSearchTree<
             return false;
         }
         if(!isFlowOptimized) {
-            var result = strategiesProvider.provideFlowOptimizer().optimizeFlow(getRoot(), totalRiskAllowed);
+            var result = flowOptimizer.optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
             if(!result.getSecond()) {
                 logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + getRoot().getWrappedState().readableStringRepresentation() + "] with allowed risk: [" + totalRiskAllowed + "]");
@@ -149,18 +143,6 @@ public class RiskAverseSearchTree<
             return true;
         }
         return true;
-    }
-
-    @Override
-    public boolean updateTree() {
-        isFlowOptimized = false;
-        try {
-            this.nodeSelector.setAllowedRiskInRoot(this.totalRiskAllowed);
-            return super.updateTree();
-        } catch(Exception e) {
-            dumpTree();
-            throw e;
-        }
     }
 
     private double roundRiskIfBelowZero(double risk, String riskName) {
@@ -176,6 +158,18 @@ public class RiskAverseSearchTree<
             return 0.0;
         } else {
             return risk;
+        }
+    }
+
+    @Override
+    public boolean updateTree() {
+        isFlowOptimized = false;
+        try {
+            this.nodeSelector.setAllowedRiskInRoot(this.totalRiskAllowed);
+            return super.updateTree();
+        } catch(Exception e) {
+            dumpTree();
+            throw e;
         }
     }
 
@@ -223,7 +217,7 @@ public class RiskAverseSearchTree<
                 if(logger.isDebugEnabled()) {
                     logger.debug("Playing action: [{}] from actions: [{}]) with distribution: [{}] with minimalRiskReachAbility: [{}]. Risk of other player actions: [{}]. Risk of other Opponent actions: [{}], dividing probability: [{}], old risk: [{}], new risk: [{}]",
                         playingDistribution.getExpectedPlayerAction(),
-                        playerActions.stream().map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
+                        Arrays.stream(action.getAllPlayerActions()).map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
                         Arrays.toString(playerActionDistribution),
                         Arrays.toString(riskEstimatedVector),
                         riskOfOtherPlayerActions,
@@ -249,6 +243,18 @@ public class RiskAverseSearchTree<
             throw e;
         }
     }
+
+    private void dumpTreeWithFlow() {
+        if(this.latestTreeWithPlayerOnTurn != null) {
+            this.printTreeToFileWithFlowNodesOnly(this.latestTreeWithPlayerOnTurn, "TreeDump_player");
+        }
+        this.printTreeToFileWithFlowNodesOnly(this.getRoot(), "TreeDump_latest");
+    }
+
+    private void dumpTree() {
+        this.printTreeToFile(this.getRoot(), "TreeDump_FULL", 1000);
+    }
+
 
     private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
         printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow() == null || a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);

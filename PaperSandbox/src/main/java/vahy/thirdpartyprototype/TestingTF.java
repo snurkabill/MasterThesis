@@ -1,4 +1,4 @@
-package vahy;
+package vahy.thirdpartyprototype;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
