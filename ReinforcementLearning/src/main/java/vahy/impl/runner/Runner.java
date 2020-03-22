@@ -78,7 +78,7 @@ public class Runner<TConfig extends ProblemConfig,
             trainer);
 
         var durationWithStatistics = trainingCycle.startTraining();
-        logger.info("Training of [{}] policy took: [{}] ms", runnerArguments.getPolicyId(), durationWithStatistics);
+        logger.info("Training of [{}] policy took: [{}] ms", runnerArguments.getPolicyId(), durationWithStatistics.getFirst().toMillis());
         return durationWithStatistics;
     }
 
