@@ -9,7 +9,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import java.util.ArrayList;
 import java.util.SplittableRandom;
 
-public class RiskBasedSelectorVahy2<
+public class RiskBasedSelector_V3<
     TAction extends Action<TAction>,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -20,7 +20,7 @@ public class RiskBasedSelectorVahy2<
     private final int playerTotalActionCount;
     private final double[] values;
 
-    public RiskBasedSelectorVahy2(double cpuctParameter, SplittableRandom random, int playerTotalActionCount) {
+    public RiskBasedSelector_V3(double cpuctParameter, SplittableRandom random, int playerTotalActionCount) {
         super(random);
         this.cpuctParameter = cpuctParameter;
         this.playerTotalActionCount = playerTotalActionCount;
@@ -36,13 +36,11 @@ public class RiskBasedSelectorVahy2<
         for (var entry : childNodeMap.values()) {
             var metadata = entry.getSearchNodeMetadata();
             double reward = metadata.getExpectedReward() + metadata.getGainedReward();
-            double risk = metadata.getPredictedRisk();
-            double value = reward * (1 - risk * currentRiskWeight);
-            if(max < value) {
-                max = value;
+            if(max < reward) {
+                max = reward;
             }
-            if(min > value) {
-                min = value;
+            if(min > reward) {
+                min = reward;
             }
         }
 
@@ -56,9 +54,9 @@ public class RiskBasedSelectorVahy2<
         for (int i = 0; i < possibleActions.length; i++) {
             var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
             var reward = metadata.getExpectedReward() + metadata.getGainedReward();
+            var normalizedReward = (max == min ? 0.5 : ((reward - min) / (max - min)));
             var risk = metadata.getPredictedRisk();
-            var value = reward * (1 - risk * currentRiskWeight);
-            var vValue = (max == min ? 0.5 : ((value - min) / (max - min)));
+            var vValue = normalizedReward * (1 - risk * currentRiskWeight);
             var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
             var quValue = vValue + uValue;
             if(quValue > maxValue) {
@@ -85,7 +83,6 @@ public class RiskBasedSelectorVahy2<
     public SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> selectNextNode() {
         checkRoot();
         var node = root;
-        var risk = this.allowedRiskInRoot;
         while(!node.isLeaf()) {
             var action = node.isPlayerTurn() ? getBestAction(node, allowedRiskInRoot) : sampleOpponentAction(node);
             node = node.getChildNodeMap().get(action);

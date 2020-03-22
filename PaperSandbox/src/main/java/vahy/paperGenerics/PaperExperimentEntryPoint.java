@@ -39,9 +39,9 @@ import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModelImproved;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.selector.RiskAverseNodeSelector;
-import vahy.paperGenerics.selector.RiskBasedSelector;
-import vahy.paperGenerics.selector.RiskBasedSelectorVahy;
-import vahy.paperGenerics.selector.RiskBasedSelectorVahy2;
+import vahy.paperGenerics.selector.RiskBasedSelector_V1;
+import vahy.paperGenerics.selector.RiskBasedSelector_V2;
+import vahy.paperGenerics.selector.RiskBasedSelector_V3;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.MathStreamUtils;
@@ -85,7 +85,8 @@ public class PaperExperimentEntryPoint {
             algorithmConfig.getExplorationNonExistingFlowStrategy(),
             algorithmConfig.getFlowOptimizerType(),
             algorithmConfig.getSubTreeRiskCalculatorTypeForKnownFlow(),
-            algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow());
+            algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow(),
+            algorithmConfig.getNoiseStrategy());
 
         var opponentPolicySupplier = (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>)ReflectionHacks.createTypeInstance(environmentPolicySupplier, new Class[] {SplittableRandom.class}, new Object[] {masterRandom});
 
@@ -127,9 +128,6 @@ public class PaperExperimentEntryPoint {
                     algorithmConfig.getTemperatureSupplier(),
                     algorithmConfig.getRiskSupplier()
                 );
-
-
-//                PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = opponentInitializerFactory.apply(masterRandom);
 
                 return experiment.run(
                     policySupplier,
@@ -258,14 +256,14 @@ public class PaperExperimentEntryPoint {
         switch (selectorType) {
             case UCB:
                 return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split());
-            case RISK_AVERSE_UCB:
-                return () -> new RiskBasedSelectorVahy2<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
-            case VAHY_1:
+            case RISK_AVERSE_UCB_V3:
+                return () -> new RiskBasedSelector_V3<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
+            case RISK_AVERSE_UCB_V2_EXPERIMENTAL:
 //                logger.warn("Node selector: [" + RiskBasedSelectorVahy.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelectorVahy<>(cpuctParameter, masterRandom.split());
-            case LINEAR_HARD_VS_UCB:
+                return () -> new RiskBasedSelector_V2<>(cpuctParameter, masterRandom.split());
+            case RISK_AVERSE_UCB_V1_EXPERIMENTAL:
 //                logger.warn("Node selector: [" + RiskBasedSelector.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelector<>(cpuctParameter, masterRandom.split(), totalRiskAllowed);
+                return () -> new RiskBasedSelector_V1<>(cpuctParameter, masterRandom.split(), totalRiskAllowed);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
         }
