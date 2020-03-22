@@ -58,8 +58,6 @@ public class Benchmark07Solution extends  DefaultLocalBenchmark {
 
             .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-
-//            .approximatorType(ApproximatorType.HASHMAP)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .evaluatorType(EvaluatorType.RALF)
             .learningRate(0.01)
