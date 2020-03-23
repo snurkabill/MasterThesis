@@ -44,7 +44,7 @@ public class ForExperimenting {
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
             HallwayPolicySupplier.class,
-            List.of(algorithmConfig),
+            List.of(algorithmConfig, algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -94,16 +94,16 @@ public class ForExperimenting {
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(200)
+            .stageCount(50)
 
-            .evaluatorType(EvaluatorType.RALF_BATCHED)
+            .evaluatorType(EvaluatorType.RALF)
             .setBatchedEvaluationSize(2)
-            .trainerAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(batchEpisodeSize * 10)
 
             .learningRate(0.1)
 
-            .approximatorType(ApproximatorType.TF_NN)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {

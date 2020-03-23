@@ -71,7 +71,5 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
             this.setVisible(true);
         }
         this.repaint();
-
     }
-
 }
