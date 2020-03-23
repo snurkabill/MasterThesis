@@ -28,6 +28,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 import vahy.utils.ThirdPartBinaryUtils;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 public class DefaultLocalBenchmark {
@@ -45,7 +46,7 @@ public class DefaultLocalBenchmark {
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
             HallwayPolicySupplier.class,
-            algorithmConfig,
+            Collections.singletonList(algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -68,7 +69,6 @@ public class DefaultLocalBenchmark {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)
@@ -138,6 +138,7 @@ public class DefaultLocalBenchmark {
 
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

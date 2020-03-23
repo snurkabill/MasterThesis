@@ -25,6 +25,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 import vahy.utils.ThirdPartBinaryUtils;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class RandomWalkExample {
@@ -42,7 +43,7 @@ public class RandomWalkExample {
             RandomWalkAction.class,
             RandomWalkInitialInstanceSupplier::new,
             RandomWalkOpponentSupplier.class,
-            algorithmConfig,
+            List.of(algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -70,7 +71,6 @@ public class RandomWalkExample {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .learningRate(0.01)
@@ -142,6 +142,7 @@ public class RandomWalkExample {
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
         return new RandomWalkSetup(
+            500,
             finishlevel,
             startLevel,
             stepPenalty,

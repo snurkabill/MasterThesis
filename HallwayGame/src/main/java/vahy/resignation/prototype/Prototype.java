@@ -25,6 +25,7 @@ import vahy.resignation.environment.agent.policy.environment.HallwayPolicySuppli
 import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class Prototype {
@@ -39,7 +40,7 @@ public class Prototype {
             HallwayActionWithResign.class,
             HallwayGameWithResignationInitialInstanceSupplier::new,
             HallwayPolicySupplierWithResign.class,
-            algorithmConfig,
+            List.of(algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -48,6 +49,7 @@ public class Prototype {
 
     private static GameConfig getGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(10_000)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -84,7 +86,6 @@ public class Prototype {
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(10_000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)

@@ -28,6 +28,7 @@ import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 import vahy.utils.ThirdPartBinaryUtils;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultLocalBenchmark {
@@ -45,7 +46,7 @@ public class DefaultLocalBenchmark {
             HallwayActionWithResign.class,
             HallwayGameWithResignationInitialInstanceSupplier::new,
             HallwayPolicySupplierWithResign.class,
-            algorithmConfig,
+            List.of(algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -69,7 +70,6 @@ public class DefaultLocalBenchmark {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)
@@ -139,6 +139,7 @@ public class DefaultLocalBenchmark {
 
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

@@ -41,6 +41,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
 
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
@@ -65,8 +66,6 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(200)
-
-            .maximalStepCountBound(500)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)

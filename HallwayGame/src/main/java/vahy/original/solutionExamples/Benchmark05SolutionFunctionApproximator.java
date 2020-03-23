@@ -27,6 +27,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 
 import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class Benchmark05SolutionFunctionApproximator {
@@ -43,7 +44,7 @@ public class Benchmark05SolutionFunctionApproximator {
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
             HallwayPolicySupplier.class,
-            algorithmConfig,
+            List.of(algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -53,6 +54,7 @@ public class Benchmark05SolutionFunctionApproximator {
 
     private static GameConfig getGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -93,7 +95,6 @@ public class Benchmark05SolutionFunctionApproximator {
             .batchEpisodeCount(batchEpisodeSize)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(200)
-            .maximalStepCountBound(500)
 
             .evaluatorType(EvaluatorType.RALF_BATCHED)
             .setBatchedEvaluationSize(2)

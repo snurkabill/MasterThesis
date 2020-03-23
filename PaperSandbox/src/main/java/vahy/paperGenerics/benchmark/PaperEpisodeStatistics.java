@@ -6,17 +6,21 @@ public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
 
     private final long riskHitCounter;
     private final double riskHitRatio;
+    private final double riskHitStdev;
 
     public PaperEpisodeStatistics(double averagePlayerStepCount,
                                   double stdevPlayerStepCount,
                                   double averageMillisPerEpisode,
+                                  double stdevMillisPerEpisode,
                                   double totalPayoffAverage,
                                   double totalPayoffStdev,
                                   long riskHitCounter,
-                                  double riskHitRatio) {
-        super(averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
+                                  double riskHitRatio,
+                                  double riskHitStdev) {
+        super(averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
         this.riskHitCounter = riskHitCounter;
         this.riskHitRatio = riskHitRatio;
+        this.riskHitStdev = riskHitStdev;
     }
 
     public long getRiskHitCounter() {
@@ -25,6 +29,10 @@ public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
 
     public double getRiskHitRatio() {
         return riskHitRatio;
+    }
+
+    public double getRiskHitStdev() {
+        return riskHitStdev;
     }
 
     @Override
@@ -40,6 +48,11 @@ public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
 
         sb.append("Risk episodes count: [");
         sb.append(riskHitCounter);
+        sb.append("]");
+        sb.append(System.lineSeparator());
+
+        sb.append("Empirical risk stdev: [");
+        sb.append(riskHitStdev);
         sb.append("]");
         sb.append(System.lineSeparator());
 

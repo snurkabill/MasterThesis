@@ -15,16 +15,17 @@ public class PolicyResults<
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> {
+    TPolicyRecord extends PolicyRecord,
+    TStatistics extends EpisodeStatistics> {
 
     private final BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy;
     private final List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeList;
-    private final EpisodeStatistics episodeStatistics;
+    private final TStatistics episodeStatistics;
     private final Duration benchmarkingDuration;
 
     public PolicyResults(BenchmarkedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy,
                          List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeList,
-                         EpisodeStatistics episodeStatistics,
+                         TStatistics episodeStatistics,
                          Duration benchmarkingDuration) {
         this.policy = policy;
         this.episodeList = episodeList;
@@ -44,7 +45,7 @@ public class PolicyResults<
         return benchmarkingDuration;
     }
 
-    public EpisodeStatistics getEpisodeStatistics() {
+    public TStatistics getEpisodeStatistics() {
         return episodeStatistics;
     }
 

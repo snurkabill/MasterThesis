@@ -41,7 +41,7 @@ public class MarketPrototype2 {
             MarketAction.class,
             InitialMarketStateSupplier::new,
             RealDataMarketPolicySupplier.class,
-            algorithmConfig,
+            List.of(algorithmConfig),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -111,7 +111,7 @@ public class MarketPrototype2 {
 //        MarketDataProvider marketDataProvider = createMarketDataProvider_new(pathToFile);
         MarketDataProvider marketDataProvider = createMarketDataProvider();
         var staticPart = new MarketEnvironmentStaticPart(systemStopLoss, constantSpread, priceRange, tradeSize, commission, marketDataProvider);
-        return new MarketConfig(staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
+        return new MarketConfig(1000, staticPart, lookbackLength, marketDataProvider, allowedCountOfTimestampsAheadOfEndOfData);
     }
 
     private static SystemConfig getSystemConfig() {
@@ -141,7 +141,6 @@ public class MarketPrototype2 {
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)

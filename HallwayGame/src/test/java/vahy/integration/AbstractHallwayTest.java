@@ -16,10 +16,11 @@ import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public abstract class AbstractHallwayTest {
 
-;    protected static final Logger logger = LoggerFactory.getLogger(AbstractHallwayTest.class.getName());
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractHallwayTest.class.getName());
 
     public static final double TOLERANCE = Math.pow(10, -15);
 
@@ -38,7 +39,7 @@ public abstract class AbstractHallwayTest {
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
             HallwayPolicySupplier.class,
-            algorithmConfig,
+            List.of(algorithmConfig),
             systemConfig,
             gameConfig,
             Path.of("../Results")

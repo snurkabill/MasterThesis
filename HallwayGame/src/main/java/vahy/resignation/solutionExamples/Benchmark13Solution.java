@@ -29,6 +29,7 @@ public class Benchmark13Solution extends DefaultLocalBenchmark {
     @Override
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(4)
@@ -55,8 +56,6 @@ public class Benchmark13Solution extends DefaultLocalBenchmark {
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(3000)
-
-            .maximalStepCountBound(500)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)

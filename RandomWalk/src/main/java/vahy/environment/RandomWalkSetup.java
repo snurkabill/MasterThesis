@@ -2,7 +2,7 @@ package vahy.environment;
 
 import vahy.api.experiment.ProblemConfig;
 
-public class RandomWalkSetup implements ProblemConfig {
+public class RandomWalkSetup extends ProblemConfig {
 
     private final int goalLevel;
     private final int startLevel;
@@ -17,7 +17,8 @@ public class RandomWalkSetup implements ProblemConfig {
     private final double upAfterSafeProbability;
     private final double upAfterUnsafeProbability;
 
-    public RandomWalkSetup(int goalLevel,
+    public RandomWalkSetup(int maximalStepCountBound,
+                           int goalLevel,
                            int startLevel,
                            int stepPenalty, int upSafeShift,
                            int downSafeShift,
@@ -25,6 +26,7 @@ public class RandomWalkSetup implements ProblemConfig {
                            int downUnsafeShift,
                            double upAfterSafeProbability,
                            double upAfterUnsafeProbability) {
+        super(maximalStepCountBound);
         this.goalLevel = goalLevel;
         this.startLevel = startLevel;
         this.stepPenalty = stepPenalty;

@@ -25,7 +25,7 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     private final double discountFactor;
     private final int batchEpisodeCount;
     private final int replayBufferSize;
-    private final int maximalStepCountBound;
+
     private final int stageCount;
 
     private final Supplier<Double> explorationConstantSupplier;
@@ -64,7 +64,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
                                 double discountFactor,
                                 int batchEpisodeCount,
                                 int replayBufferSize,
-                                int maximalStepCountBound,
                                 int stageCount,
                                 Supplier<Double> explorationConstantSupplier,
                                 Supplier<Double> temperatureSupplier,
@@ -93,7 +92,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         this.discountFactor = discountFactor;
         this.batchEpisodeCount = batchEpisodeCount;
         this.replayBufferSize = replayBufferSize;
-        this.maximalStepCountBound = maximalStepCountBound;
         this.stageCount = stageCount;
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
@@ -136,10 +134,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
 
     public int getReplayBufferSize() {
         return replayBufferSize;
-    }
-
-    public int getMaximalStepCountBound() {
-        return maximalStepCountBound;
     }
 
     public int getStageCount() {
@@ -269,7 +263,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
             "discountFactor," + discountFactor + System.lineSeparator() +
             "batchEpisodeCount," + batchEpisodeCount + System.lineSeparator() +
             "replayBufferSize," + replayBufferSize + System.lineSeparator() +
-            "maximalStepCountBound," + maximalStepCountBound + System.lineSeparator() +
             "stageCount," + stageCount + System.lineSeparator() +
             "explorationConstantSupplier," + explorationConstantSupplier + System.lineSeparator() +
             "temperatureSupplier," + temperatureSupplier + System.lineSeparator() +

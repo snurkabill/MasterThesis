@@ -56,6 +56,10 @@ public class ProgressTracker {
         }
     }
 
+    public List<DataSeriesCollector> getCollectorList() {
+        return this.dataSeriesCollectorList;
+    }
+
     public void onNextLog() {
         if(!isFinalized) {
             throw new IllegalStateException("Visualization window was not finalized");

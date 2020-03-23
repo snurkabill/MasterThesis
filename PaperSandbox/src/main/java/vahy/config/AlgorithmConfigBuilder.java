@@ -24,7 +24,6 @@ public class AlgorithmConfigBuilder {
     private double discountFactor;
     private int batchEpisodeCount;
     private int replayBufferSize;
-    private int maximalStepCountBound;
     private int stageCount;
 
     private Supplier<Double> explorationConstantSupplier;
@@ -73,10 +72,6 @@ public class AlgorithmConfigBuilder {
 
     public AlgorithmConfigBuilder replayBufferSize(int replayBufferSize) {
         this.replayBufferSize = replayBufferSize; return this;
-    }
-
-    public AlgorithmConfigBuilder maximalStepCountBound(int maximalStepCountBound) {
-        this.maximalStepCountBound = maximalStepCountBound; return this;
     }
 
     public AlgorithmConfigBuilder stageCount(int stageCount) {
@@ -190,7 +185,6 @@ public class AlgorithmConfigBuilder {
             discountFactor,
             batchEpisodeCount,
             replayBufferSize,
-            maximalStepCountBound,
             stageCount,
             explorationConstantSupplier,
             temperatureSupplier,
