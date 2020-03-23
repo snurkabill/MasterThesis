@@ -45,7 +45,7 @@ public abstract class AbstractHallwayTest {
             Path.of("../Results")
         );
 
-        PaperEpisodeStatistics stats = ((PaperEpisodeStatistics) results.get(0).getEpisodeStatistics());
+        PaperEpisodeStatistics stats =  results.getSecond().get(0);
 
         double totalPayoffAverage = stats.getTotalPayoffAverage();
         double riskHitRatio = stats.getRiskHitRatio();
