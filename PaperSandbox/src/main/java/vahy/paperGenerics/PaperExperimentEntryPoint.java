@@ -66,6 +66,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,6 +95,8 @@ public class PaperExperimentEntryPoint {
         TConfig problemConfig,
         Path resultPath) {
 
+        var timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+
         PaperEpisodeResultsFactory<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> episodeResultsFactory = new PaperEpisodeResultsFactory<>();
 
         List<TrainablePredictor> predictorList = new ArrayList<>();
@@ -105,11 +109,15 @@ public class PaperExperimentEntryPoint {
 
         int policyId = 0;
         for (PaperAlgorithmConfig algorithmConfig : algorithmConfigList) {
+
+            var policyName = "PolicyId_" + policyId;
             logger.info("Training policy id: [{}]", policyId);
             final var finalRandomSeed = systemConfig.getRandomSeed();
             final var masterRandom = new SplittableRandom(finalRandomSeed);
 
             logger.info("First random number for policy id: [{}] is [{}]", policyId, masterRandom.nextInt());
+
+            var episodeWriter = new EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>(problemConfig, algorithmConfig, systemConfig, resultPath, timestamp, policyName);
 
             var strategiesProvider = new StrategiesProvider<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(
                 algorithmConfig.getInferenceExistingFlowStrategy(),
@@ -160,7 +168,6 @@ public class PaperExperimentEntryPoint {
                 algorithmConfig.getRiskSupplier()
             );
             var progressTrackerSettings = new ProgressTrackerSettings(true, systemConfig.isDrawWindow(), false, false);
-            var episodeWriter = new EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>(problemConfig, algorithmConfig, systemConfig, resultPath);
             var episodeDataMaker = new PaperEpisodeDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(algorithmConfig.getDiscountFactor());
             var trainerAlgorithm = algorithmConfig.getDataAggregationAlgorithm();
             var gameSampler = new GameSamplerImpl<>(initialStateSupplier, episodeResultsFactory, PolicyMode.TRAINING, systemConfig.getParallelThreadsCount(), policySupplier, opponentPolicySupplier);

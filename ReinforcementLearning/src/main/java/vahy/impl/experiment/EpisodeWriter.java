@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class EpisodeWriter<
@@ -32,20 +30,29 @@ public class EpisodeWriter<
     private final Path rootPath;
     private final Path fullPath;
 
-    public EpisodeWriter(ProblemConfig problemConfig, AlgorithmConfig algorithmConfig, SystemConfig systemConfig, Path path) {
+    public EpisodeWriter(ProblemConfig problemConfig, AlgorithmConfig algorithmConfig, SystemConfig systemConfig, Path path, String timestamp, String policyName) {
         this.rootPath = path;
 
         File resultFolder = this.rootPath.toFile();
         if(!resultFolder.exists()) {
             checkFolderCreated(resultFolder, resultFolder.mkdir());
         }
-        File resultSubfolder = Paths.get(resultFolder.getAbsolutePath(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"))).toFile();
-        checkFolderCreated(resultSubfolder, resultSubfolder.mkdir());
-        this.fullPath = resultSubfolder.toPath();
+        File resultSubFolder = Paths.get(resultFolder.getAbsolutePath(), timestamp).toFile();
+        if(!resultSubFolder.exists()) {
+            checkFolderCreated(resultSubFolder, resultSubFolder.mkdir());
+        }
 
-        printConfig(problemConfig, "ProblemConfig", resultSubfolder);
-        printConfig(algorithmConfig, "AlgorithmConfig", resultSubfolder);
-        printConfig(systemConfig, "SystemConfig", resultSubfolder);
+        var resultToFullPath = Paths.get(resultSubFolder.getAbsolutePath(), policyName).toFile();
+        if(resultToFullPath.exists()) {
+            throw new IllegalStateException("Policies have same name: [" + policyName + "]");
+        }
+        checkFolderCreated(resultToFullPath, resultToFullPath.mkdir());
+
+        this.fullPath = resultToFullPath.toPath();
+
+        printConfig(problemConfig, "ProblemConfig", resultToFullPath);
+        printConfig(algorithmConfig, "AlgorithmConfig", resultToFullPath);
+        printConfig(systemConfig, "SystemConfig", resultToFullPath);
     }
 
     private void printConfig(Config config, String configName, File resultSubfolder) {

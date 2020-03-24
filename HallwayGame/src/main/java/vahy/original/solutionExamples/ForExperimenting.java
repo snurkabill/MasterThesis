@@ -71,8 +71,8 @@ public class ForExperimenting {
             .setDrawWindow(true)
             .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
-            .setDumpTrainingData(false)
-            .setDumpEvaluationData(false)
+            .setDumpTrainingData(true)
+            .setDumpEvaluationData(true)
             .setEvalEpisodeCount(1000)
             .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
