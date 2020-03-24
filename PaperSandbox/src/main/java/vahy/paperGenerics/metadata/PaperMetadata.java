@@ -6,7 +6,7 @@ import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
 import java.util.Map;
 
-public class PaperMetadata<TAction extends Action<TAction>> extends MonteCarloTreeSearchMetadata {
+public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchMetadata {
 
     private final Map<TAction, Double> childPriorProbabilities;
     private CLPVariable nodeProbabilityFlow;

@@ -5,7 +5,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 
 public interface PolicySupplier<
-        TAction extends Action<TAction>,
+        TAction extends Action,
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

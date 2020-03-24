@@ -9,7 +9,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import java.util.SplittableRandom;
 
 public interface PlayingDistributionProvider<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

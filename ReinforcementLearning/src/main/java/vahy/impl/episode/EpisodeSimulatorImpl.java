@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class EpisodeSimulatorImpl<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

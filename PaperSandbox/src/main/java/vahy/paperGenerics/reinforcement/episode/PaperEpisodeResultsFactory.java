@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.List;
 
 public class PaperEpisodeResultsFactory<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,

@@ -5,7 +5,7 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 
 public abstract class AbstractSearchNode<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

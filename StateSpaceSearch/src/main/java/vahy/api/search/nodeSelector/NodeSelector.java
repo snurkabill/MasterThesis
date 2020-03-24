@@ -7,7 +7,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
 
 public interface NodeSelector<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

@@ -11,7 +11,7 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import java.util.LinkedHashMap;
 
 public class AlphaGoNodeMetadataFactory<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

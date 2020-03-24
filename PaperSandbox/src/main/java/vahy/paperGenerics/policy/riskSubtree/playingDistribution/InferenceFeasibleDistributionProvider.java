@@ -15,7 +15,7 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class InferenceFeasibleDistributionProvider<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

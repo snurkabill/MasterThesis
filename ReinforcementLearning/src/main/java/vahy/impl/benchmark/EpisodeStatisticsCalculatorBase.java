@@ -12,7 +12,7 @@ import vahy.utils.MathStreamUtils;
 import java.util.List;
 
 public class EpisodeStatisticsCalculatorBase<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

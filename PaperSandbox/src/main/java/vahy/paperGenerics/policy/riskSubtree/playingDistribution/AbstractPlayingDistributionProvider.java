@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractPlayingDistributionProvider<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

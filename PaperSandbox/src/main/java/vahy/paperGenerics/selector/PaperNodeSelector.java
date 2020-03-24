@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.SplittableRandom;
 
 public class PaperNodeSelector<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

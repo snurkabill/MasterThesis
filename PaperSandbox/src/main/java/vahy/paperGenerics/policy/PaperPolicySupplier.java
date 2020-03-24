@@ -25,7 +25,7 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class PaperPolicySupplier<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class EpisodeWriter<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

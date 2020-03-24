@@ -83,7 +83,7 @@ public class PaperExperimentEntryPoint {
 
     public static <
         TConfig extends ProblemConfig,
-        TAction extends Enum<TAction> & Action<TAction>,
+        TAction extends Enum<TAction> & Action,
         TOpponentObservation extends FixedModelObservation<TAction>,
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     ImmutableTriple<List<List<PaperEpisodeStatistics>>, List<PaperEpisodeStatistics>, List<BenchmarkedPolicy<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>>> createExperimentAndRun(
@@ -130,6 +130,8 @@ public class PaperExperimentEntryPoint {
                 algorithmConfig.getNoiseStrategy());
 
             PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> opponentPolicySupplier = createOpponentSupplier(environmentPolicySupplier, masterRandom);
+
+
 
             ImmutableTuple<TAction[], TAction[]> playerOpponentActions = getPlayerOpponentActions(actionClass);
             var initialStateSupplier = instanceInitializerFactory.apply(problemConfig, masterRandom.split());
@@ -248,7 +250,7 @@ public class PaperExperimentEntryPoint {
         return stats.stream().map(x -> x.stream().map(mapper).collect(Collectors.toList())).collect(Collectors.toList());
     }
 
-    private static <TAction extends Enum<TAction> & Action<TAction>, TOpponentObservation extends FixedModelObservation<TAction>, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
+    private static <TAction extends Enum<TAction> & Action, TOpponentObservation extends FixedModelObservation<TAction>, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> createOpponentSupplier(Class<?> environmentPolicySupplier, SplittableRandom masterRandom) {
         return (PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>) ReflectionHacks.createTypeInstance(
             environmentPolicySupplier,
@@ -257,7 +259,7 @@ public class PaperExperimentEntryPoint {
     }
 
 
-    private static <TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action<TAction>, TOpponentObservation extends FixedModelObservation<TAction>, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
+    private static <TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action, TOpponentObservation extends FixedModelObservation<TAction>, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>
     policyInferenceEvaluation(ProblemConfig problemConfig,
                               SystemConfig systemConfig,
@@ -287,9 +289,13 @@ public class PaperExperimentEntryPoint {
         return policyResultList;
     }
 
-    private static <TAction extends Action<TAction>> ImmutableTuple<TAction[], TAction[]> getPlayerOpponentActions(Class<TAction> actionClass) {
+    private static <TAction extends Action> ImmutableTuple<TAction[], TAction[]> getPlayerOpponentActions(Class<TAction> actionClass) {
         TAction[] values = ReflectionHacks.getEnumValues(actionClass);
-        return new ImmutableTuple<>(values[0].getAllPlayerActions(), values[0].getAllOpponentActions());
+        Object[] ref = Arrays.stream(values).filter(Action::isPlayerAction).toArray();
+        Object[] ref2 = Arrays.stream(values).filter(Action::isOpponentAction).toArray();
+        TAction[] playerActions = Arrays.copyOf(ref, ref.length, ReflectionHacks.arrayClassFromClass(actionClass));
+        TAction[] opponentActions = Arrays.copyOf(ref2, ref2.length, ReflectionHacks.arrayClassFromClass(actionClass));
+        return new ImmutableTuple<>(playerActions, opponentActions);
     }
 
     private static TrainablePredictor initializePredictor(int modelInputSize,
@@ -384,7 +390,7 @@ public class PaperExperimentEntryPoint {
         return Files.readAllBytes(new File(dir, modelName + ".pb").toPath());
     }
 
-    private static <TAction extends Enum<TAction> & Action<TAction>, TOpponentObservation extends Observation, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
+    private static <TAction extends Enum<TAction> & Action, TOpponentObservation extends Observation, TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
         Supplier<RiskAverseNodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>>
     createNodeSelectorSupplier(SplittableRandom masterRandom, PaperAlgorithmConfig algorithmConfig, int playerTotalActionCount)
     {
@@ -408,7 +414,7 @@ public class PaperExperimentEntryPoint {
     }
 
     private static <
-        TAction extends Enum<TAction> & Action<TAction>,
+        TAction extends Enum<TAction> & Action,
         TOpponentObservation extends FixedModelObservation<TAction>,
         TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     NodeEvaluator<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState> resolveEvaluator(

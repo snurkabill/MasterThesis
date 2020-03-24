@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.SplittableRandom;
 
 public class UcbValueDistributionProvider<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

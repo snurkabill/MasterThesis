@@ -19,7 +19,7 @@ import java.time.Duration;
 
 public class PolicyInferenceEvaluator<
     TConfig extends ProblemConfig,
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

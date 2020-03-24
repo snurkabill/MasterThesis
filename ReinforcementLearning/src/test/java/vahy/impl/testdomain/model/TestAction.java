@@ -5,7 +5,7 @@ import vahy.api.model.Action;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public enum TestAction implements Action<TestAction> {
+public enum TestAction implements Action {
 
     A(true, 'A', 1, 0, 0),
     B(true, 'B', 2, 1, 1),
