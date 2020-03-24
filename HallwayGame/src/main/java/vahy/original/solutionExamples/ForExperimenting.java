@@ -44,7 +44,7 @@ public class ForExperimenting {
             HallwayAction.class,
             HallwayGameInitialInstanceSupplier::new,
             HallwayPolicySupplier.class,
-            List.of(algorithmConfig, algorithmConfig),
+            List.of(algorithmConfig, getAlgorithmConfig2()),
             systemConfig,
             problemConfig,
             Path.of("Results")
@@ -93,7 +93,86 @@ public class ForExperimenting {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
+            .stageCount(50)
+
+            .evaluatorType(EvaluatorType.RALF)
+            .setBatchedEvaluationSize(2)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
+            .replayBufferSize(batchEpisodeSize * 10)
+
+            .learningRate(0.1)
+
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .selectorType(SelectorType.UCB)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.00";
+                }
+            })
+            .explorationConstantSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.0;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 0.20";
+                }
+            })
+            .temperatureSupplier(new Supplier<Double>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    var x = Math.exp(-callCount / 10000.0);
+                    if(callCount % batchEpisodeSize == 0) {
+                        logger.info("Temperature: [" + x + "]");
+                    }
+                    return x;
+//                    return 2.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.05";
+                }
+            })
+
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setCreatingScriptName("create_model.py")
+            .buildAlgorithmConfig();
+    }
+
+    private static PaperAlgorithmConfig getAlgorithmConfig2() {
+        var batchEpisodeSize = 50;
+
+        return new AlgorithmConfigBuilder()
+            //MCTS
+            .cpuctParameter(1)
+
+            //.mcRolloutCount(1)
+            //NN
+            .trainingBatchSize(256)
+            .trainingEpochCount(1)
+            // REINFORCEMENT
+            .discountFactor(1)
+            .batchEpisodeCount(batchEpisodeSize)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
             .stageCount(50)
 
             .evaluatorType(EvaluatorType.RALF)
