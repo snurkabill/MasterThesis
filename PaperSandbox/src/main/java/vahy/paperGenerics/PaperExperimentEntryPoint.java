@@ -62,6 +62,12 @@ import java.util.function.Supplier;
 
 public class PaperExperimentEntryPoint {
 
+    /*
+     * THIS CLASS IS UGLY AF AND NEEDS TO BE REFACTORED
+     * TODO: REFACTOR IT ALREADY!
+     *
+     * */
+
     public static <
         TConfig extends ProblemConfig,
         TAction extends Enum<TAction> & Action<TAction>,
@@ -75,6 +81,12 @@ public class PaperExperimentEntryPoint {
         SystemConfig systemConfig,
         TConfig problemConfig,
         Path resultPath) {
+
+        /*
+        * THIS CLASS IS UGLY AF AND NEEDS TO BE REFACTORED
+        * TODO: REFACTOR IT ALREADY2!
+        *
+        * */
 
         var finalRandomSeed = systemConfig.getRandomSeed();
         var masterRandom = new SplittableRandom(finalRandomSeed);
