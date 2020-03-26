@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 
 import java.util.Arrays;
 
-public enum RandomWalkAction implements Action<RandomWalkAction> {
+public enum RandomWalkAction implements Action {
 
     SAFE(true, 0, 0),
     UNSAFE(true, 1, 1),

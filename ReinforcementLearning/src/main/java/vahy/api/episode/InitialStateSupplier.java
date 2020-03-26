@@ -7,7 +7,7 @@ import vahy.api.model.observation.Observation;
 
 public interface InitialStateSupplier<
     TConfig extends ProblemConfig,
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {

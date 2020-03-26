@@ -16,10 +16,12 @@ import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
+import vahy.original.environment.state.EnvironmentProbabilities;
+import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -27,7 +29,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 
-import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class ForExperimenting {
@@ -37,23 +39,25 @@ public class ForExperimenting {
     public static void main(String[] args) {
 
         var algorithmConfig = getAlgorithmConfig();
+        var algorithmConfig2 = getAlgorithmConfig2();
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayAction.class,
-            HallwayGameInitialInstanceSupplier::new,
-            HallwayPolicySupplier.class,
-            algorithmConfig,
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+            .setActionClass(HallwayAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig, algorithmConfig2))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(HallwayPolicySupplier::new)
+            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
-        );
+        var results = paperExperimentBuilder.execute();
+
     }
 
     private static GameConfig getGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -92,18 +96,96 @@ public class ForExperimenting {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(200)
-            .maximalStepCountBound(500)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
+            .stageCount(50)
 
-            .evaluatorType(EvaluatorType.RALF_BATCHED)
+            .evaluatorType(EvaluatorType.RALF)
             .setBatchedEvaluationSize(2)
-            .trainerAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(batchEpisodeSize * 10)
 
             .learningRate(0.1)
 
-            .approximatorType(ApproximatorType.TF_NN)
+            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .selectorType(SelectorType.UCB)
+            .globalRiskAllowed(1.00)
+            .riskSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.00";
+                }
+            })
+            .explorationConstantSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.0;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 0.20";
+                }
+            })
+            .temperatureSupplier(new Supplier<Double>() {
+                private int callCount = 0;
+                @Override
+                public Double get() {
+                    callCount++;
+                    var x = Math.exp(-callCount / 10000.0);
+                    if(callCount % batchEpisodeSize == 0) {
+                        logger.info("Temperature: [" + x + "]");
+                    }
+                    return x;
+//                    return 2.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.05";
+                }
+            })
+
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setCreatingScriptName("create_model.py")
+            .buildAlgorithmConfig();
+    }
+
+    private static PaperAlgorithmConfig getAlgorithmConfig2() {
+        var batchEpisodeSize = 50;
+
+        return new AlgorithmConfigBuilder()
+            //MCTS
+            .cpuctParameter(1)
+
+            //.mcRolloutCount(1)
+            //NN
+            .trainingBatchSize(256)
+            .trainingEpochCount(1)
+            // REINFORCEMENT
+            .discountFactor(1)
+            .batchEpisodeCount(batchEpisodeSize)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(20))
+            .stageCount(50)
+
+            .evaluatorType(EvaluatorType.RALF)
+            .setBatchedEvaluationSize(2)
+            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
+            .replayBufferSize(batchEpisodeSize * 10)
+
+            .learningRate(0.1)
+
+            .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {

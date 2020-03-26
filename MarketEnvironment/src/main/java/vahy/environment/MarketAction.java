@@ -5,7 +5,7 @@ import vahy.api.model.Action;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public enum MarketAction implements Action<MarketAction> {
+public enum MarketAction implements Action {
 
     NO_ACTION(true, 0, 0),
     OPEN_LONG(true, 1, 1),

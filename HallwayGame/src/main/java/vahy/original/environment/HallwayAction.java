@@ -5,7 +5,7 @@ import vahy.api.model.Action;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public enum HallwayAction implements Action<HallwayAction> {
+public enum HallwayAction implements Action {
 
     FORWARD(true, false, 0, 0),
     TURN_RIGHT(true, false, 1, 1),

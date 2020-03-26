@@ -5,7 +5,7 @@ import vahy.api.model.Action;
 import java.util.Arrays;
 import java.util.Comparator;
 
-public enum TicTacToeAction implements Action<TicTacToeAction> {
+public enum TicTacToeAction implements Action {
 
     _0x0(true, true,0, 0, 0, 0),
     _0x1(true, true,0, 1, 1, 1),

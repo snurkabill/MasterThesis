@@ -30,17 +30,18 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     public Object[][] experimentSettings() {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  278.0, 0.010},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  280.0, 0.010},
             {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 280.000, 0.050}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false, null);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -68,7 +69,6 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .stageCount(50)
             .evaluatorType(EvaluatorType.RALF)
 
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .globalRiskAllowed(1.0)
@@ -122,7 +122,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    return Math.exp(-callCount / 5000.0);
                 }
             })
             .explorationConstantSupplier(new Supplier<>() {

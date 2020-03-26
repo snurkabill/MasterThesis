@@ -14,7 +14,7 @@ import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -23,9 +23,11 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.resignation.environment.HallwayActionWithResign;
 import vahy.resignation.environment.agent.policy.environment.HallwayPolicySupplierWithResign;
+import vahy.resignation.environment.state.EnvironmentProbabilities;
+import vahy.resignation.environment.state.HallwayStateWithResign;
 import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 
-import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class ForExperimenting {
@@ -36,15 +38,15 @@ public class ForExperimenting {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayActionWithResign.class,
-            HallwayGameWithResignationInitialInstanceSupplier::new,
-            HallwayPolicySupplierWithResign.class,
-            algorithmConfig,
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
-        );
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayActionWithResign, EnvironmentProbabilities, HallwayStateWithResign>()
+            .setActionClass(HallwayActionWithResign.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(HallwayPolicySupplierWithResign::new)
+            .setProblemInstanceInitializerSupplier(HallwayGameWithResignationInitialInstanceSupplier::new);
+
+        paperExperimentBuilder.execute();
     }
 
     private static PaperAlgorithmConfig createAlgorithmConfig() {
@@ -63,7 +65,6 @@ public class ForExperimenting {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)
@@ -132,6 +133,7 @@ public class ForExperimenting {
 
     private static GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

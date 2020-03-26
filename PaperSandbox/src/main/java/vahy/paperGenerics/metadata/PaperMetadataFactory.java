@@ -11,7 +11,7 @@ import vahy.paperGenerics.PaperState;
 import java.util.LinkedHashMap;
 
 public class PaperMetadataFactory<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>

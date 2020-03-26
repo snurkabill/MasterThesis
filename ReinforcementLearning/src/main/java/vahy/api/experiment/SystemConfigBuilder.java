@@ -2,6 +2,7 @@ package vahy.api.experiment;
 
 import vahy.utils.EnumUtils;
 
+import java.nio.file.Path;
 import java.util.SplittableRandom;
 
 public class SystemConfigBuilder {
@@ -11,17 +12,18 @@ public class SystemConfigBuilder {
     private StochasticStrategy stochasticStrategy = StochasticStrategy.RANDOM;
 
     // THREADING
-    private boolean singleThreadedEvaluation;
-    private int parallelThreadsCount;
+    private boolean singleThreadedEvaluation = false;
+    private int parallelThreadsCount = Runtime.getRuntime().availableProcessors() - 1;
 
     // VISUALIZATION
-    private boolean drawWindow;
+    private boolean drawWindow = false;
 
     // Evaluation
     private int evalEpisodeCount;
 
-    private boolean dumpTrainingData;
-    private boolean dumpEvaluationData;
+    private boolean dumpTrainingData = false;
+    private boolean dumpEvaluationData = false;
+    private Path dumpPath = null;
 
     private String pythonVirtualEnvPath;
 
@@ -65,6 +67,10 @@ public class SystemConfigBuilder {
         this.dumpEvaluationData = dumpEvaluationData;
         return this;
     }
+    public SystemConfigBuilder setDumpPath(Path dumpPath) {
+        this.dumpPath = dumpPath;
+        return this;
+    }
 
     public SystemConfigBuilder setPythonVirtualEnvPath(String pythonVirtualEnvPath) {
         this.pythonVirtualEnvPath = pythonVirtualEnvPath;
@@ -72,7 +78,7 @@ public class SystemConfigBuilder {
     }
 
     public SystemConfig buildSystemConfig() {
-        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, dumpTrainingData, dumpEvaluationData, pythonVirtualEnvPath);
+        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, dumpTrainingData, dumpEvaluationData, dumpPath, pythonVirtualEnvPath);
     }
 
     private long resolveRandomSeed() {

@@ -12,7 +12,7 @@ import java.util.Comparator;
 import java.util.SplittableRandom;
 
 public class EGreedyNodeSelector<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

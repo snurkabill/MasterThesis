@@ -4,13 +4,18 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketEnvironmentStaticPart;
 
-public class MarketConfig implements ProblemConfig {
+public class MarketConfig extends ProblemConfig {
 
     private final MarketEnvironmentStaticPart marketEnvironmentStaticPart;
     private final int lookbackLength;
     private final int allowedCountOfTimestampsAheadOfEndOfData;
 
-    public MarketConfig(MarketEnvironmentStaticPart marketEnvironmentStaticPart, int lookbackLength, MarketDataProvider marketDataProvider, int allowedCountOfTimestampsAheadOfEndOfData) {
+    public MarketConfig(int maximalStepCountBound,
+                        MarketEnvironmentStaticPart marketEnvironmentStaticPart,
+                        int lookbackLength,
+                        MarketDataProvider marketDataProvider,
+                        int allowedCountOfTimestampsAheadOfEndOfData) {
+        super(maximalStepCountBound);
         this.marketEnvironmentStaticPart = marketEnvironmentStaticPart;
         this.lookbackLength = lookbackLength;
         this.allowedCountOfTimestampsAheadOfEndOfData = allowedCountOfTimestampsAheadOfEndOfData;

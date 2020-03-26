@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.SplittableRandom;
 
 public abstract class AbstractRiskAverseTreeBasedNodeSelector<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

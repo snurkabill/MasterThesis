@@ -13,8 +13,6 @@ public interface AlgorithmConfig extends Config {
 
     int getReplayBufferSize();
 
-    int getMaximalStepCountBound();
-
     int getStageCount();
 
     Supplier<Double> getExplorationConstantSupplier();

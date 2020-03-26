@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class PaperEpisodeDataMaker<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>,
     TPolicyRecord extends PolicyRecordBase>

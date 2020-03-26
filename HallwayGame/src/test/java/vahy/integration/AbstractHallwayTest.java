@@ -11,16 +11,18 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.GameConfig;
+import vahy.original.environment.state.EnvironmentProbabilities;
+import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.nio.file.Path;
+import java.util.List;
 
 public abstract class AbstractHallwayTest {
 
-;    protected static final Logger logger = LoggerFactory.getLogger(AbstractHallwayTest.class.getName());
+    protected static final Logger logger = LoggerFactory.getLogger(AbstractHallwayTest.class.getName());
 
     public static final double TOLERANCE = Math.pow(10, -15);
 
@@ -35,17 +37,17 @@ public abstract class AbstractHallwayTest {
     @Test(dataProvider = "TestDataProviderMethod")
     public void benchmarkSolutionTest(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, double minExpectedReward, double maxRiskHitRatio) {
 
-        var results = PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayAction.class,
-            HallwayGameInitialInstanceSupplier::new,
-            HallwayPolicySupplier.class,
-            algorithmConfig,
-            systemConfig,
-            gameConfig,
-            Path.of("../Results")
-        );
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+            .setActionClass(HallwayAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(gameConfig)
+            .setOpponentSupplier(HallwayPolicySupplier::new)
+            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
-        PaperEpisodeStatistics stats = ((PaperEpisodeStatistics) results.get(0).getEpisodeStatistics());
+        var results = paperExperimentBuilder.execute();
+
+        PaperEpisodeStatistics stats =  results.get(0).getEpisodeStatistics();
 
         double totalPayoffAverage = stats.getTotalPayoffAverage();
         double riskHitRatio = stats.getRiskHitRatio();

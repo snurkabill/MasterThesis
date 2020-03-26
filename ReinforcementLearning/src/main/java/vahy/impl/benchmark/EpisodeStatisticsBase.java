@@ -2,18 +2,24 @@ package vahy.impl.benchmark;
 
 import vahy.api.benchmark.EpisodeStatistics;
 
+import java.time.Duration;
+
 public class EpisodeStatisticsBase implements EpisodeStatistics {
 
+    private final Duration totalDuration;
     private final double averagePlayerStepCount;
     private final double stdevPlayerStepCount;
     private final double averageMillisPerEpisode;
+    private final double stdevMillisPerEpisode;
     private final double totalPayoffAverage;
     private final double totalPayoffStdev;
 
-    public EpisodeStatisticsBase(double averagePlayerStepCount, double stdevPlayerStepCount, double averageMillisPerEpisode, double totalPayoffAverage, double totalPayoffStdev) {
+    public EpisodeStatisticsBase(Duration totalDuration, double averagePlayerStepCount, double stdevPlayerStepCount, double averageMillisPerEpisode, double stdevMillisPerEpisode, double totalPayoffAverage, double totalPayoffStdev) {
+        this.totalDuration = totalDuration;
         this.averagePlayerStepCount = averagePlayerStepCount;
         this.stdevPlayerStepCount = stdevPlayerStepCount;
         this.averageMillisPerEpisode = averageMillisPerEpisode;
+        this.stdevMillisPerEpisode = stdevMillisPerEpisode;
         this.totalPayoffAverage = totalPayoffAverage;
         this.totalPayoffStdev = totalPayoffStdev;
     }
@@ -30,6 +36,10 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         return sb.toString();
     }
 
+    public Duration getTotalDuration() {
+        return totalDuration;
+    }
+
     public double getAveragePlayerStepCount() {
         return averagePlayerStepCount;
     }
@@ -40,6 +50,11 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
 
     public double getAverageMillisPerEpisode() {
         return averageMillisPerEpisode;
+    }
+
+    @Override
+    public double getStdevMillisPerEpisode() {
+        return stdevMillisPerEpisode;
     }
 
     public double getTotalPayoffAverage() {
@@ -53,16 +68,13 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
     @Override
     public String printToLog() {
         var sb = new StringBuilder();
-
+        sb.append(System.lineSeparator());
+        sb.append("TotalDuration [").append(totalDuration.toMillis()).append("] ms");
         sb.append(System.lineSeparator());
         sb.append(printOneProperty("Player Step Count", averagePlayerStepCount, stdevPlayerStepCount));
         sb.append(printOneProperty("Total Payoff", totalPayoffAverage, totalPayoffStdev));
-
-        sb.append("Milliseconds per episode average: [");
-        sb.append(averageMillisPerEpisode);
-        sb.append("]");
+        sb.append(printOneProperty("Ms per episode", averageMillisPerEpisode, stdevMillisPerEpisode));
         sb.append(System.lineSeparator());
-
         return sb.toString();
     }
 

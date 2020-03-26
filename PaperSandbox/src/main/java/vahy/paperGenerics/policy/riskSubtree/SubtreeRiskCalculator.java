@@ -7,7 +7,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
 public interface SubtreeRiskCalculator<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

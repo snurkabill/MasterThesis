@@ -13,10 +13,12 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
+import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
+import vahy.environment.RandomWalkState;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.opponent.RandomWalkOpponentSupplier;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -25,7 +27,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class RandomWalkExample {
@@ -39,15 +41,16 @@ public class RandomWalkExample {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            RandomWalkAction.class,
-            RandomWalkInitialInstanceSupplier::new,
-            RandomWalkOpponentSupplier.class,
-            algorithmConfig,
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
-        );
+        var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkProbabilities, RandomWalkState>()
+            .setActionClass(RandomWalkAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(RandomWalkOpponentSupplier::new)
+            .setProblemInstanceInitializerSupplier(RandomWalkInitialInstanceSupplier::new);
+
+        paperExperimentBuilder.execute();
+
     }
 
 
@@ -71,7 +74,6 @@ public class RandomWalkExample {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .learningRate(0.01)
@@ -143,6 +145,7 @@ public class RandomWalkExample {
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
         return new RandomWalkSetup(
+            500,
             finishlevel,
             startLevel,
             stepPenalty,

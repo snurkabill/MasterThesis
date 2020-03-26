@@ -25,7 +25,7 @@ import java.util.stream.DoubleStream;
 
 @Experimental
 public class RiskBasedSelector_V2<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

@@ -45,6 +45,7 @@ public class Benchmark00Solution extends DefaultLocalBenchmark {
     @Override
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(5)
@@ -71,7 +72,6 @@ public class Benchmark00Solution extends DefaultLocalBenchmark {
             .stageCount(300)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)

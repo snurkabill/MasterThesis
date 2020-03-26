@@ -16,10 +16,12 @@ import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
+import vahy.original.environment.state.EnvironmentProbabilities;
+import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -27,7 +29,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonEx
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 
-import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class Benchmark05SolutionFunctionApproximator {
@@ -40,20 +42,21 @@ public class Benchmark05SolutionFunctionApproximator {
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayAction.class,
-            HallwayGameInitialInstanceSupplier::new,
-            HallwayPolicySupplier.class,
-            algorithmConfig,
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+            .setActionClass(HallwayAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(HallwayPolicySupplier::new)
+            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
-        );
+        paperExperimentBuilder.execute();
+
     }
 
     private static GameConfig getGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -94,7 +97,6 @@ public class Benchmark05SolutionFunctionApproximator {
             .batchEpisodeCount(batchEpisodeSize)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(200)
-            .maximalStepCountBound(500)
 
             .evaluatorType(EvaluatorType.RALF_BATCHED)
             .setBatchedEvaluationSize(2)

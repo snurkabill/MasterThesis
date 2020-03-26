@@ -16,10 +16,12 @@ import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
+import vahy.original.environment.state.EnvironmentProbabilities;
+import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
-import vahy.paperGenerics.PaperExperimentEntryPoint;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -28,7 +30,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.nio.file.Path;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class DefaultLocalBenchmark {
@@ -42,15 +44,26 @@ public class DefaultLocalBenchmark {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayAction.class,
-            HallwayGameInitialInstanceSupplier::new,
-            HallwayPolicySupplier.class,
-            algorithmConfig,
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
-        );
+//        PaperExperimentEntryPoint.createExperimentAndRun(
+//            HallwayAction.class,
+//            HallwayGameInitialInstanceSupplier::new,
+//            HallwayPolicySupplier.class,
+//            Collections.singletonList(algorithmConfig),
+//            systemConfig,
+//            problemConfig,
+//            Path.of("Results")
+//        );
+
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+            .setActionClass(HallwayAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(HallwayPolicySupplier::new)
+            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
+
+        paperExperimentBuilder.execute();
+
 
     }
 
@@ -69,7 +82,6 @@ public class DefaultLocalBenchmark {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .maximalStepCountBound(500)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(100_000)
             .trainingBatchSize(1)
@@ -139,6 +151,7 @@ public class DefaultLocalBenchmark {
 
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(500)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

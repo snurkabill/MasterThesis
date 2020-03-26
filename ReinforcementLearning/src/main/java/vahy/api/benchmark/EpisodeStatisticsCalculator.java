@@ -6,14 +6,16 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
 
+import java.time.Duration;
 import java.util.List;
 
 public interface EpisodeStatisticsCalculator<
-    TAction extends Enum<TAction> & Action<TAction>,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> {
+    TPolicyRecord extends PolicyRecord,
+    TStatistics extends EpisodeStatistics> {
 
-    EpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList);
+    TStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration);
 }

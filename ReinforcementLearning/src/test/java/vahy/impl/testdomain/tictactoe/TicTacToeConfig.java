@@ -2,8 +2,11 @@ package vahy.impl.testdomain.tictactoe;
 
 import vahy.api.experiment.ProblemConfig;
 
-public class TicTacToeConfig implements ProblemConfig {
+public class TicTacToeConfig extends ProblemConfig {
 
+    public TicTacToeConfig() {
+        super(999);
+    }
 
     @Override
     public String toLog() {

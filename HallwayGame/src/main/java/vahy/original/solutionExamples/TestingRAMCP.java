@@ -30,6 +30,7 @@ public class TestingRAMCP extends DefaultLocalBenchmark {
     @Override
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(1000)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -55,7 +56,6 @@ public class TestingRAMCP extends DefaultLocalBenchmark {
             .batchEpisodeCount(100)
             .stageCount(100)
 
-            .maximalStepCountBound(1000)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .evaluatorType(EvaluatorType.RAMCP)

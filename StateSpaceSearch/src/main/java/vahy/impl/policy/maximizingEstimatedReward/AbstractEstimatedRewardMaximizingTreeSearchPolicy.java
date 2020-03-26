@@ -14,7 +14,7 @@ import java.util.Comparator;
 import java.util.SplittableRandom;
 
 public abstract class AbstractEstimatedRewardMaximizingTreeSearchPolicy<
-    TAction extends Action<TAction>,
+    TAction extends Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

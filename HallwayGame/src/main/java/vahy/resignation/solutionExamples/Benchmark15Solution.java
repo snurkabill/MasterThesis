@@ -30,6 +30,7 @@ public class Benchmark15Solution extends DefaultLocalBenchmark {
     @Override
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
+            .maximalStepCountBound(1000)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -58,7 +59,6 @@ public class Benchmark15Solution extends DefaultLocalBenchmark {
             .batchEpisodeCount(batchSize)
             .stageCount(3000)
 
-            .maximalStepCountBound(1000)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)

@@ -6,7 +6,7 @@ import vahy.original.game.cell.Cell;
 
 import java.util.List;
 
-public class GameConfig implements ProblemConfig {
+public class GameConfig extends ProblemConfig {
 
     private final double goalReward;
     private final double stepPenalty;
@@ -16,7 +16,15 @@ public class GameConfig implements ProblemConfig {
     private final String gameStringRepresentation;
     private final List<List<Cell>> gameMatrix;
 
-    public GameConfig(double goalReward, double stepPenalty, double trapProbability, double noisyMoveProbability, StateRepresentation stateRepresentation, String gameStringRepresentation, List<List<Cell>> gameMatrix) {
+    public GameConfig(int maximalStepCountBound,
+                      double goalReward,
+                      double stepPenalty,
+                      double trapProbability,
+                      double noisyMoveProbability,
+                      StateRepresentation stateRepresentation,
+                      String gameStringRepresentation,
+                      List<List<Cell>> gameMatrix) {
+        super(maximalStepCountBound);
         this.goalReward = goalReward;
         this.stepPenalty = stepPenalty;
         this.trapProbability = trapProbability;
@@ -56,7 +64,8 @@ public class GameConfig implements ProblemConfig {
 
     @Override
     public String toString() {
-        return "goalReward," + goalReward + System.lineSeparator() +
+        return super.toString() +
+            "goalReward," + goalReward + System.lineSeparator() +
             "stepPenalty," + stepPenalty + System.lineSeparator() +
             "trapProbability," + trapProbability + System.lineSeparator() +
             "noisyMoveProbability," + noisyMoveProbability + System.lineSeparator() +

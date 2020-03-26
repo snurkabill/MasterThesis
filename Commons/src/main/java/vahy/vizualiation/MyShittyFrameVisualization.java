@@ -15,22 +15,19 @@ import java.util.List;
 public class MyShittyFrameVisualization  extends ApplicationFrame {
 
     private final List<String> title;
-    private final List<String> xAxisLabel;
-    private final List<String> yAxisLabel;
+    private final String xAxisLabel;
+    private final String yAxisLabel;
     private final int width;
     private final int heigth;
     private final Color color;
     private final List<ChartPanel> chartPanelList = new ArrayList<>();
 
-    public MyShittyFrameVisualization(String windowTitle, List<String> titleList, List<String> xAxisLabelList, List<String> yAxisLabelList, Color color) {
+    public MyShittyFrameVisualization(String windowTitle, List<String> titleList, String xAxisLabelList, String yAxisLabelList, Color color) {
         this(windowTitle, titleList, xAxisLabelList, yAxisLabelList, 400, 280, color);
     }
 
-    public MyShittyFrameVisualization(String windowTitle, List<String> titleList, List<String> xAxisLabelList, List<String> yAxisLabelList, int width, int height, Color color) {
+    public MyShittyFrameVisualization(String windowTitle, List<String> titleList, String xAxisLabelList, String yAxisLabelList, int width, int height, Color color) {
         super(windowTitle);
-        if(titleList.size() != xAxisLabelList.size() || titleList.size() != yAxisLabelList.size()) {
-            throw new IllegalArgumentException("Different list sizes of arguments");
-        }
         this.title = titleList;
         this.xAxisLabel = xAxisLabelList;
         this.yAxisLabel = yAxisLabelList;
@@ -41,8 +38,8 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
     }
 
     private JFreeChart createChart(final XYDataset dataset, int index) {
-        final NumberAxis xAxis = new NumberAxis(xAxisLabel.get(index));
-        final NumberAxis yAxis = new NumberAxis(yAxisLabel.get(index));
+        final NumberAxis xAxis = new NumberAxis(xAxisLabel);
+        final NumberAxis yAxis = new NumberAxis(yAxisLabel);
         final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, new XYLineAndShapeRenderer(true, true));
         plot.setBackgroundPaint(Color.DARK_GRAY);
         plot.setOutlinePaint(Color.DARK_GRAY);
@@ -71,7 +68,5 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
             this.setVisible(true);
         }
         this.repaint();
-
     }
-
 }
