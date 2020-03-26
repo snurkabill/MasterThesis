@@ -2,13 +2,16 @@ package vahy.paperGenerics.benchmark;
 
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 
+import java.time.Duration;
+
 public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
 
     private final long riskHitCounter;
     private final double riskHitRatio;
     private final double riskHitStdev;
 
-    public PaperEpisodeStatistics(double averagePlayerStepCount,
+    public PaperEpisodeStatistics(Duration totalDuration,
+                                  double averagePlayerStepCount,
                                   double stdevPlayerStepCount,
                                   double averageMillisPerEpisode,
                                   double stdevMillisPerEpisode,
@@ -17,7 +20,7 @@ public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
                                   long riskHitCounter,
                                   double riskHitRatio,
                                   double riskHitStdev) {
-        super(averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
+        super(totalDuration, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
         this.riskHitCounter = riskHitCounter;
         this.riskHitRatio = riskHitRatio;
         this.riskHitStdev = riskHitStdev;

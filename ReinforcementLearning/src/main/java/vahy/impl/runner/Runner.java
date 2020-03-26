@@ -30,7 +30,6 @@ public class Runner<TConfig extends ProblemConfig,
 
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
-
     public PolicyResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> run(
         RunnerArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> runnerArguments,
         EvaluationArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> evaluationArguments) throws IOException

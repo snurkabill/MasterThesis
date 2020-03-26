@@ -9,6 +9,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.utils.MathStreamUtils;
 
+import java.time.Duration;
 import java.util.List;
 
 public class PaperEpisodeStatisticsCalculator<
@@ -20,7 +21,7 @@ public class PaperEpisodeStatisticsCalculator<
     implements EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, PaperEpisodeStatistics> {
 
     @Override
-    public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList) {
+    public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration) {
         var averagePlayerStepCount = MathStreamUtils.calculateAverage(episodeResultsList, EpisodeResults::getPlayerStepCount);
         var stdevPlayerStepCount = MathStreamUtils.calculateStdev(episodeResultsList, EpisodeResults::getPlayerStepCount);
         var totalPayoffAverage = MathStreamUtils.calculateAverage(episodeResultsList, EpisodeResults::getTotalPayoff);
@@ -30,6 +31,6 @@ public class PaperEpisodeStatisticsCalculator<
         var riskHitCounter = episodeResultsList.stream().filter(x -> x.getFinalState().isRiskHit()).count();
         var riskHitRatio = riskHitCounter / (double) episodeResultsList.size();
         var riskHitStdev = MathStreamUtils.calculateStdev(episodeResultsList, x -> x.getFinalState().isRiskHit() ? 1.0 : 0.0);
-        return new PaperEpisodeStatistics(averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio, riskHitStdev);
+        return new PaperEpisodeStatistics(duration, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev, riskHitCounter, riskHitRatio, riskHitStdev);
     }
 }

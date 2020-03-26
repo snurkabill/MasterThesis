@@ -16,6 +16,7 @@ import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -24,10 +25,11 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.resignation.environment.HallwayActionWithResign;
 import vahy.resignation.environment.agent.policy.environment.HallwayPolicySupplierWithResign;
+import vahy.resignation.environment.state.EnvironmentProbabilities;
+import vahy.resignation.environment.state.HallwayStateWithResign;
 import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -42,15 +44,15 @@ public class DefaultLocalBenchmark {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            HallwayActionWithResign.class,
-            HallwayGameWithResignationInitialInstanceSupplier::new,
-            HallwayPolicySupplierWithResign.class,
-            List.of(algorithmConfig),
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
-        );
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayActionWithResign, EnvironmentProbabilities, HallwayStateWithResign>()
+            .setActionClass(HallwayActionWithResign.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(HallwayPolicySupplierWithResign::new)
+            .setProblemInstanceInitializerSupplier(HallwayGameWithResignationInitialInstanceSupplier::new);
+
+        paperExperimentBuilder.execute();
 
     }
 

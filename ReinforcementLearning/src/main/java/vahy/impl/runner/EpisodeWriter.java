@@ -30,8 +30,12 @@ public class EpisodeWriter<
     private final Path rootPath;
     private final Path fullPath;
 
-    public EpisodeWriter(ProblemConfig problemConfig, AlgorithmConfig algorithmConfig, SystemConfig systemConfig, Path path, String timestamp, String policyName) {
-        this.rootPath = path;
+    public EpisodeWriter(ProblemConfig problemConfig, AlgorithmConfig algorithmConfig, SystemConfig systemConfig, String timestamp, String policyName) {
+        this.rootPath = systemConfig.getDumpPath();
+
+        if(rootPath == null) {
+            throw new IllegalArgumentException("Path for dumping data was not configured.");
+        }
 
         File resultFolder = this.rootPath.toFile();
         if(!resultFolder.exists()) {

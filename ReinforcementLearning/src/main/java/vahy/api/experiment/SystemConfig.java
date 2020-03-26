@@ -1,5 +1,7 @@
 package vahy.api.experiment;
 
+import java.nio.file.Path;
+
 public class SystemConfig implements Config {
 
     // STOCHASTICITY
@@ -15,12 +17,14 @@ public class SystemConfig implements Config {
     // Evaluation
     private final int evalEpisodeCount;
 
+
     private final boolean dumpTrainingData;
     private final boolean dumpEvaluationData;
+    private final Path dumpPath;
 
     private final String pythonVirtualEnvPath;
 
-    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData, boolean dumpEvaluationData, String pythonVirtualEnvPath) {
+    public SystemConfig(long randomSeed, boolean singleThreadedEvaluation, int parallelThreadsCount, boolean drawWindow, int evalEpisodeCount, boolean dumpTrainingData, boolean dumpEvaluationData, Path dumpPath, String pythonVirtualEnvPath) {
         this.randomSeed = randomSeed;
         this.singleThreadedEvaluation = singleThreadedEvaluation;
         this.parallelThreadsCount = parallelThreadsCount;
@@ -28,6 +32,7 @@ public class SystemConfig implements Config {
         this.evalEpisodeCount = evalEpisodeCount;
         this.dumpTrainingData = dumpTrainingData;
         this.dumpEvaluationData = dumpEvaluationData;
+        this.dumpPath = dumpPath;
         this.pythonVirtualEnvPath = pythonVirtualEnvPath;
     }
 
@@ -59,6 +64,10 @@ public class SystemConfig implements Config {
         return dumpEvaluationData;
     }
 
+    public Path getDumpPath() {
+        return dumpPath;
+    }
+
     public String getPythonVirtualEnvPath() {
         return pythonVirtualEnvPath;
     }
@@ -72,6 +81,7 @@ public class SystemConfig implements Config {
             "evalEpisodeCount," + evalEpisodeCount + System.lineSeparator() +
             "dumpTrainingData," + dumpTrainingData + System.lineSeparator() +
             "dumpEvaluationData," + dumpEvaluationData + System.lineSeparator() +
+            "dumpPath," + dumpPath + System.lineSeparator() +
             "pythonVirtualEnvPath," + pythonVirtualEnvPath + System.lineSeparator();
     }
 
