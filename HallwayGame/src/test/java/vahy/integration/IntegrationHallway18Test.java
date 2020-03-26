@@ -29,9 +29,9 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-//            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
+            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.055},
-//            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
         };
     }
 
