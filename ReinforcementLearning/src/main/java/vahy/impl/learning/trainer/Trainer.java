@@ -19,6 +19,7 @@ import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
 
 import java.awt.*;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,7 +103,7 @@ public class Trainer<
         var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound());
         var samplingTime = System.currentTimeMillis() - start;
 
-        var stats = statisticsCalculator.calculateStatistics(episodes);
+        var stats = statisticsCalculator.calculateStatistics(episodes, Duration.ofMillis(samplingTime - start));
 
         for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
             fromEpisodesDataPointGenerator.addNewValue(stats);

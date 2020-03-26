@@ -1,4 +1,4 @@
-package vahy.impl.experiment;
+package vahy.impl.runner;
 
 import vahy.api.episode.EpisodeResults;
 import vahy.api.experiment.AlgorithmConfig;

@@ -2,8 +2,11 @@ package vahy.impl.benchmark;
 
 import vahy.api.benchmark.EpisodeStatistics;
 
+import java.time.Duration;
+
 public class EpisodeStatisticsBase implements EpisodeStatistics {
 
+    private final Duration totalDuration;
     private final double averagePlayerStepCount;
     private final double stdevPlayerStepCount;
     private final double averageMillisPerEpisode;
@@ -11,7 +14,8 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
     private final double totalPayoffAverage;
     private final double totalPayoffStdev;
 
-    public EpisodeStatisticsBase(double averagePlayerStepCount, double stdevPlayerStepCount, double averageMillisPerEpisode, double stdevMillisPerEpisode, double totalPayoffAverage, double totalPayoffStdev) {
+    public EpisodeStatisticsBase(Duration totalDuration, double averagePlayerStepCount, double stdevPlayerStepCount, double averageMillisPerEpisode, double stdevMillisPerEpisode, double totalPayoffAverage, double totalPayoffStdev) {
+        this.totalDuration = totalDuration;
         this.averagePlayerStepCount = averagePlayerStepCount;
         this.stdevPlayerStepCount = stdevPlayerStepCount;
         this.averageMillisPerEpisode = averageMillisPerEpisode;
@@ -30,6 +34,10 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         sb.append("].");
         sb.append(System.lineSeparator());
         return sb.toString();
+    }
+
+    public Duration getTotalDuration() {
+        return totalDuration;
     }
 
     public double getAveragePlayerStepCount() {
@@ -60,6 +68,8 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
     @Override
     public String printToLog() {
         var sb = new StringBuilder();
+        sb.append(System.lineSeparator());
+        sb.append("TotalDuration [").append(totalDuration.toMillis()).append("] ms");
         sb.append(System.lineSeparator());
         sb.append(printOneProperty("Player Step Count", averagePlayerStepCount, stdevPlayerStepCount));
         sb.append(printOneProperty("Total Payoff", totalPayoffAverage, totalPayoffStdev));
