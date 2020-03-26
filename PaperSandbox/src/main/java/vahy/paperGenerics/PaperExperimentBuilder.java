@@ -75,6 +75,8 @@ public class PaperExperimentBuilder<
 
     private static final Logger logger = LoggerFactory.getLogger(PaperExperimentBuilder.class);
 
+    private static final long EVALUATION_SEED_SHIFT = 100_000;
+
     private String timestamp;
     private boolean dumpData;
     private Class<TAction> actionClazz;
@@ -150,7 +152,7 @@ public class PaperExperimentBuilder<
 
     private EvaluationArguments<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> episodeWriter) {
         final var finalRandomSeed = systemConfig.getRandomSeed();
-        final var masterRandom = new SplittableRandom(finalRandomSeed + finalRandomSeed);
+        final var masterRandom = new SplittableRandom(finalRandomSeed + EVALUATION_SEED_SHIFT);
         return new EvaluationArguments<>(
             problemConfig,
             systemConfig,

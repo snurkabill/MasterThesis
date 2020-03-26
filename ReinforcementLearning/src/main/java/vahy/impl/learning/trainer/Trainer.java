@@ -18,7 +18,7 @@ import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
