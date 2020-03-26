@@ -13,9 +13,12 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
+import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
+import vahy.environment.RandomWalkState;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.opponent.RandomWalkOpponentSupplier;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -24,7 +27,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.utils.ThirdPartBinaryUtils;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -39,15 +41,16 @@ public class RandomWalkExample {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            RandomWalkAction.class,
-            RandomWalkInitialInstanceSupplier::new,
-            RandomWalkOpponentSupplier.class,
-            List.of(algorithmConfig),
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
-        );
+        var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkProbabilities, RandomWalkState>()
+            .setActionClass(RandomWalkAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(RandomWalkOpponentSupplier::new)
+            .setProblemInstanceInitializerSupplier(RandomWalkInitialInstanceSupplier::new);
+
+        paperExperimentBuilder.execute();
+
     }
 
 

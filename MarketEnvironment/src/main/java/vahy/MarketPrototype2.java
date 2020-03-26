@@ -13,8 +13,11 @@ import vahy.config.SelectorType;
 import vahy.environment.MarketAction;
 import vahy.environment.MarketDataProvider;
 import vahy.environment.MarketEnvironmentStaticPart;
+import vahy.environment.MarketProbabilities;
+import vahy.environment.MarketState;
 import vahy.environment.RealMarketAction;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
+import vahy.paperGenerics.PaperExperimentBuilder;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -24,7 +27,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,16 +39,17 @@ public class MarketPrototype2 {
         var systemConfig = getSystemConfig();
         MarketConfig problemConfig = getGameConfig();
 
-        PaperExperimentEntryPoint.createExperimentAndRun(
-            MarketAction.class,
-            InitialMarketStateSupplier::new,
-            RealDataMarketPolicySupplier.class,
-            List.of(algorithmConfig),
-            systemConfig,
-            problemConfig,
-            Path.of("Results")
 
-        );
+        var paperExperimentBuilder = new PaperExperimentBuilder<MarketConfig, MarketAction, MarketProbabilities, MarketState>()
+            .setActionClass(MarketAction.class)
+            .setSystemConfig(systemConfig)
+            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setProblemConfig(problemConfig)
+            .setOpponentSupplier(RealDataMarketPolicySupplier::new)
+            .setProblemInstanceInitializerSupplier(InitialMarketStateSupplier::new);
+
+        paperExperimentBuilder.execute();
+
     }
 
 
