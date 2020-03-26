@@ -10,7 +10,7 @@ public class VisualizationPrototype {
 
     public static void main(String[] args) throws InterruptedException {
 
-        MyShittyFrameVisualization myShittyFrameVisualization = new MyShittyFrameVisualization("TestWindow", List.of("OneTitle", "SecondTitle"), List.of("Xlabel", "XLabel2"), List.of("Ylabel", "YLabel2"), Color.RED);
+        MyShittyFrameVisualization myShittyFrameVisualization = new MyShittyFrameVisualization("TestWindow", List.of("OneTitle", "SecondTitle"), "Xlabel", "Ylabel", Color.RED);
 
         var titles = List.of("First", "Second");
 

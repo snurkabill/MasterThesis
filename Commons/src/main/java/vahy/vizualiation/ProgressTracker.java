@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,17 +33,14 @@ public class ProgressTracker {
 
     public void finalizeRegistration() {
         if(progressTrackerSettings.isDrawOnEnd() || progressTrackerSettings.isDrawOnNextLog()) {
-            String[] iterationArr = new String[dataPointGeneratorList.size()];
-            String[] valueArr = new String[dataPointGeneratorList.size()];
-            Arrays.fill(iterationArr, "Iteration");
-            Arrays.fill(valueArr, "Value");
             visualization = new MyShittyFrameVisualization(
                 windowTitle,
                 dataPointGeneratorList
                     .stream()
                     .map(DataPointGenerator::getDataTitle)
-                    .collect(Collectors.toList()), Arrays.asList(iterationArr),
-                Arrays.asList(valueArr),
+                    .collect(Collectors.toList()),
+                "Iteration",
+                "Value",
                 color);
         }
         isFinalized = true;

@@ -4,6 +4,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -14,6 +15,7 @@ import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.config.PaperAlgorithmConfig;
+import vahy.impl.benchmark.Benchmark;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
@@ -111,6 +113,86 @@ public class PaperExperimentBuilder<
     public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setProblemInstanceInitializerSupplier(BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory) {
         this.instanceInitializerFactory = instanceInitializerFactory;
         return this;
+    }
+
+    private void finalizeSetup() {
+        timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+        logger.info("Finalized setup with timestamp [{}]", timestamp);
+        dumpData = (systemConfig.dumpEvaluationData() || systemConfig.dumpTrainingData());
+    }
+
+    private RunnerArguments<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics> buildRunnerArguments(PaperAlgorithmConfig algorithmConfig,
+                                                                                                                                                          EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> episodeWriter,
+                                                                                                                                                          String policyId) {
+        final var finalRandomSeed = systemConfig.getRandomSeed();
+        final var masterRandom = new SplittableRandom(finalRandomSeed);
+        var policySupplierWithPredictor = createPolicySupplier(algorithmConfig, masterRandom.split());
+        return new RunnerArguments<>(
+            policyId,
+            problemConfig,
+            systemConfig,
+            algorithmConfig,
+            instanceInitializerFactory.apply(problemConfig, masterRandom.split()),
+            new PaperEpisodeResultsFactory<>(),
+            new PaperEpisodeStatisticsCalculator<>(),
+            List.of(
+                new DataPointGeneratorGeneric<>("Risk hit average", PaperEpisodeStatistics::getRiskHitRatio),
+                new DataPointGeneratorGeneric<>("Risk hit stdev", PaperEpisodeStatistics::getRiskHitStdev)
+            ),
+            policySupplierWithPredictor.getSecond(),
+            algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig),
+            opponentPolicyCreator.apply(masterRandom.split()),
+            policySupplierWithPredictor.getFirst(),
+            new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
+            episodeWriter
+        );
+    }
+
+    private EvaluationArguments<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> episodeWriter) {
+        final var finalRandomSeed = systemConfig.getRandomSeed();
+        final var masterRandom = new SplittableRandom(finalRandomSeed + finalRandomSeed);
+        return new EvaluationArguments<>(
+            problemConfig,
+            systemConfig,
+            instanceInitializerFactory.apply(this.problemConfig, masterRandom.split()),
+            new PaperEpisodeResultsFactory<>(),
+            new PaperEpisodeStatisticsCalculator<>(),
+            opponentPolicyCreator.apply(masterRandom.split()),
+            episodeWriter
+        );
+    }
+
+    public List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>> execute() {
+        finalizeSetup();
+        List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>> resultList = new ArrayList<>(algorithmConfigList.size());
+        var runner = new Runner<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>();
+        try {
+            for (int i = 0; i < algorithmConfigList.size(); i++) {
+                var policyId = String.valueOf(i);
+                var episodeWriter = dumpData ? new EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>(problemConfig, algorithmConfigList.get(i), systemConfig, timestamp, policyId) : null;
+                var runnerArguments = buildRunnerArguments(algorithmConfigList.get(i), episodeWriter, policyId);
+                var evaluationArguments = buildEvaluationArguments(episodeWriter);
+                resultList.add(runner.run(runnerArguments, evaluationArguments));
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        var benchmark = new Benchmark<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>(
+            List.of(
+                new ImmutableTuple<>(EpisodeStatistics::getTotalPayoffAverage, "Payoff average"),
+                new ImmutableTuple<>(EpisodeStatistics::getTotalPayoffStdev, "Payoff stdev"),
+                new ImmutableTuple<>(EpisodeStatistics::getAveragePlayerStepCount, "Player step count average"),
+                new ImmutableTuple<>(EpisodeStatistics::getStdevPlayerStepCount, "Player step count stdev"),
+                new ImmutableTuple<>(EpisodeStatistics::getAverageMillisPerEpisode, "Per episode ms average"),
+                new ImmutableTuple<>(EpisodeStatistics::getStdevMillisPerEpisode, "Per episode ms stdev"),
+                new ImmutableTuple<>(PaperEpisodeStatistics::getRiskHitRatio, "Risk hit average"),
+                new ImmutableTuple<>(PaperEpisodeStatistics::getRiskHitStdev, "Risk hit stdev")
+            ),
+            systemConfig);
+        benchmark.benchmark(resultList);
+
+        return resultList;
     }
 
     private ImmutableTuple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom) {
@@ -328,69 +410,4 @@ public class PaperExperimentBuilder<
         }
     }
 
-
-    private void finalizeSetup() {
-        timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-        logger.info("Finalized setup with timestamp [{}]", timestamp);
-        dumpData = (systemConfig.dumpEvaluationData() || systemConfig.dumpTrainingData());
-    }
-
-    private RunnerArguments<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics> buildRunnerArguments(PaperAlgorithmConfig algorithmConfig,
-                                                                                                                                                          EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> episodeWriter,
-                                                                                                                                                          String policyId) {
-        final var finalRandomSeed = systemConfig.getRandomSeed();
-        final var masterRandom = new SplittableRandom(finalRandomSeed);
-        var policySupplierWithPredictor = createPolicySupplier(algorithmConfig, masterRandom.split());
-        return new RunnerArguments<>(
-            policyId,
-            problemConfig,
-            systemConfig,
-            algorithmConfig,
-            instanceInitializerFactory.apply(problemConfig, masterRandom.split()),
-            new PaperEpisodeResultsFactory<>(),
-            new PaperEpisodeStatisticsCalculator<>(),
-            List.of(
-                new DataPointGeneratorGeneric<>("Avg risk Hit", PaperEpisodeStatistics::getRiskHitRatio),
-                new DataPointGeneratorGeneric<>("Stdev risk Hit", PaperEpisodeStatistics::getRiskHitStdev)
-            ),
-            policySupplierWithPredictor.getSecond(),
-            algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig),
-            opponentPolicyCreator.apply(masterRandom.split()),
-            policySupplierWithPredictor.getFirst(),
-            new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
-            episodeWriter
-        );
-    }
-
-    private EvaluationArguments<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord> episodeWriter) {
-        final var finalRandomSeed = systemConfig.getRandomSeed();
-        final var masterRandom = new SplittableRandom(finalRandomSeed + finalRandomSeed);
-        return new EvaluationArguments<>(
-            problemConfig,
-            systemConfig,
-            instanceInitializerFactory.apply(this.problemConfig, masterRandom.split()),
-            new PaperEpisodeResultsFactory<>(),
-            new PaperEpisodeStatisticsCalculator<>(),
-            opponentPolicyCreator.apply(masterRandom.split()),
-            episodeWriter
-        );
-    }
-
-    public List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>> execute() {
-        finalizeSetup();
-        List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>> resultList = new ArrayList<>(algorithmConfigList.size());
-        var runner = new Runner<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>();
-        try {
-            for (int i = 0; i < algorithmConfigList.size(); i++) {
-                var policyId = String.valueOf(i);
-                var episodeWriter = dumpData ? new EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>(problemConfig, algorithmConfigList.get(i), systemConfig, timestamp, policyId) : null;
-                var runnerArguments = buildRunnerArguments(algorithmConfigList.get(i), episodeWriter, policyId);
-                var evaluationArguments = buildEvaluationArguments(episodeWriter);
-                resultList.add(runner.run(runnerArguments, evaluationArguments));
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return resultList;
-    }
 }

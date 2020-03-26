@@ -39,18 +39,19 @@ public class ForExperimenting {
     public static void main(String[] args) {
 
         var algorithmConfig = getAlgorithmConfig();
+        var algorithmConfig2 = getAlgorithmConfig2();
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
 
         var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
             .setSystemConfig(systemConfig)
-            .setAlgorithmConfigList(List.of(algorithmConfig))
+            .setAlgorithmConfigList(List.of(algorithmConfig, algorithmConfig2))
             .setProblemConfig(problemConfig)
             .setOpponentSupplier(HallwayPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
-        paperExperimentBuilder.execute();
+        var results = paperExperimentBuilder.execute();
 
     }
 
@@ -174,7 +175,7 @@ public class ForExperimenting {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(20))
             .stageCount(50)
 
             .evaluatorType(EvaluatorType.RALF)
