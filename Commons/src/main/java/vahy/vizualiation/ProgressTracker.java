@@ -65,7 +65,7 @@ public class ProgressTracker {
         if(progressTrackerSettings.isPrintOnNextLog()) {
             var stringBuilder = new StringBuilder();
             stringBuilder.append(System.lineSeparator());
-            stringBuilder.append(" Iteration: [");
+            stringBuilder.append("Iteration: [");
             stringBuilder.append(dataSeriesCollectorList.get(0).getLatest().getFirst());
             stringBuilder.append("] ").append(System.lineSeparator());
             for (DataSeriesCollector dataSeriesCollector : dataSeriesCollectorList) {
