@@ -40,8 +40,13 @@ public class Runner<TConfig extends ProblemConfig,
             runnerArguments.getTrainablePredictor(),
             runnerArguments.getPolicySupplier());
         var evaluationResults = evaluatePolicy(optimizedPolicy, evaluationArguments);
-        optimizedPolicy.getTrainablePredictor().close();
+
         return new PolicyResults<>(optimizedPolicy, trainingStatistics.getSecond(), evaluationResults.getFirst(), trainingStatistics.getFirst(), evaluationResults.getSecond());
+    }
+
+    private void closeResources(OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy) throws IOException {
+        policy.getTrainablePredictor().close();
+        logger.debug("Resources of trainable policy [{}] closed. ", policy.getPolicyId());
     }
 
     private ImmutableTuple<Duration, List<TStatistics>> optimizePolicy(RunnerArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
