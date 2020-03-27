@@ -215,7 +215,7 @@ public class PaperExperimentBuilder<
 
         var nodeEvaluator = resolveEvaluator(
             algorithmConfig,
-            new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(new PaperMetadataFactory<>()),
+            new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(new PaperMetadataFactory<>(actionClazz)),
             playerOpponentActions.getFirst(),
             playerOpponentActions.getSecond(),
             predictor,
@@ -227,7 +227,7 @@ public class PaperExperimentBuilder<
         return new ImmutableTuple<>(
             new PaperPolicySupplier<>(
                 actionClazz,
-                new PaperMetadataFactory<>(),
+                new PaperMetadataFactory<>(actionClazz),
                 algorithmConfig.getGlobalRiskAllowed(),
                 masterRandom.split(),
                 nodeSelectorSupplier,

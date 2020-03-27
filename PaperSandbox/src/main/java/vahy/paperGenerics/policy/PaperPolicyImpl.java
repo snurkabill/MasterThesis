@@ -20,7 +20,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class PaperPolicyImpl<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

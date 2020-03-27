@@ -7,7 +7,7 @@ import vahy.api.model.State;
 import java.util.List;
 
 public interface Policy<
-        TAction extends Action,
+        TAction extends Enum<TAction> & Action,
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,

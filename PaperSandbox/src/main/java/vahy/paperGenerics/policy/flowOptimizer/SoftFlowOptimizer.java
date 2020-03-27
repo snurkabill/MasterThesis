@@ -12,7 +12,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.SplittableRandom;
 
 public class SoftFlowOptimizer<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

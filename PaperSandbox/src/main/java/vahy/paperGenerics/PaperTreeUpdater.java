@@ -9,7 +9,7 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class PaperTreeUpdater<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>

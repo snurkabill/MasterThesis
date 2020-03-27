@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class UniformRandomWalkPolicy<TAction extends Action,
+public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action,
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

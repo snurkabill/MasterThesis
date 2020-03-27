@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 public class PaperNodeEvaluator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>

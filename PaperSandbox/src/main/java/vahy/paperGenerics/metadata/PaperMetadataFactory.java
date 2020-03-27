@@ -8,14 +8,20 @@ import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
 
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 
 public class PaperMetadataFactory<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+
+    private final Class<TAction> actionClass;
+
+    public PaperMetadataFactory(Class<TAction> actionClass) {
+        this.actionClass = actionClass;
+    }
 
     @Override
     public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> parent,
@@ -27,7 +33,7 @@ public class PaperMetadataFactory<
             DoubleScalarRewardAggregator.emptyReward(),
             parent != null && !parent.getSearchNodeMetadata().getChildPriorProbabilities().isEmpty() ? parent.getSearchNodeMetadata().getChildPriorProbabilities().get(appliedAction) : Double.NaN,
             stateRewardReturn.getState().isFinalState() ? (stateRewardReturn.getState().isRiskHit() ? 1.0 : 0.0) : Double.NaN,
-            new LinkedHashMap<>()
+            new EnumMap<>(actionClass)
         );
     }
 
@@ -39,7 +45,7 @@ public class PaperMetadataFactory<
             DoubleScalarRewardAggregator.emptyReward(),
             0.0d,
             0.0,
-            new LinkedHashMap<>()
+            new EnumMap<>(actionClass)
         );
     }
 }

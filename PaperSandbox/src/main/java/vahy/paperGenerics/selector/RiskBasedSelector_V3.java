@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.SplittableRandom;
 
 public class RiskBasedSelector_V3<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

@@ -9,7 +9,7 @@ import vahy.impl.model.observation.DoubleVector;
 import java.util.function.Function;
 
 public class AlphaGoEvaluator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TSearchNodeMetadata extends AlphaGoNodeMetadata<TAction>,

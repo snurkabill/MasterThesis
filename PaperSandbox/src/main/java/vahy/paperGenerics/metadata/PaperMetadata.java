@@ -4,11 +4,12 @@ import com.quantego.clp.CLPVariable;
 import vahy.api.model.Action;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
+import java.util.EnumMap;
 import java.util.Map;
 
-public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchMetadata {
+public class PaperMetadata<TAction extends Enum<TAction> & Action> extends MonteCarloTreeSearchMetadata {
 
-    private final Map<TAction, Double> childPriorProbabilities;
+    private final EnumMap<TAction, Double> childPriorProbabilities;
     private CLPVariable nodeProbabilityFlow;
     private double priorProbability;
     private double predictedRisk;
@@ -19,7 +20,7 @@ public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchM
                          double predictedReward,
                          double priorProbability,
                          double predictedRisk,
-                         Map<TAction, Double> childPriorProbabilities) {
+                         EnumMap<TAction, Double> childPriorProbabilities) {
         super(cumulativeReward, gainedReward, predictedReward);
         this.priorProbability = priorProbability;
         this.predictedRisk = predictedRisk;

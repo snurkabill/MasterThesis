@@ -21,7 +21,7 @@ import java.util.SplittableRandom;
 import java.util.function.Function;
 
 public class RamcpNodeEvaluator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>

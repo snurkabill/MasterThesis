@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.SplittableRandom;
 
 public class RiskAverseSearchTree<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

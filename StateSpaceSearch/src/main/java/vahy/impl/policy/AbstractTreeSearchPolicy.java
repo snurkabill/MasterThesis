@@ -16,7 +16,7 @@ import java.util.List;
 
 
 public abstract class AbstractTreeSearchPolicy<
-        TAction extends Action,
+        TAction extends Enum<TAction> & Action,
         TPlayerObservation extends Observation,
         TOpponentObservation extends Observation,
         TSearchNodeMetadata extends SearchNodeMetadata,

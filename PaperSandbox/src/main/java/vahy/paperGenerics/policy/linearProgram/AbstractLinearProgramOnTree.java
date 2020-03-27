@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTree<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

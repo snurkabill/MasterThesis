@@ -11,7 +11,7 @@ import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
 public class MinimalRiskReachAbilityCalculator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

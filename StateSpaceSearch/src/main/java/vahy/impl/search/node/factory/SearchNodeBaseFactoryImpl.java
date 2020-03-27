@@ -13,7 +13,7 @@ import vahy.impl.search.node.SearchNodeImpl;
 import java.util.LinkedHashMap;
 
 public class SearchNodeBaseFactoryImpl<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

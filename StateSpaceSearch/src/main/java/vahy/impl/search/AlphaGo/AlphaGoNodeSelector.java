@@ -11,7 +11,7 @@ import java.util.Comparator;
 import java.util.SplittableRandom;
 
 public class AlphaGoNodeSelector<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

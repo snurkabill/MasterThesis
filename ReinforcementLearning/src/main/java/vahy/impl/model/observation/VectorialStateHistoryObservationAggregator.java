@@ -6,7 +6,7 @@ import vahy.api.model.observation.AbstractObservationAggregator;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class VectorialStateHistoryObservationAggregator<TAction extends Action> extends AbstractObservationAggregator<TAction, DoubleVector, DoubleVectorialObservationAggregation> {
+public class VectorialStateHistoryObservationAggregator<TAction extends Enum<TAction> & Action> extends AbstractObservationAggregator<TAction, DoubleVector, DoubleVectorialObservationAggregation> {
 
     private final LinkedList<DoubleVector> observationQueue = new LinkedList<>();
 

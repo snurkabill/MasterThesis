@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.stream.DoubleStream;
 
 public class Ucb1MinMaxExplorationConstantNodeSelector<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
