@@ -16,6 +16,7 @@ public class AlphaGoTreeSearchUpdater<
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoTreeSearchUpdater.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
 
     @Override
@@ -28,7 +29,9 @@ public class AlphaGoTreeSearchUpdater<
             i++;
         }
         updateNode(expandedNode, estimatedLeafReward);
-        logger.trace("Traversing updated traversed [{}] tree levels", i);
+        if(TRACE_ENABLED) {
+            logger.trace("Traversing updated traversed [{}] tree levels", i);
+        }
     }
 
     private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> expandedNode, double estimatedLeafReward) {
