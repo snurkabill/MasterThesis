@@ -42,6 +42,9 @@ public abstract class AbstractRiskAverseTreeBasedNodeSelector<
         for(var entry : node.getChildNodeMap().values()) {
             actions.add(entry.getAppliedAction());
             priorProbabilities[index] = entry.getSearchNodeMetadata().getPriorProbability();
+            if(TRACE_ENABLED) {
+                logger.trace("Opponent's action: [{}] with prior probability: [{}] and index [{}]", entry.getAppliedAction(), priorProbabilities[index], index);
+            }
             index++;
         }
         int randomIndex = RandomDistributionUtils.getRandomIndexFromDistribution(priorProbabilities, random);
