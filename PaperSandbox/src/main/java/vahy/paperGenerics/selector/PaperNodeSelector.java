@@ -17,8 +17,6 @@ public class PaperNodeSelector<
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
-    private static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
-    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private final double cpuctParameter;
     private final int totalPlayerActions;
