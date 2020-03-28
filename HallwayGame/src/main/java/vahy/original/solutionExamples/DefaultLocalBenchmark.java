@@ -62,8 +62,9 @@ public class DefaultLocalBenchmark {
             .setOpponentSupplier(HallwayPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
-        paperExperimentBuilder.execute();
+        var results = paperExperimentBuilder.execute();
 
+        logger.info(results.get(0).getEpisodeStatistics().printToLog());
 
     }
 
