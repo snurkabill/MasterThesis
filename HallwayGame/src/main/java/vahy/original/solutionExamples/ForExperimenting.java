@@ -46,12 +46,17 @@ public class ForExperimenting {
         var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
             .setSystemConfig(systemConfig)
-            .setAlgorithmConfigList(List.of(algorithmConfig, algorithmConfig2))
+            .setAlgorithmConfigList(List.of(
+                algorithmConfig
+//                ,algorithmConfig2
+            ))
             .setProblemConfig(problemConfig)
             .setOpponentSupplier(HallwayPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
         var results = paperExperimentBuilder.execute();
+
+        logger.info(results.get(0).getEpisodeStatistics().printToLog());
 
     }
 
@@ -72,18 +77,18 @@ public class ForExperimenting {
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(4)
+            .setParallelThreadsCount(1)
             .setSingleThreadedEvaluation(false)
             .setDumpTrainingData(false)
             .setDumpEvaluationData(false)
-            .setEvalEpisodeCount(1000)
+            .setEvalEpisodeCount(0)
             .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
     }
 
     private static PaperAlgorithmConfig getAlgorithmConfig() {
 
-        var batchEpisodeSize = 50;
+        var batchEpisodeSize = 1;
 
         return new AlgorithmConfigBuilder()
             //MCTS
@@ -96,11 +101,11 @@ public class ForExperimenting {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
-            .stageCount(50)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(10))
+            .stageCount(1)
 
             .evaluatorType(EvaluatorType.RALF)
-            .setBatchedEvaluationSize(2)
+//            .setBatchedEvaluationSize(2)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(batchEpisodeSize * 10)
 
@@ -108,11 +113,11 @@ public class ForExperimenting {
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(1.00)
+            .globalRiskAllowed(0.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 1.00;
+                    return 0.00;
                 }
 
                 @Override
