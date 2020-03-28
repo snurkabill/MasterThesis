@@ -24,8 +24,8 @@ public class OptimalFlowHardConstraintCalculator<
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
 
-    public OptimalFlowHardConstraintCalculator(double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
-        super(true, random, strategy);
+    public OptimalFlowHardConstraintCalculator(Class<TAction> actionClass, double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
+        super(actionClass, true, random, strategy);
         this.totalRiskExpression = model.createExpression();
         this.totalRiskAllowed = totalRiskAllowed;
     }

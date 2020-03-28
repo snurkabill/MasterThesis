@@ -19,13 +19,13 @@ public class SoftFlowOptimizer<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
 
-    public SoftFlowOptimizer(SplittableRandom random, NoiseStrategy noiseStrategy) {
-        super(random, noiseStrategy);
+    public SoftFlowOptimizer(Class<TAction> actionClass, SplittableRandom random, NoiseStrategy noiseStrategy) {
+        super(actionClass, random, noiseStrategy);
     }
 
     @Override
     public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
-        var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+        var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(actionClass, totalRiskAllowed, random, noiseStrategy);
         boolean optimalSoftSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
         return new ImmutableTuple<>(totalRiskAllowed, optimalSoftSolutionExists);
     }

@@ -37,6 +37,7 @@ public class StrategiesProvider<
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
+    private final Class<TAction> actionClass;
     private final InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
     private final InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
     private final ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
@@ -46,7 +47,7 @@ public class StrategiesProvider<
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
     private final NoiseStrategy noiseStrategy;
 
-    public StrategiesProvider(InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
+    public StrategiesProvider(Class<TAction> actionClass, InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
                               InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
                               ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
@@ -54,6 +55,7 @@ public class StrategiesProvider<
                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
                               NoiseStrategy noiseStrategy) {
+        this.actionClass = actionClass;
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
@@ -117,15 +119,15 @@ public class StrategiesProvider<
     public AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer(SplittableRandom random) {
         switch (flowOptimizerType) {
             case HARD:
-                return new HardFlowOptimizer<>(random, noiseStrategy);
+                return new HardFlowOptimizer<>(actionClass, random, noiseStrategy);
             case SOFT:
-                return new SoftFlowOptimizer<>(random, noiseStrategy);
+                return new SoftFlowOptimizer<>(actionClass, random, noiseStrategy);
             case HARD_SOFT:
-                return new HardSoftFlowOptimizer<>(random, noiseStrategy);
+                return new HardSoftFlowOptimizer<>(actionClass, random, noiseStrategy);
             case HARD_HARD:
-                return new HardHardFlowOptimizer<>(random, noiseStrategy);
+                return new HardHardFlowOptimizer<>(actionClass, random, noiseStrategy);
             case HARD_HARD_SOFT:
-                return new HardHardSoftFlowOptimizer<>(random, noiseStrategy);
+                return new HardHardSoftFlowOptimizer<>(actionClass, random, noiseStrategy);
             default:
                 throw EnumUtils.createExceptionForNotExpectedEnumValue(flowOptimizerType);
         }
@@ -136,7 +138,7 @@ public class StrategiesProvider<
             case FLOW_SUM:
                 return FlowSumSubtreeRiskCalculator::new;
             case MINIMAL_RISK_REACHABILITY:
-                return MinimalRiskReachAbilityCalculator::new;
+                return () -> new MinimalRiskReachAbilityCalculator<>(actionClass);
             case PRIOR_SUM:
                 return SubtreePriorRiskCalculator::new;
             case ROOT_PREDICTION:

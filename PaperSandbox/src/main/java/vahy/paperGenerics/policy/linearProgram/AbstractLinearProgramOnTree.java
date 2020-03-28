@@ -11,7 +11,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.SplittableRandom;
@@ -34,15 +34,17 @@ public abstract class AbstractLinearProgramOnTree<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
-    protected CLP model;
-    protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
-    private boolean maximize;
+    private final Class<TAction> actionClass;
+    private final boolean maximize;
     protected final SplittableRandom random;
     protected final NoiseStrategy strategy;
     protected final double noiseUpperBound;
     protected final double noiseLowerBound;
+    protected CLP model;
+    protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
 
-    protected AbstractLinearProgramOnTree(boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
+    protected AbstractLinearProgramOnTree(Class<TAction> actionClass, boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
+        this.actionClass = actionClass;
         this.model = new CLP();
         this.queue = new LinkedList<>();
         this.maximize = maximize;
@@ -66,7 +68,7 @@ public abstract class AbstractLinearProgramOnTree<
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
         while(!queue.isEmpty()) {
             SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
-            Map<TAction, CLPVariable> actionChildFlowMap = new HashMap<>();
+            Map<TAction, CLPVariable> actionChildFlowMap = new EnumMap<>(actionClass);
 
             if(!node.isLeaf()) {
                 addNodeToQueue(node, actionChildFlowMap);
@@ -109,11 +111,11 @@ public abstract class AbstractLinearProgramOnTree<
     }
 
     private void addNodeToQueue(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                Map<TAction, CLPVariable> actionChildFlowMap) {
+                                EnumMap<TAction, CLPVariable> actionChildFlowMap) {
 
         var entries = node.getChildNodeMap().entrySet();
 //        var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
-            var nodeChildIterator = entries.iterator();
+        var nodeChildIterator = entries.iterator();
 
         while(nodeChildIterator.hasNext()) {
             var entry = nodeChildIterator.next();
@@ -125,9 +127,9 @@ public abstract class AbstractLinearProgramOnTree<
     }
 
     public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                                Map<TAction, CLPVariable> actionChildFlowMap) {
+                                                                EnumMap<TAction, CLPVariable> actionChildFlowMap) {
         for (Map.Entry<TAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
-            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
+            var child = node.getChildNodeMap().get(entry.getKey());
             double priorProbability = child.getSearchNodeMetadata().getPriorProbability();
             CLPExpression fixedProbabilityExpression = model.createExpression();
             fixedProbabilityExpression.add(CHILD_VARIABLE_COEFFICIENT, child.getSearchNodeMetadata().getNodeProbabilityFlow());
@@ -137,7 +139,7 @@ public abstract class AbstractLinearProgramOnTree<
     }
 
     public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                             Map<TAction, CLPVariable> actionChildFlowMap) {
+                                                             EnumMap<TAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
         for (Map.Entry<TAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {
             parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlowVariable.getValue());

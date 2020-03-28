@@ -20,6 +20,12 @@ public class MinimalRiskReachAbilityCalculator<
 
     private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculator.class.getName());
 
+    private final Class<TAction> actionClass;
+
+    public MinimalRiskReachAbilityCalculator(Class<TAction> actionClass) {
+        this.actionClass = actionClass;
+    }
+
     @Override
     public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
@@ -27,7 +33,7 @@ public class MinimalRiskReachAbilityCalculator<
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
         }
 
-        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
+        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(actionClass, false, null, NoiseStrategy.NONE) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
                 if(node.getWrappedState().isRiskHit()) {

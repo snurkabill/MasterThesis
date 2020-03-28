@@ -17,10 +17,12 @@ public abstract class AbstractFlowOptimizer<
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
+    protected final Class<TAction> actionClass;
     protected final SplittableRandom random;
     protected final NoiseStrategy noiseStrategy;
 
-    protected AbstractFlowOptimizer(SplittableRandom random, NoiseStrategy noiseStrategy) {
+    protected AbstractFlowOptimizer(Class<TAction> actionClass, SplittableRandom random, NoiseStrategy noiseStrategy) {
+        this.actionClass = actionClass;
         this.random = random;
         this.noiseStrategy = noiseStrategy;
     }

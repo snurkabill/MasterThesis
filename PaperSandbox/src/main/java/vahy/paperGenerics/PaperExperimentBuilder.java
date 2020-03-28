@@ -200,6 +200,7 @@ public class PaperExperimentBuilder<
     private ImmutableTuple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom) {
 
         var strategiesProvider = new StrategiesProvider<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(
+            actionClazz,
             algorithmConfig.getInferenceExistingFlowStrategy(),
             algorithmConfig.getInferenceNonExistingFlowStrategy(),
             algorithmConfig.getExplorationExistingFlowStrategy(),

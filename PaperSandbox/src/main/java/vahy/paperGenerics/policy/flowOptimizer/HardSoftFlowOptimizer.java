@@ -20,16 +20,16 @@ public class HardSoftFlowOptimizer<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
 
-    public HardSoftFlowOptimizer(SplittableRandom random, NoiseStrategy noiseStrategy) {
-        super(random, noiseStrategy);
+    public HardSoftFlowOptimizer(Class<TAction> actionClass, SplittableRandom random, NoiseStrategy noiseStrategy) {
+        super(actionClass, random, noiseStrategy);
     }
 
     @Override
     public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
-        var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+        var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(actionClass, totalRiskAllowed, random, noiseStrategy);
         boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(node);
         if(!optimalSolutionExists) {
-            var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+            var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(actionClass, totalRiskAllowed, random, noiseStrategy);
             optimalSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
         }
         return new ImmutableTuple<>(totalRiskAllowed, optimalSolutionExists);
