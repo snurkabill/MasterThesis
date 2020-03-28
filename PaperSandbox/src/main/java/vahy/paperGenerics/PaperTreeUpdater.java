@@ -15,7 +15,7 @@ public class PaperTreeUpdater<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
+    protected static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
