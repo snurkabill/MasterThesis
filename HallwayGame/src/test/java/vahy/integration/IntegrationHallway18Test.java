@@ -30,7 +30,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     public Object[][] experimentSettings() {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1270.0, 0.055},
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1275.0, 0.055},
             {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
         };
     }
@@ -143,7 +143,8 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
-            .stageCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(20))
+            .stageCount(300)
 //            .explorationConstantSupplier(new Supplier<>() {
 //                private int callCount = 0;
 //                @Override
