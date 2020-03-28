@@ -77,18 +77,18 @@ public class ForExperimenting {
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(true)
-            .setParallelThreadsCount(1)
+            .setParallelThreadsCount(4)
             .setSingleThreadedEvaluation(false)
             .setDumpTrainingData(false)
             .setDumpEvaluationData(false)
-            .setEvalEpisodeCount(0)
+            .setEvalEpisodeCount(1000)
             .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
     }
 
     private static PaperAlgorithmConfig getAlgorithmConfig() {
 
-        var batchEpisodeSize = 100;
+        var batchEpisodeSize = 50;
 
         return new AlgorithmConfigBuilder()
             //MCTS
@@ -101,8 +101,8 @@ public class ForExperimenting {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
-            .stageCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
+            .stageCount(50)
 
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(2)
@@ -113,11 +113,11 @@ public class ForExperimenting {
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(0.00)
+            .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 0.00;
+                    return 1.00;
                 }
 
                 @Override
