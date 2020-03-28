@@ -250,15 +250,15 @@ public class PaperExperimentBuilder<
         var totalRiskAllowed = algorithmConfig.getGlobalRiskAllowed();
         switch (selectorType) {
             case UCB:
-                return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split());
+                return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case RISK_AVERSE_UCB_V3:
                 return () -> new RiskBasedSelector_V3<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case RISK_AVERSE_UCB_V2_EXPERIMENTAL:
                 logger.warn("Node selector: [" + RiskBasedSelector_V2.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelector_V2<>(cpuctParameter, masterRandom.split());
+                return () -> new RiskBasedSelector_V2<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case RISK_AVERSE_UCB_V1_EXPERIMENTAL:
                 logger.warn("Node selector: [" + RiskBasedSelector_V1.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelector_V1<>(cpuctParameter, masterRandom.split(), totalRiskAllowed);
+                return () -> new RiskBasedSelector_V1<>(cpuctParameter, masterRandom.split(), playerTotalActionCount, totalRiskAllowed);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
         }

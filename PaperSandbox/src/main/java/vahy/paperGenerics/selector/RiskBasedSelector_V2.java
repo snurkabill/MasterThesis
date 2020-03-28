@@ -34,8 +34,8 @@ public class RiskBasedSelector_V2<
     private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector_V1.class.getName());
 
     @Experimental
-    public RiskBasedSelector_V2(double cpuctParameter, SplittableRandom random) {
-        super(cpuctParameter, random);
+    public RiskBasedSelector_V2(double cpuctParameter, SplittableRandom random, int totalPlayerActionCount) {
+        super(cpuctParameter, random, totalPlayerActionCount);
     }
 
     protected final ImmutableTuple<Double, Double> getMinMax(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
