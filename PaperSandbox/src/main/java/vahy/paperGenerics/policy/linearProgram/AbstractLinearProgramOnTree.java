@@ -68,7 +68,7 @@ public abstract class AbstractLinearProgramOnTree<
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
         while(!queue.isEmpty()) {
             SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
-            Map<TAction, CLPVariable> actionChildFlowMap = new EnumMap<>(actionClass);
+            EnumMap<TAction, CLPVariable> actionChildFlowMap = new EnumMap<>(actionClass);
 
             if(!node.isLeaf()) {
                 addNodeToQueue(node, actionChildFlowMap);
