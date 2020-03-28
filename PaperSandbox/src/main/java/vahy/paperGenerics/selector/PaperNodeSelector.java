@@ -1,5 +1,7 @@
 package vahy.paperGenerics.selector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -14,6 +16,9 @@ public class PaperNodeSelector<
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+
+    private static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private final double cpuctParameter;
     private final int totalPlayerActions;
@@ -50,6 +55,7 @@ public class PaperNodeSelector<
         double maxValue = -Double.MAX_VALUE;
 
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
+        int maxIndexCount = 0;
         if(max != min) {
             var norm = max - min;
             for (int i = 0; i < possibleActions.length; i++) {
@@ -57,17 +63,7 @@ public class PaperNodeSelector<
                 var vValue = (valueArray[i] - min) / norm;
                 var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
                 var quValue = vValue + uValue;
-                if(quValue > maxValue) {
-                    maxIndex = i;
-                    maxValue = quValue;
-                }
-            }
-            return possibleActions[maxIndex];
-        } else {
-            int maxIndexCount = 0;
-            for (int i = 0; i < possibleActions.length; i++) {
-                var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
-                var quValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
+//                logger.trace("Index: [{}], qValue[{}]", i, quValue);
                 if(quValue > maxValue) {
                     maxIndex = i;
                     maxValue = quValue;
@@ -83,7 +79,40 @@ public class PaperNodeSelector<
                     }
                 }
             }
-            return maxIndexCount == 0 ? possibleActions[maxIndex] : possibleActions[indexArray[random.nextInt(maxIndexCount)]];
+        } else {
+            for (int i = 0; i < possibleActions.length; i++) {
+                var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
+                var quValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
+//                logger.trace("Index: [{}], qValue[{}]", i, quValue);
+                if(quValue > maxValue) {
+                    maxIndex = i;
+                    maxValue = quValue;
+                    maxIndexCount = 0;
+                } else if(quValue == maxValue) {
+                    if(maxIndexCount == 0) {
+                        indexArray[0] = maxIndex;
+                        indexArray[1] = i;
+                        maxIndexCount = 2;
+                    } else {
+                        indexArray[maxIndexCount] = i;
+                        maxIndexCount++;
+                    }
+                }
+            }
+        }
+        if(maxIndexCount == 0) {
+            TAction action = possibleActions[maxIndex];
+            if(TRACE_ENABLED) {
+                logger.trace("Selecting unique action: [{}]", action);
+            }
+            return action;
+        } else {
+            var randomIndex = random.nextInt(maxIndexCount);
+            var action = possibleActions[indexArray[randomIndex]];
+            if(TRACE_ENABLED) {
+                logger.trace("Selecting action: [{}] with random index [{}] from action count: [{}]", action, randomIndex, maxIndexCount);
+            }
+            return action;
         }
     }
 
@@ -96,7 +125,9 @@ public class PaperNodeSelector<
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {
+            logger.trace("Selected node: [{}]", node.toString());
             var action = node.isPlayerTurn() ? getBestAction(node) : sampleOpponentAction(node);
+            logger.trace("Selected next action: [{}]", action.toString());
             node = node.getChildNodeMap().get(action);
         }
         return node;

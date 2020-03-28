@@ -35,6 +35,9 @@ public class PaperTreeUpdater<
     }
 
     private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> updatedNode, double estimatedLeafReward, double estimatedRisk) {
+        if(TRACE_ENABLED) {
+            logger.trace("Updating search node: [{}]", updatedNode);
+        }
         PaperMetadata<TAction> searchNodeMetadata = updatedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
 
