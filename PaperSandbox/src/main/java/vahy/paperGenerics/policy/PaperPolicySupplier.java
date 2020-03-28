@@ -7,7 +7,6 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicySupplier;
-import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
@@ -20,7 +19,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 import vahy.utils.EnumUtils;
 
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
@@ -77,7 +76,6 @@ public class PaperPolicySupplier<
 
     @Override
     public Policy<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
-
         switch(policyMode) {
             case INFERENCE:
                 return createPolicy(initialState);
@@ -89,8 +87,7 @@ public class PaperPolicySupplier<
 
     protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState) {
         logger.debug("Initialized INFERENCE policy. AllowedRisk: [{}]", totalRiskAllowedInference);
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
-            new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
+        var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
         return new PaperPolicyImpl<>(
             actionClass,
             treeUpdateConditionFactory.create(),
@@ -107,8 +104,7 @@ public class PaperPolicySupplier<
 
     protected PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
         logger.debug("Initialized TRAINING policy. Exploration constant: [{}], Temperature: [{}], Risk: [{}]", explorationConstant, temperature, totalRiskAllowed);
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node =
-            new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new LinkedHashMap<>());
+        var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
         return new PaperPolicyImpl<>(
             actionClass,
             treeUpdateConditionFactory.create(),

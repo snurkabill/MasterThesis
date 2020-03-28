@@ -215,7 +215,7 @@ public class PaperExperimentBuilder<
 
         var nodeEvaluator = resolveEvaluator(
             algorithmConfig,
-            new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(new PaperMetadataFactory<>(actionClazz)),
+            new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(actionClazz, new PaperMetadataFactory<>(actionClazz)),
             playerOpponentActions.getFirst(),
             playerOpponentActions.getSecond(),
             predictor,
