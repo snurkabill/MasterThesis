@@ -25,16 +25,30 @@ public class PaperMetadataFactory<
 
     @Override
     public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> parent,
-                                                                          StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
-                                                                          TAction appliedAction) {
-        return new PaperMetadata<>(
-            parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
-            stateRewardReturn.getReward(),
-            DoubleScalarRewardAggregator.emptyReward(),
-            parent != null && !parent.getSearchNodeMetadata().getChildPriorProbabilities().isEmpty() ? parent.getSearchNodeMetadata().getChildPriorProbabilities().get(appliedAction) : Double.NaN,
-            stateRewardReturn.getState().isFinalState() ? (stateRewardReturn.getState().isRiskHit() ? 1.0 : 0.0) : Double.NaN,
-            new EnumMap<>(actionClass)
-        );
+                                                           StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
+                                                           TAction appliedAction) {
+        double reward = stateRewardReturn.getReward();
+        TState state = stateRewardReturn.getState();
+        if(parent != null) {
+            var searchNodeMetadata = parent.getSearchNodeMetadata();
+            return new PaperMetadata<>(
+                DoubleScalarRewardAggregator.aggregate(searchNodeMetadata.getCumulativeReward(), reward),
+                reward,
+                DoubleScalarRewardAggregator.emptyReward(),
+                searchNodeMetadata.getChildPriorProbabilities().get(appliedAction),
+                state.isFinalState() ? (state.isRiskHit() ? 1.0 : 0.0) : Double.NaN,
+                new EnumMap<>(actionClass)
+            );
+        } else {
+            return new PaperMetadata<>(
+                reward,
+                reward,
+                DoubleScalarRewardAggregator.emptyReward(),
+                Double.NaN,
+                state.isFinalState() ? (state.isRiskHit() ? 1.0 : 0.0) : Double.NaN,
+                new EnumMap<>(actionClass)
+            );
+        }
     }
 
     @Override
