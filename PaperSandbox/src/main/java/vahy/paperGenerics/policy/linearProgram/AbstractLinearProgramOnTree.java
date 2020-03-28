@@ -24,6 +24,7 @@ public abstract class AbstractLinearProgramOnTree<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTree.class.getName());
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -10);
 
@@ -84,7 +85,7 @@ public abstract class AbstractLinearProgramOnTree<
         finalizeHardConstraints();
 
         long finishBuildingLinearProgram = System.currentTimeMillis();
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
         }
         long startOptimization = System.currentTimeMillis();
@@ -101,7 +102,7 @@ public abstract class AbstractLinearProgramOnTree<
             throw new IllegalStateException("Flow is not equal to 1");
         }
         long finishOptimization = System.currentTimeMillis();
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Optimizing linear program took [{}] ms", finishOptimization - startOptimization);
         }
         return true;

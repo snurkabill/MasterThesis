@@ -25,6 +25,7 @@ public abstract class AbstractTreeSearchPolicy<
     implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
@@ -49,7 +50,7 @@ public abstract class AbstractTreeSearchPolicy<
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
         for (int i = 0; treeUpdateCondition.isConditionSatisfied(); i++) {
-            if(logger.isTraceEnabled()) {
+            if(TRACE_ENABLED) {
                 logger.trace("Performing tree update for [{}]th iteration", i);
             }
             searchTree.updateTree();

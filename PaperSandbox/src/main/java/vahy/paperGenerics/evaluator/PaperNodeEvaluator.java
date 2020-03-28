@@ -29,6 +29,7 @@ public class PaperNodeEvaluator<
     implements NodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     protected final SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     protected final TrainablePredictor trainablePredictor;
@@ -52,13 +53,13 @@ public class PaperNodeEvaluator<
     public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         var nodesExpanded = 0;
         if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
-            if(logger.isTraceEnabled()) {
+            if(TRACE_ENABLED) {
                 logger.trace("Expanding root since it is freshly created without evaluation");
             }
             nodesExpanded += innerEvaluation(selectedNode);
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         }
         Map<TAction, SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();

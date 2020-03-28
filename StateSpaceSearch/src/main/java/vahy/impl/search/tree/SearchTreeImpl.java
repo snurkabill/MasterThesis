@@ -6,7 +6,10 @@ import guru.nidi.graphviz.attribute.RankDir;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.engine.GraphvizException;
+import static guru.nidi.graphviz.model.Factory.graph;
+import static guru.nidi.graphviz.model.Factory.node;
 import guru.nidi.graphviz.model.Graph;
+import static guru.nidi.graphviz.model.Link.to;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
@@ -28,10 +31,6 @@ import java.util.LinkedList;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static guru.nidi.graphviz.model.Factory.graph;
-import static guru.nidi.graphviz.model.Factory.node;
-import static guru.nidi.graphviz.model.Link.to;
-
 public class SearchTreeImpl<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
@@ -41,6 +40,8 @@ public class SearchTreeImpl<
     implements SearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root;
     private final NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
@@ -70,7 +71,7 @@ public class SearchTreeImpl<
             return false;
         }
         if(!selectedNodeForExpansion.isFinalNode()) {
-            if(logger.isTraceEnabled()) {
+            if(TRACE_ENABLED) {
                 logger.trace("Selected node [{}] is not final node, expanding", selectedNodeForExpansion);
             }
             expandAndEvaluateNode(selectedNodeForExpansion);
@@ -161,7 +162,7 @@ public class SearchTreeImpl<
             throw new IllegalArgumentException("Cannot expand final node");
         }
         if(root.isLeaf()) {
-            if(logger.isDebugEnabled()) {
+            if(DEBUG_ENABLED) {
                 logger.debug("Expanding root since it is not final node and has no children expanded");
             }
             expandAndEvaluateNode(root);

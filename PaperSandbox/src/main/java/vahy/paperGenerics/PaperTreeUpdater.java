@@ -16,6 +16,7 @@ public class PaperTreeUpdater<
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
     public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
@@ -28,7 +29,7 @@ public class PaperTreeUpdater<
             i++;
         }
         updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Traversing updated traversed [{}] tree levels", i);
         }
     }

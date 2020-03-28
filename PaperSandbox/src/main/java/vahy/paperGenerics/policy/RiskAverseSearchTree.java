@@ -31,6 +31,7 @@ public class RiskAverseSearchTree<
     extends SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(RiskAverseSearchTree.class);
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
 
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
@@ -147,12 +148,12 @@ public class RiskAverseSearchTree<
 
     private double roundRiskIfBelowZero(double risk, String riskName) {
         if(risk < 0.0 - NUMERICAL_RISK_DIFF_TOLERANCE) {
-            if(logger.isDebugEnabled()) {
+            if(DEBUG_ENABLED) {
                 logger.debug("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
             }
             return 0.0;
         } else if(risk < 0.0) {
-            if(logger.isDebugEnabled()) {
+            if(DEBUG_ENABLED) {
                 logger.debug("Rounding risk [{}] with value [{}] to 0.0", riskName, risk);
             }
             return 0.0;
@@ -214,7 +215,7 @@ public class RiskAverseSearchTree<
                     totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
                 }
 
-                if(logger.isDebugEnabled()) {
+                if(DEBUG_ENABLED) {
                     logger.debug("Playing action: [{}] from actions: [{}]) with distribution: [{}] with minimalRiskReachAbility: [{}]. Risk of other player actions: [{}]. Risk of other Opponent actions: [{}], dividing probability: [{}], old risk: [{}], new risk: [{}]",
                         playingDistribution.getExpectedPlayerAction(),
                         Arrays.stream(action.getAllPlayerActions()).map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
@@ -228,12 +229,12 @@ public class RiskAverseSearchTree<
                     );
                 }
                 if(totalRiskAllowed > 1.0 + NUMERICAL_RISK_DIFF_TOLERANCE) {
-                    if(logger.isDebugEnabled()) {
+                    if(DEBUG_ENABLED) {
                         logger.debug("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
                     }
                     totalRiskAllowed = 1.0;
                 }
-                if(logger.isDebugEnabled()) {
+                if(DEBUG_ENABLED) {
                     logger.debug("New Global risk: [{}]", totalRiskAllowed);
                 }
             }

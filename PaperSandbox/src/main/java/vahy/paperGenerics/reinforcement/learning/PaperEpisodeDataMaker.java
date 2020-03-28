@@ -35,7 +35,7 @@ public class PaperEpisodeDataMaker<
         var aggregatedRisk = episodeHistory.get(episodeHistory.size() - 1).getToState().isRiskHit() ? 1.0 : 0.0;
         var aggregatedTotalPayoff = 0.0;
         var iterator = episodeHistory.listIterator(episodeResults.getTotalStepCount());
-        var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>();
+        var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(episodeResults.getPlayerStepCount());
         while(iterator.hasPrevious()) {
             var previous = iterator.previous();
             aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getReward(), aggregatedTotalPayoff, discountFactor);
