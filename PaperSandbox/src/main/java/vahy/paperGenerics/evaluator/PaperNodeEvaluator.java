@@ -62,7 +62,7 @@ public class PaperNodeEvaluator<
         if(TRACE_ENABLED) {
             logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         }
-        Map<TAction, SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
+        var childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
             var nodeAndExpansions = evaluateChildNode(selectedNode, nextAction);
             childNodeMap.put(nextAction, nodeAndExpansions.getFirst());
