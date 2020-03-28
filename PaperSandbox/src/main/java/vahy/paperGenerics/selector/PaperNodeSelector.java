@@ -1,7 +1,5 @@
 package vahy.paperGenerics.selector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;

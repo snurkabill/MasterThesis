@@ -41,15 +41,15 @@
             <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
             <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>
         </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <onMatch>ACCEPT</onMatch>
-            <onMismatch>DENY</onMismatch>
-        </filter>
+<!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+<!--            <level>INFO</level>-->
+<!--            <onMatch>ACCEPT</onMatch>-->
+<!--            <onMismatch>DENY</onMismatch>-->
+<!--        </filter>-->
     </appender>
 
-    <root name="vahy" level="trace">
-        <appender-ref ref="FILE"/>
+    <root name="vahy" level="info">
+<!--        <appender-ref ref="FILE"/>-->
         <appender-ref ref="CONSOLE"/>
     </root>
 
