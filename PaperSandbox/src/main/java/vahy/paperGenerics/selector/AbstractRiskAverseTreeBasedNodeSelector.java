@@ -25,7 +25,7 @@ public abstract class AbstractRiskAverseTreeBasedNodeSelector<
     extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
     implements RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
+    protected static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     protected final SplittableRandom random;
@@ -47,7 +47,7 @@ public abstract class AbstractRiskAverseTreeBasedNodeSelector<
         int randomIndex = RandomDistributionUtils.getRandomIndexFromDistribution(priorProbabilities, random);
         TAction action = actions.get(randomIndex);
         if(TRACE_ENABLED) {
-            logger.trace("Sampled [{}] action from opponent's actions: [{}] by random index [{}] from [{}] distribution.", action, actions.stream().map(Enum::toString).collect(Collectors.joining(", ")), randomIndex, Arrays.toString(priorProbabilities));
+            logger.trace("Sampled [{}] action from opponent's actions: [{}] by random index [{}] from [{}] distribution.", action, actions.stream().map(Object::toString).collect(Collectors.joining(", ")), randomIndex, Arrays.toString(priorProbabilities));
         }
         return action;
     }
