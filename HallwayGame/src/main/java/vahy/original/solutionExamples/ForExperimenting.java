@@ -88,7 +88,7 @@ public class ForExperimenting {
 
     private static PaperAlgorithmConfig getAlgorithmConfig() {
 
-        var batchEpisodeSize = 1;
+        var batchEpisodeSize = 100;
 
         return new AlgorithmConfigBuilder()
             //MCTS
@@ -101,8 +101,8 @@ public class ForExperimenting {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(10))
-            .stageCount(1)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .stageCount(100)
 
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(2)

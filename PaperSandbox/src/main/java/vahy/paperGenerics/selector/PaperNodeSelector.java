@@ -97,18 +97,9 @@ public class PaperNodeSelector<
             }
         }
         if(maxIndexCount == 0) {
-            TAction action = possibleActions[maxIndex];
-            if(TRACE_ENABLED) {
-                logger.trace("Selecting unique action: [{}]", action);
-            }
-            return action;
+            return possibleActions[maxIndex];
         } else {
-            var randomIndex = random.nextInt(maxIndexCount);
-            var action = possibleActions[indexArray[randomIndex]];
-            if(TRACE_ENABLED) {
-                logger.trace("Selecting action: [{}] with random index [{}] from action count: [{}]", action, randomIndex, maxIndexCount);
-            }
-            return action;
+            return possibleActions[indexArray[random.nextInt(maxIndexCount)]];
         }
     }
 
@@ -121,9 +112,7 @@ public class PaperNodeSelector<
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {
-            logger.trace("Selected node: [{}]", node.toString());
             var action = node.isPlayerTurn() ? getBestAction(node) : sampleOpponentAction(node);
-            logger.trace("Selected next action: [{}]", action.toString());
             node = node.getChildNodeMap().get(action);
         }
         return node;
