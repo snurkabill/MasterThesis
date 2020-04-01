@@ -59,11 +59,11 @@ public class Benchmark03Solution extends DefaultLocalBenchmark {
             .setBatchedEvaluationSize(1)
 
 
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
             .stageCount(50)
             .evaluatorType(EvaluatorType.RALF_BATCHED)
-            .globalRiskAllowed(1.00)
-            .riskSupplier(() -> 1.00)
+            .globalRiskAllowed(0.00)
+            .riskSupplier(() -> 0.00)
 
             .selectorType(SelectorType.UCB)
 

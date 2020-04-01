@@ -1,19 +1,17 @@
-package vahy.paperGenerics.policy.riskSubtree;
+package vahy.paperGenerics.policy.linearProgram.deprecated;
 
-import com.quantego.clp.CLPVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
+import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
+import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 
-import java.util.List;
-
-public class MinimalRiskReachAbilityCalculator<
+@Deprecated
+public class MinimalRiskReachAbilityCalculatorDeprecated<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -21,7 +19,13 @@ public class MinimalRiskReachAbilityCalculator<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculator.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculatorDeprecated.class.getName());
+
+    private final Class<TAction> actionClass;
+
+    public MinimalRiskReachAbilityCalculatorDeprecated(Class<TAction> actionClass) {
+        this.actionClass = actionClass;
+    }
 
     @Override
     public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
@@ -30,7 +34,7 @@ public class MinimalRiskReachAbilityCalculator<
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
         }
 
-        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
+        var linProgram = new AbstractLinearProgramOnTreeDeprecated<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(actionClass, false, null, NoiseStrategy.NONE) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
                 if(node.getWrappedState().isRiskHit()) {
@@ -38,16 +42,6 @@ public class MinimalRiskReachAbilityCalculator<
                 } else {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getPredictedRisk());
                 }
-            }
-
-            @Override
-            protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> searchNodes, CLPVariable parentFlow) {
-                double sum = 0.0;
-                for (var entry : searchNodes) {
-                    var metadata = entry.getSearchNodeMetadata();
-                    sum += (entry.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk()) * metadata.getPriorProbability();
-                }
-                model.setObjectiveCoefficient(parentFlow, sum);
             }
 
             @Override

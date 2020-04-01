@@ -14,6 +14,7 @@ public class PaperMetadata<TAction extends Enum<TAction> & Action> extends Monte
     private double priorProbability;
     private double predictedRisk;
     private double sumOfRisk;
+    private double flow;
 
     public PaperMetadata(double cumulativeReward,
                          double gainedReward,
@@ -26,6 +27,7 @@ public class PaperMetadata<TAction extends Enum<TAction> & Action> extends Monte
         this.predictedRisk = predictedRisk;
         this.childPriorProbabilities = childPriorProbabilities;
         this.sumOfRisk = predictedRisk;
+        this.flow = 0.0;
     }
 
     public double getPriorProbability() {
@@ -46,6 +48,21 @@ public class PaperMetadata<TAction extends Enum<TAction> & Action> extends Monte
 
     public CLPVariable getNodeProbabilityFlow() {
         return nodeProbabilityFlow;
+    }
+
+    public double getFlow() {
+        if(nodeProbabilityFlow == null) {
+            return flow;
+        } else {
+            return nodeProbabilityFlow.getSolution();
+        }
+    }
+
+    public void setFlow(double flow) {
+        if(nodeProbabilityFlow != null) {
+            throw new IllegalStateException("Variable for flow optimization exists");
+        }
+        this.flow = flow;
     }
 
     public void setNodeProbabilityFlow(CLPVariable nodeProbabilityFlow) {
@@ -77,6 +94,8 @@ public class PaperMetadata<TAction extends Enum<TAction> & Action> extends Monte
         stringBuilder.append(this.sumOfRisk);
         stringBuilder.append("\\nCalculatedFlow: ");
         stringBuilder.append(nodeProbabilityFlow != null ? this.nodeProbabilityFlow.getSolution() : null);
+        stringBuilder.append("\\nFinalFlow: ");
+        stringBuilder.append(getFlow());
         return stringBuilder.toString();
     }
 }

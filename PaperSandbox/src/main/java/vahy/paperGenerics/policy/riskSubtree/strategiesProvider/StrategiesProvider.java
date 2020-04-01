@@ -119,15 +119,15 @@ public class StrategiesProvider<
     public AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> provideFlowOptimizer(SplittableRandom random) {
         switch (flowOptimizerType) {
             case HARD:
-                return new HardFlowOptimizer<>(actionClass, random, noiseStrategy);
+                return new HardFlowOptimizer<>(random, noiseStrategy);
             case SOFT:
-                return new SoftFlowOptimizer<>(actionClass, random, noiseStrategy);
+                return new SoftFlowOptimizer<>(random, noiseStrategy);
             case HARD_SOFT:
-                return new HardSoftFlowOptimizer<>(actionClass, random, noiseStrategy);
+                return new HardSoftFlowOptimizer<>(random, noiseStrategy);
             case HARD_HARD:
-                return new HardHardFlowOptimizer<>(actionClass, random, noiseStrategy);
+                return new HardHardFlowOptimizer<>(random, noiseStrategy);
             case HARD_HARD_SOFT:
-                return new HardHardSoftFlowOptimizer<>(actionClass, random, noiseStrategy);
+                return new HardHardSoftFlowOptimizer<>(random, noiseStrategy);
             default:
                 throw EnumUtils.createExceptionForNotExpectedEnumValue(flowOptimizerType);
         }
@@ -138,7 +138,7 @@ public class StrategiesProvider<
             case FLOW_SUM:
                 return FlowSumSubtreeRiskCalculator::new;
             case MINIMAL_RISK_REACHABILITY:
-                return () -> new MinimalRiskReachAbilityCalculator<>(actionClass);
+                return MinimalRiskReachAbilityCalculator::new;
             case PRIOR_SUM:
                 return SubtreePriorRiskCalculator::new;
             case ROOT_PREDICTION:

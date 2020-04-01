@@ -38,4 +38,9 @@ public class SubtreePriorRiskCalculator<
         }
         return totalRisk;
     }
+
+    @Override
+    public String toLog() {
+        return "SUBTREE_RISK_PRIOR_SUM";
+    }
 }

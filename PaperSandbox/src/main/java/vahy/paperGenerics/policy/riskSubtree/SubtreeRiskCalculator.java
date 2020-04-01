@@ -15,4 +15,6 @@ public interface SubtreeRiskCalculator<
 
     double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot);
 
+    String toLog();
+
 }

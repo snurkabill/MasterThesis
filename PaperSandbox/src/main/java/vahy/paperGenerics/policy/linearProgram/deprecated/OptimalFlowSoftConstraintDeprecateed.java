@@ -1,4 +1,4 @@
-package vahy.paperGenerics.policy.linearProgram;
+package vahy.paperGenerics.policy.linearProgram.deprecated;
 
 import com.quantego.clp.CLPExpression;
 import org.slf4j.Logger;
@@ -8,25 +8,27 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
 import java.util.SplittableRandom;
 
-public class OptimalFlowSoftConstraint<
+@Deprecated
+public class OptimalFlowSoftConstraintDeprecateed<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    extends AbstractLinearProgramOnTreeDeprecated<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OptimalFlowSoftConstraint.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(OptimalFlowSoftConstraintDeprecateed.class.getName());
 
     private static final double RISK_COEFFICIENT = 1.0;
 
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
 
-    public OptimalFlowSoftConstraint(Class<TAction> actionClass, double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
+    public OptimalFlowSoftConstraintDeprecateed(Class<TAction> actionClass, double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
         super(actionClass, true, random, strategy);
         this.totalRiskExpression = model.createExpression();
         this.totalRiskAllowed = totalRiskAllowed;
