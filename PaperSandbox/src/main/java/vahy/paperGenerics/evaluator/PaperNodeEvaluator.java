@@ -22,13 +22,14 @@ import java.util.Set;
 import java.util.function.Function;
 
 public class PaperNodeEvaluator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
     implements NodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     protected final SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     protected final TrainablePredictor trainablePredictor;
@@ -52,16 +53,16 @@ public class PaperNodeEvaluator<
     public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         var nodesExpanded = 0;
         if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
-            if(logger.isTraceEnabled()) {
+            if(TRACE_ENABLED) {
                 logger.trace("Expanding root since it is freshly created without evaluation");
             }
             nodesExpanded += innerEvaluation(selectedNode);
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         }
-        Map<TAction, SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
+        var childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
             var nodeAndExpansions = evaluateChildNode(selectedNode, nextAction);
             childNodeMap.put(nextAction, nodeAndExpansions.getFirst());

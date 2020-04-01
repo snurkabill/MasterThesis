@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.SplittableRandom;
 
 public class RiskAverseSearchTree<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -31,6 +31,7 @@ public class RiskAverseSearchTree<
     extends SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(RiskAverseSearchTree.class);
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
 
     public static final double NUMERICAL_RISK_DIFF_TOLERANCE = Math.pow(10, -13);
     public static final double NUMERICAL_PROBABILITY_TOLERANCE = Math.pow(10, -13);
@@ -134,7 +135,7 @@ public class RiskAverseSearchTree<
             var result = flowOptimizer.optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
             if(!result.getSecond()) {
-                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + getRoot().getWrappedState().readableStringRepresentation() + "] with allowed risk: [" + totalRiskAllowed + "]");
+                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
                 totalRiskAllowed = 1.0;
                 isFlowOptimized = false;
                 return false;
@@ -147,12 +148,12 @@ public class RiskAverseSearchTree<
 
     private double roundRiskIfBelowZero(double risk, String riskName) {
         if(risk < 0.0 - NUMERICAL_RISK_DIFF_TOLERANCE) {
-            if(logger.isDebugEnabled()) {
+            if(DEBUG_ENABLED) {
                 logger.debug("Risk [" + riskName + "] cannot be negative. Actual value: [" + risk + "]");
             }
             return 0.0;
         } else if(risk < 0.0) {
-            if(logger.isDebugEnabled()) {
+            if(DEBUG_ENABLED) {
                 logger.debug("Rounding risk [{}] with value [{}] to 0.0", riskName, risk);
             }
             return 0.0;
@@ -214,7 +215,7 @@ public class RiskAverseSearchTree<
                     totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
                 }
 
-                if(logger.isDebugEnabled()) {
+                if(DEBUG_ENABLED) {
                     logger.debug("Playing action: [{}] from actions: [{}]) with distribution: [{}] with minimalRiskReachAbility: [{}]. Risk of other player actions: [{}]. Risk of other Opponent actions: [{}], dividing probability: [{}], old risk: [{}], new risk: [{}]",
                         playingDistribution.getExpectedPlayerAction(),
                         Arrays.stream(action.getAllPlayerActions()).map(Object::toString).reduce((x, y) -> x + ", " + y).orElseThrow(() -> new IllegalStateException("Result of reduce does not exist")),
@@ -228,12 +229,12 @@ public class RiskAverseSearchTree<
                     );
                 }
                 if(totalRiskAllowed > 1.0 + NUMERICAL_RISK_DIFF_TOLERANCE) {
-                    if(logger.isDebugEnabled()) {
+                    if(DEBUG_ENABLED) {
                         logger.debug("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
                     }
                     totalRiskAllowed = 1.0;
                 }
-                if(logger.isDebugEnabled()) {
+                if(DEBUG_ENABLED) {
                     logger.debug("New Global risk: [{}]", totalRiskAllowed);
                 }
             }
@@ -257,7 +258,7 @@ public class RiskAverseSearchTree<
 
 
     private void printTreeToFileWithFlowNodesOnly(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName) {
-        printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow() == null || a.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() != 0);
+        printTreeToFileInternal(subtreeRoot, fileName, Integer.MAX_VALUE, a -> a.getSearchNodeMetadata().getNodeProbabilityFlow() == null || a.getSearchNodeMetadata().getFlow() != 0);
     }
 
 }

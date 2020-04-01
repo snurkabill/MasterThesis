@@ -1,18 +1,20 @@
 package vahy.paperGenerics.policy.linearProgram;
 
 import com.quantego.clp.CLPExpression;
+import com.quantego.clp.CLPVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 
+import java.util.List;
 import java.util.SplittableRandom;
 
 public class OptimalFlowHardConstraintCalculator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -30,26 +32,32 @@ public class OptimalFlowHardConstraintCalculator<
         this.totalRiskAllowed = totalRiskAllowed;
     }
 
-
     @Override
     protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getPredictedRisk();
-        totalRiskExpression.add(nodeRisk, node.getSearchNodeMetadata().getNodeProbabilityFlow());
-        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward();
-        double expectedReward = node.getSearchNodeMetadata().getExpectedReward();
-        double leafCoefficient = cumulativeReward + expectedReward;
+        var metadata = node.getSearchNodeMetadata();
+        double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
+        totalRiskExpression.add(nodeRisk, metadata.getNodeProbabilityFlow());
+        model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), getNodeValue(metadata));
+    }
 
-        if(strategy != NoiseStrategy.NONE) {
-            var value = random.nextDouble(noiseLowerBound, noiseUpperBound);
-            leafCoefficient = leafCoefficient + (random.nextBoolean() ? value : -value);
+    @Override
+    protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow) {
+        double sum = 0.0;
+        for (SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> entry : nodeList) {
+            var metadata = entry.getSearchNodeMetadata();
+            double nodeRisk = entry.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
+            double priorProbability = metadata.getPriorProbability();
+            totalRiskExpression.add(nodeRisk * priorProbability, parentFlow);
+            sum += getNodeValue(metadata) * priorProbability;
         }
-
-        model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), leafCoefficient);
+        model.setObjectiveCoefficient(parentFlow, sum);
     }
 
     @Override
     protected void finalizeHardConstraints() {
         this.totalRiskExpression.leq(totalRiskAllowed);
     }
+
+
 
 }

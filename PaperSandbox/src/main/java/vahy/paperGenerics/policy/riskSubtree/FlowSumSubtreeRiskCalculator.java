@@ -9,7 +9,7 @@ import vahy.paperGenerics.PaperState;
 import java.util.LinkedList;
 
 public class FlowSumSubtreeRiskCalculator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -25,9 +25,9 @@ public class FlowSumSubtreeRiskCalculator<
             var node = queue.poll();
             if(node.isLeaf()) {
                 if(node.isFinalNode()) {
-                    risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() : 0.0;
+                    risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
                 } else {
-                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution();
+                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getFlow();
                 }
             } else {
                 for (var entry : node.getChildNodeMap().entrySet()) {
@@ -36,6 +36,11 @@ public class FlowSumSubtreeRiskCalculator<
             }
         }
         return risk;
+    }
+
+    @Override
+    public String toLog() {
+        return "SUBTREE_RISK_OPTIMIZED_FLOW";
     }
 
 }

@@ -10,19 +10,21 @@ import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.search.node.SearchNodeImpl;
 
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 
 public class SearchNodeBaseFactoryImpl<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
+    private final Class<TAction> actionClass;
     private final SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
 
-    public SearchNodeBaseFactoryImpl(SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory) {
+    public SearchNodeBaseFactoryImpl(Class<TAction> actionClass, SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory) {
+        this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
     }
 
@@ -34,7 +36,7 @@ public class SearchNodeBaseFactoryImpl<
         return new SearchNodeImpl<>(
             stateRewardReturn.getState(),
             searchNodeMetadataFactory.createSearchNodeMetadata(parent, stateRewardReturn, action),
-            new LinkedHashMap<>(),
+            new EnumMap<>(actionClass),
             parent,
             action);
     }

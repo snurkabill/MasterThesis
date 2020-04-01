@@ -31,12 +31,13 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class StrategiesProvider<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
 
+    private final Class<TAction> actionClass;
     private final InferenceExistingFlowStrategy inferenceExistingFlowStrategy;
     private final InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy;
     private final ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
@@ -46,7 +47,7 @@ public class StrategiesProvider<
     private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
     private final NoiseStrategy noiseStrategy;
 
-    public StrategiesProvider(InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
+    public StrategiesProvider(Class<TAction> actionClass, InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
                               InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
                               ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
@@ -54,6 +55,7 @@ public class StrategiesProvider<
                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
                               SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
                               NoiseStrategy noiseStrategy) {
+        this.actionClass = actionClass;
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;

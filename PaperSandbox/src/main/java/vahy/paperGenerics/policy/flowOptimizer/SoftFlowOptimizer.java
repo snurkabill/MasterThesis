@@ -6,13 +6,13 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
-import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraint;
+import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraintCalculator;
 import vahy.utils.ImmutableTuple;
 
 import java.util.SplittableRandom;
 
 public class SoftFlowOptimizer<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -25,7 +25,7 @@ public class SoftFlowOptimizer<
 
     @Override
     public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
-        var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+        var optimalSoftFlowCalculator = new OptimalFlowSoftConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
         boolean optimalSoftSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
         return new ImmutableTuple<>(totalRiskAllowed, optimalSoftSolutionExists);
     }

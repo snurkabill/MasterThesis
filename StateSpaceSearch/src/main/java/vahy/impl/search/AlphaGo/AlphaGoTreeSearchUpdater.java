@@ -9,13 +9,14 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
 
 public class AlphaGoTreeSearchUpdater<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoTreeSearchUpdater.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
 
     @Override
@@ -28,7 +29,9 @@ public class AlphaGoTreeSearchUpdater<
             i++;
         }
         updateNode(expandedNode, estimatedLeafReward);
-        logger.trace("Traversing updated traversed [{}] tree levels", i);
+        if(TRACE_ENABLED) {
+            logger.trace("Traversing updated traversed [{}] tree levels", i);
+        }
     }
 
     private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> expandedNode, double estimatedLeafReward) {

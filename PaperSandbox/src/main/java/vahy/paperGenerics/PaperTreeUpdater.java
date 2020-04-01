@@ -9,13 +9,14 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class PaperTreeUpdater<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
+    protected static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
     public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
@@ -28,12 +29,15 @@ public class PaperTreeUpdater<
             i++;
         }
         updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Traversing updated traversed [{}] tree levels", i);
         }
     }
 
     private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> updatedNode, double estimatedLeafReward, double estimatedRisk) {
+        if(TRACE_ENABLED) {
+            logger.trace("Updating search node: [{}]", updatedNode);
+        }
         PaperMetadata<TAction> searchNodeMetadata = updatedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
 

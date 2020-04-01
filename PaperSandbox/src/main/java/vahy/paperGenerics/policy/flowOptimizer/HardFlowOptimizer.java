@@ -3,8 +3,8 @@ package vahy.paperGenerics.policy.flowOptimizer;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.linearProgram.OptimalFlowHardConstraintCalculator;
 import vahy.utils.ImmutableTuple;
@@ -12,7 +12,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.SplittableRandom;
 
 public class HardFlowOptimizer<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

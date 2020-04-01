@@ -5,6 +5,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.policy.riskSubtree.ConstantRiskCalculator;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.SplittableRandom;
 
 public class UcbVisitDistributionProvider<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -21,7 +22,7 @@ public class UcbVisitDistributionProvider<
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public UcbVisitDistributionProvider(boolean applyTemperature) {
-        super(applyTemperature);
+        super(applyTemperature, () -> new ConstantRiskCalculator<>(1.0));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class UcbVisitDistributionProvider<
             RandomDistributionUtils.applyBoltzmannNoise(rewardArray, temperature);
         }
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(rewardArray, random);
-        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, () -> subtreeRoot -> 1);
+        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
     }
 
 }

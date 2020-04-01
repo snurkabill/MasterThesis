@@ -1,5 +1,7 @@
 package vahy.paperGenerics.selector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -10,16 +12,21 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public abstract class AbstractRiskAverseTreeBasedNodeSelector<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
     implements RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+
+    protected static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     protected final SplittableRandom random;
     protected double allowedRiskInRoot;
@@ -38,7 +45,11 @@ public abstract class AbstractRiskAverseTreeBasedNodeSelector<
             index++;
         }
         int randomIndex = RandomDistributionUtils.getRandomIndexFromDistribution(priorProbabilities, random);
-        return actions.get(randomIndex);
+        TAction action = actions.get(randomIndex);
+        if(TRACE_ENABLED) {
+            logger.trace("Sampled [{}] action from opponent's actions: [{}] by random index [{}] from [{}] distribution.", action, actions.stream().map(Object::toString).collect(Collectors.joining(", ")), randomIndex, Arrays.toString(priorProbabilities));
+        }
+        return action;
     }
 
     @Override

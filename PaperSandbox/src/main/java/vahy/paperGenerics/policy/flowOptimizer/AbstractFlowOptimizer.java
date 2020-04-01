@@ -11,7 +11,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.SplittableRandom;
 
 public abstract class AbstractFlowOptimizer<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

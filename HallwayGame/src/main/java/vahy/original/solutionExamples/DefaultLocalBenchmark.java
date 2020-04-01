@@ -62,8 +62,9 @@ public class DefaultLocalBenchmark {
             .setOpponentSupplier(HallwayPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
-        paperExperimentBuilder.execute();
+        var results = paperExperimentBuilder.execute();
 
+        logger.info(results.get(0).getEpisodeStatistics().printToLog());
 
     }
 
@@ -88,11 +89,11 @@ public class DefaultLocalBenchmark {
             .learningRate(0.01)
 
             .approximatorType(ApproximatorType.HASHMAP_LR)
-            .globalRiskAllowed(1.00)
+            .globalRiskAllowed(0.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
-                    return 1.00;
+                    return 0.00;
                 }
 
                 @Override

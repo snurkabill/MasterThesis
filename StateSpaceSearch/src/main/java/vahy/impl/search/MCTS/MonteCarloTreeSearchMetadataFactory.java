@@ -9,7 +9,7 @@ import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 
 public class MonteCarloTreeSearchMetadataFactory<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>

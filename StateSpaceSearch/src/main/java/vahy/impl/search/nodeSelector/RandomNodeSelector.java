@@ -8,7 +8,7 @@ import vahy.api.search.node.SearchNode;
 import java.util.SplittableRandom;
 
 public class RandomNodeSelector<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata,

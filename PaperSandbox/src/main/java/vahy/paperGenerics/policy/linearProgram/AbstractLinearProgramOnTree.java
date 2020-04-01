@@ -11,19 +11,20 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTree<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTree.class.getName());
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
 
     private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -10);
 
@@ -33,17 +34,32 @@ public abstract class AbstractLinearProgramOnTree<
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
     private static final double RISK_COEFFICIENT = 1.0;
 
+    private class InnerElement {
+
+        private final SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node;
+        private final double modifier;
+        private final CLPVariable flowVariable;
+
+        private InnerElement(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double modifier, CLPVariable flowVariable) {
+            this.node = node;
+            this.modifier = modifier;
+            this.flowVariable = flowVariable;
+        }
+    }
+
+    private final boolean maximize;
+    private final NoiseStrategy strategy;
+    private final SplittableRandom random;
+    private final double noiseUpperBound;
+    private final double noiseLowerBound;
     protected CLP model;
-    protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
-    private boolean maximize;
-    protected final SplittableRandom random;
-    protected final NoiseStrategy strategy;
-    protected final double noiseUpperBound;
-    protected final double noiseLowerBound;
+
+    private LinkedList<InnerElement> masterQueue;
 
     protected AbstractLinearProgramOnTree(boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
         this.model = new CLP();
-        this.queue = new LinkedList<>();
+        this.model.algorithm(CLP.ALGORITHM.PRIMAL);
+        this.masterQueue = new LinkedList<>();
         this.maximize = maximize;
         this.random = random;
         this.strategy = strategy;
@@ -52,6 +68,7 @@ public abstract class AbstractLinearProgramOnTree<
     }
 
     protected abstract void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
+    protected abstract void setLeafObjectiveWithFlow(List<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow);
 
     protected abstract void finalizeHardConstraints();
 
@@ -60,32 +77,44 @@ public abstract class AbstractLinearProgramOnTree<
     }
 
     public boolean optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+        if(root.isPlayerTurn()) {
+            return optimizePlayerNode(root);
+        } else {
+            return optimizeOpponentNode(root);
+        }
+    }
+
+    private boolean optimizeOpponentNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+        throw new UnsupportedOperationException("Linear optimization of opponent node is not supported for now");
+    }
+
+    private boolean optimizePlayerNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
-        queue.addFirst(root);
-        root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
-        while(!queue.isEmpty()) {
-            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = queue.poll();
-            Map<TAction, CLPVariable> actionChildFlowMap = new HashMap<>();
-
-            if(!node.isLeaf()) {
-                addNodeToQueue(node, actionChildFlowMap);
-            }
-
-            if(node.isLeaf()) {
-                setLeafObjective(node);
-            } else {
-                addSummingChildrenWithParentToZeroExpression(node, actionChildFlowMap);
-                if(!node.getWrappedState().isPlayerTurn()) {
-                    addChildFlowBasedOnFixedProbabilitiesExpression(node, actionChildFlowMap);
+        initializeQueues(root);
+        while(!masterQueue.isEmpty()) {
+            var innerElement = masterQueue.pop();
+            if(!innerElement.node.isLeaf()) {
+                CLPExpression parentFlowDistribution = model.createExpression();
+                for (var opponentNode : innerElement.node.getChildNodeMap().values()) {
+                    CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
+                    opponentNode.getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
+                    parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlow);
+                    if(!opponentNode.isLeaf()) {
+                        resolveNonLeafSubChild(opponentNode, childFlow);
+                    } else {
+                        setLeafObjective(opponentNode);
+                    }
                 }
+                parentFlowDistribution.add(-innerElement.modifier, innerElement.flowVariable);
+                parentFlowDistribution.eq(0.0);
+            } else {
+                setLeafObjective(innerElement.node);
             }
         }
 
         finalizeHardConstraints();
-
-        long finishBuildingLinearProgram = System.currentTimeMillis();
-        if(logger.isTraceEnabled()) {
-            logger.trace("Building linear program took [{}]ms", finishBuildingLinearProgram - startBuildingLinearProgram);
+        if(DEBUG_ENABLED) {
+            logger.debug("Building linear program took [{}]ms", System.currentTimeMillis() - startBuildingLinearProgram);
         }
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
@@ -93,56 +122,67 @@ public abstract class AbstractLinearProgramOnTree<
             logger.debug("Optimal solution was not found.");
             return false;
         }
-        if(root.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution() < FLOW_TOLERANCE) {
+
+        var queue2 = new LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
+        queue2.addFirst(root);
+
+        while(!queue2.isEmpty()) {
+            var node = queue2.pop();
+
+            if(node.getSearchNodeMetadata().getNodeProbabilityFlow() == null) {
+                node.getSearchNodeMetadata().setFlow(node.getParent().getSearchNodeMetadata().getFlow() * node.getSearchNodeMetadata().getPriorProbability());
+            }
+            queue2.addAll(node.getChildNodeMap().values());
+        }
+
+        if(root.getSearchNodeMetadata().getFlow() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1");
         }
 
-        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getNodeProbabilityFlow().getSolution()).mapToDouble(x -> x).sum() < FLOW_TOLERANCE) {
-            throw new IllegalStateException("Flow is not equal to 1");
+        if(!root.getChildNodeMap().isEmpty()) {
+            var sum = 0.0;
+            for (var entry : root.getChildNodeMap().values()) {
+                sum += entry.getSearchNodeMetadata().getFlow();
+            }
+            if(sum < FLOW_TOLERANCE) {
+                throw new IllegalStateException("Flow is not equal to 1");
+            }
         }
-        long finishOptimization = System.currentTimeMillis();
-        if(logger.isTraceEnabled()) {
-            logger.trace("Optimizing linear program took [{}] ms", finishOptimization - startOptimization);
+        if(DEBUG_ENABLED) {
+            logger.debug("Optimizing linear program took [{}] ms", System.currentTimeMillis() - startOptimization);
         }
         return true;
     }
 
-    private void addNodeToQueue(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                Map<TAction, CLPVariable> actionChildFlowMap) {
-
-        var entries = node.getChildNodeMap().entrySet();
-//        var nodeChildIterator = new RandomIterator<>(entries.iterator(), random);
-            var nodeChildIterator = entries.iterator();
-
-        while(nodeChildIterator.hasNext()) {
-            var entry = nodeChildIterator.next();
-            queue.addLast(entry.getValue());
-            CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
-            entry.getValue().getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
-            actionChildFlowMap.put(entry.getKey(), childFlow);
-        }
+    protected final double getNodeValue(TSearchNodeMetadata metadata) {
+        double cumulativeReward = metadata.getCumulativeReward();
+        double expectedReward = metadata.getExpectedReward();
+        return addNoiseToLeaf(cumulativeReward + expectedReward);
     }
 
-    public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                                Map<TAction, CLPVariable> actionChildFlowMap) {
-        for (Map.Entry<TAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
-            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child = node.getChildNodeMap().get(entry.getKey());
-            double priorProbability = child.getSearchNodeMetadata().getPriorProbability();
-            CLPExpression fixedProbabilityExpression = model.createExpression();
-            fixedProbabilityExpression.add(CHILD_VARIABLE_COEFFICIENT, child.getSearchNodeMetadata().getNodeProbabilityFlow());
-            fixedProbabilityExpression.add(PARENT_VARIABLE_COEFFICIENT * priorProbability, node.getSearchNodeMetadata().getNodeProbabilityFlow());
-            fixedProbabilityExpression.eq(0.0);
+    protected final double addNoiseToLeaf(double leafCoefficient) {
+        if (strategy != NoiseStrategy.NONE) {
+            var value = random.nextDouble(noiseLowerBound, noiseUpperBound);
+            leafCoefficient = leafCoefficient + (random.nextBoolean() ? value : -value);
         }
+        return leafCoefficient;
     }
 
-    public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-                                                             Map<TAction, CLPVariable> actionChildFlowMap) {
-        CLPExpression parentFlowDistribution = model.createExpression();
-        for (Map.Entry<TAction, CLPVariable> childFlowVariable : actionChildFlowMap.entrySet()) {
-            parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlowVariable.getValue());
-        }
-        parentFlowDistribution.add(PARENT_VARIABLE_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
-        parentFlowDistribution.eq(0.0);
+    private void initializeQueues(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+        root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
+        masterQueue.addFirst(new InnerElement(root, 1.0, root.getSearchNodeMetadata().getNodeProbabilityFlow()));
     }
 
+    private void resolveNonLeafSubChild(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentNode, CLPVariable childFlow) {
+        var leafSubParentNodeList = new LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
+        for (var playerNode : opponentNode.getChildNodeMap().values()) {
+            var priorProbability = playerNode.getSearchNodeMetadata().getPriorProbability();
+            if(playerNode.isLeaf()) {
+                leafSubParentNodeList.add(playerNode);
+            } else {
+                masterQueue.addLast(new InnerElement(playerNode, priorProbability, childFlow));
+            }
+        }
+        setLeafObjectiveWithFlow(leafSubParentNodeList, opponentNode.getSearchNodeMetadata().getNodeProbabilityFlow());
+    }
 }

@@ -9,7 +9,7 @@ import java.util.SplittableRandom;
 
 public interface InstanceInitializerInitializer<
     TConfig extends ProblemConfig,
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {

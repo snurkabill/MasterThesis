@@ -9,13 +9,14 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
 
 public class MonteCarloTreeSearchUpdater<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloTreeSearchUpdater.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
     public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> expandedNode) {
@@ -27,7 +28,9 @@ public class MonteCarloTreeSearchUpdater<
             i++;
         }
         updateNode(expandedNode, estimatedLeafReward);
-        logger.trace("Traversing updated traversed [{}] tree levels", i);
+        if(TRACE_ENABLED) {
+            logger.trace("Traversing updated traversed [{}] tree levels", i);
+        }
     }
 
     private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> expandedNode, double estimatedLeafReward) {

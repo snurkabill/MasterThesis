@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.SplittableRandom;
 
 public class MonteCarloEvaluator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends MonteCarloTreeSearchMetadata,
@@ -27,6 +27,7 @@ public class MonteCarloEvaluator<
     implements NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloEvaluator.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private final SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
@@ -49,7 +50,9 @@ public class MonteCarloEvaluator<
             throw new IllegalStateException("Final node cannot be expanded.");
         }
         TAction[] allPossibleActions = selectedNode.getAllPossibleActions();
-        logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
+        if(TRACE_ENABLED) {
+            logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
+        }
         Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
             StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);

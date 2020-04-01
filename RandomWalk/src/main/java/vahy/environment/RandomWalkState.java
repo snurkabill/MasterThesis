@@ -78,7 +78,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
             isAgentTurnNext,
             actionType,
             randomWalkSetup);
-        var reward = actionType.isPlayerAction() ? 0.0 :  ((double) ((newLevel - level) - randomWalkSetup.getStepPenalty()));
+        var reward = actionType.isPlayerAction() ? 0.0 : ((newLevel - level) - randomWalkSetup.getStepPenalty());
         return new ImmutableStateRewardReturnTuple<>(nextState, reward);
     }
 

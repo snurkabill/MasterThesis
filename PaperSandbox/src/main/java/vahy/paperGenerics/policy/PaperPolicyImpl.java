@@ -20,7 +20,7 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class PaperPolicyImpl<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -29,6 +29,7 @@ public class PaperPolicyImpl<
     implements PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
 
     private final int totalPlayerActionCount;
 
@@ -125,7 +126,7 @@ public class PaperPolicyImpl<
             actionDistribution[element.getActionIndexInPlayerActions()] = probability;
         }
         hasActionChanged = true;
-        if(logger.isDebugEnabled()) {
+        if(DEBUG_ENABLED) {
             if(exploitation) {
                 logger.debug("Exploitation action [{}].", action);
             } else {

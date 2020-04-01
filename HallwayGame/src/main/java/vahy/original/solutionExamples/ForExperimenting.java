@@ -46,12 +46,17 @@ public class ForExperimenting {
         var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
             .setSystemConfig(systemConfig)
-            .setAlgorithmConfigList(List.of(algorithmConfig, algorithmConfig2))
+            .setAlgorithmConfigList(List.of(
+                algorithmConfig
+//                ,algorithmConfig2
+            ))
             .setProblemConfig(problemConfig)
             .setOpponentSupplier(HallwayPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
         var results = paperExperimentBuilder.execute();
+
+        logger.info(results.get(0).getEpisodeStatistics().printToLog());
 
     }
 
@@ -100,7 +105,7 @@ public class ForExperimenting {
             .stageCount(50)
 
             .evaluatorType(EvaluatorType.RALF)
-            .setBatchedEvaluationSize(2)
+//            .setBatchedEvaluationSize(2)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .replayBufferSize(batchEpisodeSize * 10)
 

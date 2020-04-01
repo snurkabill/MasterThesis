@@ -41,7 +41,7 @@ public class MCTSIntegrationTest {
         );
 
         SearchNodeMetadataFactory<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> metadataFactory = new MonteCarloTreeSearchMetadataFactory<>();
-        SearchNodeFactory<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> nodeFactory = new SearchNodeBaseFactoryImpl<>(metadataFactory);
+        SearchNodeFactory<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> nodeFactory = new SearchNodeBaseFactoryImpl<>(TicTacToeAction.class, metadataFactory);
 
         NodeEvaluator<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> nodeEvaluator = new MonteCarloEvaluator<>(nodeFactory, random, 1.0, 10);
         SearchTreeImpl<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> searchTree = new SearchTreeImpl<>(
@@ -73,7 +73,7 @@ public class MCTSIntegrationTest {
         SearchNodeMetadataFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> metadataFactory =
             new MonteCarloTreeSearchMetadataFactory<>();
         SearchNodeFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeFactory =
-            new SearchNodeBaseFactoryImpl<>(metadataFactory);
+            new SearchNodeBaseFactoryImpl<>(TestAction.class, metadataFactory);
 
         NodeEvaluator<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeEvaluator =
             new MonteCarloEvaluator<>(nodeFactory, random, 1.0, 1);

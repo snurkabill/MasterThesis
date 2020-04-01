@@ -1,5 +1,7 @@
 package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -16,19 +18,24 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class ExplorationFeasibleDistributionProvider<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExplorationFeasibleDistributionProvider.class.getName());
+    private static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+    private static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
+    private static final double RISK_BOUND_DELTA = 0.01;
+
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow;
     private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow;
 
     public ExplorationFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
                                                    Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow) {
-        super(true);
+        super(true, null);
         this.subtreeRiskCalculatorSupplierForKnownFlow = subtreeRiskCalculatorSupplierForKnownFlow;
         this.subtreeRiskCalculatorSupplierForUnknownFlow = subtreeRiskCalculatorSupplierForUnknownFlow;
     }
@@ -40,7 +47,8 @@ public class ExplorationFeasibleDistributionProvider<
         SplittableRandom random,
         double totalRiskAllowed)
     {
-        int childCount = node.getChildNodeMap().size();
+        var childMap = node.getChildNodeMap();
+        int childCount = childMap.size();
         List<TAction> actionList = new ArrayList<>(childCount);
         double[] distributionAsArray = new double[childCount];
         double[] riskArray = new double[childCount];
@@ -49,17 +57,20 @@ public class ExplorationFeasibleDistributionProvider<
         for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
             actionList.add(entry.getKey());
             var metadata = entry.getValue().getSearchNodeMetadata();
-            distributionAsArray[j] = metadata.getNodeProbabilityFlow().getSolution();
+            distributionAsArray[j] = metadata.getFlow();
             var minimalRiskReachAbilityCalculator = distributionAsArray[j] - TOLERANCE <= 0.0
                 ? subtreeRiskCalculatorSupplierForUnknownFlow.get()
                 : subtreeRiskCalculatorSupplierForKnownFlow.get();
+            if(DEBUG_ENABLED) {
+                logger.debug("Calculating risk using [{}] risk calculator", minimalRiskReachAbilityCalculator.toLog());
+            }
             riskArray[j] = minimalRiskReachAbilityCalculator.calculateRisk(entry.getValue());
             j++;
         }
 
         double[] originalDistributionAsArray = new double[distributionAsArray.length];
         System.arraycopy(distributionAsArray, 0, originalDistributionAsArray, 0, distributionAsArray.length);
-        RandomDistributionUtils.tryToRoundDistribution(distributionAsArray);
+        RandomDistributionUtils.tryToRoundDistribution(distributionAsArray, TOLERANCE);
         RandomDistributionUtils.applyBoltzmannNoise(distributionAsArray, temperature);
 
         var sum = 0.0d;
@@ -68,7 +79,7 @@ public class ExplorationFeasibleDistributionProvider<
         }
         if(sum > totalRiskAllowed) {
 
-            for(double riskBound = totalRiskAllowed; riskBound <= 1.0; riskBound += 0.01) {
+            for(double riskBound = totalRiskAllowed; riskBound <= 1.0; riskBound += RISK_BOUND_DELTA) {
                 var suitableExplorationDistribution = RandomDistributionUtils.findSimilarSuitableDistributionByLeastSquares(
                     distributionAsArray,
                     riskArray,

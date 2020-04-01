@@ -7,7 +7,7 @@ import vahy.api.search.node.SearchNodeMetadata;
 import vahy.api.search.nodeSelector.NodeSelector;
 
 public interface RiskAverseNodeSelector<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,

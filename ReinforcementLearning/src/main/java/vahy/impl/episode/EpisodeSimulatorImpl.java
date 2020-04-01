@@ -28,6 +28,8 @@ public class EpisodeSimulatorImpl<
     implements EpisodeSimulator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(EpisodeSimulator.class.getName());
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
     private int totalStepsDone = 0;
     private int playerStepsDone = 0;
     private double totalCumulativePayoff = 0.0;
@@ -45,7 +47,7 @@ public class EpisodeSimulatorImpl<
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy = episodeSetup.getOpponentPolicy();
 
         TState state = episodeSetup.getInitialState();
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         }
         return episodeRun(episodeSetup, playerPolicy, opponentPolicy, state);
@@ -56,7 +58,7 @@ public class EpisodeSimulatorImpl<
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy,
         TState state) {
-        var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>();
+        var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>(episodeSetup.getStepCountLimit() * 2); // *2 because alternation per step is expected. TODO: redo episodeHistoryList to LinkedList
         try {
             long start = System.currentTimeMillis();
             while(!state.isFinalState() && playerStepsDone < episodeSetup.getStepCountLimit()) {
@@ -64,7 +66,7 @@ public class EpisodeSimulatorImpl<
                 totalCumulativePayoff += step.getReward();
                 playerStepsDone++;
                 totalStepsDone++;
-                if(logger.isDebugEnabled()) {
+                if(DEBUG_ENABLED) {
                     makeStepLog(step);
                 }
                 episodeHistoryList.add(step);
@@ -73,13 +75,13 @@ public class EpisodeSimulatorImpl<
                     step = makePolicyStep(state, opponentPolicy, playerPolicy, false);
                     totalCumulativePayoff += step.getReward();
                     totalStepsDone++;
-                    if(logger.isDebugEnabled()) {
+                    if(DEBUG_ENABLED) {
                         logger.debug("Opponent's [{}]th action: [{}], getting reward [{}]", playerStepsDone, step.getPlayedAction(), step.getReward());
                     }
                     episodeHistoryList.add(step);
                     state = step.getToState();
                 }
-                if(logger.isTraceEnabled()) {
+                if(TRACE_ENABLED) {
                     logger.trace("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
                 }
             }
@@ -104,7 +106,7 @@ public class EpisodeSimulatorImpl<
     }
 
     private void makeStepLog(EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> step) {
-        if(logger.isDebugEnabled()) {
+        if(DEBUG_ENABLED) {
             logger.debug("Player's [{}]th action. Step log: [{}] ", playerStepsDone, step.toLogString());
         }
     }

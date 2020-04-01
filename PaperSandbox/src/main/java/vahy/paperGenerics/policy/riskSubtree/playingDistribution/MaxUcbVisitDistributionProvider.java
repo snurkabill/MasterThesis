@@ -5,6 +5,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.policy.riskSubtree.ConstantRiskCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.Map;
 import java.util.SplittableRandom;
 
 public class MaxUcbVisitDistributionProvider<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -20,7 +21,7 @@ public class MaxUcbVisitDistributionProvider<
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public MaxUcbVisitDistributionProvider() {
-        super(false);
+        super(false, () -> new ConstantRiskCalculator<>(1.0));
     }
 
     @Override
@@ -58,6 +59,6 @@ public class MaxUcbVisitDistributionProvider<
                 index = i;
             }
         }
-        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, () -> subtreeRoot -> 1);
+        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
     }
 }

@@ -8,38 +8,58 @@ import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
 
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 
 public class PaperMetadataFactory<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
 
+    private final Class<TAction> actionClass;
+
+    public PaperMetadataFactory(Class<TAction> actionClass) {
+        this.actionClass = actionClass;
+    }
+
     @Override
     public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> parent,
-                                                                          StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
-                                                                          TAction appliedAction) {
-        return new PaperMetadata<TAction>(
-            parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),
-            stateRewardReturn.getReward(),
-            DoubleScalarRewardAggregator.emptyReward(),
-            parent != null && !parent.getSearchNodeMetadata().getChildPriorProbabilities().isEmpty() ? parent.getSearchNodeMetadata().getChildPriorProbabilities().get(appliedAction) : Double.NaN,
-            stateRewardReturn.getState().isFinalState() ? (stateRewardReturn.getState().isRiskHit() ? 1.0 : 0.0) : Double.NaN,
-            new LinkedHashMap<>()
-        );
+                                                           StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
+                                                           TAction appliedAction) {
+        double reward = stateRewardReturn.getReward();
+        TState state = stateRewardReturn.getState();
+        if(parent != null) {
+            var searchNodeMetadata = parent.getSearchNodeMetadata();
+            return new PaperMetadata<>(
+                DoubleScalarRewardAggregator.aggregate(searchNodeMetadata.getCumulativeReward(), reward),
+                reward,
+                DoubleScalarRewardAggregator.emptyReward(),
+                searchNodeMetadata.getChildPriorProbabilities().get(appliedAction),
+                state.isFinalState() ? (state.isRiskHit() ? 1.0 : 0.0) : Double.NaN,
+                new EnumMap<>(actionClass)
+            );
+        } else {
+            return new PaperMetadata<>(
+                reward,
+                reward,
+                DoubleScalarRewardAggregator.emptyReward(),
+                Double.NaN,
+                state.isFinalState() ? (state.isRiskHit() ? 1.0 : 0.0) : Double.NaN,
+                new EnumMap<>(actionClass)
+            );
+        }
     }
 
     @Override
     public PaperMetadata<TAction> createEmptyNodeMetadata() {
-        return new PaperMetadata<TAction>(
+        return new PaperMetadata<>(
             DoubleScalarRewardAggregator.emptyReward(),
             DoubleScalarRewardAggregator.emptyReward(),
             DoubleScalarRewardAggregator.emptyReward(),
             0.0d,
             0.0,
-            new LinkedHashMap<>()
+            new EnumMap<>(actionClass)
         );
     }
 }

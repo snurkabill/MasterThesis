@@ -108,7 +108,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
-            .stageCount(20)
+            .stageCount(30)
             .buildAlgorithmConfig();
     }
 
@@ -116,13 +116,13 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
-            .stageCount(100)
+            .stageCount(200)
             .temperatureSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 5000.0);
+                    return Math.exp(-callCount / 8000.0);
                 }
             })
             .explorationConstantSupplier(new Supplier<>() {

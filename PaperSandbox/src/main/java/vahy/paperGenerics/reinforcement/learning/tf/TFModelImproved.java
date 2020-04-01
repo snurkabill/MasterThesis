@@ -16,6 +16,8 @@ import java.util.concurrent.BlockingQueue;
 public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(TFModelImproved.class.getName());
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private final BlockingQueue<TFWrapper> pool;
 
@@ -105,7 +107,7 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         if(input.length != target.length) {
             throw new IllegalArgumentException("Input and target lengths differ");
         }
-        if(logger.isDebugEnabled()) {
+        if(DEBUG_ENABLED) {
             logger.debug("Partially fitting TF model on [{}] inputs.", input.length);
         }
         timer.startTimer();
@@ -141,14 +143,16 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
             }
         }
         timer.stopTimer();
-        if(logger.isDebugEnabled()) {
+        if(DEBUG_ENABLED) {
             logger.debug("Training of [{}] inputs with minibatch size [{}] took [{}] milliseconds. Samples per sec: [{}]",
                 input.length, batchSize, timer.getTotalTimeInMillis() / 1000.0, timer.samplesPerSec(input.length));
         }
     }
 
     private void fillBatch(int batchesDone, int[] order, double[][] input, double[][] target) {
-        logger.trace("Filling data batch. Already done batches: [{}]", batchesDone);
+        if(TRACE_ENABLED) {
+            logger.trace("Filling data batch. Already done batches: [{}]", batchesDone);
+        }
         for (int i = 0; i < batchSize; i++) {
             int index = batchesDone * batchSize + i;
             if(index >= order.length) {

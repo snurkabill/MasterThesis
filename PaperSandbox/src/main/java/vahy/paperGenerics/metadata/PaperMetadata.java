@@ -4,27 +4,30 @@ import com.quantego.clp.CLPVariable;
 import vahy.api.model.Action;
 import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
 
+import java.util.EnumMap;
 import java.util.Map;
 
-public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchMetadata {
+public class PaperMetadata<TAction extends Enum<TAction> & Action> extends MonteCarloTreeSearchMetadata {
 
-    private final Map<TAction, Double> childPriorProbabilities;
+    private final EnumMap<TAction, Double> childPriorProbabilities;
     private CLPVariable nodeProbabilityFlow;
     private double priorProbability;
     private double predictedRisk;
     private double sumOfRisk;
+    private double flow;
 
     public PaperMetadata(double cumulativeReward,
                          double gainedReward,
                          double predictedReward,
                          double priorProbability,
                          double predictedRisk,
-                         Map<TAction, Double> childPriorProbabilities) {
+                         EnumMap<TAction, Double> childPriorProbabilities) {
         super(cumulativeReward, gainedReward, predictedReward);
         this.priorProbability = priorProbability;
         this.predictedRisk = predictedRisk;
         this.childPriorProbabilities = childPriorProbabilities;
         this.sumOfRisk = predictedRisk;
+        this.flow = 0.0;
     }
 
     public double getPriorProbability() {
@@ -45,6 +48,21 @@ public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchM
 
     public CLPVariable getNodeProbabilityFlow() {
         return nodeProbabilityFlow;
+    }
+
+    public double getFlow() {
+        if(nodeProbabilityFlow == null) {
+            return flow;
+        } else {
+            return nodeProbabilityFlow.getSolution();
+        }
+    }
+
+    public void setFlow(double flow) {
+        if(nodeProbabilityFlow != null) {
+            throw new IllegalStateException("Variable for flow optimization exists");
+        }
+        this.flow = flow;
     }
 
     public void setNodeProbabilityFlow(CLPVariable nodeProbabilityFlow) {
@@ -76,6 +94,8 @@ public class PaperMetadata<TAction extends Action> extends MonteCarloTreeSearchM
         stringBuilder.append(this.sumOfRisk);
         stringBuilder.append("\\nCalculatedFlow: ");
         stringBuilder.append(nodeProbabilityFlow != null ? this.nodeProbabilityFlow.getSolution() : null);
+        stringBuilder.append("\\nFinalFlow: ");
+        stringBuilder.append(getFlow());
         return stringBuilder.toString();
     }
 }

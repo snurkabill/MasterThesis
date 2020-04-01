@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class PlayingDistribution<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,

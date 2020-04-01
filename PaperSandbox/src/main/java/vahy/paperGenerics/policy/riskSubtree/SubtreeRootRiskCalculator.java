@@ -7,7 +7,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 
 public class SubtreeRootRiskCalculator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -17,5 +17,10 @@ public class SubtreeRootRiskCalculator<
     @Override
     public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
         return subtreeRoot.getSearchNodeMetadata().getPredictedRisk();
+    }
+
+    @Override
+    public String toLog() {
+        return "SUBTREE_RISK_ROOT";
     }
 }

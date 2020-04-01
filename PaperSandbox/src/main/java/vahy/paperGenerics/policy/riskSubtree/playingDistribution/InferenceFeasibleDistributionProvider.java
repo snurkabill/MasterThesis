@@ -15,18 +15,15 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class InferenceFeasibleDistributionProvider<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
-
     public InferenceFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
-        super(true);
-        this.subtreeRiskCalculatorSupplier = subtreeRiskCalculatorSupplier;
+        super(true, subtreeRiskCalculatorSupplier);
     }
 
     @Override
@@ -45,12 +42,12 @@ public class InferenceFeasibleDistributionProvider<
         for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
             actionList.add(entry.getKey());
             var metadata = entry.getValue().getSearchNodeMetadata();
-            distributionArray[j] = metadata.getNodeProbabilityFlow().getSolution();
+            distributionArray[j] = metadata.getFlow();
             riskArray[j] = distributionArray[j] - TOLERANCE <= 0.0 ? 1.0 : subtreeRiskCalculatorSupplier.get().calculateRisk(entry.getValue()) / distributionArray[j];
             j++;
         }
 
-        RandomDistributionUtils.tryToRoundDistribution(distributionArray);
+        RandomDistributionUtils.tryToRoundDistribution(distributionArray, TOLERANCE);
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionArray, random);
         return new PlayingDistribution<>(actionList.get(index), index, distributionArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
 

@@ -200,6 +200,7 @@ public class PaperExperimentBuilder<
     private ImmutableTuple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom) {
 
         var strategiesProvider = new StrategiesProvider<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(
+            actionClazz,
             algorithmConfig.getInferenceExistingFlowStrategy(),
             algorithmConfig.getInferenceNonExistingFlowStrategy(),
             algorithmConfig.getExplorationExistingFlowStrategy(),
@@ -215,7 +216,7 @@ public class PaperExperimentBuilder<
 
         var nodeEvaluator = resolveEvaluator(
             algorithmConfig,
-            new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(new PaperMetadataFactory<>()),
+            new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(actionClazz, new PaperMetadataFactory<>(actionClazz)),
             playerOpponentActions.getFirst(),
             playerOpponentActions.getSecond(),
             predictor,
@@ -227,7 +228,7 @@ public class PaperExperimentBuilder<
         return new ImmutableTuple<>(
             new PaperPolicySupplier<>(
                 actionClazz,
-                new PaperMetadataFactory<>(),
+                new PaperMetadataFactory<>(actionClazz),
                 algorithmConfig.getGlobalRiskAllowed(),
                 masterRandom.split(),
                 nodeSelectorSupplier,
@@ -250,15 +251,15 @@ public class PaperExperimentBuilder<
         var totalRiskAllowed = algorithmConfig.getGlobalRiskAllowed();
         switch (selectorType) {
             case UCB:
-                return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split());
+                return () -> new PaperNodeSelector<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case RISK_AVERSE_UCB_V3:
                 return () -> new RiskBasedSelector_V3<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case RISK_AVERSE_UCB_V2_EXPERIMENTAL:
                 logger.warn("Node selector: [" + RiskBasedSelector_V2.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelector_V2<>(cpuctParameter, masterRandom.split());
+                return () -> new RiskBasedSelector_V2<>(cpuctParameter, masterRandom.split(), playerTotalActionCount);
             case RISK_AVERSE_UCB_V1_EXPERIMENTAL:
                 logger.warn("Node selector: [" + RiskBasedSelector_V1.class.getName() + "] is considered Experimental.");
-                return () -> new RiskBasedSelector_V1<>(cpuctParameter, masterRandom.split(), totalRiskAllowed);
+                return () -> new RiskBasedSelector_V1<>(cpuctParameter, masterRandom.split(), playerTotalActionCount, totalRiskAllowed);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(selectorType);
         }

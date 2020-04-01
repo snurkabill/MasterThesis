@@ -11,7 +11,7 @@ import vahy.api.search.update.NodeTransitionUpdater;
 import vahy.api.search.update.TreeUpdater;
 
 public class TraversingTreeUpdater<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
@@ -19,6 +19,7 @@ public class TraversingTreeUpdater<
     implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(TraversingTreeUpdater.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     private final NodeTransitionUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeTransitionUpdater;
 
     public TraversingTreeUpdater(NodeTransitionUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeTransitionUpdater) {
@@ -38,7 +39,7 @@ public class TraversingTreeUpdater<
             traversingNode = traversingNodeParent;
             i++;
         } while(!traversingNode.isRoot());
-        if(logger.isTraceEnabled()) {
+        if(TRACE_ENABLED) {
             logger.trace("Traversing updated traversed [{}] tree levels", i);
         }
     }

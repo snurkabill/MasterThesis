@@ -3,17 +3,17 @@ package vahy.paperGenerics.policy.flowOptimizer;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.linearProgram.OptimalFlowHardConstraintCalculator;
-import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraint;
+import vahy.paperGenerics.policy.linearProgram.OptimalFlowSoftConstraintCalculator;
 import vahy.utils.ImmutableTuple;
 
 import java.util.SplittableRandom;
 
 public class HardSoftFlowOptimizer<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -29,7 +29,7 @@ public class HardSoftFlowOptimizer<
         var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
         boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(node);
         if(!optimalSolutionExists) {
-            var optimalSoftFlowCalculator = new OptimalFlowSoftConstraint<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+            var optimalSoftFlowCalculator = new OptimalFlowSoftConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
             optimalSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
         }
         return new ImmutableTuple<>(totalRiskAllowed, optimalSolutionExists);

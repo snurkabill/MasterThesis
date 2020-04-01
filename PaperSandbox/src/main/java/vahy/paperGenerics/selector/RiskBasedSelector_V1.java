@@ -25,7 +25,7 @@ import java.util.stream.DoubleStream;
 
 @Experimental
 public class RiskBasedSelector_V1<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
@@ -36,8 +36,8 @@ public class RiskBasedSelector_V1<
     private final double totalRiskAllowed;
 
     @Experimental
-    public RiskBasedSelector_V1(double cpuctParameter, SplittableRandom random, double totalRiskAllowed) {
-        super(cpuctParameter, random);
+    public RiskBasedSelector_V1(double cpuctParameter, SplittableRandom random, int totalPlayerActionCount, double totalRiskAllowed) {
+        super(cpuctParameter, random, totalPlayerActionCount);
         this.totalRiskAllowed = totalRiskAllowed;
     }
 
@@ -133,7 +133,7 @@ public class RiskBasedSelector_V1<
             for (int i = 0; i < probs.length; i++) {
                 probs[i] = probabilities.get(i);
             }
-            RandomDistributionUtils.tryToRoundDistribution(probs);
+            RandomDistributionUtils.tryToRoundDistribution(probs, Math.pow(10, -10));
             int actionIndex = RandomDistributionUtils.getRandomIndexFromDistribution(probs, random);
 
             return collect.get(actionIndex).getFirst().getFirst();

@@ -10,7 +10,7 @@ import vahy.utils.ImmutableTuple;
 import java.util.LinkedList;
 
 public class SubtreePriorRiskCalculator<
-    TAction extends Action,
+    TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -37,5 +37,10 @@ public class SubtreePriorRiskCalculator<
             }
         }
         return totalRisk;
+    }
+
+    @Override
+    public String toLog() {
+        return "SUBTREE_RISK_PRIOR_SUM";
     }
 }
