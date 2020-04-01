@@ -70,7 +70,7 @@ public class ExplorationFeasibleDistributionProvider<
 
         double[] originalDistributionAsArray = new double[distributionAsArray.length];
         System.arraycopy(distributionAsArray, 0, originalDistributionAsArray, 0, distributionAsArray.length);
-        RandomDistributionUtils.tryToRoundDistribution(distributionAsArray);
+        RandomDistributionUtils.tryToRoundDistribution(distributionAsArray, TOLERANCE);
         RandomDistributionUtils.applyBoltzmannNoise(distributionAsArray, temperature);
 
         var sum = 0.0d;

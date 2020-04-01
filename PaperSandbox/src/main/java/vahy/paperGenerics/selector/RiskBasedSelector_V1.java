@@ -133,7 +133,7 @@ public class RiskBasedSelector_V1<
             for (int i = 0; i < probs.length; i++) {
                 probs[i] = probabilities.get(i);
             }
-            RandomDistributionUtils.tryToRoundDistribution(probs);
+            RandomDistributionUtils.tryToRoundDistribution(probs, Math.pow(10, -10));
             int actionIndex = RandomDistributionUtils.getRandomIndexFromDistribution(probs, random);
 
             return collect.get(actionIndex).getFirst().getFirst();

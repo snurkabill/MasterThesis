@@ -19,13 +19,15 @@ public class HardHardSoftFlowOptimizer<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     extends AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
 
+    private final HardHardFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> hardHardFlowOptimizer;
+
     public HardHardSoftFlowOptimizer(SplittableRandom random, NoiseStrategy noiseStrategy) {
         super( random, noiseStrategy);
+        this.hardHardFlowOptimizer = new HardHardFlowOptimizer<>(random, noiseStrategy);
     }
 
     @Override
     public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
-        var hardHardFlowOptimizer = new HardHardFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(random, noiseStrategy);
         var result = hardHardFlowOptimizer.optimizeFlow(node, totalRiskAllowed);
 
         if(!result.getSecond()) {

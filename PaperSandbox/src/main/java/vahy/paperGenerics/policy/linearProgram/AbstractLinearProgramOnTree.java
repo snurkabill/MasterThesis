@@ -77,6 +77,18 @@ public abstract class AbstractLinearProgramOnTree<
     }
 
     public boolean optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+        if(root.isPlayerTurn()) {
+            return optimizePlayerNode(root);
+        } else {
+            return optimizeOpponentNode(root);
+        }
+    }
+
+    private boolean optimizeOpponentNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+        throw new UnsupportedOperationException("Linear optimization of opponent node is not supported for now");
+    }
+
+    private boolean optimizePlayerNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         initializeQueues(root);
         while(!masterQueue.isEmpty()) {
@@ -121,31 +133,20 @@ public abstract class AbstractLinearProgramOnTree<
                 node.getSearchNodeMetadata().setFlow(node.getParent().getSearchNodeMetadata().getFlow() * node.getSearchNodeMetadata().getPriorProbability());
             }
             queue2.addAll(node.getChildNodeMap().values());
-
-//
-//            if(!node.isLeaf()) {
-//                for (var opponentNode : node.getChildNodeMap().values()) {
-//                    CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
-//                    opponentNode.getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
-//                    parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlow);
-//                    if(!opponentNode.isLeaf()) {
-//                        resolveNonLeafSubChild(opponentNode, childFlow);
-//                    } else {
-//                        setLeafObjective(opponentNode);
-//                    }
-//                }
-//                parentFlowDistribution.add(-innerElement.modifier, innerElement.flowVariable);
-//                parentFlowDistribution.eq(0.0);
-//            }
         }
-
 
         if(root.getSearchNodeMetadata().getFlow() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1");
         }
 
-        if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getFlow()).mapToDouble(x -> x).sum() < FLOW_TOLERANCE) {
-            throw new IllegalStateException("Flow is not equal to 1");
+        if(!root.getChildNodeMap().isEmpty()) {
+            var sum = 0.0;
+            for (var entry : root.getChildNodeMap().values()) {
+                sum += entry.getSearchNodeMetadata().getFlow();
+            }
+            if(sum < FLOW_TOLERANCE) {
+                throw new IllegalStateException("Flow is not equal to 1");
+            }
         }
         if(DEBUG_ENABLED) {
             logger.debug("Optimizing linear program took [{}] ms", System.currentTimeMillis() - startOptimization);

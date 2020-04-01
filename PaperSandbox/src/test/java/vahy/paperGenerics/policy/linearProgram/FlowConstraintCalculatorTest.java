@@ -32,7 +32,7 @@ import java.util.function.Function;
 public class FlowConstraintCalculatorTest {
 
     private static final Logger logger = LoggerFactory.getLogger(FlowConstraintCalculatorTest.class.getName());
-    private static final double TOLERANCE = Math.pow(10, -8);
+    private static final double TOLERANCE = Math.pow(10, -10);
 
     @Test
     public void optimalFlowHardConstraintComparisonTest() {
@@ -60,15 +60,15 @@ public class FlowConstraintCalculatorTest {
         var sum_BUILD_SOLVE_1 = 0.0;
         var sum_BUILD_SOLVE_2 = 0.0;
 
-        for (int k = 900; k < 1000; k++) {
-            for (int j = 0; j < 10; j++) {
+        for (int k = 0; k < 500; k++) {
+            for (int j = 0; j < 20; j++) {
                 var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator);
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
                 long start = System.currentTimeMillis();
-                var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.0, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
-                var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.0, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
 
                 start = System.currentTimeMillis();
                 boolean firstSolvable = calculator.optimizeFlow(searchTree.getRoot());
@@ -119,8 +119,8 @@ public class FlowConstraintCalculatorTest {
         var sum_BUILD_SOLVE_1 = 0.0;
         var sum_BUILD_SOLVE_2 = 0.0;
 
-        for (int k = 900; k < 1000; k++) {
-            for (int j = 0; j < 10; j++) {
+        for (int k = 0; k < 500; k++) {
+            for (int j = 0; j < 20; j++) {
                 var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator);
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
@@ -177,16 +177,21 @@ public class FlowConstraintCalculatorTest {
         var sum_BUILD_SOLVE_1 = 0.0;
         var sum_BUILD_SOLVE_2 = 0.0;
 
-        for (int k = 900; k < 1000; k++) {
-            for (int j = 0; j < 10; j++) {
+        for (int k = 0; k < 500; k++) {
+            for (int j = 0; j < 20; j++) {
                 var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator);
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
-                long start = System.currentTimeMillis();
-                var calculator = new MinimalRiskReachAbilityCalculatorDeprecated<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class);
-                sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
-                var calculator2 = new MinimalRiskReachAbilityCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>();
+                if(j % 2 == 0) {
+                    searchTree.applyAction(EmptySpaceAction.A);
+                }
 
+
+                long start = System.currentTimeMillis();
+                var calculator = new MinimalRiskReachAbilityCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>();
+                sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
+
+                var calculator2 = new MinimalRiskReachAbilityCalculatorDeprecated<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class);
                 start = System.currentTimeMillis();
                 double solution1 = calculator.calculateRisk(searchTree.getRoot());
                 sum_BUILD_SOLVE_1 += System.currentTimeMillis() - start;
@@ -242,13 +247,13 @@ public class FlowConstraintCalculatorTest {
     }
 
     private void printStatistics(int total, double sum_UCB, double sum_BUILD_CALC_1, double sum_BUILD_SOLVE_1, double sum_BUILD_SOLVE_2, int k, int j) {
-        logger.info("------------------------" + k + "------------------------");
-        logger.info("------------------------" + j + "------------------------");
-        logger.info("------------------------" + total + "------------------------");
-        logger.info("Tree update took: [{}] milliseconds", sum_UCB / total);
-        logger.info("Calculator creation took: [{}] milliseconds", sum_BUILD_CALC_1 / total);
-        logger.info("Optimizing FLOW_1 took: [{}] milliseconds", sum_BUILD_SOLVE_1 / total);
-        logger.info("Optimizing FLOW_2 took: [{}] milliseconds", sum_BUILD_SOLVE_2 / total);
+        logger.debug("------------------------" + k + "------------------------");
+        logger.debug("------------------------" + j + "------------------------");
+        logger.debug("------------------------" + total + "------------------------");
+        logger.debug("Tree update took: [{}] milliseconds", sum_UCB / total);
+        logger.debug("Calculator creation took: [{}] milliseconds", sum_BUILD_CALC_1 / total);
+        logger.debug("Optimizing FLOW_1 took: [{}] milliseconds", sum_BUILD_SOLVE_1 / total);
+        logger.debug("Optimizing FLOW_2 took: [{}] milliseconds", sum_BUILD_SOLVE_2 / total);
     }
 
     private void assertResults(boolean firstSolvable, double[] values, boolean secondSolvable, double[] values2) {
@@ -258,7 +263,7 @@ public class FlowConstraintCalculatorTest {
                 Assert.assertEquals(values[i], values2[i], TOLERANCE, "Different results. First: " + Arrays.toString(values) + " second: " + Arrays.toString(values2)+ ".");
             }
         } else {
-//            logger.info("Unsolvable problem.");
+            logger.info("Unsolvable problem.");
         }
     }
 }

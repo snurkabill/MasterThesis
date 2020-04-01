@@ -30,6 +30,18 @@ public class MinimalRiskReachAbilityCalculator<
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
         }
 
+        var sum = 0.0;
+        if(subtreeRoot.isPlayerTurn()) {
+            return resolveNode(subtreeRoot);
+        } else {
+            for (var entry : subtreeRoot.getChildNodeMap().values()) {
+                sum += entry.getSearchNodeMetadata().getPriorProbability() * resolveNode(entry);
+            }
+        }
+        return sum;
+    }
+
+    private double resolveNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
         var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
@@ -55,7 +67,8 @@ public class MinimalRiskReachAbilityCalculator<
                 // this is it
             }
         };
-        var isFeasible = linProgram.optimizeFlow(subtreeRoot);
+
+        var isFeasible = linProgram.optimizeFlow(node);
         if(!isFeasible) {
             throw new IllegalStateException("Minimal risk reachAbility is not feasible. Should not happen. Investigate.");
         }

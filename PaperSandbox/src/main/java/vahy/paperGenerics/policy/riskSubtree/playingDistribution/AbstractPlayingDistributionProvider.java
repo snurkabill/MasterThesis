@@ -16,7 +16,7 @@ public abstract class AbstractPlayingDistributionProvider<
     TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
     implements PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
-    protected static final double TOLERANCE = Math.pow(10, -15);
+    protected static final double TOLERANCE = Math.pow(10, -10);
     protected final boolean applyTemperature;
     protected final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
 

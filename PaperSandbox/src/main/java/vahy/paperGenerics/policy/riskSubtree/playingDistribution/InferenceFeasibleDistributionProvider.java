@@ -47,7 +47,7 @@ public class InferenceFeasibleDistributionProvider<
             j++;
         }
 
-        RandomDistributionUtils.tryToRoundDistribution(distributionArray);
+        RandomDistributionUtils.tryToRoundDistribution(distributionArray, TOLERANCE);
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionArray, random);
         return new PlayingDistribution<>(actionList.get(index), index, distributionArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
 

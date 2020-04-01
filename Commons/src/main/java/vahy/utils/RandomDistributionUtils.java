@@ -155,11 +155,11 @@ public class RandomDistributionUtils {
         }
     }
 
-    public static void tryToRoundDistribution(double[] distribution) {
+    public static void tryToRoundDistribution(double[] distribution, double tolerance) {
         for (int i = 0; i < distribution.length; i++) {
-            if(distribution[i] <= 0.0 && distribution[i] + TOLERANCE >= 0.0) {
+            if(distribution[i] <= 0.0 && distribution[i] + tolerance >= 0.0) {
                 distribution[i] = 0;
-            } else if(distribution[i] >= 1.0 && distribution[i] <= 1.0 + TOLERANCE) {
+            } else if(distribution[i] >= 1.0 && distribution[i] <= 1.0 + tolerance) {
                 distribution[i] = 1.0;
             }
         }

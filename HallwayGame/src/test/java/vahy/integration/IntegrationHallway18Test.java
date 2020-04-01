@@ -30,13 +30,13 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     public Object[][] experimentSettings() {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
-//            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1275.0, 0.055},
-//            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
+            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1275.0, 0.055},
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, true, 1_000, false, false, null, null);
+        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
