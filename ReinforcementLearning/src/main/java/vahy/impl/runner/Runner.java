@@ -40,6 +40,7 @@ public class Runner<TConfig extends ProblemConfig,
             runnerArguments.getTrainablePredictor(),
             runnerArguments.getPolicySupplier());
         var evaluationResults = evaluatePolicy(optimizedPolicy, evaluationArguments);
+        closeResources(optimizedPolicy);
 
         return new PolicyResults<>(optimizedPolicy, trainingStatistics.getSecond(), evaluationResults.getFirst(), trainingStatistics.getFirst(), evaluationResults.getSecond());
     }
