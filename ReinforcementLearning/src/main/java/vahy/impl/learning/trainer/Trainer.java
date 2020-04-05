@@ -5,15 +5,11 @@ import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.GameSampler;
 import vahy.api.experiment.ProblemConfig;
-import vahy.api.learning.dataAggregator.DataAggregator;
-import vahy.api.learning.trainer.EpisodeDataMaker;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
-import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.episode.DataPointGeneratorGeneric;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTracker;
 import vahy.vizualiation.ProgressTrackerSettings;
@@ -32,13 +28,12 @@ public class Trainer<
     TStatistics extends EpisodeStatistics> {
 
     private final ProblemConfig problemConfig;
-    private final TrainablePredictor trainablePredictor;
     private final GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler;
-    private final DataAggregator dataAggregator;
-    private final EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker;
     private final ProgressTracker trainingProgressTracker;
     private final ProgressTracker samplingProgressTracker;
     private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> statisticsCalculator;
+
+    private final List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
 
     private final List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList = new ArrayList<>();
 
@@ -48,19 +43,18 @@ public class Trainer<
     private final DataPointGeneratorGeneric<Double> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
     private final DataPointGeneratorGeneric<Double> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
 
-    public Trainer(TrainablePredictor trainablePredictor,
-                   GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler,
-                   DataAggregator dataAggregator,
-                   EpisodeDataMaker<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeDataMaker,
+    public Trainer(GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler,
+                   List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList,
                    ProgressTrackerSettings progressTrackerSettings,
                    ProblemConfig problemConfig,
                    EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> statisticsCalculator,
                    List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
+        if(trainablePredictorSetupList.isEmpty()) {
+            throw new IllegalArgumentException("TrainablePredictorSetupList can't be empty");
+        }
         this.problemConfig = problemConfig;
-        this.trainablePredictor = trainablePredictor;
+        this.trainablePredictorSetupList = trainablePredictorSetupList;
         this.gameSampler = gameSampler;
-        this.dataAggregator = dataAggregator;
-        this.episodeDataMaker = episodeDataMaker;
         this.statisticsCalculator = statisticsCalculator;
         this.trainingProgressTracker = new ProgressTracker(progressTrackerSettings, "Training stats", Color.BLUE);
         trainingProgressTracker.registerDataCollector(oobAvgMsPerEpisode);
@@ -112,29 +106,29 @@ public class Trainer<
         oobAvgMsPerEpisode.addNewValue(samplingTime/(double) episodeBatchSize);
         oobSamplingTime.addNewValue(samplingTime / 1000.0);
 
-        for (var episode : episodes) {
-            var dataSamples = episodeDataMaker.createEpisodeDataSamples(episode);
-            dataAggregator.addEpisodeSamples(dataSamples);
+        for (var entry : trainablePredictorSetupList) {
+            for (var episode : episodes) {
+                var dataAggregator = entry.getDataAggregator();
+                dataAggregator.addEpisodeSamples(entry.getEpisodeDataMaker().createEpisodeDataSamples(episode));
+                var trainingDataset = dataAggregator.getTrainingDataset();
+                var datasetSize = trainingDataset.getFirst().length;
+
+                var startTraining = System.currentTimeMillis();
+                entry.getTrainablePredictor().train(trainingDataset);
+                var endTraining = System.currentTimeMillis() - startTraining;
+
+//                trainingSampleCount.addNewValue((double)datasetSize);
+//                secTraining.addNewValue(endTraining / 1000.0);
+//                msTrainingPerSample.addNewValue(endTraining / (double) datasetSize);
+
+
+
+            }
         }
-
-        var trainingDataset = dataAggregator.getTrainingDataset();
-        var datasetSize = trainingDataset.getFirst().length;
-
-        var startTraining = System.currentTimeMillis();
-        trainablePredictor.train(trainingDataset);
-        var endTraining = System.currentTimeMillis() - startTraining;
-
-        trainingSampleCount.addNewValue((double)datasetSize);
-        secTraining.addNewValue(endTraining / 1000.0);
-        msTrainingPerSample.addNewValue(endTraining / (double) datasetSize);
-
         trainingProgressTracker.onNextLog();
         samplingProgressTracker.onNextLog();
-        return new ImmutableTuple<>(episodes, stats);
-    }
 
-    protected double[] evaluatePolicy(DoubleVector observation) {
-        return this.trainablePredictor.apply(observation);
+        return new ImmutableTuple<>(episodes, stats);
     }
 
 }

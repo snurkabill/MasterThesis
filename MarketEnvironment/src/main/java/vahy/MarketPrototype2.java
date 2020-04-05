@@ -1,6 +1,5 @@
 package vahy;
 
-import vahy.agent.environment.RealDataMarketPolicySupplier;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -45,7 +44,7 @@ public class MarketPrototype2 {
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(problemConfig)
-            .setOpponentSupplier(RealDataMarketPolicySupplier::new)
+//            .setOpponentSupplier(RealDataMarketPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(InitialMarketStateSupplier::new);
 
         paperExperimentBuilder.execute();

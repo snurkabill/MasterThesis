@@ -7,10 +7,6 @@ import vahy.original.environment.agent.AgentHeading;
 import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 public class HallwayStateTest {
 
     private static final double DOUBLE_TOLERANCE = Math.pow(10, -10);
@@ -183,8 +179,9 @@ public class HallwayStateTest {
     public void emptyEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state = getHallGame1();
         Assert.assertTrue(state.isAgentTurn());
-        Assert.assertTrue(state.getOpponentObservation().getProbabilities().getFirst().isEmpty());
-        Assert.assertTrue(state.getOpponentObservation().getProbabilities().getSecond().isEmpty());
+        Assert.assertEquals(state.getAllPossibleActions().length, 0);
+        var predictor = state.getKnownModelWithPerfectObservationPredictor();
+        Assert.assertEquals(predictor.apply(state).length, 0);
     }
 
     @Test
@@ -193,16 +190,17 @@ public class HallwayStateTest {
         Assert.assertTrue(state1.isAgentTurn());
         HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.FORWARD).getState();
-        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
-        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Collections.singletonList(1.0));
+        var predictor = state2.getKnownModelWithPerfectObservationPredictor();
+        Assert.assertEquals(state2.getAllPossibleActions()[0], HallwayAction.NO_ACTION);
+        Assert.assertEquals(predictor.apply(state2)[0], 1.0);
 
         HallwayStateImpl state3 = state2
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.TURN_LEFT).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
-        Assert.assertEquals(state3.getOpponentObservation().getProbabilities().getFirst(), Collections.singletonList(HallwayAction.NO_ACTION));
-        Assert.assertEquals(state3.getOpponentObservation().getProbabilities().getSecond(), Collections.singletonList(1.0));
+        Assert.assertEquals(state2.getAllPossibleActions()[0], HallwayAction.NO_ACTION);
+        Assert.assertEquals(predictor.apply(state2)[0], 1.0);
     }
 
     @Test
@@ -211,10 +209,13 @@ public class HallwayStateTest {
         Assert.assertTrue(state1.isAgentTurn());
         HallwayStateImpl state2 = state1
             .applyAction(HallwayAction.FORWARD).getState();
-        List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
-        List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.NO_ACTION);
+        HallwayAction[] moves = state2.getAllPossibleActions();
+        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.NO_ACTION};
+        HallwayAction[] wrongOrderMoves = new HallwayAction[] {HallwayAction.NOISY_LEFT, HallwayAction.NOISY_RIGHT, HallwayAction.NO_ACTION};
         Assert.assertEquals(moves, expectedMoves);
-        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25, 0.25, 0.5));
+        Assert.assertNotEquals(moves, wrongOrderMoves);
+        var predictor = state2.getKnownModelWithPerfectObservationPredictor();
+        Assert.assertEquals(predictor.apply(state2), new double[] {0.25, 0.25, 0.5});
     }
 
     @Test
@@ -225,10 +226,13 @@ public class HallwayStateTest {
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
-        List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
-        List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NO_ACTION);
+        HallwayAction[] moves = state2.getAllPossibleActions();
+        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NO_ACTION};
+        HallwayAction[] wrongOrderMoves = new HallwayAction[] {HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NO_ACTION};
         Assert.assertEquals(moves, expectedMoves);
-        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25 * 0.9, 0.25 * 0.1, 0.25 * 0.5, 0.25 * 0.5, 0.5));
+        Assert.assertNotEquals(moves, wrongOrderMoves);
+        var predictor = state2.getKnownModelWithPerfectObservationPredictor();
+        Assert.assertEquals(predictor.apply(state2), new double[] {0.25 * 0.9, 0.25 * 0.1, 0.25 * 0.5, 0.25 * 0.5, 0.5});
     }
 
     @Test
@@ -241,10 +245,11 @@ public class HallwayStateTest {
             .applyAction(HallwayAction.FORWARD).getState()
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
-        List<HallwayAction> moves = state2.getOpponentObservation().getProbabilities().getFirst();
-        List<HallwayAction> expectedMoves = Arrays.asList(HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.TRAP, HallwayAction.NO_ACTION);
+        HallwayAction[] moves = state2.getAllPossibleActions();
+        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.TRAP, HallwayAction.NO_ACTION};
         Assert.assertEquals(moves, expectedMoves);
-        Assert.assertEquals(state2.getOpponentObservation().getProbabilities().getSecond(), Arrays.asList(0.25 * 0.8, 0.25 * 0.2, 0.25 * 0.8, 0.25 * 0.2, 0.5 * 0.2, 0.5 * 0.8));
+        var predictor = state2.getKnownModelWithPerfectObservationPredictor();
+        Assert.assertEquals(predictor.apply(state2), new double[] {0.25 * 0.8, 0.25 * 0.2, 0.25 * 0.8, 0.25 * 0.2, 0.5 * 0.2, 0.5 * 0.8});
     }
 
 

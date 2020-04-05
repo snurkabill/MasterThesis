@@ -13,7 +13,6 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
-import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
 import vahy.environment.RandomWalkState;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -41,7 +40,7 @@ public class RandomWalkExample {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkProbabilities, RandomWalkState>()
+        var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkState, RandomWalkState>()
             .setActionClass(RandomWalkAction.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))

@@ -9,9 +9,7 @@ import org.testng.annotations.Test;
 import vahy.api.experiment.SystemConfig;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.GameConfig;
-import vahy.original.environment.state.EnvironmentProbabilities;
 import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.paperGenerics.PaperExperimentBuilder;
@@ -37,12 +35,11 @@ public abstract class AbstractHallwayTest {
     @Test(dataProvider = "TestDataProviderMethod")
     public void benchmarkSolutionTest(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, GameConfig gameConfig, double minExpectedReward, double maxRiskHitRatio) {
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, HallwayStateImpl, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(gameConfig)
-            .setOpponentSupplier(HallwayPolicySupplier::new)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
 
         var results = paperExperimentBuilder.execute();

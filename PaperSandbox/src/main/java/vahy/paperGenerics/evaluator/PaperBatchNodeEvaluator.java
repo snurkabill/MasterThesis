@@ -3,7 +3,7 @@ package vahy.paperGenerics.evaluator;
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.predictor.TrainablePredictor;
+import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
@@ -13,8 +13,6 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTuple;
 
 import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
 
 public class PaperBatchNodeEvaluator<
     TAction extends Enum<TAction> & Action,
@@ -26,12 +24,13 @@ public class PaperBatchNodeEvaluator<
     private final int maximalEvaluationDepth;
 
     public PaperBatchNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                                   TrainablePredictor trainablePredictor,
-                                   Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator,
+                                   Predictor<DoubleVector> trainablePredictor,
+                                   Predictor<DoubleVector> opponentApproximator,
+                                   Predictor<TState> knownModel,
                                    TAction[] allPlayerActions,
                                    TAction[] allOpponentActions,
                                    int maximalEvaluationDepth) {
-        super(searchNodeFactory, trainablePredictor, opponentApproximator, allPlayerActions, allOpponentActions);
+        super(searchNodeFactory, trainablePredictor, opponentApproximator, knownModel, allPlayerActions, allOpponentActions);
         this.maximalEvaluationDepth = maximalEvaluationDepth;
     }
 

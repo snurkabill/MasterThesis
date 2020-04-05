@@ -1,6 +1,7 @@
 package vahy.environment;
 
 import vahy.api.model.StateRewardReturn;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -356,11 +357,6 @@ public class MarketState implements PaperState<MarketAction, DoubleVector, Marke
     }
 
     @Override
-    public MarketState deepCopy() {
-        throw new UnsupportedOperationException("Not going to implement it anyway");
-    }
-
-    @Override
     public DoubleVector getPlayerObservation() {
         int totalLenght = 0;
         totalLenght += lookback.length;
@@ -392,6 +388,11 @@ public class MarketState implements PaperState<MarketAction, DoubleVector, Marke
     @Override
     public MarketProbabilities getOpponentObservation() {
         return new MarketProbabilities(marketEnvironmentStaticPart.getMarketDataProvider());
+    }
+
+    @Override
+    public Predictor<MarketState> getKnownModelWithPerfectObservationPredictor() {
+        throw new UnsupportedOperationException("Market scenario does now support known model");
     }
 
     @Override

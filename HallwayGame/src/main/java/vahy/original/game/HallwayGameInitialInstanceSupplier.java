@@ -5,7 +5,6 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.AgentHeading;
 import vahy.original.environment.config.GameConfig;
-import vahy.original.environment.state.EnvironmentProbabilities;
 import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StaticGamePart;
 import vahy.original.game.cell.Cell;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupplier<GameConfig, HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupplier<GameConfig, HallwayAction,  DoubleVector, HallwayStateImpl, HallwayStateImpl> {
 
     public HallwayGameInitialInstanceSupplier(GameConfig gameConfig, SplittableRandom random) {
         super(gameConfig, random);

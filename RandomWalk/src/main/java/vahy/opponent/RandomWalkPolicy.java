@@ -1,64 +1,46 @@
 package vahy.opponent;
 
 import vahy.environment.RandomWalkAction;
-import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkState;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.policy.PaperPolicy;
+import vahy.impl.policy.KnownModelPolicy;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
-import vahy.utils.ImmutableTuple;
-import vahy.utils.RandomDistributionUtils;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
-public class RandomWalkPolicy implements PaperPolicy<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
+public class RandomWalkPolicy extends KnownModelPolicy<RandomWalkAction, DoubleVector, RandomWalkState, RandomWalkState, PaperPolicyRecord> {
 
-    private final SplittableRandom random;
+//    private Predictor<RandomWalkState> perfectPredictor;
 
     public RandomWalkPolicy(SplittableRandom random) {
-        this.random = random;
+        super(random);
     }
 
-    @Override
-    public double[] getPriorActionProbabilityDistribution(RandomWalkState gameState) {
-        return new double[0];
-    }
-
-    @Override
-    public double getEstimatedReward(RandomWalkState gameState) {
-        return 0.0;
-    }
-
-    @Override
-    public double getEstimatedRisk(RandomWalkState gameState) {
-        return 0;
-    }
-
-    @Override
-    public double getInnerRiskAllowed() {
-        return 0;
-    }
-
-    @Override
-    public double[] getActionProbabilityDistribution(RandomWalkState gameState) {
-        ImmutableTuple<List<RandomWalkAction>, List<Double>> actions = gameState.getOpponentObservation().getProbabilities();
-        return actions.getSecond().stream().mapToDouble(value -> value).toArray();
-    }
-
-    @Override
-    public RandomWalkAction getDiscreteAction(RandomWalkState gameState) {
-        ImmutableTuple<List<RandomWalkAction>, List<Double>> actions = gameState.getOpponentObservation().getProbabilities();
-        return actions.getFirst().get(RandomDistributionUtils.getRandomIndexFromDistribution(actions.getSecond(), random));
-    }
-
-    @Override
-    public void updateStateOnPlayedActions(List<RandomWalkAction> opponentActionList) {
-        // This is it
-    }
-
-    @Override
-    public PaperPolicyRecord getPolicyRecord(RandomWalkState gameState) {
-        return new PaperPolicyRecord(null, null, 0, 0, 0, 0);
-    }
+//    @Override
+//    public double[] getActionProbabilityDistribution(RandomWalkState gameState) {
+//        if(perfectPredictor == null) {
+//            perfectPredictor = gameState.getKnownModelWithPerfectObservationPredictor();
+//        }
+//        return perfectPredictor.apply(gameState);
+//    }
+//
+//    @Override
+//    public RandomWalkAction getDiscreteAction(RandomWalkState gameState) {
+//        if(perfectPredictor == null) {
+//            perfectPredictor = gameState.getKnownModelWithPerfectObservationPredictor();
+//        }
+//        var actions = gameState.getPossibleOpponentActions();
+//        var probabilities = perfectPredictor.apply(gameState);
+//        return actions[RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random)];
+//    }
+//
+//    @Override
+//    public void updateStateOnPlayedActions(List<RandomWalkAction> opponentActionList) {
+//        // This is it
+//    }
+//
+//    @Override
+//    public PaperPolicyRecord getPolicyRecord(RandomWalkState gameState) {
+//        return new PaperPolicyRecord(null, null, 0, 0, 0, 0);
+//    }
 }

@@ -3,6 +3,7 @@ package vahy.impl.testdomain.model;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -65,11 +66,6 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
     }
 
     @Override
-    public TestState deepCopy() {
-        throw new UnsupportedOperationException("");
-    }
-
-    @Override
     public DoubleVector getPlayerObservation() {
         return new DoubleVector(internalState.stream().mapToDouble(Character::getNumericValue).toArray());
     }
@@ -77,6 +73,11 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
     @Override
     public TestState getOpponentObservation() {
         return this;
+    }
+
+    @Override
+    public Predictor<TestState> getKnownModelWithPerfectObservationPredictor() {
+        throw new UnsupportedOperationException("Full known model predictor is not supported");
     }
 
     @Override

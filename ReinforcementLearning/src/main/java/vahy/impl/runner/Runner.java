@@ -37,15 +37,17 @@ public class Runner<TConfig extends ProblemConfig,
         var trainingStatistics = optimizePolicy(runnerArguments);
         var optimizedPolicy = new OptimizedPolicy<>(
             runnerArguments.getPolicyId(),
-            runnerArguments.getTrainablePredictor(),
+            runnerArguments.getTrainablePredictorSetupList(),
             runnerArguments.getPolicySupplier());
         var evaluationResults = evaluatePolicy(optimizedPolicy, evaluationArguments);
-
+        closeResources(optimizedPolicy);
         return new PolicyResults<>(optimizedPolicy, trainingStatistics.getSecond(), evaluationResults.getFirst(), trainingStatistics.getFirst(), evaluationResults.getSecond());
     }
 
     private void closeResources(OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy) throws IOException {
-        policy.getTrainablePredictor().close();
+        for (var entry : policy.getTrainablePredictorSetupList()) {
+            entry.getTrainablePredictor().close();
+        }
         logger.debug("Resources of trainable policy [{}] closed. ", policy.getPolicyId());
     }
 
@@ -60,10 +62,8 @@ public class Runner<TConfig extends ProblemConfig,
             runnerArguments.getOpponentPolicySupplier());
 
         var trainer = new Trainer<>(
-            runnerArguments.getTrainablePredictor(),
             gameSampler,
-            runnerArguments.getDataAggregator(),
-            runnerArguments.getDataMaker(),
+            runnerArguments.getTrainablePredictorSetupList(),
             progressTrackerSettings,
             runnerArguments.getProblemConfig(),
             runnerArguments.getEpisodeStatisticsCalculator(),

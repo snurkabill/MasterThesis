@@ -9,8 +9,9 @@ import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
-import vahy.api.model.observation.FixedModelObservation;
+import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicySupplier;
+import vahy.api.predictor.Predictor;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
@@ -18,7 +19,9 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.Benchmark;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
+import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.policy.KnownModelPolicySupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.predictor.TrainableApproximator;
@@ -49,6 +52,7 @@ import vahy.paperGenerics.selector.RiskBasedSelector_V1;
 import vahy.paperGenerics.selector.RiskBasedSelector_V2;
 import vahy.paperGenerics.selector.RiskBasedSelector_V3;
 import vahy.utils.EnumUtils;
+import vahy.utils.ImmutableTriple;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.ReflectionHacks;
 
@@ -70,7 +74,7 @@ import java.util.function.Supplier;
 public class PaperExperimentBuilder<
     TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
-    TOpponentObservation extends FixedModelObservation<TAction>,
+    TOpponentObservation extends Observation,
     TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperExperimentBuilder.class);
@@ -85,7 +89,7 @@ public class PaperExperimentBuilder<
     private List<PaperAlgorithmConfig> algorithmConfigList;
 
     private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory;
-    private Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentPolicyCreator;
+    private Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentPolicyCreator = splittableRandom -> new KnownModelPolicySupplier<>(splittableRandom);
 
     public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setActionClass(Class<TAction> actionClass) {
         this.actionClazz = actionClass;
@@ -101,6 +105,8 @@ public class PaperExperimentBuilder<
         this.systemConfig = systemConfig;
         return this;
     }
+
+
 
     public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setAlgorithmConfigList(List<PaperAlgorithmConfig> algorithmConfigList) {
         this.algorithmConfigList = algorithmConfigList;
@@ -128,7 +134,26 @@ public class PaperExperimentBuilder<
                                                                                                                                                           String policyId) {
         final var finalRandomSeed = systemConfig.getRandomSeed();
         final var masterRandom = new SplittableRandom(finalRandomSeed);
+
         var policySupplierWithPredictor = createPolicySupplier(algorithmConfig, masterRandom.split());
+        var policySupplier = policySupplierWithPredictor.getFirst();
+        var playerPredictor = policySupplierWithPredictor.getSecond();
+        var opponentPredictor = policySupplierWithPredictor.getThird();
+
+        var trainablePredictorSetupList = List.of(
+            new PredictorTrainingSetup<>(
+                playerPredictor,
+                new PaperEpisodeDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(algorithmConfig.getDiscountFactor()),
+                algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig)
+            )
+//            ,
+//            new PredictorTrainingSetup<>(
+//                opponentPredictor,
+//                new OpponentSamplerDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(),
+//                algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig)
+//            )
+        );
+
         return new RunnerArguments<>(
             policyId,
             problemConfig,
@@ -141,12 +166,10 @@ public class PaperExperimentBuilder<
                 new DataPointGeneratorGeneric<>("Risk hit average", PaperEpisodeStatistics::getRiskHitRatio),
                 new DataPointGeneratorGeneric<>("Risk hit stdev", PaperEpisodeStatistics::getRiskHitStdev)
             ),
-            policySupplierWithPredictor.getSecond(),
-            algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig),
             opponentPolicyCreator.apply(masterRandom.split()),
-            policySupplierWithPredictor.getFirst(),
-            new PaperEpisodeDataMaker<>(algorithmConfig.getDiscountFactor()),
-            episodeWriter
+            policySupplier,
+            episodeWriter,
+            trainablePredictorSetupList
         );
     }
 
@@ -197,7 +220,7 @@ public class PaperExperimentBuilder<
         return resultList;
     }
 
-    private ImmutableTuple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom) {
+    private ImmutableTriple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom) {
 
         var strategiesProvider = new StrategiesProvider<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(
             actionClazz,
@@ -211,21 +234,27 @@ public class PaperExperimentBuilder<
             algorithmConfig.getNoiseStrategy());
 
         var playerOpponentActions = getPlayerOpponentActions(actionClazz);
-        var observedVectorLength = instanceInitializerFactory.apply(problemConfig, masterRandom.split()).createInitialState().getPlayerObservation().getObservedVector().length;
-        var predictor = initializePredictor(observedVectorLength, algorithmConfig, systemConfig, playerOpponentActions.getFirst().length, masterRandom.split());
+        var stateFactory = instanceInitializerFactory.apply(problemConfig, masterRandom.split());
+        var initialStateSample = stateFactory.createInitialState();
+        var observedVectorLength = initialStateSample.getPlayerObservation().getObservedVector().length;
+        var playerPredictor = initializePlayerPredictor(observedVectorLength, algorithmConfig, systemConfig, playerOpponentActions.getFirst().length, masterRandom.split());
+
+        var knownPredictor = opponentPolicyCreator.apply(masterRandom.split()) instanceof KnownModelPolicySupplier ? initialStateSample.getKnownModelWithPerfectObservationPredictor() : null;
+        var opponentPredictor = knownPredictor == null ? initializeOpponentPredictor(observedVectorLength, algorithmConfig, systemConfig, playerOpponentActions.getSecond().length, masterRandom.split()) : null;
 
         var nodeEvaluator = resolveEvaluator(
             algorithmConfig,
             new SearchNodeBaseFactoryImpl<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(actionClazz, new PaperMetadataFactory<>(actionClazz)),
             playerOpponentActions.getFirst(),
             playerOpponentActions.getSecond(),
-            predictor,
-            FixedModelObservation::getProbabilities,
+            playerPredictor,
+            opponentPredictor,
+            knownPredictor,
             masterRandom.split());
 
         var nodeSelectorSupplier = createNodeSelectorSupplier(masterRandom, algorithmConfig, playerOpponentActions.getFirst().length);
 
-        return new ImmutableTuple<>(
+        return new ImmutableTriple<>(
             new PaperPolicySupplier<>(
                 actionClazz,
                 new PaperMetadataFactory<>(actionClazz),
@@ -239,7 +268,8 @@ public class PaperExperimentBuilder<
                 algorithmConfig.getExplorationConstantSupplier(),
                 algorithmConfig.getTemperatureSupplier(),
                 algorithmConfig.getRiskSupplier()),
-            predictor);
+            playerPredictor,
+            opponentPredictor);
     }
 
     private Supplier<RiskAverseNodeSelector<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>> createNodeSelectorSupplier(SplittableRandom masterRandom,
@@ -272,11 +302,8 @@ public class PaperExperimentBuilder<
         return new ImmutableTuple<>(Arrays.copyOf(ref, ref.length, ReflectionHacks.arrayClassFromClass(actionClass)), Arrays.copyOf(ref2, ref2.length, ReflectionHacks.arrayClassFromClass(actionClass)));
     }
 
-    private TrainablePredictor initializePredictor(int modelInputSize,
-                                                   PaperAlgorithmConfig algorithmConfig,
-                                                   SystemConfig systemConfig,
-                                                   int actionCount,
-                                                   SplittableRandom masterRandom) {
+    private TrainablePredictor initializePlayerPredictor(int modelInputSize, PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, int actionCount, SplittableRandom masterRandom)
+    {
         var approximatorType = algorithmConfig.getApproximatorType();
         var defaultPrediction = new double[2 + actionCount];
         defaultPrediction[0] = 0;
@@ -301,6 +328,52 @@ public class PaperExperimentBuilder<
 //                    algorithmConfig.getTrainingBatchSize(),
 //                    tfModelAsBytes,
 //                    masterRandom.split());
+                    var tfModel = new TFModelImproved(
+                        modelInputSize,
+                        PaperModel.POLICY_START_INDEX + actionCount,
+                        algorithmConfig.getTrainingBatchSize(),
+                        algorithmConfig.getTrainingEpochCount(),
+                        tfModelAsBytes,
+                        systemConfig.getParallelThreadsCount(),
+                        masterRandom.split());
+                    return new TrainableApproximator(tfModel);
+                case DL4J_NN:
+                    var model = new Dl4jModel(
+                        modelInputSize,
+                        PaperModel.POLICY_START_INDEX + actionCount,
+                        null,
+                        masterRandom.nextInt(),
+                        algorithmConfig.getLearningRate(),
+                        algorithmConfig.getTrainingEpochCount(),
+                        algorithmConfig.getTrainingBatchSize());
+                    return new TrainableApproximator(model);
+                default:
+                    throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
+            }
+        } catch (IOException |InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private TrainablePredictor initializeOpponentPredictor(int modelInputSize, PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, int actionCount, SplittableRandom masterRandom)
+    {
+        var approximatorType = algorithmConfig.getApproximatorType();
+        var defaultPrediction = new double[2 + actionCount];
+        defaultPrediction[0] = 0;
+        defaultPrediction[1] = 0.0;
+        for (int i = 0; i < actionCount; i++) {
+            defaultPrediction[i + 2] = 1.0 / actionCount;
+        }
+        try {
+            switch(approximatorType) {
+                case EMPTY:
+                    return new EmptyPredictor(defaultPrediction);
+                case HASHMAP:
+                    return new DataTablePredictor(defaultPrediction);
+                case HASHMAP_LR:
+                    return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
+                case TF_NN:
+                    var tfModelAsBytes = loadTensorFlowModel(algorithmConfig, systemConfig, modelInputSize, actionCount);
                     var tfModel = new TFModelImproved(
                         modelInputSize,
                         PaperModel.POLICY_START_INDEX + actionCount,
@@ -368,13 +441,15 @@ public class PaperExperimentBuilder<
                                   SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState> searchNodeFactory,
                                   TAction[] playerActions,
                                   TAction[] opponentActions,
-                                  TrainablePredictor approximator,
-                                  Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentPredictor,
+                                  Predictor<DoubleVector> approximator,
+                                  Predictor<DoubleVector> opponentPredictor,
+                                  Predictor<TState> knownModel,
                                   SplittableRandom masterRandom)
     {
         var evaluatorType = algorithmConfig.getEvaluatorType();
         var discountFactor = algorithmConfig.getDiscountFactor();
         var batchedEvaluationSize = algorithmConfig.getBatchedEvaluationSize();
+
 
         switch (evaluatorType) {
             case RALF:
@@ -382,6 +457,7 @@ public class PaperExperimentBuilder<
                     searchNodeFactory,
                     approximator,
                     opponentPredictor,
+                    knownModel,
                     playerActions,
                     opponentActions);
             case RALF_BATCHED:
@@ -389,13 +465,14 @@ public class PaperExperimentBuilder<
                     searchNodeFactory,
                     approximator,
                     opponentPredictor,
+                    knownModel,
                     playerActions,
                     opponentActions,
                     batchedEvaluationSize);
             case MONTE_CARLO:
                 return new MonteCarloNodeEvaluator<>(
                     searchNodeFactory,
-                    opponentPredictor,
+                    knownModel,
                     playerActions,
                     opponentActions,
                     masterRandom.split(),
@@ -403,7 +480,7 @@ public class PaperExperimentBuilder<
             case RAMCP:
                 return new RamcpNodeEvaluator<>(
                     searchNodeFactory,
-                    opponentPredictor,
+                    knownModel,
                     playerActions,
                     opponentActions,
                     masterRandom.split(),

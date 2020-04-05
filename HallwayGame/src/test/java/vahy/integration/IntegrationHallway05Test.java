@@ -42,6 +42,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(500)
+            .isModelKnown(true)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

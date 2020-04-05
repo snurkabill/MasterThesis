@@ -8,7 +8,6 @@ import vahy.original.game.cell.Cell;
 import vahy.original.game.cell.CellType;
 import vahy.resignation.environment.HallwayActionWithResign;
 import vahy.resignation.environment.agent.AgentHeadingWithResign;
-import vahy.resignation.environment.state.EnvironmentProbabilities;
 import vahy.resignation.environment.state.HallwayStateWithResign;
 import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameWithResignationInitialInstanceSupplier extends AbstractInitialStateSupplier<GameConfig, HallwayActionWithResign, DoubleVector, EnvironmentProbabilities, HallwayStateWithResign> {
+public class HallwayGameWithResignationInitialInstanceSupplier extends AbstractInitialStateSupplier<GameConfig, HallwayActionWithResign, DoubleVector, HallwayStateWithResign, HallwayStateWithResign> {
 
     public HallwayGameWithResignationInitialInstanceSupplier(GameConfig gameConfig, SplittableRandom random) {
         super(gameConfig, random);

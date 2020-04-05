@@ -23,7 +23,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistin
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
 import vahy.resignation.environment.HallwayActionWithResign;
 import vahy.resignation.environment.agent.policy.environment.HallwayPolicySupplierWithResign;
-import vahy.resignation.environment.state.EnvironmentProbabilities;
 import vahy.resignation.environment.state.HallwayStateWithResign;
 import vahy.resignation.game.HallwayGameWithResignationInitialInstanceSupplier;
 
@@ -38,7 +37,7 @@ public class ForExperimenting {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayActionWithResign, EnvironmentProbabilities, HallwayStateWithResign>()
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayActionWithResign, HallwayStateWithResign, HallwayStateWithResign>()
             .setActionClass(HallwayActionWithResign.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))

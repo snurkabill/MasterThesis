@@ -1,6 +1,7 @@
 package vahy.original.environment.state;
 
 import vahy.api.model.StateRewardReturn;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
@@ -12,10 +13,11 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
-public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector, HallwayStateImpl, HallwayStateImpl> {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -84,11 +86,10 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
         this.hasAgentResigned = hasAgentResigned;
     }
 
-    private ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities() {
-        List<HallwayAction> possibleActions = new LinkedList<>();
-        List<Double> actionProbabilities = new LinkedList<>();
+    private EnumMap<HallwayAction, Double> environmentActionsWithProbabilities() {
+        var actionMap = new EnumMap<HallwayAction, Double>(HallwayAction.class);
         if(isAgentTurn) {
-            return new ImmutableTuple<>(possibleActions, actionProbabilities);
+            return actionMap;
         }
         double sum = 0.0;
 
@@ -100,18 +101,16 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
             ImmutableTuple<Integer, Integer> coordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
-                    possibleActions.add(HallwayAction.NOISY_RIGHT);
                     double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
-                    actionProbabilities.add(noisyRightProb);
+                    actionMap.put(HallwayAction.NOISY_RIGHT, noisyRightProb);
                     sum += noisyRightProb;
-                    possibleActions.add(HallwayAction.NOISY_RIGHT_TRAP);
+
                     double noisyRightTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
-                    actionProbabilities.add(noisyRightTrapProb);
+                    actionMap.put(HallwayAction.NOISY_RIGHT_TRAP, noisyRightTrapProb);
                     sum += noisyRightTrapProb;
                 } else {
-                    possibleActions.add(HallwayAction.NOISY_RIGHT);
                     double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0;
-                    actionProbabilities.add(noisyRightProb);
+                    actionMap.put(HallwayAction.NOISY_RIGHT, noisyRightProb);
                     sum += noisyRightProb;
                 }
             } else {
@@ -120,51 +119,121 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
             coordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
-                    possibleActions.add(HallwayAction.NOISY_LEFT);
                     double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
-                    actionProbabilities.add(noisyLeftProb);
+                    actionMap.put(HallwayAction.NOISY_LEFT, noisyLeftProb);
                     sum += noisyLeftProb;
-                    possibleActions.add(HallwayAction.NOISY_LEFT_TRAP);
+
                     double noisyLeftTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
-                    actionProbabilities.add(noisyLeftTrapProb);
+                    actionMap.put(HallwayAction.NOISY_LEFT_TRAP, noisyLeftTrapProb);
                     sum += noisyLeftTrapProb;
                 } else {
-                    possibleActions.add(HallwayAction.NOISY_LEFT);
                     double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0;
-                    actionProbabilities.add(noisyLeftProb);
+                    actionMap.put(HallwayAction.NOISY_LEFT, noisyLeftProb);
                     sum += noisyLeftProb;
                 }
             } else {
                 failedNoisyMoveProbability += staticGamePart.getNoisyMoveProbability() / 2.0;
             }
             if(traps[agentXCoordination][agentYCoordination] != 0) {
-                possibleActions.add(HallwayAction.TRAP);
                 double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability() + failedNoisyMoveProbability) * traps[agentXCoordination][agentYCoordination];
-                actionProbabilities.add(straightTrapProb);
+                actionMap.put(HallwayAction.TRAP, straightTrapProb);
                 sum += straightTrapProb;
             }
         } else {
             if(traps[agentXCoordination][agentYCoordination] != 0) {
-                possibleActions.add(HallwayAction.TRAP);
-                actionProbabilities.add(traps[agentXCoordination][agentYCoordination]);
+                actionMap.put(HallwayAction.TRAP, traps[agentXCoordination][agentYCoordination]);
                 sum += traps[agentXCoordination][agentYCoordination];
             }
         }
 
-        if(sum > 1) {
+        if(sum > 1.0) {
             throw new IllegalStateException("Sum of probabilities should be less than one");
         }
-        possibleActions.add(HallwayAction.NO_ACTION);
-        actionProbabilities.add(1.0 - sum);
-        return new ImmutableTuple<>(possibleActions, actionProbabilities);
+        actionMap.put(HallwayAction.NO_ACTION, 1.0 - sum);
+        return actionMap;
     }
+
+//    private ImmutableTuple<List<HallwayAction>, List<Double>> environmentActionsWithProbabilities() {
+//        List<HallwayAction> possibleActions = new LinkedList<>();
+//        List<Double> actionProbabilities = new LinkedList<>();
+//        if(isAgentTurn) {
+//            return new ImmutableTuple<>(possibleActions, actionProbabilities);
+//        }
+//        double sum = 0.0;
+//
+//        boolean[][] walls = staticGamePart.getWalls();
+//        double[][] traps = staticGamePart.getTrapProbabilities();
+//
+//        if(hasAgentMoved) {
+//            double failedNoisyMoveProbability = 0.0;
+//            ImmutableTuple<Integer, Integer> coordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
+//            if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
+//                if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
+//                    possibleActions.add(HallwayAction.NOISY_RIGHT);
+//                    double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
+//                    actionProbabilities.add(noisyRightProb);
+//                    sum += noisyRightProb;
+//                    possibleActions.add(HallwayAction.NOISY_RIGHT_TRAP);
+//                    double noisyRightTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
+//                    actionProbabilities.add(noisyRightTrapProb);
+//                    sum += noisyRightTrapProb;
+//                } else {
+//                    possibleActions.add(HallwayAction.NOISY_RIGHT);
+//                    double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0;
+//                    actionProbabilities.add(noisyRightProb);
+//                    sum += noisyRightProb;
+//                }
+//            } else {
+//                failedNoisyMoveProbability += staticGamePart.getNoisyMoveProbability() / 2.0;
+//            }
+//            coordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
+//            if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
+//                if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
+//                    possibleActions.add(HallwayAction.NOISY_LEFT);
+//                    double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
+//                    actionProbabilities.add(noisyLeftProb);
+//                    sum += noisyLeftProb;
+//                    possibleActions.add(HallwayAction.NOISY_LEFT_TRAP);
+//                    double noisyLeftTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
+//                    actionProbabilities.add(noisyLeftTrapProb);
+//                    sum += noisyLeftTrapProb;
+//                } else {
+//                    possibleActions.add(HallwayAction.NOISY_LEFT);
+//                    double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0;
+//                    actionProbabilities.add(noisyLeftProb);
+//                    sum += noisyLeftProb;
+//                }
+//            } else {
+//                failedNoisyMoveProbability += staticGamePart.getNoisyMoveProbability() / 2.0;
+//            }
+//            if(traps[agentXCoordination][agentYCoordination] != 0) {
+//                possibleActions.add(HallwayAction.TRAP);
+//                double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability() + failedNoisyMoveProbability) * traps[agentXCoordination][agentYCoordination];
+//                actionProbabilities.add(straightTrapProb);
+//                sum += straightTrapProb;
+//            }
+//        } else {
+//            if(traps[agentXCoordination][agentYCoordination] != 0) {
+//                possibleActions.add(HallwayAction.TRAP);
+//                actionProbabilities.add(traps[agentXCoordination][agentYCoordination]);
+//                sum += traps[agentXCoordination][agentYCoordination];
+//            }
+//        }
+//
+//        if(sum > 1) {
+//            throw new IllegalStateException("Sum of probabilities should be less than one");
+//        }
+//        possibleActions.add(HallwayAction.NO_ACTION);
+//        actionProbabilities.add(1.0 - sum);
+//        return new ImmutableTuple<>(possibleActions, actionProbabilities);
+//    }
 
     @Override
     public HallwayAction[] getAllPossibleActions() {
         if(isAgentTurn) {
             return HallwayAction.playerActions;
         } else {
-            return environmentActionsWithProbabilities().getFirst().toArray(new HallwayAction[0]);
+            return environmentActionsWithProbabilities().keySet().toArray(new HallwayAction[0]);
         }
     }
 
@@ -180,14 +249,14 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     @Override
     public HallwayAction[] getPossibleOpponentActions() {
         if(isOpponentTurn()) {
-            return HallwayAction.playerActions;
+            return HallwayAction.environmentActions;
         } else {
             return new HallwayAction[0];
         }
     }
 
     @Override
-    public StateRewardReturn<HallwayAction, DoubleVector, EnvironmentProbabilities, HallwayStateImpl> applyAction(HallwayAction hallwayAction) {
+    public StateRewardReturn<HallwayAction, DoubleVector, HallwayStateImpl, HallwayStateImpl> applyAction(HallwayAction hallwayAction) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -337,21 +406,6 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     }
 
     @Override
-    public HallwayStateImpl deepCopy() {
-        return new HallwayStateImpl(
-            staticGamePart,
-            ArrayUtils.cloneArray(rewards),
-            agentXCoordination,
-            agentYCoordination,
-            agentHeading,
-            isAgentTurn,
-            rewardsLeft,
-            isAgentKilled,
-            hasAgentMoved,
-            hasAgentResigned);
-    }
-
-    @Override
     public boolean isFinalState() {
         return isAgentKilled || rewardsLeft == 0 || hasAgentResigned;
     }
@@ -379,8 +433,36 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     }
 
     @Override
-    public EnvironmentProbabilities getOpponentObservation() {
-        return new EnvironmentProbabilities(this.environmentActionsWithProbabilities());
+    public HallwayStateImpl getOpponentObservation() {
+        return this;
+    }
+
+    @Override
+    public Predictor<HallwayStateImpl> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<>() {
+;
+            @Override
+            public double[] apply(HallwayStateImpl observation) {
+                var probs = observation.environmentActionsWithProbabilities();
+                var prediction = new double[probs.size()];
+                int index = 0;
+                for (Map.Entry<HallwayAction, Double> entry : probs.entrySet()) {
+                    prediction[index] = entry.getValue(); // entryMap is always sorted
+                    index++;
+                }
+                return prediction;
+            }
+
+            @Override
+            public double[][] apply(HallwayStateImpl[] observationArray) {
+                var prediction = new double[observationArray.length][];
+                for (int i = 0; i < prediction.length; i++) {
+                    prediction[i] = apply(observationArray[i]);
+                }
+                return prediction;
+            }
+        };
+
     }
 
     private DoubleVector getFullDoubleVectorialObservation() {

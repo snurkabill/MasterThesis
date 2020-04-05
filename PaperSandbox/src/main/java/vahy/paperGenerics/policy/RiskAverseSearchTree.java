@@ -240,8 +240,8 @@ public class RiskAverseSearchTree<
             }
             return innerApplyAction(action);
         } catch(Exception e) {
-            dumpTreeWithFlow();
-            throw e;
+//            dumpTreeWithFlow();
+            throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. ", e);
         }
     }
 

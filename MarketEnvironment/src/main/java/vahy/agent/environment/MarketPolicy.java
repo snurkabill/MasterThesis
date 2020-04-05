@@ -1,11 +1,12 @@
 package vahy.agent.environment;
 
+import vahy.api.policy.Policy;
+import vahy.api.policy.PolicyRecordBase;
 import vahy.environment.MarketAction;
 import vahy.environment.MarketProbabilities;
 import vahy.environment.MarketState;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.policy.PaperPolicy;
 
-public abstract class MarketPolicy implements PaperPolicy<MarketAction, DoubleVector, MarketProbabilities, MarketState> {
+public abstract class MarketPolicy implements Policy<MarketAction, DoubleVector, MarketProbabilities, MarketState, PolicyRecordBase> {
 
 }

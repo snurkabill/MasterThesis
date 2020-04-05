@@ -16,7 +16,6 @@ import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
-import vahy.original.environment.state.EnvironmentProbabilities;
 import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
@@ -54,7 +53,7 @@ public class DefaultLocalBenchmark {
 //            Path.of("Results")
 //        );
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, HallwayStateImpl, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
@@ -153,6 +152,7 @@ public class DefaultLocalBenchmark {
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(500)
+            .isModelKnown(true)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

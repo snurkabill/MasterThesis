@@ -1,8 +1,11 @@
 package vahy.resignation.environment.state;
 
 import vahy.api.model.StateRewardReturn;
+import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.original.environment.HallwayAction;
 import vahy.original.environment.state.StaticGamePart;
 import vahy.paperGenerics.PaperState;
 import vahy.resignation.environment.HallwayActionWithResign;
@@ -13,10 +16,11 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
-public class HallwayStateWithResign implements PaperState<HallwayActionWithResign, DoubleVector, EnvironmentProbabilities, HallwayStateWithResign> {
+public class HallwayStateWithResign implements PaperState<HallwayActionWithResign, DoubleVector, HallwayStateWithResign, HallwayStateWithResign>, Observation {
 
     public static final int ADDITIONAL_DIMENSION_AGENT_ON_TRAP = 1;
     public static final int ADDITIONAL_DIMENSION_AGENT_HEADING = 4;
@@ -85,11 +89,10 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
         this.hasAgentResigned = hasAgentResigned;
     }
 
-    private ImmutableTuple<List<HallwayActionWithResign>, List<Double>> environmentActionsWithProbabilities() {
-        List<HallwayActionWithResign> possibleActions = new LinkedList<>();
-        List<Double> actionProbabilities = new LinkedList<>();
+    private EnumMap<HallwayActionWithResign, Double> environmentActionsWithProbabilities() {
+        var actionMap = new EnumMap<HallwayActionWithResign, Double>(HallwayActionWithResign.class);
         if(isAgentTurn) {
-            return new ImmutableTuple<>(possibleActions, actionProbabilities);
+            return actionMap;
         }
         double sum = 0.0;
 
@@ -101,18 +104,16 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
             ImmutableTuple<Integer, Integer> coordinates = getRightCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
-                    possibleActions.add(HallwayActionWithResign.NOISY_RIGHT);
                     double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
-                    actionProbabilities.add(noisyRightProb);
+                    actionMap.put(HallwayActionWithResign.NOISY_RIGHT, noisyRightProb);
                     sum += noisyRightProb;
-                    possibleActions.add(HallwayActionWithResign.NOISY_RIGHT_TRAP);
+
                     double noisyRightTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
-                    actionProbabilities.add(noisyRightTrapProb);
+                    actionMap.put(HallwayActionWithResign.NOISY_RIGHT_TRAP, noisyRightTrapProb);
                     sum += noisyRightTrapProb;
                 } else {
-                    possibleActions.add(HallwayActionWithResign.NOISY_RIGHT);
                     double noisyRightProb = staticGamePart.getNoisyMoveProbability() / 2.0;
-                    actionProbabilities.add(noisyRightProb);
+                    actionMap.put(HallwayActionWithResign.NOISY_RIGHT, noisyRightProb);
                     sum += noisyRightProb;
                 }
             } else {
@@ -121,43 +122,38 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
             coordinates = getLeftCoordinates(agentXCoordination, agentYCoordination, agentHeading);
             if(!walls[coordinates.getFirst()][coordinates.getSecond()]) {
                 if(traps[coordinates.getFirst()][coordinates.getSecond()] != 0) {
-                    possibleActions.add(HallwayActionWithResign.NOISY_LEFT);
                     double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0 * (1 - traps[coordinates.getFirst()][coordinates.getSecond()]);
-                    actionProbabilities.add(noisyLeftProb);
+                    actionMap.put(HallwayActionWithResign.NOISY_LEFT, noisyLeftProb);
                     sum += noisyLeftProb;
-                    possibleActions.add(HallwayActionWithResign.NOISY_LEFT_TRAP);
+
                     double noisyLeftTrapProb = staticGamePart.getNoisyMoveProbability() / 2.0 * traps[coordinates.getFirst()][coordinates.getSecond()];
-                    actionProbabilities.add(noisyLeftTrapProb);
+                    actionMap.put(HallwayActionWithResign.NOISY_LEFT_TRAP, noisyLeftTrapProb);
                     sum += noisyLeftTrapProb;
                 } else {
-                    possibleActions.add(HallwayActionWithResign.NOISY_LEFT);
                     double noisyLeftProb = staticGamePart.getNoisyMoveProbability() / 2.0;
-                    actionProbabilities.add(noisyLeftProb);
+                    actionMap.put(HallwayActionWithResign.NOISY_LEFT, noisyLeftProb);
                     sum += noisyLeftProb;
                 }
             } else {
                 failedNoisyMoveProbability += staticGamePart.getNoisyMoveProbability() / 2.0;
             }
             if(traps[agentXCoordination][agentYCoordination] != 0) {
-                possibleActions.add(HallwayActionWithResign.TRAP);
                 double straightTrapProb = (1 - staticGamePart.getNoisyMoveProbability() + failedNoisyMoveProbability) * traps[agentXCoordination][agentYCoordination];
-                actionProbabilities.add(straightTrapProb);
+                actionMap.put(HallwayActionWithResign.TRAP, straightTrapProb);
                 sum += straightTrapProb;
             }
         } else {
             if(traps[agentXCoordination][agentYCoordination] != 0) {
-                possibleActions.add(HallwayActionWithResign.TRAP);
-                actionProbabilities.add(traps[agentXCoordination][agentYCoordination]);
+                actionMap.put(HallwayActionWithResign.TRAP, traps[agentXCoordination][agentYCoordination]);
                 sum += traps[agentXCoordination][agentYCoordination];
             }
         }
 
-        if(sum > 1) {
+        if(sum > 1.0) {
             throw new IllegalStateException("Sum of probabilities should be less than one");
         }
-        possibleActions.add(HallwayActionWithResign.NO_ACTION);
-        actionProbabilities.add(1.0 - sum);
-        return new ImmutableTuple<>(possibleActions, actionProbabilities);
+        actionMap.put(HallwayActionWithResign.NO_ACTION, 1.0 - sum);
+        return actionMap;
     }
 
     @Override
@@ -165,7 +161,7 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
         if(isAgentTurn) {
             return HallwayActionWithResign.playerActions;
         } else {
-            return environmentActionsWithProbabilities().getFirst().toArray(new HallwayActionWithResign[0]);
+            return environmentActionsWithProbabilities().keySet().toArray(new HallwayActionWithResign[0]);
         }
     }
 
@@ -188,7 +184,7 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
     }
 
     @Override
-    public StateRewardReturn<HallwayActionWithResign, DoubleVector, EnvironmentProbabilities, HallwayStateWithResign> applyAction(HallwayActionWithResign hallwayActionWithResign) {
+    public StateRewardReturn<HallwayActionWithResign, DoubleVector, HallwayStateWithResign, HallwayStateWithResign> applyAction(HallwayActionWithResign hallwayActionWithResign) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -337,21 +333,6 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
     }
 
     @Override
-    public HallwayStateWithResign deepCopy() {
-        return new HallwayStateWithResign(
-            staticGamePart,
-            ArrayUtils.cloneArray(rewards),
-            agentXCoordination,
-            agentYCoordination,
-            agentHeading,
-            isAgentTurn,
-            rewardsLeft,
-            isAgentKilled,
-            hasAgentMoved,
-            hasAgentResigned);
-    }
-
-    @Override
     public boolean isFinalState() {
         return isAgentKilled || rewardsLeft == 0 || hasAgentResigned;
     }
@@ -379,8 +360,35 @@ public class HallwayStateWithResign implements PaperState<HallwayActionWithResig
     }
 
     @Override
-    public EnvironmentProbabilities getOpponentObservation() {
-        return new EnvironmentProbabilities(this.environmentActionsWithProbabilities());
+    public HallwayStateWithResign getOpponentObservation() {
+        return this;
+    }
+
+    @Override
+    public Predictor<HallwayStateWithResign> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<>() {
+
+            @Override
+            public double[] apply(HallwayStateWithResign observation) {
+                var probs = environmentActionsWithProbabilities();
+                var prediction = new double[probs.size()];
+                int index = 0;
+                for (Map.Entry<HallwayActionWithResign, Double> entry : probs.entrySet()) {
+                    prediction[index] = entry.getValue(); // entryMap is always sorted
+                    index++;
+                }
+                return prediction;
+            }
+
+            @Override
+            public double[][] apply(HallwayStateWithResign[] observationArray) {
+                var prediction = new double[observationArray.length][];
+                for (int i = 0; i < prediction.length; i++) {
+                    prediction[i] = apply(observationArray[i]);
+                }
+                return prediction;
+            }
+        };
     }
 
     private DoubleVector getFullDoubleVectorialObservation() {

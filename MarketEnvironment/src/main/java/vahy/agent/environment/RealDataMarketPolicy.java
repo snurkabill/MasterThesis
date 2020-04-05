@@ -48,24 +48,4 @@ public class RealDataMarketPolicy extends MarketPolicy {
         return new PaperPolicyRecord(probabilities, probabilities, 0.0, 0.0, 0.0, 0);
     }
 
-    @Override
-    public double[] getPriorActionProbabilityDistribution(MarketState gameState) {
-        return probabilities;
-    }
-
-    @Override
-    public double getEstimatedReward(MarketState gameState) {
-        return 0.0;
-    }
-
-    @Override
-    public double getEstimatedRisk(MarketState gameState) {
-        return 0.0;
-    }
-
-    @Override
-    public double getInnerRiskAllowed() {
-        return 0;
-    }
-
 }

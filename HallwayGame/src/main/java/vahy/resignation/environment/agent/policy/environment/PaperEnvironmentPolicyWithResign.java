@@ -4,12 +4,11 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.resignation.environment.HallwayActionWithResign;
-import vahy.resignation.environment.state.EnvironmentProbabilities;
 import vahy.resignation.environment.state.HallwayStateWithResign;
 
 import java.util.SplittableRandom;
 
-public class PaperEnvironmentPolicyWithResign extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayActionWithResign,  DoubleVector, EnvironmentProbabilities, HallwayStateWithResign> {
+public class PaperEnvironmentPolicyWithResign extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayActionWithResign,  DoubleVector, HallwayStateWithResign, HallwayStateWithResign> {
 
     public PaperEnvironmentPolicyWithResign(SplittableRandom random) {
         super(random);

@@ -5,7 +5,7 @@ import vahy.impl.model.observation.DoubleVector;
 
 import java.util.SplittableRandom;
 
-public class RandomWalkInitialInstanceSupplier extends AbstractInitialStateSupplier<RandomWalkSetup, RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
+public class RandomWalkInitialInstanceSupplier extends AbstractInitialStateSupplier<RandomWalkSetup, RandomWalkAction, DoubleVector, RandomWalkState, RandomWalkState> {
 
     public RandomWalkInitialInstanceSupplier(RandomWalkSetup randomWalkSetup, SplittableRandom random) {
         super(randomWalkSetup, random);
