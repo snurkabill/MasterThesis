@@ -179,7 +179,7 @@ public class HallwayStateTest {
     public void emptyEnvironmentActionsWithProbabilitiesTest() {
         HallwayStateImpl state = getHallGame1();
         Assert.assertTrue(state.isAgentTurn());
-        Assert.assertEquals(state.getAllPossibleActions().length, 0);
+        Assert.assertEquals(state.getPossibleOpponentActions().length, 0);
         var predictor = state.getKnownModelWithPerfectObservationPredictor();
         Assert.assertEquals(predictor.apply(state).length, 0);
     }
@@ -227,12 +227,12 @@ public class HallwayStateTest {
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
         HallwayAction[] moves = state2.getAllPossibleActions();
-        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NO_ACTION};
+        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NO_ACTION};
         HallwayAction[] wrongOrderMoves = new HallwayAction[] {HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NO_ACTION};
         Assert.assertEquals(moves, expectedMoves);
         Assert.assertNotEquals(moves, wrongOrderMoves);
         var predictor = state2.getKnownModelWithPerfectObservationPredictor();
-        Assert.assertEquals(predictor.apply(state2), new double[] {0.25 * 0.9, 0.25 * 0.1, 0.25 * 0.5, 0.25 * 0.5, 0.5});
+        Assert.assertEquals(predictor.apply(state2), new double[] {0.25 * 0.9, 0.25 * 0.5, 0.25 * 0.1, 0.25 * 0.5, 0.5});
     }
 
     @Test
@@ -246,10 +246,10 @@ public class HallwayStateTest {
             .applyAction(HallwayAction.NO_ACTION).getState()
             .applyAction(HallwayAction.FORWARD).getState();
         HallwayAction[] moves = state2.getAllPossibleActions();
-        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.TRAP, HallwayAction.NO_ACTION};
+        HallwayAction[] expectedMoves = new HallwayAction[] {HallwayAction.NOISY_RIGHT, HallwayAction.NOISY_LEFT, HallwayAction.TRAP, HallwayAction.NOISY_RIGHT_TRAP, HallwayAction.NOISY_LEFT_TRAP, HallwayAction.NO_ACTION};
         Assert.assertEquals(moves, expectedMoves);
         var predictor = state2.getKnownModelWithPerfectObservationPredictor();
-        Assert.assertEquals(predictor.apply(state2), new double[] {0.25 * 0.8, 0.25 * 0.2, 0.25 * 0.8, 0.25 * 0.2, 0.5 * 0.2, 0.5 * 0.8});
+        Assert.assertEquals(predictor.apply(state2), new double[] {0.25 * 0.8, 0.25 * 0.8, 0.5 * 0.2, 0.25 * 0.2, 0.25 * 0.2, 0.5 * 0.8});
     }
 
 
