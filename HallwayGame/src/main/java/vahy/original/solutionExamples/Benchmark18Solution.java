@@ -12,6 +12,7 @@ import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
@@ -23,7 +24,7 @@ import java.util.function.Supplier;
 public class Benchmark18Solution extends DefaultLocalBenchmark {
 
     public static void main(String[] args) {
-        var benchmark = new Benchmark19Solution();
+        var benchmark = new Benchmark18Solution();
         benchmark.runBenchmark();
     }
 
@@ -31,6 +32,7 @@ public class Benchmark18Solution extends DefaultLocalBenchmark {
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(1000)
+            .isModelKnown(true)
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
@@ -42,12 +44,12 @@ public class Benchmark18Solution extends DefaultLocalBenchmark {
 
     @Override
     protected PaperAlgorithmConfig createAlgorithmConfig() {
-        int batchSize = 1000;
+        int batchSize = 100;
 
         return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             //.mcRolloutCount(1)
             //NN
             .trainingBatchSize(64)
@@ -56,48 +58,32 @@ public class Benchmark18Solution extends DefaultLocalBenchmark {
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
-            .stageCount(200)
+            .stageCount(300)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP_LR)
             .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
-            .globalRiskAllowed(0.00)
-            .riskSupplier(() -> 0.00)
-            .explorationConstantSupplier(new Supplier<>() {
-                private int callCount = 0;
-                @Override
-                public Double get() {
-                    callCount++;
-                    var x = Math.exp(-callCount / 100000.0) / 5;
-                    if(callCount % batchSize == 0) {
-                        logger.info("Exploration constant: [{}] in call: [{}]", x, callCount);
-                    }
-                    return x;
-//                    return 1.0;
-                }
-            })
+            .riskSupplier(() -> 1.0)
+            .globalRiskAllowed(1.0)
+            .explorationConstantSupplier(() -> 1.0)
             .temperatureSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
                     callCount++;
-                    double x = Math.exp(-callCount / 200000.0) * 10;
-                    if(callCount % batchSize == 0) {
-                        logger.info("Temperature constant: [{}] in call: [{}]", x, callCount);
-                    }
-                    return x;
-//                    return 1.5;
+                    return Math.exp(-callCount / 10000.0);
                 }
                 private int callCount = 0;
             })
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
-            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.PRIOR_SUM)
+            .setNoiseStrategy(NoiseStrategy.NOISY_03_04)
             .buildAlgorithmConfig();
     }
 }

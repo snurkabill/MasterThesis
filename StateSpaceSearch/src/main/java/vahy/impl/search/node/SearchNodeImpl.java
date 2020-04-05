@@ -20,7 +20,7 @@ public class SearchNodeImpl<
     extends AbstractSearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
 
     public static AtomicLong nodeInstanceId = new AtomicLong(0);
-    private final long nodeId = nodeInstanceId.getAndIncrement();
+    public final long nodeId = nodeInstanceId.getAndIncrement();
     private final Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
     public SearchNodeImpl(

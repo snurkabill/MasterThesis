@@ -76,9 +76,9 @@ public class RandomDistributionUtils {
     }
 
     public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
-//        if(!isDistribution(distribution)) {
-//            throw new IllegalArgumentException("Given array does not represent probability distribution");
-//        }
+        if(!isDistribution(distribution)) {
+            throw new IllegalArgumentException("Given array does not represent probability distribution");
+        }
         for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
             double value = random.nextDouble();
             double cumulativeSum = 0.0;
