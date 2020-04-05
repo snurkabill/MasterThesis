@@ -24,26 +24,26 @@ public class RandomDistributionUtils {
     public static int SAMPLING_RANDOM_INDEX_TRIAL_COUNT = 10;
     public static double TOLERANCE = Math.pow(10, -5);
 
-    public static boolean isDistribution(List<Double> distribution) {
+    public static boolean isDistribution(List<Double> distribution, double tolerance) {
         double cumulativeSum = 0.0;
         for (double v : distribution) {
             cumulativeSum += v;
-            if(v < 0.0 || v > 1.0) {
+            if(v < 0.0 - tolerance || v > 1.0 + tolerance) {
                 return false;
             }
         }
-        return Math.abs(1 - cumulativeSum) < TOLERANCE;
+        return Math.abs(1 - cumulativeSum) < tolerance;
     }
 
-    public static boolean isDistribution(double[] distribution) {
+    public static boolean isDistribution(double[] distribution, double tolerance) {
         double cumulativeSum = 0.0;
         for (double v : distribution) {
             cumulativeSum += v;
-            if(v < 0.0 || v > 1.0) {
+            if(v < 0.0 - tolerance || v > 1.0 + tolerance) {
                 return false;
             }
         }
-        return Math.abs(1 - cumulativeSum) < TOLERANCE;
+        return Math.abs(1 - cumulativeSum) < tolerance;
     }
 
 //    public static List<Double> normalizeDistribution(List<Double> distribution) {
@@ -56,7 +56,7 @@ public class RandomDistributionUtils {
 //    }
 
     public static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random) {
-        if(!isDistribution(distribution)) {
+        if(!isDistribution(distribution, Math.pow(10, -8))) {
             throw new IllegalArgumentException("Given array does not represent probability distribution. Array: [" + distribution + "]");
         }
         for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
@@ -76,8 +76,8 @@ public class RandomDistributionUtils {
     }
 
     public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
-        if(!isDistribution(distribution)) {
-            throw new IllegalArgumentException("Given array does not represent probability distribution");
+        if(!isDistribution(distribution, Math.pow(10, -8))) {
+            throw new IllegalArgumentException("Given array does not represent probability distribution Array: [" + Arrays.toString(distribution) + "]");
         }
         for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
             double value = random.nextDouble();

@@ -107,23 +107,22 @@ public class Trainer<
         oobSamplingTime.addNewValue(samplingTime / 1000.0);
 
         for (var entry : trainablePredictorSetupList) {
+            var dataAggregator = entry.getDataAggregator();
             for (var episode : episodes) {
-                var dataAggregator = entry.getDataAggregator();
                 dataAggregator.addEpisodeSamples(entry.getEpisodeDataMaker().createEpisodeDataSamples(episode));
-                var trainingDataset = dataAggregator.getTrainingDataset();
-                var datasetSize = trainingDataset.getFirst().length;
+            }
+            var trainingDataset = dataAggregator.getTrainingDataset();
+            var datasetSize = trainingDataset.getFirst().length;
 
-                var startTraining = System.currentTimeMillis();
-                entry.getTrainablePredictor().train(trainingDataset);
-                var endTraining = System.currentTimeMillis() - startTraining;
+            var startTraining = System.currentTimeMillis();
+            entry.getTrainablePredictor().train(trainingDataset);
+            var endTraining = System.currentTimeMillis() - startTraining;
 
 //                trainingSampleCount.addNewValue((double)datasetSize);
 //                secTraining.addNewValue(endTraining / 1000.0);
 //                msTrainingPerSample.addNewValue(endTraining / (double) datasetSize);
 
 
-
-            }
         }
         trainingProgressTracker.onNextLog();
         samplingProgressTracker.onNextLog();
