@@ -31,12 +31,12 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1275.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1285.0, 0.105}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false, null, null);
+        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
@@ -133,7 +133,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    return Math.exp(-callCount / 20000.0);
                 }
                 private int callCount = 0;
             })
