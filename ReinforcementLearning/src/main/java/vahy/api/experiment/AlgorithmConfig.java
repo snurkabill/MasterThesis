@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 
 public interface AlgorithmConfig extends Config {
 
+    String getAlgorithmId();
+
     double getDiscountFactor();
 
     int getBatchEpisodeCount();

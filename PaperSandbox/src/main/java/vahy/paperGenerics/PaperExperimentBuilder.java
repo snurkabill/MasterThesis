@@ -19,9 +19,11 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.impl.benchmark.Benchmark;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
+import vahy.impl.learning.trainer.OpponentSamplerDataMaker;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.KnownModelPolicySupplier;
+import vahy.impl.predictor.DataTableDistributionPredictorWithLr;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.predictor.TrainableApproximator;
@@ -89,7 +91,7 @@ public class PaperExperimentBuilder<
     private List<PaperAlgorithmConfig> algorithmConfigList;
 
     private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory;
-    private Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentPolicyCreator = splittableRandom -> new KnownModelPolicySupplier<>(splittableRandom);
+    private Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentPolicyCreator = KnownModelPolicySupplier::new;
 
     public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setActionClass(Class<TAction> actionClass) {
         this.actionClazz = actionClass;
@@ -135,24 +137,26 @@ public class PaperExperimentBuilder<
         final var finalRandomSeed = systemConfig.getRandomSeed();
         final var masterRandom = new SplittableRandom(finalRandomSeed);
 
-        var policySupplierWithPredictor = createPolicySupplier(algorithmConfig, masterRandom.split());
+        var playerOpponentActions = getPlayerOpponentActions(actionClazz);
+
+        var policySupplierWithPredictor = createPolicySupplier(algorithmConfig, masterRandom.split(), playerOpponentActions);
         var policySupplier = policySupplierWithPredictor.getFirst();
         var playerPredictor = policySupplierWithPredictor.getSecond();
         var opponentPredictor = policySupplierWithPredictor.getThird();
 
-        var trainablePredictorSetupList = List.of(
-            new PredictorTrainingSetup<>(
-                playerPredictor,
-                new PaperEpisodeDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(algorithmConfig.getDiscountFactor()),
+        var trainablePredictorSetupList = new ArrayList<>(List.of(new PredictorTrainingSetup<>(
+            playerPredictor,
+            new PaperEpisodeDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(algorithmConfig.getDiscountFactor()),
+            algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig)
+        )));
+
+        if(opponentPredictor != null) {
+            trainablePredictorSetupList.add(new PredictorTrainingSetup<>(
+                opponentPredictor,
+                new OpponentSamplerDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(playerOpponentActions.getSecond().length),
                 algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig)
-            )
-//            ,
-//            new PredictorTrainingSetup<>(
-//                opponentPredictor,
-//                new OpponentSamplerDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(),
-//                algorithmConfig.getDataAggregationAlgorithm().resolveDataAggregator(algorithmConfig)
-//            )
-        );
+            ));
+        }
 
         return new RunnerArguments<>(
             policyId,
@@ -193,7 +197,7 @@ public class PaperExperimentBuilder<
         var runner = new Runner<TConfig, TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>();
         try {
             for (int i = 0; i < algorithmConfigList.size(); i++) {
-                var policyId = String.valueOf(i);
+                var policyId = algorithmConfigList.get(i).getAlgorithmId();
                 var episodeWriter = dumpData ? new EpisodeWriter<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>(problemConfig, algorithmConfigList.get(i), systemConfig, timestamp, policyId) : null;
                 var runnerArguments = buildRunnerArguments(algorithmConfigList.get(i), episodeWriter, policyId);
                 var evaluationArguments = buildEvaluationArguments(episodeWriter);
@@ -220,7 +224,7 @@ public class PaperExperimentBuilder<
         return resultList;
     }
 
-    private ImmutableTriple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom) {
+    private ImmutableTriple<PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>, TrainablePredictor, TrainablePredictor> createPolicySupplier(PaperAlgorithmConfig algorithmConfig, SplittableRandom masterRandom, ImmutableTuple<TAction[], TAction[]> playerOpponentActions) {
 
         var strategiesProvider = new StrategiesProvider<TAction, DoubleVector, TOpponentObservation, PaperMetadata<TAction>, TState>(
             actionClazz,
@@ -233,14 +237,14 @@ public class PaperExperimentBuilder<
             algorithmConfig.getSubTreeRiskCalculatorTypeForUnknownFlow(),
             algorithmConfig.getNoiseStrategy());
 
-        var playerOpponentActions = getPlayerOpponentActions(actionClazz);
+
         var stateFactory = instanceInitializerFactory.apply(problemConfig, masterRandom.split());
         var initialStateSample = stateFactory.createInitialState();
         var observedVectorLength = initialStateSample.getPlayerObservation().getObservedVector().length;
         var playerPredictor = initializePlayerPredictor(observedVectorLength, algorithmConfig, systemConfig, playerOpponentActions.getFirst().length, masterRandom.split());
 
-        var knownPredictor = opponentPolicyCreator.apply(masterRandom.split()) instanceof KnownModelPolicySupplier ? initialStateSample.getKnownModelWithPerfectObservationPredictor() : null;
-        var opponentPredictor = knownPredictor == null ? initializeOpponentPredictor(observedVectorLength, algorithmConfig, systemConfig, playerOpponentActions.getSecond().length, masterRandom.split()) : null;
+        var knownPredictor = problemConfig.isModelKnown() ? initialStateSample.getKnownModelWithPerfectObservationPredictor() : null;
+        var opponentPredictor = !problemConfig.isModelKnown() ? initializeOpponentPredictor(playerOpponentActions.getSecond().length, 0.1) : null;
 
         var nodeEvaluator = resolveEvaluator(
             algorithmConfig,
@@ -355,50 +359,51 @@ public class PaperExperimentBuilder<
         }
     }
 
-    private TrainablePredictor initializeOpponentPredictor(int modelInputSize, PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, int actionCount, SplittableRandom masterRandom)
+    private TrainablePredictor initializeOpponentPredictor(int actionCount, double learningRate)
     {
-        var approximatorType = algorithmConfig.getApproximatorType();
-        var defaultPrediction = new double[2 + actionCount];
-        defaultPrediction[0] = 0;
-        defaultPrediction[1] = 0.0;
+//        var approximatorType = algorithmConfig.getApproximatorType();
+        var defaultPrediction = new double[actionCount];
         for (int i = 0; i < actionCount; i++) {
-            defaultPrediction[i + 2] = 1.0 / actionCount;
+            defaultPrediction[i] = 1.0 / actionCount;
         }
-        try {
-            switch(approximatorType) {
-                case EMPTY:
-                    return new EmptyPredictor(defaultPrediction);
-                case HASHMAP:
-                    return new DataTablePredictor(defaultPrediction);
-                case HASHMAP_LR:
-                    return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
-                case TF_NN:
-                    var tfModelAsBytes = loadTensorFlowModel(algorithmConfig, systemConfig, modelInputSize, actionCount);
-                    var tfModel = new TFModelImproved(
-                        modelInputSize,
-                        PaperModel.POLICY_START_INDEX + actionCount,
-                        algorithmConfig.getTrainingBatchSize(),
-                        algorithmConfig.getTrainingEpochCount(),
-                        tfModelAsBytes,
-                        systemConfig.getParallelThreadsCount(),
-                        masterRandom.split());
-                    return new TrainableApproximator(tfModel);
-                case DL4J_NN:
-                    var model = new Dl4jModel(
-                        modelInputSize,
-                        PaperModel.POLICY_START_INDEX + actionCount,
-                        null,
-                        masterRandom.nextInt(),
-                        algorithmConfig.getLearningRate(),
-                        algorithmConfig.getTrainingEpochCount(),
-                        algorithmConfig.getTrainingBatchSize());
-                    return new TrainableApproximator(model);
-                default:
-                    throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
-            }
-        } catch (IOException |InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        return new DataTableDistributionPredictorWithLr(defaultPrediction, learningRate);
+
+//        try {
+//            switch(approximatorType) {
+//                case EMPTY:
+//                    return new EmptyPredictor(defaultPrediction);
+//                case HASHMAP:
+//                    return new DataTablePredictor(defaultPrediction);
+//                case HASHMAP_LR:
+//                    return new DataTablePredictorWithLr(defaultPrediction, algorithmConfig.getLearningRate(), actionCount);
+//                case TF_NN:
+////                    var tfModelAsBytes = loadTensorFlowModel(algorithmConfig, systemConfig, modelInputSize, actionCount);
+////                    var tfModel = new TFModelImproved(
+////                        modelInputSize,
+////                        PaperModel.POLICY_START_INDEX + actionCount,
+////                        algorithmConfig.getTrainingBatchSize(),
+////                        algorithmConfig.getTrainingEpochCount(),
+////                        tfModelAsBytes,
+////                        systemConfig.getParallelThreadsCount(),
+////                        masterRandom.split());
+////                    return new TrainableApproximator(tfModel);
+//                case DL4J_NN:
+////                    var model = new Dl4jModel(
+////                        modelInputSize,
+////                        PaperModel.POLICY_START_INDEX + actionCount,
+////                        null,
+////                        masterRandom.nextInt(),
+////                        algorithmConfig.getLearningRate(),
+////                        algorithmConfig.getTrainingEpochCount(),
+////                        algorithmConfig.getTrainingBatchSize());
+////                    return new TrainableApproximator(model);
+//                    throw new IllegalStateException("TF or DL4J is not expected now for opponent prediction. Value: [" + approximatorType + "]");
+//                default:
+//                    throw EnumUtils.createExceptionForUnknownEnumValue(approximatorType);
+//            }
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     private static byte[] loadTensorFlowModel(PaperAlgorithmConfig algorithmConfig, SystemConfig systemConfig, int inputCount, int outputActionCount) throws IOException, InterruptedException {

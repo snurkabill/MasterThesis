@@ -20,6 +20,16 @@ public class MutableDoubleArray {
         counter++;
     }
 
+    public void addDataSample(double[] newSample, int newCount) {
+        if(newSample.length != doubleArray.length) {
+            throw new IllegalArgumentException("Lengths of arrays differ");
+        }
+        for (int i = 0; i < doubleArray.length; i++) {
+            doubleArray[i] = ((doubleArray[i] * counter) + (newSample[i] * newCount)) / (counter + newCount);
+        }
+        counter += newCount;
+    }
+
     public double[] getDoubleArray() {
         return doubleArray;
     }

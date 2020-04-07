@@ -52,6 +52,7 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
 
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         return new AlgorithmConfigBuilder()
+            .algorithmId("Base")
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
@@ -61,7 +62,7 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .stageCount(20)
+            .stageCount(30)
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
             .approximatorType(ApproximatorType.HASHMAP)
             .setBatchedEvaluationSize(1)

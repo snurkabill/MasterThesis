@@ -62,7 +62,7 @@ public class EpisodeSimulatorImpl<
         try {
             long start = System.currentTimeMillis();
             while(!state.isFinalState() && playerStepsDone < episodeSetup.getStepCountLimit()) {
-                var step = makePolicyStep(state, playerPolicy, opponentPolicy, playerPolicy,true);
+                var step = makePolicyStep(state, playerPolicy, opponentPolicy, true);
                 totalCumulativePayoff += step.getReward();
                 playerStepsDone++;
                 totalStepsDone++;
@@ -72,7 +72,7 @@ public class EpisodeSimulatorImpl<
                 episodeHistoryList.add(step);
                 state = step.getToState();
                 if(!state.isFinalState()) {
-                    step = makePolicyStep(state, opponentPolicy, playerPolicy, playerPolicy, false);
+                    step = makePolicyStep(state, opponentPolicy, playerPolicy, false);
                     totalCumulativePayoff += step.getReward();
                     totalStepsDone++;
                     if(DEBUG_ENABLED) {
@@ -96,11 +96,10 @@ public class EpisodeSimulatorImpl<
         TState state,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> onTurnPolicy,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> otherPolicy,
-        Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicy,
         boolean isPlayerMove)
     {
         TAction action = onTurnPolicy.getDiscreteAction(state);
-        var playerPaperPolicyStepRecord = playerPolicy.getPolicyRecord(state);
+        var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(state);
         onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         otherPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
         StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = state.applyAction(action);

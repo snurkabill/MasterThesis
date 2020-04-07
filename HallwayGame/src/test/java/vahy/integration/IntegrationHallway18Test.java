@@ -31,12 +31,12 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1275.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1285.0, 0.105}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1298.0, 0.105}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false, false, null, null);
+        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, true, 1_000, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
@@ -55,21 +55,22 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         int batchSize = 100;
         return  new AlgorithmConfigBuilder()
+            .algorithmId("Base")
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(64)
-            .trainingEpochCount(100)
-            .learningRate(0.1)
+//            .trainingBatchSize(64)
+//            .trainingEpochCount(100)
+//            .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(200)
 
             .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .approximatorType(ApproximatorType.HASHMAP)
             .evaluatorType(EvaluatorType.RALF)
             .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
@@ -104,6 +105,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
             .stageCount(5)
+            .trainerAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -128,6 +130,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
             .stageCount(300)
+            .learningRate(0.5)
             .explorationConstantSupplier(() -> 1.0)
             .temperatureSupplier(new Supplier<>() {
                 @Override

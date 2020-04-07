@@ -21,15 +21,20 @@ public class OpponentSamplerDataMaker<
     TPolicyRecord extends PolicyRecordBase>
     implements EpisodeDataMaker<TAction, DoubleVector, TOpponentObservation, TState, TPolicyRecord> {
 
+    private final int allOpponentActions;
+
+    public OpponentSamplerDataMaker(int allOpponentActions) {
+        this.allOpponentActions = allOpponentActions;
+    }
+
     @Override
     public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TOpponentObservation, TState, TPolicyRecord> episodeResults) {
         var episodeHistory = episodeResults.getEpisodeHistory();
         var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(episodeResults.getPlayerStepCount());
         for (EpisodeStepRecord<TAction, DoubleVector, TOpponentObservation, TState, TPolicyRecord> entry : episodeHistory) {
             if(!entry.isPlayerMove()) {
-                var policyArray = entry.getPolicyStepRecord().getPolicyProbabilities();
-                var doubleArray = new double[policyArray.length];
-                System.arraycopy(policyArray, 0, doubleArray, 0, policyArray.length);
+                var doubleArray = new double[allOpponentActions];
+                doubleArray[entry.getPlayedAction().getActionIndexInOpponentActions()] = 1.0;
                 mutableDataSampleList.add(new ImmutableTuple<>(entry.getFromState().getPlayerObservation(), new MutableDoubleArray(doubleArray, false)));
             }
         }

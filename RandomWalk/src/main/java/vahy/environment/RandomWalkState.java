@@ -84,7 +84,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
 
     @Override
     public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {level});
+        return new DoubleVector(new double[] {level, previousAction.getGlobalIndex()});
     }
 
     @Override

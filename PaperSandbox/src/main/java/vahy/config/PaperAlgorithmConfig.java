@@ -16,6 +16,8 @@ import java.util.function.Supplier;
 
 public class PaperAlgorithmConfig implements AlgorithmConfig {
 
+    private final String algorithmId;
+
     // MCTS
     private final double cpuctParameter;
 
@@ -59,7 +61,8 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     private final int batchedEvaluationSize;
     private final NoiseStrategy noiseStrategy;
 
-    public PaperAlgorithmConfig(double cpuctParameter,
+    public PaperAlgorithmConfig(String algorithmId,
+                                double cpuctParameter,
                                 TreeUpdateConditionFactory treeUpdateConditionFactory,
                                 double discountFactor,
                                 int batchEpisodeCount,
@@ -86,7 +89,10 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
                                 int batchedEvaluationSize,
                                 String creatingScript,
                                 NoiseStrategy noiseStrategy) {
-
+        if(algorithmId == null) {
+            throw new IllegalArgumentException("PolicyId is missing.");
+        }
+        this.algorithmId = algorithmId;
         this.cpuctParameter = cpuctParameter;
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
         this.discountFactor = discountFactor;
@@ -122,6 +128,11 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
 
     public TreeUpdateConditionFactory getTreeUpdateConditionFactory() {
         return treeUpdateConditionFactory;
+    }
+
+    @Override
+    public String getAlgorithmId() {
+        return algorithmId;
     }
 
     public double getDiscountFactor() {
@@ -258,7 +269,9 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
 
     @Override
     public String toString() {
-        return "cpuctParameter," + cpuctParameter + System.lineSeparator() +
+        return
+            "algorithmId," + algorithmId + System.lineSeparator() +
+            "cpuctParameter," + cpuctParameter + System.lineSeparator() +
             "treeUpdateConditionFactory," + treeUpdateConditionFactory + System.lineSeparator() +
             "discountFactor," + discountFactor + System.lineSeparator() +
             "batchEpisodeCount," + batchEpisodeCount + System.lineSeparator() +

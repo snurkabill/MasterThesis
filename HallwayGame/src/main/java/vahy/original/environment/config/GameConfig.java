@@ -8,7 +8,6 @@ import java.util.List;
 
 public class GameConfig extends ProblemConfig {
 
-    private final boolean isModelKnown;
     private final double goalReward;
     private final double stepPenalty;
     private final double trapProbability;
@@ -26,8 +25,7 @@ public class GameConfig extends ProblemConfig {
                       StateRepresentation stateRepresentation,
                       String gameStringRepresentation,
                       List<List<Cell>> gameMatrix) {
-        super(maximalStepCountBound);
-        this.isModelKnown = isModelKnown;
+        super(maximalStepCountBound, isModelKnown);
         this.goalReward = goalReward;
         this.stepPenalty = stepPenalty;
         this.trapProbability = trapProbability;
@@ -35,10 +33,6 @@ public class GameConfig extends ProblemConfig {
         this.stateRepresentation = stateRepresentation;
         this.gameStringRepresentation = gameStringRepresentation;
         this.gameMatrix = gameMatrix;
-    }
-
-    public boolean isModelKnown() {
-        return isModelKnown;
     }
 
     public double getGoalReward() {
@@ -72,7 +66,6 @@ public class GameConfig extends ProblemConfig {
     @Override
     public String toString() {
         return super.toString() +
-            "isModelKnown," + isModelKnown + System.lineSeparator() +
             "goalReward," + goalReward + System.lineSeparator() +
             "stepPenalty," + stepPenalty + System.lineSeparator() +
             "trapProbability," + trapProbability + System.lineSeparator() +

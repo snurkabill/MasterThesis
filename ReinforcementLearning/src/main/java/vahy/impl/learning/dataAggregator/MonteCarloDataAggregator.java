@@ -44,7 +44,7 @@ public abstract class MonteCarloDataAggregator implements DataAggregator {
     protected abstract void putDataSample(Map<DoubleVector, MutableDoubleArray> firstVisitSet, MutableDoubleArray dataSample, DoubleVector observation);
 
     protected Map<DoubleVector, MutableDoubleArray> calculatedVisitedRewards(List<ImmutableTuple<DoubleVector, MutableDoubleArray>> episodeHistory) {
-        Map<DoubleVector, MutableDoubleArray> visitSet = new LinkedHashMap<>();
+        Map<DoubleVector, MutableDoubleArray> visitSet = new LinkedHashMap<>(episodeHistory.size());
         for (int i = 0; i < episodeHistory.size(); i++) {
             var dataSample = episodeHistory.get(i);
             putDataSample(visitSet, dataSample.getSecond(), dataSample.getFirst());
@@ -56,7 +56,7 @@ public abstract class MonteCarloDataAggregator implements DataAggregator {
         for (Map.Entry<DoubleVector, MutableDoubleArray> entry : sampledStateVisitMap.entrySet()) {
             if(visitAverageRewardMap.containsKey(entry.getKey())) {
                 MutableDoubleArray mutableDoubleArray = visitAverageRewardMap.get(entry.getKey());
-                mutableDoubleArray.addDataSample(entry.getValue().getDoubleArray());
+                mutableDoubleArray.addDataSample(entry.getValue().getDoubleArray(), entry.getValue().getCounter());
             } else {
                 visitAverageRewardMap.put(entry.getKey(), new MutableDoubleArray(entry.getValue().getDoubleArray(), false));
             }

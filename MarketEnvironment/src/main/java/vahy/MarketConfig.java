@@ -15,7 +15,7 @@ public class MarketConfig extends ProblemConfig {
                         int lookbackLength,
                         MarketDataProvider marketDataProvider,
                         int allowedCountOfTimestampsAheadOfEndOfData) {
-        super(maximalStepCountBound);
+        super(maximalStepCountBound, false);
         this.marketEnvironmentStaticPart = marketEnvironmentStaticPart;
         this.lookbackLength = lookbackLength;
         this.allowedCountOfTimestampsAheadOfEndOfData = allowedCountOfTimestampsAheadOfEndOfData;

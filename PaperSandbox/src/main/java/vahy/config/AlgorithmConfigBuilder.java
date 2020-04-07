@@ -15,6 +15,8 @@ import java.util.function.Supplier;
 
 public class AlgorithmConfigBuilder {
 
+    private String algorithmId;
+
     // MCTS
     private double cpuctParameter;
 
@@ -56,6 +58,10 @@ public class AlgorithmConfigBuilder {
 
     private String creatingScriptName;
 
+    public AlgorithmConfigBuilder algorithmId(String algorithmId) {
+        this.algorithmId = algorithmId;
+        return this;
+    }
 
     public AlgorithmConfigBuilder cpuctParameter(double cpuctParameter) {
         this.cpuctParameter = cpuctParameter;
@@ -180,6 +186,7 @@ public class AlgorithmConfigBuilder {
 
     public PaperAlgorithmConfig buildAlgorithmConfig() {
         return new PaperAlgorithmConfig(
+            algorithmId,
             cpuctParameter,
             treeUpdateConditionFactory,
             discountFactor,

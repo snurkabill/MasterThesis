@@ -29,8 +29,8 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
     @Override
     public Object[][] experimentSettings() {
         return new Object[][] {
-            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
-            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  280.0, 0.010},
+//            {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 280.0, 0.0},
+//            {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(),  280.0, 0.010},
             {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 280.000, 0.050}
         };
     }
@@ -54,6 +54,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
 
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         return new AlgorithmConfigBuilder()
+            .algorithmId("Base")
             //MCTS
             .cpuctParameter(1)
 
@@ -75,7 +76,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .globalRiskAllowed(1.0)
             .riskSupplier(() -> 1.0)
 
-            .learningRate(0.01)
+            .learningRate(0.1)
             .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
@@ -118,6 +119,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
             .stageCount(200)
+            .learningRate(0.5)
             .temperatureSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override

@@ -55,10 +55,11 @@ public class RandomWalkExample {
 
     public static PaperAlgorithmConfig createAlgorithmConfig() {
 
-        var riskAllowed = 1.0;
+        var riskAllowed = 0.0;
         var batchSize = 1000;
 
         return new AlgorithmConfigBuilder()
+            .algorithmId("Base")
             //MCTS
             .cpuctParameter(1)
 
@@ -120,7 +121,7 @@ public class RandomWalkExample {
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
@@ -143,17 +144,19 @@ public class RandomWalkExample {
         var diffLevel = 100;
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
+        var isModelKnown = false;
         return new RandomWalkSetup(
+            isModelKnown,
             500,
             finishlevel,
             startLevel,
             stepPenalty,
             2,
             2,
-            5,
-            9,
+            10,
+            11,
             0.9,
-            0.8);
+            0.6);
     }
 
 //    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment() {

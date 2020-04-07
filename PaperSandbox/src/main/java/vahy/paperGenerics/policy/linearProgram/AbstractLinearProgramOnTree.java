@@ -58,7 +58,7 @@ public abstract class AbstractLinearProgramOnTree<
 
     protected AbstractLinearProgramOnTree(boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
         this.model = new CLP();
-        this.model.algorithm(CLP.ALGORITHM.PRIMAL);
+//        this.model.algorithm(CLP.ALGORITHM.PRIMAL);
         this.masterQueue = new LinkedList<>();
         this.maximize = maximize;
         this.random = random;

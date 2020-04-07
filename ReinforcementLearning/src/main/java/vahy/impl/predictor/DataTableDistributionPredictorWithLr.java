@@ -1,45 +1,36 @@
-package vahy.paperGenerics.reinforcement;
+package vahy.impl.predictor;
 
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.predictor.DataTablePredictor;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.List;
 
-public class DataTablePredictorWithLr extends DataTablePredictor {
+public class DataTableDistributionPredictorWithLr extends DataTablePredictor {
 
-    private final int actionCount;
+    public static final double EPSILON = Math.pow(10, -15);
+
     private final double learningRate;
-    private final double[] killMeNow;
 
-    public DataTablePredictorWithLr(double[] defaultPrediction, double learningRate, int actionCount) {
+    public DataTableDistributionPredictorWithLr(double[] defaultPrediction, double learningRate) {
         super(defaultPrediction);
-        this.actionCount = actionCount;
-        if(learningRate <= 0.0) {
-            throw new IllegalArgumentException("Learning rate must be positive. Value: [" + learningRate + "]");
+        if(learningRate <= 0.0 || learningRate >= 1.0) {
+            throw new IllegalArgumentException("Learning rate must be from interval (0.0, 1.0). Value: [" + learningRate + "]");
         }
+
         this.learningRate = learningRate;
-        this.killMeNow = new double[actionCount];
     }
 
     private void trainDataSample(DoubleVector observation, double[] target) {
         double[] prediction = predictionMap.getOrDefault(observation, defaultPrediction);
         double[] newPrediction = new double[prediction.length];
 
-        var rewardDiff = prediction[0] - target[0];
-        newPrediction[0] = prediction[0] - learningRate * rewardDiff;
-
-        var riskDiff = prediction[1] - target[1];
-        newPrediction[1] = prediction[1] - learningRate * riskDiff;
-
-        for (int i = 0; i < actionCount; i++) {
-            var diffByI = - target[i + 2] / prediction[i + 2];
-            killMeNow[i] = prediction[i + 2] - learningRate * diffByI;
+        for (int i = 0; i < newPrediction.length; i++) {
+//            var diffByI = - target[i] / (prediction[i] + EPSILON);
+            var diffByI = - target[i] / prediction[i];
+            newPrediction[i] = prediction[i] - learningRate * diffByI;
         }
-        RandomDistributionUtils.applySoftmax(killMeNow);
-        System.arraycopy(killMeNow, 0, newPrediction, 2, actionCount);
-
+        RandomDistributionUtils.applySoftmax(newPrediction);
         predictionMap.put(observation, newPrediction);
     }
 
