@@ -440,7 +440,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     @Override
     public Predictor<HallwayStateImpl> getKnownModelWithPerfectObservationPredictor() {
         return new Predictor<>() {
-;
+
             @Override
             public double[] apply(HallwayStateImpl observation) {
                 var probs = observation.environmentActionsWithProbabilities();

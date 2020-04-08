@@ -1,0 +1,6 @@
+1 1 1 1 1 1 1 1 1
+1 g x g g g x g 1
+1 g g g g g x g 1
+1 g x g + g x g 1
+1 g x g g g g g 1
+1 1 1 1 1 1 1 1 1
