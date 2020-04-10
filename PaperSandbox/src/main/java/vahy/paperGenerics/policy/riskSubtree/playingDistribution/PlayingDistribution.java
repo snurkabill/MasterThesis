@@ -23,20 +23,20 @@ public class PlayingDistribution<
     private final double[] riskOnPlayerSubNodes;
     private final List<TAction> actionList;
 
-    private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier;
+    private final List<Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierList;
 
     public PlayingDistribution(TAction expectedPlayerAction,
                                int expectedPlayerActionIndex,
                                double[] playerDistribution,
                                double[] riskOnPlayerSubNodes,
                                List<TAction> actionList,
-                               Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier) {
+                               List<Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierList) {
         this.expectedPlayerAction = expectedPlayerAction;
         this.expectedPlayerActionIndex = expectedPlayerActionIndex;
         this.playerDistribution = playerDistribution;
         this.riskOnPlayerSubNodes = riskOnPlayerSubNodes;
         this.actionList = actionList;
-        this.usedSubTreeRiskCalculatorSupplier = usedSubTreeRiskCalculatorSupplier;
+        this.usedSubTreeRiskCalculatorSupplierList = usedSubTreeRiskCalculatorSupplierList;
 
         if(playerDistribution.length != riskOnPlayerSubNodes.length) {
             throw new IllegalArgumentException("Player distribution and risks on subnodes differ in length");
@@ -63,7 +63,7 @@ public class PlayingDistribution<
         return actionList;
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getUsedSubTreeRiskCalculatorSupplier() {
-        return usedSubTreeRiskCalculatorSupplier;
+    public List<Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> getUsedSubTreeRiskCalculatorSupplierList() {
+        return usedSubTreeRiskCalculatorSupplierList;
     }
 }

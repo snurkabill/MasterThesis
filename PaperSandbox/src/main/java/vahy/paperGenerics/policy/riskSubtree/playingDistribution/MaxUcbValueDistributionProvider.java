@@ -59,6 +59,6 @@ public class MaxUcbValueDistributionProvider<
             }
         }
 
-        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
+        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, List.of(subtreeRiskCalculatorSupplier));
     }
 }

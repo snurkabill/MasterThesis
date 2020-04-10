@@ -37,7 +37,7 @@ public class Example05 extends SHExperiment {
             .isModelKnown(true)
             .reward(100)
             .stepPenalty(1)
-            .trapProbability(0.2)
+            .trapProbability(0.1)
             .gameStringRepresentation(SHInstance.BENCHMARK_05)
             .buildConfig();
     }
@@ -65,16 +65,16 @@ public class Example05 extends SHExperiment {
                 //NN
                 .trainingBatchSize(1).trainingEpochCount(10)
                 // REINFORCEMENT
-                .batchEpisodeCount(100).stageCount(100).treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50)).discountFactor(1)
+                .batchEpisodeCount(1000).stageCount(100000).treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0)).discountFactor(1)
                 .selectorType(SelectorType.UCB)
                 .evaluatorType(EvaluatorType.RALF) //            .setBatchedEvaluationSize(1)
-                .trainerAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC)
+                .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
                 .approximatorType(ApproximatorType.HASHMAP_LR).learningRate(0.1)
-                .globalRiskAllowed(0.00)
+                .globalRiskAllowed(1.00)
                 .riskSupplier(new Supplier<Double>() {
                     @Override
                     public Double get() {
-                        return 0.00;
+                        return 1.00;
                     }
 
                     @Override
@@ -85,7 +85,7 @@ public class Example05 extends SHExperiment {
                 .explorationConstantSupplier(new Supplier<Double>() {
                     @Override
                     public Double get() {
-                        return 0.2;
+                        return 1.0;
                     }
 
                     @Override
@@ -94,14 +94,12 @@ public class Example05 extends SHExperiment {
                     }
                 })
                 .temperatureSupplier(new Supplier<Double>() {
+                    private int callCount = 0;
                     @Override
                     public Double get() {
-                        return 1.50;
-                    }
-
-                    @Override
-                    public String toString() {
-                        return "() -> 1.05";
+                        callCount++;
+                        return Math.exp(-callCount / 10000.0);
+//                    return 2.00;
                     }
                 })
 

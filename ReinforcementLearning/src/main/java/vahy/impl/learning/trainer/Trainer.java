@@ -106,6 +106,10 @@ public class Trainer<
         oobAvgMsPerEpisode.addNewValue(samplingTime/(double) episodeBatchSize);
         oobSamplingTime.addNewValue(samplingTime / 1000.0);
 
+        var trainingSampleCountList = new ArrayList<Double>(trainablePredictorSetupList.size());
+        var trainingTimeList = new ArrayList<Double>(trainablePredictorSetupList.size());
+        var trainingMsPerSampleList = new ArrayList<Double>(trainablePredictorSetupList.size());
+
         for (var entry : trainablePredictorSetupList) {
             var dataAggregator = entry.getDataAggregator();
             for (var episode : episodes) {
@@ -118,12 +122,14 @@ public class Trainer<
             entry.getTrainablePredictor().train(trainingDataset);
             var endTraining = System.currentTimeMillis() - startTraining;
 
-//                trainingSampleCount.addNewValue((double)datasetSize);
-//                secTraining.addNewValue(endTraining / 1000.0);
-//                msTrainingPerSample.addNewValue(endTraining / (double) datasetSize);
-
+            trainingSampleCountList.add((double)datasetSize);
+            trainingTimeList.add(endTraining / 1000.0);
+            trainingMsPerSampleList.add(endTraining / (double) datasetSize);
 
         }
+        trainingSampleCount.addNewValue(trainingSampleCountList);
+        secTraining.addNewValue(trainingTimeList);
+        msTrainingPerSample.addNewValue(trainingMsPerSampleList);
         trainingProgressTracker.onNextLog();
         samplingProgressTracker.onNextLog();
 
