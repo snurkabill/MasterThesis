@@ -184,9 +184,7 @@ public class RiskAverseSearchTree<
             }
             if(action.isPlayerAction()) {
                 latestTreeWithPlayerOnTurn = this.getRoot(); // debug purposes
-
-                var subtreeRiskList = playingDistribution.getUsedSubTreeRiskCalculatorSupplierList();
-                subtreeRiskCalculator = (subtreeRiskList.size() == 1 ? subtreeRiskList.get(0) : subtreeRiskList.get(action.getActionIndexInPlayerActions())).get();
+                subtreeRiskCalculator = playingDistribution.getUsedSubTreeRiskCalculatorSupplierMap().get(action).get();
             }
             isFlowOptimized = false;
             if(!action.isPlayerAction() && !isRiskIgnored()) {
@@ -243,9 +241,10 @@ public class RiskAverseSearchTree<
                 }
             }
             return innerApplyAction(action);
-        } catch(Exception e) {
-//            dumpTreeWithFlow();
-            throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. ", e);
+        } catch (Exception e) {
+            dumpTreeWithFlow();
+            throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. " +
+                "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getWrappedState().readableStringRepresentation() + "]", e);
         }
     }
 

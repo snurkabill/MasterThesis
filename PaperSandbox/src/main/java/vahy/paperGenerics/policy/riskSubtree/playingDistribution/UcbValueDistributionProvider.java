@@ -52,6 +52,7 @@ public class UcbValueDistributionProvider<
             RandomDistributionUtils.applyBoltzmannNoise(rewardArray, temperature);
         }
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(rewardArray, random);
-        return new PlayingDistribution<>(actionList.get(index), index, rewardArray, riskArray, actionList, List.of(subtreeRiskCalculatorSupplier));
+        TAction action = actionList.get(index);
+        return new PlayingDistribution<>(action, index, rewardArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
     }
 }

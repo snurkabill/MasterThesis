@@ -12,6 +12,7 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
@@ -49,7 +50,7 @@ public class ExplorationFeasibleDistributionProvider<
         var childMap = node.getChildNodeMap();
         var childCount = childMap.size();
         var actionList = new ArrayList<TAction>(childCount);
-        var riskSupplierList = new ArrayList<Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>>(childCount);
+        var riskSupplierMap = new HashMap<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>>(childCount);
         var distributionAsArray = new double[childCount];
         var riskArray = new double[childCount];
 
@@ -59,7 +60,7 @@ public class ExplorationFeasibleDistributionProvider<
             var metadata = entry.getValue().getSearchNodeMetadata();
             distributionAsArray[j] = metadata.getFlow();
             var riskSupplier = distributionAsArray[j] - TOLERANCE <= 0.0 ? subtreeRiskCalculatorSupplierForUnknownFlow : subtreeRiskCalculatorSupplierForKnownFlow;
-            riskSupplierList.add(riskSupplier);
+            riskSupplierMap.put(entry.getKey(), riskSupplier);
             var minimalRiskReachAbilityCalculator = riskSupplier.get();
 
             if(DEBUG_ENABLED) {
@@ -87,7 +88,7 @@ public class ExplorationFeasibleDistributionProvider<
                     riskBound);
                 if(suitableExplorationDistribution.getFirst()) {
                     int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution.getSecond(), random);
-                    return new PlayingDistribution<>(actionList.get(index), index, suitableExplorationDistribution.getSecond(), riskArray, actionList, riskSupplierList);
+                    return new PlayingDistribution<>(actionList.get(index), index, suitableExplorationDistribution.getSecond(), riskArray, actionList, riskSupplierMap);
                 }
             }
             throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found. Total risk allowed: [" + totalRiskAllowed +
@@ -98,7 +99,7 @@ public class ExplorationFeasibleDistributionProvider<
                 "] This is probably due to numeric inconsistency. Boltzmann exploration can have such effect with SOFT flow optimizer when allowed risk is 0.");
         } else {
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionAsArray, random);
-            return new PlayingDistribution<>(actionList.get(index), index, distributionAsArray, riskArray, actionList, riskSupplierList);
+            return new PlayingDistribution<>(actionList.get(index), index, distributionAsArray, riskArray, actionList, riskSupplierMap);
         }
     }
 }
