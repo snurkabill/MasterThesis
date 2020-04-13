@@ -4,6 +4,8 @@ public enum SHInstance {
 
     DEMO_01("examples/hallway_demo0.txt"),
 
+    GOLD_EVERYWHERE("examples/goldEverywhere.txt"),
+
     BENCHMARK_00("examples/benchmark/benchmark_00.txt"),
     BENCHMARK_01("examples/benchmark/benchmark_01.txt"),
     BENCHMARK_02("examples/benchmark/benchmark_02.txt"),
