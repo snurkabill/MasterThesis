@@ -8,6 +8,7 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.utils.ImmutableTuple;
@@ -94,7 +95,7 @@ public class Trainer<
 
     public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> trainPolicy(int episodeBatchSize) {
         var start = System.currentTimeMillis();
-        var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound());
+        var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound(), PolicyMode.TRAINING);
         var samplingTime = System.currentTimeMillis() - start;
 
         var stats = statisticsCalculator.calculateStatistics(episodes, Duration.ofMillis(samplingTime - start));

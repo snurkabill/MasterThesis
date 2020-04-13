@@ -6,7 +6,6 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.GameSampler;
 import vahy.api.episode.InitialStateSupplier;
-import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -26,7 +25,6 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
-    TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -40,22 +38,18 @@ public class GameSamplerImpl<
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
     private final int processingUnitCount;
 
-    private final PolicyMode policyMode;
-
     private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier;
     private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
 
     public GameSamplerImpl(
         InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
-        PolicyMode policyMode,
         int processingUnitCount,
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier,
         PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier)
     {
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
-        this.policyMode = policyMode;
         this.processingUnitCount = processingUnitCount;
         this.playerPolicySupplier = playerPolicySupplier;
         this.opponentPolicySupplier = opponentPolicySupplier;
@@ -69,7 +63,7 @@ public class GameSamplerImpl<
         return opponentPolicySupplier.initializePolicy(initialState, policyMode);
     }
 
-    public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit) {
+    public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
         logger.info("Sampling [{}] episodes started", episodeBatchSize);

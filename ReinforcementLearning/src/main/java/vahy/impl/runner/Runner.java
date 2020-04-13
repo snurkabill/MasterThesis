@@ -56,7 +56,6 @@ public class Runner<TConfig extends ProblemConfig,
         var gameSampler = new GameSamplerImpl<>(
             runnerArguments.getInitialStateSupplier(),
             runnerArguments.getEpisodeResultsFactory(),
-            PolicyMode.TRAINING,
             runnerArguments.getSystemConfig().getParallelThreadsCount(),
             runnerArguments.getPolicySupplier(),
             runnerArguments.getOpponentPolicySupplier());
@@ -91,12 +90,11 @@ public class Runner<TConfig extends ProblemConfig,
         var gameSampler = new GameSamplerImpl<>(
             evaluationArguments.getInitialStateSupplier(),
             evaluationArguments.getEpisodeResultsFactory(),
-            PolicyMode.INFERENCE,
             systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount(),
             policy.getPolicySupplier(),
             evaluationArguments.getOpponentPolicySupplier());
         long start = System.currentTimeMillis();
-        var episodeList = gameSampler.sampleEpisodes(systemConfig.getEvalEpisodeCount(), evaluationArguments.getProblemConfig().getMaximalStepCountBound());
+        var episodeList = gameSampler.sampleEpisodes(systemConfig.getEvalEpisodeCount(), evaluationArguments.getProblemConfig().getMaximalStepCountBound(), PolicyMode.INFERENCE);
         long end = System.currentTimeMillis();
         logger.info("Evaluation of [{}] policy in [{}] runs took [{}] milliseconds", policy.getPolicyId(), systemConfig.getEvalEpisodeCount(), end - start);
         var duration = Duration.ofMillis(end - start);
