@@ -17,7 +17,6 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 
 public class PaperNodeEvaluator<
     TAction extends Enum<TAction> & Action,
@@ -166,14 +165,6 @@ public class PaperNodeEvaluator<
                 }
             }
         }
-    }
-
-    private boolean[] createMask(TAction[] allPlayerActions, Set<TAction> keys) {
-        boolean[] mask = new boolean[allPlayerActions.length];
-        for (TAction key : keys) {
-            mask[key.getActionIndexInPlayerActions()] = true;
-        }
-        return mask;
     }
 
     protected int innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
