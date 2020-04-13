@@ -1,5 +1,6 @@
 package vahy.environment;
 
+import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.AbstractInitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -12,7 +13,7 @@ public class RandomWalkInitialInstanceSupplier extends AbstractInitialStateSuppl
     }
 
     @Override
-    protected RandomWalkState createState_inner(RandomWalkSetup problemConfig, SplittableRandom random) {
+    protected RandomWalkState createState_inner(RandomWalkSetup problemConfig, SplittableRandom random, PolicyMode policyMode) {
         return new RandomWalkState(problemConfig);
     }
 }

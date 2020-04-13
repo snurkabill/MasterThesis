@@ -25,29 +25,29 @@ public class RunnerArguments<TConfig extends ProblemConfig,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
-    private String policyId;
+    private final String policyId;
 
-    private TConfig problemConfig;
-    private SystemConfig systemConfig;
-    private AlgorithmConfig algorithmConfig;
+    private final TConfig problemConfig;
+    private final SystemConfig systemConfig;
+    private final AlgorithmConfig algorithmConfig;
 
-    private InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
-    private EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory;
+    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
+    private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory;
 
-    private EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
-    private List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
+    private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
+    private final List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
 
-    private List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
+    private final List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
 
-    private PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
+    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
 
-    private PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier;
-    private EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
+    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier;
+    private final EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
 
     public RunnerArguments(String policyId, TConfig problemConfig,
                            SystemConfig systemConfig,
                            AlgorithmConfig algorithmConfig,
-                           InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                           InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                            EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
                            EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
                            List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList,
@@ -81,7 +81,7 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         return algorithmConfig;
     }
 
-    public InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> getInitialStateSupplier() {
+    public InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> getInitialStateSupplier() {
         return initialStateSupplier;
     }
 

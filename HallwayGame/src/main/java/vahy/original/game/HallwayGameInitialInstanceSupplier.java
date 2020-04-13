@@ -1,5 +1,6 @@
 package vahy.original.game;
 
+import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.AbstractInitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
@@ -24,7 +25,7 @@ public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupp
     }
 
     @Override
-    protected HallwayStateImpl createState_inner(GameConfig problemConfig, SplittableRandom random) {
+    protected HallwayStateImpl createState_inner(GameConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
         return createImmutableInitialState(problemConfig.getGameMatrix(), problemConfig, random);
     }
 

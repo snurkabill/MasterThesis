@@ -1,5 +1,6 @@
 package vahy.domain;
 
+import vahy.api.policy.PolicyMode;
 import vahy.domain.cell.Cell;
 import vahy.domain.cell.CellType;
 import vahy.impl.episode.AbstractInitialStateSupplier;
@@ -17,7 +18,7 @@ public class SHInstanceSupplier extends AbstractInitialStateSupplier<SHConfig, S
     }
 
     @Override
-    protected SHState createState_inner(SHConfig problemConfig, SplittableRandom random) {
+    protected SHState createState_inner(SHConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
         return createImmutableInitialState(problemConfig.getGameMatrix(), problemConfig, random);
     }
 

@@ -5,6 +5,7 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PolicyMode;
 
 import java.util.SplittableRandom;
 
@@ -14,7 +15,7 @@ public abstract class AbstractInitialStateSupplier<
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
     TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> {
+    implements InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> {
 
     private final TConfig problemConfig;
     private final SplittableRandom random;
@@ -25,9 +26,9 @@ public abstract class AbstractInitialStateSupplier<
     }
 
     @Override
-    public TState createInitialState() {
-        return createState_inner(problemConfig, random.split());
+    public TState createInitialState(PolicyMode policyMode) {
+        return createState_inner(problemConfig, random.split(), policyMode);
     }
 
-    protected abstract TState createState_inner(TConfig problemConfig, SplittableRandom random);
+    protected abstract TState createState_inner(TConfig problemConfig, SplittableRandom random, PolicyMode policyMode);
 }

@@ -1,5 +1,6 @@
 package vahy.resignation.game;
 
+import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.AbstractInitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.config.GameConfig;
@@ -24,7 +25,7 @@ public class HallwayGameWithResignationInitialInstanceSupplier extends AbstractI
     }
 
     @Override
-    protected HallwayStateWithResign createState_inner(GameConfig problemConfig, SplittableRandom random) {
+    protected HallwayStateWithResign createState_inner(GameConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
         return createImmutableInitialState(problemConfig.getGameMatrix(), problemConfig, random);
     }
 

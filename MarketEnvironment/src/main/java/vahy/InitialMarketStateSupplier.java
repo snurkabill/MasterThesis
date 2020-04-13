@@ -1,5 +1,6 @@
 package vahy;
 
+import vahy.api.policy.PolicyMode;
 import vahy.environment.MarketAction;
 import vahy.environment.MarketProbabilities;
 import vahy.environment.MarketState;
@@ -17,7 +18,7 @@ public class InitialMarketStateSupplier extends AbstractInitialStateSupplier<Mar
     }
 
     @Override
-    protected MarketState createState_inner(MarketConfig problemConfig, SplittableRandom random) {
+    protected MarketState createState_inner(MarketConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
         var lookbackLength = problemConfig.getLookbackLength();
         var marketDataProvider = problemConfig.getMarketEnvironmentStaticPart().getMarketDataProvider();
         var marketEnvironmentStaticPart = problemConfig.getMarketEnvironmentStaticPart();

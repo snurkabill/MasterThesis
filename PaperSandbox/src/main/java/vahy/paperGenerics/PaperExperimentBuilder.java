@@ -10,6 +10,7 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.Predictor;
 import vahy.api.predictor.TrainablePredictor;
@@ -90,7 +91,7 @@ public class PaperExperimentBuilder<
     private SystemConfig systemConfig;
     private List<PaperAlgorithmConfig> algorithmConfigList;
 
-    private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory;
+    private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory;
     private Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentPolicyCreator = KnownModelPolicySupplier::new;
 
     public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setActionClass(Class<TAction> actionClass) {
@@ -120,7 +121,7 @@ public class PaperExperimentBuilder<
         return this;
     }
 
-    public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setProblemInstanceInitializerSupplier(BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TConfig, TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory) {
+    public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setProblemInstanceInitializerSupplier(BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory) {
         this.instanceInitializerFactory = instanceInitializerFactory;
         return this;
     }
@@ -239,7 +240,7 @@ public class PaperExperimentBuilder<
 
 
         var stateFactory = instanceInitializerFactory.apply(problemConfig, masterRandom.split());
-        var initialStateSample = stateFactory.createInitialState();
+        var initialStateSample = stateFactory.createInitialState(PolicyMode.INFERENCE);
         var observedVectorLength = initialStateSample.getPlayerObservation().getObservedVector().length;
         var playerPredictor = initializePlayerPredictor(observedVectorLength, algorithmConfig, systemConfig, playerOpponentActions.getFirst().length, masterRandom.split());
 

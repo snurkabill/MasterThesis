@@ -36,7 +36,7 @@ public class GameSamplerImpl<
 
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
-    private final InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
+    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
     private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
     private final int processingUnitCount;
 
@@ -46,7 +46,7 @@ public class GameSamplerImpl<
     private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
 
     public GameSamplerImpl(
-        InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+        InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
         EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
         PolicyMode policyMode,
         int processingUnitCount,
@@ -75,7 +75,7 @@ public class GameSamplerImpl<
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
         var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
-            TState initialGameState = initialStateSupplier.createInitialState();
+            TState initialGameState = initialStateSupplier.createInitialState(policyMode);
             var paperPolicy = supplyPlayerPolicy(initialGameState, policyMode);
             var opponentPolicy = supplyOpponentPolicy(initialGameState, policyMode);
             var paperEpisode = new EpisodeSetupImpl<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
