@@ -15,10 +15,7 @@ public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerato
     private int counter = 0;
     private List<Double> valueList = null;
 
-    public DataPointGeneratorGeneric(
-        String dataTitle,
-        Function<TDataSource, Double> function)
-    {
+    public DataPointGeneratorGeneric(String dataTitle, Function<TDataSource, Double> function) {
         this.dataTitle = dataTitle;
         this.function = function;
     }
@@ -41,5 +38,9 @@ public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerato
     public void addNewValue(TDataSource dataSource) {
         counter++;
         valueList = List.of(function.apply(dataSource));
+    }
+
+    public DataPointGeneratorGeneric<TDataSource> createCopy() {
+        return new DataPointGeneratorGeneric<>(dataTitle, function);
     }
 }

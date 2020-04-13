@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Trainer<
     TAction extends Enum<TAction> & Action,
@@ -32,11 +33,13 @@ public class Trainer<
     private final GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler;
     private final ProgressTracker trainingProgressTracker;
     private final ProgressTracker samplingProgressTracker;
+    private final ProgressTracker evaluationProgressTracker;
     private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> statisticsCalculator;
 
     private final List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
 
-    private final List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList = new ArrayList<>();
+    private final List<DataPointGeneratorGeneric<TStatistics>> samplingDataGeneratorList;
+    private final List<DataPointGeneratorGeneric<TStatistics>> evalDataGeneratorList;
 
     private final DataPointGeneratorGeneric<Double> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", x -> x);
     private final DataPointGeneratorGeneric<Double> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", x -> x);
@@ -57,39 +60,43 @@ public class Trainer<
         this.trainablePredictorSetupList = trainablePredictorSetupList;
         this.gameSampler = gameSampler;
         this.statisticsCalculator = statisticsCalculator;
+
         this.trainingProgressTracker = new ProgressTracker(progressTrackerSettings, "Training stats", Color.BLUE);
+        this.samplingProgressTracker =  new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.RED);
+        this.evaluationProgressTracker =  new ProgressTracker(progressTrackerSettings, "Eval stats", Color.RED);
+
+        var baseDataGenerators = addBaseDataGenerators(additionalDataPointGeneratorList);
+
+        samplingDataGeneratorList = baseDataGenerators.stream().map(DataPointGeneratorGeneric::createCopy).collect(Collectors.toList());
+        evalDataGeneratorList = baseDataGenerators.stream().map(DataPointGeneratorGeneric::createCopy).collect(Collectors.toList());
+
         trainingProgressTracker.registerDataCollector(oobAvgMsPerEpisode);
         trainingProgressTracker.registerDataCollector(oobSamplingTime);
         trainingProgressTracker.registerDataCollector(trainingSampleCount);
         trainingProgressTracker.registerDataCollector(secTraining);
         trainingProgressTracker.registerDataCollector(msTrainingPerSample);
+
+        registerDataGenerators(samplingDataGeneratorList, trainingProgressTracker);
+        registerDataGenerators(evalDataGeneratorList, evaluationProgressTracker);
+
         trainingProgressTracker.finalizeRegistration();
-
-        this.samplingProgressTracker =  new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.RED);
-        createSamplingDataGenerators(additionalDataPointGeneratorList);
         samplingProgressTracker.finalizeRegistration();
+        evaluationProgressTracker.finalizeRegistration();
     }
 
-    private void createSamplingDataGenerators(List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
+    private List<DataPointGeneratorGeneric<TStatistics>> addBaseDataGenerators(List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
         var dataPointGeneratorList = new ArrayList<>(additionalDataPointGeneratorList == null ? new ArrayList<>() : additionalDataPointGeneratorList);
-
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Player Step Count", EpisodeStatistics::getAveragePlayerStepCount));
-
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Total Payoff", EpisodeStatistics::getTotalPayoffAverage));
-
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
-
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", EpisodeStatistics::getAverageMillisPerEpisode));
-
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", EpisodeStatistics::getStdevMillisPerEpisode));
-
-        registerDataGenerators(dataPointGeneratorList);
+        return dataPointGeneratorList;
     }
 
-    protected void registerDataGenerators(List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList) {
-        this.dataPointGeneratorList.addAll(dataPointGeneratorList);
+    protected void registerDataGenerators(List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList, ProgressTracker progressTracker) {
         for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
-            samplingProgressTracker.registerDataCollector(fromEpisodesDataPointGenerator);
+            progressTracker.registerDataCollector(fromEpisodesDataPointGenerator);
         }
     }
 
@@ -100,13 +107,31 @@ public class Trainer<
 
         var stats = statisticsCalculator.calculateStatistics(episodes, Duration.ofMillis(samplingTime - start));
 
-        for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
+        for (var fromEpisodesDataPointGenerator : samplingDataGeneratorList) {
             fromEpisodesDataPointGenerator.addNewValue(stats);
         }
 
         oobAvgMsPerEpisode.addNewValue(samplingTime/(double) episodeBatchSize);
         oobSamplingTime.addNewValue(samplingTime / 1000.0);
 
+        evaluate();
+
+        trainPredictors(episodes);
+        makeLog();
+        return new ImmutableTuple<>(episodes, stats);
+    }
+
+    private void evaluate() {
+
+    }
+
+    private void makeLog() {
+        trainingProgressTracker.onNextLog();
+        evaluationProgressTracker.onNextLog();
+        samplingProgressTracker.onNextLog();
+    }
+
+    private void trainPredictors(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodes) {
         var trainingSampleCountList = new ArrayList<Double>(trainablePredictorSetupList.size());
         var trainingTimeList = new ArrayList<Double>(trainablePredictorSetupList.size());
         var trainingMsPerSampleList = new ArrayList<Double>(trainablePredictorSetupList.size());
@@ -131,10 +156,6 @@ public class Trainer<
         trainingSampleCount.addNewValue(trainingSampleCountList);
         secTraining.addNewValue(trainingTimeList);
         msTrainingPerSample.addNewValue(trainingMsPerSampleList);
-        trainingProgressTracker.onNextLog();
-        samplingProgressTracker.onNextLog();
-
-        return new ImmutableTuple<>(episodes, stats);
     }
 
 }
