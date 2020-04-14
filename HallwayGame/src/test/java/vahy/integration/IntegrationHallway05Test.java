@@ -1,6 +1,7 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
@@ -59,9 +60,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .cpuctParameter(1)
 
             //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.1).build())
             // REINFORCEMENT
             .discountFactor(1)
 
@@ -71,13 +70,9 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .stageCount(50)
             .evaluatorType(EvaluatorType.RALF)
 
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
             .globalRiskAllowed(1.0)
             .riskSupplier(() -> 1.0)
 
-            .learningRate(0.1)
-            .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
             .explorationConstantSupplier(new Supplier<>() {
@@ -119,7 +114,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
             .stageCount(200)
-            .learningRate(0.5)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.5).build())
             .temperatureSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override

@@ -2,6 +2,7 @@ package vahy.original.solutionExamples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -89,8 +90,15 @@ public class Benchmark05SolutionFunctionApproximator {
 
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(1024)
-            .trainingEpochCount(100)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder()
+                .setApproximatorType(ApproximatorType.TF_NN)
+                .setCreatingScriptName("create_model_solution05.py")
+                .setDataAggregationAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
+                .setReplayBufferSize(batchEpisodeSize * 10)
+                .setTrainingBatchSize(1024)
+                .setTrainingEpochCount(100)
+                .setLearningRate(0.01)
+                .build())
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
@@ -99,12 +107,7 @@ public class Benchmark05SolutionFunctionApproximator {
 
             .evaluatorType(EvaluatorType.RALF_BATCHED)
             .setBatchedEvaluationSize(2)
-            .trainerAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
-            .replayBufferSize(batchEpisodeSize * 10)
 
-            .learningRate(0.01)
-
-            .approximatorType(ApproximatorType.TF_NN)
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
@@ -154,7 +157,6 @@ public class Benchmark05SolutionFunctionApproximator {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setCreatingScriptName("create_model_solution05.py")
             .buildAlgorithmConfig();
     }
 }

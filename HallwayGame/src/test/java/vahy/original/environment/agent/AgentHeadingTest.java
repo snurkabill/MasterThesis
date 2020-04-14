@@ -4,7 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.original.environment.HallwayAction;
 
-public class AgentHeadingWithResignTest {
+public class AgentHeadingTest {
 
     @Test
     public void turnRightTest() {

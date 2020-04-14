@@ -1,5 +1,6 @@
 package vahy.original.prototype;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -78,9 +79,6 @@ public class Prototype {
             .cpuctParameter(1)
 
             //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
@@ -88,27 +86,23 @@ public class Prototype {
             .stageCount(200)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.01)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
-            .riskSupplier(new Supplier<Double>() {
-                @Override
-                public Double get() {
-                    return 1.00;
-                }
 
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setLearningRate(0.1).build())
+
+            .riskSupplier(new Supplier<Double>() {
                 @Override
                 public String toString() {
                     return "() -> 1.00";
                 }
-            })
 
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
+                @Override
+                public Double get() {
+                    return 1.00;
+                }
+            })
 
             .explorationConstantSupplier(new Supplier<Double>() {
                 @Override

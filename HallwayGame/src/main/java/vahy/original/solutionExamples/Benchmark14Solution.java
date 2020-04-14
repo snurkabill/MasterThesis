@@ -1,5 +1,6 @@
 package vahy.original.solutionExamples;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
@@ -47,19 +48,12 @@ public class Benchmark14Solution extends DefaultLocalBenchmark {
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
-            //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(64)
-            .trainingEpochCount(100)
-            .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(2000)
 
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
-            .replayBufferSize(20000)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setLearningRate(0.1).build())
             .selectorType(SelectorType.UCB)
 
             .globalRiskAllowed(0.5)

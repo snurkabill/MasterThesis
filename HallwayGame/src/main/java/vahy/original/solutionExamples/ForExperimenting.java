@@ -2,6 +2,7 @@ package vahy.original.solutionExamples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -62,6 +63,7 @@ public class ForExperimenting {
     private static GameConfig getGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(500)
+            .isModelKnown(false)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
@@ -81,6 +83,8 @@ public class ForExperimenting {
             .setDumpTrainingData(false)
             .setDumpEvaluationData(false)
             .setEvalEpisodeCount(1000)
+            .setEvalEpisodeCountDuringTraining(100)
+            .setEvaluateDuringTraining(true)
             .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
     }
@@ -91,26 +95,34 @@ public class ForExperimenting {
 
         return new AlgorithmConfigBuilder()
             //MCTS
+            .algorithmId("Base")
             .cpuctParameter(1)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(30))
 
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(256)
-            .trainingEpochCount(1)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder()
+                .setApproximatorType(ApproximatorType.TF_NN)
+                .setCreatingScriptName("create_model.py")
+                .setDataAggregationAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
+                .setReplayBufferSize(1_000)
+                .setTrainingBatchSize(256)
+                .setTrainingEpochCount(1)
+                .setLearningRate(0.1).build())
+
+            .setOpponentApproximatorConfig(new ApproximatorConfigBuilder()
+                .setApproximatorType(ApproximatorType.HASHMAP_LR)
+                .setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC)
+                .setLearningRate(0.1).build())
+
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0))
             .stageCount(50)
 
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(2)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(batchEpisodeSize * 10)
 
-            .learningRate(0.1)
-
-            .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
@@ -161,7 +173,7 @@ public class ForExperimenting {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setCreatingScriptName("create_model.py")
+
             .buildAlgorithmConfig();
     }
 
@@ -171,11 +183,10 @@ public class ForExperimenting {
         return new AlgorithmConfigBuilder()
             //MCTS
             .cpuctParameter(1)
-
+            .algorithmId("Base2")
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(256)
-            .trainingEpochCount(1)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setLearningRate(0.1).build())
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
@@ -184,12 +195,7 @@ public class ForExperimenting {
 
             .evaluatorType(EvaluatorType.RALF)
             .setBatchedEvaluationSize(2)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(batchEpisodeSize * 10)
 
-            .learningRate(0.1)
-
-            .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
@@ -240,7 +246,6 @@ public class ForExperimenting {
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
-            .setCreatingScriptName("create_model.py")
             .buildAlgorithmConfig();
     }
 }

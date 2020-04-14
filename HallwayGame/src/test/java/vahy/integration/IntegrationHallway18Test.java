@@ -1,6 +1,7 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
@@ -68,12 +69,10 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(200)
-
-            .trainerAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).build())
             .evaluatorType(EvaluatorType.RALF)
-            .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
+
             .globalRiskAllowed(1.00)
             .riskSupplier(() -> 1.00)
             .explorationConstantSupplier(() -> 1.0)
@@ -105,7 +104,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
             .stageCount(5)
-            .trainerAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).build())
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -130,7 +129,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
             .stageCount(300)
-            .learningRate(0.5)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).setLearningRate(0.5).build())
             .explorationConstantSupplier(() -> 1.0)
             .temperatureSupplier(new Supplier<>() {
                 @Override

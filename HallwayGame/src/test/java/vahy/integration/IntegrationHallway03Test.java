@@ -1,6 +1,7 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
@@ -57,14 +58,11 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
             //NN
-            .trainingBatchSize(0)
-            .trainingEpochCount(0)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).build())
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
             .stageCount(30)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
             .setBatchedEvaluationSize(1)
             .selectorType(SelectorType.UCB)
             .evaluatorType(EvaluatorType.RALF)

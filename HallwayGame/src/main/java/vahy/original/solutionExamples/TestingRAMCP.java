@@ -1,5 +1,6 @@
 package vahy.original.solutionExamples;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
@@ -47,21 +48,16 @@ public class TestingRAMCP extends DefaultLocalBenchmark {
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))
             //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
 
             .batchEpisodeCount(100)
             .stageCount(100)
 
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
-            .evaluatorType(EvaluatorType.RAMCP)
-            .learningRate(0.1)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setLearningRate(0.1).build())
 
-            .replayBufferSize(10000)
+            .evaluatorType(EvaluatorType.RAMCP)
+
             .selectorType(SelectorType.UCB)
 
             .globalRiskAllowed(0.10)

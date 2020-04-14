@@ -103,7 +103,7 @@ public class Trainer<
     public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> sampleTraining(int episodeBatchSize) {
         var result = run(episodeBatchSize, samplingDataGeneratorList, PolicyMode.TRAINING);
         oobAvgMsPerEpisode.addNewValue(result.getSecond().getTotalDuration().toMillis() /(double) episodeBatchSize);
-        oobSamplingTime.addNewValue((double) result.getSecond().getTotalDuration().toSeconds());
+        oobSamplingTime.addNewValue(result.getSecond().getTotalDuration().toMillis() / 1000.0);
         return result;
     }
 
@@ -118,7 +118,7 @@ public class Trainer<
         var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound(), policyMode);
         var samplingTime = System.currentTimeMillis() - start;
 
-        var stats = statisticsCalculator.calculateStatistics(episodes, Duration.ofMillis(samplingTime - start));
+        var stats = statisticsCalculator.calculateStatistics(episodes, Duration.ofMillis(samplingTime));
 
         for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
             fromEpisodesDataPointGenerator.addNewValue(stats);

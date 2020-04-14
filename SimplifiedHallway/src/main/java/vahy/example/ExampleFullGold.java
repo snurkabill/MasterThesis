@@ -1,5 +1,6 @@
 package vahy.example;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -62,14 +63,11 @@ public class ExampleFullGold extends SHExperiment {
                 .algorithmId("Base")
                 //MCTS
                 .cpuctParameter(1)
-                //NN
-                .trainingBatchSize(1).trainingEpochCount(10)
                 // REINFORCEMENT
                 .batchEpisodeCount(1000).stageCount(100000).treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100)).discountFactor(1)
+                .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.1).build())
                 .selectorType(SelectorType.UCB)
                 .evaluatorType(EvaluatorType.RALF) //            .setBatchedEvaluationSize(1)
-                .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-                .approximatorType(ApproximatorType.HASHMAP_LR).learningRate(0.1)
                 .globalRiskAllowed(1.00)
                 .riskSupplier(new Supplier<Double>() {
                     @Override

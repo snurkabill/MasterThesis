@@ -2,6 +2,7 @@ package vahy.original.solutionExamples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -81,9 +82,6 @@ public class DefaultLocalBenchmark {
             //MCTS
             .cpuctParameter(1)
 
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
@@ -91,12 +89,9 @@ public class DefaultLocalBenchmark {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.1)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setLearningRate(0.1).build())
+
             .globalRiskAllowed(0.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -110,7 +105,7 @@ public class DefaultLocalBenchmark {
                 }
             })
 
-            .replayBufferSize(10000)
+
             .selectorType(SelectorType.UCB)
 
             .explorationConstantSupplier(new Supplier<Double>() {
@@ -152,9 +147,6 @@ public class DefaultLocalBenchmark {
             //MCTS
             .cpuctParameter(1)
 
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
@@ -162,12 +154,7 @@ public class DefaultLocalBenchmark {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.1)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
             .globalRiskAllowed(0.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -181,7 +168,6 @@ public class DefaultLocalBenchmark {
                 }
             })
 
-            .replayBufferSize(10000)
             .selectorType(SelectorType.UCB)
 
             .explorationConstantSupplier(new Supplier<Double>() {

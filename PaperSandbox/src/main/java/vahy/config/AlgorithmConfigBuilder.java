@@ -1,6 +1,6 @@
 package vahy.config;
 
-import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
+import vahy.api.experiment.ApproximatorConfig;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
@@ -9,7 +9,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExist
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.api.learning.ApproximatorType;
 
 import java.util.function.Supplier;
 
@@ -25,23 +24,17 @@ public class AlgorithmConfigBuilder {
     // REINFORCEMENT
     private double discountFactor;
     private int batchEpisodeCount;
-    private int replayBufferSize;
     private int stageCount;
 
     private Supplier<Double> explorationConstantSupplier;
     private Supplier<Double> temperatureSupplier;
     private Supplier<Double> riskSupplier;
 
-    private DataAggregationAlgorithm dataAggregationAlgorithm;
-    private ApproximatorType approximatorType;
     private EvaluatorType evaluatorType;
     private SelectorType selectorType;
 
-    // NN
-    private int trainingBatchSize;
-    private int trainingEpochCount;
-
-    private double learningRate;
+    private ApproximatorConfig playerApproximatorConfig;
+    private ApproximatorConfig opponentApproximatorConfig;
 
     // PAPER
     private double globalRiskAllowed;
@@ -55,8 +48,6 @@ public class AlgorithmConfigBuilder {
 
     private int batchedEvaluationSize;
     private NoiseStrategy noiseStrategy = NoiseStrategy.NOISY_03_04;
-
-    private String creatingScriptName;
 
     public AlgorithmConfigBuilder algorithmId(String algorithmId) {
         this.algorithmId = algorithmId;
@@ -76,10 +67,6 @@ public class AlgorithmConfigBuilder {
         this.batchEpisodeCount = batchEpisodeCount; return this;
     }
 
-    public AlgorithmConfigBuilder replayBufferSize(int replayBufferSize) {
-        this.replayBufferSize = replayBufferSize; return this;
-    }
-
     public AlgorithmConfigBuilder stageCount(int stageCount) {
         this.stageCount = stageCount; return this;
     }
@@ -96,28 +83,8 @@ public class AlgorithmConfigBuilder {
         this.riskSupplier = riskSupplier; return this;
     }
 
-    public AlgorithmConfigBuilder trainerAlgorithm(DataAggregationAlgorithm dataAggregationAlgorithm) {
-        this.dataAggregationAlgorithm = dataAggregationAlgorithm; return this;
-    }
-
-    public AlgorithmConfigBuilder approximatorType(ApproximatorType approximatorType) {
-        this.approximatorType = approximatorType; return this;
-    }
-
     public AlgorithmConfigBuilder evaluatorType(EvaluatorType evaluatorType) {
         this.evaluatorType = evaluatorType; return this;
-    }
-
-    public AlgorithmConfigBuilder trainingBatchSize(int trainingBatchSize) {
-        this.trainingBatchSize = trainingBatchSize; return this;
-    }
-
-    public AlgorithmConfigBuilder trainingEpochCount(int trainingEpochCount) {
-        this.trainingEpochCount = trainingEpochCount; return this;
-    }
-
-    public AlgorithmConfigBuilder learningRate(double learningRate) {
-        this.learningRate = learningRate; return this;
     }
 
     public AlgorithmConfigBuilder globalRiskAllowed(double globalRiskAllowed) {
@@ -174,13 +141,18 @@ public class AlgorithmConfigBuilder {
         return this;
     }
 
-    public AlgorithmConfigBuilder setCreatingScriptName(String creatingScriptName) {
-        this.creatingScriptName = creatingScriptName;
+    public AlgorithmConfigBuilder setNoiseStrategy(NoiseStrategy noiseStrategy) {
+        this.noiseStrategy = noiseStrategy;
         return this;
     }
 
-    public AlgorithmConfigBuilder setNoiseStrategy(NoiseStrategy noiseStrategy) {
-        this.noiseStrategy = noiseStrategy;
+    public AlgorithmConfigBuilder setPlayerApproximatorConfig(ApproximatorConfig approximatorConfig) {
+        this.playerApproximatorConfig = approximatorConfig;
+        return this;
+    }
+
+    public AlgorithmConfigBuilder setOpponentApproximatorConfig(ApproximatorConfig approximatorConfig) {
+        this.opponentApproximatorConfig = approximatorConfig;
         return this;
     }
 
@@ -191,18 +163,14 @@ public class AlgorithmConfigBuilder {
             treeUpdateConditionFactory,
             discountFactor,
             batchEpisodeCount,
-            replayBufferSize,
             stageCount,
             explorationConstantSupplier,
             temperatureSupplier,
             riskSupplier,
-            dataAggregationAlgorithm,
-            approximatorType,
             evaluatorType,
             selectorType,
-            trainingBatchSize,
-            trainingEpochCount,
-            learningRate,
+            playerApproximatorConfig,
+            opponentApproximatorConfig,
             globalRiskAllowed,
             inferenceExistingFlowStrategy,
             inferenceNonExistingFlowStrategy,
@@ -212,7 +180,6 @@ public class AlgorithmConfigBuilder {
             subTreeRiskCalculatorTypeForKnownFlow,
             subTreeRiskCalculatorTypeForUnknownFlow,
             batchedEvaluationSize,
-            creatingScriptName,
             noiseStrategy);
     }
 

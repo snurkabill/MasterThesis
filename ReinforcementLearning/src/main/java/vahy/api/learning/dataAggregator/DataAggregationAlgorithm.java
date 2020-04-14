@@ -1,6 +1,6 @@
 package vahy.api.learning.dataAggregator;
 
-import vahy.api.experiment.AlgorithmConfig;
+import vahy.api.experiment.ApproximatorConfig;
 import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
@@ -15,7 +15,7 @@ public enum DataAggregationAlgorithm {
     EVERY_VISIT_MC,
     REPLAY_BUFFER;
 
-    public DataAggregator resolveDataAggregator(AlgorithmConfig algorithmConfig) {
+    public DataAggregator resolveDataAggregator(ApproximatorConfig algorithmConfig) {
         switch(this) {
             case REPLAY_BUFFER:
                 return new ReplayBufferDataAggregator(algorithmConfig.getReplayBufferSize(), new LinkedList<>());

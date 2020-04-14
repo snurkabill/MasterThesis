@@ -1,5 +1,6 @@
 package vahy;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -133,9 +134,7 @@ public class MarketPrototype2 {
             .cpuctParameter(1)
 
             //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.01).build())
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(1000)
@@ -143,12 +142,7 @@ public class MarketPrototype2 {
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.01)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
 
             .globalRiskAllowed(1.00)

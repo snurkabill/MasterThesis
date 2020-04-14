@@ -1,8 +1,7 @@
 package vahy.config;
 
 import vahy.api.experiment.AlgorithmConfig;
-import vahy.api.learning.ApproximatorType;
-import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
+import vahy.api.experiment.ApproximatorConfig;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
@@ -26,7 +25,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     // REINFORCEMENT
     private final double discountFactor;
     private final int batchEpisodeCount;
-    private final int replayBufferSize;
 
     private final int stageCount;
 
@@ -34,19 +32,11 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     private final Supplier<Double> temperatureSupplier;
     private final Supplier<Double> riskSupplier;
 
-    private final DataAggregationAlgorithm dataAggregationAlgorithm;
-    private final ApproximatorType approximatorType;
     private final EvaluatorType evaluatorType;
     private final SelectorType selectorType;
 
-    // TENSORFLOW
-    private final String creatingScript;
-
-    // NN
-    private final int trainingBatchSize;
-    private final int trainingEpochCount;
-
-    private final double learningRate;
+    private final ApproximatorConfig playerApproximatorConfig;
+    private final ApproximatorConfig opponentApproximatorConfig;
 
     // PAPER
     private final double globalRiskAllowed;
@@ -66,18 +56,14 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
                                 TreeUpdateConditionFactory treeUpdateConditionFactory,
                                 double discountFactor,
                                 int batchEpisodeCount,
-                                int replayBufferSize,
                                 int stageCount,
                                 Supplier<Double> explorationConstantSupplier,
                                 Supplier<Double> temperatureSupplier,
                                 Supplier<Double> riskSupplier,
-                                DataAggregationAlgorithm dataAggregationAlgorithm,
-                                ApproximatorType approximatorType,
                                 EvaluatorType evaluatorType,
                                 SelectorType selectorType,
-                                int trainingBatchSize,
-                                int trainingEpochCount,
-                                double learningRate,
+                                ApproximatorConfig playerApproximatorConfig,
+                                ApproximatorConfig opponentApproximatorConfig,
                                 double globalRiskAllowed,
                                 InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
                                 InferenceNonExistingFlowStrategy inferenceNonExistingFlowStrategy,
@@ -87,8 +73,9 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
                                 SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
                                 SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
                                 int batchedEvaluationSize,
-                                String creatingScript,
                                 NoiseStrategy noiseStrategy) {
+        this.playerApproximatorConfig = playerApproximatorConfig;
+        this.opponentApproximatorConfig = opponentApproximatorConfig;
         if(algorithmId == null) {
             throw new IllegalArgumentException("PolicyId is missing.");
         }
@@ -97,18 +84,12 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         this.treeUpdateConditionFactory = treeUpdateConditionFactory;
         this.discountFactor = discountFactor;
         this.batchEpisodeCount = batchEpisodeCount;
-        this.replayBufferSize = replayBufferSize;
         this.stageCount = stageCount;
         this.explorationConstantSupplier = explorationConstantSupplier;
         this.temperatureSupplier = temperatureSupplier;
         this.riskSupplier = riskSupplier;
-        this.dataAggregationAlgorithm = dataAggregationAlgorithm;
-        this.approximatorType = approximatorType;
         this.evaluatorType = evaluatorType;
         this.selectorType = selectorType;
-        this.trainingBatchSize = trainingBatchSize;
-        this.trainingEpochCount = trainingEpochCount;
-        this.learningRate = learningRate;
         this.globalRiskAllowed = globalRiskAllowed;
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
         this.inferenceNonExistingFlowStrategy = inferenceNonExistingFlowStrategy;
@@ -118,7 +99,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
         this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
         this.batchedEvaluationSize = batchedEvaluationSize;
-        this.creatingScript = creatingScript;
         this.noiseStrategy = noiseStrategy;
     }
 
@@ -143,10 +123,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         return batchEpisodeCount;
     }
 
-    public int getReplayBufferSize() {
-        return replayBufferSize;
-    }
-
     public int getStageCount() {
         return stageCount;
     }
@@ -163,32 +139,12 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         return riskSupplier;
     }
 
-    public DataAggregationAlgorithm getDataAggregationAlgorithm() {
-        return dataAggregationAlgorithm;
-    }
-
-    public ApproximatorType getApproximatorType() {
-        return approximatorType;
-    }
-
     public EvaluatorType getEvaluatorType() {
         return evaluatorType;
     }
 
     public SelectorType getSelectorType() {
         return selectorType;
-    }
-
-    public int getTrainingBatchSize() {
-        return trainingBatchSize;
-    }
-
-    public int getTrainingEpochCount() {
-        return trainingEpochCount;
-    }
-
-    public double getLearningRate() {
-        return learningRate;
     }
 
     public double getGlobalRiskAllowed() {
@@ -227,15 +183,18 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         return batchedEvaluationSize;
     }
 
-    public String getCreatingScript() {
-        return creatingScript;
-    }
-
     public NoiseStrategy getNoiseStrategy() {
         return noiseStrategy;
     }
 
-    //    @Override
+    public ApproximatorConfig getPlayerApproximatorConfig() {
+        return playerApproximatorConfig;
+    }
+
+    public ApproximatorConfig getOpponentApproximatorConfig() {
+        return opponentApproximatorConfig;
+    }
+//    @Override
 //    public String toString() {
 //        return "AlgorithmConfig{" +
 //            "cpuctParameter=" + cpuctParameter +
@@ -275,18 +234,12 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
             "treeUpdateConditionFactory," + treeUpdateConditionFactory + System.lineSeparator() +
             "discountFactor," + discountFactor + System.lineSeparator() +
             "batchEpisodeCount," + batchEpisodeCount + System.lineSeparator() +
-            "replayBufferSize," + replayBufferSize + System.lineSeparator() +
             "stageCount," + stageCount + System.lineSeparator() +
             "explorationConstantSupplier," + explorationConstantSupplier + System.lineSeparator() +
             "temperatureSupplier," + temperatureSupplier + System.lineSeparator() +
             "riskSupplier," + riskSupplier + System.lineSeparator() +
-            "trainerAlgorithm," + dataAggregationAlgorithm + System.lineSeparator() +
-            "approximatorType," + approximatorType + System.lineSeparator() +
             "evaluatorType," + evaluatorType + System.lineSeparator() +
             "selectorType," + selectorType + System.lineSeparator() +
-            "trainingBatchSize," + trainingBatchSize + System.lineSeparator() +
-            "trainingEpochCount," + trainingEpochCount + System.lineSeparator() +
-            "learningRate," + learningRate + System.lineSeparator() +
             "globalRiskAllowed," + globalRiskAllowed + System.lineSeparator() +
             "inferenceExistingFlowStrategy," + inferenceExistingFlowStrategy + System.lineSeparator() +
             "inferenceNonExistingFlowStrategy," + inferenceNonExistingFlowStrategy + System.lineSeparator() +
@@ -295,6 +248,8 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
             "flowOptimizerType," + flowOptimizerType + System.lineSeparator() +
             "subTreeRiskCalculatorTypeForKnownFlow," + subTreeRiskCalculatorTypeForKnownFlow + System.lineSeparator() +
             "subTreeRiskCalculatorTypeForUnknownFlow," + subTreeRiskCalculatorTypeForUnknownFlow + System.lineSeparator() +
+            "playerApproximatorConfig," + playerApproximatorConfig.toString() + System.lineSeparator() +
+                (opponentApproximatorConfig != null ? "OpponentApproximatorConfig," + opponentApproximatorConfig.toString() + System.lineSeparator() : "known_model")  +
             "batchedEvaluationSize," + batchedEvaluationSize + System.lineSeparator() +
             "noiseStrategy, " + noiseStrategy + System.lineSeparator();
     }
