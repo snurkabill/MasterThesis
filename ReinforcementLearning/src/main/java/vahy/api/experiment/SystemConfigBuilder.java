@@ -20,6 +20,8 @@ public class SystemConfigBuilder {
 
     // Evaluation
     private int evalEpisodeCount;
+    private int evalEpisodeCountDuringTraining;
+    private boolean evaluateDuringTraining;
 
     private boolean dumpTrainingData = false;
     private boolean dumpEvaluationData = false;
@@ -58,6 +60,16 @@ public class SystemConfigBuilder {
         return this;
     }
 
+    public SystemConfigBuilder setEvalEpisodeCountDuringTraining(int evalEpisodeCountDuringTraining) {
+        this.evalEpisodeCountDuringTraining = evalEpisodeCountDuringTraining;
+        return this;
+    }
+
+    public SystemConfigBuilder setEvaluateDuringTraining(boolean evaluateDuringTraining) {
+        this.evaluateDuringTraining = evaluateDuringTraining;
+        return this;
+    }
+
     public SystemConfigBuilder setDumpTrainingData(boolean dumpTrainingData) {
         this.dumpTrainingData = dumpTrainingData;
         return this;
@@ -78,7 +90,7 @@ public class SystemConfigBuilder {
     }
 
     public SystemConfig buildSystemConfig() {
-        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, dumpTrainingData, dumpEvaluationData, dumpPath, pythonVirtualEnvPath);
+        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, evalEpisodeCountDuringTraining, evaluateDuringTraining, dumpTrainingData, dumpEvaluationData, dumpPath, pythonVirtualEnvPath);
     }
 
     private long resolveRandomSeed() {

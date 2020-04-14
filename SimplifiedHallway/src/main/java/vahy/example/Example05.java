@@ -65,7 +65,7 @@ public class Example05 extends SHExperiment {
                 //NN
                 .trainingBatchSize(1).trainingEpochCount(10)
                 // REINFORCEMENT
-                .batchEpisodeCount(1000).stageCount(100000).treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0)).discountFactor(1)
+                .batchEpisodeCount(100).stageCount(1000).treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(0)).discountFactor(1)
                 .selectorType(SelectorType.UCB)
                 .evaluatorType(EvaluatorType.RALF) //            .setBatchedEvaluationSize(1)
                 .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)

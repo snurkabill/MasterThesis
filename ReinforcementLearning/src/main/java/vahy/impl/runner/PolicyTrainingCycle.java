@@ -53,7 +53,12 @@ public class PolicyTrainingCycle<
         var statisticsList = new ArrayList<TStatistics>(algorithmConfig.getStageCount());
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
-            var episodes = trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount());
+            var episodes = trainer.sampleTraining(algorithmConfig.getBatchEpisodeCount());
+            if(systemConfig.isEvaluateDuringTraining()) {
+                trainer.evaluate(algorithmConfig.getBatchEpisodeCount());
+            }
+            trainer.trainPredictors(episodes.getFirst());
+            trainer.makeLog();
             statisticsList.add(episodes.getSecond());
             if(systemConfig.dumpTrainingData()) {
                 episodeWriter.writeTrainingEpisode(i, episodes.getFirst());

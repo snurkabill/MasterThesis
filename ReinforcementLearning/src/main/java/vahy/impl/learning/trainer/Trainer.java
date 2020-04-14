@@ -76,7 +76,7 @@ public class Trainer<
         trainingProgressTracker.registerDataCollector(secTraining);
         trainingProgressTracker.registerDataCollector(msTrainingPerSample);
 
-        registerDataGenerators(samplingDataGeneratorList, trainingProgressTracker);
+        registerDataGenerators(samplingDataGeneratorList, samplingProgressTracker);
         registerDataGenerators(evalDataGeneratorList, evaluationProgressTracker);
 
         trainingProgressTracker.finalizeRegistration();
@@ -100,38 +100,39 @@ public class Trainer<
         }
     }
 
-    public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> trainPolicy(int episodeBatchSize) {
+    public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> sampleTraining(int episodeBatchSize) {
+        var result = run(episodeBatchSize, samplingDataGeneratorList, PolicyMode.TRAINING);
+        oobAvgMsPerEpisode.addNewValue(result.getSecond().getTotalDuration().toMillis() /(double) episodeBatchSize);
+        oobSamplingTime.addNewValue((double) result.getSecond().getTotalDuration().toSeconds());
+        return result;
+    }
+
+    public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> evaluate(int episodeBatchSize) {
+        return run(episodeBatchSize, evalDataGeneratorList, PolicyMode.INFERENCE);
+    }
+
+    private ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> run(int episodeBatchSize,
+                                                                                                                                            List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList,
+                                                                                                                                            PolicyMode policyMode) {
         var start = System.currentTimeMillis();
-        var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound(), PolicyMode.TRAINING);
+        var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound(), policyMode);
         var samplingTime = System.currentTimeMillis() - start;
 
         var stats = statisticsCalculator.calculateStatistics(episodes, Duration.ofMillis(samplingTime - start));
 
-        for (var fromEpisodesDataPointGenerator : samplingDataGeneratorList) {
+        for (var fromEpisodesDataPointGenerator : dataPointGeneratorList) {
             fromEpisodesDataPointGenerator.addNewValue(stats);
         }
-
-        oobAvgMsPerEpisode.addNewValue(samplingTime/(double) episodeBatchSize);
-        oobSamplingTime.addNewValue(samplingTime / 1000.0);
-
-        evaluate();
-
-        trainPredictors(episodes);
-        makeLog();
         return new ImmutableTuple<>(episodes, stats);
     }
 
-    private void evaluate() {
-
-    }
-
-    private void makeLog() {
+    public void makeLog() {
         trainingProgressTracker.onNextLog();
         evaluationProgressTracker.onNextLog();
         samplingProgressTracker.onNextLog();
     }
 
-    private void trainPredictors(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodes) {
+    public void trainPredictors(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodes) {
         var trainingSampleCountList = new ArrayList<Double>(trainablePredictorSetupList.size());
         var trainingTimeList = new ArrayList<Double>(trainablePredictorSetupList.size());
         var trainingMsPerSampleList = new ArrayList<Double>(trainablePredictorSetupList.size());
