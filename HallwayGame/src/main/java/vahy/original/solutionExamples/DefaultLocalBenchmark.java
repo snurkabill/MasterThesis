@@ -61,7 +61,7 @@ public class DefaultLocalBenchmark {
         var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, HallwayStateImpl, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
             .setSystemConfig(systemConfig)
-            .setAlgorithmConfigList(List.of(algorithmConfig, createAlgorithmConfig2()))
+            .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(problemConfig)
             .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new)
             .setOpponentSupplier(KnownModelPolicySupplier::new);
