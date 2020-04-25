@@ -103,8 +103,8 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
-            .stageCount(5)
-            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).build())
+            .stageCount(10)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.1).build())
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override

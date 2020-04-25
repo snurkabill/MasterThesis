@@ -60,7 +60,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
             .cpuctParameter(1)
 
             //.mcRolloutCount(1)
-            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.1).build())
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.2).build())
             // REINFORCEMENT
             .discountFactor(1)
 
