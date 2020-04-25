@@ -43,6 +43,7 @@ public class RandomWalkExample {
 
         var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkState, RandomWalkState>()
             .setActionClass(RandomWalkAction.class)
+            .setStateClass(RandomWalkState.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(problemConfig)
@@ -56,7 +57,7 @@ public class RandomWalkExample {
 
     public static PaperAlgorithmConfig createAlgorithmConfig() {
 
-        var riskAllowed = 0.0;
+        var riskAllowed = 1.0;
         var batchSize = 1000;
 
         return new AlgorithmConfigBuilder()
@@ -137,7 +138,7 @@ public class RandomWalkExample {
         var diffLevel = 100;
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
-        var isModelKnown = false;
+        var isModelKnown = true;
         return new RandomWalkSetup(
             isModelKnown,
             500,
