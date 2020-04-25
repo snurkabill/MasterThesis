@@ -1,6 +1,7 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
@@ -34,12 +35,13 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, false, false, null, null);
+        return new SystemConfig(0, false, Runtime.getRuntime().availableProcessors() - 1, false, 10_000, 0, false, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(1000)
+            .isModelKnown(true)
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
@@ -51,18 +53,16 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
 
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
             //NN
-            .trainingBatchSize(0)
-            .trainingEpochCount(0)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).build())
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
-            .stageCount(20)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP)
+            .stageCount(30)
             .setBatchedEvaluationSize(1)
             .selectorType(SelectorType.UCB)
             .evaluatorType(EvaluatorType.RALF)

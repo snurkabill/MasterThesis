@@ -19,6 +19,7 @@ import java.util.List;
 public class ConfigBuilder {
 
     private int maximalStepCountBound;
+    private boolean isModelKnown = true;
     private double goalReward;
     private double stepPenalty;
     private double trapProbability;
@@ -60,13 +61,18 @@ public class ConfigBuilder {
         this.maximalStepCountBound = maximalStepCountBound; return this;
     }
 
+    public ConfigBuilder isModelKnown(boolean isModelKnown) {
+        this.isModelKnown = isModelKnown;
+        return this;
+    }
+
     public GameConfig buildConfig() {
 
         InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(hallwayGameInstance.getPath());
         try {
             var bytes = resourceAsStream.readAllBytes();
             var representation = new String(bytes);
-            return new GameConfig(maximalStepCountBound, goalReward, stepPenalty, trapProbability, noisyMoveProbability, stateRepresentation, representation, deserialize(representation));
+            return new GameConfig(maximalStepCountBound, isModelKnown, goalReward, stepPenalty, trapProbability, noisyMoveProbability, stateRepresentation, representation, deserialize(representation));
         } catch (IOException | InvalidInstanceSetupException e) {
             throw new RuntimeException(e);
         }

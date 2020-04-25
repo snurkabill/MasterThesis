@@ -1,6 +1,10 @@
 package vahy.api.benchmark;
 
+import java.time.Duration;
+
 public interface EpisodeStatistics {
+
+    Duration getTotalDuration();
 
     double getAveragePlayerStepCount();
 

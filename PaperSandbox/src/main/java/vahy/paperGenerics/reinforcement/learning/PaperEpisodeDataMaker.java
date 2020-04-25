@@ -45,6 +45,7 @@ public class PaperEpisodeDataMaker<
                 doubleArray[PaperModel.Q_VALUE_INDEX] = aggregatedTotalPayoff;
                 doubleArray[PaperModel.RISK_VALUE_INDEX] = aggregatedRisk;
                 System.arraycopy(policyArray, 0, doubleArray, PaperModel.POLICY_START_INDEX, policyArray.length);
+
                 mutableDataSampleList.add(new ImmutableTuple<>(
                     previous.getFromState().getPlayerObservation(),
                     new MutableDoubleArray(doubleArray, false)));

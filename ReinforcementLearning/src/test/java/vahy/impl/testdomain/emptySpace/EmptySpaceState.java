@@ -3,9 +3,11 @@ package vahy.impl.testdomain.emptySpace;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, EmptySpaceState, EmptySpaceState>, Observation {
@@ -41,11 +43,6 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
     }
 
     @Override
-    public EmptySpaceState deepCopy() {
-        return null;
-    }
-
-    @Override
     public DoubleVector getPlayerObservation() {
         return new DoubleVector(new double[] {0.0});
     }
@@ -53,6 +50,25 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
     @Override
     public EmptySpaceState getOpponentObservation() {
         return this;
+    }
+
+    @Override
+    public Predictor<EmptySpaceState> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<>() {
+            private double[] fixedPrediction = new double[]{1 / 3., 2 / 3.0};
+
+            @Override
+            public double[] apply(EmptySpaceState observation) {
+                return fixedPrediction;
+            }
+
+            @Override
+            public double[][] apply(EmptySpaceState[] observationArray) {
+                var prediction = new double[observationArray.length][];
+                Arrays.fill(prediction, fixedPrediction);
+                return prediction;
+            }
+        };
     }
 
     @Override

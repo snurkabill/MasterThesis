@@ -96,7 +96,8 @@ public class EpisodeSimulatorImpl<
         TState state,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> onTurnPolicy,
         Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> otherPolicy,
-        boolean isPlayerMove) {
+        boolean isPlayerMove)
+    {
         TAction action = onTurnPolicy.getDiscreteAction(state);
         var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(state);
         onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));

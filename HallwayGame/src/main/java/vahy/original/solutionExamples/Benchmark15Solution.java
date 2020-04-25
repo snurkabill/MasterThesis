@@ -1,5 +1,6 @@
 package vahy.original.solutionExamples;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
@@ -47,12 +48,9 @@ public class Benchmark15Solution extends DefaultLocalBenchmark {
 
         return new AlgorithmConfigBuilder()
             //MCTS
+            .policyId("Base")
             .cpuctParameter(1)
 
-            //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
@@ -60,27 +58,21 @@ public class Benchmark15Solution extends DefaultLocalBenchmark {
             .stageCount(1000)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.01)
-
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setLearningRate(0.1).build())
+            .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)
             .riskSupplier(new Supplier<Double>() {
+                @Override
+
+                public String toString() {
+                    return "() -> 1.00";
+                }
+
                 @Override
                 public Double get() {
                     return 1.00;
                 }
-
-                @Override
-                public String toString() {
-                    return "() -> 1.00";
-                }
             })
-
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
 
             .explorationConstantSupplier(new Supplier<Double>() {
                 @Override

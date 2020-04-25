@@ -63,7 +63,11 @@ public abstract class AbstractTreeSearchPolicy<
 
     protected void checkStateRoot(TState gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
-            throw new IllegalStateException("Tree PaperPolicy has invalid state or argument itself is invalid. Possibly missing equals method");
+            throw new IllegalStateException("Tree PaperPolicy has invalid state in root or gameState argument itself is invalid. Possible issues: " + System.lineSeparator() +
+                "1. missing or invalid equals method on state implementation. Proper equals method does not have to take into account static parts of state" + System.lineSeparator() +
+                "2. wrong logic in applying actons on states, leading in inconsistency" + System.lineSeparator() +
+                "Expected state as string: " + System.lineSeparator() + searchTree.getRoot().getWrappedState().readableStringRepresentation() + System.lineSeparator() +
+                "Actual state as string: " + System.lineSeparator() + gameState.readableStringRepresentation());
         }
     }
 }

@@ -3,6 +3,7 @@ package vahy.impl.testdomain.tictactoe;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -193,11 +194,6 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public TicTacToeState deepCopy() {
-        return null;
-    }
-
-    @Override
     public DoubleVector getPlayerObservation() {
         return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
     }
@@ -205,6 +201,11 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     @Override
     public TicTacToeState getOpponentObservation() {
         return this;
+    }
+
+    @Override
+    public Predictor<TicTacToeState> getKnownModelWithPerfectObservationPredictor() {
+        throw new UnsupportedOperationException("TicTacToe does not have fixed model");
     }
 
     @Override

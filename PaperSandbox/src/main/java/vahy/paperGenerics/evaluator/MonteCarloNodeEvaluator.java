@@ -3,6 +3,7 @@ package vahy.paperGenerics.evaluator;
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
@@ -10,14 +11,12 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTriple;
-import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
-import java.util.function.Function;
 
 public class MonteCarloNodeEvaluator<
     TAction extends Enum<TAction> & Action,
@@ -30,19 +29,21 @@ public class MonteCarloNodeEvaluator<
     protected final double discountFactor;
     protected final double[] priorProbabilities;
 
+    @Deprecated // TOTO JE KURVA CELE ZLE
     public MonteCarloNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                                   Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator,
+                                   Predictor<TState> knownModel,
                                    TAction[] allPlayerActions,
                                    TAction[] allOpponentActions,
                                    SplittableRandom random,
                                    double discountFactor) {
-        super(searchNodeFactory, null, opponentApproximator, allPlayerActions, allOpponentActions);
-        this.random = random;
-        this.discountFactor = discountFactor;
-        this.priorProbabilities = new double[allPlayerActions.length];
-        for (int i = 0; i < priorProbabilities.length; i++) {
-            priorProbabilities[i] = 1.0 / allPlayerActions.length;
-        }
+        super(searchNodeFactory, null, null, knownModel, allPlayerActions, allOpponentActions);
+        throw new UnsupportedOperationException("Ok so ... class [" + MonteCarloNodeEvaluator.class + "] is deprecated. Needs to be fixed. Issue: how to sample unknown opponent ");
+//        this.random = random;
+//        this.discountFactor = discountFactor;
+//        this.priorProbabilities = new double[allPlayerActions.length];
+//        for (int i = 0; i < priorProbabilities.length; i++) {
+//            priorProbabilities[i] = 1.0 / allPlayerActions.length;
+//        }
     }
 
     @Override
@@ -64,7 +65,7 @@ public class MonteCarloNodeEvaluator<
                 childPriorProbabilities.put(allPlayerActions[i], (priorProbabilities[i]));
             }
         } else {
-            evaluateOpponentNode(node, childPriorProbabilities);
+//            evaluateOpponentNode(node, childPriorProbabilities, null);
         }
         return sampledRewardWithRisk.getThird();
     }
@@ -89,8 +90,14 @@ public class MonteCarloNodeEvaluator<
             int actionIndex = random.nextInt(actions.length);
             return actions[actionIndex];
         } else {
-            var probabilities = opponentPredictor.apply(wrappedState.getOpponentObservation());
-            return probabilities.getFirst().get(RandomDistributionUtils.getRandomIndexFromDistribution(probabilities.getSecond(), random));
+            TAction[] actions = wrappedState.getAllPossibleActions();
+            if(knownModel != null) {
+                double[] probabilities = knownModel.apply(wrappedState);
+                return actions[RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random)];
+            } else {
+                int actionIndex = random.nextInt(actions.length);
+                return actions[actionIndex];
+            }
         }
     }
 

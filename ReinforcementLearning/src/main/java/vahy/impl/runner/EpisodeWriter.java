@@ -78,14 +78,16 @@ public class EpisodeWriter<
 
     public void writeTrainingEpisode(int stageId, List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResults)  {
         for (int i = 0; i < episodeResults.size(); i++) {
-            Path path = Paths.get(fullPath.toString(), "training", "stageId_" + stageId, "episodeId_" + i);
+            var formatted = String.format("%0" + String.valueOf(episodeResults.size()).length() + "d" , i);
+            Path path = Paths.get(fullPath.toString(), "training", "stageId_" + stageId, "episodeId_" + formatted);
             createDirAndWriteData(episodeResults.get(i), path);
         }
     }
 
     public void writeEvaluationEpisode(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList) {
         for (int i = 0; i < episodeResultsList.size(); i++) {
-            Path path = Paths.get(fullPath.toString(),"evaluation", "episodeId_" + i);
+            var formatted = String.format("%0" + String.valueOf(episodeResultsList.size()).length() + "d" , i);
+            Path path = Paths.get(fullPath.toString(),"evaluation", "episodeId_" + formatted);
             createDirAndWriteData(episodeResultsList.get(i), path);
         }
     }

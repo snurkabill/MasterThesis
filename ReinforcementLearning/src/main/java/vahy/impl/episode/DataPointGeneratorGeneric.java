@@ -3,7 +3,9 @@ package vahy.impl.episode;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.DataPointGenerator;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerator {
 
@@ -11,12 +13,9 @@ public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerato
     private final Function<TDataSource, Double> function;
 
     private int counter = 0;
-    private double value = Double.NaN;
+    private List<Double> valueList = null;
 
-    public DataPointGeneratorGeneric(
-        String dataTitle,
-        Function<TDataSource, Double> function)
-    {
+    public DataPointGeneratorGeneric(String dataTitle, Function<TDataSource, Double> function) {
         this.dataTitle = dataTitle;
         this.function = function;
     }
@@ -27,12 +26,21 @@ public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerato
     }
 
     @Override
-    public ImmutableTuple<Double, Double> get() {
-        return new ImmutableTuple<>((double) counter, value);
+    public ImmutableTuple<Double, List<Double>> get() {
+        return new ImmutableTuple<>((double) counter, valueList);
+    }
+
+    public void addNewValue(List<TDataSource> dataSource) {
+        counter++;
+        valueList = dataSource.stream().map(function).collect(Collectors.toList());
     }
 
     public void addNewValue(TDataSource dataSource) {
         counter++;
-        value = function.apply(dataSource);
+        valueList = List.of(function.apply(dataSource));
+    }
+
+    public DataPointGeneratorGeneric<TDataSource> createCopy() {
+        return new DataPointGeneratorGeneric<>(dataTitle, function);
     }
 }

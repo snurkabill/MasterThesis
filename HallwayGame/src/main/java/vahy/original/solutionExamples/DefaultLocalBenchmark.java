@@ -2,6 +2,7 @@ package vahy.original.solutionExamples;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -11,17 +12,20 @@ import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
+import vahy.impl.benchmark.PolicyResults;
+import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.policy.KnownModelPolicySupplier;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
-import vahy.original.environment.state.EnvironmentProbabilities;
 import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
 import vahy.paperGenerics.PaperExperimentBuilder;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
@@ -54,28 +58,31 @@ public class DefaultLocalBenchmark {
 //            Path.of("Results")
 //        );
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, EnvironmentProbabilities, HallwayStateImpl>()
+        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, HallwayStateImpl, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
+            .setStateClass(HallwayStateImpl.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(problemConfig)
-            .setOpponentSupplier(HallwayPolicySupplier::new)
-            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
+            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new)
+            .setOpponentSupplier(KnownModelPolicySupplier::new);
 
         var results = paperExperimentBuilder.execute();
 
-        logger.info(results.get(0).getEpisodeStatistics().printToLog());
+        for (PolicyResults<HallwayAction, DoubleVector, HallwayStateImpl, HallwayStateImpl, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
+            logger.info("PolicyId: " + result.getPolicy().getPolicyId());
+            logger.info("Results: " + result.getEpisodeStatistics().printToLog());
+        }
 
     }
 
     protected PaperAlgorithmConfig createAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
+
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
 
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
@@ -83,12 +90,9 @@ public class DefaultLocalBenchmark {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.01)
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setLearningRate(0.1).build())
+
             .globalRiskAllowed(0.00)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -102,7 +106,7 @@ public class DefaultLocalBenchmark {
                 }
             })
 
-            .replayBufferSize(10000)
+
             .selectorType(SelectorType.UCB)
 
             .explorationConstantSupplier(new Supplier<Double>() {
@@ -129,21 +133,93 @@ public class DefaultLocalBenchmark {
             })
 
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
-            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
             .buildAlgorithmConfig();
     }
 
+    protected PaperAlgorithmConfig createAlgorithmConfig2() {
+        return new AlgorithmConfigBuilder()
+            .policyId("Without LR")
+            //MCTS
+            .cpuctParameter(1)
+
+            // REINFORCEMENT
+            .discountFactor(1)
+            .batchEpisodeCount(100)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .stageCount(100)
+            .evaluatorType(EvaluatorType.RALF)
+//            .setBatchedEvaluationSize(1)
+
+            .globalRiskAllowed(0.00)
+            .riskSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 0.00;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.00";
+                }
+            })
+
+            .selectorType(SelectorType.UCB)
+
+            .explorationConstantSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 0.2;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 0.20";
+                }
+            })
+            .temperatureSupplier(new Supplier<Double>() {
+                @Override
+                public Double get() {
+                    return 1.50;
+                }
+
+                @Override
+                public String toString() {
+                    return "() -> 1.05";
+                }
+            })
+
+//        temperatureSupplier(new Supplier<>() {
+//            @Override
+//            public Double get() {
+//                callCount++;
+//                return Math.exp(-callCount / 10000.0);
+//            }
+//            private int callCount = 0;
+//        })
+
+            .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
+            .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VALUE)
+            .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE)
+            .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
+            .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
+            .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
+            .buildAlgorithmConfig();
+    }
+
+
     protected SystemConfig createSystemConfig() {
         return new SystemConfigBuilder()
             .setRandomSeed(0)
             .setStochasticStrategy(StochasticStrategy.REPRODUCIBLE)
             .setDrawWindow(false)
-            .setParallelThreadsCount(Runtime.getRuntime().availableProcessors())
+            .setParallelThreadsCount(Runtime.getRuntime().availableProcessors() - 1)
             .setSingleThreadedEvaluation(false)
             .setEvalEpisodeCount(1000)
             .setDumpTrainingData(false)
@@ -153,6 +229,7 @@ public class DefaultLocalBenchmark {
     protected GameConfig createGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(500)
+            .isModelKnown(true)
             .reward(100)
             .noisyMoveProbability(0.1)
             .stepPenalty(1)

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.experiment.AlgorithmConfig;
-import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PolicyTrainingCycle<
-    TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends Observation,
     TOpponentObservation extends Observation,
@@ -55,7 +53,12 @@ public class PolicyTrainingCycle<
         var statisticsList = new ArrayList<TStatistics>(algorithmConfig.getStageCount());
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Training policy for [{}]th iteration", i);
-            var episodes = trainer.trainPolicy(algorithmConfig.getBatchEpisodeCount());
+            var episodes = trainer.sampleTraining(algorithmConfig.getBatchEpisodeCount());
+            if(systemConfig.isEvaluateDuringTraining()) {
+                trainer.evaluate(algorithmConfig.getBatchEpisodeCount());
+            }
+            trainer.trainPredictors(episodes.getFirst());
+            trainer.makeLog();
             statisticsList.add(episodes.getSecond());
             if(systemConfig.dumpTrainingData()) {
                 episodeWriter.writeTrainingEpisode(i, episodes.getFirst());

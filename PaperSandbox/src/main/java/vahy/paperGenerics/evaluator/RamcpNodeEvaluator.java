@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
@@ -12,13 +13,11 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTriple;
-import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
-import java.util.function.Function;
 
 public class RamcpNodeEvaluator<
     TAction extends Enum<TAction> & Action,
@@ -29,13 +28,15 @@ public class RamcpNodeEvaluator<
 
     private final Logger logger = LoggerFactory.getLogger(RamcpNodeEvaluator.class.getName());
 
+    @Deprecated
     public RamcpNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                              Function<TOpponentObservation, ImmutableTuple<List<TAction>, List<Double>>> opponentApproximator,
+                              Predictor<TState> knownModel,
                               TAction[] allPlayerActions,
                               TAction[] allOpponentActions,
                               SplittableRandom random,
                               double discountFactor) {
-        super(searchNodeFactory, opponentApproximator, allPlayerActions, allOpponentActions, random, discountFactor);
+        super(searchNodeFactory, knownModel, allPlayerActions, allOpponentActions, random, discountFactor);
+        throw new UnsupportedOperationException("Ok so ... class [" + RamcpNodeEvaluator.class + "] is deprecated. Needs to be fixed. Issue: how to sample unknown opponent ");
     }
 
     @Override
@@ -78,10 +79,7 @@ public class RamcpNodeEvaluator<
                 childNodePriorProbabilitiesMap.put(possibleAction, priorProbabilities[0]);
             }
         } else {
-            var probabilities = opponentPredictor.apply(node.getWrappedState().getOpponentObservation());
-            for (int i = 0; i < probabilities.getFirst().size(); i++) {
-                childNodePriorProbabilitiesMap.put(probabilities.getFirst().get(i), probabilities.getSecond().get(i));
-            }
+//            evaluateOpponentNode(node, childNodePriorProbabilitiesMap, null);
         }
     }
 
