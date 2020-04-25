@@ -1,11 +1,15 @@
 package vahy.api.experiment;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.utils.EnumUtils;
 
 import java.nio.file.Path;
 import java.util.SplittableRandom;
 
 public class SystemConfigBuilder {
+
+    private static final Logger logger = LoggerFactory.getLogger(SystemConfigBuilder.class.getName());
 
     // STOCHASTICITY
     private long randomSeed;
@@ -46,7 +50,13 @@ public class SystemConfigBuilder {
     }
 
     public SystemConfigBuilder setParallelThreadsCount(int parallelThreadsCount) {
-        this.parallelThreadsCount = parallelThreadsCount;
+        if(parallelThreadsCount <= 0) {
+            logger.warn("ParallelThreadCount set to: [{}]. Setting to 1.", parallelThreadsCount);
+            this.parallelThreadsCount = 1;
+        } else {
+            this.parallelThreadsCount = parallelThreadsCount;
+        }
+
         return this;
     }
 

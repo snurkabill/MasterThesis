@@ -46,16 +46,7 @@ public class TFWrapper implements Closeable {
         singleInputDoubleBuffer.position(0);
         singleInputDoubleBuffer.put(input);
         singleInputDoubleBuffer.flip();
-        var inputTensor = Tensor.create(singleInputShape, singleInputDoubleBuffer);
-        List<Tensor<?>> tensors = sess
-            .runner()
-            .feed("input_node", inputTensor)
-            .fetch("prediction_node", 0)
-            .run();
-        inputTensor.close();
-        if(tensors.size() != 1) {
-            throw new IllegalStateException("There should be only one output tensor.");
-        }
+        List<Tensor<?>> tensors = evaluateTensor(singleInputShape, singleInputDoubleBuffer);
         var output = tensors.get(0);
         output.writeTo(singleOutputDoubleBuffer);
         singleOutputDoubleBuffer.position(0);
@@ -70,18 +61,7 @@ public class TFWrapper implements Closeable {
         }
         doubleBuffer.position(0);
         batchedInputShape[0] = input.length;
-        var inputTensor = Tensor.create(batchedInputShape, doubleBuffer);
-        List<Tensor<?>> tensors = sess
-            .runner()
-            .feed("input_node", inputTensor)
-//                .feed("keep_prob_node", inferenceKeepProbability)
-            .fetch("prediction_node", 0)
-            .run();
-        inputTensor.close();
-
-        if(tensors.size() != 1) {
-            throw new IllegalStateException("There should be only one output tensor.");
-        }
+        List<Tensor<?>> tensors = evaluateTensor(batchedInputShape, doubleBuffer);
         double[][] outputMatrix = new double[input.length][];
         for (int i = 0; i < outputMatrix.length; i++) {
             outputMatrix[i] = new double[outputDimension];
@@ -92,12 +72,19 @@ public class TFWrapper implements Closeable {
         return outputMatrix;
     }
 
-    public int getInputDimension() {
-        return inputDimension;
-    }
-
-    public int getOutputDimension() {
-        return outputDimension;
+    private List<Tensor<?>> evaluateTensor(long[] singleInputShape, DoubleBuffer singleInputDoubleBuffer) {
+        var inputTensor = Tensor.create(singleInputShape, singleInputDoubleBuffer);
+        List<Tensor<?>> tensors = sess
+            .runner()
+            .feed("input_node", inputTensor)
+            .feed("keep_prob_node", inferenceKeepProbability)
+            .fetch("prediction_node", 0)
+            .run();
+        inputTensor.close();
+        if (tensors.size() != 1) {
+            throw new IllegalStateException("There should be only one output tensor.");
+        }
+        return tensors;
     }
 
     @Override

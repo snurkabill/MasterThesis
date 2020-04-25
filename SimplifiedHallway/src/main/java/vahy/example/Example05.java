@@ -60,7 +60,7 @@ public class Example05 extends SHExperiment {
     protected List<PaperAlgorithmConfig> createAlgorithmConfigList() {
         return List.of(
             new AlgorithmConfigBuilder()
-                .algorithmId("Base")
+                .policyId("Base")
                 //MCTS
                 .cpuctParameter(1)
                 // REINFORCEMENT

@@ -37,12 +37,13 @@ public class MonteCarloNodeEvaluator<
                                    SplittableRandom random,
                                    double discountFactor) {
         super(searchNodeFactory, null, null, knownModel, allPlayerActions, allOpponentActions);
-        this.random = random;
-        this.discountFactor = discountFactor;
-        this.priorProbabilities = new double[allPlayerActions.length];
-        for (int i = 0; i < priorProbabilities.length; i++) {
-            priorProbabilities[i] = 1.0 / allPlayerActions.length;
-        }
+        throw new UnsupportedOperationException("Ok so ... class [" + MonteCarloNodeEvaluator.class + "] is deprecated. Needs to be fixed. Issue: how to sample unknown opponent ");
+//        this.random = random;
+//        this.discountFactor = discountFactor;
+//        this.priorProbabilities = new double[allPlayerActions.length];
+//        for (int i = 0; i < priorProbabilities.length; i++) {
+//            priorProbabilities[i] = 1.0 / allPlayerActions.length;
+//        }
     }
 
     @Override
@@ -64,7 +65,7 @@ public class MonteCarloNodeEvaluator<
                 childPriorProbabilities.put(allPlayerActions[i], (priorProbabilities[i]));
             }
         } else {
-            evaluateOpponentNode(node, childPriorProbabilities);
+//            evaluateOpponentNode(node, childPriorProbabilities, null);
         }
         return sampledRewardWithRisk.getThird();
     }

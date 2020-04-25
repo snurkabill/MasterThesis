@@ -37,6 +37,7 @@ public abstract class AbstractHallwayTest {
 
         var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, HallwayStateImpl, HallwayStateImpl>()
             .setActionClass(HallwayAction.class)
+            .setStateClass(HallwayStateImpl.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(gameConfig)

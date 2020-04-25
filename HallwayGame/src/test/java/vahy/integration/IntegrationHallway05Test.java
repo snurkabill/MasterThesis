@@ -55,7 +55,7 @@ public class IntegrationHallway05Test extends AbstractHallwayTest {
 
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         return new AlgorithmConfigBuilder()
-            .algorithmId("Base")
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
 

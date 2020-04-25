@@ -48,8 +48,8 @@
 <!--        </filter>-->
     </appender>
 
-    <root name="vahy" level="info">
-<!--        <appender-ref ref="FILE"/>-->
+    <root name="vahy" level="debug">
+        <appender-ref ref="FILE"/>
         <appender-ref ref="CONSOLE"/>
     </root>
 

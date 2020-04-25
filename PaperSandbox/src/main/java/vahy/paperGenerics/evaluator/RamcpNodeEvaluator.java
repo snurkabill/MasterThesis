@@ -36,6 +36,7 @@ public class RamcpNodeEvaluator<
                               SplittableRandom random,
                               double discountFactor) {
         super(searchNodeFactory, knownModel, allPlayerActions, allOpponentActions, random, discountFactor);
+        throw new UnsupportedOperationException("Ok so ... class [" + RamcpNodeEvaluator.class + "] is deprecated. Needs to be fixed. Issue: how to sample unknown opponent ");
     }
 
     @Override
@@ -78,7 +79,7 @@ public class RamcpNodeEvaluator<
                 childNodePriorProbabilitiesMap.put(possibleAction, priorProbabilities[0]);
             }
         } else {
-            evaluateOpponentNode(node, childNodePriorProbabilitiesMap);
+//            evaluateOpponentNode(node, childNodePriorProbabilitiesMap, null);
         }
     }
 

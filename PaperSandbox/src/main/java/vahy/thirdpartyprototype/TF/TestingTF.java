@@ -1,9 +1,10 @@
-package vahy.thirdpartyprototype;
+package vahy.thirdpartyprototype.TF;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
+import vahy.thirdpartyprototype.TestingDL4J;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,7 @@ public class TestingTF {
         target[2] = new double[] {3};
         target[3] = new double[] {4};
 
-        File tfGraphFile = new File(TestingDL4J.class.getClassLoader().getResource("tfModel/graph.pb").getFile());
+        File tfGraphFile = new File(TestingTF.class.getClassLoader().getResource("tfModel/graph.pb").getFile());
         Graph graph = new Graph();
         Session sess;
 

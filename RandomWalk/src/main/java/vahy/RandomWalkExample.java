@@ -60,7 +60,7 @@ public class RandomWalkExample {
         var batchSize = 1000;
 
         return new AlgorithmConfigBuilder()
-            .algorithmId("Base")
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
 

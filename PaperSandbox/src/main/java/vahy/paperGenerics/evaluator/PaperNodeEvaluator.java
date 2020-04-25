@@ -50,6 +50,12 @@ public class PaperNodeEvaluator<
         this.knownModel = knownModel;
     }
 
+    protected final void unmakeLeaf(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+        if(!node.isFinalNode()) {
+            node.unmakeLeaf();
+        }
+    }
+
     @Override
     public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
         var nodesExpanded = 0;
@@ -69,13 +75,11 @@ public class PaperNodeEvaluator<
             childNodeMap.put(nextAction, nodeAndExpansions.getFirst());
             nodesExpanded += nodeAndExpansions.getSecond();
         }
-        if(!selectedNode.isFinalNode()) {
-            selectedNode.unmakeLeaf();
-        }
+        unmakeLeaf(selectedNode);
         return nodesExpanded;
     }
 
-    protected void fillNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, double[] prediction) {
+    protected void fillNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, double[] prediction, double[] opponentPrediction) {
         var searchMetadata = node.getSearchNodeMetadata();
         searchMetadata.setPredictedReward(prediction[PaperModel.Q_VALUE_INDEX]);
         searchMetadata.setExpectedReward(prediction[PaperModel.Q_VALUE_INDEX]);
@@ -87,7 +91,7 @@ public class PaperNodeEvaluator<
         if(node.getWrappedState().isPlayerTurn()) {
             evaluatePlayerNode(node, childPriorProbabilities, prediction);
         } else {
-            evaluateOpponentNode(node, childPriorProbabilities);
+            evaluateOpponentNode(node, childPriorProbabilities, opponentPrediction);
         }
         searchMetadata.setEvaluated();
     }
@@ -119,7 +123,7 @@ public class PaperNodeEvaluator<
         }
     }
 
-    protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities) {
+    protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] probabilities) {
         //TODO: THIS METHOD IS UGLY
         TAction[] allPossibleActions = node.getAllPossibleActions();
         if(DEBUG_ENABLED) {
@@ -131,7 +135,6 @@ public class PaperNodeEvaluator<
         }
 
         if(knownModel == null) {
-            double[] probabilities = opponentPredictor.apply(node.getWrappedState().getPlayerObservation());
             if(allOpponentActions.length == allPossibleActions.length) {
                 for (int i = 0; i < allOpponentActions.length; i++) {
                     childPriorProbabilities.put(allOpponentActions[i], probabilities[i]);
@@ -149,7 +152,6 @@ public class PaperNodeEvaluator<
                 }
             }
         } else {
-            double[] probabilities = knownModel.apply(node.getWrappedState());
             if(allOpponentActions.length == allPossibleActions.length) {
                 for (int i = 0; i < allOpponentActions.length; i++) {
                     childPriorProbabilities.put(allOpponentActions[i], probabilities[i]);
@@ -168,7 +170,13 @@ public class PaperNodeEvaluator<
     }
 
     protected int innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()));
+        // TODO: this is also ugly
+        if(node.isPlayerTurn()) {
+            fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()), null);
+        } else {
+            double[] opponentPrediction = knownModel != null ? knownModel.apply(node.getWrappedState()) : opponentPredictor.apply(node.getWrappedState().getPlayerObservation());
+            fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()), opponentPrediction);
+        }
         return 1;
     }
 

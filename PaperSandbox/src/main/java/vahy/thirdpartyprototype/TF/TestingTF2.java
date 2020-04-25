@@ -1,4 +1,4 @@
-package vahy.thirdpartyprototype;
+package vahy.thirdpartyprototype.TF;
 
 import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 

@@ -78,7 +78,7 @@ public class DefaultLocalBenchmark {
     protected PaperAlgorithmConfig createAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
 
-            .algorithmId("Base")
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
 
@@ -143,7 +143,7 @@ public class DefaultLocalBenchmark {
 
     protected PaperAlgorithmConfig createAlgorithmConfig2() {
         return new AlgorithmConfigBuilder()
-            .algorithmId("Without LR")
+            .policyId("Without LR")
             //MCTS
             .cpuctParameter(1)
 

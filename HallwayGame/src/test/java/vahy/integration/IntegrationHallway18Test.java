@@ -37,7 +37,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, true, 1_000, 0, false, false, false, null, null);
+        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, 0, false, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
@@ -56,7 +56,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         int batchSize = 100;
         return  new AlgorithmConfigBuilder()
-            .algorithmId("Base")
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))

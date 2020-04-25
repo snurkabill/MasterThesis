@@ -49,7 +49,7 @@ public class AlgorithmConfigBuilder {
     private int batchedEvaluationSize;
     private NoiseStrategy noiseStrategy = NoiseStrategy.NOISY_03_04;
 
-    public AlgorithmConfigBuilder algorithmId(String algorithmId) {
+    public AlgorithmConfigBuilder policyId(String algorithmId) {
         this.algorithmId = algorithmId;
         return this;
     }

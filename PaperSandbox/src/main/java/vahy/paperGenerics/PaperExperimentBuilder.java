@@ -49,6 +49,7 @@ import vahy.paperGenerics.reinforcement.DataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.episode.PaperEpisodeResultsFactory;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker;
 import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
+import vahy.paperGenerics.reinforcement.learning.tf.TFModel;
 import vahy.paperGenerics.reinforcement.learning.tf.TFModelImproved;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.selector.RiskAverseNodeSelector;
@@ -87,12 +88,18 @@ public class PaperExperimentBuilder<
     private String timestamp;
     private boolean dumpData;
     private Class<TAction> actionClazz;
+    private Class<TState> stateClazz;
     private TConfig problemConfig;
     private SystemConfig systemConfig;
     private List<PaperAlgorithmConfig> algorithmConfigList;
 
     private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TOpponentObservation, TState>> instanceInitializerFactory;
     private Function<SplittableRandom, PolicySupplier<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord>> opponentPolicyCreator = KnownModelPolicySupplier::new;
+
+    public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setStateClass(Class<TState> stateClass) {
+        this.stateClazz = stateClass;
+        return this;
+    }
 
     public PaperExperimentBuilder<TConfig, TAction, TOpponentObservation, TState> setActionClass(Class<TAction> actionClass) {
         this.actionClazz = actionClass;
@@ -128,6 +135,15 @@ public class PaperExperimentBuilder<
         timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
         logger.info("Finalized setup with timestamp [{}]", timestamp);
         dumpData = (systemConfig.dumpEvaluationData() || systemConfig.dumpTrainingData());
+        if(stateClazz == null) {
+            throw new IllegalArgumentException("Missing StateClass. Don't forget to add it within ExperimentBuilder");
+        }
+        if(actionClazz == null) {
+            throw new IllegalArgumentException("Missing ActionClass. Don't forget to add it within ExperimentBuilder");
+        }
+        if(instanceInitializerFactory == null) {
+            throw new IllegalArgumentException("Missing instanceInitializerFactory");
+        }
     }
 
     public List<PolicyResults<TAction, DoubleVector, TOpponentObservation, TState, PaperPolicyRecord, PaperEpisodeStatistics>> execute() {
@@ -338,6 +354,9 @@ public class PaperExperimentBuilder<
         var discountFactor = algorithmConfig.getDiscountFactor();
         var batchedEvaluationSize = algorithmConfig.getBatchedEvaluationSize();
 
+        TState[] array = (TState[]) java.lang.reflect.Array.newInstance(stateClazz, 0);
+
+//        var array = ReflectionHacks.arrayFromGenericClass(stateClazz, 10);
 
         switch (evaluatorType) {
             case RALF:
@@ -356,7 +375,9 @@ public class PaperExperimentBuilder<
                     knownModel,
                     playerActions,
                     opponentActions,
-                    batchedEvaluationSize);
+                    batchedEvaluationSize,
+                    array
+                    );
             case MONTE_CARLO:
                 return new MonteCarloNodeEvaluator<>(
                     searchNodeFactory,
@@ -400,7 +421,7 @@ public class PaperExperimentBuilder<
 
     private TrainablePredictor createPredictor(int modelInputSize, int actionCount, ApproximatorConfig approximatorConfig, SystemConfig systemConfig, SplittableRandom masterRandom, double[] defaultPrediction, boolean isOpponent) {
         if(approximatorConfig == null) {
-            throw new IllegalArgumentException("Approximator Config type is not defined");
+            throw new IllegalArgumentException("ApproximatorConfig type is not defined. Either player or model predictor setting is missing.");
         }
         var approximatorType = approximatorConfig.getApproximatorType();
         try {
@@ -415,22 +436,27 @@ public class PaperExperimentBuilder<
                         : new DataTablePredictorWithLr(defaultPrediction, approximatorConfig.getLearningRate(), actionCount);
                 case TF_NN:
                     var tfModelAsBytes = loadTensorFlowModel(approximatorConfig, systemConfig, modelInputSize, actionCount);
-//                var tfModel = new TFModel(
-//                    modelInputSize,
-//                    PaperModel.POLICY_START_INDEX + actionCount,
-//                    algorithmConfig.getTrainingEpochCount(),
-//                    algorithmConfig.getTrainingBatchSize(),
-//                    tfModelAsBytes,
-//                    masterRandom.split());
                     var tfModel = new TFModelImproved(
                         modelInputSize,
                         defaultPrediction.length,
                         approximatorConfig.getTrainingBatchSize(),
                         approximatorConfig.getTrainingEpochCount(),
+                        approximatorConfig.getDropoutKeepProbability(),
+                        approximatorConfig.getLearningRate(),
                         tfModelAsBytes,
                         systemConfig.getParallelThreadsCount(),
                         masterRandom.split());
                     return new TrainableApproximator(tfModel);
+                case TF_OLD_NN:
+                    var tfModelAsBytes2 = loadTensorFlowModel(approximatorConfig, systemConfig, modelInputSize, actionCount);
+                    var tfModel2 = new TFModel(
+                        modelInputSize,
+                        defaultPrediction.length,
+                        approximatorConfig.getTrainingEpochCount(),
+                        approximatorConfig.getTrainingBatchSize(),
+                        tfModelAsBytes2,
+                        masterRandom.split());
+                    return new TrainableApproximator(tfModel2);
                 case DL4J_NN:
                     var model = new Dl4jModel(
                         modelInputSize,
@@ -470,10 +496,10 @@ public class PaperExperimentBuilder<
             String line2;
 
             while ((line = input.readLine()) != null) {
-                System.out.println(line);
+                logger.info(line);
             }
             while ((line2 = error.readLine()) != null) {
-                System.out.println(line2);
+                logger.error(line2);
             }
         }
         var exitValue = process.waitFor();

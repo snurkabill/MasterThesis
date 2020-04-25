@@ -53,7 +53,7 @@ public class IntegrationHallway03Test extends AbstractHallwayTest {
 
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         return new AlgorithmConfigBuilder()
-            .algorithmId("Base")
+            .policyId("Base")
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))

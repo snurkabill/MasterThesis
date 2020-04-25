@@ -71,7 +71,7 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
         if(input.length != target.length) {
             throw new IllegalArgumentException("Input and target lengths differ");
         }
-        logger.debug("Partially fitting TF model on [{}] inputs.", input.length);
+        logger.debug("Partially fitting TF model on [{}] inputs with random.nextInt(): [{}]", input.length, random.nextInt());
         timer.startTimer();
         int[] order = IntStream.range(0, input.length).toArray();
         for (int i = 0; i < trainingIterations; i++) {

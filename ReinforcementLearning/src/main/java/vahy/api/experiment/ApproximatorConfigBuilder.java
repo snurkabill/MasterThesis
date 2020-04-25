@@ -17,6 +17,7 @@ public class ApproximatorConfigBuilder {
     private int replayBufferSize;
 
     private double learningRate;
+    private double dropoutKeepProbability = 1.0;
 
     public ApproximatorConfigBuilder setCreatingScriptName(String creatingScript) {
         this.creatingScript = creatingScript;
@@ -51,6 +52,11 @@ public class ApproximatorConfigBuilder {
 
     public ApproximatorConfigBuilder setLearningRate(double learningRate) {
         this.learningRate = learningRate;
+        return this;
+    }
+
+    public ApproximatorConfigBuilder setDropoutKeepProbability(double dropoutKeepProbability) {
+        this.dropoutKeepProbability = dropoutKeepProbability;
         return this;
     }
 
@@ -95,6 +101,7 @@ public class ApproximatorConfigBuilder {
             approximatorType,
             dataAggregationAlgorithm,
             replayBufferSize,
-            learningRate);
+            learningRate,
+            dropoutKeepProbability);
     }
 }
