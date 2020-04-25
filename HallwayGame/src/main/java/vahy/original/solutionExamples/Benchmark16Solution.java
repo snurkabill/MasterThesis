@@ -47,6 +47,7 @@ public class Benchmark16Solution extends DefaultLocalBenchmark {
         int batchSize = 10;
 
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(1))

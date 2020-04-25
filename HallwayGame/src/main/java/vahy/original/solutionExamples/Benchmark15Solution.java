@@ -48,6 +48,7 @@ public class Benchmark15Solution extends DefaultLocalBenchmark {
 
         return new AlgorithmConfigBuilder()
             //MCTS
+            .policyId("Base")
             .cpuctParameter(1)
 
             // REINFORCEMENT

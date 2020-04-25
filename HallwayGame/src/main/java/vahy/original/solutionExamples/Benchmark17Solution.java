@@ -46,6 +46,7 @@ public class Benchmark17Solution extends DefaultLocalBenchmark {
     protected PaperAlgorithmConfig createAlgorithmConfig() {
         int batchSize = 100;
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))

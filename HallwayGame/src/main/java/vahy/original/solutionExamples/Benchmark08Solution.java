@@ -4,6 +4,7 @@ import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.config.AlgorithmConfigBuilder;
+import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -43,6 +44,7 @@ public class Benchmark08Solution extends DefaultLocalBenchmark {
     @Override
     protected PaperAlgorithmConfig createAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(200))
@@ -54,6 +56,7 @@ public class Benchmark08Solution extends DefaultLocalBenchmark {
             .stageCount(100)
             .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setLearningRate(0.1).build())
             .selectorType(SelectorType.UCB)
+            .evaluatorType(EvaluatorType.RALF)
             .globalRiskAllowed(0.15)
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;

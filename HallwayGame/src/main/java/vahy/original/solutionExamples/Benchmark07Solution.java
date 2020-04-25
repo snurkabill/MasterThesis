@@ -45,6 +45,7 @@ public class Benchmark07Solution extends  DefaultLocalBenchmark {
     @Override
     protected PaperAlgorithmConfig createAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(3)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(100))

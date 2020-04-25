@@ -354,6 +354,10 @@ public class PaperExperimentBuilder<
         var discountFactor = algorithmConfig.getDiscountFactor();
         var batchedEvaluationSize = algorithmConfig.getBatchedEvaluationSize();
 
+        if(evaluatorType == null) {
+            throw new IllegalArgumentException("Missing evaluator type");
+        }
+
         TState[] array = (TState[]) java.lang.reflect.Array.newInstance(stateClazz, 0);
 
 //        var array = ReflectionHacks.arrayFromGenericClass(stateClazz, 10);

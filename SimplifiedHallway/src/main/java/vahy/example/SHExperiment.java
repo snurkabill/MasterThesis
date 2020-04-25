@@ -31,6 +31,7 @@ public abstract class SHExperiment {
 
         var paperExperimentBuilder = new PaperExperimentBuilder<SHConfig, SHAction, SHState, SHState>()
             .setActionClass(SHAction.class)
+            .setStateClass(SHState.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(algorithmConfigList)
             .setProblemConfig(problemConfig)
