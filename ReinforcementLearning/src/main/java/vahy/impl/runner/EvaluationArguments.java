@@ -20,18 +20,18 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
-    private TConfig problemConfig;
-    private SystemConfig systemConfig;
+    private final TConfig problemConfig;
+    private final SystemConfig systemConfig;
 
-    private InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
-    private EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory;
-    private EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
-    private PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
-    private EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
+    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
+    private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory;
+    private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
+    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
+    private final EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
 
     public EvaluationArguments(TConfig problemConfig,
                                SystemConfig systemConfig,
-                               InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
+                               InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
                                EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
                                EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
                                PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
@@ -54,7 +54,7 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
         return systemConfig;
     }
 
-    public InitialStateSupplier<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState> getInitialStateSupplier() {
+    public InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> getInitialStateSupplier() {
         return initialStateSupplier;
     }
 

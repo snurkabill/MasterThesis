@@ -15,19 +15,16 @@ import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
+import vahy.paperGenerics.policy.linearProgram.deprecated.MinimalRiskReachAbilityCalculatorDeprecated;
 import vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowHardConstraintCalculatorDeprecated;
 import vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowSoftConstraintDeprecateed;
-import vahy.paperGenerics.policy.linearProgram.deprecated.MinimalRiskReachAbilityCalculatorDeprecated;
 import vahy.paperGenerics.policy.riskSubtree.MinimalRiskReachAbilityCalculator;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.testDomain.EmptySpaceRiskState;
-import vahy.utils.ImmutableTuple;
 
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.SplittableRandom;
-import java.util.function.Function;
 
 public class FlowConstraintCalculatorTest {
 
@@ -49,8 +46,8 @@ public class FlowConstraintCalculatorTest {
 
         var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(EmptySpaceAction.class);
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
-        Function<EmptySpaceRiskState, ImmutableTuple<List<EmptySpaceAction>, List<Double>>> function = x -> new ImmutableTuple<>(List.of(EmptySpaceAction.AA, EmptySpaceAction.BB), List.of(1.0/3, 2.0/3));
-        var nodeEvaluator = new PaperNodeEvaluator<>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), function, playerActions, opponentActions);
+        var knownModel = state.getKnownModelWithPerfectObservationPredictor();
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
 
 
         var total = 0;
@@ -108,8 +105,10 @@ public class FlowConstraintCalculatorTest {
 
         var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(EmptySpaceAction.class);
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
-        Function<EmptySpaceRiskState, ImmutableTuple<List<EmptySpaceAction>, List<Double>>> function = x -> new ImmutableTuple<>(List.of(EmptySpaceAction.AA, EmptySpaceAction.BB), List.of(1.0/3, 2.0/3));
-        var nodeEvaluator = new PaperNodeEvaluator<>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), function, playerActions, opponentActions);
+
+        var knownModel = state.getKnownModelWithPerfectObservationPredictor();
+
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
 
 
         var total = 0;
@@ -166,8 +165,10 @@ public class FlowConstraintCalculatorTest {
 
         var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(EmptySpaceAction.class);
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
-        Function<EmptySpaceRiskState, ImmutableTuple<List<EmptySpaceAction>, List<Double>>> function = x -> new ImmutableTuple<>(List.of(EmptySpaceAction.AA, EmptySpaceAction.BB), List.of(1.0/3, 2.0/3));
-        var nodeEvaluator = new PaperNodeEvaluator<>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), function, playerActions, opponentActions);
+
+        var knownModel = state.getKnownModelWithPerfectObservationPredictor();
+
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
 
 
         var total = 0;

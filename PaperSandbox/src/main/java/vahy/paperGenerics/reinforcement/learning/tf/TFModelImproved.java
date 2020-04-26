@@ -31,14 +31,17 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
     private final double[][] trainTargetBatch;
     private final long[] trainInputShape;
     private final long[] trainTargetShape;
+
     private final Graph commonGraph;
     private final Session trainingSession;
+    private final Tensor trainingKeepProbability;
+    private final Tensor learningRate;
 
     private final DoubleBuffer inputDoubleBuffer;
     private final DoubleBuffer targetDoubleBuffer;
 
 
-    public TFModelImproved(int inputDimension, int outputDimension, int batchSize, int trainingIterations, byte[] bytes, int poolSize, SplittableRandom random) {
+    public TFModelImproved(int inputDimension, int outputDimension, int batchSize, int trainingIterations, double keepProb, double learningRate, byte[] bytes, int poolSize, SplittableRandom random) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.batchSize = batchSize;
@@ -60,12 +63,13 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         this.commonGraph.importGraphDef(bytes);
         this.trainingSession = new Session(commonGraph);
         this.trainingSession.runner().addTarget("init").run();
+        this.trainingKeepProbability = Tensor.create(keepProb);
+        this.learningRate = Tensor.create(learningRate);
 
         this.pool = new ArrayBlockingQueue<>(poolSize, true);
         for (int i = 0; i < poolSize; i++) {
             this.pool.add(new TFWrapper(inputDimension, outputDimension, trainingSession));
         }
-
     }
 
     @Override
@@ -108,7 +112,7 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
             throw new IllegalArgumentException("Input and target lengths differ");
         }
         if(DEBUG_ENABLED) {
-            logger.debug("Partially fitting TF model on [{}] inputs.", input.length);
+            logger.debug("Partially fitting TF model on [{}] inputs with random.nextInt(): [{}]", input.length, random.nextInt());
         }
         timer.startTimer();
         int[] order = new int[input.length];
@@ -136,6 +140,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
                     .runner()
                     .feed("input_node", tfInput)
                     .feed("target_node", tfTarget)
+                    .feed("keep_prob_node", trainingKeepProbability)
+                    .feed("learning_rate_node", learningRate)
                     .addTarget("optimize_node")
                     .run();
                 tfInput.close();
@@ -144,8 +150,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
         timer.stopTimer();
         if(DEBUG_ENABLED) {
-            logger.debug("Training of [{}] inputs with minibatch size [{}] took [{}] milliseconds. Samples per sec: [{}]",
-                input.length, batchSize, timer.getTotalTimeInMillis() / 1000.0, timer.samplesPerSec(input.length));
+            logger.debug("Training of [{}] inputs with minibatch size [{}] took [{}] milliseconds. Samples per sec: [{}], Ending with random.nextInt(): [{}]",
+                input.length, batchSize, timer.getTotalTimeInMillis() / 1000.0, timer.samplesPerSec(input.length), random.nextInt());
         }
     }
 

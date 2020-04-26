@@ -7,6 +7,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class PlayingDistribution<
@@ -23,20 +24,20 @@ public class PlayingDistribution<
     private final double[] riskOnPlayerSubNodes;
     private final List<TAction> actionList;
 
-    private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier;
+    private final Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap;
 
     public PlayingDistribution(TAction expectedPlayerAction,
                                int expectedPlayerActionIndex,
                                double[] playerDistribution,
                                double[] riskOnPlayerSubNodes,
                                List<TAction> actionList,
-                               Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> usedSubTreeRiskCalculatorSupplier) {
+                               Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap) {
         this.expectedPlayerAction = expectedPlayerAction;
         this.expectedPlayerActionIndex = expectedPlayerActionIndex;
         this.playerDistribution = playerDistribution;
         this.riskOnPlayerSubNodes = riskOnPlayerSubNodes;
         this.actionList = actionList;
-        this.usedSubTreeRiskCalculatorSupplier = usedSubTreeRiskCalculatorSupplier;
+        this.usedSubTreeRiskCalculatorSupplierMap = usedSubTreeRiskCalculatorSupplierMap;
 
         if(playerDistribution.length != riskOnPlayerSubNodes.length) {
             throw new IllegalArgumentException("Player distribution and risks on subnodes differ in length");
@@ -63,7 +64,7 @@ public class PlayingDistribution<
         return actionList;
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getUsedSubTreeRiskCalculatorSupplier() {
-        return usedSubTreeRiskCalculatorSupplier;
+    public Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> getUsedSubTreeRiskCalculatorSupplierMap() {
+        return usedSubTreeRiskCalculatorSupplierMap;
     }
 }

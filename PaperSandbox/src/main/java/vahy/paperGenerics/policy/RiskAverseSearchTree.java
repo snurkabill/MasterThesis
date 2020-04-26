@@ -13,6 +13,7 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.flowOptimizer.AbstractFlowOptimizer;
+import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistribution;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionProvider;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
@@ -46,6 +47,7 @@ public class RiskAverseSearchTree<
     private double totalRiskAllowed;
 
     private PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> playingDistribution;
+    private SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRiskCalculator;
 
     private final RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> nodeSelector;
 
@@ -180,8 +182,9 @@ public class RiskAverseSearchTree<
             if(action.isPlayerAction() && action != playingDistribution.getExpectedPlayerAction()) {
                 throw new IllegalStateException("RiskAverseTree is applied with player action which was not selected by riskAverseTree. Discrepancy.");
             }
-            if(action.isPlayerAction()) { // debug purposes
-                latestTreeWithPlayerOnTurn = this.getRoot();
+            if(action.isPlayerAction()) {
+                latestTreeWithPlayerOnTurn = this.getRoot(); // debug purposes
+                subtreeRiskCalculator = playingDistribution.getUsedSubTreeRiskCalculatorSupplierMap().get(action).get();
             }
             isFlowOptimized = false;
             if(!action.isPlayerAction() && !isRiskIgnored()) {
@@ -196,15 +199,14 @@ public class RiskAverseSearchTree<
                     }
                 }
                 riskOfOtherPlayerActions = roundRiskIfBelowZero(riskOfOtherPlayerActions, "RiskOfOtherPlayerActions");
-                var riskOfOtherOpponentActions = getRoot()
-                    .getChildNodeStream()
-                    .filter(x -> x.getAppliedAction() != action)
-                    .mapToDouble(x ->
-                        playingDistribution.getUsedSubTreeRiskCalculatorSupplier().get().calculateRisk(x) *
-                        x.getSearchNodeMetadata().getPriorProbability() *
-                        playerActionProbability
-                    )
-                    .sum();
+
+                var riskOfOtherOpponentActions = 0.0;
+                for (var entry : getRoot().getChildNodeMap().values()) {
+                    if(entry.getAppliedAction() != action) {
+                        riskOfOtherOpponentActions += subtreeRiskCalculator.calculateRisk(entry) * entry.getSearchNodeMetadata().getPriorProbability() * playerActionProbability;
+                    }
+                }
+
                 riskOfOtherOpponentActions = roundRiskIfBelowZero(riskOfOtherOpponentActions, "RiskOfOtherOpponentActions");
 
                 var dividingProbability = (playerActionProbability * opponentActionProbability);
@@ -239,9 +241,10 @@ public class RiskAverseSearchTree<
                 }
             }
             return innerApplyAction(action);
-        } catch(Exception e) {
+        } catch (Exception e) {
             dumpTreeWithFlow();
-            throw e;
+            throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. " +
+                "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getWrappedState().readableStringRepresentation() + "]", e);
         }
     }
 

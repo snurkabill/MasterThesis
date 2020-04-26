@@ -17,7 +17,8 @@ public class RandomWalkSetup extends ProblemConfig {
     private final double upAfterSafeProbability;
     private final double upAfterUnsafeProbability;
 
-    public RandomWalkSetup(int maximalStepCountBound,
+    public RandomWalkSetup(boolean isModelKnown,
+                           int maximalStepCountBound,
                            int goalLevel,
                            int startLevel,
                            int stepPenalty, int upSafeShift,
@@ -26,7 +27,7 @@ public class RandomWalkSetup extends ProblemConfig {
                            int downUnsafeShift,
                            double upAfterSafeProbability,
                            double upAfterUnsafeProbability) {
-        super(maximalStepCountBound);
+        super(maximalStepCountBound, isModelKnown);
         this.goalLevel = goalLevel;
         this.startLevel = startLevel;
         this.stepPenalty = stepPenalty;

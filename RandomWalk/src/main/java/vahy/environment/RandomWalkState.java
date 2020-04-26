@@ -3,16 +3,16 @@ package vahy.environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
+import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
-import vahy.utils.ImmutableTuple;
 
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
-public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> {
+public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVector, RandomWalkState, RandomWalkState>, Observation {
 
     private static final Logger logger = LoggerFactory.getLogger(RandomWalkState.class.getName());
 
@@ -70,7 +70,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
     }
 
     @Override
-    public StateRewardReturn<RandomWalkAction, DoubleVector, RandomWalkProbabilities, RandomWalkState> applyAction(RandomWalkAction actionType) {
+    public StateRewardReturn<RandomWalkAction, DoubleVector, RandomWalkState, RandomWalkState> applyAction(RandomWalkAction actionType) {
         int newLevel = resolveNewLevel(actionType);
         boolean isAgentTurnNext = !isAgentTurn;
         var nextState = new RandomWalkState(
@@ -83,36 +83,45 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
     }
 
     @Override
-    public RandomWalkState deepCopy() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {level});
+        return new DoubleVector(new double[] {level, previousAction.getGlobalIndex()});
     }
 
     @Override
-    public RandomWalkProbabilities getOpponentObservation() {
-        var possibleActions = new LinkedList<RandomWalkAction>();
-        var actionProbabilities = new LinkedList<Double>();
-        if(isAgentTurn) {
-            return new RandomWalkProbabilities(new ImmutableTuple<>(possibleActions, actionProbabilities));
-        } else {
-            if(previousAction == RandomWalkAction.SAFE) {
-                possibleActions.add(RandomWalkAction.UP);
-                actionProbabilities.add(randomWalkSetup.getUpAfterSafeProbability());
-                possibleActions.add(RandomWalkAction.DOWN);
-                actionProbabilities.add(1.0 - randomWalkSetup.getUpAfterSafeProbability());
-            } else {
-                possibleActions.add(RandomWalkAction.UP);
-                actionProbabilities.add(randomWalkSetup.getUpAfterUnsafeProbability());
-                possibleActions.add(RandomWalkAction.DOWN);
-                actionProbabilities.add(1.0 - randomWalkSetup.getUpAfterUnsafeProbability());
-            }
-        }
-        return new RandomWalkProbabilities(new ImmutableTuple<>(possibleActions, actionProbabilities));
+    public RandomWalkState getOpponentObservation() {
+        return this;
     }
+
+    @Override
+    public Predictor<RandomWalkState> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<>() {
+
+            private final double[] safeProbabilities = new double[] {randomWalkSetup.getUpAfterSafeProbability(), 1.0 - randomWalkSetup.getUpAfterSafeProbability()};
+            private final double[] unsafeProbabilities = new double[] {randomWalkSetup.getUpAfterUnsafeProbability(), 1.0 - randomWalkSetup.getUpAfterUnsafeProbability()};
+
+            @Override
+            public double[] apply(RandomWalkState observation) {
+                if(observation.previousAction == RandomWalkAction.SAFE) {
+                    return safeProbabilities;
+                } else if(observation.previousAction == RandomWalkAction.UNSAFE) {
+                    return unsafeProbabilities;
+                } else {
+                    throw new IllegalStateException("Not recognized previous action [" + observation.previousAction + "]. There must be player action");
+                }
+            }
+
+            @Override
+            public double[][] apply(RandomWalkState[] observationArray) {
+                var prediction = new double[observationArray.length][];
+                for (int i = 0; i < prediction.length; i++) {
+                    prediction[i] = apply(observationArray[i]);
+                }
+                return prediction;
+            }
+        };
+
+    }
+
 
     @Override
     public String readableStringRepresentation() {

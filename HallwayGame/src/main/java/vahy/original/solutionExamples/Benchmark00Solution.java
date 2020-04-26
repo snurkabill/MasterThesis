@@ -1,5 +1,6 @@
 package vahy.original.solutionExamples;
 
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -58,13 +59,12 @@ public class Benchmark00Solution extends DefaultLocalBenchmark {
     @Override
     protected PaperAlgorithmConfig createAlgorithmConfig() {
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(3)
 
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(100)
@@ -72,13 +72,8 @@ public class Benchmark00Solution extends DefaultLocalBenchmark {
             .stageCount(300)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .trainingBatchSize(1)
-            .learningRate(0.01)
-
-            .approximatorType(ApproximatorType.HASHMAP_LR)
             .selectorType(SelectorType.UCB)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setApproximatorType(ApproximatorType.HASHMAP_LR).setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setLearningRate(0.1).build())
 
             .globalRiskAllowed(0.15)
             .riskSupplier(new Supplier<Double>() {

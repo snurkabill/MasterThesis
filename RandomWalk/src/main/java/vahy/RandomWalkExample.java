@@ -2,6 +2,7 @@ package vahy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
@@ -13,7 +14,6 @@ import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
 import vahy.environment.RandomWalkAction;
 import vahy.environment.RandomWalkInitialInstanceSupplier;
-import vahy.environment.RandomWalkProbabilities;
 import vahy.environment.RandomWalkSetup;
 import vahy.environment.RandomWalkState;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -41,8 +41,9 @@ public class RandomWalkExample {
         var systemConfig = createSystemConfig();
         var problemConfig = createGameConfig();
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkProbabilities, RandomWalkState>()
+        var paperExperimentBuilder = new PaperExperimentBuilder<RandomWalkSetup, RandomWalkAction, RandomWalkState, RandomWalkState>()
             .setActionClass(RandomWalkAction.class)
+            .setStateClass(RandomWalkState.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(problemConfig)
@@ -60,13 +61,11 @@ public class RandomWalkExample {
         var batchSize = 1000;
 
         return new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
 
             //.mcRolloutCount(1)
-            //NN
-            .trainingBatchSize(1)
-            .trainingEpochCount(10)
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
@@ -74,11 +73,10 @@ public class RandomWalkExample {
             .stageCount(100)
             .evaluatorType(EvaluatorType.RALF)
 //            .setBatchedEvaluationSize(1)
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .replayBufferSize(100_000)
-            .learningRate(0.01)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.01).build())
 
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .selectorType(SelectorType.UCB)
+
             .globalRiskAllowed(riskAllowed)
             .riskSupplier(new Supplier<Double>() {
                 @Override
@@ -91,10 +89,6 @@ public class RandomWalkExample {
                     return "() -> 1.00";
                 }
             })
-
-            .replayBufferSize(10000)
-            .selectorType(SelectorType.UCB)
-
             .explorationConstantSupplier(new Supplier<Double>() {
                 @Override
                 public Double get() {
@@ -121,7 +115,7 @@ public class RandomWalkExample {
             .setInferenceExistingFlowStrategy(InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW)
             .setInferenceNonExistingFlowStrategy(InferenceNonExistingFlowStrategy.MAX_UCB_VISIT)
             .setExplorationExistingFlowStrategy(ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE)
-            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT)
+            .setExplorationNonExistingFlowStrategy(ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VISIT_WITH_TEMPERATURE)
             .setFlowOptimizerType(FlowOptimizerType.HARD_HARD)
             .setSubTreeRiskCalculatorTypeForKnownFlow(SubTreeRiskCalculatorType.FLOW_SUM)
             .setSubTreeRiskCalculatorTypeForUnknownFlow(SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY)
@@ -144,17 +138,19 @@ public class RandomWalkExample {
         var diffLevel = 100;
         var finishlevel = startLevel + diffLevel;
         var stepPenalty = 1;
+        var isModelKnown = true;
         return new RandomWalkSetup(
+            isModelKnown,
             500,
             finishlevel,
             startLevel,
             stepPenalty,
             2,
             2,
-            5,
-            9,
+            10,
+            11,
             0.9,
-            0.8);
+            0.6);
     }
 
 //    public static ImmutableTuple<RandomWalkSetup, ExperimentSetup> createExperiment() {

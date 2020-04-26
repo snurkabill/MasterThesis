@@ -2,14 +2,13 @@ package vahy.original.environment.agent.policy.environment;
 
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.state.EnvironmentProbabilities;
 import vahy.original.environment.state.HallwayStateImpl;
 import vahy.paperGenerics.policy.PaperPolicy;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 
 import java.util.SplittableRandom;
 
-public class PaperEnvironmentPolicy extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayAction,  DoubleVector, EnvironmentProbabilities, HallwayStateImpl> {
+public class PaperEnvironmentPolicy extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayAction,  DoubleVector, HallwayStateImpl, HallwayStateImpl> {
 
     public PaperEnvironmentPolicy(SplittableRandom random) {
         super(random);

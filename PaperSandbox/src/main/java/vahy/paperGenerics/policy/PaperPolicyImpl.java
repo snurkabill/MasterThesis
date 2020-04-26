@@ -7,15 +7,13 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ArrayUtils;
-import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
@@ -32,6 +30,7 @@ public class PaperPolicyImpl<
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
 
     private final int totalPlayerActionCount;
+    private final int totalOpponentActionCount;
 
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
@@ -72,6 +71,7 @@ public class PaperPolicyImpl<
         TAction[] allActions = clazz.getEnumConstants();
 
         this.totalPlayerActionCount = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new)).size();
+        this.totalOpponentActionCount = Arrays.stream(allActions).filter(Action::isOpponentAction).collect(Collectors.toCollection(ArrayList::new)).size();
         this.isExplorationDisabled = isExplorationDisabled;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
@@ -143,19 +143,13 @@ public class PaperPolicyImpl<
     }
 
     private double[] innerPriorProbabilityDistribution(TState gameState) {
-        if(gameState.isOpponentTurn()) {
-            throw new IllegalStateException("Can't sample opponent's distribution from player's policy");
+        double[] priorProbabilities = new double[gameState.isPlayerTurn() ? totalPlayerActionCount : totalOpponentActionCount];
+        for (var entry : this.riskAverseSearchTree.getRoot().getChildNodeMap().entrySet()) {
+            var action = entry.getValue().getAppliedAction();
+            int actionIndex = gameState.isPlayerTurn() ? action.getActionIndexInPlayerActions() : action.getActionIndexInOpponentActions();
+            priorProbabilities[actionIndex] = entry.getValue().getSearchNodeMetadata().getPriorProbability();
         }
-        double[] priorProbabilities = new double[totalPlayerActionCount];
-        List<ImmutableTuple<TAction, Double>> actionDoubleList = this.riskAverseSearchTree
-            .getRoot()
-            .getChildNodeStream()
-            .map(x -> new ImmutableTuple<>(x.getAppliedAction(), x.getSearchNodeMetadata().getPriorProbability()))
-            .collect(Collectors.toList());
-        for (ImmutableTuple<TAction, Double> entry : actionDoubleList) {
-            int actionIndex = entry.getFirst().getActionIndexInPlayerActions();
-            priorProbabilities[actionIndex] = entry.getSecond();
-        }
+
         return priorProbabilities;
     }
 
@@ -169,7 +163,7 @@ public class PaperPolicyImpl<
         checkStateRoot(gameState);
         return new PaperPolicyRecord(
             innerPriorProbabilityDistribution(gameState),
-            innerActionProbability(),
+            gameState.isPlayerTurn() ? innerActionProbability() : innerPriorProbabilityDistribution(gameState),
             riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward(),
             riskAverseSearchTree.getRoot().getSearchNodeMetadata().getSumOfRisk(),
             riskAverseSearchTree.getTotalRiskAllowed(),

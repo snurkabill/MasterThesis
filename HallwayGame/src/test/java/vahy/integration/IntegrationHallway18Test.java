@@ -1,6 +1,7 @@
 package vahy.integration;
 
 import org.testng.annotations.DataProvider;
+import vahy.api.experiment.ApproximatorConfigBuilder;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
@@ -31,17 +32,18 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return new Object[][] {
             {createExperiment_SAFE(), getSystemConfig(), createGameConfig(), 1270.0, 0.0},
             {createExperiment_MIDDLE_RISK(), getSystemConfig(), createGameConfig(), 1275.0, 0.055},
-            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1290.0, 0.105}
+            {createExperiment_TOTAL_RISK(), getSystemConfig(), createGameConfig(), 1298.0, 0.105}
         };
     }
 
     private SystemConfig getSystemConfig() {
-        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, false, false, null, null);
+        return new SystemConfig(1000, false, Runtime.getRuntime().availableProcessors() - 1, false, 1_000, 0, false, false, false, null, null);
     }
 
     public static GameConfig createGameConfig() {
         return new ConfigBuilder()
             .maximalStepCountBound(500)
+            .isModelKnown(true)
             .reward(100)
             .noisyMoveProbability(0.0)
             .stepPenalty(10)
@@ -54,24 +56,23 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
     private static AlgorithmConfigBuilder genericAlgoConfig() {
         int batchSize = 100;
         return  new AlgorithmConfigBuilder()
+            .policyId("Base")
             //MCTS
             .cpuctParameter(1)
             .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             //.mcRolloutCount(1)
             //NN
-            .trainingBatchSize(64)
-            .trainingEpochCount(100)
-            .learningRate(0.1)
+//            .trainingBatchSize(64)
+//            .trainingEpochCount(100)
+//            .learningRate(0.1)
             // REINFORCEMENTs
             .discountFactor(1)
             .batchEpisodeCount(batchSize)
             .stageCount(200)
-
-            .trainerAlgorithm(DataAggregationAlgorithm.EVERY_VISIT_MC)
-            .approximatorType(ApproximatorType.HASHMAP_LR)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).build())
             .evaluatorType(EvaluatorType.RALF)
-            .replayBufferSize(20000)
             .selectorType(SelectorType.UCB)
+
             .globalRiskAllowed(1.00)
             .riskSupplier(() -> 1.00)
             .explorationConstantSupplier(() -> 1.0)
@@ -102,7 +103,8 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.0)
             .globalRiskAllowed(0.0)
-            .stageCount(5)
+            .stageCount(10)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP_LR).setLearningRate(0.1).build())
             .explorationConstantSupplier(new Supplier<>() {
                 private int callCount = 0;
                 @Override
@@ -127,12 +129,13 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
             .riskSupplier(() -> 1.0)
             .globalRiskAllowed(1.0)
             .stageCount(300)
+            .setPlayerApproximatorConfig(new ApproximatorConfigBuilder().setDataAggregationAlgorithm(DataAggregationAlgorithm.FIRST_VISIT_MC).setApproximatorType(ApproximatorType.HASHMAP).setLearningRate(0.5).build())
             .explorationConstantSupplier(() -> 1.0)
             .temperatureSupplier(new Supplier<>() {
                 @Override
                 public Double get() {
                     callCount++;
-                    return Math.exp(-callCount / 10000.0);
+                    return Math.exp(-callCount / 20000.0);
                 }
                 private int callCount = 0;
             })
@@ -143,7 +146,7 @@ public class IntegrationHallway18Test extends AbstractHallwayTest {
         return genericAlgoConfig()
             .riskSupplier(() -> 0.05)
             .globalRiskAllowed(0.05)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(20))
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
             .stageCount(300)
 //            .explorationConstantSupplier(new Supplier<>() {
 //                private int callCount = 0;

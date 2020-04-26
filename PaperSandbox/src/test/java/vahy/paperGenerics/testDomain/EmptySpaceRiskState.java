@@ -2,11 +2,13 @@ package vahy.paperGenerics.testDomain;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
+import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturnTuple;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
 import vahy.paperGenerics.PaperState;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 
@@ -49,11 +51,6 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public EmptySpaceRiskState deepCopy() {
-        return null;
-    }
-
-    @Override
     public DoubleVector getPlayerObservation() {
         return new DoubleVector(new double[] {0.0});
     }
@@ -61,6 +58,26 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     @Override
     public EmptySpaceRiskState getOpponentObservation() {
         return this;
+    }
+
+    @Override
+    public Predictor<EmptySpaceRiskState> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<>() {
+
+            private double[] fixedPrediction = new double[] {1/3., 2/3.0};
+
+            @Override
+            public double[] apply(EmptySpaceRiskState observation) {
+                return fixedPrediction;
+            }
+
+            @Override
+            public double[][] apply(EmptySpaceRiskState[] observationArray) {
+                var prediction = new double[observationArray.length][];
+                Arrays.fill(prediction, fixedPrediction);
+                return prediction;
+            }
+        };
     }
 
     @Override

@@ -5,7 +5,7 @@ import vahy.api.experiment.ProblemConfig;
 public class TicTacToeConfig extends ProblemConfig {
 
     public TicTacToeConfig() {
-        super(999);
+        super(999, false);
     }
 
     @Override

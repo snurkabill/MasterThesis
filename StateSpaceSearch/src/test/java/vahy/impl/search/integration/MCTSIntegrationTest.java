@@ -1,6 +1,7 @@
 package vahy.impl.search.integration;
 
 import org.testng.annotations.Test;
+import vahy.api.policy.PolicyMode;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
@@ -32,7 +33,7 @@ public class MCTSIntegrationTest {
         SplittableRandom random = new SplittableRandom(0);
 
         TicTacToeStateInitializer initializer = new TicTacToeStateInitializer(new TicTacToeConfig(), random);
-        var state = initializer.createInitialState();
+        var state = initializer.createInitialState(PolicyMode.INFERENCE);
 
         SearchNode<TicTacToeAction, DoubleVector, TicTacToeState, MonteCarloTreeSearchMetadata, TicTacToeState> root = new SearchNodeImpl<>(
             state,

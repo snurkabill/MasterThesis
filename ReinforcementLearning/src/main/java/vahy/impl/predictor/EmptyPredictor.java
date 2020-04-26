@@ -4,7 +4,6 @@ import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class EmptyPredictor implements TrainablePredictor {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 }

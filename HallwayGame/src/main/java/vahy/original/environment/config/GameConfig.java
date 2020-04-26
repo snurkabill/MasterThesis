@@ -17,6 +17,7 @@ public class GameConfig extends ProblemConfig {
     private final List<List<Cell>> gameMatrix;
 
     public GameConfig(int maximalStepCountBound,
+                      boolean isModelKnown,
                       double goalReward,
                       double stepPenalty,
                       double trapProbability,
@@ -24,7 +25,7 @@ public class GameConfig extends ProblemConfig {
                       StateRepresentation stateRepresentation,
                       String gameStringRepresentation,
                       List<List<Cell>> gameMatrix) {
-        super(maximalStepCountBound);
+        super(maximalStepCountBound, isModelKnown);
         this.goalReward = goalReward;
         this.stepPenalty = stepPenalty;
         this.trapProbability = trapProbability;

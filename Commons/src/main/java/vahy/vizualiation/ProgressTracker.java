@@ -62,6 +62,10 @@ public class ProgressTracker {
         }
         gatherData();
 
+        if(dataSeriesCollectorList.stream().anyMatch(dataSeriesCollector -> dataSeriesCollector.getData().stream().anyMatch(x -> x.getSecond() == null))) {
+            return;
+        }
+
         if(progressTrackerSettings.isPrintOnNextLog()) {
             var stringBuilder = new StringBuilder();
             stringBuilder.append(System.lineSeparator());

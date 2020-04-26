@@ -1,5 +1,6 @@
 package vahy.impl.testdomain.tictactoe;
 
+import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.AbstractInitialStateSupplier;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -13,7 +14,7 @@ public class TicTacToeStateInitializer extends AbstractInitialStateSupplier<TicT
     }
 
     @Override
-    protected TicTacToeState createState_inner(TicTacToeConfig ticTacToeConfig, SplittableRandom random) {
+    protected TicTacToeState createState_inner(TicTacToeConfig ticTacToeConfig, SplittableRandom random, PolicyMode policyMode) {
         return new TicTacToeState(
             new TicTacToeState.Symbol[][] {
                 {

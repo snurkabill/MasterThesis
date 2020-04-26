@@ -73,7 +73,7 @@ public class EpisodeStepRecordImpl<
         return "EpisodeStepRecord{" +
             "isPlayerMove=" + isPlayerMove +
             ", playedAction=" + playedAction +
-            ", policyStepRecord=" + policyStepRecord.toString() +
+            ", policyStepRecord=" + (policyStepRecord != null ? policyStepRecord.toString() : null) +
             ", fromState=" + fromState +
             ", toState=" + toState +
             ", reward=" + reward +
@@ -88,7 +88,7 @@ public class EpisodeStepRecordImpl<
         sb.append(" getting reward: ");
         sb.append(getReward());
         sb.append(". PolicyStepLog: ");
-        sb.append(policyStepRecord.toLogString());
+        sb.append((policyStepRecord != null ? policyStepRecord.toLogString() : null));
         return sb.toString();
     }
 

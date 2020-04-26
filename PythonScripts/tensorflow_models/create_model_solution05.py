@@ -8,14 +8,14 @@ action_output_count = int(sys.argv[3])
 path_to_store = sys.argv[4]
 seed = int(sys.argv[5])
 
+print("INITIALIZING TF MODEL WITH SEED" + str(seed))
+
 hidden_count_1 = 100
 hidden_count_2 = 100
 hidden_count_3 = 100
 
 Q_output_count = 1
 risk_output_count = 1
-
-tf.random.set_random_seed(seed)
 
 output_count = Q_output_count + risk_output_count + action_output_count
 
@@ -40,8 +40,8 @@ risk_target = tf.slice(target, [0, Q_output_count], [-1, risk_output_count], nam
 action_target = tf.slice(target, [0, Q_output_count + risk_output_count], [-1, action_output_count], name = "action_slice_node")
 
 hidden_1 = Dense(x,        hidden_count_1, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_1")
-hidden_2 = Dense(Dropout(hidden_1, keep_prob=0.5), hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2")
-hidden_3 = Dense(Dropout(hidden_2, keep_prob=0.5), hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3")
+hidden_2 = Dense(Dropout(hidden_1, keep_prob=keep_prob), hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2")
+hidden_3 = Dense(Dropout(hidden_2, keep_prob=keep_prob), hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3")
 
 Q_output      = tf.layers.dense(hidden_3, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
 risk_output   = tf.layers.dense(hidden_3, risk_output_count, tf.nn.tanh, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "risk_output_node")
@@ -55,16 +55,12 @@ risk_loss = tf.keras.losses.binary_crossentropy(y_true = risk_target, y_pred = r
 policy_loss = tf.keras.losses.categorical_crossentropy(y_true = action_target, y_pred = action_output)
 
 total_loss = Q_loss + risk_loss + policy_loss
-train_op = tf.train.AdamOptimizer(learning_rate = 0.001, name = "Optimizer").minimize(total_loss, name = 'optimize_node')
+train_op = tf.train.AdamOptimizer(learning_rate = learning_rate, name = "Optimizer").minimize(total_loss, name = 'optimize_node')
 
-tf.random.set_random_seed(seed)
 init = tf.global_variables_initializer()
-tf.random.set_random_seed(seed)
 
 sess = tf.Session()
-tf.random.set_random_seed(seed)
 sess.run(init)
-tf.random.set_random_seed(seed)
 train_writer = tf.summary.FileWriter(path_to_store + "/summary", sess.graph)
 train_writer.close()
 

@@ -35,6 +35,7 @@ public class InferenceFeasibleDistributionProvider<
     {
         int childCount = node.getChildNodeMap().size();
         List<TAction> actionList = new ArrayList<>(childCount);
+        List<Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> riskCalculatorSupplierList = new ArrayList<>(childCount);
         double[] distributionArray = new double[childCount];
         double[] riskArray = new double[childCount];
 
@@ -49,7 +50,7 @@ public class InferenceFeasibleDistributionProvider<
 
         RandomDistributionUtils.tryToRoundDistribution(distributionArray, TOLERANCE);
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionArray, random);
-        return new PlayingDistribution<>(actionList.get(index), index, distributionArray, riskArray, actionList, subtreeRiskCalculatorSupplier);
-
+        TAction action = actionList.get(index);
+        return new PlayingDistribution<>(action, index, distributionArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
     }
 }
