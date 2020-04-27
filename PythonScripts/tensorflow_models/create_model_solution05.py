@@ -1,3 +1,5 @@
+import os
+
 import sys
 import tensorflow as tf
 
@@ -65,7 +67,7 @@ train_writer = tf.summary.FileWriter(path_to_store + "/summary", sess.graph)
 train_writer.close()
 
 
-with open(path_to_store + "/" + model_name + '.pb', 'wb') as f:
+with open(os.path.join(path_to_store, model_name + '.pb'), 'wb') as f:
     f.write(tf.get_default_graph().as_graph_def().SerializeToString())
 
 

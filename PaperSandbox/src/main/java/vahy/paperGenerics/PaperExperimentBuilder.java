@@ -65,6 +65,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -481,16 +482,17 @@ public class PaperExperimentBuilder<
 
     private static byte[] loadTensorFlowModel(ApproximatorConfig approximatorConfig, SystemConfig systemConfig, int inputCount, int outputActionCount) throws IOException, InterruptedException {
         var modelName = "tfModel_" + DateTime.now().withZone(DateTimeZone.UTC);
-        Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath() +
-            " PythonScripts/tensorflow_models/" +
-            approximatorConfig.getCreatingScript() +
+        Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath()
+            + " " +
+            Paths.get("PythonScripts", "tensorflow_models", approximatorConfig.getCreatingScript()) +
             " " +
             modelName +
             " " +
             inputCount +
             " " +
             outputActionCount +
-            " PythonScripts/generated_models" +
+            " " +
+            Paths.get("PythonScripts", "generated_models") +
             " " +
             (int)systemConfig.getRandomSeed());
 
@@ -510,7 +512,7 @@ public class PaperExperimentBuilder<
         if(exitValue != 0) {
             throw new IllegalStateException("Python process ended with non-zero exit value. Exit val: [" + exitValue + "]");
         }
-        var dir = new File("PythonScripts/generated_models/");
+        var dir = new File(Paths.get("PythonScripts", "generated_models").toString());
         Files.createDirectories(dir.toPath());
         return Files.readAllBytes(new File(dir, modelName + ".pb").toPath());
     }
