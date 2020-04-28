@@ -482,6 +482,7 @@ public class PaperExperimentBuilder<
 
     private static byte[] loadTensorFlowModel(ApproximatorConfig approximatorConfig, SystemConfig systemConfig, int inputCount, int outputActionCount) throws IOException, InterruptedException {
         var modelName = "tfModel_" + DateTime.now().withZone(DateTimeZone.UTC);
+        modelName = modelName.replace(":", "_");
         Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath()
             + " " +
             Paths.get("PythonScripts", "tensorflow_models", approximatorConfig.getCreatingScript()) +

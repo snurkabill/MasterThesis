@@ -38,38 +38,6 @@ public class Benchmark05SolutionFunctionApproximator {
     public static void main(String[] args) {
 
         var algorithmConfig_0 = getAlgorithmConfig();
-        algorithmConfig_0.setBatchedEvaluationSize(2);
-        algorithmConfig_0.policyId("2");
-        var algorithmConfig_1 = getAlgorithmConfig();
-        algorithmConfig_1.setBatchedEvaluationSize(2);
-        algorithmConfig_1.policyId("2_reproducible");
-        var algorithmConfig_2 = getAlgorithmConfig();
-        algorithmConfig_2.setBatchedEvaluationSize(2);
-        algorithmConfig_2.setPlayerApproximatorConfig(new ApproximatorConfigBuilder()
-            .setApproximatorType(ApproximatorType.TF_OLD_NN)
-            .setCreatingScriptName("create_model_solution05.py")
-            .setDataAggregationAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
-            .setReplayBufferSize(20 * 10)
-            .setTrainingBatchSize(1024)
-            .setTrainingEpochCount(10)
-            .setLearningRate(0.01)
-            .build());
-        algorithmConfig_2.policyId("2_old");
-
-        var algorithmConfig_3 = getAlgorithmConfig();
-        algorithmConfig_3.setBatchedEvaluationSize(2);
-        algorithmConfig_3.setPlayerApproximatorConfig(new ApproximatorConfigBuilder()
-            .setApproximatorType(ApproximatorType.TF_OLD_NN)
-            .setCreatingScriptName("create_model_solution05.py")
-            .setDataAggregationAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
-            .setReplayBufferSize(20 * 10)
-            .setTrainingBatchSize(1024)
-            .setTrainingEpochCount(10)
-            .setLearningRate(0.01)
-            .build());
-        algorithmConfig_3.policyId("2_reproducible_old");
-
-
 
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
@@ -80,9 +48,6 @@ public class Benchmark05SolutionFunctionApproximator {
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(List.of(
                 algorithmConfig_0.buildAlgorithmConfig()
-                ,algorithmConfig_1.buildAlgorithmConfig()
-//                ,algorithmConfig_2.buildAlgorithmConfig()
-//                ,algorithmConfig_3.buildAlgorithmConfig()
             ))
             .setProblemConfig(problemConfig)
             .setOpponentSupplier(HallwayPolicySupplier::new)
@@ -99,6 +64,7 @@ public class Benchmark05SolutionFunctionApproximator {
             .noisyMoveProbability(0.1)
             .stepPenalty(1)
             .trapProbability(1)
+            .isModelKnown(false)
             .stateRepresentation(StateRepresentation.COMPACT)
             .gameStringRepresentation(HallwayInstance.BENCHMARK_05)
             .buildConfig();
@@ -113,14 +79,16 @@ public class Benchmark05SolutionFunctionApproximator {
             .setSingleThreadedEvaluation(false)
             .setDumpTrainingData(false)
             .setDumpEvaluationData(false)
-            .setEvalEpisodeCount(1)
+            .setEvaluateDuringTraining(false)
+            .setEvalEpisodeCountDuringTraining(100)
+            .setEvalEpisodeCount(1000)
             .setPythonVirtualEnvPath(System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python")
             .buildSystemConfig();
     }
 
     private static AlgorithmConfigBuilder getAlgorithmConfig() {
 
-        var batchEpisodeSize = 20;
+        var batchEpisodeSize = 100;
 
         return new AlgorithmConfigBuilder()
             //MCTS
@@ -136,17 +104,30 @@ public class Benchmark05SolutionFunctionApproximator {
                 .setReplayBufferSize(batchEpisodeSize * 10)
                 .setTrainingBatchSize(1024)
                 .setTrainingEpochCount(10)
-                .setLearningRate(0.001)
+                .setLearningRate(0.1)
                 .setDropoutKeepProbability(1.0)
                 .build())
+
+            .setOpponentApproximatorConfig(new ApproximatorConfigBuilder()
+                .setApproximatorType(ApproximatorType.TF_NN)
+                .setCreatingScriptName("create_model_solution05_opponent.py")
+                .setDataAggregationAlgorithm(DataAggregationAlgorithm.REPLAY_BUFFER)
+                .setReplayBufferSize(batchEpisodeSize * 10)
+                .setTrainingBatchSize(1024)
+                .setTrainingEpochCount(10)
+                .setLearningRate(0.1)
+                .setDropoutKeepProbability(1.0)
+                .build())
+
+
             // REINFORCEMENT
             .discountFactor(1)
             .batchEpisodeCount(batchEpisodeSize)
-            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(25))
-            .stageCount(10)
+            .treeUpdateConditionFactory(new FixedUpdateCountTreeConditionFactory(50))
+            .stageCount(200)
 
             .evaluatorType(EvaluatorType.RALF_BATCHED)
-            .setBatchedEvaluationSize(2)
+            .setBatchedEvaluationSize(3)
 
             .selectorType(SelectorType.UCB)
             .globalRiskAllowed(1.00)

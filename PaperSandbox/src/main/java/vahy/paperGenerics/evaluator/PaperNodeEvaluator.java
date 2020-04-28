@@ -124,6 +124,9 @@ public class PaperNodeEvaluator<
     }
 
     protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] probabilities) {
+        if(!RandomDistributionUtils.isDistribution(probabilities, RandomDistributionUtils.TOLERANCE)) {
+            throw new IllegalArgumentException("Prediction does not represent distribution: [" + Arrays.toString(probabilities) + "]");
+        }
         //TODO: THIS METHOD IS UGLY
         TAction[] allPossibleActions = node.getAllPossibleActions();
         if(DEBUG_ENABLED) {
