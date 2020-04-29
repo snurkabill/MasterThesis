@@ -8,6 +8,7 @@ import org.tensorflow.Tensors;
 
 import java.io.Closeable;
 import java.nio.DoubleBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 public class TFWrapper implements Closeable {
@@ -51,7 +52,7 @@ public class TFWrapper implements Closeable {
         output.writeTo(singleOutputDoubleBuffer);
         singleOutputDoubleBuffer.position(0);
         output.close();
-        return singleOutputArray;
+        return Arrays.copyOf(singleOutputArray, singleOutputArray.length);
     }
 
     public double[][] predict(double[][] input) {

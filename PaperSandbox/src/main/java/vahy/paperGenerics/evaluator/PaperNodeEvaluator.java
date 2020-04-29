@@ -124,9 +124,7 @@ public class PaperNodeEvaluator<
     }
 
     protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] probabilities) {
-        if(!RandomDistributionUtils.isDistribution(probabilities, RandomDistributionUtils.TOLERANCE)) {
-            throw new IllegalArgumentException("Prediction does not represent distribution: [" + Arrays.toString(probabilities) + "]");
-        }
+
         //TODO: THIS METHOD IS UGLY
         TAction[] allPossibleActions = node.getAllPossibleActions();
         if(DEBUG_ENABLED) {
@@ -177,8 +175,9 @@ public class PaperNodeEvaluator<
         if(node.isPlayerTurn()) {
             fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()), null);
         } else {
+            double[] playerPrediction = trainablePredictor.apply(node.getWrappedState().getPlayerObservation());
             double[] opponentPrediction = knownModel != null ? knownModel.apply(node.getWrappedState()) : opponentPredictor.apply(node.getWrappedState().getPlayerObservation());
-            fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()), opponentPrediction);
+            fillNode(node, playerPrediction, opponentPrediction);
         }
         return 1;
     }

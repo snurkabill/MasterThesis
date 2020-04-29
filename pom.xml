@@ -196,6 +196,63 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration combine.self="append">
+                            <release>${java.version}</release>
+                            <compilerArgs combine.self="override">
+                                <arg>-Werror</arg>
+                                <arg>-Xlint:all,-fallthrough,-processing,-serial,-classfile,-path</arg>
+                                <arg>-parameters</arg>
+                                <arg>-XDcompilePolicy=simple</arg>
+                                <arg>-J--illegal-access=debug</arg>
+                                <arg>-J--add-opens=java.base/java.lang=ALL-UNNAMED</arg>
+                                <arg>-J--add-opens=java.base/java.lang.reflect=ALL-UNNAMED</arg>
+                                <arg>-J--add-opens=java.base/javax.crypto=ALL-UNNAMED</arg>
+                                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                                <arg>-Xplugin:ErrorProne
+                                    -XepOpt:Immutable:KnownImmutable=javax.money.CurrencyUnit
+                                    -XepDisableWarningsInGeneratedCode
+                                    -Xep:ConstantField:WARN
+                                    -Xep:ClassName:WARN
+                                    -Xep:DivZero:WARN
+                                    -Xep:EmptyIf:WARN
+                                    -Xep:IterablePathParameter:WARN
+                                    -Xep:LongLiteralLowerCaseSuffix:WARN
+                                    -Xep:AnnotationPosition:WARN
+                                    -Xep:EmptyTopLevelDeclaration:WARN
+                                    -Xep:EqualsBrokenForNull:WARN
+                                    -Xep:FunctionalInterfaceClash:WARN
+                                    -Xep:InvalidInlineTag:WARN
+                                    -Xep:InvalidParam:WARN
+                                    -Xep:MissingDefault:WARN
+                                    -Xep:NonCanonicalStaticMemberImport:WARN
+                                    -Xep:PrimitiveArrayPassedToVarargsMethod:WARN
+                                    -Xep:RedundantOverride:WARN
+                                    -Xep:RedundantThrows:WARN
+                                    -Xep:StaticQualifiedUsingExpression:WARN
+                                    -Xep:StringEquality:WARN
+                                    -Xep:UnusedException:WARN
+                                    -Xep:ConstantField:WARN
+                                    -Xep:MultiVariableDeclaration:WARN
+                                    -Xep:MultipleTopLevelClasses:WARN
+                                    -Xep:MultipleUnaryOperatorsInMethodCall:WARN
+                                    -Xep:PrivateConstructorForUtilityClass:WARN
+                                    -Xep:UngroupedOverloads:WARN
+                                </arg>
+                            </compilerArgs>
+                            <annotationProcessorPaths combine.self="append">
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_core</artifactId>
+                                    <version>2.3.4</version>
+                                </path>
+                            </annotationProcessorPaths>
+                            <showWarnings>true</showWarnings>
+                        </configuration>
+                    </plugin>
+
                 </plugins>
             </build>
 
