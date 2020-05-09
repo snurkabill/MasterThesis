@@ -14,24 +14,23 @@ import java.util.EnumMap;
 
 public class SearchNodeBaseFactoryImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private final Class<TAction> actionClass;
-    private final SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
+    private final SearchNodeMetadataFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
 
-    public SearchNodeBaseFactoryImpl(Class<TAction> actionClass, SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory) {
+    public SearchNodeBaseFactoryImpl(Class<TAction> actionClass, SearchNodeMetadataFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory) {
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createNode(
-        StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> createNode(
+        StateRewardReturn<TAction, TObservation, TState> stateRewardReturn,
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent,
         TAction action) {
         return new SearchNodeImpl<>(
             stateRewardReturn.getState(),

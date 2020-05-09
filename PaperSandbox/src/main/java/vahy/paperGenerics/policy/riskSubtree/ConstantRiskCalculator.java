@@ -8,11 +8,10 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class ConstantRiskCalculator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private final double riskConstant;
 
@@ -24,7 +23,7 @@ public class ConstantRiskCalculator<
     }
 
     @Override
-    public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
+    public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
         return riskConstant;
     }
 

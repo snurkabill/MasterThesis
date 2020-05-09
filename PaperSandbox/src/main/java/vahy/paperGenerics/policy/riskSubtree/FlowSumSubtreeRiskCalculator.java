@@ -10,16 +10,15 @@ import java.util.LinkedList;
 
 public class FlowSumSubtreeRiskCalculator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     @Override
-    public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
+    public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
-        var queue = new LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
+        var queue = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         queue.addFirst(subTreeRoot);
         while(!queue.isEmpty()) {
             var node = queue.poll();

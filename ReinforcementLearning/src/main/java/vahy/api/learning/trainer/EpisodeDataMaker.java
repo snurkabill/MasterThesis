@@ -13,10 +13,9 @@ import java.util.List;
 
 public interface EpisodeDataMaker<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResults);
+    List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, TObservation, TState, TPolicyRecord> episodeResults);
 }

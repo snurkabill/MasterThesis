@@ -6,7 +6,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
@@ -158,7 +158,7 @@ public class PaperBatchNodeEvaluator<
         var nodeOrder = new LinkedList<StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState>>();
 
         queue.add(new ImmutableTuple<>(rootState, 0));
-        nodeOrder.add(new ImmutableStateRewardReturnTuple<>(rootState, null));
+        nodeOrder.add(new ImmutableStateRewardReturn<>(rootState, null));
 
         while(!queue.isEmpty()) {
             var stateTuple = queue.pop();

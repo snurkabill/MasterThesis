@@ -15,16 +15,15 @@ import java.util.List;
 
 public class MinimalRiskReachAbilityCalculator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculator.class.getName());
 
     @Override
-    public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
+    public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
         if(subtreeRoot.isLeaf()) {
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
@@ -41,10 +40,10 @@ public class MinimalRiskReachAbilityCalculator<
         return sum;
     }
 
-    private double resolveNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        var linProgram = new AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
+    private double resolveNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        var linProgram = new AbstractLinearProgramOnTree<TAction, TObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
             @Override
-            protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+            protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
                 if(node.getWrappedState().isRiskHit()) {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
                 } else {
@@ -53,7 +52,7 @@ public class MinimalRiskReachAbilityCalculator<
             }
 
             @Override
-            protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> searchNodes, CLPVariable parentFlow) {
+            protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> searchNodes, CLPVariable parentFlow) {
                 double sum = 0.0;
                 for (var entry : searchNodes) {
                     var metadata = entry.getSearchNodeMetadata();

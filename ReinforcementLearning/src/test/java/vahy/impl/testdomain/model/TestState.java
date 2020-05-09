@@ -4,7 +4,7 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestState implements State<TestAction, DoubleVector, TestState, TestState>, Observation {
+public class TestState implements State<TestAction, DoubleVector, TestState>, Observation {
 
     public static TestState getDefaultInitialStatePlayerTurn() {
         return new TestState(Collections.singletonList('Z'));
@@ -31,7 +31,7 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
 
     @Override
     public TestAction[] getAllPossibleActions() {
-        if(isOpponentTurn()) {
+        if(isPlayerZeroOnTurn()) {
             return TestAction.playerActions;
         } else {
             return TestAction.opponentActions;
@@ -39,40 +39,22 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
     }
 
     @Override
-    public TestAction[] getPossiblePlayerActions() {
-        if(isPlayerTurn()) {
-            return TestAction.playerActions;
-        } else {
-            return new TestAction[0];
-        }
-    }
-
-    @Override
-    public TestAction[] getPossibleOpponentActions() {
-        if(isOpponentTurn()) {
-            return TestAction.opponentActions;
-        } else {
-            return new TestAction[0];
-        }
-    }
-
-    @Override
-    public StateRewardReturn<TestAction, DoubleVector, TestState, TestState> applyAction(TestAction action) {
+    public StateRewardReturn<TestAction, DoubleVector, TestState> applyAction(TestAction action) {
         List<Character> newInternalState = new ArrayList<>(internalState);
         newInternalState.add(action.getCharRepresentation());
-        return new ImmutableStateRewardReturnTuple<>(
+        return new ImmutableStateRewardReturn<>(
             new TestState(newInternalState),
             action.getReward());
     }
 
     @Override
-    public DoubleVector getPlayerObservation() {
+    public DoubleVector getPlayerObservation(int playerId) {
         return new DoubleVector(internalState.stream().mapToDouble(Character::getNumericValue).toArray());
     }
 
     @Override
-    public TestState getOpponentObservation() {
-        return this;
+    public DoubleVector getCommonObservation(int playerId) {
+        return new DoubleVector(internalState.stream().mapToDouble(Character::getNumericValue).toArray());
     }
 
     @Override
@@ -96,7 +78,22 @@ public class TestState implements State<TestAction, DoubleVector, TestState, Tes
     }
 
     @Override
-    public boolean isOpponentTurn() {
+    public int getTotalPlayerCount() {
+        return 2;
+    }
+
+    @Override
+    public int getPlayerIdOnTurn() {
+        return isPlayerZeroOnTurn() ? 0 : 1;
+    }
+
+    @Override
+    public boolean isInGame(int playerId) {
+        return false;
+    }
+
+
+    private boolean isPlayerZeroOnTurn() {
         char c = internalState.get(internalState.size() - 1);
         if(Arrays.stream(TestAction.opponentActions).anyMatch(testAction -> c == testAction.getCharRepresentation())) {
             return false;

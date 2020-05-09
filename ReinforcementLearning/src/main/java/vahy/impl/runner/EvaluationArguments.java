@@ -14,28 +14,27 @@ import vahy.api.policy.PolicySupplier;
 
 public class EvaluationArguments<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private final TConfig problemConfig;
     private final SystemConfig systemConfig;
 
-    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
-    private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory;
-    private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
-    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
-    private final EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
+    private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
+    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
+    private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
+    private final PolicySupplier<TAction, TObservation, TState, TPolicyRecord> opponentPolicySupplier;
+    private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
 
     public EvaluationArguments(TConfig problemConfig,
                                SystemConfig systemConfig,
-                               InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
-                               EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResultsFactory,
-                               EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
-                               PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier,
-                               EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter)
+                               InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
+                               EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
+                               EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
+                               PolicySupplier<TAction, TObservation, TState, TPolicyRecord> opponentPolicySupplier,
+                               EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter)
     {
         this.problemConfig = problemConfig;
         this.systemConfig = systemConfig;
@@ -54,23 +53,23 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
         return systemConfig;
     }
 
-    public InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> getInitialStateSupplier() {
+    public InitialStateSupplier<TAction, TObservation, TState> getInitialStateSupplier() {
         return initialStateSupplier;
     }
 
-    public EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getEpisodeResultsFactory() {
+    public EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> getEpisodeResultsFactory() {
         return episodeResultsFactory;
     }
 
-    public EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> getEpisodeStatisticsCalculator() {
+    public EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> getEpisodeStatisticsCalculator() {
         return episodeStatisticsCalculator;
     }
 
-    public PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getOpponentPolicySupplier() {
+    public PolicySupplier<TAction, TObservation, TState, TPolicyRecord> getOpponentPolicySupplier() {
         return opponentPolicySupplier;
     }
 
-    public EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getEpisodeWriter() {
+    public EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> getEpisodeWriter() {
         return episodeWriter;
     }
 }

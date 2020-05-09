@@ -10,12 +10,11 @@ import java.util.SplittableRandom;
 
 public interface PlayingDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends PaperState<TAction, TObservation, TState>> {
 
-    PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
                                                                                                                            double temperature,
                                                                                                                            SplittableRandom random,
                                                                                                                            double totalRiskAllowed);

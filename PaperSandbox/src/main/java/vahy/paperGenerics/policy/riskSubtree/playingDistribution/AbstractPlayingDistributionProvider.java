@@ -10,18 +10,17 @@ import java.util.function.Supplier;
 
 public abstract class AbstractPlayingDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements PlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements PlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     protected static final double TOLERANCE = Math.pow(10, -10);
     protected final boolean applyTemperature;
-    protected final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
+    protected final Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
 
     protected AbstractPlayingDistributionProvider(boolean applyTemperature,
-                                                  Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
+                                                  Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
         this.applyTemperature = applyTemperature;
         this.subtreeRiskCalculatorSupplier = subtreeRiskCalculatorSupplier;
     }

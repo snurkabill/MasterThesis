@@ -10,16 +10,16 @@ import java.util.List;
 
 public interface EpisodeResultsFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> createResults(
-        List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory,
-        int playerStepCount,
+    EpisodeResults<TAction, TObservation, TState, TPolicyRecord> createResults(
+        List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+        int policyCount,
+        List<Integer> playerStepCountList,
         int totalStepCount,
-        double totalCumulativePayoff,
+        List<List<Double>> totalCumulativePayoffList,
         Duration duration
     );
 }

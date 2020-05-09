@@ -10,16 +10,15 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class PaperTreeUpdater<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+    TObservation extends Observation,
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements TreeUpdater<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     protected static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
-    public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
         double estimatedLeafReward = expandedNode.getSearchNodeMetadata().getCumulativeReward() + (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
         double estimatedLeafRisk = expandedNode.isFinalNode() ? (expandedNode.getWrappedState().isRiskHit() ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
@@ -34,7 +33,7 @@ public class PaperTreeUpdater<
         }
     }
 
-    private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> updatedNode, double estimatedLeafReward, double estimatedRisk) {
+    private void updateNode(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> updatedNode, double estimatedLeafReward, double estimatedRisk) {
         if(TRACE_ENABLED) {
             logger.trace("Updating search node: [{}]", updatedNode);
         }

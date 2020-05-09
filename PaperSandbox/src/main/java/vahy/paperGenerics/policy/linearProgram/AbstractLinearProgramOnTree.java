@@ -17,10 +17,9 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTree<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
+    TState extends PaperState<TAction, TObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTree.class.getName());
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
@@ -36,11 +35,11 @@ public abstract class AbstractLinearProgramOnTree<
 
     private class InnerElement {
 
-        private final SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node;
+        private final SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node;
         private final double modifier;
         private final CLPVariable flowVariable;
 
-        private InnerElement(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double modifier, CLPVariable flowVariable) {
+        private InnerElement(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double modifier, CLPVariable flowVariable) {
             this.node = node;
             this.modifier = modifier;
             this.flowVariable = flowVariable;
@@ -67,8 +66,8 @@ public abstract class AbstractLinearProgramOnTree<
         this.noiseUpperBound = strategy.getUpperBound();
     }
 
-    protected abstract void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
-    protected abstract void setLeafObjectiveWithFlow(List<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow);
+    protected abstract void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node);
+    protected abstract void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow);
 
     protected abstract void finalizeHardConstraints();
 
@@ -76,7 +75,7 @@ public abstract class AbstractLinearProgramOnTree<
         return model.getObjectiveValue();
     }
 
-    public boolean optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    public boolean optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         if(root.isPlayerTurn()) {
             return optimizePlayerNode(root);
         } else {
@@ -84,11 +83,11 @@ public abstract class AbstractLinearProgramOnTree<
         }
     }
 
-    private boolean optimizeOpponentNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    private boolean optimizeOpponentNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         throw new UnsupportedOperationException("Linear optimization of opponent node is not supported for now");
     }
 
-    private boolean optimizePlayerNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    private boolean optimizePlayerNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         initializeQueues(root);
         while(!masterQueue.isEmpty()) {
@@ -123,7 +122,7 @@ public abstract class AbstractLinearProgramOnTree<
             return false;
         }
 
-        var queue2 = new LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
+        var queue2 = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         queue2.addFirst(root);
 
         while(!queue2.isEmpty()) {
@@ -168,13 +167,13 @@ public abstract class AbstractLinearProgramOnTree<
         return leafCoefficient;
     }
 
-    private void initializeQueues(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    private void initializeQueues(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
         masterQueue.addFirst(new InnerElement(root, 1.0, root.getSearchNodeMetadata().getNodeProbabilityFlow()));
     }
 
-    private void resolveNonLeafSubChild(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> opponentNode, CLPVariable childFlow) {
-        var leafSubParentNodeList = new LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
+    private void resolveNonLeafSubChild(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> opponentNode, CLPVariable childFlow) {
+        var leafSubParentNodeList = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         for (var playerNode : opponentNode.getChildNodeMap().values()) {
             var priorProbability = playerNode.getSearchNodeMetadata().getPriorProbability();
             if(playerNode.isLeaf()) {

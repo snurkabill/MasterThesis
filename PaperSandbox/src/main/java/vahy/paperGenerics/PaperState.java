@@ -6,10 +6,9 @@ import vahy.api.model.observation.Observation;
 
 public interface PaperState<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends State<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends State<TAction, TObservation, TState> {
 
     boolean isRiskHit();
 }

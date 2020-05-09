@@ -15,17 +15,16 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractEstimatedRewardMaximizingTreeSearchPolicy<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState, PolicyRecordBase> {
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractTreeSearchPolicy<TAction, TObservation, TSearchNodeMetadata, TState, PolicyRecordBase> {
 
     private final SplittableRandom random;
 
     public AbstractEstimatedRewardMaximizingTreeSearchPolicy(SplittableRandom random,
                                                              TreeUpdateCondition treeUpdateCondition,
-                                                             SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree) {
+                                                             SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
         super(treeUpdateCondition, searchTree);
         this.random = random;
     }

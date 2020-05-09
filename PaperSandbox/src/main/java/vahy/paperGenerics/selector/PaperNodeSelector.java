@@ -10,10 +10,9 @@ import java.util.SplittableRandom;
 
 public class PaperNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
 
     private final double cpuctParameter;
@@ -29,7 +28,7 @@ public class PaperNodeSelector<
         this.valueArray =  new double[totalPlayerActions];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
 
@@ -108,7 +107,7 @@ public class PaperNodeSelector<
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> selectNextNode() {
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {

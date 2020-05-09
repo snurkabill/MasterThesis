@@ -5,23 +5,15 @@ import vahy.api.predictor.Predictor;
 
 import java.util.List;
 
-public interface State<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> extends Observation {
+public interface State<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> extends Observation {
 
     TAction[] getAllPossibleActions();
 
-    TAction[] getPossiblePlayerActions();
+    StateRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType);
 
-    TAction[] getPossibleOpponentActions();
+    TObservation getPlayerObservation(int playerId);
 
-    StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction actionType);
-
-    TPlayerObservation getPlayerObservation();
-
-    TOpponentObservation getOpponentObservation();
+    TObservation getCommonObservation(int playerId);
 
     Predictor<TState> getKnownModelWithPerfectObservationPredictor();
 
@@ -31,11 +23,11 @@ public interface State<
 
     List<String> getCsvRecord();
 
-    boolean isOpponentTurn();
+    int getTotalPlayerCount();
 
-    default boolean isPlayerTurn() {
-        return !isOpponentTurn();
-    }
+    int getPlayerIdOnTurn();
+
+    boolean isInGame(int playerId);
 
     boolean isFinalState();
 

@@ -13,40 +13,39 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class SearchNodeImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractSearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractSearchNode<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     public static AtomicLong nodeInstanceId = new AtomicLong(0);
     public final long nodeId = nodeInstanceId.getAndIncrement();
-    private final Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap;
+    private final Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap;
 
     public SearchNodeImpl(
         TState wrappedState,
         TSearchNodeMetadata searchNodeMetadata,
-        Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap) {
+        Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
         this(wrappedState, searchNodeMetadata, childNodeMap, null, null);
     }
 
     public SearchNodeImpl(
         TState wrappedState,
         TSearchNodeMetadata searchNodeMetadata,
-        Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap,
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+        Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap,
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent,
         TAction appliedAction) {
         super(wrappedState, parent, appliedAction, searchNodeMetadata);
         this.childNodeMap = childNodeMap;
     }
 
     @Override
-    public Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeMap() {
+    public Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap() {
         return childNodeMap;
     }
 
     @Override
-    public StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action) {
+    public StateRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
         return wrappedState.applyAction(action);
     }
 

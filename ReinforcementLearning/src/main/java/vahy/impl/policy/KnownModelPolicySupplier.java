@@ -11,17 +11,16 @@ import java.util.SplittableRandom;
 
 public class KnownModelPolicySupplier<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> extends AbstractRandomizedPolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
+    TPolicyRecord extends PolicyRecord> extends AbstractRandomizedPolicySupplier<TAction, TObservation, TState, TPolicyRecord> {
 
-    public KnownModelPolicySupplier(SplittableRandom random) {
-        super(random);
+    public KnownModelPolicySupplier(SplittableRandom random, int policyId) {
+        super(random, policyId);
     }
 
     @Override
-    protected Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy_inner(TState initialState, PolicyMode policyMode, SplittableRandom random) {
-        return new KnownModelPolicy<>(random.split());
+    protected Policy<TAction, TObservation, TState, TPolicyRecord> initializePolicy_inner(TState initialState, PolicyMode policyMode, SplittableRandom random) {
+        return new KnownModelPolicy<>(random.split(), this.getPolicyId());
     }
 }

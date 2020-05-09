@@ -17,12 +17,11 @@ import java.util.List;
 
 public abstract class AbstractTreeSearchPolicy<
         TAction extends Enum<TAction> & Action,
-        TPlayerObservation extends Observation,
-        TOpponentObservation extends Observation,
+        TObservation extends Observation,
         TSearchNodeMetadata extends SearchNodeMetadata,
-        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+        TState extends State<TAction, TObservation, TState>,
         TPolicyRecord extends PolicyRecord>
-    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    implements Policy<TAction, TObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
@@ -30,10 +29,10 @@ public abstract class AbstractTreeSearchPolicy<
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    protected final SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree;
+    protected final SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree;
 
     public AbstractTreeSearchPolicy(TreeUpdateCondition treeUpdateCondition,
-                                    SearchTreeImpl<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree) {
+                                    SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
     }

@@ -11,11 +11,10 @@ import java.util.List;
 
 public interface EpisodeStatisticsCalculator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
-    TStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration);
+    TStatistics calculateStatistics(List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration);
 }

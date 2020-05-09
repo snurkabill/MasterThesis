@@ -20,10 +20,9 @@ import java.util.SplittableRandom;
 @Deprecated
 public abstract class AbstractLinearProgramOnTreeDeprecated<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>  {
+    TState extends PaperState<TAction, TObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTreeDeprecated.class.getName());
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
@@ -44,7 +43,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
     protected final double noiseUpperBound;
     protected final double noiseLowerBound;
     protected CLP model;
-    protected LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> queue;
+    protected LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> queue;
 
     protected AbstractLinearProgramOnTreeDeprecated(Class<TAction> actionClass, boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
         this.actionClass = actionClass;
@@ -57,7 +56,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
         this.noiseUpperBound = strategy.getUpperBound();
     }
 
-    protected abstract void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node);
+    protected abstract void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node);
 
     protected abstract void finalizeHardConstraints();
 
@@ -65,7 +64,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
         return model.getObjectiveValue();
     }
 
-    public boolean optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    public boolean optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         queue.addFirst(root);
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
@@ -113,7 +112,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
         return true;
     }
 
-    private void addNodeToQueue(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    private void addNodeToQueue(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
                                 EnumMap<TAction, CLPVariable> actionChildFlowMap) {
 
         var entries = node.getChildNodeMap().entrySet();
@@ -129,7 +128,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
         }
     }
 
-    public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public void addChildFlowBasedOnFixedProbabilitiesExpression(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
                                                                 EnumMap<TAction, CLPVariable> actionChildFlowMap) {
         for (Map.Entry<TAction, CLPVariable> entry : actionChildFlowMap.entrySet()) {
             var child = node.getChildNodeMap().get(entry.getKey());
@@ -141,7 +140,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
         }
     }
 
-    public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public void addSummingChildrenWithParentToZeroExpression(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
                                                              EnumMap<TAction, CLPVariable> actionChildFlowMap) {
         CLPExpression parentFlowDistribution = model.createExpression();
         actionChildFlowMap.forEach((x, y) -> parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, y));

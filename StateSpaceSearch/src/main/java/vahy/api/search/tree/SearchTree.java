@@ -9,14 +9,13 @@ import vahy.api.search.node.SearchNodeMetadata;
 
 public interface SearchTree<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends State<TAction, TObservation, TState>> {
 
-    SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getRoot();
+    SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getRoot();
 
-    StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action);
+    StateRewardReturn<TAction, TObservation, TState> applyAction(TAction action);
 
     boolean updateTree();
 

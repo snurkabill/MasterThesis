@@ -4,7 +4,6 @@ import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.episode.EpisodeResultsImpl;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.policy.PaperPolicyRecord;
 
@@ -13,18 +12,17 @@ import java.util.List;
 
 public class PaperEpisodeResults<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends PaperState<TAction, TObservation, TState>,
     TPolicyRecord extends PaperPolicyRecord>
-    extends EpisodeResultsImpl<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    extends EpisodeResultsImpl<TAction, TObservation, TState, TPolicyRecord> {
 
-    public PaperEpisodeResults(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory,
+    public PaperEpisodeResults(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
                                int playerStepCount,
                                int totalStepCount,
                                double totalPayoff,
                                Duration duration) {
-        super(episodeHistory, playerStepCount, totalStepCount, totalPayoff, duration);
+        super(episodeHistory, policyCount, playerStepCount, totalStepCount, totalPayoff, duration);
     }
 
     public boolean isRiskHit() {

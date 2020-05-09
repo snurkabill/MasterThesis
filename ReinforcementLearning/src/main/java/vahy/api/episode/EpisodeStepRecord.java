@@ -9,14 +9,13 @@ import java.util.List;
 
 public interface EpisodeStepRecord<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    boolean isPlayerMove();
+    int getPolicyIdOnTurn();
 
-    TAction getPlayedAction();
+    TAction getAction();
 
     TPolicyRecord getPolicyStepRecord();
 
@@ -24,7 +23,7 @@ public interface EpisodeStepRecord<
 
     TState getToState();
 
-    double getReward();
+    double[][] getReward();
 
     String toLogString();
 

@@ -13,13 +13,12 @@ import java.util.SplittableRandom;
 
 public class HardHardSoftFlowOptimizer<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractFlowOptimizer<TAction, TObservation, TSearchNodeMetadata , TState> {
 
-    private final HardHardFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> hardHardFlowOptimizer;
+    private final HardHardFlowOptimizer<TAction, TObservation, TSearchNodeMetadata, TState> hardHardFlowOptimizer;
 
     public HardHardSoftFlowOptimizer(SplittableRandom random, NoiseStrategy noiseStrategy) {
         super( random, noiseStrategy);
@@ -27,11 +26,11 @@ public class HardHardSoftFlowOptimizer<
     }
 
     @Override
-    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
+    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
         var result = hardHardFlowOptimizer.optimizeFlow(node, totalRiskAllowed);
 
         if(!result.getSecond()) {
-            var optimalSoftFlowCalculator = new OptimalFlowSoftConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+            var optimalSoftFlowCalculator = new OptimalFlowSoftConstraintCalculator<TAction, TObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
             boolean optimalSolutionExists = optimalSoftFlowCalculator.optimizeFlow(node);
             return new ImmutableTuple<>(result.getFirst(), optimalSolutionExists);
         } else {

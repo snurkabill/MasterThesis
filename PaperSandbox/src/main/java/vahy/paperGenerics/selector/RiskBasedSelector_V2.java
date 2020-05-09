@@ -26,10 +26,9 @@ import java.util.stream.DoubleStream;
 @Experimental
 public class RiskBasedSelector_V2<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends PaperNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends PaperNodeSelector<TAction, TObservation, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(RiskBasedSelector_V1.class.getName());
 
@@ -38,11 +37,11 @@ public class RiskBasedSelector_V2<
         super(cpuctParameter, random, totalPlayerActionCount);
     }
 
-    protected final ImmutableTuple<Double, Double> getMinMax(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
+    protected final ImmutableTuple<Double, Double> getMinMax(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
         double helpMax = -Double.MAX_VALUE;
         double helpMin = Double.MAX_VALUE;
 
-        for (SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> entry : node.getChildNodeMap().values()) {
+        for (SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> entry : node.getChildNodeMap().values()) {
             double value = entry.getSearchNodeMetadata().getExpectedReward() + entry.getSearchNodeMetadata().getGainedReward();
             if(helpMax < value) {
                 helpMax = value;
@@ -54,7 +53,7 @@ public class RiskBasedSelector_V2<
         return new ImmutableTuple<>(helpMin, helpMax);
     }
 
-    protected final double getExtremeElement(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node,
+    protected final double getExtremeElement(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node,
                                              Function<DoubleStream, OptionalDouble> function,
                                              String nonExistingElementMessage) {
         return function.apply(node
@@ -65,7 +64,7 @@ public class RiskBasedSelector_V2<
 
     @NotNull
     private Function<
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState>,
+        SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState>,
         ImmutableTuple<TAction, Double>>
     getSearchNodeImmutableTupleFunction(final int totalNodeVisitCount, final double min, final double max)
     {
@@ -82,7 +81,7 @@ public class RiskBasedSelector_V2<
 
 
     @Override
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 
 //                final double max = getExtremeElement(node, DoubleStream::max, "Maximum Does not exists");
@@ -99,7 +98,7 @@ public class RiskBasedSelector_V2<
 
         CLP model = new CLP();
         final CLPExpression sumToOneExpression = model.createExpression();
-        final SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> finalNodeReference = node;
+        final SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> finalNodeReference = node;
         List<ImmutableTuple<ImmutableTuple<TAction, Double>, CLPVariable>> collect = actionsUcbValue
             .stream()
             .map(x -> {

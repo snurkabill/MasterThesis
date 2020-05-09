@@ -11,19 +11,18 @@ import java.util.List;
 
 public class PolicyResults<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
-    private final OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy;
+    private final OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> policy;
     private final List<TStatistics> trainingStatisticsList;
     private final TStatistics episodeStatistics;
     private final Duration trainingDuration;
     private final Duration benchmarkingDuration;
 
-    public PolicyResults(OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy,
+    public PolicyResults(OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> policy,
                          List<TStatistics> trainingStatisticsList,
                          TStatistics episodeStatistics,
                          Duration trainingDuration,
@@ -35,7 +34,7 @@ public class PolicyResults<
         this.benchmarkingDuration = benchmarkingDuration;
     }
 
-    public OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getPolicy() {
+    public OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> getPolicy() {
         return policy;
     }
 

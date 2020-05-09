@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 
@@ -79,7 +79,7 @@ public class RandomWalkState implements PaperState<RandomWalkAction, DoubleVecto
             actionType,
             randomWalkSetup);
         var reward = actionType.isPlayerAction() ? 0.0 : ((newLevel - level) - randomWalkSetup.getStepPenalty());
-        return new ImmutableStateRewardReturnTuple<>(nextState, reward);
+        return new ImmutableStateRewardReturn<>(nextState, reward);
     }
 
     @Override

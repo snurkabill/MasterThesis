@@ -13,11 +13,10 @@ import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 @Deprecated
 public class MinimalRiskReachAbilityCalculatorDeprecated<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculatorDeprecated.class.getName());
 
@@ -28,15 +27,15 @@ public class MinimalRiskReachAbilityCalculatorDeprecated<
     }
 
     @Override
-    public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subtreeRoot) {
+    public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
         if(subtreeRoot.isLeaf()) {
             return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
         }
 
-        var linProgram = new AbstractLinearProgramOnTreeDeprecated<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(actionClass, false, null, NoiseStrategy.NONE) {
+        var linProgram = new AbstractLinearProgramOnTreeDeprecated<TAction, TObservation, TSearchNodeMetadata, TState>(actionClass, false, null, NoiseStrategy.NONE) {
             @Override
-            protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+            protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
                 if(node.getWrappedState().isRiskHit()) {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
                 } else {

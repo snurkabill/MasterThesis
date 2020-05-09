@@ -10,18 +10,19 @@ import java.util.List;
 
 public interface EpisodeResults<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> getEpisodeHistory();
+    List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> getEpisodeHistory();
+
+    int getPolicyCount();
 
     int getTotalStepCount();
 
-    int getPlayerStepCount();
+    List<Integer> getPlayerStepCountList();
 
-    double getTotalPayoff();
+    List<List<Double>> getTotalPayoff();
 
     Duration getDuration();
 

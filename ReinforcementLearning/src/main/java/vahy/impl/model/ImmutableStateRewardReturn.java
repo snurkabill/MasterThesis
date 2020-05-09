@@ -6,20 +6,19 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.utils.ImmutableTuple;
 
-public class ImmutableStateRewardReturnTuple<
+public class ImmutableStateRewardReturn<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends ImmutableTuple<TState, Double>
-    implements StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends ImmutableTuple<TState, double[][]>
+    implements StateRewardReturn<TAction, TObservation, TState> {
 
-    public ImmutableStateRewardReturnTuple(TState state, Double reward) {
+    public ImmutableStateRewardReturn(TState state, double[][] reward) {
         super(state, reward);
     }
 
     @Override
-    public double getReward() {
+    public double[][] getReward() {
         return super.getSecond();
     }
 

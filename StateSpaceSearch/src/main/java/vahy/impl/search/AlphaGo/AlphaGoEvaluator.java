@@ -13,8 +13,8 @@ public class AlphaGoEvaluator<
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
     TSearchNodeMetadata extends AlphaGoNodeMetadata<TAction>,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     public static final int Q_VALUE_INDEX = 0;
     public static final int POLICY_START_INDEX = 1;
@@ -30,7 +30,7 @@ public class AlphaGoEvaluator<
     }
 
     @Override
-    public int evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNode) {
         throw new UnsupportedOperationException(); // TODO: finish it
     }
 }

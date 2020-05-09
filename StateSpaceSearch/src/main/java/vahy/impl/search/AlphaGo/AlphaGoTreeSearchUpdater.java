@@ -12,15 +12,15 @@ public class AlphaGoTreeSearchUpdater<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements TreeUpdater<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements TreeUpdater<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoTreeSearchUpdater.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
 
     @Override
-    public void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> expandedNode) {
         double estimatedLeafReward = (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward()) + expandedNode.getSearchNodeMetadata().getCumulativeReward();
         int i = 0;
         while (!expandedNode.isRoot()) {
@@ -34,7 +34,7 @@ public class AlphaGoTreeSearchUpdater<
         }
     }
 
-    private void updateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> expandedNode, double estimatedLeafReward) {
+    private void updateNode(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> expandedNode, double estimatedLeafReward) {
         AlphaGoNodeMetadata<TAction> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
         if(searchNodeMetadata.getVisitCounter() == 1) {

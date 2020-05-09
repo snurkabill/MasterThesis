@@ -14,19 +14,18 @@ import java.util.SplittableRandom;
 
 public class MaxUcbVisitDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     public MaxUcbVisitDistributionProvider() {
         super(false, () -> new ConstantRiskCalculator<>(1.0));
     }
 
     @Override
-    public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
         double temperature,
         SplittableRandom random,
         double totalRiskAllowed)
@@ -42,7 +41,7 @@ public class MaxUcbVisitDistributionProvider<
         double[] riskArray = new double[childCount];
 
         int j = 0;
-        for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+        for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
             actionList.add(entry.getKey());
             var metadata = entry.getValue().getSearchNodeMetadata();
             rewardArray[j] = metadata.getVisitCounter() / totalVisitSum;

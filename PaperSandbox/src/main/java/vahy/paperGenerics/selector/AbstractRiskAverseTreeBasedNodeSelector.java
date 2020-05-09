@@ -18,12 +18,11 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractRiskAverseTreeBasedNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>
-    implements RiskAverseNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState>
+    implements RiskAverseNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     protected static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
@@ -35,7 +34,7 @@ public abstract class AbstractRiskAverseTreeBasedNodeSelector<
         this.random = random;
     }
 
-    protected final TAction sampleOpponentAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
+    protected final TAction sampleOpponentAction(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
         var actions = new ArrayList<TAction>(node.getChildNodeMap().size());
         var priorProbabilities = new double[node.getChildNodeMap().size()];
         int index = 0;

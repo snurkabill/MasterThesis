@@ -22,9 +22,9 @@ public class PaperPolicyImpl<
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState, PaperPolicyRecord>
-    implements PaperPolicy<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractTreeSearchPolicy<TAction, TObservation, TSearchNodeMetadata, TState, PaperPolicyRecord>
+    implements PaperPolicy<TAction, TObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
@@ -33,7 +33,7 @@ public class PaperPolicyImpl<
     private final int totalOpponentActionCount;
 
     private final SplittableRandom random;
-    private final RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
+    private final RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
 
     private final boolean isExplorationDisabled;
     private final double explorationConstant;
@@ -44,7 +44,7 @@ public class PaperPolicyImpl<
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
-                           RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
+                           RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random,
                            double explorationConstant,
                            double temperature) {
@@ -53,14 +53,14 @@ public class PaperPolicyImpl<
 
     public PaperPolicyImpl(Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
-                           RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
+                           RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random) {
         this(clazz, treeUpdateCondition, searchTree, random, true, 0.0, 0.0);
     }
 
     private PaperPolicyImpl(Class<TAction> clazz,
                             TreeUpdateCondition treeUpdateCondition,
-                            RiskAverseSearchTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchTree,
+                            RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
                             SplittableRandom random,
                             boolean isExplorationDisabled,
                             double explorationConstant,

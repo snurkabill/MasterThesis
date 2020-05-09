@@ -3,7 +3,7 @@ package vahy.paperGenerics.testDomain;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
 import vahy.paperGenerics.PaperState;
@@ -47,7 +47,7 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
 
     @Override
     public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState> applyAction(EmptySpaceAction actionType) {
-        return new ImmutableStateRewardReturnTuple<>(new EmptySpaceRiskState(!isPlayerTurn, random, random.nextDouble() < riskProbability, riskProbability), random.nextDouble());
+        return new ImmutableStateRewardReturn<>(new EmptySpaceRiskState(!isPlayerTurn, random, random.nextDouble() < riskProbability, riskProbability), random.nextDouble());
     }
 
     @Override

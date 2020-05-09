@@ -3,7 +3,7 @@ package vahy.domain;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 import vahy.utils.ArrayUtils;
@@ -166,12 +166,12 @@ public class SHState implements PaperState<SHAction, DoubleVector, SHState, SHSt
                 var newRewards = ArrayUtils.cloneArray(rewards);
                 newRewards[newX][newY] = 0.0;
                 newObservation[2 + rewardId] = -1.0;
-                return new ImmutableStateRewardReturnTuple<>(new SHState(staticPart, newX, newY, false, false, newRewards, rewardCount, newObservation), reward);
+                return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, newRewards, rewardCount, newObservation), reward);
             } else {
-                return new ImmutableStateRewardReturnTuple<>(new SHState(staticPart, newX, newY, false, false, rewards, rewardsLeft, newObservation), -staticPart.getDefaultStepPenalty());
+                return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, rewards, rewardsLeft, newObservation), -staticPart.getDefaultStepPenalty());
             }
         } else {
-            return new ImmutableStateRewardReturnTuple<>(new SHState(staticPart, agentXCoordination, agentYCoordination, false, false, rewards, rewardsLeft, doubleObservation), -staticPart.getDefaultStepPenalty());
+            return new ImmutableStateRewardReturn<>(new SHState(staticPart, agentXCoordination, agentYCoordination, false, false, rewards, rewardsLeft, doubleObservation), -staticPart.getDefaultStepPenalty());
         }
 
     }
@@ -179,7 +179,7 @@ public class SHState implements PaperState<SHAction, DoubleVector, SHState, SHSt
     private StateRewardReturn<SHAction, DoubleVector, SHState, SHState> applyOpponentAction(SHAction action) {
         switch(action) {
             case TRAP:
-                return new ImmutableStateRewardReturnTuple<>(new SHState(
+                return new ImmutableStateRewardReturn<>(new SHState(
                     staticPart,
                     agentXCoordination,
                     agentYCoordination,
@@ -191,7 +191,7 @@ public class SHState implements PaperState<SHAction, DoubleVector, SHState, SHSt
                     ),
                     0.0);
             case NO_ACTION:
-                return new ImmutableStateRewardReturnTuple<>(new SHState(
+                return new ImmutableStateRewardReturn<>(new SHState(
                     staticPart,
                     agentXCoordination,
                     agentYCoordination,

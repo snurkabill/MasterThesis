@@ -4,14 +4,14 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState, TicTacToeState>, Observation {
+public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState>, Observation {
 
     private enum Player_inner {
         PLAYER(Symbol.PLAYER),
@@ -124,17 +124,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public TicTacToeAction[] getPossiblePlayerActions() {
-        return getAllPossibleActions();
-    }
-
-    @Override
-    public TicTacToeAction[] getPossibleOpponentActions() {
-        return getAllPossibleActions();
-    }
-
-    @Override
-    public StateRewardReturn<TicTacToeAction, DoubleVector, TicTacToeState, TicTacToeState> applyAction(TicTacToeAction actionType) {
+    public StateRewardReturn<TicTacToeAction, DoubleVector, TicTacToeState> applyAction(TicTacToeAction actionType) {
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
         }
@@ -156,8 +146,8 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             }
             newPlayground[x][y] = Symbol.PLAYER;
             var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
-            double reward = hasOneWin(Player_inner.PLAYER, newPlayground) ? 1 : 0;
-            return new ImmutableStateRewardReturnTuple<>(
+            double[][] reward = hasOneWin(Player_inner.PLAYER, newPlayground) ? new double[][]{new double[] {1.0}} 1 : 0;
+            return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
                     newPlayground,
                     false,
@@ -181,7 +171,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             newPlayground[x][y] = Symbol.OPPONENT;
             var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
             double reward = hasOneWin(Player_inner.OPPONENT, newPlayground) ? -1 : 0;
-            return new ImmutableStateRewardReturnTuple<>(
+            return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
                     newPlayground,
                     true,
@@ -194,13 +184,13 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public DoubleVector getPlayerObservation() {
+    public DoubleVector getPlayerObservation(int playerId) {
         return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
     }
 
     @Override
-    public TicTacToeState getOpponentObservation() {
-        return this;
+    public DoubleVector getCommonObservation(int playerId) {
+        return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
     }
 
     @Override
@@ -224,8 +214,13 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public boolean isOpponentTurn() {
-        return !isAgentTurn;
+    public int getPlayerIdOnTurn() {
+        return 0;
+    }
+
+    @Override
+    public boolean isInGame(int playerId) {
+        return false;
     }
 
     @Override

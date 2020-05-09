@@ -7,11 +7,10 @@ import vahy.api.policy.PolicyRecord;
 
 public interface EpisodeSimulator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> calculateEpisode(EpisodeSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeSetup);
+    EpisodeResults<TAction, TObservation, TState, TPolicyRecord> calculateEpisode(EpisodeSetup<TAction, TObservation, TState, TPolicyRecord> episodeSetup);
 
 }

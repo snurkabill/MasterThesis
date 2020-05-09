@@ -301,7 +301,7 @@ public class PaperExperimentBuilder<
         TrainablePredictor opponentPredictor = initializeOpponentPredictor(observedVectorLength, approximatorConfig, systemConfig, opponentActionCount, masterRandom.split());
         return new PredictorTrainingSetup<>(
             opponentPredictor,
-            new OpponentSamplerDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(opponentActionCount),
+            new OpponentSamplerDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(opponentActionCount, playerPolicyId, opponentPolicyId),
             approximatorConfig.getDataAggregationAlgorithm().resolveDataAggregator(approximatorConfig)
         );
     }

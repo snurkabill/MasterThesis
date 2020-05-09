@@ -26,53 +26,43 @@ import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord>
-    implements GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    implements GameSampler<TAction, TObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
-    private final InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier;
-    private final EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory;
+    private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
+    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory;
     private final int processingUnitCount;
 
-    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier;
-    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier;
+    private final List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> policySupplierList;
 
-    public GameSamplerImpl(
-        InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> initialStateSupplier,
-        EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> resultsFactory,
-        int processingUnitCount,
-        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPolicySupplier,
-        PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicySupplier)
+    public GameSamplerImpl(InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
+                           EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory,
+                           List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> playerPolicySupplierList,
+                           int processingUnitCount)
     {
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
         this.processingUnitCount = processingUnitCount;
-        this.playerPolicySupplier = playerPolicySupplier;
-        this.opponentPolicySupplier = opponentPolicySupplier;
+        this.policySupplierList = playerPolicySupplierList;
     }
 
-    private Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> supplyPlayerPolicy(TState initialState, PolicyMode policyMode) {
-        return playerPolicySupplier.initializePolicy(initialState, policyMode);
+    private Policy<TAction, TObservation, TState, TPolicyRecord> supplyPlayerPolicy(PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier, TState initialState, PolicyMode policyMode) {
+        return policySupplier.initializePolicy(initialState, policyMode);
     }
 
-    private Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> supplyOpponentPolicy(TState initialState, PolicyMode policyMode) {
-        return opponentPolicySupplier.initializePolicy(initialState, policyMode);
-    }
-
-    public List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
+    public List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
-        var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>>(episodeBatchSize);
+        var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState(policyMode);
-            var paperPolicy = supplyPlayerPolicy(initialGameState, policyMode);
-            var opponentPolicy = supplyOpponentPolicy(initialGameState, policyMode);
-            var paperEpisode = new EpisodeSetupImpl<>(initialGameState, paperPolicy, opponentPolicy, stepCountLimit);
+            var policyList = policySupplierList.stream().map(x -> supplyPlayerPolicy(x, initialGameState, policyMode)).collect(Collectors.toList());
+            var paperEpisode = new EpisodeSetupImpl<>(initialGameState, policyList, stepCountLimit);
             var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
             episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }

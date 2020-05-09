@@ -7,27 +7,18 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
 
-public class EpisodeSetupImpl<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    implements EpisodeSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+import java.util.List;
+
+public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord>
+    implements EpisodeSetup<TAction, TObservation, TState, TPolicyRecord> {
 
     private final TState initialState;
-    private final Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPaperPolicy;
-    private final Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy;
+    private final List<Policy<TAction, TObservation, TState, TPolicyRecord>> policyList;
     private final int stepCountLimit;
 
-    public EpisodeSetupImpl(
-            TState initialState,
-            Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> playerPaperPolicy,
-            Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> opponentPolicy,
-            int stepCountLimit) {
+    public EpisodeSetupImpl(TState initialState, List<Policy<TAction, TObservation, TState, TPolicyRecord>> policyList, int stepCountLimit) {
         this.initialState = initialState;
-        this.playerPaperPolicy = playerPaperPolicy;
-        this.opponentPolicy = opponentPolicy;
+        this.policyList = policyList;
         this.stepCountLimit = stepCountLimit;
     }
 
@@ -35,12 +26,9 @@ public class EpisodeSetupImpl<
         return initialState;
     }
 
-    public Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getPlayerPaperPolicy() {
-        return playerPaperPolicy;
-    }
-
-    public Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getOpponentPolicy() {
-        return opponentPolicy;
+    @Override
+    public List<Policy<TAction, TObservation, TState, TPolicyRecord>> getPolicyList() {
+        return policyList;
     }
 
     public int getStepCountLimit() {

@@ -20,21 +20,20 @@ import java.util.SplittableRandom;
 
 public class MonteCarloEvaluator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends MonteCarloTreeSearchMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements NodeEvaluator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloEvaluator.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
-    private final SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
+    private final SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private final SplittableRandom random;
     private final double discountFactor;
     private final int rolloutCount;
 
-    public MonteCarloEvaluator(SearchNodeFactory<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+    public MonteCarloEvaluator(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                SplittableRandom random,
                                double discountFactor,
                                int rolloutCount) {
@@ -45,7 +44,7 @@ public class MonteCarloEvaluator<
     }
 
     @Override
-    public int evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNode) {
         if(selectedNode.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
@@ -53,9 +52,9 @@ public class MonteCarloEvaluator<
         if(TRACE_ENABLED) {
             logger.trace("Expanding node [{}] with possible actions: [{}] ", selectedNode, Arrays.toString(allPossibleActions));
         }
-        Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
+        Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
-            StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
+            StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
             childNodeMap.put(nextAction, searchNodeFactory.createNode(stateRewardReturn, selectedNode, nextAction));
         }
         var rewardPredictionNodeCounter = runRollouts(selectedNode);
@@ -67,7 +66,7 @@ public class MonteCarloEvaluator<
         return rewardPredictionNodeCounter.getSecond();
     }
 
-    private ImmutableTuple<Double, Integer> runRollouts(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    private ImmutableTuple<Double, Integer> runRollouts(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         List<ImmutableTuple<Double, Integer>> rewardList = new ArrayList<>();
         for (int i = 0; i < rolloutCount; i++) {
             rewardList.add(runRandomWalkSimulation(node));
@@ -75,14 +74,14 @@ public class MonteCarloEvaluator<
         return new ImmutableTuple<>(DoubleScalarRewardAggregator.averageReward(rewardList.stream().map(ImmutableTuple::getFirst)), rewardList.stream().mapToInt(ImmutableTuple::getSecond).sum());
     }
 
-    private ImmutableTuple<Double, Integer> runRandomWalkSimulation(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    private ImmutableTuple<Double, Integer> runRandomWalkSimulation(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
         int stateCounter = 0;
         TState wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
-            StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
+            StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
             stateCounter += 1;

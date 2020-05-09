@@ -14,8 +14,8 @@ public class AlphaGoNodeMetadataFactory<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     @Override
     public AlphaGoNodeMetadata<TAction> createEmptyNodeMetadata() {
@@ -23,8 +23,8 @@ public class AlphaGoNodeMetadataFactory<
     }
 
     @Override
-    public AlphaGoNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> parent,
-                                                                 StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
+    public AlphaGoNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> parent,
+                                                                 StateRewardReturn<TAction, TObservation, TState> stateRewardReturn,
                                                                  TAction appliedAction) {
         return new AlphaGoNodeMetadata<TAction>(
             parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),

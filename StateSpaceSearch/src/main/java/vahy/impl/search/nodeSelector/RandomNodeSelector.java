@@ -9,11 +9,10 @@ import java.util.SplittableRandom;
 
 public class RandomNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private final SplittableRandom random;
 
@@ -22,9 +21,9 @@ public class RandomNodeSelector<
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectNextNode() {
         checkRoot();
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = root;
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node = root;
         while(!node.isLeaf()) {
             TAction[] allPossibleActions = node.getAllPossibleActions();
             var action = allPossibleActions[random.nextInt(allPossibleActions.length)];

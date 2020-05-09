@@ -1,22 +1,23 @@
 package vahy.api.benchmark;
 
 import java.time.Duration;
+import java.util.List;
 
 public interface EpisodeStatistics {
 
     Duration getTotalDuration();
 
-    double getAveragePlayerStepCount();
+    List<Double> getAveragePlayerStepCount();
 
-    double getStdevPlayerStepCount();
+    List<Double> getStdevPlayerStepCount();
 
     double getAverageMillisPerEpisode();
 
     double getStdevMillisPerEpisode();
 
-    double getTotalPayoffAverage();
+    List<List<Double>> getTotalPayoffAverage();
 
-    double getTotalPayoffStdev();
+    List<List<Double>> getTotalPayoffStdev();
 
 
     String printToLog();

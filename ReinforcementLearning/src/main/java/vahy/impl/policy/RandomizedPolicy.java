@@ -10,15 +10,21 @@ import java.util.SplittableRandom;
 
 public abstract class RandomizedPolicy<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord>
-    implements Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    implements Policy<TAction, TObservation, TState, TPolicyRecord> {
 
     protected final SplittableRandom random;
+    private final int policyId;
 
-    protected RandomizedPolicy(SplittableRandom random) {
+    protected RandomizedPolicy(SplittableRandom random, int policyId) {
         this.random = random;
+        this.policyId = policyId;
+    }
+
+    @Override
+    public int getPolicyId() {
+        return policyId;
     }
 }

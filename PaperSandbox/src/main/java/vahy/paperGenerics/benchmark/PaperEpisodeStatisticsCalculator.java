@@ -16,12 +16,12 @@ public class PaperEpisodeStatisticsCalculator<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TState extends PaperState<TAction, TObservation, TState>,
     TPolicyRecord extends PaperPolicyRecord>
-    implements EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, PaperEpisodeStatistics> {
+    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, PaperEpisodeStatistics> {
 
     @Override
-    public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration) {
+    public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration) {
         var averagePlayerStepCount = MathStreamUtils.calculateAverage(episodeResultsList, EpisodeResults::getPlayerStepCount);
         var stdevPlayerStepCount = MathStreamUtils.calculateStdev(episodeResultsList, EpisodeResults::getPlayerStepCount);
         var totalPayoffAverage = MathStreamUtils.calculateAverage(episodeResultsList, EpisodeResults::getTotalPayoff);

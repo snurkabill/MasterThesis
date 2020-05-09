@@ -1,24 +1,22 @@
 package vahy.api.policy;
 
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
+import vahy.api.model.StateWrapper;
+import vahy.api.model.observation.Observation;
 
 import java.util.List;
 
-public interface Policy<
-        TAction extends Enum<TAction> & Action,
-        TPlayerObservation extends Observation,
-        TOpponentObservation extends Observation,
-        TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-        TPolicyRecord extends PolicyRecord> {
+public interface Policy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord> {
 
-    double[] getActionProbabilityDistribution(TState gameState);
+    int getPolicyId();
 
-    TAction getDiscreteAction(TState gameState);
+    double[] getActionProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState);
+
+    TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState);
 
     void updateStateOnPlayedActions(List<TAction> opponentActionList);
 
-    TPolicyRecord getPolicyRecord(TState gameState);
+    TPolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState);
 
 }

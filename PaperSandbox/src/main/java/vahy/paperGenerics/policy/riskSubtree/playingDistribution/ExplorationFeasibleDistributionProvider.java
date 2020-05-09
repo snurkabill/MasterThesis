@@ -19,30 +19,29 @@ import java.util.function.Supplier;
 
 public class ExplorationFeasibleDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExplorationFeasibleDistributionProvider.class.getName());
     private static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     private static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
     private static final double RISK_BOUND_DELTA = 0.01;
 
-    private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow;
-    private final Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow;
+    private final Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow;
+    private final Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow;
 
-    public ExplorationFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
-                                                   Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow) {
+    public ExplorationFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
+                                                   Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow) {
         super(true, null);
         this.subtreeRiskCalculatorSupplierForKnownFlow = subtreeRiskCalculatorSupplierForKnownFlow;
         this.subtreeRiskCalculatorSupplierForUnknownFlow = subtreeRiskCalculatorSupplierForUnknownFlow;
     }
 
     @Override
-    public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
         double temperature,
         SplittableRandom random,
         double totalRiskAllowed)
@@ -50,12 +49,12 @@ public class ExplorationFeasibleDistributionProvider<
         var childMap = node.getChildNodeMap();
         var childCount = childMap.size();
         var actionList = new ArrayList<TAction>(childCount);
-        var riskSupplierMap = new HashMap<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>>(childCount);
+        var riskSupplierMap = new HashMap<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>>(childCount);
         var distributionAsArray = new double[childCount];
         var riskArray = new double[childCount];
 
         var j = 0;
-        for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+        for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
             actionList.add(entry.getKey());
             var metadata = entry.getValue().getSearchNodeMetadata();
             distributionAsArray[j] = metadata.getFlow();

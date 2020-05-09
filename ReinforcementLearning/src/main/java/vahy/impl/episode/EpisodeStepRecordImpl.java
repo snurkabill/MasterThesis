@@ -7,30 +7,30 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class EpisodeStepRecordImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord>
-    implements EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    implements EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord> {
 
-    private final boolean isPlayerMove;
+    private final int policyIdOnTurn;
     private final TAction playedAction;
     private final TPolicyRecord policyStepRecord;
     private final TState fromState;
     private final TState toState;
-    private final double reward;
+    private final double[][] reward;
 
-    public EpisodeStepRecordImpl(boolean isPlayerMove,
+    public EpisodeStepRecordImpl(int policyIdOnTurn,
                                  TAction playedAction,
                                  TPolicyRecord policyStepRecord,
                                  TState fromState,
                                  TState toState,
-                                 double reward) {
-        this.isPlayerMove = isPlayerMove;
+                                 double[][] reward) {
+        this.policyIdOnTurn = policyIdOnTurn;
         this.playedAction = playedAction;
         this.policyStepRecord = policyStepRecord;
         this.fromState = fromState;
@@ -39,12 +39,12 @@ public class EpisodeStepRecordImpl<
     }
 
     @Override
-    public boolean isPlayerMove() {
-        return isPlayerMove;
+    public int getPolicyIdOnTurn() {
+        return policyIdOnTurn;
     }
 
     @Override
-    public TAction getPlayedAction() {
+    public TAction getAction() {
         return playedAction;
     }
 
@@ -64,14 +64,14 @@ public class EpisodeStepRecordImpl<
     }
 
     @Override
-    public double getReward() {
+    public double[][] getReward() {
         return reward;
     }
 
     @Override
     public String toString() {
         return "EpisodeStepRecord{" +
-            "isPlayerMove=" + isPlayerMove +
+            "policyOnTurnId=" + policyIdOnTurn +
             ", playedAction=" + playedAction +
             ", policyStepRecord=" + (policyStepRecord != null ? policyStepRecord.toString() : null) +
             ", fromState=" + fromState +
@@ -84,7 +84,7 @@ public class EpisodeStepRecordImpl<
     public String toLogString() {
         StringBuilder sb = new StringBuilder();
         sb.append("action: ");
-        sb.append(getPlayedAction());
+        sb.append(getAction());
         sb.append(" getting reward: ");
         sb.append(getReward());
         sb.append(". PolicyStepLog: ");
@@ -98,21 +98,17 @@ public class EpisodeStepRecordImpl<
         list.add("Is player move");
         list.add("Action played");
         list.add("Obtained reward");
-        if(isPlayerMove) {
-            list.addAll(policyStepRecord.getCsvHeader());
-        }
+        list.addAll(policyStepRecord.getCsvHeader());
         return list;
     }
 
     @Override
     public List<String> getCsvRecord() {
         var list = new ArrayList<String>();
-        list.add(Boolean.toString(isPlayerMove));
+        list.add(Integer.toString(policyIdOnTurn));
         list.add(playedAction.toString());
-        list.add(Double.toString(reward));
-        if(isPlayerMove) {
-            list.addAll(policyStepRecord.getCsvRecord());
-        }
+        list.add(Arrays.deepToString(reward));
+        list.addAll(policyStepRecord.getCsvRecord());
         return list;
     }
 }

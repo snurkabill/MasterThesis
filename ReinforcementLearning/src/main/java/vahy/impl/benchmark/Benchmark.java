@@ -18,9 +18,8 @@ import java.util.stream.Collectors;
 
 public class Benchmark<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
@@ -32,7 +31,7 @@ public class Benchmark<
         this.systemConfig = systemConfig;
     }
 
-    public void benchmark(List<PolicyResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics>> policyList) {
+    public void benchmark(List<PolicyResults<TAction, TObservation, TState, TPolicyRecord, TStatistics>> policyList) {
         createReport(
             policyList.stream().sorted(Comparator.comparing(x -> x.getPolicy().getPolicyId())).map(PolicyResults::getTrainingStatisticsList).collect(Collectors.toList()),
             policyList.stream().sorted(Comparator.comparing(x -> x.getPolicy().getPolicyId())).map(PolicyResults::getEpisodeStatistics).collect(Collectors.toList()),

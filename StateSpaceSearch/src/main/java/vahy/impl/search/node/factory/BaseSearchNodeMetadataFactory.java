@@ -11,14 +11,13 @@ import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 
 public class BaseSearchNodeMetadataFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, BaseSearchNodeMetadata, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TObservation, BaseSearchNodeMetadata, TState> {
 
     @Override
-    public BaseSearchNodeMetadata createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, BaseSearchNodeMetadata, TState> parent,
-                                                                    StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>stateRewardReturn,
+    public BaseSearchNodeMetadata createSearchNodeMetadata(SearchNode<TAction, TObservation, BaseSearchNodeMetadata, TState> parent,
+                                                                    StateRewardReturn<TAction, TObservation, TState>stateRewardReturn,
                                                                     TAction appliedAction) {
         return new BaseSearchNodeMetadata(
             DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()),

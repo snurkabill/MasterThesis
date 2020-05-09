@@ -8,10 +8,9 @@ import vahy.api.search.node.SearchNodeMetadata;
 
 public interface NodeEvaluator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends State<TAction, TObservation, TState>> {
 
-    int evaluateNode(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode);
+    int evaluateNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNode);
 }

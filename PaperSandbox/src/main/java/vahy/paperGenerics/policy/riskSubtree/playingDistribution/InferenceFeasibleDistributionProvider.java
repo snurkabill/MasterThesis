@@ -16,31 +16,30 @@ import java.util.function.Supplier;
 
 public class InferenceFeasibleDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    public InferenceFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
+    public InferenceFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
         super(true, subtreeRiskCalculatorSupplier);
     }
 
     @Override
-    public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
+    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
         double temperature,
         SplittableRandom random,
         double totalRiskAllowed)
     {
         int childCount = node.getChildNodeMap().size();
         List<TAction> actionList = new ArrayList<>(childCount);
-        List<Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> riskCalculatorSupplierList = new ArrayList<>(childCount);
+        List<Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> riskCalculatorSupplierList = new ArrayList<>(childCount);
         double[] distributionArray = new double[childCount];
         double[] riskArray = new double[childCount];
 
         int j = 0;
-        for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
+        for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
             actionList.add(entry.getKey());
             var metadata = entry.getValue().getSearchNodeMetadata();
             distributionArray[j] = metadata.getFlow();

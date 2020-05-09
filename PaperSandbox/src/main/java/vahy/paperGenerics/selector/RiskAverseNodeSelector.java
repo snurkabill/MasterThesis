@@ -8,10 +8,9 @@ import vahy.api.search.nodeSelector.NodeSelector;
 
 public interface RiskAverseNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> extends NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>> extends NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     void setAllowedRiskInRoot(double allowedRiskInRoot);
 

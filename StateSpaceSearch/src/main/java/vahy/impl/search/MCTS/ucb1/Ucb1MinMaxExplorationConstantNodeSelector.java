@@ -16,10 +16,9 @@ import java.util.stream.DoubleStream;
 
 public class Ucb1MinMaxExplorationConstantNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends Ucb1NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends Ucb1NodeSelector<TAction, TObservation, TState> {
 
     public Ucb1MinMaxExplorationConstantNodeSelector(SplittableRandom random) {
         super(random, 0.0d);
@@ -27,7 +26,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
 
     private double findExtreme(Function<DoubleStream, OptionalDouble> function,
                                String exceptionMsg,
-                               SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
+                               SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> node) {
         return function
             .apply(node
                 .getChildNodeStream()
@@ -36,7 +35,7 @@ public class Ucb1MinMaxExplorationConstantNodeSelector<
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {

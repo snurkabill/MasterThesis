@@ -11,16 +11,15 @@ import java.util.List;
 
 public class OptimizedPolicy<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
     private final String policyId;
-    private final List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
-    private final PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier;
+    private final List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
+    private final PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier;
 
-    public OptimizedPolicy(String policyId, List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList, PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policySupplier) {
+    public OptimizedPolicy(String policyId, List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList, PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier) {
         this.policyId = policyId;
         this.trainablePredictorSetupList = trainablePredictorSetupList;
         this.policySupplier = policySupplier;
@@ -30,11 +29,11 @@ public class OptimizedPolicy<
         return policyId;
     }
 
-    public List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> getTrainablePredictorSetupList() {
+    public List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> getTrainablePredictorSetupList() {
         return trainablePredictorSetupList;
     }
 
-    public PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getPolicySupplier() {
+    public PolicySupplier<TAction, TObservation, TState, TPolicyRecord> getPolicySupplier() {
         return policySupplier;
     }
 

@@ -37,23 +37,22 @@ public enum TestAction implements Action {
         return charRepresentation;
     }
 
-    @Override
-    public TestAction[] getAllPlayerActions() {
-        return playerActions;
-    }
-
-    @Override
-    public TestAction[] getAllOpponentActions() {
-        return opponentActions;
-    }
-
     public boolean isPlayerAction() {
         return isPlayerAction;
     }
 
     @Override
-    public boolean isOpponentAction() {
-        return isOpponentAction;
+    public boolean isPlayerAction(int playerId) {
+        if(playerId == 1) {
+            return isPlayerAction;
+        } else {
+            return isOpponentAction;
+        }
+    }
+
+    @Override
+    public boolean isOpponentAction(int playerId) {
+        return false;
     }
 
     @Override
@@ -62,22 +61,13 @@ public enum TestAction implements Action {
     }
 
     @Override
-    public int getActionIndexInPlayerActions() {
-        if(isPlayerAction) {
-            return localIndex;
-        } else {
-            return -1;
-        }
-
+    public int getActionIndexInPlayerActions(int playerId) {
+        return 0;
     }
 
     @Override
-    public int getActionIndexInOpponentActions() {
-        if(isOpponentAction) {
-            return localIndex;
-        } else {
-            return -1;
-        }
+    public int getActionIndexInOpponentActions(int playerId) {
+        return 0;
     }
 
     public double getReward() {

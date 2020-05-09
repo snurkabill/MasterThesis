@@ -15,8 +15,6 @@ import vahy.impl.search.MCTS.ucb1.Ucb1NodeSelector;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.impl.testdomain.model.TestAction;
-import vahy.impl.testdomain.model.TestState;
 import vahy.impl.testdomain.tictactoe.TicTacToeAction;
 import vahy.impl.testdomain.tictactoe.TicTacToeConfig;
 import vahy.impl.testdomain.tictactoe.TicTacToeState;
@@ -60,39 +58,39 @@ public class MCTSIntegrationTest {
 
     }
 
-    @Test
-    public void testMCTSAlgorithm() {
-
-        SplittableRandom random = new SplittableRandom(0);
-
-        SearchNode<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> root = new SearchNodeImpl<>(
-            new TestState(Arrays.asList('Z')),
-            new MonteCarloTreeSearchMetadata(0.0, 0.0, 0.0),
-            new LinkedHashMap<>()
-        );
-
-        SearchNodeMetadataFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> metadataFactory =
-            new MonteCarloTreeSearchMetadataFactory<>();
-        SearchNodeFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeFactory =
-            new SearchNodeBaseFactoryImpl<>(TestAction.class, metadataFactory);
-
-        NodeEvaluator<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeEvaluator =
-            new MonteCarloEvaluator<>(nodeFactory, random, 1.0, 1);
-
-        SearchTreeImpl<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> searchTree = new SearchTreeImpl<>(
-            root,
-            new Ucb1NodeSelector<>(random, 1.0),
-            new MonteCarloTreeSearchUpdater<>(),
-            nodeEvaluator
-        );
-
-        for (int i = 0; i < 100; i++) {
-            searchTree.updateTree();
-        }
-
-        System.out.println("asdf");
-
-
-    }
+//    @Test
+//    public void testMCTSAlgorithm() {
+//
+//        SplittableRandom random = new SplittableRandom(0);
+//
+//        SearchNode<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> root = new SearchNodeImpl<>(
+//            new TestState(Arrays.asList('Z')),
+//            new MonteCarloTreeSearchMetadata(0.0, 0.0, 0.0),
+//            new LinkedHashMap<>()
+//        );
+//
+//        SearchNodeMetadataFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> metadataFactory =
+//            new MonteCarloTreeSearchMetadataFactory<>();
+//        SearchNodeFactory<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeFactory =
+//            new SearchNodeBaseFactoryImpl<>(TestAction.class, metadataFactory);
+//
+//        NodeEvaluator<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> nodeEvaluator =
+//            new MonteCarloEvaluator<>(nodeFactory, random, 1.0, 1);
+//
+//        SearchTreeImpl<TestAction, DoubleVector, TestState, MonteCarloTreeSearchMetadata, TestState> searchTree = new SearchTreeImpl<>(
+//            root,
+//            new Ucb1NodeSelector<>(random, 1.0),
+//            new MonteCarloTreeSearchUpdater<>(),
+//            nodeEvaluator
+//        );
+//
+//        for (int i = 0; i < 100; i++) {
+//            searchTree.updateTree();
+//        }
+//
+//        System.out.println("asdf");
+//
+//
+//    }
 
 }

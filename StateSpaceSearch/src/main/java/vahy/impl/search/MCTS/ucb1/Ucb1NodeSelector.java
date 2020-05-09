@@ -15,10 +15,9 @@ import java.util.SplittableRandom;
 
 public class Ucb1NodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
@@ -31,7 +30,7 @@ public class Ucb1NodeSelector<
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {
@@ -53,7 +52,7 @@ public class Ucb1NodeSelector<
     }
 
 //    @Override
-//    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> node) {
+//    protected TAction getBestAction(SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> node) {
 //        int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
 //        return node.getChildNodeStream()
 //            .collect(StreamUtils.toRandomizedMaxCollector(

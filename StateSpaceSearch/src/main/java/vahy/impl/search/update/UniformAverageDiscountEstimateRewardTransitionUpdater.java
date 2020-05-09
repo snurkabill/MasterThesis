@@ -10,11 +10,10 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 
 public class UniformAverageDiscountEstimateRewardTransitionUpdater<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements NodeTransitionUpdater<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements NodeTransitionUpdater<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private final double discountFactor;
 
@@ -23,9 +22,9 @@ public class UniformAverageDiscountEstimateRewardTransitionUpdater<
     }
 
     @Override
-    public void applyUpdate(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> evaluatedNode,
-                            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> parent,
-                            SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> child) {
+    public void applyUpdate(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> evaluatedNode,
+                            SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent,
+                            SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> child) {
         parent
             .getSearchNodeMetadata()
             .setExpectedReward(DoubleScalarRewardAggregator

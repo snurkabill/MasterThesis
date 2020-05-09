@@ -10,15 +10,14 @@ import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 
 public class MonteCarloTreeSearchMetadataFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> {
 
 
     @Override
-    public MonteCarloTreeSearchMetadata createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> parent,
-                                                                          StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState>stateRewardReturn,
+    public MonteCarloTreeSearchMetadata createSearchNodeMetadata(SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> parent,
+                                                                          StateRewardReturn<TAction, TObservation, TState>stateRewardReturn,
                                                                           TAction appliedAction) {
         return new MonteCarloTreeSearchMetadata(
             parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),

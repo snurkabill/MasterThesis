@@ -10,10 +10,9 @@ import java.util.SplittableRandom;
 
 public class RiskBasedSelector_V3<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     private final int totalPlayerActions;
@@ -28,7 +27,7 @@ public class RiskBasedSelector_V3<
         this.valueArray =  new double[totalPlayerActions];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node, double currentRisk) {
+    protected TAction getBestAction(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node, double currentRisk) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         double max = -Double.MAX_VALUE;
@@ -96,7 +95,7 @@ public class RiskBasedSelector_V3<
 
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> selectNextNode() {
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {

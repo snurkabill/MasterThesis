@@ -14,8 +14,8 @@ public class AlphaGoNodeSelector<
     TAction extends Enum<TAction> & Action,
     TPlayerObservation extends DoubleVector,
     TOpponentObservation extends DoubleVector,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     private final SplittableRandom random;
@@ -31,7 +31,7 @@ public class AlphaGoNodeSelector<
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, AlphaGoNodeMetadata<TAction>, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> selectNextNode() {
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {

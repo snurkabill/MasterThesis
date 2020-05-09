@@ -4,13 +4,16 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, EmptySpaceState, EmptySpaceState>, Observation {
+public class EmptySpaceState implements Observation, State<EmptySpaceAction, DoubleVector, EmptySpaceState> {
+
+    public static final DoubleVector FIXED_OBSERVATION = new DoubleVector(new double[] {0.0});
+    public static final double[][] FIXED_REWARD = new double[][] {new double[] {0.0}, new double[] {0.0}};
 
     private final boolean isPlayerTurn;
 
@@ -28,34 +31,24 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
     }
 
     @Override
-    public EmptySpaceAction[] getPossiblePlayerActions() {
-        return getAllPossibleActions();
+    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceState> applyAction(EmptySpaceAction actionType) {
+        return new ImmutableStateRewardReturn<>(new EmptySpaceState(!isPlayerTurn), FIXED_REWARD);
     }
 
     @Override
-    public EmptySpaceAction[] getPossibleOpponentActions() {
-        return getAllPossibleActions();
+    public DoubleVector getPlayerObservation(int playerId) {
+        return FIXED_OBSERVATION;
     }
 
     @Override
-    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceState, EmptySpaceState> applyAction(EmptySpaceAction actionType) {
-        return new ImmutableStateRewardReturnTuple<>(new EmptySpaceState(!isPlayerTurn), 0.0);
-    }
-
-    @Override
-    public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {0.0});
-    }
-
-    @Override
-    public EmptySpaceState getOpponentObservation() {
-        return this;
+    public DoubleVector getCommonObservation(int playerId) {
+        return FIXED_OBSERVATION;
     }
 
     @Override
     public Predictor<EmptySpaceState> getKnownModelWithPerfectObservationPredictor() {
         return new Predictor<>() {
-            private double[] fixedPrediction = new double[]{1 / 3., 2 / 3.0};
+            private final double[] fixedPrediction = new double[]{1 / 3., 2 / 3.0};
 
             @Override
             public double[] apply(EmptySpaceState observation) {
@@ -87,8 +80,18 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
     }
 
     @Override
-    public boolean isOpponentTurn() {
-        return !isPlayerTurn;
+    public int getTotalPlayerCount() {
+        return 2;
+    }
+
+    @Override
+    public int getPlayerIdOnTurn() {
+        return isPlayerTurn ? 1 : 0;
+    }
+
+    @Override
+    public boolean isInGame(int playerId) {
+        return true;
     }
 
     @Override

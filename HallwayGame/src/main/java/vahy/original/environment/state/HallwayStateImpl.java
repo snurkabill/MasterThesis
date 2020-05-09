@@ -2,7 +2,7 @@ package vahy.original.environment.state;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.original.environment.HallwayAction;
 import vahy.original.environment.agent.AgentHeading;
@@ -198,7 +198,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                     if (rewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] != 0.0) {
                         newRewards[agentCoordinates.getFirst()][agentCoordinates.getSecond()] = 0.0;
                     }
-                    return new ImmutableStateRewardReturnTuple<>(
+                    return new ImmutableStateRewardReturn<>(
                         new HallwayStateImpl(
                             staticGamePart,
                             newRewards,
@@ -214,7 +214,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                 case TURN_RIGHT:
                 case TURN_LEFT:
                     AgentHeading newAgentHeading = agentHeading.turn(hallwayAction);
-                    return new ImmutableStateRewardReturnTuple<>(
+                    return new ImmutableStateRewardReturn<>(
                         new HallwayStateImpl(
                             staticGamePart,
                             ArrayUtils.cloneArray(rewards),
@@ -259,10 +259,10 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         isAgentKilled,
                         false,
                         false);
-                    return new ImmutableStateRewardReturnTuple<>(state, 0.0);
+                    return new ImmutableStateRewardReturn<>(state, 0.0);
                 case NOISY_RIGHT:
                     ImmutableTuple<Integer, Integer> newRightCoordinates = makeRightMove();
-                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
+                    return new ImmutableStateRewardReturn<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newRightCoordinates.getFirst(),
@@ -275,7 +275,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         false), 0.0);
                 case NOISY_LEFT:
                     ImmutableTuple<Integer, Integer> newLeftCoordinates = makeLeftMove();
-                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
+                    return new ImmutableStateRewardReturn<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newLeftCoordinates.getFirst(),
@@ -287,7 +287,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         false,
                         false), 0.0);
                 case TRAP:
-                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
+                    return new ImmutableStateRewardReturn<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         agentXCoordination,
@@ -300,7 +300,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         false), 0.0);
                 case NOISY_RIGHT_TRAP:
                     ImmutableTuple<Integer, Integer> newRightTrapCoordinates = makeRightMove();
-                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
+                    return new ImmutableStateRewardReturn<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newRightTrapCoordinates.getFirst(),
@@ -313,7 +313,7 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                         false), 0.0);
                 case NOISY_LEFT_TRAP:
                     ImmutableTuple<Integer, Integer> newLeftTrapCoordinates = makeLeftMove();
-                    return new ImmutableStateRewardReturnTuple<>(new HallwayStateImpl(
+                    return new ImmutableStateRewardReturn<>(new HallwayStateImpl(
                         staticGamePart,
                         ArrayUtils.cloneArray(rewards),
                         newLeftTrapCoordinates.getFirst(),

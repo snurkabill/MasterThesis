@@ -7,10 +7,9 @@ import vahy.api.policy.Policy;
 
 public interface PaperPolicy<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends Policy<TAction, TPlayerObservation, TOpponentObservation, TState, PaperPolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends Policy<TAction, TObservation, TState, PaperPolicyRecord> {
 
     double[] getPriorActionProbabilityDistribution(TState gameState);
 

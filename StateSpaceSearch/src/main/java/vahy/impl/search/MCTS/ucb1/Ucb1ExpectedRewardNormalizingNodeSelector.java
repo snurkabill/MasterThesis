@@ -13,17 +13,16 @@ import java.util.SplittableRandom;
 
 public class Ucb1ExpectedRewardNormalizingNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends Ucb1NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends Ucb1NodeSelector<TAction, TObservation, TState> {
 
     public Ucb1ExpectedRewardNormalizingNodeSelector(SplittableRandom random, double explorationConstant) {
         super(random, explorationConstant);
     }
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> selectNextNode() {
         checkRoot();
         var node = root;
         while(!node.isLeaf()) {

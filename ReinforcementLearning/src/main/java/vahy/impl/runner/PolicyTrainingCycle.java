@@ -18,9 +18,8 @@ import java.util.List;
 
 public class PolicyTrainingCycle<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
@@ -28,14 +27,14 @@ public class PolicyTrainingCycle<
 
     private final SystemConfig systemConfig;
     private final AlgorithmConfig algorithmConfig;
-    private final EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
-    private final Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> trainer;
+    private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
+    private final Trainer<TAction, TObservation, TState, TPolicyRecord, TStatistics> trainer;
 
 
     public PolicyTrainingCycle(SystemConfig systemConfig,
                                AlgorithmConfig algorithmConfig,
-                               EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter,
-                               Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> trainer) {
+                               EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
+                               Trainer<TAction, TObservation, TState, TPolicyRecord, TStatistics> trainer) {
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
         this.episodeWriter = episodeWriter;

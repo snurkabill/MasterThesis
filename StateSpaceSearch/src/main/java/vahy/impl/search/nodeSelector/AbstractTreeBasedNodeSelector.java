@@ -9,16 +9,15 @@ import vahy.api.search.nodeSelector.NodeSelector;
 
 public abstract class AbstractTreeBasedNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements NodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    implements NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    protected SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root;
+    protected SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root;
 
     @Override
-    public void setNewRoot(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> root) {
+    public void setNewRoot(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         this.root = root;
     }
 
@@ -28,6 +27,6 @@ public abstract class AbstractTreeBasedNodeSelector<
         }
     }
 
-    public abstract SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode();
+    public abstract SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectNextNode();
 
 }

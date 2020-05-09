@@ -12,10 +12,9 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractFlowOptimizer<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends PaperState<TAction, TObservation, TState>> {
 
     protected final SplittableRandom random;
     protected final NoiseStrategy noiseStrategy;
@@ -25,6 +24,6 @@ public abstract class AbstractFlowOptimizer<
         this.noiseStrategy = noiseStrategy;
     }
 
-    public abstract ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed);
+    public abstract ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed);
 
 }

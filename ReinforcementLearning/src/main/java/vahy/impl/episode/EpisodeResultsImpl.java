@@ -9,37 +9,43 @@ import vahy.api.policy.PolicyRecord;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EpisodeResultsImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord>
-    implements EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    implements EpisodeResults<TAction, TObservation, TState, TPolicyRecord> {
 
-    private final List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory;
-    private final int playerStepCount;
+    private final List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory;
+    private final int policyCount;
+    private final List<Integer> playerStepCountList;
     private final int totalStepCount;
-    private final double totalPayoff;
+    private final List<List<Double>> totalPayoff;
     private final Duration duration;
 
-    public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory,
-                              int playerStepCount,
+    public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+                              int policyCount, List<Integer> playerStepCountList,
                               int totalStepCount,
-                              double totalPayoff,
+                              List<List<Double>> totalPayoff,
                               Duration duration) {
         this.episodeHistory = episodeHistory;
-        this.playerStepCount = playerStepCount;
+        this.policyCount = policyCount;
+        this.playerStepCountList = playerStepCountList;
         this.totalStepCount = totalStepCount;
         this.totalPayoff = totalPayoff;
         this.duration = duration;
     }
 
+    @Override
+    public List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> getEpisodeHistory() {
+        return episodeHistory;
+    }
 
     @Override
-    public List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> getEpisodeHistory() {
-        return episodeHistory;
+    public int getPolicyCount() {
+        return policyCount;
     }
 
     @Override
@@ -48,12 +54,12 @@ public class EpisodeResultsImpl<
     }
 
     @Override
-    public int getPlayerStepCount() {
-        return playerStepCount;
+    public List<Integer> getPlayerStepCountList() {
+        return playerStepCountList;
     }
 
     @Override
-    public double getTotalPayoff() {
+    public List<List<Double>> getTotalPayoff() {
         return totalPayoff;
     }
 
@@ -78,7 +84,7 @@ public class EpisodeResultsImpl<
     public String episodeMetadataToFile() {
         var sb = new StringBuilder();
         appendLine(sb, "Total step count", String.valueOf(getTotalStepCount()));
-        appendLine(sb, "Player step count", String.valueOf(getPlayerStepCount()));
+        appendLine(sb, "Player step count", playerStepCountList.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
         appendLine(sb, "Duration [ms]", String.valueOf(getDuration().toMillis()));
         appendLine(sb, "Total Payoff", String.valueOf(getTotalPayoff()));
         return sb.toString();

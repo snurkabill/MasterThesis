@@ -12,21 +12,26 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractRandomizedPolicySupplier<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> implements PolicySupplier<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
+    TPolicyRecord extends PolicyRecord> implements PolicySupplier<TAction, TObservation, TState, TPolicyRecord> {
 
     private final SplittableRandom random;
+    private final int policyId;
 
-    public AbstractRandomizedPolicySupplier(SplittableRandom random) {
+    public AbstractRandomizedPolicySupplier(SplittableRandom random, int policyId) {
         this.random = random;
+        this.policyId = policyId;
+    }
+
+    public int getPolicyId() {
+        return policyId;
     }
 
     @Override
-    public Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
+    public Policy<TAction, TObservation, TState, TPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
         return initializePolicy_inner(initialState, policyMode, random.split());
     }
 
-    protected abstract Policy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> initializePolicy_inner(TState initialState, PolicyMode policyMode, SplittableRandom random);
+    protected abstract Policy<TAction, TObservation, TState, TPolicyRecord> initializePolicy_inner(TState initialState, PolicyMode policyMode, SplittableRandom random);
 }

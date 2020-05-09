@@ -13,16 +13,15 @@ import java.util.SplittableRandom;
 
 public class EGreedyNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractTreeBasedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> selectNextNode() {
+    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectNextNode() {
         checkRoot();
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node = root;
+        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node = root;
         while(!node.isLeaf()) {
             var action = getAction(node);
             node = node.getChildNodeMap().get(action);
@@ -30,10 +29,10 @@ public class EGreedyNodeSelector<
         return node;
     }
 
-    private class SearchNodeComparator implements Comparator<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>{
+    private class SearchNodeComparator implements Comparator<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>{
 
         @Override
-        public int compare(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> o1, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> o2) {
+        public int compare(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> o1, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> o2) {
             return Double.compare(o1.getSearchNodeMetadata().getExpectedReward(), o2.getSearchNodeMetadata().getExpectedReward());
         }
     }
@@ -47,7 +46,7 @@ public class EGreedyNodeSelector<
         this.random = random;
     }
 
-    private TAction getAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    private TAction getAction(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         if (random.nextDouble() < epsilon) {
             TAction[] allPossibleActions = node.getAllPossibleActions();
             return allPossibleActions[random.nextInt(allPossibleActions.length)];

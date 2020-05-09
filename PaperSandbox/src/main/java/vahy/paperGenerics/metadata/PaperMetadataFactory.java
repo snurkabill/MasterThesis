@@ -12,10 +12,9 @@ import java.util.EnumMap;
 
 public class PaperMetadataFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+    TObservation extends Observation,
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements SearchNodeMetadataFactory<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     private final Class<TAction> actionClass;
 
@@ -24,8 +23,8 @@ public class PaperMetadataFactory<
     }
 
     @Override
-    public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> parent,
-                                                           StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> stateRewardReturn,
+    public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> parent,
+                                                           StateRewardReturn<TAction, TObservation, TState> stateRewardReturn,
                                                            TAction appliedAction) {
         double reward = stateRewardReturn.getReward();
         TState state = stateRewardReturn.getState();

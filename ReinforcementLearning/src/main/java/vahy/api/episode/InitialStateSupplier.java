@@ -7,9 +7,8 @@ import vahy.api.policy.PolicyMode;
 
 public interface InitialStateSupplier<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>> {
 
     TState createInitialState(PolicyMode policyMode);
 }

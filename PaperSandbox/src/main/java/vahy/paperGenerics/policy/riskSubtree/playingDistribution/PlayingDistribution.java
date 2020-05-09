@@ -12,10 +12,9 @@ import java.util.function.Supplier;
 
 public class PlayingDistribution<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+    TState extends PaperState<TAction, TObservation, TState>> {
 
     private final TAction expectedPlayerAction;
     private final int expectedPlayerActionIndex;
@@ -24,14 +23,14 @@ public class PlayingDistribution<
     private final double[] riskOnPlayerSubNodes;
     private final List<TAction> actionList;
 
-    private final Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap;
+    private final Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap;
 
     public PlayingDistribution(TAction expectedPlayerAction,
                                int expectedPlayerActionIndex,
                                double[] playerDistribution,
                                double[] riskOnPlayerSubNodes,
                                List<TAction> actionList,
-                               Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap) {
+                               Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap) {
         this.expectedPlayerAction = expectedPlayerAction;
         this.expectedPlayerActionIndex = expectedPlayerActionIndex;
         this.playerDistribution = playerDistribution;
@@ -64,7 +63,7 @@ public class PlayingDistribution<
         return actionList;
     }
 
-    public Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>> getUsedSubTreeRiskCalculatorSupplierMap() {
+    public Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> getUsedSubTreeRiskCalculatorSupplierMap() {
         return usedSubTreeRiskCalculatorSupplierMap;
     }
 }

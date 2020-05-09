@@ -15,11 +15,10 @@ import java.util.SplittableRandom;
 
 public class OptimalFlowHardConstraintCalculator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractLinearProgramOnTree<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractLinearProgramOnTree<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(OptimalFlowHardConstraintCalculator.class.getName());
 
@@ -33,7 +32,7 @@ public class OptimalFlowHardConstraintCalculator<
     }
 
     @Override
-    protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         var metadata = node.getSearchNodeMetadata();
         double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
         totalRiskExpression.add(nodeRisk, metadata.getNodeProbabilityFlow());
@@ -41,9 +40,9 @@ public class OptimalFlowHardConstraintCalculator<
     }
 
     @Override
-    protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow) {
+    protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow) {
         double sum = 0.0;
-        for (SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> entry : nodeList) {
+        for (SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> entry : nodeList) {
             var metadata = entry.getSearchNodeMetadata();
             double nodeRisk = entry.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
             double priorProbability = metadata.getPriorProbability();

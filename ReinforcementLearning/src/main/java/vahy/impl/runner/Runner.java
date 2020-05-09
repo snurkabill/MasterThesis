@@ -22,17 +22,16 @@ import java.util.List;
 
 public class Runner<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
-    public PolicyResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> run(
-        RunnerArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> runnerArguments,
-        EvaluationArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> evaluationArguments) throws IOException
+    public PolicyResults<TAction, TObservation, TState, TPolicyRecord, TStatistics> run(
+        RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments,
+        EvaluationArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> evaluationArguments) throws IOException
     {
         var trainingStatistics = optimizePolicy(runnerArguments);
         var optimizedPolicy = new OptimizedPolicy<>(
@@ -44,21 +43,20 @@ public class Runner<TConfig extends ProblemConfig,
         return new PolicyResults<>(optimizedPolicy, trainingStatistics.getSecond(), evaluationResults.getFirst(), trainingStatistics.getFirst(), evaluationResults.getSecond());
     }
 
-    private void closeResources(OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy) throws IOException {
+    private void closeResources(OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> policy) throws IOException {
         for (var entry : policy.getTrainablePredictorSetupList()) {
             entry.getTrainablePredictor().close();
         }
         logger.debug("Resources of trainable policy [{}] closed. ", policy.getPolicyId());
     }
 
-    private ImmutableTuple<Duration, List<TStatistics>> optimizePolicy(RunnerArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
+    private ImmutableTuple<Duration, List<TStatistics>> optimizePolicy(RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
         var progressTrackerSettings = new ProgressTrackerSettings(true, runnerArguments.getSystemConfig().isDrawWindow(), false, false);
         var gameSampler = new GameSamplerImpl<>(
             runnerArguments.getInitialStateSupplier(),
             runnerArguments.getEpisodeResultsFactory(),
-            runnerArguments.getSystemConfig().getParallelThreadsCount(),
-            runnerArguments.getPolicySupplier(),
-            runnerArguments.getOpponentPolicySupplier());
+            runnerArguments.getPolicySupplierList(),
+            runnerArguments.getSystemConfig().getParallelThreadsCount());
 
         var trainer = new Trainer<>(
             gameSampler,
@@ -82,17 +80,16 @@ public class Runner<TConfig extends ProblemConfig,
     }
 
     public ImmutableTuple<TStatistics, Duration> evaluatePolicy(
-        OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy,
-        EvaluationArguments<TConfig, TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> evaluationArguments)
+        OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> policy,
+        EvaluationArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> evaluationArguments)
     {
         var systemConfig = evaluationArguments.getSystemConfig();
         logger.info("Running evaluation inference of [{}] policy for [{}] iterations", policy.getPolicyId(), systemConfig.getEvalEpisodeCount());
         var gameSampler = new GameSamplerImpl<>(
             evaluationArguments.getInitialStateSupplier(),
             evaluationArguments.getEpisodeResultsFactory(),
-            systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount(),
-            policy.getPolicySupplier(),
-            evaluationArguments.getOpponentPolicySupplier());
+            // insert list of policies here.
+            systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount());
         long start = System.currentTimeMillis();
         var episodeList = gameSampler.sampleEpisodes(systemConfig.getEvalEpisodeCount(), evaluationArguments.getProblemConfig().getMaximalStepCountBound(), PolicyMode.INFERENCE);
         long end = System.currentTimeMillis();
