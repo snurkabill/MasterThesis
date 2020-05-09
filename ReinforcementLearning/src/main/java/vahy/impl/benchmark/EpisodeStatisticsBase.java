@@ -13,8 +13,8 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
     private final List<Double> stdevPlayerStepCount;
     private final double averageMillisPerEpisode;
     private final double stdevMillisPerEpisode;
-    private final List<List<Double>> totalPayoffAverage;
-    private final List<List<Double>> totalPayoffStdev;
+    private final List<Double> totalPayoffAverage;
+    private final List<Double> totalPayoffStdev;
 
     public EpisodeStatisticsBase(Duration totalDuration,
                                  int playerCount,
@@ -22,8 +22,8 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
                                  List<Double> stdevPlayerStepCount,
                                  double averageMillisPerEpisode,
                                  double stdevMillisPerEpisode,
-                                 List<List<Double>> totalPayoffAverage,
-                                 List<List<Double>> totalPayoffStdev) {
+                                 List<Double> totalPayoffAverage,
+                                 List<Double> totalPayoffStdev) {
         this.totalDuration = totalDuration;
         this.playerCount = playerCount;
         this.averagePlayerStepCount = averagePlayerStepCount;
@@ -67,11 +67,11 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         return stdevMillisPerEpisode;
     }
 
-    public List<List<Double>> getTotalPayoffAverage() {
+    public List<Double> getTotalPayoffAverage() {
         return totalPayoffAverage;
     }
 
-    public List<List<Double>> getTotalPayoffStdev() {
+    public List<Double> getTotalPayoffStdev() {
         return totalPayoffStdev;
     }
 
@@ -83,9 +83,8 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         sb.append(System.lineSeparator());
         for (int i = 0; i < playerCount; i++) {
             sb.append(printOneProperty("Player " + i + " StepCount", averagePlayerStepCount.get(i), stdevPlayerStepCount.get(i)));
-            for (int j = 0; j < totalPayoffAverage.get(i).size(); j++) {
-                sb.append(printOneProperty("Total " + j + "th payoff for " + i + "th player", totalPayoffAverage.get(i).get(j), totalPayoffStdev.get(i).get(j)));
-            }
+            sb.append(printOneProperty("Total payoff for " + i + "th player", totalPayoffAverage.get(i), totalPayoffStdev.get(i)));
+
         }
         sb.append(printOneProperty("Ms per episode", averageMillisPerEpisode, stdevMillisPerEpisode));
         sb.append(System.lineSeparator());

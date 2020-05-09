@@ -23,7 +23,7 @@ public interface EpisodeStepRecord<
 
     TState getToState();
 
-    double[][] getReward();
+    double[] getReward();
 
     String toLogString();
 

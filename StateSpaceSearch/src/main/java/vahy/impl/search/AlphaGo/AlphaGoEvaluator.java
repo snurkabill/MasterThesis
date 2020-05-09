@@ -10,8 +10,7 @@ import java.util.function.Function;
 
 public class AlphaGoEvaluator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends DoubleVector,
+    TObservation extends DoubleVector,
     TSearchNodeMetadata extends AlphaGoNodeMetadata<TAction>,
     TState extends State<TAction, TObservation, TState>>
     implements NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {

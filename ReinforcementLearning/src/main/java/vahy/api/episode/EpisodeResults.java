@@ -22,7 +22,7 @@ public interface EpisodeResults<
 
     List<Integer> getPlayerStepCountList();
 
-    List<List<Double>> getTotalPayoff();
+    List<Double> getTotalPayoff();
 
     Duration getDuration();
 

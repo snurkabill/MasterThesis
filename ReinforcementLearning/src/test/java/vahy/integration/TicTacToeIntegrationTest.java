@@ -130,7 +130,7 @@ public class TicTacToeIntegrationTest {
         var result = runner.run(runnerArguments, evaluationArguments);
 
         Assert.assertTrue(result.getEpisodeStatistics().getAveragePlayerStepCount().get(0) < result.getEpisodeStatistics().getAveragePlayerStepCount().get(1));
-        Assert.assertEquals(result.getEpisodeStatistics().getTotalPayoffAverage().get(0).get(0) + result.getEpisodeStatistics().getTotalPayoffAverage().get(1).get(0), 0.0, Math.pow(10, -10));
-        Assert.assertTrue(result.getEpisodeStatistics().getTotalPayoffAverage().get(0).get(0) < result.getEpisodeStatistics().getTotalPayoffAverage().get(1).get(0));
+        Assert.assertEquals(result.getEpisodeStatistics().getTotalPayoffAverage().get(0) + result.getEpisodeStatistics().getTotalPayoffAverage().get(1), 0.0, Math.pow(10, -10));
+        Assert.assertTrue(result.getEpisodeStatistics().getTotalPayoffAverage().get(0) < result.getEpisodeStatistics().getTotalPayoffAverage().get(1));
     }
 }

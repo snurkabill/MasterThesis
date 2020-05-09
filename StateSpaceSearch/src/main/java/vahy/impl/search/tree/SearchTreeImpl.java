@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
@@ -22,7 +22,7 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.SearchTree;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.ImmutableStateRewardReturn;
+import vahy.impl.model.ImmutableStateWrapperRewardReturn;
 import vahy.utils.ImmutableTuple;
 
 import java.io.File;
@@ -80,7 +80,7 @@ public class SearchTreeImpl<
     }
 
     @Override
-    public StateRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
+    public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
         checkApplicableAction(action);
         return innerApplyAction(action);
     }
@@ -145,7 +145,7 @@ public class SearchTreeImpl<
         }
     }
 
-    protected StateRewardReturn<TAction, TObservation, TState> innerApplyAction(TAction action) {
+    protected StateWrapperRewardReturn<TAction, TObservation, TState> innerApplyAction(TAction action) {
         double reward = root.getChildNodeMap().get(action).getSearchNodeMetadata().getGainedReward();
         root = root.getChildNodeMap().get(action);
         root.makeRoot();
@@ -153,7 +153,7 @@ public class SearchTreeImpl<
         if(!root.isFinalNode()) {
             expandTreeToNextPlayerLevel();
         }
-        return new ImmutableStateRewardReturn<>(root.getWrappedState(), reward);
+        return new ImmutableStateWrapperRewardReturn<>(root.getWrappedState(), reward);
     }
 
     protected void expandTreeToNextPlayerLevel() {

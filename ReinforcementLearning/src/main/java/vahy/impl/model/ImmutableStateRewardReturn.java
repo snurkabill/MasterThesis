@@ -10,15 +10,15 @@ public class ImmutableStateRewardReturn<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends ImmutableTuple<TState, double[][]>
+    extends ImmutableTuple<TState, double[]>
     implements StateRewardReturn<TAction, TObservation, TState> {
 
-    public ImmutableStateRewardReturn(TState state, double[][] reward) {
+    public ImmutableStateRewardReturn(TState state, double[] reward) {
         super(state, reward);
     }
 
     @Override
-    public double[][] getReward() {
+    public double[] getReward() {
         return super.getSecond();
     }
 

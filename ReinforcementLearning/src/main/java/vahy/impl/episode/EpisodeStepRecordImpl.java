@@ -22,14 +22,14 @@ public class EpisodeStepRecordImpl<
     private final TPolicyRecord policyStepRecord;
     private final TState fromState;
     private final TState toState;
-    private final double[][] reward;
+    private final double[] reward;
 
     public EpisodeStepRecordImpl(int policyIdOnTurn,
                                  TAction playedAction,
                                  TPolicyRecord policyStepRecord,
                                  TState fromState,
                                  TState toState,
-                                 double[][] reward) {
+                                 double[] reward) {
         this.policyIdOnTurn = policyIdOnTurn;
         this.playedAction = playedAction;
         this.policyStepRecord = policyStepRecord;
@@ -64,7 +64,7 @@ public class EpisodeStepRecordImpl<
     }
 
     @Override
-    public double[][] getReward() {
+    public double[] getReward() {
         return reward;
     }
 
@@ -107,7 +107,7 @@ public class EpisodeStepRecordImpl<
         var list = new ArrayList<String>();
         list.add(Integer.toString(policyIdOnTurn));
         list.add(playedAction.toString());
-        list.add(Arrays.deepToString(reward));
+        list.add(Arrays.toString(reward));
         list.addAll(policyStepRecord.getCsvRecord());
         return list;
     }

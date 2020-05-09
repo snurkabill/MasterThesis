@@ -2,7 +2,7 @@ package vahy.api.search.tree;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.SearchNodeMetadata;
@@ -15,7 +15,7 @@ public interface SearchTree<
 
     SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getRoot();
 
-    StateRewardReturn<TAction, TObservation, TState> applyAction(TAction action);
+    StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action);
 
     boolean updateTree();
 

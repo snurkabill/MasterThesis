@@ -23,7 +23,7 @@ public class EpisodeResultsFactoryBase<
                                                                                       int policyCount,
                                                                                       List<Integer> playerStepCount,
                                                                                       int totalStepCountList,
-                                                                                      List<List<Double>> totalCumulativePayoff,
+                                                                                      List<Double> totalCumulativePayoff,
                                                                                       Duration duration)
     {
         return new EpisodeResultsImpl<>(episodeHistory, policyCount, playerStepCount, totalStepCountList, totalCumulativePayoff, duration);

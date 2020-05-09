@@ -70,7 +70,7 @@ public class DefaultLocalBenchmark {
         var results = paperExperimentBuilder.execute();
 
         for (PolicyResults<HallwayAction, DoubleVector, HallwayStateImpl, HallwayStateImpl, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
-            logger.info("PolicyId: " + result.getPolicy().getPolicyId());
+            logger.info("PolicyId: " + result.getPolicyList().getPolicyName());
             logger.info("Results: " + result.getEpisodeStatistics().printToLog());
         }
 

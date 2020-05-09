@@ -53,10 +53,10 @@ public class EpisodeSimulatorImpl<
 
         policyList.sort(Comparator.comparing(Policy::getPolicyId));
         List<Integer> playerStepsDone = new ArrayList<>(policyList.size());
-        List<List<Double>> totalCumulativePayoffList = new ArrayList<>(policyList.size());
+        List<Double> totalCumulativePayoffList = new ArrayList<>(policyList.size());
         for (int i = 0; i < policyList.size(); i++) {
             playerStepsDone.add(0);
-            totalCumulativePayoffList.add(new ArrayList<>());
+            totalCumulativePayoffList.add(0.0);
         }
 
         TState state = initState;
@@ -88,18 +88,10 @@ public class EpisodeSimulatorImpl<
         }
     }
 
-    private void distributeRewards(List<List<Double>> totalCumulativePayoffList, EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord> step) {
+    private void distributeRewards(List<Double> totalCumulativePayoffList, EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord> step) {
         var rewards = step.getReward();
         for (int i = 0; i < rewards.length; i++) {
-            var rewardArray = totalCumulativePayoffList.get(i);
-            if(rewardArray.size() == 0) {
-                for (int j = 0; j < rewards[i].length; j++) {
-                    rewardArray.add(0.0);
-                }
-            }
-            for (int j = 0; j < rewards[i].length; j++) {
-                totalCumulativePayoffList.get(i).set(j, totalCumulativePayoffList.get(i).get(j) + rewards[i][j]);
-            }
+            totalCumulativePayoffList.set(i, totalCumulativePayoffList.get(i) + rewards[i]);
         }
     }
 

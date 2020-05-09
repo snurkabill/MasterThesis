@@ -12,8 +12,7 @@ import java.util.LinkedHashMap;
 
 public class AlphaGoNodeMetadataFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends DoubleVector,
+    TObservation extends DoubleVector,
     TState extends State<TAction, TObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 

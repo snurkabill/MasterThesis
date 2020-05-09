@@ -13,7 +13,7 @@ import java.util.List;
 public class EmptySpaceState implements Observation, State<EmptySpaceAction, DoubleVector, EmptySpaceState> {
 
     public static final DoubleVector FIXED_OBSERVATION = new DoubleVector(new double[] {0.0});
-    public static final double[][] FIXED_REWARD = new double[][] {new double[] {0.0}, new double[] {0.0}};
+    public static final double[] FIXED_REWARD = new double[] {0.0, 0.0};
 
     private final boolean isPlayerTurn;
 

@@ -58,8 +58,6 @@ public abstract class AbstractTreeSearchPolicy<
         timer.stopTimer();
     }
 
-    public abstract int getExpandedNodeCountSoFar();
-
     protected void checkStateRoot(TState gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state in root or gameState argument itself is invalid. Possible issues: " + System.lineSeparator() +

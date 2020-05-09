@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 
 public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState>, Observation {
 
-    public static final double[][] PLAYER_ZERO_WON_REWARD = new double[][]{new double[] {1.0}, new double[] {-1.0}};
-    public static final double[][] PLAYER_ONE_WON_REWARD = new double[][]{new double[] {-1.0}, new double[] {1.0}};
-    public static final double[][] IN_GAME_REWARD = new double[][]{new double[] {0.0}, new double[] {0.0}};
+    public static final double[] PLAYER_ZERO_WON_REWARD = new double[] {1.0, -1.0};
+    public static final double[] PLAYER_ONE_WON_REWARD = new double[] {-1.0, 1.0};
+    public static final double[] IN_GAME_REWARD = new double[] {0.0, 0.0};
 
     private enum Player_inner {
         PLAYER_ZERO(Symbol.PLAYER_ZERO_SYMBOL),
@@ -150,7 +150,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             }
             newPlayground[x][y] = Symbol.PLAYER_ZERO_SYMBOL;
             var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
-            double[][] reward = hasOneWin(Player_inner.PLAYER_ZERO, newPlayground) ? PLAYER_ZERO_WON_REWARD : IN_GAME_REWARD;
+            double[] reward = hasOneWin(Player_inner.PLAYER_ZERO, newPlayground) ? PLAYER_ZERO_WON_REWARD : IN_GAME_REWARD;
             return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
                     newPlayground,
@@ -174,7 +174,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             }
             newPlayground[x][y] = Symbol.PLAYER_ONE_SYMBOL;
             var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
-            double[][] reward = hasOneWin(Player_inner.PLAYER_ONE, newPlayground) ? PLAYER_ONE_WON_REWARD : IN_GAME_REWARD;
+            double[] reward = hasOneWin(Player_inner.PLAYER_ONE, newPlayground) ? PLAYER_ONE_WON_REWARD : IN_GAME_REWARD;
             return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
                     newPlayground,

@@ -300,7 +300,7 @@ public class PaperExperimentBuilder<
                                                                                                                                        SplittableRandom masterRandom) {
         TrainablePredictor opponentPredictor = initializeOpponentPredictor(observedVectorLength, approximatorConfig, systemConfig, opponentActionCount, masterRandom.split());
         return new PredictorTrainingSetup<>(
-            opponentPredictor,
+            playerIdPredictor, opponentPredictor,
             new OpponentSamplerDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(opponentActionCount, playerPolicyId, opponentPolicyId),
             approximatorConfig.getDataAggregationAlgorithm().resolveDataAggregator(approximatorConfig)
         );
@@ -313,7 +313,7 @@ public class PaperExperimentBuilder<
                                                                                                                                      SplittableRandom masterRandom) {
         TrainablePredictor playerPredictor = initializePlayerPredictor(observedVectorLength, approximatorConfig, systemConfig, playerActionCount, masterRandom.split());
         return new PredictorTrainingSetup<>(
-            playerPredictor,
+            playerIdPredictor, playerPredictor,
             new PaperEpisodeDataMaker<TAction, TOpponentObservation, TState, PaperPolicyRecord>(discountFactor),
             approximatorConfig.getDataAggregationAlgorithm().resolveDataAggregator(approximatorConfig)
         );

@@ -41,7 +41,7 @@ public abstract class SHExperiment {
         var results = paperExperimentBuilder.execute();
 
         for (PolicyResults<SHAction, DoubleVector, SHState, SHState, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
-            logger.info("PolicyId: " + result.getPolicy().getPolicyId());
+            logger.info("PolicyId: " + result.getPolicyList().getPolicyName());
             logger.info("Results: " + result.getEpisodeStatistics().printToLog());
         }
     }

@@ -10,11 +10,7 @@ import vahy.utils.StreamUtils;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class AlphaGoNodeSelector<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends DoubleVector,
-    TState extends State<TAction, TObservation, TState>>
+public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
     extends AbstractTreeBasedNodeSelector<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private final double cpuctParameter;

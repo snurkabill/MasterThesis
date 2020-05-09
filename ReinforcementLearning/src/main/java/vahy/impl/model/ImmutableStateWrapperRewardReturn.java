@@ -11,15 +11,15 @@ public class ImmutableStateWrapperRewardReturn<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends ImmutableTuple<StateWrapper<TAction, TObservation, TState>, double[][]>
+    extends ImmutableTuple<StateWrapper<TAction, TObservation, TState>, double[]>
     implements StateWrapperRewardReturn<TAction, TObservation, TState> {
 
-    public ImmutableStateWrapperRewardReturn(StateWrapper<TAction, TObservation, TState> first, double[][] second) {
+    public ImmutableStateWrapperRewardReturn(StateWrapper<TAction, TObservation, TState> first, double[] second) {
         super(first, second);
     }
 
     @Override
-    public double[][] getReward() {
+    public double[] getReward() {
         return super.getSecond();
     }
 

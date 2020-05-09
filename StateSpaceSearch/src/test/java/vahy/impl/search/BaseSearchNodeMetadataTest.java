@@ -1,8 +1,8 @@
-package vahy.impl.search.node.nodeMetadata;
+package vahy.impl.search;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import vahy.impl.search.AbstractStateSpaceSearchTest;
+import vahy.impl.search.node.nodeMetadata.BaseSearchNodeMetadata;
 
 public class BaseSearchNodeMetadataTest extends AbstractStateSpaceSearchTest {
 

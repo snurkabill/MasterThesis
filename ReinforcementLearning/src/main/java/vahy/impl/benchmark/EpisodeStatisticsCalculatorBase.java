@@ -31,20 +31,14 @@ public class EpisodeStatisticsCalculatorBase<
             stdevPlayerStepCount.add(MathStreamUtils.calculateStdev(episodeResultsList, value -> value.getPlayerStepCountList().get(index), average));
         }
 
-        List<List<Double>> totalPayoffAverage = new ArrayList<>(policyCount);
-        List<List<Double>> totalPayoffStdev = new ArrayList<>(policyCount);
+        List<Double> totalPayoffAverage = new ArrayList<>(policyCount);
+        List<Double> totalPayoffStdev = new ArrayList<>(policyCount);
         for (int i = 0; i < policyCount; i++) {
-            var payoffCount = episodeResultsList.get(0).getTotalPayoff().get(i).size();
-            totalPayoffAverage.add(new ArrayList<>(payoffCount));
-            totalPayoffStdev.add(new ArrayList<>(payoffCount));
-            for (int j = 0; j < payoffCount; j++) {
-                var index_i = i;
-                var index_j = j;
-                var average = MathStreamUtils.calculateAverage(episodeResultsList, x -> x.getTotalPayoff().get(index_i).get(index_j));
-                var stdev = MathStreamUtils.calculateStdev(episodeResultsList, x -> x.getTotalPayoff().get(index_i).get(index_j));
-                totalPayoffAverage.get(i).add(average);
-                totalPayoffStdev.get(i).add(stdev);
-            }
+            var index_i = i;
+            var average = MathStreamUtils.calculateAverage(episodeResultsList, x -> x.getTotalPayoff().get(index_i));
+            var stdev = MathStreamUtils.calculateStdev(episodeResultsList, x -> x.getTotalPayoff().get(index_i));
+            totalPayoffAverage.add(average);
+            totalPayoffStdev.add(stdev);
         }
         var averageMillisPerEpisode = MathStreamUtils.calculateAverage(episodeResultsList, (x) -> x.getDuration().toMillis());
         var stdevMillisPerEpisode = MathStreamUtils.calculateStdev(episodeResultsList, (x) -> x.getDuration().toMillis());

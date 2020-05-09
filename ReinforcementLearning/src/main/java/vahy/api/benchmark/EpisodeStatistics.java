@@ -15,9 +15,9 @@ public interface EpisodeStatistics {
 
     double getStdevMillisPerEpisode();
 
-    List<List<Double>> getTotalPayoffAverage();
+    List<Double> getTotalPayoffAverage();
 
-    List<List<Double>> getTotalPayoffStdev();
+    List<Double> getTotalPayoffStdev();
 
 
     String printToLog();

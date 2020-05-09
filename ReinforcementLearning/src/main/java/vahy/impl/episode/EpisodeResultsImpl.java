@@ -22,13 +22,13 @@ public class EpisodeResultsImpl<
     private final int policyCount;
     private final List<Integer> playerStepCountList;
     private final int totalStepCount;
-    private final List<List<Double>> totalPayoff;
+    private final List<Double> totalPayoff;
     private final Duration duration;
 
     public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
                               int policyCount, List<Integer> playerStepCountList,
                               int totalStepCount,
-                              List<List<Double>> totalPayoff,
+                              List<Double> totalPayoff,
                               Duration duration) {
         this.episodeHistory = episodeHistory;
         this.policyCount = policyCount;
@@ -59,7 +59,7 @@ public class EpisodeResultsImpl<
     }
 
     @Override
-    public List<List<Double>> getTotalPayoff() {
+    public List<Double> getTotalPayoff() {
         return totalPayoff;
     }
 

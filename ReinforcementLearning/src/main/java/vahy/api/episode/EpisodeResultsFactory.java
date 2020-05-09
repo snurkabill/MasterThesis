@@ -19,7 +19,7 @@ public interface EpisodeResultsFactory<
         int policyCount,
         List<Integer> playerStepCountList,
         int totalStepCount,
-        List<List<Double>> totalCumulativePayoffList,
+        List<Double> totalCumulativePayoffList,
         Duration duration
     );
 }

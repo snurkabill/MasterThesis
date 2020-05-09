@@ -8,11 +8,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.observation.DoubleVector;
 
-public class AlphaGoTreeSearchUpdater<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends DoubleVector,
-    TState extends State<TAction, TObservation, TState>>
+public class AlphaGoTreeSearchUpdater<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
     implements TreeUpdater<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(AlphaGoTreeSearchUpdater.class);
