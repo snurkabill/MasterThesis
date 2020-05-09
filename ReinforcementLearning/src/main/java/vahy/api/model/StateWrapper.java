@@ -6,8 +6,8 @@ import vahy.impl.model.ImmutableStateWrapperRewardReturn;
 
 public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
 
-    private final int policyId;
-    private final TState state;
+    protected final int policyId;
+    protected final TState state;
 
     public StateWrapper(int policyId, TState state) {
         this.policyId = policyId;
@@ -24,7 +24,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
 
     public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType) {
         StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(actionType);
-        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(policyId, stateRewardReturn.getState()), stateRewardReturn.getReward());
+        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(policyId, stateRewardReturn.getState()), stateRewardReturn.getReward()[policyId]);
     }
 
     public TObservation getObservation() {
@@ -45,6 +45,10 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
 
     public boolean isPlayerTurn() {
         return state.getPlayerIdOnTurn() == policyId;
+    }
+
+    public int getPlayerOnTurnId() {
+        return state.getPlayerIdOnTurn();
     }
 
     public boolean isFinalState() {
