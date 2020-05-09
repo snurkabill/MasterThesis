@@ -1,7 +1,7 @@
 package vahy.impl.runner;
 
 import vahy.api.episode.EpisodeResults;
-import vahy.api.experiment.AlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.Config;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -29,7 +29,7 @@ public class EpisodeWriter<
     private final Path rootPath;
     private final Path fullPath;
 
-    public EpisodeWriter(ProblemConfig problemConfig, AlgorithmConfig algorithmConfig, SystemConfig systemConfig, String timestamp, String policyName) {
+    public EpisodeWriter(ProblemConfig problemConfig, CommonAlgorithmConfig algorithmConfig, SystemConfig systemConfig, String timestamp, String policyName) {
         this.rootPath = systemConfig.getDumpPath();
 
         if(rootPath == null) {

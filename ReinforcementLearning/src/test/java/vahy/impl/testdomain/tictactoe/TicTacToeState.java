@@ -13,9 +13,13 @@ import java.util.stream.Collectors;
 
 public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState>, Observation {
 
+    public static final double[][] PLAYER_ZERO_WON_REWARD = new double[][]{new double[] {1.0}, new double[] {-1.0}};
+    public static final double[][] PLAYER_ONE_WON_REWARD = new double[][]{new double[] {-1.0}, new double[] {1.0}};
+    public static final double[][] IN_GAME_REWARD = new double[][]{new double[] {0.0}, new double[] {0.0}};
+
     private enum Player_inner {
-        PLAYER(Symbol.PLAYER),
-        OPPONENT(Symbol.OPPONENT);
+        PLAYER_ZERO(Symbol.PLAYER_ZERO_SYMBOL),
+        PLAYER_ONE(Symbol.PLAYER_ONE_SYMBOL);
 
         private final Symbol symbol;
 
@@ -29,8 +33,8 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     public enum Symbol {
-        PLAYER(1),
-        OPPONENT(2),
+        PLAYER_ZERO_SYMBOL(1),
+        PLAYER_ONE_SYMBOL(2),
         EMPTY(0);
 
         private final int symbol;
@@ -45,19 +49,19 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     private final Symbol[][] playground;
-    private final boolean isAgentTurn;
+    private final boolean isPlayerZeroOnTurn;
     private final int turnsLeft;
 
     private final List<TicTacToeAction> enabledActions;
 
-    public TicTacToeState(Symbol[][] playground, boolean isAgentTurn, int turnsLeft, List<TicTacToeAction> enabledActions) {
+    public TicTacToeState(Symbol[][] playground, boolean isPlayerZeroOnTurn, int turnsLeft, List<TicTacToeAction> enabledActions) {
         for (int i = 0; i < playground.length; i++) {
             if(playground[i].length != playground.length) {
                 throw new IllegalArgumentException("Playground is not square-like");
             }
         }
         this.playground = playground;
-        this.isAgentTurn = isAgentTurn;
+        this.isPlayerZeroOnTurn = isPlayerZeroOnTurn;
         this.turnsLeft = turnsLeft;
         this.enabledActions = enabledActions;
     }
@@ -129,7 +133,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             throw new IllegalStateException("Cannot apply actions on final state");
         }
 
-        if(isAgentTurn) {
+        if(isPlayerZeroOnTurn) {
             var x = actionType.getX();
             var y = actionType.getY();
 
@@ -144,9 +148,9 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                     newPlayground[i][j] = this.playground[i][j];
                 }
             }
-            newPlayground[x][y] = Symbol.PLAYER;
+            newPlayground[x][y] = Symbol.PLAYER_ZERO_SYMBOL;
             var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
-            double[][] reward = hasOneWin(Player_inner.PLAYER, newPlayground) ? new double[][]{new double[] {1.0}} 1 : 0;
+            double[][] reward = hasOneWin(Player_inner.PLAYER_ZERO, newPlayground) ? PLAYER_ZERO_WON_REWARD : IN_GAME_REWARD;
             return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
                     newPlayground,
@@ -168,9 +172,9 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                     newPlayground[i][j] = this.playground[i][j];
                 }
             }
-            newPlayground[x][y] = Symbol.OPPONENT;
+            newPlayground[x][y] = Symbol.PLAYER_ONE_SYMBOL;
             var newActions = enabledActions.stream().filter(item -> item.getX() != x || item.getY() != y).collect(Collectors.toList());
-            double reward = hasOneWin(Player_inner.OPPONENT, newPlayground) ? -1 : 0;
+            double[][] reward = hasOneWin(Player_inner.PLAYER_ONE, newPlayground) ? PLAYER_ONE_WON_REWARD : IN_GAME_REWARD;
             return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
                     newPlayground,
@@ -214,17 +218,22 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
+    public int getTotalPlayerCount() {
+        return 2;
+    }
+
+    @Override
     public int getPlayerIdOnTurn() {
-        return 0;
+        return isPlayerZeroOnTurn ? 0 : 1;
     }
 
     @Override
     public boolean isInGame(int playerId) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isFinalState() {
-        return turnsLeft == 0 || hasOneWin(Player_inner.PLAYER, playground) || hasOneWin(Player_inner.OPPONENT, playground);
+        return turnsLeft == 0 || hasOneWin(Player_inner.PLAYER_ZERO, playground) || hasOneWin(Player_inner.PLAYER_ONE, playground);
     }
 }

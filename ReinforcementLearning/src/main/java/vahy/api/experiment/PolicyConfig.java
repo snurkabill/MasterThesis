@@ -2,15 +2,9 @@ package vahy.api.experiment;
 
 import java.util.function.Supplier;
 
-public interface AlgorithmConfig extends Config {
-
-    String getAlgorithmId();
+public interface PolicyConfig extends Config {
 
     double getDiscountFactor();
-
-    int getBatchEpisodeCount();
-
-    int getStageCount();
 
     Supplier<Double> getExplorationConstantSupplier();
 

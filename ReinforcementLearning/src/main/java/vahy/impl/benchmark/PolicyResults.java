@@ -16,26 +16,33 @@ public class PolicyResults<
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
-    private final OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> policy;
+    private final String runName;
+    private final List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList;
     private final List<TStatistics> trainingStatisticsList;
     private final TStatistics episodeStatistics;
     private final Duration trainingDuration;
     private final Duration benchmarkingDuration;
 
-    public PolicyResults(OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> policy,
+    public PolicyResults(String runName,
+                         List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList,
                          List<TStatistics> trainingStatisticsList,
                          TStatistics episodeStatistics,
                          Duration trainingDuration,
                          Duration benchmarkingDuration) {
-        this.policy = policy;
+        this.runName = runName;
+        this.policyList = policyList;
         this.trainingStatisticsList = trainingStatisticsList;
         this.episodeStatistics = episodeStatistics;
         this.trainingDuration = trainingDuration;
         this.benchmarkingDuration = benchmarkingDuration;
     }
 
-    public OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord> getPolicy() {
-        return policy;
+    public String getRunName() {
+        return runName;
+    }
+
+    public List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> getPolicyList() {
+        return policyList;
     }
 
     public List<TStatistics> getTrainingStatisticsList() {

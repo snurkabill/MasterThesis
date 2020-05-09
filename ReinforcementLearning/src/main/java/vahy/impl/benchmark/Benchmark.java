@@ -31,14 +31,15 @@ public class Benchmark<
         this.systemConfig = systemConfig;
     }
 
-    public void benchmark(List<PolicyResults<TAction, TObservation, TState, TPolicyRecord, TStatistics>> policyList) {
-        createReport(
-            policyList.stream().sorted(Comparator.comparing(x -> x.getPolicy().getPolicyId())).map(PolicyResults::getTrainingStatisticsList).collect(Collectors.toList()),
-            policyList.stream().sorted(Comparator.comparing(x -> x.getPolicy().getPolicyId())).map(PolicyResults::getEpisodeStatistics).collect(Collectors.toList()),
-            policyList.stream().sorted(Comparator.comparing(x -> x.getPolicy().getPolicyId())).map(x -> x.getPolicy().getPolicyId()).collect(Collectors.toList()),
-            mapperList,
-            systemConfig);
-    }
+//    public void benchmark(List<PolicyResults<TAction, TObservation, TState, TPolicyRecord, TStatistics>> policyList) {
+//        var sorted = policyList.stream().sorted(Comparator.comparing(PolicyResults::getRunName));
+//        createReport(
+//            sorted.map(PolicyResults::getTrainingStatisticsList).collect(Collectors.toList()),
+//            sorted.map(PolicyResults::getEpisodeStatistics).collect(Collectors.toList()),
+//            sorted.map(x -> x.getPolicyList().getPolicyName()).collect(Collectors.toList()),
+//            mapperList,
+//            systemConfig);
+//    }
 
     private void createReport(List<List<TStatistics>> trainingStatisticsList,
                               List<TStatistics> evaluationStatisticsList,

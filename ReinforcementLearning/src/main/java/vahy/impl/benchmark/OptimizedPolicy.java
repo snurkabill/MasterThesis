@@ -15,18 +15,24 @@ public class OptimizedPolicy<
     TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
-    private final String policyId;
+    private final int policyId;
+    private final String policyName;
     private final List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
     private final PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier;
 
-    public OptimizedPolicy(String policyId, List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList, PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier) {
+    public OptimizedPolicy(int policyId, String policyName, List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList, PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier) {
         this.policyId = policyId;
+        this.policyName = policyName;
         this.trainablePredictorSetupList = trainablePredictorSetupList;
         this.policySupplier = policySupplier;
     }
 
-    public String getPolicyId() {
+    public int getPolicyId() {
         return policyId;
+    }
+
+    public String getPolicyName() {
+        return policyName;
     }
 
     public List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> getTrainablePredictorSetupList() {

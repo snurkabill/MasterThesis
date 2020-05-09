@@ -4,16 +4,14 @@ import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
-import vahy.api.experiment.AlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
-import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.DataPointGeneratorGeneric;
-import vahy.impl.learning.trainer.PredictorTrainingSetup;
 
 import java.util.List;
 
@@ -24,35 +22,32 @@ public class RunnerArguments<TConfig extends ProblemConfig,
     TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
-    private final String policyId;
+    private final String runName;
 
     private final TConfig problemConfig;
     private final SystemConfig systemConfig;
-    private final AlgorithmConfig algorithmConfig;
+    private final CommonAlgorithmConfig algorithmConfig;
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
-    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
-
     private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
     private final List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
+    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
 
-    private final List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
-
-    private final List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> policySupplierList;
+    private final List<PolicyArguments<TAction, TObservation, TState, TPolicyRecord>> policyArgumentsList;
 
     private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
 
-    public RunnerArguments(String policyId, TConfig problemConfig,
+    public RunnerArguments(String runName,
+                           TConfig problemConfig,
                            SystemConfig systemConfig,
-                           AlgorithmConfig algorithmConfig,
+                           CommonAlgorithmConfig algorithmConfig,
                            InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                            EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
                            EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
                            List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList,
-                           List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> policySupplier,
                            EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
-                           List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList) {
-        this.policyId = policyId;
+                           List<PolicyArguments<TAction, TObservation, TState, TPolicyRecord>> policyArgumentsList) {
+        this.runName = runName;
         this.problemConfig = problemConfig;
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
@@ -60,9 +55,12 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         this.episodeResultsFactory = episodeResultsFactory;
         this.episodeStatisticsCalculator = episodeStatisticsCalculator;
         this.additionalDataPointGeneratorList = additionalDataPointGeneratorList;
-        this.policySupplierList = policySupplier;
         this.episodeWriter = episodeWriter;
-        this.trainablePredictorSetupList = trainablePredictorSetupList;
+        this.policyArgumentsList = policyArgumentsList;
+    }
+
+    public String getRunName() {
+        return runName;
     }
 
     public TConfig getProblemConfig() {
@@ -73,7 +71,7 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         return systemConfig;
     }
 
-    public AlgorithmConfig getAlgorithmConfig() {
+    public CommonAlgorithmConfig getAlgorithmConfig() {
         return algorithmConfig;
     }
 
@@ -93,19 +91,11 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         return additionalDataPointGeneratorList;
     }
 
-    public List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> getPolicySupplierList() {
-        return policySupplierList;
-    }
-
     public EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> getEpisodeWriter() {
         return episodeWriter;
     }
 
-    public List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> getTrainablePredictorSetupList() {
-        return trainablePredictorSetupList;
-    }
-
-    public String getPolicyId() {
-        return policyId;
+    public List<PolicyArguments<TAction, TObservation, TState, TPolicyRecord>> getPolicyArgumentsList() {
+        return policyArgumentsList;
     }
 }

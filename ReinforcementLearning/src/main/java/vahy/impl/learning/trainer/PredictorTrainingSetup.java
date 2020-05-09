@@ -14,14 +14,20 @@ public class PredictorTrainingSetup<
     TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> {
 
+    private final int predictorPredictingId;
     private final TrainablePredictor trainablePredictor;
     private final EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker;
     private final DataAggregator dataAggregator;
 
-    public PredictorTrainingSetup(TrainablePredictor trainablePredictor, EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker, DataAggregator dataAggregator) {
+    public PredictorTrainingSetup(int predictorPredictingId, TrainablePredictor trainablePredictor, EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker, DataAggregator dataAggregator) {
+        this.predictorPredictingId = predictorPredictingId;
         this.trainablePredictor = trainablePredictor;
         this.episodeDataMaker = episodeDataMaker;
         this.dataAggregator = dataAggregator;
+    }
+
+    public int getPredictorPredictingId() {
+        return predictorPredictingId;
     }
 
     public TrainablePredictor getTrainablePredictor() {

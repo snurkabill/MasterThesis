@@ -3,7 +3,7 @@ package vahy.impl.runner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatistics;
-import vahy.api.experiment.AlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -26,13 +26,13 @@ public class PolicyTrainingCycle<
     private static Logger logger = LoggerFactory.getLogger(PolicyTrainingCycle.class.getName());
 
     private final SystemConfig systemConfig;
-    private final AlgorithmConfig algorithmConfig;
+    private final CommonAlgorithmConfig algorithmConfig;
     private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
     private final Trainer<TAction, TObservation, TState, TPolicyRecord, TStatistics> trainer;
 
 
     public PolicyTrainingCycle(SystemConfig systemConfig,
-                               AlgorithmConfig algorithmConfig,
+                               CommonAlgorithmConfig algorithmConfig,
                                EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
                                Trainer<TAction, TObservation, TState, TPolicyRecord, TStatistics> trainer) {
         this.systemConfig = systemConfig;
