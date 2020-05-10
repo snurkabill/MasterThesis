@@ -46,6 +46,10 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         return sb.toString();
     }
 
+    public int getPlayerCount() {
+        return playerCount;
+    }
+
     public Duration getTotalDuration() {
         return totalDuration;
     }

@@ -1,4 +1,4 @@
-package vahy.impl.testdomain.tictactoe;
+package vahy.examples.tictactoe;
 
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyRecordBase;
@@ -12,7 +12,7 @@ import java.util.SplittableRandom;
 public class AlwaysStartAtMiddlePolicy extends RandomizedPolicy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> {
 
     private boolean isMiddleAlreadyPlayed = false;
-    private UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState> randomWalkPolicy;
+    private final UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState> randomWalkPolicy;
 
     public AlwaysStartAtMiddlePolicy(SplittableRandom random, int policyId) {
         super(random, policyId);

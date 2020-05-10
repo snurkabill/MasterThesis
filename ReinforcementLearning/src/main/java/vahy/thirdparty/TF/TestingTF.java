@@ -1,10 +1,9 @@
-package vahy.thirdpartyprototype.TF;
+package vahy.thirdparty.TF;
 
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
-import vahy.thirdpartyprototype.TestingDL4J;
 
 import java.io.File;
 import java.io.IOException;

@@ -7,7 +7,30 @@
     <artifactId>master-thesis-reinforcement-learning</artifactId>
     <packaging>jar</packaging>
     <version>2.0-SNAPSHOT</version>
+
+    <properties>
+        <dl4j.version>1.0.0-beta2</dl4j.version>
+        <nd4j.version>1.0.0-beta2</nd4j.version>
+        <tf.version>1.15.0</tf.version>
+    </properties>
+
+
     <dependencies>
+        <dependency>
+            <groupId>org.tensorflow</groupId>
+            <artifactId>tensorflow</artifactId>
+            <version>${tf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.deeplearning4j</groupId>
+            <artifactId>deeplearning4j-core</artifactId>
+            <version>${dl4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.nd4j</groupId>
+            <artifactId>nd4j-native-platform</artifactId>
+            <version>${nd4j.version}</version>
+        </dependency>
         <dependency>
             <groupId>vahy</groupId>
             <artifactId>master-thesis-commons</artifactId>

@@ -86,7 +86,7 @@ public class EpisodeResultsImpl<
         appendLine(sb, "Total step count", String.valueOf(getTotalStepCount()));
         appendLine(sb, "Player step count", playerStepCountList.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
         appendLine(sb, "Duration [ms]", String.valueOf(getDuration().toMillis()));
-        appendLine(sb, "Total Payoff", String.valueOf(getTotalPayoff()));
+        appendLine(sb, "Total Payoff", totalPayoff.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
         return sb.toString();
     }
 }

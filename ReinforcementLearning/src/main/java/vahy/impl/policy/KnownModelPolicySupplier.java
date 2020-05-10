@@ -9,10 +9,7 @@ import vahy.api.policy.PolicyRecord;
 
 import java.util.SplittableRandom;
 
-public class KnownModelPolicySupplier<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
+public class KnownModelPolicySupplier<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> extends AbstractRandomizedPolicySupplier<TAction, TObservation, TState, TPolicyRecord> {
 
     public KnownModelPolicySupplier(SplittableRandom random, int policyId) {

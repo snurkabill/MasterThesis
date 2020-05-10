@@ -1,6 +1,6 @@
-package vahy.thirdpartyprototype.TF.concurrency;
+package vahy.thirdparty.TF.concurrency;
 
-import vahy.paperGenerics.reinforcement.learning.tf.TFModelImproved;
+import vahy.impl.predictor.tf.TFModelImproved;
 
 import java.util.concurrent.Callable;
 

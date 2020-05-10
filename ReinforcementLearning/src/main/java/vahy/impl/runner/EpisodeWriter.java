@@ -29,7 +29,7 @@ public class EpisodeWriter<
     private final Path rootPath;
     private final Path fullPath;
 
-    public EpisodeWriter(ProblemConfig problemConfig, CommonAlgorithmConfig algorithmConfig, SystemConfig systemConfig, String timestamp, String policyName) {
+    public EpisodeWriter(ProblemConfig problemConfig, CommonAlgorithmConfig commonAlgorithmConfig, SystemConfig systemConfig, String timestamp, String policyName) {
         this.rootPath = systemConfig.getDumpPath();
 
         if(rootPath == null) {
@@ -54,7 +54,7 @@ public class EpisodeWriter<
         this.fullPath = resultToFullPath.toPath();
 
         printConfig(problemConfig, "ProblemConfig", resultToFullPath);
-        printConfig(algorithmConfig, "AlgorithmConfig", resultToFullPath);
+        printConfig(commonAlgorithmConfig, "CommonAlgorithmConfig", resultToFullPath);
         printConfig(systemConfig, "SystemConfig", resultToFullPath);
     }
 

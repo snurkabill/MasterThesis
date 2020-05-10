@@ -19,6 +19,7 @@ public class OpponentSamplerDataMaker<TAction extends Enum<TAction> & Action, TS
     private final int allOpponentActions;
     private final int playerPolicyId;
     private final int opponentPolicyId;
+
     public OpponentSamplerDataMaker(int allOpponentActions, int playerPolicyId, int opponentPolicyId) {
         this.allOpponentActions = allOpponentActions;
         this.playerPolicyId = playerPolicyId;

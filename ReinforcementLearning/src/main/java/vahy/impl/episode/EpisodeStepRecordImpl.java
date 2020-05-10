@@ -76,7 +76,7 @@ public class EpisodeStepRecordImpl<
             ", policyStepRecord=" + (policyStepRecord != null ? policyStepRecord.toString() : null) +
             ", fromState=" + fromState +
             ", toState=" + toState +
-            ", reward=" + reward +
+            ", reward=" + Arrays.toString(reward) +
             '}';
     }
 
@@ -98,7 +98,9 @@ public class EpisodeStepRecordImpl<
         list.add("Is player move");
         list.add("Action played");
         list.add("Obtained reward");
-        list.addAll(policyStepRecord.getCsvHeader());
+        if(policyStepRecord != null) {
+            list.addAll(policyStepRecord.getCsvHeader());
+        }
         return list;
     }
 
@@ -108,7 +110,9 @@ public class EpisodeStepRecordImpl<
         list.add(Integer.toString(policyIdOnTurn));
         list.add(playedAction.toString());
         list.add(Arrays.toString(reward));
-        list.addAll(policyStepRecord.getCsvRecord());
+        if(policyStepRecord != null) {
+            list.addAll(policyStepRecord.getCsvRecord());
+        }
         return list;
     }
 }

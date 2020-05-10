@@ -2,32 +2,26 @@ package vahy.integration;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import vahy.api.episode.InitialStateSupplier;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.api.policy.PolicySupplier;
+import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.UniformRandomWalkPolicy;
-import vahy.impl.runner.EpisodeWriter;
-import vahy.impl.runner.EvaluationArguments;
 import vahy.impl.runner.PolicyArguments;
-import vahy.impl.runner.Runner;
-import vahy.impl.runner.RunnerArguments;
-import vahy.impl.testdomain.tictactoe.AlwaysStartAtMiddlePolicy;
-import vahy.impl.testdomain.tictactoe.TicTacToeAction;
-import vahy.impl.testdomain.tictactoe.TicTacToeConfig;
-import vahy.impl.testdomain.tictactoe.TicTacToeState;
-import vahy.impl.testdomain.tictactoe.TicTacToeStateInitializer;
+import vahy.examples.tictactoe.AlwaysStartAtMiddlePolicy;
+import vahy.examples.tictactoe.TicTacToeAction;
+import vahy.examples.tictactoe.TicTacToeConfig;
+import vahy.examples.tictactoe.TicTacToeState;
+import vahy.examples.tictactoe.TicTacToeStateInitializer;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
@@ -35,10 +29,9 @@ import java.util.SplittableRandom;
 public class TicTacToeIntegrationTest {
 
     @Test
-    public void emptyDomainIntegrationTest() throws IOException {
+    public void emptyDomainIntegrationTest() {
 
         var ticTacConfig = new TicTacToeConfig();
-
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -51,11 +44,6 @@ public class TicTacToeIntegrationTest {
             @Override
             public String toFile() {
                 return "";
-            }
-
-            @Override
-            public String getAlgorithmName() {
-                return "DUMMY_ALGO_TEST";
             }
 
             @Override
@@ -97,37 +85,17 @@ public class TicTacToeIntegrationTest {
             playerTwoSupplier
         );
 
-        InitialStateSupplier<TicTacToeAction, DoubleVector, TicTacToeState> initailStateSupplier = policyMode -> (new TicTacToeStateInitializer(ticTacConfig, new SplittableRandom())).createInitialState(policyMode);
-
-        var episodeResultsFactory = new EpisodeResultsFactoryBase<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>();
-        var statisticsCalculator = new EpisodeStatisticsCalculatorBase<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>();
-        var episodeWriter = new EpisodeWriter<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(ticTacConfig, algorithmConfig, systemConfig, LocalDateTime.now().toString(), "dummy_name");
-
-        var runnerArguments = new RunnerArguments<TicTacToeConfig, TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>(
-            "Test",
-            ticTacConfig,
-            systemConfig,
-            algorithmConfig,
-            initailStateSupplier,
-            episodeResultsFactory,
-            statisticsCalculator,
-            null,
-            episodeWriter,
-            policyArgumentsList
-        );
-
-        var evaluationArguments = new EvaluationArguments<TicTacToeConfig, TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>(
-            "Test_eval",
-            ticTacConfig,
-            systemConfig,
-            initailStateSupplier,
-            episodeResultsFactory,
-            statisticsCalculator,
-            episodeWriter
-        );
-
-        var runner = new Runner<TicTacToeConfig, TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>();
-        var result = runner.run(runnerArguments, evaluationArguments);
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+            .setRoundName("TicTacToeIntegrationTest")
+            .setAdditionalDataPointGeneratorListSupplier(null)
+            .setCommonAlgorithmConfig(algorithmConfig)
+            .setProblemConfig(ticTacConfig)
+            .setSystemConfig(systemConfig)
+            .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
+            .setResultsFactory(new EpisodeResultsFactoryBase<>())
+            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
+            .setPolicySupplierList(policyArgumentsList);
+        var result = roundBuilder.execute();
 
         Assert.assertTrue(result.getEpisodeStatistics().getAveragePlayerStepCount().get(0) < result.getEpisodeStatistics().getAveragePlayerStepCount().get(1));
         Assert.assertEquals(result.getEpisodeStatistics().getTotalPayoffAverage().get(0) + result.getEpisodeStatistics().getTotalPayoffAverage().get(1), 0.0, Math.pow(10, -10));

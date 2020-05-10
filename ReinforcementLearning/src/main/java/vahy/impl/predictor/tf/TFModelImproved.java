@@ -1,4 +1,4 @@
-package vahy.paperGenerics.reinforcement.learning.tf;
+package vahy.impl.predictor.tf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

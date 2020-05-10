@@ -14,6 +14,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         this.state = state;
     }
 
+    // TODO: remove this
     public TState getWrappedState() {
         return state;
     }
@@ -58,4 +59,21 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.isInGame(policyId);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        StateWrapper<?, ?, ?> that = (StateWrapper<?, ?, ?>) o;
+
+        if (policyId != that.policyId) return false;
+        return state.equals(that.state);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = policyId;
+        result = 31 * result + state.hashCode();
+        return result;
+    }
 }

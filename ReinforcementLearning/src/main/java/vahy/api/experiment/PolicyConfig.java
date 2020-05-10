@@ -4,6 +4,8 @@ import java.util.function.Supplier;
 
 public interface PolicyConfig extends Config {
 
+    String getAlgorithmId();
+
     double getDiscountFactor();
 
     Supplier<Double> getExplorationConstantSupplier();

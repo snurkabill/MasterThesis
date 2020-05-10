@@ -1,8 +1,8 @@
-package vahy.thirdpartyprototype.TF.concurrency;
+package vahy.thirdparty.TF.concurrency;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paperGenerics.reinforcement.learning.tf.TFModelImproved;
+import vahy.impl.predictor.tf.TFModelImproved;
 import vahy.utils.RandomDistributionUtils;
 
 import java.io.IOException;

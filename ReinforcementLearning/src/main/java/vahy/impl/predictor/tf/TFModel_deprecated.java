@@ -1,4 +1,4 @@
-package vahy.paperGenerics.reinforcement.learning.tf;
+package vahy.impl.predictor.tf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,17 +6,18 @@ import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.Tensors;
+import vahy.api.learning.model.Model;
 import vahy.api.learning.model.SupervisedTrainableModel;
-import vahy.paperGenerics.PaperModel;
 import vahy.timer.SimpleTimer;
 
 import java.nio.DoubleBuffer;
 import java.util.SplittableRandom;
 import java.util.stream.IntStream;
 
-public class TFModel extends PaperModel implements SupervisedTrainableModel, AutoCloseable {
+@Deprecated
+public class TFModel_deprecated implements SupervisedTrainableModel, AutoCloseable, Model {
 
-    private static final Logger logger = LoggerFactory.getLogger(TFModel.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(TFModel_deprecated.class.getName());
 
     private final int inputDimension;
     private final int outputDimension;
@@ -31,7 +32,7 @@ public class TFModel extends PaperModel implements SupervisedTrainableModel, Aut
 //    private double[][] inputMatrixForOneVector;
     private Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
 
-    public TFModel(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random) {
+    public TFModel_deprecated(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.trainingIterations = trainingIterations;

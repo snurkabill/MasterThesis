@@ -1,4 +1,4 @@
-package vahy.impl.testdomain.tictactoe;
+package vahy.examples.tictactoe;
 
 import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.AbstractInitialStateSupplier;

@@ -64,9 +64,6 @@ public class ApproximatorConfigBuilder {
         if(approximatorType == null) {
             throw new IllegalArgumentException("Approximator algorithm setup is missing. ");
         }
-        if(approximatorType == ApproximatorType.DL4J_NN) {
-            throw new IllegalArgumentException("Predictor: [" + approximatorType + "] is not supported for now. ");
-        }
 
         if(approximatorType == ApproximatorType.TF_NN) {
             if(creatingScript == null) {
@@ -79,7 +76,7 @@ public class ApproximatorConfigBuilder {
                 throw new IllegalArgumentException("TrainingEpochCount must be positive. Value: [" + trainingEpochCount + "]");
             }
         }
-        if(approximatorType == ApproximatorType.TF_NN ||  approximatorType == ApproximatorType.DL4J_NN || approximatorType == ApproximatorType.HASHMAP_LR) {
+        if(approximatorType == ApproximatorType.TF_NN ||  approximatorType == ApproximatorType.HASHMAP_LR) {
             if(learningRate <= 0.0) {
                 throw new IllegalArgumentException("Learning rate must be positive. Value: [" + learningRate + "]");
             }
