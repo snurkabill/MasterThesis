@@ -39,8 +39,10 @@ public class SearchTreeImpl<
     implements SearchTree<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchTreeImpl.class);
-    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || logger.isDebugEnabled();
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+
+    protected final int policyId;
 
     private SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root;
     private final NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector;
@@ -50,10 +52,12 @@ public class SearchTreeImpl<
     private int totalNodesExpanded = 0;
 
     public SearchTreeImpl(
+        int policyId,
         SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
         NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector,
         TreeUpdater<TAction, TObservation, TSearchNodeMetadata, TState> treeUpdater,
         NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> nodeEvaluator) {
+        this.policyId = policyId;
         this.root = root;
         this.nodeSelector = nodeSelector;
         this.treeUpdater = treeUpdater;

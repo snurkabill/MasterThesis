@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
@@ -29,12 +30,20 @@ public abstract class AbstractTreeSearchPolicy<
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
+    protected final int policyId;
     protected final SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree;
 
-    public AbstractTreeSearchPolicy(TreeUpdateCondition treeUpdateCondition,
+    public AbstractTreeSearchPolicy(int policyId,
+                                    TreeUpdateCondition treeUpdateCondition,
                                     SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
+        this.policyId = policyId;
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
+    }
+
+    @Override
+    public int getPolicyId() {
+        return policyId;
     }
 
     @Override
@@ -44,7 +53,7 @@ public abstract class AbstractTreeSearchPolicy<
         }
     }
 
-    protected void expandSearchTree(TState gameState) {
+    protected void expandSearchTree(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
@@ -58,13 +67,13 @@ public abstract class AbstractTreeSearchPolicy<
         timer.stopTimer();
     }
 
-    protected void checkStateRoot(TState gameState) {
+    protected void checkStateRoot(StateWrapper<TAction, TObservation, TState> gameState) {
         if (!searchTree.getRoot().getWrappedState().equals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state in root or gameState argument itself is invalid. Possible issues: " + System.lineSeparator() +
                 "1. missing or invalid equals method on state implementation. Proper equals method does not have to take into account static parts of state" + System.lineSeparator() +
                 "2. wrong logic in applying actons on states, leading in inconsistency" + System.lineSeparator() +
-                "Expected state as string: " + System.lineSeparator() + searchTree.getRoot().getWrappedState().readableStringRepresentation() + System.lineSeparator() +
-                "Actual state as string: " + System.lineSeparator() + gameState.readableStringRepresentation());
+                "Expected state as string: " + System.lineSeparator() + searchTree.getRoot().getWrappedState().getWrappedState().readableStringRepresentation() + System.lineSeparator() +
+                "Actual state as string: " + System.lineSeparator() + gameState.getWrappedState().readableStringRepresentation());
         }
     }
 }

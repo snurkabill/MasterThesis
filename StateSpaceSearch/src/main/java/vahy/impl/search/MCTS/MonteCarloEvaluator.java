@@ -4,7 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapper;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -54,7 +55,7 @@ public class MonteCarloEvaluator<
         }
         Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap = selectedNode.getChildNodeMap();
         for (TAction nextAction : allPossibleActions) {
-            StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = selectedNode.applyAction(nextAction);
+            var stateRewardReturn = selectedNode.applyAction(nextAction);
             childNodeMap.put(nextAction, searchNodeFactory.createNode(stateRewardReturn, selectedNode, nextAction));
         }
         var rewardPredictionNodeCounter = runRollouts(selectedNode);
@@ -77,11 +78,11 @@ public class MonteCarloEvaluator<
     private ImmutableTuple<Double, Integer> runRandomWalkSimulation(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
         int stateCounter = 0;
-        TState wrappedState = node.getWrappedState();
+        StateWrapper<TAction, TObservation, TState> wrappedState = node.getWrappedState();
         while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
-            StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
+            StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
             stateCounter += 1;

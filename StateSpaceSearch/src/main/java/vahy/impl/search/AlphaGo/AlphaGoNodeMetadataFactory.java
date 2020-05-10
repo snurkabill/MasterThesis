@@ -2,7 +2,7 @@ package vahy.impl.search.AlphaGo;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.model.observation.DoubleVector;
@@ -23,7 +23,7 @@ public class AlphaGoNodeMetadataFactory<
 
     @Override
     public AlphaGoNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> parent,
-                                                                 StateRewardReturn<TAction, TObservation, TState> stateRewardReturn,
+                                                                 StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
                                                                  TAction appliedAction) {
         return new AlphaGoNodeMetadata<TAction>(
             parent != null ? DoubleScalarRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), stateRewardReturn.getReward()) : stateRewardReturn.getReward(),

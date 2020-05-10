@@ -2,17 +2,14 @@ package vahy.api.search.node;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapper;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface SearchNode<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TObservation, TState>> {
+public interface SearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends SearchNodeMetadata, TState extends State<TAction, TObservation, TState>> {
 
     SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getParent();
 
@@ -20,13 +17,13 @@ public interface SearchNode<
 
     Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
 
-    StateRewardReturn<TAction, TObservation, TState> applyAction(TAction action);
+    StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action);
 
     TAction[] getAllPossibleActions();
 
     TSearchNodeMetadata getSearchNodeMetadata();
 
-    TState getWrappedState();
+    StateWrapper<TAction, TObservation, TState> getWrappedState();
 
     boolean isFinalNode();
 

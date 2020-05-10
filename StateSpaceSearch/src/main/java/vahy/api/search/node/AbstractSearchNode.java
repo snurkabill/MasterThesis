@@ -2,19 +2,16 @@ package vahy.api.search.node;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 
-public abstract class AbstractSearchNode<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TObservation, TState>>
+public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends SearchNodeMetadata, TState extends State<TAction, TObservation, TState>>
     implements SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     protected final boolean isFinalState;
     protected final boolean isOpponentTurn;
     protected final TAction[] allPossibleActions;
-    protected final TState wrappedState;
+    protected final StateWrapper<TAction, TObservation, TState> wrappedState;
     private final TSearchNodeMetadata searchNodeMetadata;
     private SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent;
     private TAction appliedParentAction;
@@ -22,7 +19,7 @@ public abstract class AbstractSearchNode<
     private boolean isLeaf = true;
 
     protected AbstractSearchNode(
-        TState wrappedState,
+        StateWrapper<TAction, TObservation, TState> wrappedState,
         SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent,
         TAction appliedParentAction,
         TSearchNodeMetadata searchNodeMetadata) {
@@ -31,7 +28,7 @@ public abstract class AbstractSearchNode<
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
         this.isFinalState = wrappedState.isFinalState();
-        this.isOpponentTurn = wrappedState.isOpponentTurn();
+        this.isOpponentTurn = !wrappedState.isPlayerTurn();
         this.allPossibleActions = wrappedState.getAllPossibleActions();
     }
 
@@ -69,7 +66,7 @@ public abstract class AbstractSearchNode<
     }
 
     @Override
-    public TState getWrappedState() {
+    public StateWrapper<TAction, TObservation, TState> getWrappedState() {
         return wrappedState;
     }
 
