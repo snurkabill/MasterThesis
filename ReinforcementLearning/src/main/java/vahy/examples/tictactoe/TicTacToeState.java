@@ -218,6 +218,16 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
+    public TicTacToeAction[] getAllEnvironmentActions() {
+        return new TicTacToeAction[0];
+    }
+
+    @Override
+    public TicTacToeAction[] getAllPlayerActions() {
+        return TicTacToeAction.values();
+    }
+
+    @Override
     public int getTotalPlayerCount() {
         return 2;
     }

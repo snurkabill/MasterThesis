@@ -36,6 +36,6 @@ public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action, TOb
 
     @Override
     public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
-        return null;
+        return new PolicyRecordBase(getActionProbabilityDistribution(gameState), 0.0);
     }
 }

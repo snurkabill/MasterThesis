@@ -23,6 +23,10 @@ public interface State<TAction extends Enum<TAction> & Action, TObservation exte
 
     List<String> getCsvRecord();
 
+    TAction[] getAllEnvironmentActions();
+
+    TAction[] getAllPlayerActions();
+
     int getTotalPlayerCount();
 
     int getPlayerIdOnTurn();

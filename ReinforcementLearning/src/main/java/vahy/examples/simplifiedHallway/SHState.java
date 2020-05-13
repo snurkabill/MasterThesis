@@ -17,9 +17,11 @@ import java.util.Map;
 
 public class SHState implements State<SHAction, DoubleVector, SHState>, Observation {
 
-    public static final int REWARD_OBSERVATION_SHIFT = 2;
+    public static final int REWARD_OBSERVATION_SHIFT = 3;
     public static final int ENVIRONMENT_ID = 0;
     public static final int PLAYER_ID = 1;
+    public static final SHAction[] environmentActionArray = new SHAction[] {SHAction.NO_ACTION, SHAction.TRAP};
+    public static final SHAction[] playerActionArray = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
 
     private final int agentXCoordination;
     private final int agentYCoordination;
@@ -51,8 +53,9 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
         this.rewards = rewards;
         this.rewardsLeft = rewardsLeft;
         this.doubleObservation = new double[REWARD_OBSERVATION_SHIFT + rewardsLeft];
-        this.doubleObservation[0] = getXPortion(staticPart, x);
-        this.doubleObservation[1] = getYPortion(staticPart, y);
+        this.doubleObservation[0] = isAgentTurn ? 1.0 : 0.0;
+        this.doubleObservation[1] = getXPortion(staticPart, x);
+        this.doubleObservation[2] = getYPortion(staticPart, y);
         for (int i = REWARD_OBSERVATION_SHIFT; i < doubleObservation.length; i++) {
             doubleObservation[i] = 1.0;
         }
@@ -87,7 +90,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     @Override
     public SHAction[] getAllPossibleActions() {
         if(isAgentTurn) {
-            return SHAction.playerActions;
+            return playerActionArray;
         } else {
             return this.getEnvironmentProbabilities().keySet().toArray(new SHAction[0]);
         }
@@ -95,12 +98,8 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
 
     @Override
     public StateRewardReturn<SHAction, DoubleVector, SHState> applyAction(SHAction actionType) {
-
         if (isFinalState()) {
             throw new IllegalStateException("Cannot apply actions on final state");
-        }
-        if(isAgentTurn != actionType.isPlayerAction(PLAYER_ID)) {
-            throw new IllegalStateException("Inconsistency between player turn and applying action");
         }
 
         if(isAgentTurn) {
@@ -143,15 +142,17 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
         var agentCoordinates = tryMakeMove(action);
         var isMoveDoable = isMoveDoable(agentCoordinates.getFirst(), agentCoordinates.getSecond());
 
+        var newObservation = new double[doubleObservation.length];
+        System.arraycopy(doubleObservation, 0, newObservation, 0, doubleObservation.length);
+        newObservation[0] = 0.0;
+
         if(isMoveDoable) {
             var newX = agentCoordinates.getFirst();
             var newY = agentCoordinates.getSecond();
 
-            var newObservation = new double[doubleObservation.length];
-            System.arraycopy(doubleObservation, 0, newObservation, 0, doubleObservation.length);
 
-            newObservation[0] = getXPortion(staticPart, newX);
-            newObservation[1] = getYPortion(staticPart, newY);
+            newObservation[1] = getXPortion(staticPart, newX);
+            newObservation[2] = getYPortion(staticPart, newY);
 
             if(rewards[newX][newY] != 0.0) {
                 var rewardId = staticPart.getRewardIds()[newX][newY];
@@ -166,12 +167,15 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                 return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, rewards, rewardsLeft, newObservation), staticPart.getNoRewardGained());
             }
         } else {
-            return new ImmutableStateRewardReturn<>(new SHState(staticPart, agentXCoordination, agentYCoordination, false, false, rewards, rewardsLeft, doubleObservation), staticPart.getNoRewardGained());
+            return new ImmutableStateRewardReturn<>(new SHState(staticPart, agentXCoordination, agentYCoordination, false, false, rewards, rewardsLeft, newObservation), staticPart.getNoRewardGained());
         }
 
     }
 
     private StateRewardReturn<SHAction, DoubleVector, SHState> applyOpponentAction(SHAction action) {
+        var newObservation = new double[doubleObservation.length];
+        System.arraycopy(doubleObservation, 0, newObservation, 0, doubleObservation.length);
+        newObservation[0] = 1.0;
         switch(action) {
             case TRAP:
                 return new ImmutableStateRewardReturn<>(new SHState(
@@ -182,7 +186,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                     true,
                     rewards,
                     rewardsLeft,
-                    doubleObservation
+                    newObservation
                     ),
                     staticPart.getEnvironmentMovementReward());
             case NO_ACTION:
@@ -194,7 +198,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                     false,
                     rewards,
                     rewardsLeft,
-                    doubleObservation),
+                    newObservation),
                     staticPart.getEnvironmentMovementReward());
             default:
                 throw EnumUtils.createExceptionForNotExpectedEnumValue(action);
@@ -241,6 +245,16 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     @Override
     public List<String> getCsvRecord() {
         return List.of("TODO: Implement this...");
+    }
+
+    @Override
+    public SHAction[] getAllEnvironmentActions() {
+        return environmentActionArray;
+    }
+
+    @Override
+    public SHAction[] getAllPlayerActions() {
+        return playerActionArray;
     }
 
     @Override

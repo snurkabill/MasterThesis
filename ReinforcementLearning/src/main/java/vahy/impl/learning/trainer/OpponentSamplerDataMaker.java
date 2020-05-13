@@ -33,7 +33,7 @@ public class OpponentSamplerDataMaker<TAction extends Enum<TAction> & Action, TS
         for (EpisodeStepRecord<TAction, DoubleVector, TState, TPolicyRecord> entry : episodeHistory) {
             if(entry.getPolicyIdOnTurn() == opponentPolicyId) {
                 var doubleArray = new double[allOpponentActions];
-                doubleArray[entry.getAction().getActionIndexInOpponentActions(playerPolicyId)] = 1.0;
+                doubleArray[entry.getAction().getLocalIndex()] = 1.0;
                 mutableDataSampleList.add(new ImmutableTuple<>(entry.getFromState().getCommonObservation(playerPolicyId), new MutableDoubleArray(doubleArray, false)));
             }
         }

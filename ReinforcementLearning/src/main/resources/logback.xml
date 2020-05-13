@@ -1,20 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!--<statusListener class="ch.qos.logback.core.status.NopStatusListener"/>-->
 
-    <!--<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
-        <!--&lt;!&ndash; By default, encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder &ndash;&gt;-->
-        <!--<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
-            <!--<pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-3level) %cyan(%logger) - %msg %n</pattern>-->
-        <!--</encoder>-->
-        <!--&lt;!&ndash;<layout class="ch.qos.logback.classic.PatternLayout">&ndash;&gt;-->
-        <!--&lt;!&ndash;<Pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-3level) %cyan(%logger) - %msg %n</Pattern>&ndash;&gt;-->
-        <!--&lt;!&ndash;</layout>&ndash;&gt;-->
-    <!--</appender>-->
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
 
-    <!--<root>-->
-    <!--<appender-ref ref="CONSOLE"/>-->
-    <!--</root>-->
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <encoder>
+            <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
+            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>
+        </encoder>
+        <append>false</append>
+        <!--        <file>local/log/logFile-${bySecond}.log</file>-->
+        <file>local/log/logFile.log</file>
+    </appender>
 
 
     <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
@@ -24,10 +21,21 @@
         </encoder>
     </appender>
 
-    <logger name="vahy" level="info"/>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
+            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>
+        </encoder>
+        <!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+        <!--            <level>INFO</level>-->
+        <!--            <onMatch>ACCEPT</onMatch>-->
+        <!--            <onMismatch>DENY</onMismatch>-->
+        <!--        </filter>-->
+    </appender>
 
-    <root level="info">
-        <appender-ref ref="consoleAppender" />
+    <root name="vahy" level="info">
+        <!--        <appender-ref ref="FILE"/>-->
+        <appender-ref ref="CONSOLE"/>
     </root>
 
 

@@ -39,7 +39,7 @@ public class Runner<
             return optimizePolicies_inner(runnerArguments);
         } else {
             logger.info("There is no trainable policy. Skipping training.");
-            return new ImmutableTuple<>(Duration.ZERO, new ArrayList<>());
+            return new ImmutableTuple<>(Duration.ZERO, new ArrayList<>(0));
         }
     }
 

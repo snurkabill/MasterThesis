@@ -19,20 +19,20 @@ public class PolicyResults<
     private final String runName;
     private final List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList;
     private final List<TStatistics> trainingStatisticsList;
-    private final TStatistics episodeStatistics;
+    private final TStatistics evaluationStatistics;
     private final Duration trainingDuration;
     private final Duration benchmarkingDuration;
 
     public PolicyResults(String runName,
                          List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList,
                          List<TStatistics> trainingStatisticsList,
-                         TStatistics episodeStatistics,
+                         TStatistics evaluationStatistics,
                          Duration trainingDuration,
                          Duration benchmarkingDuration) {
         this.runName = runName;
         this.policyList = policyList;
         this.trainingStatisticsList = trainingStatisticsList;
-        this.episodeStatistics = episodeStatistics;
+        this.evaluationStatistics = evaluationStatistics;
         this.trainingDuration = trainingDuration;
         this.benchmarkingDuration = benchmarkingDuration;
     }
@@ -57,8 +57,8 @@ public class PolicyResults<
         return benchmarkingDuration;
     }
 
-    public TStatistics getEpisodeStatistics() {
-        return episodeStatistics;
+    public TStatistics getEvaluationStatistics() {
+        return evaluationStatistics;
     }
 
 }

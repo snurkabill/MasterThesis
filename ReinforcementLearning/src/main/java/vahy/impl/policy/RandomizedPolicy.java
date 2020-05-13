@@ -8,15 +8,11 @@ import vahy.api.policy.PolicyRecord;
 
 import java.util.SplittableRandom;
 
-public abstract class RandomizedPolicy<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
+public abstract class RandomizedPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord>
     implements Policy<TAction, TObservation, TState, TPolicyRecord> {
 
     protected final SplittableRandom random;
-    private final int policyId;
+    protected final int policyId;
 
     protected RandomizedPolicy(SplittableRandom random, int policyId) {
         this.random = random;

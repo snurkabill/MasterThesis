@@ -1,7 +1,5 @@
-package vahy.integration;
+package vahy.examples.tictactoe;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.Policy;
@@ -15,21 +13,15 @@ import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.runner.PolicyArguments;
-import vahy.examples.tictactoe.AlwaysStartAtMiddlePolicy;
-import vahy.examples.tictactoe.TicTacToeAction;
-import vahy.examples.tictactoe.TicTacToeConfig;
-import vahy.examples.tictactoe.TicTacToeState;
-import vahy.examples.tictactoe.TicTacToeStateInitializer;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class TicTacToeIntegrationTest {
+public class TrainingVsStaticExample {
 
-    @Test
-    public void emptyDomainIntegrationTest() {
+    public static void main(String[] args) {
 
         var ticTacConfig = new TicTacToeConfig();
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
@@ -97,8 +89,5 @@ public class TicTacToeIntegrationTest {
             .setPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        Assert.assertTrue(result.getEpisodeStatistics().getAveragePlayerStepCount().get(0) < result.getEpisodeStatistics().getAveragePlayerStepCount().get(1));
-        Assert.assertEquals(result.getEpisodeStatistics().getTotalPayoffAverage().get(0) + result.getEpisodeStatistics().getTotalPayoffAverage().get(1), 0.0, Math.pow(10, -10));
-        Assert.assertTrue(result.getEpisodeStatistics().getTotalPayoffAverage().get(0) < result.getEpisodeStatistics().getTotalPayoffAverage().get(1));
     }
 }
