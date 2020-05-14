@@ -3,7 +3,6 @@ package vahy.paperGenerics.evaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -18,30 +17,29 @@ import vahy.utils.RandomDistributionUtils;
 import java.util.Arrays;
 import java.util.Map;
 
-public class PaperNodeEvaluator<
-    TAction extends Enum<TAction> & Action,
-    TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
-    implements NodeEvaluator<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> {
+public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchNodeMetadata extends PaperMetadata<TAction>, TState extends PaperState<TAction, DoubleVector, TState>>
+    implements NodeEvaluator<TAction, DoubleVector, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
-    protected final SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory;
+    protected final int policyId;
+    protected final SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory;
     protected final Predictor<DoubleVector> trainablePredictor;
     protected final Predictor<DoubleVector> opponentPredictor;
     protected final Predictor<TState> knownModel;
     protected final TAction[] allPlayerActions;
     protected final TAction[] allOpponentActions;
 
-    public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+    public PaperNodeEvaluator(int policyId,
+                              SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory,
                               Predictor<DoubleVector> trainablePredictor,
                               Predictor<DoubleVector> opponentPredictor,
                               Predictor<TState> knownModel,
                               TAction[] allPlayerActions,
                               TAction[] allOpponentActions) {
+        this.policyId = policyId;
         this.searchNodeFactory = searchNodeFactory;
         this.trainablePredictor = trainablePredictor;
         this.opponentPredictor = opponentPredictor;
@@ -50,14 +48,14 @@ public class PaperNodeEvaluator<
         this.knownModel = knownModel;
     }
 
-    protected final void unmakeLeaf(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected final void unmakeLeaf(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
         if(!node.isFinalNode()) {
             node.unmakeLeaf();
         }
     }
 
     @Override
-    public int evaluateNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> selectedNode) {
         var nodesExpanded = 0;
         if(selectedNode.isRoot() && selectedNode.getSearchNodeMetadata().getVisitCounter() == 0) {
             if(TRACE_ENABLED) {
@@ -79,7 +77,7 @@ public class PaperNodeEvaluator<
         return nodesExpanded;
     }
 
-    protected void fillNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, double[] prediction, double[] opponentPrediction) {
+    protected void fillNode(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node, double[] prediction, double[] opponentPrediction) {
         var searchMetadata = node.getSearchNodeMetadata();
         searchMetadata.setPredictedReward(prediction[PaperModel.Q_VALUE_INDEX]);
         searchMetadata.setExpectedReward(prediction[PaperModel.Q_VALUE_INDEX]);
@@ -96,11 +94,11 @@ public class PaperNodeEvaluator<
         searchMetadata.setEvaluated();
     }
 
-    private void evaluatePlayerNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] prediction) {
+    private void evaluatePlayerNode(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] prediction) {
         TAction[] allPossibleActions = node.getAllPossibleActions();
         if(DEBUG_ENABLED) {
             for (TAction allPossibleAction : allPossibleActions) {
-                if (allPossibleAction.isOpponentAction()) {
+                if (allPossibleAction.isOpponentAction(policyId)) {
                     throw new IllegalStateException("Only player actions are available. Action set: [" + Arrays.toString(allPossibleActions) + "]");
                 }
             }
@@ -114,22 +112,22 @@ public class PaperNodeEvaluator<
             System.arraycopy(prediction, PaperModel.POLICY_START_INDEX, distribution, 0, distribution.length);
             boolean[] mask = new boolean[allPlayerActions.length];
             for (int i = 0; i < allPossibleActions.length; i++) {
-                mask[allPossibleActions[i].getActionIndexInPlayerActions()] = true;
+                mask[allPossibleActions[i].getActionIndexInPlayerActions(policyId)] = true;
             }
             RandomDistributionUtils.applyMaskToRandomDistribution(distribution, mask);
             for (TAction key : allPossibleActions) {
-                childPriorProbabilities.put(key, distribution[key.getActionIndexInPlayerActions()]);
+                childPriorProbabilities.put(key, distribution[key.getActionIndexInPlayerActions(policyId)]);
             }
         }
     }
 
-    protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] probabilities) {
+    protected void evaluateOpponentNode(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] probabilities) {
 
         //TODO: THIS METHOD IS UGLY
         TAction[] allPossibleActions = node.getAllPossibleActions();
         if(DEBUG_ENABLED) {
             for (TAction allPossibleAction : allPossibleActions) {
-                if (allPossibleAction.isPlayerAction()) {
+                if (allPossibleAction.isPlayerAction(policyId)) {
                     throw new IllegalStateException("Only opponent actions are available. Action set: [" + Arrays.toString(allPossibleActions) + "]");
                 }
             }
@@ -145,11 +143,11 @@ public class PaperNodeEvaluator<
                 System.arraycopy(probabilities, 0, distribution, 0, distribution.length);
                 boolean[] mask = new boolean[allOpponentActions.length];
                 for (int i = 0; i < allPossibleActions.length; i++) {
-                    mask[allPossibleActions[i].getActionIndexInOpponentActions()] = true;
+                    mask[allPossibleActions[i].getActionIndexInOpponentActions(policyId)] = true;
                 }
                 RandomDistributionUtils.applyMaskToRandomDistribution(distribution, mask);
                 for (TAction key : allPossibleActions) {
-                    childPriorProbabilities.put(key, distribution[key.getActionIndexInOpponentActions()]);
+                    childPriorProbabilities.put(key, distribution[key.getActionIndexInOpponentActions(policyId)]);
                 }
             }
         } else {
@@ -161,30 +159,30 @@ public class PaperNodeEvaluator<
                 double[] distribution = new double[allOpponentActions.length];
                 for (int i = 0; i < allPossibleActions.length; i++) {
                     var possibleAction = allPossibleActions[i];
-                    distribution[possibleAction.getActionIndexInOpponentActions()] = probabilities[i];
+                    distribution[possibleAction.getActionIndexInOpponentActions(policyId)] = probabilities[i];
                 }
                 for (TAction key : allPossibleActions) {
-                    childPriorProbabilities.put(key, distribution[key.getActionIndexInOpponentActions()]);
+                    childPriorProbabilities.put(key, distribution[key.getActionIndexInOpponentActions(policyId)]);
                 }
             }
         }
     }
 
-    protected int innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected int innerEvaluation(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
         // TODO: this is also ugly
         if(node.isPlayerTurn()) {
-            fillNode(node, trainablePredictor.apply(node.getWrappedState().getPlayerObservation()), null);
+            fillNode(node, trainablePredictor.apply(node.getWrappedState().getObservation()), null);
         } else {
-            double[] playerPrediction = trainablePredictor.apply(node.getWrappedState().getPlayerObservation());
-            double[] opponentPrediction = knownModel != null ? knownModel.apply(node.getWrappedState()) : opponentPredictor.apply(node.getWrappedState().getPlayerObservation());
+            double[] playerPrediction = trainablePredictor.apply(node.getWrappedState().getObservation());
+            double[] opponentPrediction = knownModel != null ? knownModel.apply(node.getWrappedState().getWrappedState()) : opponentPredictor.apply(node.getWrappedState().getCommonObservation());
             fillNode(node, playerPrediction, opponentPrediction);
         }
         return 1;
     }
 
 
-    private ImmutableTuple<SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState>, Integer> evaluateChildNode(
-        SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> parent,
+    private ImmutableTuple<SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState>, Integer> evaluateChildNode(
+        SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> parent,
         TAction nextAction)
     {
         var stateRewardReturn = parent.applyAction(nextAction);

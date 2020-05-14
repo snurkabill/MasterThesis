@@ -3,24 +3,21 @@ package vahy.paperGenerics.policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
+import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.PolicyStepMode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ArrayUtils;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 
 public class PaperPolicyImpl<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractTreeSearchPolicy<TAction, TObservation, TSearchNodeMetadata, TState, PaperPolicyRecord>
@@ -30,7 +27,6 @@ public class PaperPolicyImpl<
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
 
     private final int totalPlayerActionCount;
-    private final int totalOpponentActionCount;
 
     private final SplittableRandom random;
     private final RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> riskAverseSearchTree;
@@ -42,36 +38,38 @@ public class PaperPolicyImpl<
     private double[] actionDistribution;
     private boolean hasActionChanged = false;
 
-    public PaperPolicyImpl(Class<TAction> clazz,
+    public PaperPolicyImpl(int policyId,
+                           Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
                            RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random,
                            double explorationConstant,
                            double temperature) {
-        this(clazz, treeUpdateCondition, searchTree, random, false, explorationConstant, temperature);
+        this(policyId, clazz, treeUpdateCondition, searchTree, random, false, explorationConstant, temperature);
     }
 
-    public PaperPolicyImpl(Class<TAction> clazz,
+    public PaperPolicyImpl(int policyId,
+                           Class<TAction> clazz,
                            TreeUpdateCondition treeUpdateCondition,
                            RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
                            SplittableRandom random) {
-        this(clazz, treeUpdateCondition, searchTree, random, true, 0.0, 0.0);
+        this(policyId, clazz, treeUpdateCondition, searchTree, random, true, 0.0, 0.0);
     }
 
-    private PaperPolicyImpl(Class<TAction> clazz,
+    private PaperPolicyImpl(int policyId,
+                            Class<TAction> clazz,
                             TreeUpdateCondition treeUpdateCondition,
                             RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
                             SplittableRandom random,
                             boolean isExplorationDisabled,
                             double explorationConstant,
                             double temperature) {
-        super(treeUpdateCondition, searchTree);
+        super(policyId, treeUpdateCondition, searchTree);
         this.random = random;
         this.riskAverseSearchTree = searchTree;
         TAction[] allActions = clazz.getEnumConstants();
 
-        this.totalPlayerActionCount = Arrays.stream(allActions).filter(Action::isPlayerAction).collect(Collectors.toCollection(ArrayList::new)).size();
-        this.totalOpponentActionCount = Arrays.stream(allActions).filter(Action::isOpponentAction).collect(Collectors.toCollection(ArrayList::new)).size();
+        this.totalPlayerActionCount = (int) Arrays.stream(allActions).filter(x -> x.isPlayerAction(policyId)).count();
         this.isExplorationDisabled = isExplorationDisabled;
         this.explorationConstant = explorationConstant;
         this.temperature = temperature;
@@ -79,19 +77,19 @@ public class PaperPolicyImpl<
     }
 
     @Override
-    public double getEstimatedReward(TState gameState) {
+    public double getEstimatedReward(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         return riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedReward();
     }
 
     @Override
-    public double getEstimatedRisk(TState gameState) {
+    public double getEstimatedRisk(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         return riskAverseSearchTree.getRoot().getSearchNodeMetadata().getPredictedRisk();
     }
 
     @Override
-    public double[] getActionProbabilityDistribution(TState gameState) {
+    public double[] getActionProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         return innerActionProbability();
     }
@@ -104,7 +102,7 @@ public class PaperPolicyImpl<
     }
 
     @Override
-    public TAction getDiscreteAction(TState gameState) {
+    public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         expandSearchTree(gameState); //  TODO expand search tree should be enabled in episode simulation
 
@@ -123,7 +121,7 @@ public class PaperPolicyImpl<
         for (int i = 0; i < actionList.size(); i++) {
             var element = actionList.get(i);
             var probability = actionProbabilities[i];
-            actionDistribution[element.getActionIndexInPlayerActions()] = probability;
+            actionDistribution[element.getActionIndexInPlayerActions(policyId)] = probability;
         }
         hasActionChanged = true;
         if(DEBUG_ENABLED) {
@@ -137,16 +135,16 @@ public class PaperPolicyImpl<
     }
 
     @Override
-    public double[] getPriorActionProbabilityDistribution(TState gameState) {
+    public double[] getPriorActionProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         return innerPriorProbabilityDistribution(gameState);
     }
 
-    private double[] innerPriorProbabilityDistribution(TState gameState) {
-        double[] priorProbabilities = new double[gameState.isPlayerTurn() ? totalPlayerActionCount : totalOpponentActionCount];
+    private double[] innerPriorProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
+        double[] priorProbabilities = new double[gameState.getAllPossibleActions().length];
         for (var entry : this.riskAverseSearchTree.getRoot().getChildNodeMap().entrySet()) {
             var action = entry.getValue().getAppliedAction();
-            int actionIndex = gameState.isPlayerTurn() ? action.getActionIndexInPlayerActions() : action.getActionIndexInOpponentActions();
+            int actionIndex = gameState.isPlayerTurn() ? action.getActionIndexInPlayerActions(policyId) : action.getActionIndexInOpponentActions(policyId);
             priorProbabilities[actionIndex] = entry.getValue().getSearchNodeMetadata().getPriorProbability();
         }
 
@@ -159,7 +157,7 @@ public class PaperPolicyImpl<
     }
 
     @Override
-    public PaperPolicyRecord getPolicyRecord(TState gameState) {
+    public PaperPolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
         return new PaperPolicyRecord(
             innerPriorProbabilityDistribution(gameState),
@@ -170,8 +168,4 @@ public class PaperPolicyImpl<
             riskAverseSearchTree.getTotalNodesExpanded());
     }
 
-    @Override
-    public int getExpandedNodeCountSoFar() {
-        return this.riskAverseSearchTree.getTotalNodesExpanded();
-    }
 }

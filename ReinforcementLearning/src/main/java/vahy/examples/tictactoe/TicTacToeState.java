@@ -188,12 +188,12 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public DoubleVector getPlayerObservation(int playerId) {
+    public DoubleVector getInGameEntityObservation(int inGameEntityId) {
         return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
     }
 
     @Override
-    public DoubleVector getCommonObservation(int playerId) {
+    public DoubleVector getCommonObservation(int inGameEntityId) {
         return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
     }
 
@@ -218,27 +218,22 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public TicTacToeAction[] getAllEnvironmentActions() {
-        return new TicTacToeAction[0];
-    }
-
-    @Override
-    public TicTacToeAction[] getAllPlayerActions() {
-        return TicTacToeAction.values();
-    }
-
-    @Override
     public int getTotalPlayerCount() {
         return 2;
     }
 
     @Override
-    public int getPlayerIdOnTurn() {
+    public int getRemainingPlayerCount() {
+        return 2;
+    }
+
+    @Override
+    public int getInGameEntityIdOnTurn() {
         return isPlayerZeroOnTurn ? 0 : 1;
     }
 
     @Override
-    public boolean isInGame(int playerId) {
+    public boolean isInGame(int inGameEntityId) {
         return true;
     }
 

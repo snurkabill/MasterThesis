@@ -45,7 +45,7 @@ public abstract class AbstractHallwayTest {
 
         var results = paperExperimentBuilder.execute();
 
-        PaperEpisodeStatistics stats =  results.get(0).getEpisodeStatistics();
+        PaperEpisodeStatistics stats =  results.get(0).getEvaluationStatistics();
 
         double totalPayoffAverage = stats.getTotalPayoffAverage();
         double riskHitRatio = stats.getRiskHitRatio();

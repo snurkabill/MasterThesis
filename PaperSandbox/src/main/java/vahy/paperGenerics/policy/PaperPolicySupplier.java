@@ -3,6 +3,7 @@ package vahy.paperGenerics.policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
+import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
@@ -11,7 +12,6 @@ import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
@@ -23,16 +23,12 @@ import java.util.EnumMap;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class PaperPolicySupplier<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TObservation, TState>>
+public class PaperPolicySupplier<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends PaperMetadata<TAction>, TState extends PaperState<TAction, TObservation, TState>>
     implements PolicySupplier<TAction, TObservation, TState, PaperPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicySupplier.class.getName());
 
+    private final int policyId;
     private final Class<TAction> actionClass;
     private final SearchNodeMetadataFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory;
     private final double totalRiskAllowedInference;
@@ -48,7 +44,8 @@ public class PaperPolicySupplier<
     private final Supplier<Double> temperatureSupplier;
     private final Supplier<Double> riskSupplier;
 
-    public PaperPolicySupplier(Class<TAction> actionClass,
+    public PaperPolicySupplier(int policyId,
+                               Class<TAction> actionClass,
                                SearchNodeMetadataFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeMetadataFactory,
                                double totalRiskAllowedInference,
                                SplittableRandom random,
@@ -60,6 +57,7 @@ public class PaperPolicySupplier<
                                Supplier<Double> explorationConstantSupplier,
                                Supplier<Double> temperatureSupplier,
                                Supplier<Double> riskSupplier) {
+        this.policyId = policyId;
         this.actionClass = actionClass;
         this.searchNodeMetadataFactory = searchNodeMetadataFactory;
         this.totalRiskAllowedInference = totalRiskAllowedInference;
@@ -75,7 +73,7 @@ public class PaperPolicySupplier<
     }
 
     @Override
-    public Policy<TAction, TObservation, TState, PaperPolicyRecord> initializePolicy(TState initialState, PolicyMode policyMode) {
+    public Policy<TAction, TObservation, TState, PaperPolicyRecord> initializePolicy(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode) {
         switch(policyMode) {
             case INFERENCE:
                 return createPolicy(initialState);
@@ -85,13 +83,15 @@ public class PaperPolicySupplier<
         }
     }
 
-    protected PaperPolicy<TAction, TObservation, TState> createPolicy(TState initialState) {
+    protected PaperPolicy<TAction, TObservation, TState> createPolicy(StateWrapper<TAction, TObservation, TState> initialState) {
         logger.debug("Initialized INFERENCE policy. AllowedRisk: [{}]", totalRiskAllowedInference);
         var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
         return new PaperPolicyImpl<>(
+            policyId,
             actionClass,
             treeUpdateConditionFactory.create(),
             new RiskAverseSearchTree<>(
+                policyId,
                 node,
                 nodeSelectorSupplier.get(),
                 treeUpdater,
@@ -102,13 +102,15 @@ public class PaperPolicySupplier<
             random.split());
     }
 
-    protected PaperPolicy<TAction, TObservation, TState> createPolicy(TState initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
+    protected PaperPolicy<TAction, TObservation, TState> createPolicy(StateWrapper<TAction, TObservation, TState> initialState, double explorationConstant, double temperature, double totalRiskAllowed) {
         logger.debug("Initialized TRAINING policy. Exploration constant: [{}], Temperature: [{}], Risk: [{}]", explorationConstant, temperature, totalRiskAllowed);
         var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
         return new PaperPolicyImpl<>(
+            policyId,
             actionClass,
             treeUpdateConditionFactory.create(),
             new RiskAverseSearchTree<>(
+                policyId,
                 node,
                 nodeSelectorSupplier.get(),
                 treeUpdater,

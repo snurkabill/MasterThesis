@@ -64,7 +64,7 @@ public class EpisodeSimulatorImpl<
             long start = System.currentTimeMillis();
             while(!state.isFinalState() && totalStepsDone < episodeStepCountLimit) {
 
-                var policyIdOnTurn = state.getPlayerIdOnTurn();
+                var policyIdOnTurn = state.getInGameEntityIdOnTurn();
                 var onTurnPolicy = policyList.get(policyIdOnTurn);
 
                 var step = makePolicyStep(state, onTurnPolicy, policyList);
@@ -138,7 +138,7 @@ public class EpisodeSimulatorImpl<
                             .append("State information: ")
                             .append(System.lineSeparator())
                             .append("PolicyId On Turn: ")
-                            .append(x.getToState().getPlayerIdOnTurn())
+                            .append(x.getToState().getInGameEntityIdOnTurn())
                             .append(System.lineSeparator())
                             .append(x.getToState().readableStringRepresentation())
                             .append(System.lineSeparator())

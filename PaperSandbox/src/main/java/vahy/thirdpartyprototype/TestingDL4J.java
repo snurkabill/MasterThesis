@@ -2,7 +2,6 @@ package vahy.thirdpartyprototype;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paperGenerics.reinforcement.learning.dl4j.Dl4jModel;
 
 import java.io.File;
 import java.util.Arrays;

@@ -39,7 +39,7 @@ public class ValueDataMaker<TAction extends Enum<TAction> & Action, TState exten
 //            if(previous.getPolicyIdOnTurn() == playerPolicyId) {
                 var doubleArray = new double[1];
                 doubleArray[0] = aggregatedTotalPayoff;
-                mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getPlayerObservation(playerPolicyId), new MutableDoubleArray(doubleArray, false)));
+                mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(playerPolicyId), new MutableDoubleArray(doubleArray, false)));
 //            }
         }
         Collections.reverse(mutableDataSampleList);

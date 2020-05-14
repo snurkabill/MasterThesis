@@ -8,7 +8,7 @@ import vahy.paperGenerics.policy.PaperPolicyRecord;
 
 import java.util.SplittableRandom;
 
-public class PaperEnvironmentPolicy extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayAction,  DoubleVector, HallwayStateImpl, HallwayStateImpl> {
+public class PaperEnvironmentPolicy extends EnvironmentPolicy<PaperPolicyRecord> implements PaperPolicy<HallwayAction,  DoubleVector, HallwayStateImpl> {
 
     public PaperEnvironmentPolicy(SplittableRandom random) {
         super(random);

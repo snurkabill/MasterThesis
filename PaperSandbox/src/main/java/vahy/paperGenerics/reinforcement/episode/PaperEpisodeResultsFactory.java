@@ -19,8 +19,12 @@ public class PaperEpisodeResultsFactory<
     implements EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> {
 
     @Override
-    public EpisodeResults<TAction, TObservation, TState, TPolicyRecord> createResults(
-        List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory, int playerStepCount, int totalStepCount, double totalCumulativePayoff, Duration duration) {
-        return new PaperEpisodeResults<>(episodeHistory, playerStepCount, totalStepCount, totalCumulativePayoff, duration);
+    public EpisodeResults<TAction, TObservation, TState, TPolicyRecord> createResults(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+                                                                                      int policyCount,
+                                                                                      List<Integer> playerStepCountList,
+                                                                                      int totalStepCount,
+                                                                                      List<Double> totalCumulativePayoffList,
+                                                                                      Duration duration) {
+        return new PaperEpisodeResults<>(episodeHistory,policyCount, playerStepCountList, totalStepCount, totalCumulativePayoffList, duration);
     }
 }

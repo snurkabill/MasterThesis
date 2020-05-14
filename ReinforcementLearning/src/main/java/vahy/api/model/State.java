@@ -11,9 +11,9 @@ public interface State<TAction extends Enum<TAction> & Action, TObservation exte
 
     StateRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType);
 
-    TObservation getPlayerObservation(int playerId);
+    TObservation getInGameEntityObservation(int inGameEntityId);
 
-    TObservation getCommonObservation(int playerId);
+    TObservation getCommonObservation(int inGameEntityId);
 
     Predictor<TState> getKnownModelWithPerfectObservationPredictor();
 
@@ -23,15 +23,11 @@ public interface State<TAction extends Enum<TAction> & Action, TObservation exte
 
     List<String> getCsvRecord();
 
-    TAction[] getAllEnvironmentActions();
-
-    TAction[] getAllPlayerActions();
-
     int getTotalPlayerCount();
 
-    int getPlayerIdOnTurn();
+    int getInGameEntityIdOnTurn();
 
-    boolean isInGame(int playerId);
+    boolean isInGame(int inGameEntityId);
 
     boolean isFinalState();
 

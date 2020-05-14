@@ -71,7 +71,7 @@ public class DefaultLocalBenchmark {
 
         for (PolicyResults<HallwayAction, DoubleVector, HallwayStateImpl, HallwayStateImpl, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
             logger.info("PolicyId: " + result.getPolicyList().getPolicyName());
-            logger.info("Results: " + result.getEpisodeStatistics().printToLog());
+            logger.info("Results: " + result.getEvaluationStatistics().printToLog());
         }
 
     }

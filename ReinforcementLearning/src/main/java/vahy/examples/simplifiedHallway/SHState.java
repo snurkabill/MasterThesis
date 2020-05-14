@@ -20,8 +20,8 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     public static final int REWARD_OBSERVATION_SHIFT = 3;
     public static final int ENVIRONMENT_ID = 0;
     public static final int PLAYER_ID = 1;
-    public static final SHAction[] environmentActionArray = new SHAction[] {SHAction.NO_ACTION, SHAction.TRAP};
-    public static final SHAction[] playerActionArray = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
+    public static final SHAction[] ENVIRONMENT_ACTION_ARRAY = new SHAction[] {SHAction.NO_ACTION, SHAction.TRAP};
+    public static final SHAction[] PLAYER_ENTITY_ACTION_ARRAY = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
 
     private final int agentXCoordination;
     private final int agentYCoordination;
@@ -90,7 +90,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     @Override
     public SHAction[] getAllPossibleActions() {
         if(isAgentTurn) {
-            return playerActionArray;
+            return PLAYER_ENTITY_ACTION_ARRAY;
         } else {
             return this.getEnvironmentProbabilities().keySet().toArray(new SHAction[0]);
         }
@@ -110,12 +110,12 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     }
 
     @Override
-    public DoubleVector getPlayerObservation(int playerId) {
+    public DoubleVector getInGameEntityObservation(int inGameEntityId) {
         return new DoubleVector(doubleObservation);
     }
 
     @Override
-    public DoubleVector getCommonObservation(int playerId) {
+    public DoubleVector getCommonObservation(int inGameEntityId) {
         return new DoubleVector(doubleObservation);
     }
 
@@ -248,28 +248,18 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     }
 
     @Override
-    public SHAction[] getAllEnvironmentActions() {
-        return environmentActionArray;
-    }
-
-    @Override
-    public SHAction[] getAllPlayerActions() {
-        return playerActionArray;
-    }
-
-    @Override
     public int getTotalPlayerCount() {
         return 2;
     }
 
     @Override
-    public int getPlayerIdOnTurn() {
+    public int getInGameEntityIdOnTurn() {
         return isAgentTurn ? PLAYER_ID : ENVIRONMENT_ID;
     }
 
     @Override
-    public boolean isInGame(int playerId) {
-        if(playerId == PLAYER_ID && isAgentKilled) {
+    public boolean isInGame(int inGameEntityId) {
+        if(inGameEntityId == PLAYER_ID && isAgentKilled) {
             return false;
         }
         return true;

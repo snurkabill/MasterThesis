@@ -20,17 +20,16 @@ import java.util.SplittableRandom;
 
 public class MonteCarloNodeEvaluator<
     TAction extends Enum<TAction> & Action,
-    TOpponentObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, DoubleVector, TOpponentObservation, TState>>
-    extends PaperNodeEvaluator<TAction, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, DoubleVector, TState>>
+    extends PaperNodeEvaluator<TAction, TSearchNodeMetadata, TState> {
 
     protected final SplittableRandom random;
     protected final double discountFactor;
     protected final double[] priorProbabilities;
 
     @Deprecated // TOTO JE KURVA CELE ZLE
-    public MonteCarloNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+    public MonteCarloNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory,
                                    Predictor<TState> knownModel,
                                    TAction[] allPlayerActions,
                                    TAction[] allOpponentActions,
@@ -47,7 +46,7 @@ public class MonteCarloNodeEvaluator<
     }
 
     @Override
-    protected int innerEvaluation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected int innerEvaluation(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
 
         ImmutableTriple<Double, Boolean, Integer> sampledRewardWithRisk = runRandomWalkSimulation(node);
         node.getSearchNodeMetadata().increaseVisitCounter();
@@ -70,13 +69,13 @@ public class MonteCarloNodeEvaluator<
         return sampledRewardWithRisk.getThird();
     }
 
-    protected ImmutableTriple<Double, Boolean, Integer> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TOpponentObservation, TSearchNodeMetadata, TState> node) {
+    protected ImmutableTriple<Double, Boolean, Integer> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
         TState wrappedState = node.getWrappedState();
         var nodeCounter = 0;
         while (!wrappedState.isFinalState()) {
             TAction action = getNextAction(wrappedState);
-            StateRewardReturn<TAction, DoubleVector, TOpponentObservation, TState> stateRewardReturn = wrappedState.applyAction(action);
+            StateRewardReturn<TAction, DoubleVector, TState> stateRewardReturn = wrappedState.applyAction(action);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
             nodeCounter++;

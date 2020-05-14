@@ -56,7 +56,7 @@ public class ForExperimenting {
 
         var results = paperExperimentBuilder.execute();
 
-        logger.info(results.get(0).getEpisodeStatistics().printToLog());
+        logger.info(results.get(0).getEvaluationStatistics().printToLog());
 
     }
 

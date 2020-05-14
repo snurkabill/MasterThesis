@@ -42,7 +42,7 @@ public abstract class SHExperiment {
 
         for (PolicyResults<SHAction, DoubleVector, SHState, SHState, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
             logger.info("PolicyId: " + result.getPolicyList().getPolicyName());
-            logger.info("Results: " + result.getEpisodeStatistics().printToLog());
+            logger.info("Results: " + result.getEvaluationStatistics().printToLog());
         }
     }
 

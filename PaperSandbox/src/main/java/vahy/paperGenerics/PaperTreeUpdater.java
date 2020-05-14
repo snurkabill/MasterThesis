@@ -8,10 +8,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
-public class PaperTreeUpdater<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TState extends PaperState<TAction, TObservation, TState>>
+public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
     implements TreeUpdater<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     protected static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
@@ -20,8 +17,11 @@ public class PaperTreeUpdater<
     @Override
     public void updateTree(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
+        // TODO: THIS IS DIRTY
+        int policyId = expandedNode.getWrappedState().getPlayerIdWrapper();
+
         double estimatedLeafReward = expandedNode.getSearchNodeMetadata().getCumulativeReward() + (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
-        double estimatedLeafRisk = expandedNode.isFinalNode() ? (expandedNode.getWrappedState().isRiskHit() ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
+        double estimatedLeafRisk = expandedNode.isFinalNode() ? (expandedNode.getWrappedState().getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
             expandedNode = expandedNode.getParent();

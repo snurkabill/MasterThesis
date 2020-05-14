@@ -3,7 +3,8 @@ package vahy.paperGenerics.policy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapper;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
@@ -57,14 +58,15 @@ public class RiskAverseSearchTree<
     private final AbstractFlowOptimizer<TAction, TObservation, TSearchNodeMetadata, TState> flowOptimizer;
 
 
-    public RiskAverseSearchTree(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
+    public RiskAverseSearchTree(int policyId,
+                                SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
                                 RiskAverseNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector,
                                 TreeUpdater<TAction, TObservation, TSearchNodeMetadata, TState> treeUpdater,
                                 NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> nodeEvaluator,
                                 SplittableRandom random,
                                 double totalRiskAllowed,
                                 StrategiesProvider<TAction, TObservation, TSearchNodeMetadata, TState> strategyProvider) {
-        super(root, nodeSelector, treeUpdater, nodeEvaluator);
+        super(policyId, root, nodeSelector, treeUpdater, nodeEvaluator);
         this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
         this.nodeSelector = nodeSelector;
@@ -102,8 +104,8 @@ public class RiskAverseSearchTree<
         }
     }
 
-    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> getActionDistributionAndDiscreteAction(TState state, PolicyStepMode policyStepMode, double temperature) {
-        if(state.isOpponentTurn()) {
+    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> getActionDistributionAndDiscreteAction(StateWrapper<TAction, TObservation,TState> state, PolicyStepMode policyStepMode, double temperature) {
+        if(!state.isPlayerTurn()) {
             throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
         }
         try {
@@ -136,7 +138,7 @@ public class RiskAverseSearchTree<
             var result = flowOptimizer.optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
             if(!result.getSecond()) {
-                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
+                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getWrappedState().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
                 totalRiskAllowed = 1.0;
                 isFlowOptimized = false;
                 return false;
@@ -176,17 +178,17 @@ public class RiskAverseSearchTree<
     }
 
     @Override
-    public StateRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
+    public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
         try {
-            if(action.isPlayerAction() && action != playingDistribution.getExpectedPlayerAction()) {
+            if(action.isPlayerAction(policyId) && action != playingDistribution.getExpectedPlayerAction()) {
                 throw new IllegalStateException("RiskAverseTree is applied with player action which was not selected by riskAverseTree. Discrepancy.");
             }
-            if(action.isPlayerAction()) {
+            if(action.isPlayerAction(policyId)) {
                 latestTreeWithPlayerOnTurn = this.getRoot(); // debug purposes
                 subtreeRiskCalculator = playingDistribution.getUsedSubTreeRiskCalculatorSupplierMap().get(action).get();
             }
             isFlowOptimized = false;
-            if(!action.isPlayerAction() && !isRiskIgnored()) {
+            if(!action.isPlayerAction(policyId) && !isRiskIgnored()) {
                 var playerActionDistribution = playingDistribution.getPlayerDistribution();
                 var riskEstimatedVector = playingDistribution.getRiskOnPlayerSubNodes();
                 var playerActionProbability = playerActionDistribution[playingDistribution.getExpectedPlayerActionIndex()];
@@ -243,7 +245,7 @@ public class RiskAverseSearchTree<
         } catch (Exception e) {
             dumpTreeWithFlow();
             throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. " +
-                "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getWrappedState().readableStringRepresentation() + "]", e);
+                "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getWrappedState().getWrappedState().readableStringRepresentation() + "]", e);
         }
     }
 

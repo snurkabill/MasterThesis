@@ -3,38 +3,40 @@ package vahy.paperGenerics.benchmark;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 
 import java.time.Duration;
+import java.util.List;
 
 public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
 
-    private final long riskHitCounter;
-    private final double riskHitRatio;
-    private final double riskHitStdev;
+    private final List<Long> riskHitCounter;
+    private final List<Double> riskHitRatio;
+    private final List<Double> riskHitStdev;
 
     public PaperEpisodeStatistics(Duration totalDuration,
-                                  double averagePlayerStepCount,
-                                  double stdevPlayerStepCount,
+                                  int playerCount,
+                                  List<Double> averagePlayerStepCount,
+                                  List<Double> stdevPlayerStepCount,
                                   double averageMillisPerEpisode,
                                   double stdevMillisPerEpisode,
-                                  double totalPayoffAverage,
-                                  double totalPayoffStdev,
-                                  long riskHitCounter,
-                                  double riskHitRatio,
-                                  double riskHitStdev) {
-        super(totalDuration, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
+                                  List<Double> totalPayoffAverage,
+                                  List<Double> totalPayoffStdev,
+                                  List<Long> riskHitCounter,
+                                  List<Double> riskHitRatio,
+                                  List<Double> riskHitStdev) {
+        super(totalDuration, playerCount, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
         this.riskHitCounter = riskHitCounter;
         this.riskHitRatio = riskHitRatio;
         this.riskHitStdev = riskHitStdev;
     }
 
-    public long getRiskHitCounter() {
+    public List<Long> getRiskHitCounter() {
         return riskHitCounter;
     }
 
-    public double getRiskHitRatio() {
+    public List<Double> getRiskHitRatio() {
         return riskHitRatio;
     }
 
-    public double getRiskHitStdev() {
+    public List<Double> getRiskHitStdev() {
         return riskHitStdev;
     }
 
@@ -45,17 +47,23 @@ public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
         sb.append(System.lineSeparator());
 
         sb.append("Empirical risk average: [");
-        sb.append(riskHitRatio);
+        for (int i = 0; i < getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] StepCount:").append(riskHitRatio.get(i));
+        }
         sb.append("]");
         sb.append(System.lineSeparator());
 
         sb.append("Risk episodes count: [");
-        sb.append(riskHitCounter);
+        for (int i = 0; i < getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskHitCounter:").append(riskHitCounter.get(i));
+        }
         sb.append("]");
         sb.append(System.lineSeparator());
 
         sb.append("Empirical risk stdev: [");
-        sb.append(riskHitStdev);
+        for (int i = 0; i < getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskHitStdev:").append(riskHitStdev.get(i));
+        }
         sb.append("]");
         sb.append(System.lineSeparator());
 

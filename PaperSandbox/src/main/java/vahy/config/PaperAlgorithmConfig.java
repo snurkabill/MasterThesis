@@ -1,7 +1,7 @@
 package vahy.config;
 
-import vahy.api.experiment.AlgorithmConfig;
 import vahy.api.experiment.ApproximatorConfig;
+import vahy.api.experiment.PolicyConfig;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateConditionFactory;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
@@ -13,7 +13,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 
 import java.util.function.Supplier;
 
-public class PaperAlgorithmConfig implements AlgorithmConfig {
+public class PaperAlgorithmConfig implements PolicyConfig {
 
     private final String algorithmId;
 
@@ -102,17 +102,17 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
         this.noiseStrategy = noiseStrategy;
     }
 
+    @Override
+    public String getAlgorithmId() {
+        return algorithmId;
+    }
+
     public double getCpuctParameter() {
         return cpuctParameter;
     }
 
     public TreeUpdateConditionFactory getTreeUpdateConditionFactory() {
         return treeUpdateConditionFactory;
-    }
-
-    @Override
-    public String getAlgorithmId() {
-        return algorithmId;
     }
 
     public double getDiscountFactor() {
@@ -194,37 +194,6 @@ public class PaperAlgorithmConfig implements AlgorithmConfig {
     public ApproximatorConfig getOpponentApproximatorConfig() {
         return opponentApproximatorConfig;
     }
-//    @Override
-//    public String toString() {
-//        return "AlgorithmConfig{" +
-//            "cpuctParameter=" + cpuctParameter +
-//            ", treeUpdateConditionFactory=" + treeUpdateConditionFactory +
-//            ", discountFactor=" + discountFactor +
-//            ", batchEpisodeCount=" + batchEpisodeCount +
-//            ", replayBufferSize=" + replayBufferSize +
-//            ", maximalStepCountBound=" + maximalStepCountBound +
-//            ", stageCount=" + stageCount +
-//            ", explorationConstantSupplier=" + explorationConstantSupplier +
-//            ", temperatureSupplier=" + temperatureSupplier +
-//            ", riskSupplier=" + riskSupplier +
-//            ", trainerAlgorithm=" + dataAggregationAlgorithm +
-//            ", approximatorType=" + approximatorType +
-//            ", evaluatorType=" + evaluatorType +
-//            ", selectorType=" + selectorType +
-//            ", trainingBatchSize=" + trainingBatchSize +
-//            ", trainingEpochCount=" + trainingEpochCount +
-//            ", learningRate=" + learningRate +
-//            ", globalRiskAllowed=" + globalRiskAllowed +
-//            ", inferenceExistingFlowStrategy=" + inferenceExistingFlowStrategy +
-//            ", inferenceNonExistingFlowStrategy=" + inferenceNonExistingFlowStrategy +
-//            ", explorationExistingFlowStrategy=" + explorationExistingFlowStrategy +
-//            ", explorationNonExistingFlowStrategy=" + explorationNonExistingFlowStrategy +
-//            ", flowOptimizerType=" + flowOptimizerType +
-//            ", subTreeRiskCalculatorTypeForKnownFlow=" + subTreeRiskCalculatorTypeForKnownFlow +
-//            ", subTreeRiskCalculatorTypeForUnknownFlow=" + subTreeRiskCalculatorTypeForUnknownFlow +
-//            ", batchedEvaluationSize=" + batchedEvaluationSize +
-//            '}';
-//    }
 
     @Override
     public String toString() {

@@ -1,7 +1,8 @@
 package vahy.paperGenerics.metadata;
 
 import vahy.api.model.Action;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapper;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
@@ -10,10 +11,7 @@ import vahy.paperGenerics.PaperState;
 
 import java.util.EnumMap;
 
-public class PaperMetadataFactory<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TState extends PaperState<TAction, TObservation, TState>>
+public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     private final Class<TAction> actionClass;
@@ -24,10 +22,12 @@ public class PaperMetadataFactory<
 
     @Override
     public PaperMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> parent,
-                                                           StateRewardReturn<TAction, TObservation, TState> stateRewardReturn,
+                                                           StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
                                                            TAction appliedAction) {
         double reward = stateRewardReturn.getReward();
-        TState state = stateRewardReturn.getState();
+        StateWrapper<TAction, TObservation, TState> state = stateRewardReturn.getState();
+        //TODO THIS IS DIRTY:
+        int policyId = state.getPlayerIdWrapper();
         if(parent != null) {
             var searchNodeMetadata = parent.getSearchNodeMetadata();
             return new PaperMetadata<>(
@@ -35,7 +35,7 @@ public class PaperMetadataFactory<
                 reward,
                 DoubleScalarRewardAggregator.emptyReward(),
                 searchNodeMetadata.getChildPriorProbabilities().get(appliedAction),
-                state.isFinalState() ? (state.isRiskHit() ? 1.0 : 0.0) : Double.NaN,
+                state.isFinalState() ? (state.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
                 new EnumMap<>(actionClass)
             );
         } else {
@@ -44,7 +44,7 @@ public class PaperMetadataFactory<
                 reward,
                 DoubleScalarRewardAggregator.emptyReward(),
                 Double.NaN,
-                state.isFinalState() ? (state.isRiskHit() ? 1.0 : 0.0) : Double.NaN,
+                state.isFinalState() ? (state.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
                 new EnumMap<>(actionClass)
             );
         }

@@ -29,7 +29,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
     }
 
     public TObservation getObservation() {
-        return state.getPlayerObservation(policyId);
+        return state.getInGameEntityObservation(policyId);
     }
 
     public TObservation getCommonObservation() {
@@ -45,11 +45,11 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
     }
 
     public boolean isPlayerTurn() {
-        return state.getPlayerIdOnTurn() == policyId;
+        return state.getInGameEntityIdOnTurn() == policyId;
     }
 
     public int getPlayerOnTurnId() {
-        return state.getPlayerIdOnTurn();
+        return state.getInGameEntityIdOnTurn();
     }
 
     public boolean isFinalState() {
