@@ -86,7 +86,7 @@ public class EpisodeStepRecordImpl<
         sb.append("action: ");
         sb.append(getAction());
         sb.append(" getting reward: ");
-        sb.append(getReward());
+        sb.append(Arrays.toString(getReward()));
         sb.append(". PolicyStepLog: ");
         sb.append((policyStepRecord != null ? policyStepRecord.toLogString() : null));
         return sb.toString();

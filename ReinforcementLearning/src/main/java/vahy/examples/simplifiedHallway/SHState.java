@@ -249,7 +249,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
 
     @Override
     public int getTotalPlayerCount() {
-        return 2;
+        return 1;
     }
 
     @Override

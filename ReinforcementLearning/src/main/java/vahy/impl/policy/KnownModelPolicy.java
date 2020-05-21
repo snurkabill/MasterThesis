@@ -28,6 +28,7 @@ public class KnownModelPolicy<
     public double[] getActionProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
         if(perfectPredictor == null) {
             perfectPredictor = gameState.getKnownModelWithPerfectObservationPredictor();
+            checkIfStillNull();
         }
         return perfectPredictor.apply(gameState.getWrappedState());
     }
@@ -36,15 +37,20 @@ public class KnownModelPolicy<
     public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
         if(perfectPredictor == null) {
             perfectPredictor = gameState.getKnownModelWithPerfectObservationPredictor();
+            checkIfStillNull();
         }
         var actions = gameState.getAllPossibleActions();
         var probabilities = perfectPredictor.apply(gameState.getWrappedState());
         if(actions.length != probabilities.length) {
-            perfectPredictor.apply(gameState.getWrappedState());
-            gameState.getAllPossibleActions();
             throw new IllegalStateException("Action count differ from probability length");
         }
         return actions[RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random)];
+    }
+
+    private void checkIfStillNull() {
+        if(perfectPredictor == null) {
+            throw new IllegalStateException("Perfect state predictor is requested, but implementation is missing.");
+        }
     }
 
     @Override

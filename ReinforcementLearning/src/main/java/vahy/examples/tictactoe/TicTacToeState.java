@@ -223,11 +223,6 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public int getRemainingPlayerCount() {
-        return 2;
-    }
-
-    @Override
     public int getInGameEntityIdOnTurn() {
         return isPlayerZeroOnTurn ? 0 : 1;
     }

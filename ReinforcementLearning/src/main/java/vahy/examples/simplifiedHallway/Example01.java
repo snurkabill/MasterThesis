@@ -1,6 +1,8 @@
 package vahy.examples.simplifiedHallway;
 
+import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.CommonAlgorithmConfig;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
@@ -24,6 +26,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Example01 {
 
@@ -35,8 +39,9 @@ public class Example01 {
             .gameStringRepresentation(SHInstance.BENCHMARK_03)
             .maximalStepCountBound(500)
             .stepPenalty(10)
-            .trapProbability(1.00)
+            .trapProbability(0.00)
             .buildConfig();
+
 
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
@@ -63,33 +68,29 @@ public class Example01 {
             }
         };
 
-
-        var playerOneSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
-            0,
-            "Policy_0",
-            new KnownModelPolicySupplier<>(new SplittableRandom(), 0),
-            new ArrayList<>()
-        );
-
         double discountFactor = 1;
+
+        var initializingRandom = new SplittableRandom(systemConfig.getRandomSeed());
+
+        var envPolicySuppliers = createEnvironmentPolicySuppliers(config, initializingRandom.split());
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
         var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, SHState.PLAYER_ENTITY_ACTION_ARRAY.length, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
-        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var predictorTrainingSetup = new PredictorTrainingSetup<>(
             1,
             trainablePredictor,
             episodeDataMaker,
             dataAggregator
         );
 
-        var playerTwoSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var playerSupplier = new PolicyArguments<>(
             1,
             "Policy_1",
             new PolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>() {
 
-                private final SplittableRandom random = new SplittableRandom(0);
+                private final SplittableRandom random = initializingRandom.split();
 
                 @Override
                 public Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> initializePolicy(SHState initialState, PolicyMode policyMode) {
@@ -102,10 +103,8 @@ public class Example01 {
             List.of(predictorTrainingSetup)
         );
 
-        var policyArgumentsList = List.of(
-            playerOneSupplier,
-            playerTwoSupplier
-        );
+        var policyArgumentsList = new ArrayList<>(envPolicySuppliers);
+        policyArgumentsList.add(playerSupplier);
 
         var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
             .setRoundName("SHIntegrationTest")
@@ -120,7 +119,18 @@ public class Example01 {
         var result = roundBuilder.execute();
 
         System.out.println(result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
+    }
 
+    private static List<PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>> createEnvironmentPolicySuppliers(ProblemConfig config, SplittableRandom random) {
+        return IntStream.range(0, config.getEnvironmentPolicyCount())
+                .mapToObj(x ->
+                new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+                    x,
+                    "EnvironmentPolicy_" + x,
+                    new KnownModelPolicySupplier<>(random.split(), x),
+                    new ArrayList<>()
+                ))
+                .collect(Collectors.toList());
     }
 
 }

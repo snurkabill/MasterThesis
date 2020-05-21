@@ -3,32 +3,50 @@ package vahy.examples.bomberman;
 public class BomberManStaticPart {
 
     private final boolean[][] walls;
+
+    private final boolean[][] goldEntitiesArray;
+    private final int[][] goldEntitiesReferenceArray;
+    private final int rewardPerGold;
+
+    private final int goldEntityCount;
     private final int startingPlayerCount;
-    private final int startingEntityCount;
+    private final int startingTotalEntityCount;
+    private final double goldRespawnProbability;
+
     private final int bombsPerPlayer;
-//    private final int rewardsPerPlayer;
     private final int bombRange;
     private final int bombCountDown;
+
     private final int playerLivesAtStart;
 
     private final double[][] moveReward;
     private final double[] noEnvironmentActionReward;
 
-    public BomberManStaticPart(boolean[][] walls, int startingPlayerCount, int startingEntityCount, int bombsPerPlayer, int rewardPerStep, int bombRange, int bombCountDown, int playerLivesAtStart) {
+    private final int goldWithEnvironmentEntityCount;
+
+    public BomberManStaticPart(boolean[][] walls, int startingPlayerCount, int startingTotalEntityCount, int bombsPerPlayer, int rewardPerStep, int goldEntityCount, boolean[][] goldEntitiesArray, int[][] goldEntitiesReferenceArray, int rewardPerGold, double goldRespawnProbability, int bombRange, int bombCountDown, int playerLivesAtStart) {
         this.walls = walls;
+        this.goldEntitiesArray = goldEntitiesArray;
+        this.goldEntitiesReferenceArray = goldEntitiesReferenceArray;
+        this.rewardPerGold = rewardPerGold;
+        this.goldRespawnProbability = goldRespawnProbability;
         this.startingPlayerCount = startingPlayerCount;
-        this.startingEntityCount = startingEntityCount;
+        this.startingTotalEntityCount = startingTotalEntityCount;
         this.bombsPerPlayer = bombsPerPlayer;
-//        this.rewardsPerPlayer = rewardsPerPlayer;
+        this.goldEntityCount = goldEntityCount;
         this.bombRange = bombRange;
-        this.moveReward = new double[startingPlayerCount][];
         this.bombCountDown = bombCountDown;
         this.playerLivesAtStart = playerLivesAtStart;
-        for (int i = 0; i < moveReward.length; i++) {
-            moveReward[i] = new double[startingEntityCount];
-            moveReward[i][i + 1] = -rewardPerStep;
+        this.goldWithEnvironmentEntityCount = 1 + goldEntityCount;
+        if(startingPlayerCount + goldWithEnvironmentEntityCount != startingTotalEntityCount) {
+            throw new IllegalStateException("Summary of entities in game does not match");
         }
-        this.noEnvironmentActionReward = new double[startingPlayerCount];
+        this.moveReward = new double[startingPlayerCount][];
+        for (int i = 0; i < moveReward.length; i++) {
+            moveReward[i] = new double[startingTotalEntityCount];
+            moveReward[i][i + goldWithEnvironmentEntityCount] = -rewardPerStep;
+        }
+        this.noEnvironmentActionReward = new double[startingTotalEntityCount];
     }
 
     public double[][] getMoveReward() {
@@ -43,17 +61,13 @@ public class BomberManStaticPart {
         return startingPlayerCount;
     }
 
-    public int getStartingEntityCount() {
-        return startingEntityCount;
+    public int getStartingTotalEntityCount() {
+        return startingTotalEntityCount;
     }
 
     public int getBombsPerPlayer() {
         return bombsPerPlayer;
     }
-
-//    public int getRewardsPerPlayer() {
-//        return rewardsPerPlayer;
-//    }
 
     public int getBombRange() {
         return bombRange;
@@ -69,5 +83,29 @@ public class BomberManStaticPart {
 
     public int getPlayerLivesAtStart() {
         return playerLivesAtStart;
+    }
+
+    public int getGoldEntityCount() {
+        return goldEntityCount;
+    }
+
+    public boolean[][] getGoldEntitiesArray() {
+        return goldEntitiesArray;
+    }
+
+    public int[][] getGoldEntitiesReferenceArray() {
+        return goldEntitiesReferenceArray;
+    }
+
+    public int getRewardPerGold() {
+        return rewardPerGold;
+    }
+
+    public double getGoldRespawnProbability() {
+        return goldRespawnProbability;
+    }
+
+    public int getGoldWithEnvironmentEntityCount() {
+        return goldWithEnvironmentEntityCount;
     }
 }

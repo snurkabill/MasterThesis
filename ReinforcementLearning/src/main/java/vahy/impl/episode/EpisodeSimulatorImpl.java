@@ -1,5 +1,6 @@
 package vahy.impl.episode;
 
+import org.datavec.api.writable.comparator.Comparators;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.episode.EpisodeResults;
@@ -17,6 +18,7 @@ import vahy.api.policy.PolicyRecord;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -51,7 +53,6 @@ public class EpisodeSimulatorImpl<
     private EpisodeResults<TAction, TObservation, TState, TPolicyRecord> episodeRun(int episodeStepCountLimit, List<Policy<TAction, TObservation, TState, TPolicyRecord>> policyList, TState initState) {
         var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>>(episodeStepCountLimit);
 
-        policyList.sort(Comparator.comparing(Policy::getPolicyId));
         List<Integer> playerStepsDone = new ArrayList<>(policyList.size());
         List<Double> totalCumulativePayoffList = new ArrayList<>(policyList.size());
         for (int i = 0; i < policyList.size(); i++) {
@@ -121,6 +122,9 @@ public class EpisodeSimulatorImpl<
     }
 
     private String createErrorMsg(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistoryList) {
+        if(episodeHistoryList.isEmpty()) {
+            return "No steps were done in episode.";
+        }
         return "Episode simulation ended due to inner exception. Episode steps: [" +
             episodeHistoryList
                 .stream()
@@ -128,7 +132,8 @@ public class EpisodeSimulatorImpl<
                 .reduce((a, b) -> a + ", " + b)
                 .orElse("Episode does not contain any states as history")
             +
-            "] with the executed episode history: " +
+            "]. " +
+            " Total episode history: " +
             episodeHistoryList
                 .stream()
                 .map(x -> {
@@ -150,7 +155,7 @@ public class EpisodeSimulatorImpl<
                             .append(System.lineSeparator())
                             .append("Getting reward: ")
                             .append(System.lineSeparator())
-                            .append(x.getReward())
+                            .append(Arrays.toString(x.getReward()))
                             .append(System.lineSeparator());
                         sb.append("----------------------------------------------------------------------------------------------------");
                         return sb.toString();

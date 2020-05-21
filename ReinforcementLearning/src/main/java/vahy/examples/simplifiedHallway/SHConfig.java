@@ -4,6 +4,8 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.examples.simplifiedHallway.cell.Cell;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SHConfig extends ProblemConfig {
 
@@ -20,7 +22,7 @@ public class SHConfig extends ProblemConfig {
                       double trapProbability,
                       String gameStringRepresentation,
                       List<List<Cell>> gameMatrix) {
-        super(maximalStepCountBound, isModelKnown);
+        super(maximalStepCountBound, isModelKnown, 1, 1, Stream.of(1).collect(Collectors.toSet()));
         this.goalReward = goalReward;
         this.stepPenalty = stepPenalty;
         this.trapProbability = trapProbability;
