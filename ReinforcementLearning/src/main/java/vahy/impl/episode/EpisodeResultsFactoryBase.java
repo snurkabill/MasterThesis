@@ -3,6 +3,7 @@ package vahy.impl.episode;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.EpisodeStepRecord;
+import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.PolicyRecord;
@@ -20,12 +21,13 @@ public class EpisodeResultsFactoryBase<
 
     @Override
     public EpisodeResults<TAction, TObservation, TState, TPolicyRecord> createResults(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+                                                                                      PolicyIdTranslationMap policyIdTranslationMap,
                                                                                       int policyCount,
                                                                                       List<Integer> playerStepCount,
                                                                                       int totalStepCountList,
                                                                                       List<Double> totalCumulativePayoff,
                                                                                       Duration duration)
     {
-        return new EpisodeResultsImpl<>(episodeHistory, policyCount, playerStepCount, totalStepCountList, totalCumulativePayoff, duration);
+        return new EpisodeResultsImpl<>(episodeHistory, policyIdTranslationMap, policyCount, playerStepCount, totalStepCountList, totalCumulativePayoff, duration);
     }
 }

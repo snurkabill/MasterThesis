@@ -1,5 +1,6 @@
 package vahy.api.model;
 
+import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 
@@ -22,8 +23,6 @@ public interface State<TAction extends Enum<TAction> & Action, TObservation exte
     List<String> getCsvHeader();
 
     List<String> getCsvRecord();
-
-    int getTotalPlayerCount();
 
     int getInGameEntityIdOnTurn();
 

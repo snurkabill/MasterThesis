@@ -7,6 +7,7 @@ import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 
 import java.util.List;
+import java.util.SplittableRandom;
 
 public interface GameSampler<
     TAction extends Enum<TAction> & Action,

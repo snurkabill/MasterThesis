@@ -1,10 +1,14 @@
 package vahy.examples.bomberman;
 
+import vahy.api.episode.PolicyCategoryInfo;
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.ProblemConfig;
+import vahy.impl.RoundBuilder;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.utils.ImmutableTuple;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -64,7 +68,10 @@ public class BomberManConfig extends ProblemConfig {
             isModelKnown,
             gamePlayground.getSecond() + 1,
             1,
-            IntStream.range(gamePlayground.getSecond() + 1, gamePlayground.getSecond() + 1 + playerCount).boxed().collect(Collectors.toSet()));
+            List.of(
+                new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID, gamePlayground.getSecond() + 1),
+                new PolicyCategoryInfo(true, RoundBuilder.ENVIRONMENT_CATEGORY_ID + 1, playerCount)),
+            PolicyShuffleStrategy.CATEGORY_SHUFFLE);
 
         this.goldReward = goldReward;
         this.stepPenalty = stepPenalty;

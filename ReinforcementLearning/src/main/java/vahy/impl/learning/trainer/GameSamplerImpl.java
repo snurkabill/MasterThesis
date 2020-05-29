@@ -6,18 +6,26 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.GameSampler;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.episode.PolicyCategoryInfo;
+import vahy.api.episode.PolicyCategory;
+import vahy.api.episode.PolicyIdTranslationMap;
+import vahy.api.episode.PolicyShuffleStrategy;
+import vahy.api.episode.RegisteredPolicy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.EpisodeSetupImpl;
 import vahy.impl.episode.EpisodeSimulatorImpl;
+import vahy.utils.EnumUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -37,21 +45,92 @@ public class GameSamplerImpl<
     private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory;
     private final int processingUnitCount;
 
-    private final List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> policySupplierList;
+    private final int totalPolicyCount;
+    private final List<PolicyCategoryInfo> expectedPolicyCategoryInfoList;
+    private final List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategoryList;
+    private final PolicyShuffleStrategy policyShuffleStrategy;
+
+    private final Random random;
 
     public GameSamplerImpl(InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                            EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory,
-                           List<PolicySupplier<TAction, TObservation, TState, TPolicyRecord>> playerPolicySupplierList,
-                           int processingUnitCount)
+                           List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategoryList,
+                           PolicyShuffleStrategy policyShuffleStrategy,
+                           int processingUnitCount,
+                           List<PolicyCategoryInfo> expectedPolicyCategoryInfoList,
+                           SplittableRandom random)
     {
+        this.random = new Random(random.nextInt());
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
         this.processingUnitCount = processingUnitCount;
-        this.policySupplierList = playerPolicySupplierList;
+        this.policyCategoryList = policyCategoryList;
+        this.totalPolicyCount = policyCategoryList.stream().mapToInt(x -> x.getPolicySupplierList().size()).sum();
+        this.policyShuffleStrategy = policyShuffleStrategy;
+        this.expectedPolicyCategoryInfoList = expectedPolicyCategoryInfoList;
     }
 
-    private Policy<TAction, TObservation, TState, TPolicyRecord> supplyPlayerPolicy(PolicySupplier<TAction, TObservation, TState, TPolicyRecord> policySupplier, TState initialState, PolicyMode policyMode) {
-        return policySupplier.initializePolicy(initialState, policyMode);
+    private void checkPolicyCount(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> providedPolicyCategories) {
+        for (int i = 0; i < requestedCategoryList.size(); i++) {
+            var requestedCategory = requestedCategoryList.get(i);
+            var providedCategory = providedPolicyCategories.get(i);
+            if(requestedCategory.getCategoryId() != providedCategory.getCategoryId()) {
+                throw new IllegalStateException("Different categoryIDs in expected " + requestedCategory.getCategoryId() + "] and provided [" + providedCategory.getCategoryId() + "] categoryList");
+            }
+            if(requestedCategory.getPolicyInCategoryCount() != providedCategory.getPolicySupplierList().size()) {
+                throw new IllegalStateException("Different count of expected and provided policies. Policy requested count: [" + requestedCategoryList.get(i) +
+                    "]. Policy provided count: [" + providedPolicyCategories.get(i).getPolicySupplierList().size() +
+                    "] for category: [" + i + "]");
+            }
+        }
+    }
+
+    private PolicyIdTranslationMap createPolicyTranslationMap(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> providedPolicyCategories) {
+        checkPolicyCount(requestedCategoryList, providedPolicyCategories); // TODO: move to constructor
+        var map = new PolicyIdTranslationMap(this.totalPolicyCount);
+
+        switch (policyShuffleStrategy) {
+            case NO_SHUFFLE: {
+                var inGameId = 0;
+                for (var category : providedPolicyCategories) {
+                    var categoryPolicyList = category.getPolicySupplierList();
+                    for (var entry : categoryPolicyList) {
+                        map.put(entry.getPolicyId(), inGameId);
+                        inGameId++;
+                    }
+                }
+            }
+            break;
+            case CATEGORY_SHUFFLE: {
+                var inGameId = 0;
+                for (int i = 0; i < providedPolicyCategories.size(); i++) {
+                    var isShufflePossible = requestedCategoryList.get(i).isShufflePossible();
+                    var category = providedPolicyCategories.get(i);
+                    var categoryPolicyList = category.getPolicySupplierList();
+                    var policyIndexList = categoryPolicyList.stream().map(PolicySupplier::getPolicyId).collect(Collectors.toList());
+                    if(isShufflePossible) {
+                        Collections.shuffle(policyIndexList, random);
+                    }
+                    for (var entry : policyIndexList) {
+                        map.put(entry, inGameId);
+                        inGameId++;
+                    }
+                }
+            }
+            break;
+            default: throw EnumUtils.createExceptionForNotExpectedEnumValue(policyShuffleStrategy);
+        }
+        return map;
+    }
+
+    private List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> initializeAndRegisterPolicies(TState initialState, PolicyMode policyMode, PolicyIdTranslationMap policyIdTranslationMap) {
+        var registeredPolicyList = new ArrayList<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>>(this.totalPolicyCount);
+        for (var category : this.policyCategoryList) {
+            for (var entry : category.getPolicySupplierList()) {
+                registeredPolicyList.add(new RegisteredPolicy<>(entry.initializePolicy(initialState, policyMode), policyIdTranslationMap.getInGameEntityId(entry.getPolicyId())));
+            }
+        }
+        return registeredPolicyList;
     }
 
     public List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
@@ -61,8 +140,9 @@ public class GameSamplerImpl<
         var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState(policyMode);
-            var policyList = policySupplierList.stream().map(x -> supplyPlayerPolicy(x, initialGameState, policyMode)).collect(Collectors.toList());
-            var paperEpisode = new EpisodeSetupImpl<>(initialGameState, policyList, stepCountLimit);
+            var policyIdTranslationMap = createPolicyTranslationMap(expectedPolicyCategoryInfoList, policyCategoryList);
+            var registeredPolicies = initializeAndRegisterPolicies(initialGameState, policyMode, policyIdTranslationMap);
+            var paperEpisode = new EpisodeSetupImpl<>(initialGameState, policyIdTranslationMap, registeredPolicies, stepCountLimit);
             var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
             episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }

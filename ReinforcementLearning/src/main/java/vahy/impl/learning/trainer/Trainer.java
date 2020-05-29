@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class Trainer<
@@ -40,11 +41,11 @@ public class Trainer<
     private final List<DataPointGeneratorGeneric<TStatistics>> samplingDataGeneratorList;
     private final List<DataPointGeneratorGeneric<TStatistics>> evalDataGeneratorList;
 
-    private final DataPointGeneratorGeneric<Double> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", x -> x);
-    private final DataPointGeneratorGeneric<Double> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", x -> x);
-    private final DataPointGeneratorGeneric<Double> trainingSampleCount = new DataPointGeneratorGeneric<>("Training sample count", x -> x);
-    private final DataPointGeneratorGeneric<Double> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
-    private final DataPointGeneratorGeneric<Double> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
+    private final DataPointGeneratorGeneric<Double> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", List::of);
+    private final DataPointGeneratorGeneric<Double> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", List::of);
+    private final DataPointGeneratorGeneric<List<Double>> trainingSampleCount = new DataPointGeneratorGeneric<>("Training sample count", x -> x);
+    private final DataPointGeneratorGeneric<List<Double>> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
+    private final DataPointGeneratorGeneric<List<Double>> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
 
     public Trainer(GameSampler<TAction, TObservation, TState, TPolicyRecord> gameSampler,
                    List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList,
@@ -85,11 +86,11 @@ public class Trainer<
 
     private List<DataPointGeneratorGeneric<TStatistics>> addBaseDataGenerators(List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
         var dataPointGeneratorList = new ArrayList<>(additionalDataPointGeneratorList == null ? new ArrayList<>() : additionalDataPointGeneratorList);
-//        dataPointGeneratorList.add(new DataPointGeneratorGeneric<TStatistics>("Avg Player Step Count", EpisodeStatistics::getAveragePlayerStepCount));
-//        dataPointGeneratorList.add(new DataPointGeneratorGeneric<TStatistics>("Avg Total Payoff", EpisodeStatistics::getTotalPayoffAverage));
-//        dataPointGeneratorList.add(new DataPointGeneratorGeneric<TStatistics>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<TStatistics>("Avg episode duration [ms]", EpisodeStatistics::getAverageMillisPerEpisode));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<TStatistics>("Stdev episode duration [ms]", EpisodeStatistics::getStdevMillisPerEpisode));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Player Step Count", EpisodeStatistics::getAveragePlayerStepCount));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Total Payoff", EpisodeStatistics::getTotalPayoffAverage));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", x -> List.of(x.getAverageMillisPerEpisode())));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", x -> List.of(x.getStdevMillisPerEpisode())));
         return dataPointGeneratorList;
     }
 

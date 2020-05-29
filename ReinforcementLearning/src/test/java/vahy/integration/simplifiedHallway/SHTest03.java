@@ -4,10 +4,10 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.policy.AbstractPolicySupplier;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
-import vahy.api.policy.PolicySupplier;
 import vahy.examples.simplifiedHallway.SHAction;
 import vahy.examples.simplifiedHallway.SHConfig;
 import vahy.examples.simplifiedHallway.SHConfigBuilder;
@@ -22,13 +22,11 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.KnownModelPolicySupplier;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
-import vahy.impl.runner.PolicyArguments;
+import vahy.impl.runner.PolicyDefinition;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.SplittableRandom;
@@ -72,18 +70,10 @@ public class SHTest03 {
             }
         };
 
-
-        var playerOneSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
-            0,
-            "Policy_0",
-            new KnownModelPolicySupplier<>(new SplittableRandom(), 0),
-            new ArrayList<>()
-        );
-
         double discountFactor = 1;
 
-        var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, SHState.PLAYER_ENTITY_ACTION_ARRAY.length, 1);
+        var trainablePredictor = new DataTablePredictor(new double[]{0.0});
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
@@ -93,28 +83,22 @@ public class SHTest03 {
             dataAggregator
         );
 
-        var playerTwoSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var playerTwoSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>(
             1,
-            "Policy_1",
-            new PolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>() {
-
-                private final SplittableRandom random = new SplittableRandom(0);
-
+            1,
+            (policyId, categoryId, random) -> new AbstractPolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>(policyId, categoryId, random) {
                 @Override
-                public Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> initializePolicy(SHState initialState, PolicyMode policyMode) {
-                    if(policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.0);
+                protected Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> createState_inner(SHState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+                    if (policyMode == PolicyMode.INFERENCE) {
+                        return new ValuePolicy<>(random, policyId, trainablePredictor, 0.0);
                     }
-                    return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.5);
+                    return new ValuePolicy<>(random, policyId, trainablePredictor, 0.5);
                 }
             },
             List.of(predictorTrainingSetup)
         );
 
-        var policyArgumentsList = List.of(
-            playerOneSupplier,
-            playerTwoSupplier
-        );
+        var policyArgumentsList = List.of(playerTwoSupplier);
 
         var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
             .setRoundName("SH03SAFEIntegrationTest")
@@ -125,7 +109,7 @@ public class SHTest03 {
             .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPolicySupplierList(policyArgumentsList);
+            .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
         Assert.assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 80, Math.pow(10, -10));
@@ -167,18 +151,10 @@ public class SHTest03 {
             }
         };
 
-
-        var playerOneSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
-            0,
-            "Policy_0",
-            new KnownModelPolicySupplier<>(new SplittableRandom(), 0),
-            new ArrayList<>()
-        );
-
         double discountFactor = 1;
 
-        var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, SHState.PLAYER_ENTITY_ACTION_ARRAY.length, 1);
+        var trainablePredictor = new DataTablePredictor(new double[]{0.0});
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
@@ -188,28 +164,22 @@ public class SHTest03 {
             dataAggregator
         );
 
-        var playerTwoSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var playerTwoSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>(
             1,
-            "Policy_1",
-            new PolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>() {
-
-                private final SplittableRandom random = new SplittableRandom(0);
-
+            1,
+            (policyId, categoryId, random) -> new AbstractPolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>(policyId, categoryId, random) {
                 @Override
-                public Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> initializePolicy(SHState initialState, PolicyMode policyMode) {
-                    if(policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.0);
+                protected Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> createState_inner(SHState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+                    if (policyMode == PolicyMode.INFERENCE) {
+                        return new ValuePolicy<>(random, policyId, trainablePredictor, 0.0);
                     }
-                    return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.5);
+                    return new ValuePolicy<>(random, policyId, trainablePredictor, 0.5);
                 }
             },
             List.of(predictorTrainingSetup)
         );
 
-        var policyArgumentsList = List.of(
-            playerOneSupplier,
-            playerTwoSupplier
-        );
+        var policyArgumentsList = List.of(playerTwoSupplier);
 
         var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
             .setRoundName("SH03SAFEIntegrationTest")
@@ -220,7 +190,7 @@ public class SHTest03 {
             .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPolicySupplierList(policyArgumentsList);
+            .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
         Assert.assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 60, Math.pow(10, -10));
@@ -262,18 +232,10 @@ public class SHTest03 {
             }
         };
 
-
-        var playerOneSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
-            0,
-            "Policy_0",
-            new KnownModelPolicySupplier<>(new SplittableRandom(), 0),
-            new ArrayList<>()
-        );
-
         double discountFactor = 1;
 
-        var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, SHState.PLAYER_ENTITY_ACTION_ARRAY.length, 1);
+        var trainablePredictor = new DataTablePredictor(new double[]{0.0});
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
@@ -283,28 +245,22 @@ public class SHTest03 {
             dataAggregator
         );
 
-        var playerTwoSupplier = new PolicyArguments<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var playerTwoSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>(
             1,
-            "Policy_1",
-            new PolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>() {
-
-                private final SplittableRandom random = new SplittableRandom(0);
-
+            1,
+            (policyId, categoryId, random) -> new AbstractPolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>(policyId, categoryId, random) {
                 @Override
-                public Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> initializePolicy(SHState initialState, PolicyMode policyMode) {
-                    if(policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.0);
+                protected Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> createState_inner(SHState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+                    if (policyMode == PolicyMode.INFERENCE) {
+                        return new ValuePolicy<>(random, policyId, trainablePredictor, 0.0);
                     }
-                    return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.5);
+                    return new ValuePolicy<>(random, policyId, trainablePredictor, 0.5);
                 }
             },
             List.of(predictorTrainingSetup)
         );
 
-        var policyArgumentsList = List.of(
-            playerOneSupplier,
-            playerTwoSupplier
-        );
+        var policyArgumentsList = List.of(playerTwoSupplier);
 
         var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
             .setRoundName("SH03SAFEIntegrationTest")
@@ -315,9 +271,9 @@ public class SHTest03 {
             .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPolicySupplierList(policyArgumentsList);
+            .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) >  74);
+        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) > 74);
     }
 }

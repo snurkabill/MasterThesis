@@ -10,12 +10,12 @@ import java.util.stream.Collectors;
 public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerator {
 
     private final String dataTitle;
-    private final Function<TDataSource, Double> function;
+    private final Function<TDataSource, List<Double>> function;
 
     private int counter = 0;
     private List<Double> valueList = null;
 
-    public DataPointGeneratorGeneric(String dataTitle, Function<TDataSource, Double> function) {
+    public DataPointGeneratorGeneric(String dataTitle, Function<TDataSource, List<Double>> function) {
         this.dataTitle = dataTitle;
         this.function = function;
     }
@@ -29,15 +29,15 @@ public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerato
     public ImmutableTuple<Double, List<Double>> get() {
         return new ImmutableTuple<>((double) counter, valueList);
     }
-
-    public void addNewValue(List<TDataSource> dataSource) {
-        counter++;
-        valueList = dataSource.stream().map(function).collect(Collectors.toList());
-    }
+//
+//    public void addNewValue(List<TDataSource> dataSource) {
+//        counter++;
+//        valueList = dataSource.stream().map(function).collect(Collectors.toList());
+//    }
 
     public void addNewValue(TDataSource dataSource) {
         counter++;
-        valueList = List.of(function.apply(dataSource));
+        valueList = function.apply(dataSource);
     }
 
     public DataPointGeneratorGeneric<TDataSource> createCopy() {

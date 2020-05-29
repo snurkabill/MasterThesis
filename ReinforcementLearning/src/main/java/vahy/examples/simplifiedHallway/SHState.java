@@ -1,5 +1,6 @@
 package vahy.examples.simplifiedHallway;
 
+import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
@@ -245,11 +246,6 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     @Override
     public List<String> getCsvRecord() {
         return List.of("TODO: Implement this...");
-    }
-
-    @Override
-    public int getTotalPlayerCount() {
-        return 1;
     }
 
     @Override

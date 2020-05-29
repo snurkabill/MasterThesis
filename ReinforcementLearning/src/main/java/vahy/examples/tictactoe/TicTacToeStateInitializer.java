@@ -27,7 +27,7 @@ public class TicTacToeStateInitializer extends AbstractInitialStateSupplier<TicT
                     TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY,
                 }
             },
-            random.nextBoolean(),
+            true,
             9,
             Arrays.asList(TicTacToeAction.values())
         );

@@ -20,6 +20,8 @@ public interface EpisodeResults<
 
     int getTotalStepCount();
 
+    PolicyIdTranslationMap getPolicyIdTranslationMap();
+
     List<Integer> getPlayerStepCountList();
 
     List<Double> getTotalPayoff();

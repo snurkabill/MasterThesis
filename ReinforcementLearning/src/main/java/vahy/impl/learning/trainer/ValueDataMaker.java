@@ -18,29 +18,31 @@ public class ValueDataMaker<TAction extends Enum<TAction> & Action, TState exten
     implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
 
     private final double discountFactor;
-    private final int allActionCount;
     private final int playerPolicyId;
 
-    public ValueDataMaker(double discountFactor, int allActionCount, int playerPolicyId) {
+    public ValueDataMaker(double discountFactor, int playerPolicyId) {
         this.discountFactor = discountFactor;
-        this.allActionCount = allActionCount;
         this.playerPolicyId = playerPolicyId;
     }
 
     @Override
     public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState, TPolicyRecord> episodeResults) {
         var episodeHistory = episodeResults.getEpisodeHistory();
+        var translationMap = episodeResults.getPolicyIdTranslationMap();
+        var inGameEntityId = translationMap.getInGameEntityId(playerPolicyId);
         var aggregatedTotalPayoff = 0.0;
         var iterator = episodeHistory.listIterator(episodeResults.getTotalStepCount());
-        var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(episodeResults.getPlayerStepCountList().get(playerPolicyId));
+        var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(episodeResults.getPlayerStepCountList().get(inGameEntityId));
         while(iterator.hasPrevious()) {
             var previous = iterator.previous();
-            aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getReward()[playerPolicyId], aggregatedTotalPayoff, discountFactor);
+            if(previous.getFromState().isInGame(inGameEntityId)) {
+                aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getReward()[inGameEntityId], aggregatedTotalPayoff, discountFactor);
 //            if(previous.getPolicyIdOnTurn() == playerPolicyId) {
                 var doubleArray = new double[1];
                 doubleArray[0] = aggregatedTotalPayoff;
-                mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(playerPolicyId), new MutableDoubleArray(doubleArray, false)));
+                mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(inGameEntityId), new MutableDoubleArray(doubleArray, false)));
 //            }
+            }
         }
         Collections.reverse(mutableDataSampleList);
         return mutableDataSampleList;

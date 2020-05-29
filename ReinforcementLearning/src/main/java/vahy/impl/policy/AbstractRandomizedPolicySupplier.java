@@ -18,14 +18,22 @@ public abstract class AbstractRandomizedPolicySupplier<
 
     private final SplittableRandom random;
     private final int policyId;
+    private final int policyCategoryId;
 
-    public AbstractRandomizedPolicySupplier(SplittableRandom random, int policyId) {
+
+    public AbstractRandomizedPolicySupplier(SplittableRandom random, int policyId, int policyCategoryId) {
         this.random = random;
         this.policyId = policyId;
+        this.policyCategoryId = policyCategoryId;
     }
 
     public int getPolicyId() {
         return policyId;
+    }
+
+    @Override
+    public int getPolicyCategoryId() {
+        return policyCategoryId;
     }
 
     @Override

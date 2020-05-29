@@ -16,9 +16,10 @@ import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.policy.KnownModelPolicySupplier;
 import vahy.impl.runner.EpisodeWriter;
 import vahy.impl.runner.EvaluationArguments;
-import vahy.impl.runner.PolicyArguments;
+import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.runner.Runner;
 import vahy.impl.runner.RunnerArguments;
 
@@ -31,17 +32,21 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SplittableRandom;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord, TStatistics extends EpisodeStatisticsBase> {
 
     private static final Logger logger = LoggerFactory.getLogger(RoundBuilder.class);
 
     public static final long EVALUATION_SEED_SHIFT = 100_000;
+    public static final int ENVIRONMENT_CATEGORY_ID = 0;
 
     private String roundName;
     private String timestamp;
@@ -50,7 +55,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     private SystemConfig systemConfig;
     private CommonAlgorithmConfig commonAlgorithmConfig;
 
-    private List<PolicyArguments<TAction, DoubleVector, TState, TPolicyRecord>> policyArgumentList;
+    private List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> playerPolicyArgumentList;
 
     private EpisodeStatisticsCalculator<TAction, DoubleVector, TState, TPolicyRecord, TStatistics> statisticsCalculator;
     private EpisodeResultsFactory<TAction, DoubleVector, TState, TPolicyRecord> resultsFactory;
@@ -80,8 +85,8 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setPolicySupplierList(List<PolicyArguments<TAction, DoubleVector, TState, TPolicyRecord>> policyArgumentsList) {
-        this.policyArgumentList = policyArgumentsList;
+    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setPlayerPolicySupplierList(List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> policyDefinitionList) {
+        this.playerPolicyArgumentList = policyDefinitionList;
         return this;
     }
 
@@ -127,23 +132,28 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         if(resultsFactory == null) {
             throw new IllegalArgumentException("Missing resultsFactory");
         }
-        if(policyArgumentList == null) {
+        if(playerPolicyArgumentList == null) {
             throw new IllegalArgumentException("Missing policyArgumentList");
         }
-        checkPolicyArgumentList(policyArgumentList);
+        checkPolicyArgumentList(playerPolicyArgumentList);
         timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
         logger.info("Finalized setup with timestamp [{}]", timestamp);
         dumpData = (systemConfig.dumpEvaluationData() || systemConfig.dumpTrainingData());
-
     }
 
-    private void checkPolicyArgumentList(List<PolicyArguments<TAction, DoubleVector, TState, TPolicyRecord>> policyArgumentsList) {
+    private void checkPolicyArgumentList(List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> policyDefinitionList) {
         Set<Integer> policyIdSet = new HashSet<>();
-        for (PolicyArguments<TAction, DoubleVector, TState, TPolicyRecord> entry : policyArgumentsList) {
+        for (PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord> entry : policyDefinitionList) {
             if(policyIdSet.contains(entry.getPolicyId())) {
                 throw new IllegalStateException("Two or more policies have policy id: [" + entry.getPolicyId() + "]");
             } else {
                 policyIdSet.add(entry.getPolicyId());
+            }
+            if(entry.getCategoryId() == ENVIRONMENT_CATEGORY_ID) {
+                throw new IllegalArgumentException("Category ID: [" + ENVIRONMENT_CATEGORY_ID + "] is reserved for environment and hence can't be used as player category.");
+            }
+            if(entry.getCategoryId() < 0) {
+                throw new IllegalArgumentException("All category Ids should be positive. Got: [" + entry.getCategoryId() + "]");
             }
         }
     }
@@ -164,32 +174,53 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     private RunnerArguments<TConfig, TAction, DoubleVector, TState, TPolicyRecord, TStatistics> buildRunnerArguments(EpisodeWriter<TAction, DoubleVector, TState, TPolicyRecord> episodeWriter) {
         final var finalRandomSeed = systemConfig.getRandomSeed();
         final var masterRandom = new SplittableRandom(finalRandomSeed);
+
+        var policyList = createEnvironmentPolicySuppliers(problemConfig);
+        policyList.addAll(playerPolicyArgumentList);
+
         return new RunnerArguments<>(
             roundName,
             problemConfig,
             systemConfig,
             commonAlgorithmConfig,
+            masterRandom,
             instanceInitializerFactory.apply(problemConfig, masterRandom.split()),
             resultsFactory,
             statisticsCalculator,
             additionalDataPointGeneratorList,
             episodeWriter,
-            policyArgumentList
-        );
+            policyList);
     }
 
     private EvaluationArguments<TConfig, TAction, DoubleVector, TState, TPolicyRecord, TStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TState, TPolicyRecord> episodeWriter) {
         final var finalRandomSeed = systemConfig.getRandomSeed();
         final var masterRandom = new SplittableRandom(finalRandomSeed + EVALUATION_SEED_SHIFT);
+
+        var policyList = createEnvironmentPolicySuppliers(problemConfig);
+        policyList.addAll(playerPolicyArgumentList);
+
         return new EvaluationArguments<>(
             roundName,
             problemConfig,
             systemConfig,
+            masterRandom,
             instanceInitializerFactory.apply(this.problemConfig, masterRandom.split()),
             resultsFactory,
             statisticsCalculator,
-            episodeWriter
-        );
+            episodeWriter,
+            policyList);
+    }
+
+    private List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> createEnvironmentPolicySuppliers(ProblemConfig config) {
+        return IntStream.range(0, config.getEnvironmentPolicyCount())
+            .mapToObj(x ->
+                new PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>(
+                    x,
+                    ENVIRONMENT_CATEGORY_ID,
+                    (policyId, categoryId, splittableRandom) -> new KnownModelPolicySupplier<>(splittableRandom, policyId, categoryId),
+                    new ArrayList<>()
+                ))
+            .collect(Collectors.toList());
     }
 
     public static byte[] loadTensorFlowModel(ApproximatorConfig approximatorConfig, SystemConfig systemConfig, int inputCount, int outputActionCount) throws IOException, InterruptedException {

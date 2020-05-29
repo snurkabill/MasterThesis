@@ -3,12 +3,14 @@ package vahy.impl.runner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatistics;
+import vahy.api.episode.PolicyCategory;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecord;
+import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.benchmark.OptimizedPolicy;
 import vahy.impl.benchmark.PolicyResults;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Runner<
@@ -35,10 +38,10 @@ public class Runner<
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
     private ImmutableTuple<Duration, List<TStatistics>> optimizePolicies(RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
-        if(runnerArguments.getPolicyArgumentsList().stream().mapToLong(x -> x.getTrainablePredictorSetupList().size()).sum() > 0) {
+        if(runnerArguments.getPolicyDefinitionList().stream().mapToLong(x -> x.getTrainablePredictorSetupList().size()).sum() > 0) {
             return optimizePolicies_inner(runnerArguments);
         } else {
-            logger.info("There is no trainable policy. Skipping training.");
+            logger.info("There is no trainable predictors within policies. Skipping training.");
             return new ImmutableTuple<>(Duration.ZERO, new ArrayList<>(0));
         }
     }
@@ -47,15 +50,15 @@ public class Runner<
                                                                                         EvaluationArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> evaluationArguments) throws IOException
     {
         var trainingStatistics = optimizePolicies(runnerArguments);
-        var optimizedPolicyList = runnerArguments.getPolicyArgumentsList().stream().map(x ->
+        var optimizedPolicyList = runnerArguments.getPolicyDefinitionList().stream().map(x ->
             new OptimizedPolicy<>(
                 x.getPolicyId(),
-                x.getPolicyName(),
+                x.getCategoryId(),
                 x.getTrainablePredictorSetupList(),
-                x.getPolicySupplier()
+                x.getPolicySupplierFactory()
             )).collect(Collectors.toList());
         var evaluationResults = evaluatePolicies(optimizedPolicyList, evaluationArguments);
-        closeResources(runnerArguments.getPolicyArgumentsList().stream().flatMap(x -> x.getTrainablePredictorSetupList().stream()).collect(Collectors.toList()));
+        closeResources(runnerArguments.getPolicyDefinitionList().stream().flatMap(x -> x.getTrainablePredictorSetupList().stream()).collect(Collectors.toList()));
         return new PolicyResults<>(runnerArguments.getRunName(), optimizedPolicyList, trainingStatistics.getSecond(), evaluationResults.getFirst(), trainingStatistics.getFirst(), evaluationResults.getSecond());
     }
 
@@ -69,15 +72,31 @@ public class Runner<
 
     private ImmutableTuple<Duration, List<TStatistics>> optimizePolicies_inner(RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
         var progressTrackerSettings = new ProgressTrackerSettings(true, runnerArguments.getSystemConfig().isDrawWindow(), false, false);
+        var random = runnerArguments.getFinalMasterRandom();
+
+        List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategories = runnerArguments.getPolicyDefinitionList()
+            .stream()
+            .map(x -> x.getPolicySupplierFactory().createPolicySupplier(x.getPolicyId(), x.getCategoryId(), random.split()))
+            .collect(Collectors.groupingBy(
+                PolicySupplier::getPolicyCategoryId,
+                Collectors.mapping(Function.identity(), Collectors.toList())))
+            .entrySet()
+            .stream()
+            .map(x -> new PolicyCategory<>(x.getKey(), x.getValue()))
+            .collect(Collectors.toList());
+
         var gameSampler = new GameSamplerImpl<>(
             runnerArguments.getInitialStateSupplier(),
             runnerArguments.getEpisodeResultsFactory(),
-            runnerArguments.getPolicyArgumentsList().stream().map(PolicyArguments::getPolicySupplier).collect(Collectors.toList()),
-            runnerArguments.getSystemConfig().getParallelThreadsCount());
+            policyCategories,
+            runnerArguments.getProblemConfig().getPolicyShuffleStrategy(),
+            runnerArguments.getSystemConfig().getParallelThreadsCount(),
+            runnerArguments.getProblemConfig().getPolicyCategoryInfoList(),
+            random.split());
 
         var trainer = new Trainer<>(
             gameSampler,
-            runnerArguments.getPolicyArgumentsList().stream().flatMap(x -> x.getTrainablePredictorSetupList().stream()).collect(Collectors.toList()),
+            runnerArguments.getPolicyDefinitionList().stream().flatMap(x -> x.getTrainablePredictorSetupList().stream()).collect(Collectors.toList()),
             progressTrackerSettings,
             runnerArguments.getProblemConfig(),
             runnerArguments.getEpisodeStatisticsCalculator(),
@@ -96,12 +115,28 @@ public class Runner<
                                                                   EvaluationArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> evaluationArguments)
     {
         var systemConfig = evaluationArguments.getSystemConfig();
+        var random = evaluationArguments.getFinalMasterRandom();
         logger.info("Running evaluation inference of [{}] policy for [{}] iterations", evaluationArguments.getRunName(), systemConfig.getEvalEpisodeCount());
+
+        List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategories = policyList
+            .stream()
+            .map(x -> x.getPolicySupplierFactory().createPolicySupplier(x.getPolicyId(), x.getPolicyCategoryId(), random.split()))
+            .collect(Collectors.groupingBy(
+                PolicySupplier::getPolicyCategoryId,
+                Collectors.mapping(Function.identity(), Collectors.toList())))
+            .entrySet()
+            .stream()
+            .map(x -> new PolicyCategory<>(x.getKey(), x.getValue()))
+            .collect(Collectors.toList());
+
         var gameSampler = new GameSamplerImpl<>(
             evaluationArguments.getInitialStateSupplier(),
             evaluationArguments.getEpisodeResultsFactory(),
-            policyList.stream().map(OptimizedPolicy::getPolicySupplier).collect(Collectors.toList()),
-            systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount());
+            policyCategories,
+            evaluationArguments.getProblemConfig().getPolicyShuffleStrategy(),
+            systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount(),
+            evaluationArguments.getProblemConfig().getPolicyCategoryInfoList(),
+            random.split());
         long start = System.currentTimeMillis();
         var episodeList = gameSampler.sampleEpisodes(systemConfig.getEvalEpisodeCount(), evaluationArguments.getProblemConfig().getMaximalStepCountBound(), PolicyMode.INFERENCE);
         long end = System.currentTimeMillis();

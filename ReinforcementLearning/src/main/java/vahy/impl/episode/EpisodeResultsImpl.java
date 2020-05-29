@@ -2,6 +2,7 @@ package vahy.impl.episode;
 
 import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeStepRecord;
+import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -19,6 +20,7 @@ public class EpisodeResultsImpl<
     implements EpisodeResults<TAction, TObservation, TState, TPolicyRecord> {
 
     private final List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory;
+    private final PolicyIdTranslationMap getPolicyIdTranslationMap;
     private final int policyCount;
     private final List<Integer> playerStepCountList;
     private final int totalStepCount;
@@ -26,11 +28,14 @@ public class EpisodeResultsImpl<
     private final Duration duration;
 
     public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
-                              int policyCount, List<Integer> playerStepCountList,
+                              PolicyIdTranslationMap getPolicyIdTranslationMap,
+                              int policyCount,
+                              List<Integer> playerStepCountList,
                               int totalStepCount,
                               List<Double> totalPayoff,
                               Duration duration) {
         this.episodeHistory = episodeHistory;
+        this.getPolicyIdTranslationMap = getPolicyIdTranslationMap;
         this.policyCount = policyCount;
         this.playerStepCountList = playerStepCountList;
         this.totalStepCount = totalStepCount;
@@ -51,6 +56,11 @@ public class EpisodeResultsImpl<
     @Override
     public int getTotalStepCount() {
         return totalStepCount;
+    }
+
+    @Override
+    public PolicyIdTranslationMap getPolicyIdTranslationMap() {
+        return getPolicyIdTranslationMap;
     }
 
     @Override

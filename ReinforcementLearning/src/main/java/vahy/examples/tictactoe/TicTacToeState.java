@@ -1,5 +1,6 @@
 package vahy.examples.tictactoe;
 
+import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
@@ -7,6 +8,7 @@ import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -189,12 +191,27 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public DoubleVector getInGameEntityObservation(int inGameEntityId) {
-        return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
+        var observationVector = new double[10];
+        for (int i = 0; i < playground.length; i++) {
+            for (int j = 0; j < playground[i].length; j++) {
+                observationVector[i * playground[j].length + j] = playground[i][j].symbol;
+            }
+        }
+//        observationVector[observationVector.length - 1] = isPlayerZeroOnTurn ? 0 : 1;
+        return new DoubleVector(observationVector);
+//        return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
     }
 
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
-        return new DoubleVector(Arrays.stream(playground).flatMap(Arrays::stream).mapToDouble(x -> x.symbol).toArray());
+        var observationVector = new double[10];
+        for (int i = 0; i < playground.length; i++) {
+            for (int j = 0; j < playground[i].length; j++) {
+                observationVector[i * playground[j].length + j] = playground[i][j].symbol;
+            }
+        }
+//        observationVector[observationVector.length - 1] = isPlayerZeroOnTurn ? 0 : 1;
+        return new DoubleVector(observationVector);
     }
 
     @Override
@@ -215,11 +232,6 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     @Override
     public List<String> getCsvRecord() {
         return Arrays.asList("Dummy");
-    }
-
-    @Override
-    public int getTotalPlayerCount() {
-        return 2;
     }
 
     @Override

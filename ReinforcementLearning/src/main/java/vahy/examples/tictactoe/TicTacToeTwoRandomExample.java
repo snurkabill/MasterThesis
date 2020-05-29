@@ -2,6 +2,7 @@ package vahy.examples.tictactoe;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.policy.AbstractPolicySupplier;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
@@ -12,7 +13,7 @@ import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.UniformRandomWalkPolicy;
-import vahy.impl.runner.PolicyArguments;
+import vahy.impl.runner.PolicyDefinition;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -49,24 +50,24 @@ public class TicTacToeTwoRandomExample {
             }
         };
 
-        var playerOneSupplier = new PolicyArguments<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
-            "Policy_0",
-            new PolicySupplier<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>() {
+            1,
+            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
                 @Override
-                public Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> initializePolicy(TicTacToeState initialState, PolicyMode policyMode) {
-                    return new UniformRandomWalkPolicy<>(new SplittableRandom(), 0);
+                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+                    return new UniformRandomWalkPolicy<>(random, policyId);
                 }
             },
             new ArrayList<>()
         );
-        var playerTwoSupplier = new PolicyArguments<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             1,
-            "Policy_1",
-            new PolicySupplier<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>() {
+            1,
+            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
                 @Override
-                public Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> initializePolicy(TicTacToeState initialState, PolicyMode policyMode) {
-                    return new UniformRandomWalkPolicy(new SplittableRandom(), 1);
+                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+                    return new UniformRandomWalkPolicy<>(random, policyId);
                 }
             },
             new ArrayList<>()
@@ -86,7 +87,7 @@ public class TicTacToeTwoRandomExample {
             .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPolicySupplierList(policyArgumentsList);
+            .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
     }

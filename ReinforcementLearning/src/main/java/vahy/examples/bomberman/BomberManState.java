@@ -397,7 +397,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             var copyX = Arrays.copyOf(playerXCoordinates, playerXCoordinates.length);
             var copyY = Arrays.copyOf(playerYCoordinates, playerYCoordinates.length);
             var newPlayerLivesCount = Arrays.copyOf(playerLivesCount, playerLivesCount.length);
-            for (int i = 0; i < staticPart.getPlayerLivesAtStart(); i++) {
+            for (int i = 0; i < staticPart.getStartingPlayerCount(); i++) {
                 if (affectedSquares.containsKey(playerXCoordinates[i]) && affectedSquares.get(playerXCoordinates[i]).contains(playerYCoordinates[i])) {
                     newPlayerLivesCount[i]--;
                     if (newPlayerLivesCount[i] == 0) {
@@ -692,7 +692,64 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
     @Override
     public String readableStringRepresentation() {
-        return "Nope";
+
+        boolean[][] walls = staticPart.getWalls();
+        boolean[][] golds = staticPart.getGoldEntitiesArray();
+        int[][] goldReference = staticPart.getGoldEntitiesReferenceArray();
+        char[][] matrix = new char[walls.length][];
+        for (int i = 0; i < matrix.length; i++) {
+            matrix[i] = new char[walls[i].length];
+            Arrays.fill(matrix[i], ' ');
+            for (int j = 0; j < matrix[i].length; j++) {
+                if(walls[i][j]) {
+                    matrix[i][j] = '∎';
+                }
+            }
+        }
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < matrix[i].length; j++) {
+                if(golds[i][j]) {
+                    var idx = goldReference[i][j];
+                    if(goldsInPlaceArray[idx]) {
+                        matrix[i][j] = 'G';
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < bombXCoordinates.length; i++) {
+            var x = bombXCoordinates[i];
+            var y = bombYCoordinates[i];
+            if(bombCountDowns[i] != -1) {
+                if(matrix[x][y] == 'G') {
+                    matrix[x][y] = 'g';
+                } else {
+                    matrix[x][y] = 'B';
+                }
+            }
+        }
+        for (int i = 0; i < playerLivesCount.length; i++) {
+            if(playerLivesCount[i] > 0) {
+               var x = playerXCoordinates[i];
+               var y = playerYCoordinates[i];
+               if(matrix[x][y] == 'G') {
+                   matrix[x][y] = 'p';
+               } else if(matrix[x][y] == 'g') {
+                   matrix[x][y] = 'q';
+               } else if(matrix[x][y] == 'B') {
+                   matrix[x][y] = 'b';
+               } else {
+                   matrix[x][y] = 'P';
+               }
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < matrix.length; i++) {
+            sb.append(matrix[i]).append(System.lineSeparator());
+        }
+        sb.append(Arrays.toString(playerLivesCount)).append(System.lineSeparator());
+        sb.append(Arrays.toString(bombCountDowns)).append(System.lineSeparator());
+        return sb.toString();
     }
 
     @Override
@@ -706,19 +763,14 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     }
 
     @Override
-    public int getTotalPlayerCount() {
-        return staticPart.getStartingPlayerCount();
-    }
-
-    @Override
     public int getInGameEntityIdOnTurn() {
         return entityIdOnTurn;
     }
 
     @Override
     public boolean isInGame(int inGameEntityId) {
-        if (inGameEntityId <= staticPart.getGoldWithEnvironmentEntityCount()) {
-            throw new IllegalStateException("Environment is always in game. WTF");
+        if (inGameEntityId < staticPart.getGoldWithEnvironmentEntityCount()) {
+            throw new IllegalStateException("Environment is always in game. WTF. In game entityId: [" + inGameEntityId + "]");
         }
         return isInGameArray[inGameEntityId - staticPart.getGoldWithEnvironmentEntityCount()];
     }

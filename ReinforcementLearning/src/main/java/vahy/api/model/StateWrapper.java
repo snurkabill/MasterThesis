@@ -6,11 +6,11 @@ import vahy.impl.model.ImmutableStateWrapperRewardReturn;
 
 public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
 
-    protected final int policyId;
+    protected final int inGameEntityId;
     protected final TState state;
 
-    public StateWrapper(int policyId, TState state) {
-        this.policyId = policyId;
+    public StateWrapper(int inGameEntityId, TState state) {
+        this.inGameEntityId = inGameEntityId;
         this.state = state;
     }
 
@@ -25,15 +25,15 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
 
     public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType) {
         StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(actionType);
-        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(policyId, stateRewardReturn.getState()), stateRewardReturn.getReward()[policyId]);
+        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(inGameEntityId, stateRewardReturn.getState()), stateRewardReturn.getReward()[inGameEntityId]);
     }
 
     public TObservation getObservation() {
-        return state.getInGameEntityObservation(policyId);
+        return state.getInGameEntityObservation(inGameEntityId);
     }
 
     public TObservation getCommonObservation() {
-        return state.getCommonObservation(policyId);
+        return state.getCommonObservation(inGameEntityId);
     }
 
     public Predictor<TState> getKnownModelWithPerfectObservationPredictor() {
@@ -41,11 +41,11 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
     }
 
     public int getPlayerIdWrapper() {
-        return policyId;
+        return inGameEntityId;
     }
 
     public boolean isPlayerTurn() {
-        return state.getInGameEntityIdOnTurn() == policyId;
+        return state.getInGameEntityIdOnTurn() == inGameEntityId;
     }
 
     public int getPlayerOnTurnId() {
@@ -56,7 +56,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         if(state.isFinalState()) {
             return true;
         }
-        return state.isInGame(policyId);
+        return state.isInGame(inGameEntityId);
     }
 
     @Override
@@ -66,13 +66,13 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
 
         StateWrapper<?, ?, ?> that = (StateWrapper<?, ?, ?>) o;
 
-        if (policyId != that.policyId) return false;
+        if (inGameEntityId != that.inGameEntityId) return false;
         return state.equals(that.state);
     }
 
     @Override
     public int hashCode() {
-        int result = policyId;
+        int result = inGameEntityId;
         result = 31 * result + state.hashCode();
         return result;
     }

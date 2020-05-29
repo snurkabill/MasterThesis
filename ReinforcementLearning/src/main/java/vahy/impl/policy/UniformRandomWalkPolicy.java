@@ -10,7 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> extends RandomizedPolicy<TAction, TObservation, TState, PolicyRecordBase> {
+public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+    extends RandomizedPolicy<TAction, TObservation, TState, PolicyRecordBase> {
 
     public UniformRandomWalkPolicy(SplittableRandom random, int policyId) {
         super(random, policyId);

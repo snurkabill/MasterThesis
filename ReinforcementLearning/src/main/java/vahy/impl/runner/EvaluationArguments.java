@@ -11,6 +11,9 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecord;
 
+import java.util.List;
+import java.util.SplittableRandom;
+
 public class EvaluationArguments<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
@@ -22,26 +25,33 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
 
     private final TConfig problemConfig;
     private final SystemConfig systemConfig;
+    private final SplittableRandom finalMasterRandom;
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
     private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
     private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
     private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
+    private final List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> environmentPolicyArgumemntList;
 
-    public EvaluationArguments(String runName, TConfig problemConfig,
+    public EvaluationArguments(String runName,
+                               TConfig problemConfig,
                                SystemConfig systemConfig,
+                               SplittableRandom finalMasterRandom,
                                InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                                EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
                                EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
-                               EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter)
+                               EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
+                               List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> environmentPolicyArgumemntList)
     {
         this.runName = runName;
         this.problemConfig = problemConfig;
         this.systemConfig = systemConfig;
+        this.finalMasterRandom = finalMasterRandom;
         this.initialStateSupplier = initialStateSupplier;
         this.episodeResultsFactory = episodeResultsFactory;
         this.episodeStatisticsCalculator = episodeStatisticsCalculator;
         this.episodeWriter = episodeWriter;
+        this.environmentPolicyArgumemntList = environmentPolicyArgumemntList;
     }
 
     public String getRunName() {
@@ -70,5 +80,13 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
 
     public EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> getEpisodeWriter() {
         return episodeWriter;
+    }
+
+    public List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> getEnvironmentPolicyArgumemntList() {
+        return environmentPolicyArgumemntList;
+    }
+
+    public SplittableRandom getFinalMasterRandom() {
+        return finalMasterRandom;
     }
 }

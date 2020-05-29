@@ -1,9 +1,13 @@
 package vahy.examples.simplifiedHallway;
 
+import vahy.api.episode.PolicyCategoryInfo;
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.ProblemConfig;
 import vahy.examples.simplifiedHallway.cell.Cell;
+import vahy.impl.RoundBuilder;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +26,9 @@ public class SHConfig extends ProblemConfig {
                       double trapProbability,
                       String gameStringRepresentation,
                       List<List<Cell>> gameMatrix) {
-        super(maximalStepCountBound, isModelKnown, 1, 1, Stream.of(1).collect(Collectors.toSet()));
+        super(maximalStepCountBound, isModelKnown, 1, 1, List.of(
+            new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID, 1),
+            new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID + 1, 1)), PolicyShuffleStrategy.NO_SHUFFLE);
         this.goalReward = goalReward;
         this.stepPenalty = stepPenalty;
         this.trapProbability = trapProbability;

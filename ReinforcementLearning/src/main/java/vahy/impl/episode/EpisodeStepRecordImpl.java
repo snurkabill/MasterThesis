@@ -18,6 +18,7 @@ public class EpisodeStepRecordImpl<
     implements EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord> {
 
     private final int policyIdOnTurn;
+    private final int inGameEntityId;
     private final TAction playedAction;
     private final TPolicyRecord policyStepRecord;
     private final TState fromState;
@@ -25,12 +26,14 @@ public class EpisodeStepRecordImpl<
     private final double[] reward;
 
     public EpisodeStepRecordImpl(int policyIdOnTurn,
+                                 int inGameEntityId,
                                  TAction playedAction,
                                  TPolicyRecord policyStepRecord,
                                  TState fromState,
                                  TState toState,
                                  double[] reward) {
         this.policyIdOnTurn = policyIdOnTurn;
+        this.inGameEntityId = inGameEntityId;
         this.playedAction = playedAction;
         this.policyStepRecord = policyStepRecord;
         this.fromState = fromState;
@@ -41,6 +44,11 @@ public class EpisodeStepRecordImpl<
     @Override
     public int getPolicyIdOnTurn() {
         return policyIdOnTurn;
+    }
+
+    @Override
+    public int getInGameEntityIdOnTurn() {
+        return inGameEntityId;
     }
 
     @Override
@@ -72,6 +80,7 @@ public class EpisodeStepRecordImpl<
     public String toString() {
         return "EpisodeStepRecord{" +
             "policyOnTurnId=" + policyIdOnTurn +
+            ", inGameEntityIdOnTurnId=" + inGameEntityId +
             ", playedAction=" + playedAction +
             ", policyStepRecord=" + (policyStepRecord != null ? policyStepRecord.toString() : null) +
             ", fromState=" + fromState +
@@ -95,7 +104,8 @@ public class EpisodeStepRecordImpl<
     @Override
     public List<String> getCsvHeader() {
         var list = new ArrayList<String>();
-        list.add("Is player move");
+        list.add("PolicyId");
+        list.add("InGameEntityId");
         list.add("Action played");
         list.add("Obtained reward");
         if(policyStepRecord != null) {
@@ -108,6 +118,7 @@ public class EpisodeStepRecordImpl<
     public List<String> getCsvRecord() {
         var list = new ArrayList<String>();
         list.add(Integer.toString(policyIdOnTurn));
+        list.add(Integer.toString(inGameEntityId));
         list.add(playedAction.toString());
         list.add(Arrays.toString(reward));
         if(policyStepRecord != null) {

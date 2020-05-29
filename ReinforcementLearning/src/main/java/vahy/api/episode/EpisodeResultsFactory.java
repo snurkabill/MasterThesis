@@ -16,6 +16,7 @@ public interface EpisodeResultsFactory<
 
     EpisodeResults<TAction, TObservation, TState, TPolicyRecord> createResults(
         List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+        PolicyIdTranslationMap policyIdTranslationMap,
         int policyCount,
         List<Integer> playerStepCountList,
         int totalStepCount,

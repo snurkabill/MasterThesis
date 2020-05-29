@@ -14,6 +14,7 @@ import vahy.api.policy.PolicyRecord;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 
 import java.util.List;
+import java.util.SplittableRandom;
 
 public class RunnerArguments<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
@@ -27,13 +28,14 @@ public class RunnerArguments<TConfig extends ProblemConfig,
     private final TConfig problemConfig;
     private final SystemConfig systemConfig;
     private final CommonAlgorithmConfig algorithmConfig;
+    private final SplittableRandom finalMasterRandom;
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
     private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
     private final List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
     private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
 
-    private final List<PolicyArguments<TAction, TObservation, TState, TPolicyRecord>> policyArgumentsList;
+    private final List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> policyDefinitionList;
 
     private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
 
@@ -41,22 +43,24 @@ public class RunnerArguments<TConfig extends ProblemConfig,
                            TConfig problemConfig,
                            SystemConfig systemConfig,
                            CommonAlgorithmConfig algorithmConfig,
+                           SplittableRandom finalMasterRandom,
                            InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                            EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
                            EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
                            List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList,
                            EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
-                           List<PolicyArguments<TAction, TObservation, TState, TPolicyRecord>> policyArgumentsList) {
+                           List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> policyDefinitionList) {
         this.runName = runName;
         this.problemConfig = problemConfig;
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
+        this.finalMasterRandom = finalMasterRandom;
         this.initialStateSupplier = initialStateSupplier;
         this.episodeResultsFactory = episodeResultsFactory;
         this.episodeStatisticsCalculator = episodeStatisticsCalculator;
         this.additionalDataPointGeneratorList = additionalDataPointGeneratorList;
         this.episodeWriter = episodeWriter;
-        this.policyArgumentsList = policyArgumentsList;
+        this.policyDefinitionList = policyDefinitionList;
     }
 
     public String getRunName() {
@@ -95,7 +99,11 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         return episodeWriter;
     }
 
-    public List<PolicyArguments<TAction, TObservation, TState, TPolicyRecord>> getPolicyArgumentsList() {
-        return policyArgumentsList;
+    public List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> getPolicyDefinitionList() {
+        return policyDefinitionList;
+    }
+
+    public SplittableRandom getFinalMasterRandom() {
+        return finalMasterRandom;
     }
 }
