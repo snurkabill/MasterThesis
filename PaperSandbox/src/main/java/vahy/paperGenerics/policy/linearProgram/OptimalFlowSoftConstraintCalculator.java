@@ -36,7 +36,7 @@ public class OptimalFlowSoftConstraintCalculator<
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         var metadata = node.getSearchNodeMetadata();
-        totalRiskExpression.add(node.getWrappedState().isRiskHit() ? 1.0 : 0.0, metadata.getNodeProbabilityFlow());
+        totalRiskExpression.add(node.getStateWrapper().isRiskHit() ? 1.0 : 0.0, metadata.getNodeProbabilityFlow());
         double cumulativeReward = metadata.getCumulativeReward();
         double expectedReward = metadata.getExpectedReward();
         double predictedRisk = metadata.getPredictedRisk();
@@ -50,7 +50,7 @@ public class OptimalFlowSoftConstraintCalculator<
         for (SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> entry : nodeList) {
             var metadata = entry.getSearchNodeMetadata();
             double priorProbability = metadata.getPriorProbability();
-            totalRiskExpression.add((entry.getWrappedState().isRiskHit() ? 1.0 : 0.0) * priorProbability, parentFlow);
+            totalRiskExpression.add((entry.getStateWrapper().isRiskHit() ? 1.0 : 0.0) * priorProbability, parentFlow);
             double cumulativeReward = metadata.getCumulativeReward();
             double expectedReward = metadata.getExpectedReward();
             double predictedRisk = metadata.getPredictedRisk();

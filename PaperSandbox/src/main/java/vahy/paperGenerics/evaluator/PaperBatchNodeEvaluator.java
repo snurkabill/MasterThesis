@@ -50,7 +50,7 @@ public class PaperBatchNodeEvaluator<
     }
 
     private int createSubtree(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> rootNode) {
-        var stateRewardOrder = createTreeStateSkeleton(rootNode.getWrappedState());
+        var stateRewardOrder = createTreeStateSkeleton(rootNode.getStateWrapper());
         int nodeCount = stateRewardOrder.size();
         if(knownModel != null) {
             var observationBatch = createObservationBatchForKnownModel(stateRewardOrder);

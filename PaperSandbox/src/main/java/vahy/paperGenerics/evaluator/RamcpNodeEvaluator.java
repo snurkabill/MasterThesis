@@ -46,7 +46,7 @@ public class RamcpNodeEvaluator<
         List<Double> rewardList = new ArrayList<>();
         var nodeCounter = 0;
         List<SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState>> nodeList = new ArrayList<>();
-        TState wrappedState = node.getWrappedState();
+        TState wrappedState = node.getStateWrapper();
         while (!parent.isFinalNode()) {
 
             initializeChildNodePrioriProbabilityMap(parent);
@@ -57,11 +57,11 @@ public class RamcpNodeEvaluator<
             nodeList.add(nextNode);
             rewardList.add(stateRewardReturn.getReward());
 
-            wrappedState = nextNode.getWrappedState();
+            wrappedState = nextNode.getStateWrapper();
             parent = nextNode;
             nodeCounter++;
         }
-        if(!parent.getWrappedState().isRiskHit()) {
+        if(!parent.getStateWrapper().isRiskHit()) {
             nodeCounter += createSuccessfulBranch(node, nodeList);
         }  else {
             node.getChildNodeMap().clear();
@@ -71,7 +71,7 @@ public class RamcpNodeEvaluator<
     }
 
     private void initializeChildNodePrioriProbabilityMap(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
-        var allPossibleActions = node.getWrappedState().getAllPossibleActions();
+        var allPossibleActions = node.getStateWrapper().getAllPossibleActions();
         var childNodePriorProbabilitiesMap = node.getSearchNodeMetadata().getChildPriorProbabilities();
 
         if(node.isPlayerTurn()) {
@@ -96,7 +96,7 @@ public class RamcpNodeEvaluator<
         }
 
         var reward = parent.getSearchNodeMetadata().getCumulativeReward();
-        var risk = parent.getWrappedState().isRiskHit() ? 1.0 : 0.0;
+        var risk = parent.getStateWrapper().isRiskHit() ? 1.0 : 0.0;
         parent = parent.getParent();
         if(!parent.isRoot()) {
             while(!parent.equals(node)) {

@@ -25,7 +25,7 @@ public class SubtreePriorRiskCalculator<
             var node = queue.poll();
             if(node.getFirst().isLeaf()) {
                 if(node.getFirst().isFinalNode()) {
-                    totalRisk += node.getFirst().getWrappedState().isRiskHit() ? node.getSecond() : 0.0;
+                    totalRisk += node.getFirst().getStateWrapper().isRiskHit() ? node.getSecond() : 0.0;
                 } else {
                     totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getPredictedRisk();
                 }

@@ -157,7 +157,7 @@ public class SearchTreeImpl<
         if(!root.isFinalNode()) {
             expandTreeToNextPlayerLevel();
         }
-        return new ImmutableStateWrapperRewardReturn<>(root.getWrappedState(), reward);
+        return new ImmutableStateWrapperRewardReturn<>(root.getStateWrapper(), reward);
     }
 
     protected void expandTreeToNextPlayerLevel() {

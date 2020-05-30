@@ -34,7 +34,7 @@ public class OptimalFlowHardConstraintCalculator<
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         var metadata = node.getSearchNodeMetadata();
-        double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
+        double nodeRisk = node.getStateWrapper().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
         totalRiskExpression.add(nodeRisk, metadata.getNodeProbabilityFlow());
         model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), getNodeValue(metadata));
     }
@@ -44,7 +44,7 @@ public class OptimalFlowHardConstraintCalculator<
         double sum = 0.0;
         for (SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> entry : nodeList) {
             var metadata = entry.getSearchNodeMetadata();
-            double nodeRisk = entry.getWrappedState().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
+            double nodeRisk = entry.getStateWrapper().isRiskHit() ? 1.0 : metadata.getPredictedRisk();
             double priorProbability = metadata.getPriorProbability();
             totalRiskExpression.add(nodeRisk * priorProbability, parentFlow);
             sum += getNodeValue(metadata) * priorProbability;

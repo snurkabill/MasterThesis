@@ -23,7 +23,7 @@ public interface SearchNode<TAction extends Enum<TAction> & Action, TObservation
 
     TSearchNodeMetadata getSearchNodeMetadata();
 
-    StateWrapper<TAction, TObservation, TState> getWrappedState();
+    StateWrapper<TAction, TObservation, TState> getStateWrapper();
 
     boolean isFinalNode();
 

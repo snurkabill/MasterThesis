@@ -11,7 +11,7 @@ import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.PolicyStepMode;
+import vahy.api.policy.PolicyStepMode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.flowOptimizer.AbstractFlowOptimizer;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
@@ -138,7 +138,7 @@ public class RiskAverseSearchTree<
             var result = flowOptimizer.optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
             if(!result.getSecond()) {
-                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getWrappedState().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
+                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getStateWrapper().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
                 totalRiskAllowed = 1.0;
                 isFlowOptimized = false;
                 return false;
@@ -245,7 +245,7 @@ public class RiskAverseSearchTree<
         } catch (Exception e) {
             dumpTreeWithFlow();
             throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. " +
-                "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getWrappedState().getWrappedState().readableStringRepresentation() + "]", e);
+                "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getStateWrapper().getWrappedState().readableStringRepresentation() + "]", e);
         }
     }
 

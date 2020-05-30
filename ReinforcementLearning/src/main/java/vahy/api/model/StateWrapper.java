@@ -40,7 +40,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.getKnownModelWithPerfectObservationPredictor();
     }
 
-    public int getPlayerIdWrapper() {
+    public int getinGameEntityIdWrapper() {
         return inGameEntityId;
     }
 
@@ -57,6 +57,10 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
             return true;
         }
         return state.isInGame(inGameEntityId);
+    }
+
+    public String getReadableStringRepresentation() {
+        return state.readableStringRepresentation();
     }
 
     @Override

@@ -24,7 +24,7 @@ public class FlowSumSubtreeRiskCalculator<
             var node = queue.poll();
             if(node.isLeaf()) {
                 if(node.isFinalNode()) {
-                    risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
+                    risk += node.getStateWrapper().isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
                 } else {
                     risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getFlow();
                 }

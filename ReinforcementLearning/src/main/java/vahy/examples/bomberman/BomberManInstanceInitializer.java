@@ -85,7 +85,8 @@ public class BomberManInstanceInitializer extends AbstractInitialStateSupplier<B
             problemConfig.getGoldRespawnProbability(),
             problemConfig.getBombRange(),
             problemConfig.getBombCountDown(),
-            problemConfig.getPlayerLivesAtStart());
+            problemConfig.getPlayerLivesAtStart(),
+            problemConfig.getMaximalStepCountBound());
         return new BomberManState(staticPart, playerXCoordinates, playerYCoordinates, entityIdOnTurn);
     }
 }

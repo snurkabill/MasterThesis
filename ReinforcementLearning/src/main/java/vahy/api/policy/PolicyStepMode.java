@@ -1,4 +1,4 @@
-package vahy.paperGenerics;
+package vahy.api.policy;
 
 public enum PolicyStepMode {
 

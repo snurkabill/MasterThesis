@@ -30,13 +30,13 @@ public class MinimalRiskReachAbilityCalculatorDeprecated<
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
         if(subtreeRoot.isLeaf()) {
-            return subtreeRoot.getWrappedState().isRiskHit() ?  1.0 : 0.0;
+            return subtreeRoot.getStateWrapper().isRiskHit() ?  1.0 : 0.0;
         }
 
         var linProgram = new AbstractLinearProgramOnTreeDeprecated<TAction, TObservation, TSearchNodeMetadata, TState>(actionClass, false, null, NoiseStrategy.NONE) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-                if(node.getWrappedState().isRiskHit()) {
+                if(node.getStateWrapper().isRiskHit()) {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
                 } else {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getPredictedRisk());

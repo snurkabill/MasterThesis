@@ -79,6 +79,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
     private final int droppedBombs;
 
+    private final int stepsDone;
+
     public BomberManState(BomberManStaticPart staticPart,
                           boolean[] isInGameArray,
                           boolean[] goldsInPlaceArray,
@@ -92,7 +94,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                           int[] bombXCoordinates,
                           int[] bombYCoordinates,
                           int[] bombCountDowns,
-                          int droppedBombs) {
+                          int droppedBombs, int stepsDone) {
         this.staticPart = staticPart;
         this.isInGameArray = isInGameArray;
         this.goldsInPlaceArray = goldsInPlaceArray;
@@ -107,6 +109,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
         this.bombYCoordinates = bombYCoordinates;
         this.bombCountDowns = bombCountDowns;
         this.droppedBombs = droppedBombs;
+        this.stepsDone = stepsDone;
         this.observation = createObservation();
     }
 
@@ -124,6 +127,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             throw new IllegalStateException("Gold entity can't start");
         }
         this.staticPart = staticPart;
+        this.stepsDone = 0;
         var booleanArray = new boolean[playerCount];
         Arrays.fill(booleanArray, true);
         this.isInGameArray = booleanArray;
@@ -354,7 +358,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     bombXCoordinates,
                     bombYCoordinates,
                     copyC,
-                    droppedBombs),
+                    droppedBombs,
+                    stepsDone + 1),
                 staticPart.getNoEnvironmentActionReward());
 
         } else if (actionType == BomberManAction.DETONATE_BOMB) {
@@ -411,22 +416,24 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
             var nextIdOnTurn = nextEntityIdOnTurn();
 
-            return new ImmutableStateRewardReturn<>(new BomberManState(
-                staticPart,
-                newIsInGameArray,
-                goldsInPlaceArray,
-                newEntityInGameCount,
-                nextIdOnTurn,
-                newPlayerIdOnTurn,
-                newGoldIdOnTurn,
-                copyX,
-                copyY,
-                newPlayerLivesCount,
-                newBombXCoordinates,
-                newBombYCoordinates,
-                newBombCountDowns,
-                newDroppedBombs
-            ), staticPart.getNoEnvironmentActionReward());
+            return new ImmutableStateRewardReturn<>(
+                new BomberManState(
+                    staticPart,
+                    newIsInGameArray,
+                    goldsInPlaceArray,
+                    newEntityInGameCount,
+                    nextIdOnTurn,
+                    newPlayerIdOnTurn,
+                    newGoldIdOnTurn,
+                    copyX,
+                    copyY,
+                    newPlayerLivesCount,
+                    newBombXCoordinates,
+                    newBombYCoordinates,
+                    newBombCountDowns,
+                    newDroppedBombs,
+                    stepsDone + 1),
+                staticPart.getNoEnvironmentActionReward());
         } else {
             throw EnumUtils.createExceptionForNotExpectedEnumValue(actionType);
         }
@@ -470,7 +477,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         copyX,
                         copyY,
                         copyC,
-                        droppedBombs + 1),
+                        droppedBombs + 1,
+                        stepsDone + 1),
                     rewardArray);
             } else {
                 return new ImmutableStateRewardReturn<>(
@@ -488,7 +496,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         bombXCoordinates,
                         bombYCoordinates,
                         bombCountDowns,
-                        droppedBombs),
+                        droppedBombs,
+                        stepsDone + 1),
                     rewardArray);
             }
         } else {
@@ -531,7 +540,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                                 bombXCoordinates,
                                 bombYCoordinates,
                                 bombCountDowns,
-                                droppedBombs),
+                                droppedBombs,
+                                stepsDone + 1),
                             newRewardArray);
                     }
                 }
@@ -550,7 +560,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         bombXCoordinates,
                         bombYCoordinates,
                         bombCountDowns,
-                        droppedBombs),
+                        droppedBombs,
+                        stepsDone + 1),
                     rewardArray);
             } else {
                 return new ImmutableStateRewardReturn<>(
@@ -568,7 +579,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         bombXCoordinates,
                         bombYCoordinates,
                         bombCountDowns,
-                        droppedBombs),
+                        droppedBombs,
+                        stepsDone + 1),
                     rewardArray);
             }
         }
@@ -594,7 +606,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     bombXCoordinates,
                     bombYCoordinates,
                     bombCountDowns,
-                    droppedBombs),
+                    droppedBombs,
+                    stepsDone + 1),
                 staticPart.getNoEnvironmentActionReward());
         } else {
             var newGoldsInPlaceArray = Arrays.copyOf(goldsInPlaceArray, goldsInPlaceArray.length);
@@ -614,7 +627,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     bombXCoordinates,
                     bombYCoordinates,
                     bombCountDowns,
-                    droppedBombs),
+                    droppedBombs,
+                    stepsDone + 1),
                 staticPart.getNoEnvironmentActionReward());
         }
     }
@@ -777,7 +791,52 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
     @Override
     public boolean isFinalState() {
-        return entityInGameCount == staticPart.getGoldWithEnvironmentEntityCount();
+        return entityInGameCount == staticPart.getGoldWithEnvironmentEntityCount() || staticPart.getTotalStepsAllowed() <= stepsDone;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BomberManState that = (BomberManState) o;
+
+        if (entityInGameCount != that.entityInGameCount) return false;
+        if (entityIdOnTurn != that.entityIdOnTurn) return false;
+        if (playerIdOnTurn != that.playerIdOnTurn) return false;
+        if (goldIdOnTurn != that.goldIdOnTurn) return false;
+        if (droppedBombs != that.droppedBombs) return false;
+        if (stepsDone != that.stepsDone) return false;
+        if (!staticPart.equals(that.staticPart)) return false;
+        if (!Arrays.equals(goldsInPlaceArray, that.goldsInPlaceArray)) return false;
+        if (!observation.equals(that.observation)) return false;
+        if (!Arrays.equals(isInGameArray, that.isInGameArray)) return false;
+        if (!Arrays.equals(playerLivesCount, that.playerLivesCount)) return false;
+        if (!Arrays.equals(playerXCoordinates, that.playerXCoordinates)) return false;
+        if (!Arrays.equals(playerYCoordinates, that.playerYCoordinates)) return false;
+        if (!Arrays.equals(bombXCoordinates, that.bombXCoordinates)) return false;
+        if (!Arrays.equals(bombYCoordinates, that.bombYCoordinates)) return false;
+        return Arrays.equals(bombCountDowns, that.bombCountDowns);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = staticPart.hashCode();
+        result = 31 * result + entityInGameCount;
+        result = 31 * result + entityIdOnTurn;
+        result = 31 * result + playerIdOnTurn;
+        result = 31 * result + goldIdOnTurn;
+        result = 31 * result + Arrays.hashCode(goldsInPlaceArray);
+        result = 31 * result + observation.hashCode();
+        result = 31 * result + Arrays.hashCode(isInGameArray);
+        result = 31 * result + Arrays.hashCode(playerLivesCount);
+        result = 31 * result + Arrays.hashCode(playerXCoordinates);
+        result = 31 * result + Arrays.hashCode(playerYCoordinates);
+        result = 31 * result + Arrays.hashCode(bombXCoordinates);
+        result = 31 * result + Arrays.hashCode(bombYCoordinates);
+        result = 31 * result + Arrays.hashCode(bombCountDowns);
+        result = 31 * result + droppedBombs;
+        result = 31 * result + stepsDone;
+        return result;
+    }
 }

@@ -2,7 +2,6 @@ package vahy.paperGenerics.evaluator;
 
 import vahy.api.model.Action;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -59,7 +58,7 @@ public class MonteCarloNodeEvaluator<
             node.getSearchNodeMetadata().setSumOfRisk(risk);
         }
         Map<TAction, Double> childPriorProbabilities = node.getSearchNodeMetadata().getChildPriorProbabilities();
-        if(node.getWrappedState().isPlayerTurn()) {
+        if(node.getStateWrapper().isPlayerTurn()) {
             for (int i = 0; i < allPlayerActions.length; i++) {
                 childPriorProbabilities.put(allPlayerActions[i], (priorProbabilities[i]));
             }
@@ -71,7 +70,7 @@ public class MonteCarloNodeEvaluator<
 
     protected ImmutableTriple<Double, Boolean, Integer> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
-        TState wrappedState = node.getWrappedState();
+        TState wrappedState = node.getStateWrapper();
         var nodeCounter = 0;
         while (!wrappedState.isFinalState()) {
             TAction action = getNextAction(wrappedState);

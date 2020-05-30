@@ -80,7 +80,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
                 setLeafObjective(node);
             } else {
                 addSummingChildrenWithParentToZeroExpression(node, actionChildFlowMap);
-                if(!node.getWrappedState().isPlayerTurn()) {
+                if(!node.getStateWrapper().isPlayerTurn()) {
                     addChildFlowBasedOnFixedProbabilitiesExpression(node, actionChildFlowMap);
                 }
             }

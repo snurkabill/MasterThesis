@@ -78,7 +78,7 @@ public class MonteCarloEvaluator<
     private ImmutableTuple<Double, Integer> runRandomWalkSimulation(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
         int stateCounter = 0;
-        StateWrapper<TAction, TObservation, TState> wrappedState = node.getWrappedState();
+        StateWrapper<TAction, TObservation, TState> wrappedState = node.getStateWrapper();
         while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);

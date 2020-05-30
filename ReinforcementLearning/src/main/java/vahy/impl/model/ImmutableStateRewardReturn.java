@@ -1,14 +1,15 @@
 package vahy.impl.model;
 
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
+import vahy.api.model.observation.Observation;
 import vahy.utils.ImmutableTuple;
 
 public class ImmutableStateRewardReturn<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
+    TReward,
     TState extends State<TAction, TObservation, TState>>
     extends ImmutableTuple<TState, double[]>
     implements StateRewardReturn<TAction, TObservation, TState> {

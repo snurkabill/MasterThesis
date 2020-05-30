@@ -35,7 +35,7 @@ public class OptimalFlowSoftConstraintDeprecateed<
 
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        if(node.getWrappedState().isRiskHit()) {
+        if(node.getStateWrapper().isRiskHit()) {
             totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         } else {
             totalRiskExpression.add(0.0, node.getSearchNodeMetadata().getNodeProbabilityFlow());

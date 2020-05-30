@@ -86,7 +86,7 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
         }
         Map<TAction, Double> childPriorProbabilities = searchMetadata.getChildPriorProbabilities();
 
-        if(node.getWrappedState().isPlayerTurn()) {
+        if(node.getStateWrapper().isPlayerTurn()) {
             evaluatePlayerNode(node, childPriorProbabilities, prediction);
         } else {
             evaluateOpponentNode(node, childPriorProbabilities, opponentPrediction);
@@ -171,10 +171,10 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
     protected int innerEvaluation(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
         // TODO: this is also ugly
         if(node.isPlayerTurn()) {
-            fillNode(node, trainablePredictor.apply(node.getWrappedState().getObservation()), null);
+            fillNode(node, trainablePredictor.apply(node.getStateWrapper().getObservation()), null);
         } else {
-            double[] playerPrediction = trainablePredictor.apply(node.getWrappedState().getObservation());
-            double[] opponentPrediction = knownModel != null ? knownModel.apply(node.getWrappedState().getWrappedState()) : opponentPredictor.apply(node.getWrappedState().getCommonObservation());
+            double[] playerPrediction = trainablePredictor.apply(node.getStateWrapper().getObservation());
+            double[] opponentPrediction = knownModel != null ? knownModel.apply(node.getStateWrapper().getWrappedState()) : opponentPredictor.apply(node.getStateWrapper().getCommonObservation());
             fillNode(node, playerPrediction, opponentPrediction);
         }
         return 1;

@@ -8,7 +8,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.policy.AbstractTreeSearchPolicy;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.PolicyStepMode;
+import vahy.api.policy.PolicyStepMode;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ArrayUtils;
 

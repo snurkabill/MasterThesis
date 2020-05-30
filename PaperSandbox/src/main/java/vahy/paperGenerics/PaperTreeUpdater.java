@@ -18,10 +18,10 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
     public void updateTree(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
         // TODO: THIS IS DIRTY
-        int policyId = expandedNode.getWrappedState().getPlayerIdWrapper();
+        int policyId = expandedNode.getStateWrapper().getinGameEntityIdWrapper();
 
         double estimatedLeafReward = expandedNode.getSearchNodeMetadata().getCumulativeReward() + (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
-        double estimatedLeafRisk = expandedNode.isFinalNode() ? (expandedNode.getWrappedState().getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
+        double estimatedLeafRisk = expandedNode.isFinalNode() ? (expandedNode.getStateWrapper().getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
             expandedNode = expandedNode.getParent();

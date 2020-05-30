@@ -66,7 +66,7 @@ public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action,
     }
 
     @Override
-    public StateWrapper<TAction, TObservation, TState> getWrappedState() {
+    public StateWrapper<TAction, TObservation, TState> getStateWrapper() {
         return wrappedState;
     }
 
