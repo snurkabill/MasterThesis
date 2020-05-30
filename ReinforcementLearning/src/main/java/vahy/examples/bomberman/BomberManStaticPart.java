@@ -24,7 +24,9 @@ public class BomberManStaticPart {
 
     private final int goldWithEnvironmentEntityCount;
 
-    public BomberManStaticPart(boolean[][] walls, int startingPlayerCount, int startingTotalEntityCount, int bombsPerPlayer, int rewardPerStep, int goldEntityCount, boolean[][] goldEntitiesArray, int[][] goldEntitiesReferenceArray, int rewardPerGold, double goldRespawnProbability, int bombRange, int bombCountDown, int playerLivesAtStart) {
+    private final int totalStepsAllowed;
+
+    public BomberManStaticPart(boolean[][] walls, int startingPlayerCount, int startingTotalEntityCount, int bombsPerPlayer, int rewardPerStep, int goldEntityCount, boolean[][] goldEntitiesArray, int[][] goldEntitiesReferenceArray, int rewardPerGold, double goldRespawnProbability, int bombRange, int bombCountDown, int playerLivesAtStart, int totalStepsAllowed) {
         this.walls = walls;
         this.goldEntitiesArray = goldEntitiesArray;
         this.goldEntitiesReferenceArray = goldEntitiesReferenceArray;
@@ -38,6 +40,7 @@ public class BomberManStaticPart {
         this.bombCountDown = bombCountDown;
         this.playerLivesAtStart = playerLivesAtStart;
         this.goldWithEnvironmentEntityCount = 1 + goldEntityCount;
+        this.totalStepsAllowed = totalStepsAllowed;
         if(startingPlayerCount + goldWithEnvironmentEntityCount != startingTotalEntityCount) {
             throw new IllegalStateException("Summary of entities in game does not match");
         }
@@ -107,5 +110,9 @@ public class BomberManStaticPart {
 
     public int getGoldWithEnvironmentEntityCount() {
         return goldWithEnvironmentEntityCount;
+    }
+
+    public int getTotalStepsAllowed() {
+        return totalStepsAllowed;
     }
 }
