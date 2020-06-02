@@ -2,11 +2,11 @@ package vahy.examples.tictactoe;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.AbstractPolicySupplier;
+import vahy.api.model.StateWrapper;
+import vahy.api.policy.PolicySupplierImpl;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
-import vahy.api.policy.PolicySupplier;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
@@ -53,23 +53,13 @@ public class TicTacToeTwoRandomExample {
         var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new UniformRandomWalkPolicy<>(random, policyId);
-                }
-            },
+            (initialState_, policyMode_, policyId_, random_) -> new UniformRandomWalkPolicy<>(random_, policyId_),
             new ArrayList<>()
         );
         var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             1,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new UniformRandomWalkPolicy<>(random, policyId);
-                }
-            },
+            (initialState_, policyMode_, policyId_, random_) -> new UniformRandomWalkPolicy<>(random_, policyId_),
             new ArrayList<>()
         );
 

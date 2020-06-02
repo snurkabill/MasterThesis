@@ -2,7 +2,8 @@ package vahy.examples.tictactoe;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.AbstractPolicySupplier;
+import vahy.api.model.StateWrapper;
+import vahy.api.policy.PolicySupplierImpl;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
@@ -52,23 +53,13 @@ public class TrainingVsStaticExample {
         var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new UniformRandomWalkPolicy<>(random, policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId),
             new ArrayList<>()
         );
         var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             1,
             1,
-            (policyId,categoryId, random) -> new AbstractPolicySupplier<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new AlwaysStartAtMiddlePolicy(random, policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new AlwaysStartAtMiddlePolicy(random, policyId),
             new ArrayList<>()
         );
 

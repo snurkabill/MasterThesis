@@ -3,7 +3,8 @@ package vahy.examples.bomberman;
 import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.AbstractPolicySupplier;
+import vahy.api.model.StateWrapper;
+import vahy.api.policy.PolicySupplierImpl;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
@@ -99,14 +100,11 @@ public class Example01 {
         return new PolicyDefinition<>(
             policyId,
             categoryId,
-            (policyId_, categoryId_, random) -> new AbstractPolicySupplier<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>(policyId_, categoryId_, random) {
-                @Override
-                protected Policy<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> createState_inner(BomberManState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    if (policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), policyId, predictor, 0.0);
-                    }
-                    return new ValuePolicy<>(random.split(), policyId, predictor, 0.2);
+            (initialState, policyMode, policyId1, random) -> {
+                if (policyMode == PolicyMode.INFERENCE) {
+                    return new ValuePolicy<>(random.split(), policyId, predictor, 0.0);
                 }
+                return new ValuePolicy<>(random.split(), policyId, predictor, 0.2);
             },
             List.of(predictorTrainingSetup)
         );

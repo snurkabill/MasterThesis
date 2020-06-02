@@ -87,6 +87,7 @@ public class Runner<
 
         var gameSampler = new GameSamplerImpl<>(
             runnerArguments.getInitialStateSupplier(),
+            runnerArguments.getStateStateWrapperInitializer(),
             runnerArguments.getEpisodeResultsFactory(),
             policyCategories,
             runnerArguments.getProblemConfig().getPolicyShuffleStrategy(),
@@ -131,6 +132,7 @@ public class Runner<
 
         var gameSampler = new GameSamplerImpl<>(
             evaluationArguments.getInitialStateSupplier(),
+            evaluationArguments.getStateStateWrapperInitializer(),
             evaluationArguments.getEpisodeResultsFactory(),
             policyCategories,
             evaluationArguments.getProblemConfig().getPolicyShuffleStrategy(),

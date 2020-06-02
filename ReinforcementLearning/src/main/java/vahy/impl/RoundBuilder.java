@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.episode.StateWrapperInitializer;
 import vahy.api.experiment.ApproximatorConfig;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.ProblemConfig;
@@ -16,7 +17,7 @@ import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.KnownModelPolicySupplier;
+import vahy.impl.policy.KnownModelPolicy;
 import vahy.impl.runner.EpisodeWriter;
 import vahy.impl.runner.EvaluationArguments;
 import vahy.impl.runner.PolicyDefinition;
@@ -61,7 +62,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     private EpisodeResultsFactory<TAction, DoubleVector, TState, TPolicyRecord> resultsFactory;
 
     private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TState>> instanceInitializerFactory;
-
+    private StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer;
 
     private List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
 
@@ -110,6 +111,11 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         return this;
     }
 
+    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setStateStateWrapperInitializer(StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer) {
+        this.stateStateWrapperInitializer  = stateStateWrapperInitializer;
+        return this;
+    }
+
     private void finalizeSetup() {
         if(roundName == null) {
             throw new IllegalArgumentException("Missing RunName");
@@ -125,6 +131,9 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         }
         if(instanceInitializerFactory == null) {
             throw new IllegalArgumentException("Missing instanceInitializerFactory");
+        }
+        if(stateStateWrapperInitializer == null) {
+            throw new IllegalArgumentException("Missing stateStateWrapperInitializer");
         }
         if(statisticsCalculator == null) {
             throw new IllegalArgumentException("Missing statisticsCalculator");
@@ -185,6 +194,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             commonAlgorithmConfig,
             masterRandom,
             instanceInitializerFactory.apply(problemConfig, masterRandom.split()),
+            stateStateWrapperInitializer,
             resultsFactory,
             statisticsCalculator,
             additionalDataPointGeneratorList,
@@ -205,6 +215,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             systemConfig,
             masterRandom,
             instanceInitializerFactory.apply(this.problemConfig, masterRandom.split()),
+            stateStateWrapperInitializer,
             resultsFactory,
             statisticsCalculator,
             episodeWriter,
@@ -217,7 +228,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
                 new PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>(
                     x,
                     ENVIRONMENT_CATEGORY_ID,
-                    (policyId, categoryId, splittableRandom) -> new KnownModelPolicySupplier<>(splittableRandom, policyId, categoryId),
+                    (initialState, policyMode, policyId, random) -> new KnownModelPolicy<>(random, policyId),
                     new ArrayList<>()
                 ))
             .collect(Collectors.toList());

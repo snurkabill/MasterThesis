@@ -4,6 +4,7 @@ import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.episode.StateWrapperInitializer;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
@@ -28,6 +29,7 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
     private final SplittableRandom finalMasterRandom;
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
+    private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
     private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
     private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
     private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
@@ -38,6 +40,7 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
                                SystemConfig systemConfig,
                                SplittableRandom finalMasterRandom,
                                InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
+                               StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
                                EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
                                EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
                                EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
@@ -48,6 +51,7 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
         this.systemConfig = systemConfig;
         this.finalMasterRandom = finalMasterRandom;
         this.initialStateSupplier = initialStateSupplier;
+        this.stateStateWrapperInitializer = stateStateWrapperInitializer;
         this.episodeResultsFactory = episodeResultsFactory;
         this.episodeStatisticsCalculator = episodeStatisticsCalculator;
         this.episodeWriter = episodeWriter;
@@ -68,6 +72,10 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
 
     public InitialStateSupplier<TAction, TObservation, TState> getInitialStateSupplier() {
         return initialStateSupplier;
+    }
+
+    public StateWrapperInitializer<TAction, TObservation, TState> getStateStateWrapperInitializer() {
+        return stateStateWrapperInitializer;
     }
 
     public EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> getEpisodeResultsFactory() {

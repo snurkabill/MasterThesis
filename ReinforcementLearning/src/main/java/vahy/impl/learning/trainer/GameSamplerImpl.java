@@ -11,6 +11,7 @@ import vahy.api.episode.PolicyCategory;
 import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.episode.RegisteredPolicy;
+import vahy.api.episode.StateWrapperInitializer;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -42,6 +43,7 @@ public class GameSamplerImpl<
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
+    private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
     private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory;
     private final int processingUnitCount;
 
@@ -53,6 +55,7 @@ public class GameSamplerImpl<
     private final Random random;
 
     public GameSamplerImpl(InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
+                           StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
                            EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory,
                            List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategoryList,
                            PolicyShuffleStrategy policyShuffleStrategy,
@@ -60,6 +63,7 @@ public class GameSamplerImpl<
                            List<PolicyCategoryInfo> expectedPolicyCategoryInfoList,
                            SplittableRandom random)
     {
+        this.stateStateWrapperInitializer = stateStateWrapperInitializer;
         this.random = new Random(random.nextInt());
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
@@ -127,7 +131,8 @@ public class GameSamplerImpl<
         var registeredPolicyList = new ArrayList<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>>(this.totalPolicyCount);
         for (var category : this.policyCategoryList) {
             for (var entry : category.getPolicySupplierList()) {
-                registeredPolicyList.add(new RegisteredPolicy<>(entry.initializePolicy(initialState, policyMode), policyIdTranslationMap.getInGameEntityId(entry.getPolicyId())));
+                var inGameEntityId = policyIdTranslationMap.getInGameEntityId(entry.getPolicyId());
+                registeredPolicyList.add(new RegisteredPolicy<>(entry.initializePolicy(stateStateWrapperInitializer.createInitialStateWrapper(inGameEntityId, initialState), policyMode), inGameEntityId));
             }
         }
         return registeredPolicyList;

@@ -3,12 +3,11 @@ package vahy.examples.bomberman;
 import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.AbstractPolicySupplier;
+import vahy.api.model.StateWrapper;
+import vahy.api.policy.PolicySupplierImpl;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
-import vahy.examples.tictactoe.TicTacToeAction;
-import vahy.examples.tictactoe.TicTacToeState;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
@@ -18,7 +17,6 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
@@ -76,7 +74,7 @@ public class Example02 {
 //            1,
 //            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
 //                @Override
-//                protected Policy<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> createState_inner(BomberManState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+//                protected Policy<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> createState_inner(StateWrapper<BomberManAction, DoubleVector, BomberManState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
 //                    return new UniformRandomWalkPolicy<>(random.split(), policyId);
 //                }
 //            },
@@ -112,14 +110,11 @@ public class Example02 {
         return new PolicyDefinition<>(
             policyId,
             categoryId,
-            (policyId_, categoryId_, random) -> new AbstractPolicySupplier<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>(policyId_, categoryId_, random) {
-                @Override
-                protected Policy<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> createState_inner(BomberManState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    if (policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), policyId, predictor, 0.0);
-                    }
-                    return new ValuePolicy<>(random.split(), policyId, predictor, 0.2);
+            (initialState, policyMode, policyId1, random) -> {
+                if (policyMode == PolicyMode.INFERENCE) {
+                    return new ValuePolicy<>(random.split(), policyId, predictor, 0.0);
                 }
+                return new ValuePolicy<>(random.split(), policyId, predictor, 0.2);
             },
             List.of(predictorTrainingSetup)
         );

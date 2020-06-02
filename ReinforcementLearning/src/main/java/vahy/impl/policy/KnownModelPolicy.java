@@ -21,7 +21,7 @@ public class KnownModelPolicy<
 
     private Predictor<TState> perfectPredictor;
 
-    protected KnownModelPolicy(SplittableRandom random, int policyId) {
+    public KnownModelPolicy(SplittableRandom random, int policyId) {
         super(random, policyId);
     }
 

@@ -2,7 +2,8 @@ package vahy.examples.simplifiedHallway;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.AbstractPolicySupplier;
+import vahy.api.model.StateWrapper;
+import vahy.api.policy.PolicySupplierImpl;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
@@ -79,14 +80,11 @@ public class Example01 {
         var playerSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>(
             1,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<SHAction, DoubleVector, SHState, PolicyRecordBase>(policyId, categoryId, random) {
-                @Override
-                protected Policy<SHAction, DoubleVector, SHState, PolicyRecordBase> createState_inner(SHState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    if(policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.0);
-                    }
-                    return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.5);
+            (initialState, policyMode, policyId, random) -> {
+                if(policyMode == PolicyMode.INFERENCE) {
+                    return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.0);
                 }
+                return new ValuePolicy<>(random.split(), 1, trainablePredictor, 0.5);
             },
             List.of(predictorTrainingSetup)
         );

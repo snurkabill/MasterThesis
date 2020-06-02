@@ -4,7 +4,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.AbstractPolicySupplier;
+import vahy.api.model.StateWrapper;
+import vahy.api.policy.PolicySupplierImpl;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
@@ -66,23 +67,13 @@ public class TicTacToeIntegrationTest {
         var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new UniformRandomWalkPolicy<>(random, policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId),
             new ArrayList<>()
         );
         var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             1,
             1,
-            (policyId,categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new AlwaysStartAtMiddlePolicy(random, policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new AlwaysStartAtMiddlePolicy(random, policyId),
             new ArrayList<>()
         );
 
@@ -98,6 +89,7 @@ public class TicTacToeIntegrationTest {
             .setProblemConfig(ticTacConfig)
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
+            .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setPlayerPolicySupplierList(policyArgumentsList);
@@ -140,23 +132,13 @@ public class TicTacToeIntegrationTest {
         var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new AlwaysStartAtMiddlePolicy(random, policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new AlwaysStartAtMiddlePolicy(random, policyId),
             new ArrayList<>()
         );
         var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             1,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new UniformRandomWalkPolicy<>(random, policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId),
             new ArrayList<>()
         );
 
@@ -172,6 +154,7 @@ public class TicTacToeIntegrationTest {
             .setProblemConfig(ticTacConfig)
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
+            .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setPlayerPolicySupplierList(policyArgumentsList);
@@ -218,12 +201,7 @@ public class TicTacToeIntegrationTest {
         var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    return new UniformRandomWalkPolicy<>(random.split(), policyId);
-                }
-            },
+            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId),
             new ArrayList<>()
         );
 
@@ -243,14 +221,11 @@ public class TicTacToeIntegrationTest {
         var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             1,
             1,
-            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
-                @Override
-                protected Policy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createState_inner(TicTacToeState initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
-                    if(policyMode == PolicyMode.INFERENCE) {
-                        return new ValuePolicy<>(random.split(), policyId, trainablePredictor, 0.0);
-                    }
-                    return new ValuePolicy<>(random.split(), policyId, trainablePredictor, 0.1);
+            (initialState, policyMode, policyId, random) -> {
+                if(policyMode == PolicyMode.INFERENCE) {
+                    return new ValuePolicy<>(random.split(), policyId, trainablePredictor, 0.0);
                 }
+                return new ValuePolicy<>(random.split(), policyId, trainablePredictor, 0.1);
             },
             List.of(predictorTrainingSetup)
         );
@@ -268,6 +243,7 @@ public class TicTacToeIntegrationTest {
             .setProblemConfig(ticTacConfig)
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
+            .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setPlayerPolicySupplierList(policyArgumentsList);

@@ -4,6 +4,7 @@ import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
+import vahy.api.episode.StateWrapperInitializer;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -31,6 +32,7 @@ public class RunnerArguments<TConfig extends ProblemConfig,
     private final SplittableRandom finalMasterRandom;
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
+    private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
     private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
     private final List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
     private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
@@ -45,6 +47,7 @@ public class RunnerArguments<TConfig extends ProblemConfig,
                            CommonAlgorithmConfig algorithmConfig,
                            SplittableRandom finalMasterRandom,
                            InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
+                           StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
                            EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
                            EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
                            List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList,
@@ -56,6 +59,7 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         this.algorithmConfig = algorithmConfig;
         this.finalMasterRandom = finalMasterRandom;
         this.initialStateSupplier = initialStateSupplier;
+        this.stateStateWrapperInitializer = stateStateWrapperInitializer;
         this.episodeResultsFactory = episodeResultsFactory;
         this.episodeStatisticsCalculator = episodeStatisticsCalculator;
         this.additionalDataPointGeneratorList = additionalDataPointGeneratorList;
@@ -81,6 +85,10 @@ public class RunnerArguments<TConfig extends ProblemConfig,
 
     public InitialStateSupplier<TAction, TObservation, TState> getInitialStateSupplier() {
         return initialStateSupplier;
+    }
+
+    public StateWrapperInitializer<TAction, TObservation, TState> getStateStateWrapperInitializer() {
+        return stateStateWrapperInitializer;
     }
 
     public EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> getEpisodeResultsFactory() {
