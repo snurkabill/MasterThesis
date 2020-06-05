@@ -48,13 +48,15 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         }
     }
 
+    private final int dimension;
     private final Symbol[][] playground;
     private final boolean isPlayerZeroOnTurn;
     private final int turnsLeft;
 
     private final List<TicTacToeAction> enabledActions;
 
-    public TicTacToeState(Symbol[][] playground, boolean isPlayerZeroOnTurn, int turnsLeft, List<TicTacToeAction> enabledActions) {
+    public TicTacToeState(int dimension, Symbol[][] playground, boolean isPlayerZeroOnTurn, int turnsLeft, List<TicTacToeAction> enabledActions) {
+        this.dimension = dimension;
         for (int i = 0; i < playground.length; i++) {
             if(playground[i].length != playground.length) {
                 throw new IllegalArgumentException("Playground is not square-like");
@@ -158,6 +160,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             double[] reward = hasOneWin(Player_inner.PLAYER_ZERO, newPlayground) ? PLAYER_ZERO_WON_REWARD : IN_GAME_REWARD;
             return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
+                    dimension,
                     newPlayground,
                     false,
                     turnsLeft - 1,
@@ -182,6 +185,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
             double[] reward = hasOneWin(Player_inner.PLAYER_ONE, newPlayground) ? PLAYER_ONE_WON_REWARD : IN_GAME_REWARD;
             return new ImmutableStateRewardReturn<>(
                 new TicTacToeState(
+                    dimension,
                     newPlayground,
                     true,
                     turnsLeft - 1,
@@ -194,7 +198,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public DoubleVector getInGameEntityObservation(int inGameEntityId) {
-        var observationVector = new double[10];
+        var observationVector = new double[dimension + 1];
         for (int i = 0; i < playground.length; i++) {
             for (int j = 0; j < playground[i].length; j++) {
                 observationVector[i * playground[j].length + j] = playground[i][j].symbol;
@@ -207,7 +211,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
-        var observationVector = new double[10];
+        var observationVector = new double[dimension + 1];
         for (int i = 0; i < playground.length; i++) {
             for (int j = 0; j < playground[i].length; j++) {
                 observationVector[i * playground[j].length + j] = playground[i][j].symbol;

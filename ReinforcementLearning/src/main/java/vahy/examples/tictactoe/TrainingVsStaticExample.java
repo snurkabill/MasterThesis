@@ -2,10 +2,6 @@ package vahy.examples.tictactoe;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicySupplierImpl;
-import vahy.api.policy.Policy;
-import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
@@ -18,13 +14,12 @@ import vahy.impl.runner.PolicyDefinition;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class TrainingVsStaticExample {
 
     public static void main(String[] args) {
 
-        var ticTacConfig = new TicTacToeConfig();
+        var ticTacConfig = new TicTacToeConfig(3);
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {

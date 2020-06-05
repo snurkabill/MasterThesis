@@ -20,7 +20,6 @@ import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.MCTSPolicy;
-import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;

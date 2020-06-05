@@ -38,7 +38,7 @@ public class TicTacToeIntegrationTest {
     @Test
     public void emptyDomainIntegrationTest() {
 
-        var ticTacConfig = new TicTacToeConfig();
+        var ticTacConfig = new TicTacToeConfig(3);
         var systemConfig = new SystemConfig(987568, true, Runtime.getRuntime().availableProcessors() - 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -103,7 +103,7 @@ public class TicTacToeIntegrationTest {
     @Test
     public void emptyDomainIntegrationReversedTest() {
 
-        var ticTacConfig = new TicTacToeConfig();
+        var ticTacConfig = new TicTacToeConfig(3);
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -171,7 +171,7 @@ public class TicTacToeIntegrationTest {
     @Test
     public void trainablePolicyTest() {
 
-        var ticTacConfig = new TicTacToeConfig();
+        var ticTacConfig = new TicTacToeConfig(3);
 //        var systemConfig = new SystemConfig(987568, true, Runtime.getRuntime().availableProcessors() - 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
         var systemConfig = new SystemConfig(987568, false, 10, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 

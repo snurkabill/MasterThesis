@@ -15,20 +15,17 @@ public class TicTacToeStateInitializer extends AbstractInitialStateSupplier<TicT
 
     @Override
     protected TicTacToeState createState_inner(TicTacToeConfig ticTacToeConfig, SplittableRandom random, PolicyMode policyMode) {
+
+        var ticTacToeArray = new TicTacToeState.Symbol[ticTacToeConfig.getDimension()][];
+        for (int i = 0; i < ticTacToeArray.length; i++) {
+            ticTacToeArray[i] = new TicTacToeState.Symbol[ticTacToeConfig.getDimension()];
+            Arrays.fill(ticTacToeArray[i], TicTacToeState.Symbol.EMPTY);
+        }
         return new TicTacToeState(
-            new TicTacToeState.Symbol[][] {
-                {
-                    TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY,
-                },
-                {
-                    TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY,
-                },
-                {
-                    TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY, TicTacToeState.Symbol.EMPTY,
-                }
-            },
+            ticTacToeConfig.getDimension(),
+            ticTacToeArray,
             true,
-            9,
+            ticTacToeConfig.getDimension() * ticTacToeConfig.getDimension(),
             Arrays.asList(TicTacToeAction.values())
         );
     }

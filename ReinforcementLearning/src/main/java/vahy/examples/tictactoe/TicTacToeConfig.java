@@ -5,14 +5,22 @@ import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.ProblemConfig;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TicTacToeConfig extends ProblemConfig {
 
+    private final int dimension = 3;
+
     public TicTacToeConfig() {
-        super(999, false, 0, 2, List.of(new PolicyCategoryInfo(true, 1, 2)), PolicyShuffleStrategy.CATEGORY_SHUFFLE);
+        super(Integer.MAX_VALUE, // state will stop it anyway.
+            false,
+            0,
+            2,
+            List.of(new PolicyCategoryInfo(true, 1, 2)),
+            PolicyShuffleStrategy.CATEGORY_SHUFFLE);
+    }
+
+    public int getDimension() {
+        return dimension;
     }
 
     @Override
