@@ -7,7 +7,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
-import vahy.impl.search.MCTS.MonteCarloTreeMetadata;
+import vahy.impl.search.MCTS.MCTSMetadata;
 import vahy.impl.search.tree.SearchTreeImpl;
 
 import java.util.Comparator;
@@ -17,9 +17,9 @@ public class MCTSPolicy<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TObservation, MonteCarloTreeMetadata, TState, PolicyRecordBase> {
+    extends AbstractTreeSearchPolicy<TAction, TObservation, MCTSMetadata, TState, PolicyRecordBase> {
 
-    public MCTSPolicy(int policyId, SplittableRandom random, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, MonteCarloTreeMetadata, TState> searchTree) {
+    public MCTSPolicy(int policyId, SplittableRandom random, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, MCTSMetadata, TState> searchTree) {
         super(policyId, random, treeUpdateCondition, searchTree);
     }
 
@@ -48,7 +48,7 @@ public class MCTSPolicy<
         return getAppliedAction(gameState, searchTree.getRoot());
     }
 
-    private TAction getAppliedAction(StateWrapper<TAction, TObservation, TState> gameState, SearchNode<TAction, TObservation, MonteCarloTreeMetadata, TState> root) {
+    private TAction getAppliedAction(StateWrapper<TAction, TObservation, TState> gameState, SearchNode<TAction, TObservation, MCTSMetadata, TState> root) {
         return root.getChildNodeStream().max(Comparator.comparing(x -> x.getSearchNodeMetadata().getExpectedReward()[gameState.getInGameEntityIdWrapper()])).orElseThrow().getAppliedAction();
     }
 

@@ -4,14 +4,14 @@ import vahy.impl.search.node.nodeMetadata.BaseNodeMetadata;
 
 import java.util.Arrays;
 
-public class MonteCarloTreeMetadata extends BaseNodeMetadata {
+public class MCTSMetadata extends BaseNodeMetadata {
 
     private final double[] predictedReward;
     private final double[] expectedReward;
     private final double[] sumOfTotalEstimations;
     private int visitCounter;
 
-    public MonteCarloTreeMetadata(double[] cumulativeReward, double[] gainedReward) {
+    public MCTSMetadata(double[] cumulativeReward, double[] gainedReward) {
         super(cumulativeReward, gainedReward);
         this.predictedReward = new double[cumulativeReward.length];
         this.expectedReward = new double[cumulativeReward.length];

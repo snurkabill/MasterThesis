@@ -23,9 +23,9 @@ import vahy.impl.policy.MCTSPolicy;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.search.MCTS.MonteCarloEvaluator;
-import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadataFactory;
-import vahy.impl.search.MCTS.MonteCarloTreeSearchUpdater;
+import vahy.impl.search.MCTS.MCTSEvaluator;
+import vahy.impl.search.MCTS.MCTSMetadataFactory;
+import vahy.impl.search.MCTS.MCTSTreeUpdater;
 import vahy.impl.search.MCTS.Ucb1NodeSelector;
 import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
@@ -76,7 +76,7 @@ public class BaseMctsTest {
             (initialState, policyMode, policyId, random) -> {
 
                 var actionClass = TicTacToeAction.class;
-                var nodeMetadataFactory = new MonteCarloTreeSearchMetadataFactory<TicTacToeAction, DoubleVector, TicTacToeState>();
+                var nodeMetadataFactory = new MCTSMetadataFactory<TicTacToeAction, DoubleVector, TicTacToeState>();
                 var searchNodeFactory = new SearchNodeBaseFactoryImpl<>(actionClass, nodeMetadataFactory);
                 var root = new SearchNodeImpl<>(initialState, nodeMetadataFactory.createEmptyNodeMetadata(initialState.getTotalEntityCount()), new EnumMap<>(actionClass));
 
@@ -84,8 +84,8 @@ public class BaseMctsTest {
                     new SearchTreeImpl<>(
                         root,
                         new Ucb1NodeSelector<>(random, 1.0, actionClass.getEnumConstants().length),
-                        new MonteCarloTreeSearchUpdater<>(),
-                        new MonteCarloEvaluator<>(searchNodeFactory, random, 1.0, 1)
+                        new MCTSTreeUpdater<>(),
+                        new MCTSEvaluator<>(searchNodeFactory, random, 1.0, 1)
                     ));
 
             },

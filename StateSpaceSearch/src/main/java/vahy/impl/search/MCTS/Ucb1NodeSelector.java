@@ -7,7 +7,6 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.NodeSelector;
-import vahy.utils.StreamUtils;
 
 import java.util.SplittableRandom;
 
@@ -15,7 +14,7 @@ public class Ucb1NodeSelector<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    implements NodeSelector<TAction, TObservation, MonteCarloTreeMetadata, TState> {
+    implements NodeSelector<TAction, TObservation, MCTSMetadata, TState> {
 
     private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
 
@@ -31,7 +30,7 @@ public class Ucb1NodeSelector<
         this.valueArray = new double[maxBranchingCount];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TObservation, MonteCarloTreeMetadata, TState> node) {
+    protected TAction getBestAction(SearchNode<TAction, TObservation, MCTSMetadata, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
@@ -107,7 +106,7 @@ public class Ucb1NodeSelector<
     }
 
     @Override
-    public SearchNode<TAction, TObservation, MonteCarloTreeMetadata, TState> selectNextNode(SearchNode<TAction, TObservation, MonteCarloTreeMetadata, TState> root) {
+    public SearchNode<TAction, TObservation, MCTSMetadata, TState> selectNextNode(SearchNode<TAction, TObservation, MCTSMetadata, TState> root) {
         var node = root;
         while(!node.isLeaf()) {
             var bestAction = getBestAction(node);

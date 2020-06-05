@@ -2,12 +2,11 @@ package vahy.impl.search.AlphaGo;
 
 import vahy.api.model.Action;
 import vahy.api.search.node.ProbabilisticNodeMetadata;
-import vahy.impl.search.MCTS.MonteCarloTreeMetadata;
+import vahy.impl.search.MCTS.MCTSMetadata;
 
 import java.util.EnumMap;
-import java.util.Map;
 
-public class AlphaGoNodeMetadata<TAction extends Enum<TAction> & Action> extends MonteCarloTreeMetadata implements ProbabilisticNodeMetadata<TAction> {
+public class AlphaGoNodeMetadata<TAction extends Enum<TAction> & Action> extends MCTSMetadata implements ProbabilisticNodeMetadata<TAction> {
 
     private final double priorProbability; /// P value
     private final EnumMap<TAction, Double> childPriorProbabilities;

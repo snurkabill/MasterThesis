@@ -10,7 +10,6 @@ import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 import vahy.utils.ImmutableTuple;
 
@@ -21,14 +20,14 @@ import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class MonteCarloEvaluator<
+public class MCTSEvaluator<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TSearchNodeMetadata extends MonteCarloTreeMetadata,
+    TSearchNodeMetadata extends MCTSMetadata,
     TState extends State<TAction, TObservation, TState>>
     implements NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MonteCarloEvaluator.class);
+    private static final Logger logger = LoggerFactory.getLogger(MCTSEvaluator.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     private final SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
@@ -36,7 +35,7 @@ public class MonteCarloEvaluator<
     private final double discountFactor;
     private final int rolloutCount;
 
-    public MonteCarloEvaluator(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory, SplittableRandom random, double discountFactor, int rolloutCount) {
+    public MCTSEvaluator(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory, SplittableRandom random, double discountFactor, int rolloutCount) {
         this.searchNodeFactory = searchNodeFactory;
         this.random = random;
         this.discountFactor = discountFactor;

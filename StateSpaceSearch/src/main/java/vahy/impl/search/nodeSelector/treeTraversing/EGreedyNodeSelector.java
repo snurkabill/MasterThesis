@@ -3,10 +3,9 @@ package vahy.impl.search.nodeSelector.treeTraversing;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.search.node.NodeMetadata;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.RandomizedNodeSelector;
-import vahy.impl.search.MCTS.MonteCarloTreeMetadata;
+import vahy.impl.search.MCTS.MCTSMetadata;
 import vahy.utils.StreamUtils;
 
 import java.util.Comparator;
@@ -15,7 +14,7 @@ import java.util.SplittableRandom;
 public class EGreedyNodeSelector<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TSearchNodeMetadata extends MonteCarloTreeMetadata,
+    TSearchNodeMetadata extends MCTSMetadata,
     TState extends State<TAction, TObservation, TState>>
     extends RandomizedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
