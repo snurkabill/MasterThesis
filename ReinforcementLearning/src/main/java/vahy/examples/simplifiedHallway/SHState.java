@@ -1,6 +1,5 @@
 package vahy.examples.simplifiedHallway;
 
-import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
@@ -95,6 +94,11 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
         } else {
             return this.getEnvironmentProbabilities().keySet().toArray(new SHAction[0]);
         }
+    }
+
+    @Override
+    public int getTotalEntityCount() {
+        return 2;
     }
 
     @Override
@@ -264,6 +268,10 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     @Override
     public boolean isFinalState() {
         return isAgentKilled || rewardsLeft == 0;
+    }
+
+    public boolean isAgentKilled() {
+        return isAgentKilled;
     }
 
     @Override

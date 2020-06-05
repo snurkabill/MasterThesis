@@ -11,14 +11,14 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class SHInstanceSupplier extends AbstractInitialStateSupplier<SHConfig, SHAction,  DoubleVector, SHState, SHState> {
+public class SHInstanceSupplier extends AbstractInitialStateSupplier<SHConfig, SHAction2,  DoubleVector, SHRiskState, SHRiskState> {
 
     public SHInstanceSupplier(SHConfig SHConfig, SplittableRandom random) {
         super(SHConfig, random);
     }
 
     @Override
-    protected SHState createState_inner(SHConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
+    protected SHRiskState createState_inner(SHConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
         return createImmutableInitialState(problemConfig.getGameMatrix(), problemConfig, random);
     }
 
@@ -31,7 +31,7 @@ public class SHInstanceSupplier extends AbstractInitialStateSupplier<SHConfig, S
         return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
     }
 
-    private SHState createImmutableInitialState(List<List<Cell>> gameSetup, SHConfig SHConfig, SplittableRandom random) {
+    private SHRiskState createImmutableInitialState(List<List<Cell>> gameSetup, SHConfig SHConfig, SplittableRandom random) {
         boolean[][] walls = new boolean[gameSetup.size()][gameSetup.get(0).size()];
         double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
         double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
@@ -58,7 +58,7 @@ public class SHInstanceSupplier extends AbstractInitialStateSupplier<SHConfig, S
 
         SHStaticPart staticGamePart = new SHStaticPart(walls, trapProbabilities, rewardIds, SHConfig.getStepPenalty());
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup, random);
-        return new SHState(staticGamePart, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), true, false, rewards, rewardCounter);
+        return new SHRiskState(staticGamePart, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), true, false, rewards, rewardCounter);
     }
 
 

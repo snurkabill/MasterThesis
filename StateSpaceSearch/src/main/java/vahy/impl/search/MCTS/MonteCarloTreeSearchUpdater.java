@@ -7,20 +7,29 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
+import vahy.impl.model.reward.DoubleVectorRewardAggregator;
+
+import java.util.Arrays;
 
 public class MonteCarloTreeSearchUpdater<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    implements TreeUpdater<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> {
+    implements TreeUpdater<TAction, TObservation, MonteCarloTreeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(MonteCarloTreeSearchUpdater.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
-    public void updateTree(SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, TObservation, MonteCarloTreeMetadata, TState> expandedNode) {
         int i = 0;
-        double estimatedLeafReward = (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward()) + expandedNode.getSearchNodeMetadata().getCumulativeReward();
+        var stateWrapper = expandedNode.getStateWrapper();
+        var nodeMetadata = expandedNode.getSearchNodeMetadata();
+        double[] estimatedLeafReward = DoubleVectorRewardAggregator.aggregate(
+            stateWrapper.isFinalState() ?
+                DoubleVectorRewardAggregator.emptyReward(nodeMetadata.getGainedReward().length)
+                : expandedNode.getSearchNodeMetadata().getPredictedReward(),
+            expandedNode.getSearchNodeMetadata().getCumulativeReward());
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward);
             expandedNode = expandedNode.getParent();
@@ -32,14 +41,21 @@ public class MonteCarloTreeSearchUpdater<
         }
     }
 
-    private void updateNode(SearchNode<TAction, TObservation, MonteCarloTreeSearchMetadata, TState> expandedNode, double estimatedLeafReward) {
-        MonteCarloTreeSearchMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
+    private void updateNode(SearchNode<TAction, TObservation, MonteCarloTreeMetadata, TState> expandedNode, double[] estimatedLeafReward) {
+        MonteCarloTreeMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
+        var totalEstimations = searchNodeMetadata.getSumOfTotalEstimations();
         if(searchNodeMetadata.getVisitCounter() == 1) {
-            searchNodeMetadata.setSumOfTotalEstimations(estimatedLeafReward);
+            System.arraycopy(estimatedLeafReward, 0, totalEstimations, 0, estimatedLeafReward.length);
         } else {
-            searchNodeMetadata.setSumOfTotalEstimations(searchNodeMetadata.getSumOfTotalEstimations() + estimatedLeafReward);
+            for (int i = 0; i < totalEstimations.length; i++) {
+                totalEstimations[i] += estimatedLeafReward[i];
+            }
         }
-        searchNodeMetadata.setExpectedReward(searchNodeMetadata.getSumOfTotalEstimations() / searchNodeMetadata.getVisitCounter());
+        var expectedRewards = searchNodeMetadata.getExpectedReward();
+        var visitCounter = searchNodeMetadata.getVisitCounter();
+        for (int i = 0; i < expectedRewards.length; i++) {
+            expectedRewards[i] = totalEstimations[i] / visitCounter;
+        }
     }
 }

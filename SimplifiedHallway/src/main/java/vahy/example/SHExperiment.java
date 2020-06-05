@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.experiment.SystemConfig;
 import vahy.config.PaperAlgorithmConfig;
-import vahy.domain.SHAction;
+import vahy.domain.SHAction2;
 import vahy.domain.SHConfig;
 import vahy.domain.SHInstanceSupplier;
-import vahy.domain.SHState;
+import vahy.domain.SHRiskState;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.KnownModelPolicySupplier;
@@ -29,9 +29,9 @@ public abstract class SHExperiment {
         var systemConfig = createSystemConfig();
         var problemConfig = createProblemConfig();
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<SHConfig, SHAction, SHState, SHState>()
-            .setActionClass(SHAction.class)
-            .setStateClass(SHState.class)
+        var paperExperimentBuilder = new PaperExperimentBuilder<SHConfig, SHAction2, SHRiskState, SHRiskState>()
+            .setActionClass(SHAction2.class)
+            .setStateClass(SHRiskState.class)
             .setSystemConfig(systemConfig)
             .setAlgorithmConfigList(algorithmConfigList)
             .setProblemConfig(problemConfig)
@@ -40,7 +40,7 @@ public abstract class SHExperiment {
 
         var results = paperExperimentBuilder.execute();
 
-        for (PolicyResults<SHAction, DoubleVector, SHState, SHState, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
+        for (PolicyResults<SHAction2, DoubleVector, SHRiskState, SHRiskState, PaperPolicyRecord, PaperEpisodeStatistics> result : results) {
             logger.info("PolicyId: " + result.getPolicyList().getPolicyName());
             logger.info("Results: " + result.getEvaluationStatistics().printToLog());
         }

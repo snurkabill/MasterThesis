@@ -9,7 +9,6 @@ import vahy.utils.ImmutableTuple;
 public class ImmutableStateRewardReturn<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TReward,
     TState extends State<TAction, TObservation, TState>>
     extends ImmutableTuple<TState, double[]>
     implements StateRewardReturn<TAction, TObservation, TState> {

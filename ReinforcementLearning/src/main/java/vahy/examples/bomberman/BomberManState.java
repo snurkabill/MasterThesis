@@ -247,6 +247,11 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
         return !staticPart.getWalls()[x][y];
     }
 
+    @Override
+    public int getTotalEntityCount() {
+        return staticPart.getStartingTotalEntityCount();
+    }
+
     private int nextEntityIdOnTurn() {
         var index = entityIdOnTurn;
         do {

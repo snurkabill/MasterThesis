@@ -5,7 +5,7 @@ import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 
-public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends SearchNodeMetadata, TState extends State<TAction, TObservation, TState>>
+public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
     implements SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     protected final boolean isFinalState;

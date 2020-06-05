@@ -11,6 +11,7 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
+import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
@@ -18,11 +19,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public class MonteCarloEvaluator<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TSearchNodeMetadata extends MonteCarloTreeSearchMetadata,
+    TSearchNodeMetadata extends MonteCarloTreeMetadata,
     TState extends State<TAction, TObservation, TState>>
     implements NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
@@ -34,10 +36,7 @@ public class MonteCarloEvaluator<
     private final double discountFactor;
     private final int rolloutCount;
 
-    public MonteCarloEvaluator(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
-                               SplittableRandom random,
-                               double discountFactor,
-                               int rolloutCount) {
+    public MonteCarloEvaluator(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory, SplittableRandom random, double discountFactor, int rolloutCount) {
         this.searchNodeFactory = searchNodeFactory;
         this.random = random;
         this.discountFactor = discountFactor;
@@ -60,33 +59,37 @@ public class MonteCarloEvaluator<
         }
         var rewardPredictionNodeCounter = runRollouts(selectedNode);
         TSearchNodeMetadata searchNodeMetadata = selectedNode.getSearchNodeMetadata();
-        searchNodeMetadata.setPredictedReward(rewardPredictionNodeCounter.getFirst());
+        var predictedRewards = searchNodeMetadata.getPredictedReward();
+        var estimatedRewards = rewardPredictionNodeCounter.getFirst();
+        System.arraycopy(estimatedRewards, 0, predictedRewards, 0, predictedRewards.length);
         if(!selectedNode.isFinalNode()) {
             selectedNode.unmakeLeaf();
         }
         return rewardPredictionNodeCounter.getSecond();
     }
 
-    private ImmutableTuple<Double, Integer> runRollouts(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        List<ImmutableTuple<Double, Integer>> rewardList = new ArrayList<>();
+    private ImmutableTuple<double[], Integer> runRollouts(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        List<ImmutableTuple<double[], Integer>> rewardList = new ArrayList<>();
         for (int i = 0; i < rolloutCount; i++) {
             rewardList.add(runRandomWalkSimulation(node));
         }
-        return new ImmutableTuple<>(DoubleScalarRewardAggregator.averageReward(rewardList.stream().map(ImmutableTuple::getFirst)), rewardList.stream().mapToInt(ImmutableTuple::getSecond).sum());
+        return new ImmutableTuple<>(
+            DoubleVectorRewardAggregator.averageReward(rewardList.stream().map(ImmutableTuple::getFirst).collect(Collectors.toList())),
+            rewardList.stream().mapToInt(ImmutableTuple::getSecond).sum());
     }
 
-    private ImmutableTuple<Double, Integer> runRandomWalkSimulation(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        List<Double> rewardList = new ArrayList<>();
+    private ImmutableTuple<double[], Integer> runRandomWalkSimulation(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        List<double[]> rewardList = new ArrayList<>();
         int stateCounter = 0;
         StateWrapper<TAction, TObservation, TState> wrappedState = node.getStateWrapper();
         while (!wrappedState.isFinalState()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
             StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn = wrappedState.applyAction(actions[actionIndex]);
-            rewardList.add(stateRewardReturn.getReward());
+            rewardList.add(stateRewardReturn.getAllPlayerRewards());
             wrappedState = stateRewardReturn.getState();
             stateCounter += 1;
         }
-        return new ImmutableTuple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), stateCounter);
+        return new ImmutableTuple<>(DoubleVectorRewardAggregator.aggregateDiscount(rewardList, discountFactor), stateCounter);
     }
 }

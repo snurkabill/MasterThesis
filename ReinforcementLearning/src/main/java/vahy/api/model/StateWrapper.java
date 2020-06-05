@@ -25,7 +25,8 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
 
     public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType) {
         StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(actionType);
-        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(inGameEntityId, stateRewardReturn.getState()), stateRewardReturn.getReward()[inGameEntityId]);
+        var allPlayerRewards = stateRewardReturn.getReward();
+        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(inGameEntityId, stateRewardReturn.getState()), allPlayerRewards[inGameEntityId], allPlayerRewards);
     }
 
     public TObservation getObservation() {
@@ -40,7 +41,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.getKnownModelWithPerfectObservationPredictor();
     }
 
-    public int getinGameEntityIdWrapper() {
+    public int getInGameEntityIdWrapper() {
         return inGameEntityId;
     }
 
@@ -48,7 +49,11 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.getInGameEntityIdOnTurn() == inGameEntityId;
     }
 
-    public int getPlayerOnTurnId() {
+    public int getTotalEntityCount() {
+        return state.getTotalEntityCount();
+    }
+
+    public int getInGameEntityOnTurnId() {
         return state.getInGameEntityIdOnTurn();
     }
 
@@ -56,7 +61,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         if(state.isFinalState()) {
             return true;
         }
-        return state.isInGame(inGameEntityId);
+        return !state.isInGame(inGameEntityId);
     }
 
     public String getReadableStringRepresentation() {

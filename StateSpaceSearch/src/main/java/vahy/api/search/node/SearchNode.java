@@ -9,7 +9,7 @@ import vahy.api.model.observation.Observation;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface SearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends SearchNodeMetadata, TState extends State<TAction, TObservation, TState>> {
+public interface SearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>> {
 
     SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getParent();
 

@@ -6,44 +6,49 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyRecord;
-import vahy.api.search.node.SearchNodeMetadata;
+import vahy.api.search.node.NodeMetadata;
+import vahy.api.search.node.SearchNode;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.timer.SimpleTimer;
 
 import java.util.List;
+import java.util.SplittableRandom;
 
 
 public abstract class AbstractTreeSearchPolicy<
         TAction extends Enum<TAction> & Action,
         TObservation extends Observation,
-        TSearchNodeMetadata extends SearchNodeMetadata,
+        TSearchNodeMetadata extends NodeMetadata,
         TState extends State<TAction, TObservation, TState>,
         TPolicyRecord extends PolicyRecord>
-    implements Policy<TAction, TObservation, TState, TPolicyRecord> {
+    extends RandomizedPolicy<TAction, TObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
     private final TreeUpdateCondition treeUpdateCondition;
     private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
-    protected final int policyId;
     protected final SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree;
 
-    public AbstractTreeSearchPolicy(int policyId,
-                                    TreeUpdateCondition treeUpdateCondition,
-                                    SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
-        this.policyId = policyId;
+    protected final int countOfAllActionFromSameEntity;
+
+    public AbstractTreeSearchPolicy(int policyId, SplittableRandom random, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
+        super(random, policyId);
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
+        this.countOfAllActionFromSameEntity = obtainCountOfAllActionFromSameEntity(searchTree.getRoot());
     }
 
-    @Override
-    public int getPolicyId() {
-        return policyId;
+    private int obtainCountOfAllActionFromSameEntity(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> gameState) {
+        var actionArray = gameState.getAllPossibleActions();
+        if(actionArray.length == 0) {
+            throw new IllegalStateException("There must be at least one playable action.");
+        }
+        return actionArray[0].getCountOfAllActionsFromSameEntity();
     }
 
     @Override
@@ -54,7 +59,9 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     protected void expandSearchTree(StateWrapper<TAction, TObservation, TState> gameState) {
-        checkStateRoot(gameState);
+        if(DEBUG_ENABLED) {
+            checkStateRoot(gameState);
+        }
         timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
         for (int i = 0; treeUpdateCondition.isConditionSatisfied(); i++) {

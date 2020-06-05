@@ -5,22 +5,27 @@ import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.utils.ImmutableTuple;
+import vahy.utils.ImmutableTriple;
 
 public class ImmutableStateWrapperRewardReturn<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends ImmutableTuple<StateWrapper<TAction, TObservation, TState>, Double>
+    extends ImmutableTriple<StateWrapper<TAction, TObservation, TState>, Double, double[]>
     implements StateWrapperRewardReturn<TAction, TObservation, TState> {
 
-    public ImmutableStateWrapperRewardReturn(StateWrapper<TAction, TObservation, TState> first, Double second) {
-        super(first, second);
+    public ImmutableStateWrapperRewardReturn(StateWrapper<TAction, TObservation, TState> first, Double second, double[] third) {
+        super(first, second, third);
     }
 
     @Override
     public Double getReward() {
         return super.getSecond();
+    }
+
+    @Override
+    public double[] getAllPlayerRewards() {
+        return super.getThird();
     }
 
     @Override

@@ -59,7 +59,7 @@
                         </goals>
                     </execution>
                 </executions>
-                <inherited>false</inherited>
+<!--                <inherited>false</inherited>-->
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>

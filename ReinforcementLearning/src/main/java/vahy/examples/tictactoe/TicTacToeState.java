@@ -1,6 +1,5 @@
 package vahy.examples.tictactoe;
 
-import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
@@ -8,7 +7,6 @@ import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -127,6 +125,11 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     @Override
     public TicTacToeAction[] getAllPossibleActions() {
         return enabledActions.toArray(new TicTacToeAction[0]);
+    }
+
+    @Override
+    public int getTotalEntityCount() {
+        return 2;
     }
 
     @Override
