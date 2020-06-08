@@ -20,7 +20,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     public static int ENVIRONMENT_ENTITY_ID = 0;
     public static int ENTITY_ON_TURN_INDEX = 0;
 
-    public static BomberManAction[] ENVIRONMENT_ACTION_ARRAY = new BomberManAction[] {BomberManAction.NO_ACTION, BomberManAction.DETONATE_BOMB};
+    public static BomberManAction[] ENVIRONMENT_ACTION_ARRAY_NO_BOMB = new BomberManAction[] {BomberManAction.NO_ACTION};
+    public static BomberManAction[] ENVIRONMENT_ACTION_ARRAY_DETONATE = new BomberManAction[] {BomberManAction.DETONATE_BOMB};
     public static BomberManAction[] REWARD_ACTION_ARRAY = new BomberManAction[] {BomberManAction.NO_ACTION_REWARD, BomberManAction.RESPAWN_REWARD};
     public static BomberManAction[] PLAYER_ACTION_ARRAY = new BomberManAction[] {BomberManAction.UP, BomberManAction.DOWN, BomberManAction.LEFT, BomberManAction.RIGHT, BomberManAction.DROP_BOMB};
 
@@ -68,7 +69,9 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     private final boolean[] goldsInPlaceArray;
 
     private final DoubleVector observation;
+
     private final boolean[] isInGameArray;
+
     private final int[] playerLivesCount;
     private final int[] playerXCoordinates;
 
@@ -94,7 +97,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                           int[] bombXCoordinates,
                           int[] bombYCoordinates,
                           int[] bombCountDowns,
-                          int droppedBombs, int stepsDone) {
+                          int droppedBombs,
+                          int stepsDone) {
         this.staticPart = staticPart;
         this.isInGameArray = isInGameArray;
         this.goldsInPlaceArray = goldsInPlaceArray;
@@ -165,24 +169,58 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
         newObservationArray[ENTITY_ON_TURN_INDEX] = entityIdOnTurn;
         int index = 1;
+
         for (int i = 0; i < maxPlayerCount; i++) {
-            newObservationArray[index] = getXPortion(this.staticPart, this.playerXCoordinates[i]);
-            newObservationArray[index + 1] = getYPortion(this.staticPart, this.playerYCoordinates[i]);
-            newObservationArray[index + 2] = this.playerLivesCount[i];
-            index += 3;
+            newObservationArray[index + i] = this.playerXCoordinates[i];
         }
+        index += maxPlayerCount;
+        for (int i = 0; i < maxPlayerCount; i++) {
+            newObservationArray[index + i] = this.playerYCoordinates[i];
+        }
+        index += maxPlayerCount;
+        for (int i = 0; i < maxPlayerCount; i++) {
+            newObservationArray[index + i] = this.playerLivesCount[i];
+        }
+        index += maxPlayerCount;
 
         for (int i = 0; i < maxBombCount; i++) {
-            newObservationArray[index] = getXPortion(this.staticPart, this.bombXCoordinates[i]);
-            newObservationArray[index + 1] = getYPortion(this.staticPart, this.bombYCoordinates[i]);
-            newObservationArray[index + 2] = this.bombCountDowns[i];
-            index += 3;
+            newObservationArray[index + i] = this.bombXCoordinates[i];
         }
+        index += maxBombCount;
+        for (int i = 0; i < maxBombCount; i++) {
+            newObservationArray[index + i] = this.bombYCoordinates[i];
+        }
+        index += maxBombCount;
+        for (int i = 0; i < maxBombCount; i++) {
+            newObservationArray[index + i] = this.bombCountDowns[i];
+        }
+        index += maxBombCount;
+
 
         for (int i = 0; i < goldsInPlaceArray.length; i++) {
             newObservationArray[index] = goldsInPlaceArray[i] ? 1.0 : 0.0;
             index++;
         }
+
+
+//        for (int i = 0; i < maxPlayerCount; i++) {
+//            newObservationArray[index] = this.playerXCoordinates[i]; // getXPortion(this.staticPart, this.playerXCoordinates[i]);
+//            newObservationArray[index + 1] = this.playerYCoordinates[i]; // getYPortion(this.staticPart, this.playerYCoordinates[i]);
+//            newObservationArray[index + 2] = this.playerLivesCount[i];
+//            index += 3;
+//        }
+//
+//        for (int i = 0; i < maxBombCount; i++) {
+//            newObservationArray[index] = this.bombXCoordinates[i]; // getXPortion(this.staticPart, this.bombXCoordinates[i]);
+//            newObservationArray[index + 1] = this.bombYCoordinates[i]; //getYPortion(this.staticPart, this.bombYCoordinates[i]);
+//            newObservationArray[index + 2] = this.bombCountDowns[i];
+//            index += 3;
+//        }
+//
+//        for (int i = 0; i < goldsInPlaceArray.length; i++) {
+//            newObservationArray[index] = goldsInPlaceArray[i] ? 1.0 : 0.0;
+//            index++;
+//        }
         return new DoubleVector(newObservationArray);
     }
 
@@ -220,7 +258,18 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     @Override
     public BomberManAction[] getAllPossibleActions() {
         if (entityIdOnTurn == ENVIRONMENT_ENTITY_ID) {
-            return ENVIRONMENT_ACTION_ARRAY;
+            var anyBombCountDownToZero = false;
+            for (int i = 0; i < bombCountDowns.length; i++) {
+                if(bombCountDowns[i] == 0) {
+                    anyBombCountDownToZero = true;
+                    break;
+                }
+            }
+            if(anyBombCountDownToZero) {
+                return ENVIRONMENT_ACTION_ARRAY_DETONATE;
+            } else {
+                return ENVIRONMENT_ACTION_ARRAY_NO_BOMB;
+            }
         } else if(goldIdOnTurn != -1) {
             return REWARD_ACTION_ARRAY;
         } else {
@@ -667,8 +716,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
         return new Predictor<>() {
 
-            private final double[] environmentBombExplosionProbs = new double[] {0.0, 1.0};
-            private final double[] environmentNoActionProbs = new double[] {1.0, 0.0};
+            private final double[] environmentBombExplosionProbs = new double[] {1.0};
+            private final double[] environmentNoActionProbs = new double[] {1.0};
             private final double[] goldRespawnProbs = new double[] {1.0 - staticPart.getGoldRespawnProbability(), staticPart.getGoldRespawnProbability()};
             private final double[] goldInPlaceProbs = new double[] {1.0, 0.0};
 
@@ -787,9 +836,14 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     }
 
     @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return entityIdOnTurn < staticPart.getGoldWithEnvironmentEntityCount();
+    }
+
+    @Override
     public boolean isInGame(int inGameEntityId) {
         if (inGameEntityId < staticPart.getGoldWithEnvironmentEntityCount()) {
-            throw new IllegalStateException("Environment is always in game. WTF. In game entityId: [" + inGameEntityId + "]");
+            return true; // throw new IllegalStateException("Environment is always in game. WTF. In game entityId: [" + inGameEntityId + "]");
         }
         return isInGameArray[inGameEntityId - staticPart.getGoldWithEnvironmentEntityCount()];
     }

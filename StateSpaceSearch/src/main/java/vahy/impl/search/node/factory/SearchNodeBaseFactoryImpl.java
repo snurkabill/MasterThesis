@@ -2,6 +2,7 @@ package vahy.impl.search.node.factory;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.StateWrapper;
 import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -11,6 +12,7 @@ import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.search.node.SearchNodeImpl;
 
 import java.util.EnumMap;
+import java.util.Map;
 
 public class SearchNodeBaseFactoryImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
     implements SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> {
@@ -33,5 +35,15 @@ public class SearchNodeBaseFactoryImpl<TAction extends Enum<TAction> & Action, T
             new EnumMap<>(actionClass),
             parent,
             action);
+    }
+
+    @Override
+    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> createNode(StateWrapper<TAction, TObservation, TState> initialState, TSearchNodeMetadata metadata, Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
+        return new SearchNodeImpl<>(initialState, metadata, childNodeMap);
+    }
+
+    @Override
+    public SearchNodeMetadataFactory<TAction, TObservation, TSearchNodeMetadata, TState> getSearchNodeMetadataFactory() {
+        return searchNodeMetadataFactory;
     }
 }

@@ -27,6 +27,8 @@ public interface State<TAction extends Enum<TAction> & Action, TObservation exte
 
     int getInGameEntityIdOnTurn();
 
+    boolean isEnvironmentEntityOnTurn();
+
     boolean isInGame(int inGameEntityId);
 
     boolean isFinalState();

@@ -5,11 +5,10 @@ import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
-import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.AbstractSearchNode;
-import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.NodeMetadata;
+import vahy.api.search.node.SearchNode;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -48,11 +47,6 @@ public class SearchNodeImpl<TAction extends Enum<TAction> & Action, TObservation
     @Override
     public Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap() {
         return childNodeMap;
-    }
-
-    @Override
-    public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
-        return wrappedState.applyAction(action);
     }
 
     @Override

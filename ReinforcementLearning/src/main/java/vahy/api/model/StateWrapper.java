@@ -57,6 +57,10 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.getInGameEntityIdOnTurn();
     }
 
+    public boolean isEnvironmentEntityOnTurn() {
+        return state.isEnvironmentEntityOnTurn();
+    }
+
     public boolean isFinalState() {
         if(state.isFinalState()) {
             return true;

@@ -14,15 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
-import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.NodeMetadata;
+import vahy.api.search.node.SearchNode;
+import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.api.search.nodeEvaluator.NodeEvaluator;
 import vahy.api.search.nodeSelector.NodeSelector;
 import vahy.api.search.tree.SearchTree;
 import vahy.api.search.update.TreeUpdater;
-import vahy.impl.model.ImmutableStateWrapperRewardReturn;
 import vahy.utils.ImmutableTuple;
 
 import java.io.File;
@@ -42,17 +41,21 @@ public class SearchTreeImpl<
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
+    private final SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
     private SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root;
+
     private final NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector;
     private final NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> nodeEvaluator;
     private final TreeUpdater<TAction, TObservation, TSearchNodeMetadata, TState> treeUpdater;
 
     private int totalNodesExpanded = 0;
 
-    public SearchTreeImpl(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
+    public SearchTreeImpl(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+                          SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
                           NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector,
                           TreeUpdater<TAction, TObservation, TSearchNodeMetadata, TState> treeUpdater,
                           NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> nodeEvaluator) {
+        this.searchNodeFactory = searchNodeFactory;
         this.root = root;
         this.nodeSelector = nodeSelector;
         this.treeUpdater = treeUpdater;
@@ -77,10 +80,9 @@ public class SearchTreeImpl<
         return true;
     }
 
-    @Override
-    public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
+    public void applyAction(TAction action) {
         checkApplicableAction(action);
-        return innerApplyAction(action);
+        innerApplyAction(action);
     }
 
     public int getTotalNodesExpanded() {
@@ -135,23 +137,22 @@ public class SearchTreeImpl<
         if(root.isFinalNode()) {
             throw new IllegalStateException("Can't apply action [" + action +"] on final state");
         }
-        if(root.isLeaf()) {
-            throw new IllegalStateException("Policy cannot apply action to leaf node without expanded descendants");
-        }
-        if(!root.getChildNodeMap().containsKey(action)) {
-            throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
-        }
+//        if(root.isLeaf()) {
+//            throw new IllegalStateException("Policy cannot apply action to leaf node without expanded descendants");
+//        }
+//        if(!root.getChildNodeMap().containsKey(action)) {
+//            throw new IllegalStateException("Action [" + action + "] is invalid and cannot be applied to current policy state");
+//        }
     }
 
-    protected StateWrapperRewardReturn<TAction, TObservation, TState> innerApplyAction(TAction action) {
-        var child = root.getChildNodeMap().get(action);
-        double[] allPlayerRewards = child.getSearchNodeMetadata().getGainedReward();
-        root = child;
-        root.makeRoot();
-        if(!root.isFinalNode()) {
-            expandTreeToNextPlayerLevel();
+    protected void innerApplyAction(TAction action) {
+        if(!root.getChildNodeMap().containsKey(action)) {
+            var stateRewardReturn = root.applyAction(action);
+            root = searchNodeFactory.createNode(stateRewardReturn, null, action);
+        } else {
+            root = root.getChildNodeMap().get(action);
+            root.makeRoot();
         }
-        return new ImmutableStateWrapperRewardReturn<>(root.getStateWrapper(), allPlayerRewards[root.getStateWrapper().getInGameEntityIdWrapper()], allPlayerRewards);
     }
 
     protected void expandTreeToNextPlayerLevel() {

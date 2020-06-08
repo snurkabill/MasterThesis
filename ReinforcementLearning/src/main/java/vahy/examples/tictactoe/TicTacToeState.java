@@ -198,7 +198,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public DoubleVector getInGameEntityObservation(int inGameEntityId) {
-        var observationVector = new double[dimension + 1];
+        var observationVector = new double[dimension * dimension + 1];
         for (int i = 0; i < playground.length; i++) {
             for (int j = 0; j < playground[i].length; j++) {
                 observationVector[i * playground[j].length + j] = playground[i][j].symbol;
@@ -211,7 +211,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
-        var observationVector = new double[dimension + 1];
+        var observationVector = new double[dimension * dimension + 1];
         for (int i = 0; i < playground.length; i++) {
             for (int j = 0; j < playground[i].length; j++) {
                 observationVector[i * playground[j].length + j] = playground[i][j].symbol;
@@ -244,6 +244,11 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     @Override
     public int getInGameEntityIdOnTurn() {
         return isPlayerZeroOnTurn ? 0 : 1;
+    }
+
+    @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return false;
     }
 
     @Override

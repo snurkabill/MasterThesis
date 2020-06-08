@@ -3,6 +3,7 @@ package vahy.api.search.node;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 
 public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
@@ -55,6 +56,7 @@ public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action,
         return parent;
     }
 
+
     @Override
     public TAction[] getAllPossibleActions() {
         return allPossibleActions;
@@ -68,6 +70,11 @@ public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action,
     @Override
     public StateWrapper<TAction, TObservation, TState> getStateWrapper() {
         return wrappedState;
+    }
+
+    @Override
+    public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action) {
+        return wrappedState.applyAction(action);
     }
 
     @Override

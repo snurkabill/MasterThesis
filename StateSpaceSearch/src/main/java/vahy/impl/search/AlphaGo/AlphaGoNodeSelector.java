@@ -3,18 +3,19 @@ package vahy.impl.search.AlphaGo;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.nodeSelector.RandomizedNodeSelector;
 import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.search.nodeSelector.AbstractSamplingNodeSelector;
+
 import java.util.SplittableRandom;
 
 public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
-    extends RandomizedNodeSelector<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
+    extends AbstractSamplingNodeSelector<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     private final double[] valueArray;
     private final int[] indexArray;
 
-    public AlphaGoNodeSelector(double cpuctParameter, SplittableRandom random, int maxBranchingCount) {
+    public AlphaGoNodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
         super(random);
         this.cpuctParameter = cpuctParameter;
         this.indexArray = new int[maxBranchingCount];
@@ -22,7 +23,7 @@ public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObserv
     }
 
 
-    protected TAction getBestAction(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> node) {
+    private TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
@@ -97,12 +98,19 @@ public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObserv
         }
     }
 
+    private TAction getBestAction(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> node) {
+        if(node.getStateWrapper().isEnvironmentEntityOnTurn()) {
+            return sampleAction(node);
+        } else {
+            return getBestAction_inner(node);
+        }
+    }
+
     @Override
     public SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> selectNextNode(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> root) {
         var node = root;
         while(!node.isLeaf()) {
-            var bestAction = getBestAction(node);
-            node = node.getChildNodeMap().get(bestAction);
+            node = node.getChildNodeMap().get(getBestAction(node));
         }
         return node;
     }

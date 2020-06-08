@@ -258,6 +258,11 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     }
 
     @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return !isAgentTurn;
+    }
+
+    @Override
     public boolean isInGame(int inGameEntityId) {
         if(inGameEntityId == PLAYER_ID && isAgentKilled) {
             return false;

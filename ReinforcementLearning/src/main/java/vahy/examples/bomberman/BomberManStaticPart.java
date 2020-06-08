@@ -26,6 +26,12 @@ public class BomberManStaticPart {
 
     private final int totalStepsAllowed;
 
+    private final int observation_onTurnIndex = 0;
+    private final int[] observation_playerIndexes;
+    private final int[] observation_bombIndexes;
+    private final int observation_goldInPlaceIndex;
+
+
     public BomberManStaticPart(boolean[][] walls, int startingPlayerCount, int startingTotalEntityCount, int bombsPerPlayer, int rewardPerStep, int goldEntityCount, boolean[][] goldEntitiesArray, int[][] goldEntitiesReferenceArray, int rewardPerGold, double goldRespawnProbability, int bombRange, int bombCountDown, int playerLivesAtStart, int totalStepsAllowed) {
         this.walls = walls;
         this.goldEntitiesArray = goldEntitiesArray;
@@ -50,6 +56,17 @@ public class BomberManStaticPart {
             moveReward[i][i + goldWithEnvironmentEntityCount] = -rewardPerStep;
         }
         this.noEnvironmentActionReward = new double[startingTotalEntityCount];
+
+        this.observation_playerIndexes = new int[startingPlayerCount];
+        for (int i = 0; i < startingPlayerCount; i++) {
+            observation_playerIndexes[i] = 1 + 3 * i;
+        }
+
+        this.observation_bombIndexes = new int[startingPlayerCount * bombsPerPlayer];
+        for (int i = 0; i < startingPlayerCount * bombsPerPlayer; i++) {
+            observation_bombIndexes[i] = 1 + 3 * startingPlayerCount + 3 * i;
+        }
+        this.observation_goldInPlaceIndex = 1 + 3 * startingPlayerCount + 3 * startingPlayerCount * bombsPerPlayer;
     }
 
     public double[][] getMoveReward() {
@@ -114,5 +131,21 @@ public class BomberManStaticPart {
 
     public int getTotalStepsAllowed() {
         return totalStepsAllowed;
+    }
+
+    public int getObservation_onTurnIndex() {
+        return observation_onTurnIndex;
+    }
+
+    public int[] getObservation_playerIndexes() {
+        return observation_playerIndexes;
+    }
+
+    public int[] getObservation_bombIndexes() {
+        return observation_bombIndexes;
+    }
+
+    public int getObservation_goldInPlaceIndex() {
+        return observation_goldInPlaceIndex;
     }
 }

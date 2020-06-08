@@ -82,7 +82,7 @@ public class GameSamplerImpl<
                 throw new IllegalStateException("Different categoryIDs in expected " + requestedCategory.getCategoryId() + "] and provided [" + providedCategory.getCategoryId() + "] categoryList");
             }
             if(requestedCategory.getPolicyInCategoryCount() != providedCategory.getPolicySupplierList().size()) {
-                throw new IllegalStateException("Different count of expected and provided policies. Policy requested count: [" + requestedCategoryList.get(i) +
+                throw new IllegalStateException("Different count of expected and provided policies. Policy requested count: [" + requestedCategoryList.get(i).getPolicyInCategoryCount() +
                     "]. Policy provided count: [" + providedPolicyCategories.get(i).getPolicySupplierList().size() +
                     "] for category: [" + i + "]");
             }

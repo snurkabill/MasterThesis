@@ -8,10 +8,10 @@ import java.util.List;
 
 public class TicTacToeConfig extends ProblemConfig {
 
-    private final int dimension = 3;
+    private static final int dimension = 3;
 
     public TicTacToeConfig() {
-        super(Integer.MAX_VALUE, // state will stop it anyway.
+        super(dimension * dimension,
             false,
             0,
             2,

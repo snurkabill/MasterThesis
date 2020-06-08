@@ -4,8 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicySupplierImpl;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.impl.RoundBuilder;
@@ -26,14 +24,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class Example01 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
 
         var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 3, 5, 0.2, BomberManInstance.BM_01);
-        var systemConfig = new SystemConfig(987568, true, 7, true, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
+        var systemConfig = new SystemConfig(987568, false, 7, true, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
 
@@ -76,6 +73,7 @@ public class Example01 {
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((BomberManConfig, splittableRandom) -> policyMode -> (new BomberManInstanceInitializer(config, splittableRandom)).createInitialState(policyMode))
+            .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setPlayerPolicySupplierList(policyArgumentsList);

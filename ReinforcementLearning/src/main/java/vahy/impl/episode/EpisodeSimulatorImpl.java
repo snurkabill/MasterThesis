@@ -55,7 +55,6 @@ public class EpisodeSimulatorImpl<
                                                                                     TState initState) {
         var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>>(episodeStepCountLimit);
 
-        double[] rewardTempArray = new double[policyList.size()];
         List<Integer> playerStepsDone = new ArrayList<>(policyList.size());
         List<Double> totalCumulativePayoffList = new ArrayList<>(policyList.size());
         for (int i = 0; i < policyList.size(); i++) {
@@ -72,7 +71,7 @@ public class EpisodeSimulatorImpl<
                 var inGameEntityIdOnTurn = state.getInGameEntityIdOnTurn();
                 var policyIdOnTurn = policyIdTranslationMap.getPolicyId(inGameEntityIdOnTurn);
 
-                var step = makePolicyStep(state, policyIdOnTurn, inGameEntityIdOnTurn, policyList, policyIdTranslationMap, rewardTempArray);
+                var step = makePolicyStep(state, policyIdOnTurn, inGameEntityIdOnTurn, policyList, policyIdTranslationMap);
                 var stepPolicyIdOnTurn = step.getPolicyIdOnTurn();
                 var stepInGameEntityOnTurn = step.getInGameEntityIdOnTurn();
 
@@ -123,8 +122,7 @@ public class EpisodeSimulatorImpl<
                                                                                            int policyIdOnTurn,
                                                                                            int inGameEntityId,
                                                                                            List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> allPolicyList,
-                                                                                           PolicyIdTranslationMap policyIdTranslationMap,
-                                                                                           double[] rewardTempArray)
+                                                                                           PolicyIdTranslationMap policyIdTranslationMap)
     {
         var onTurnRegisteredPolicy = allPolicyList.get(policyIdOnTurn);
         if(inGameEntityId != onTurnRegisteredPolicy.getInGameEntityId()) {
@@ -141,7 +139,10 @@ public class EpisodeSimulatorImpl<
         var actionList = Collections.singletonList(action);
         for (var entry : allPolicyList) {
             if(entry.getPolicyId() != policyIdOnTurn) {
-                entry.getPolicy().updateStateOnPlayedActions(actionList);
+                var toUpdatePolicy = entry.getPolicy();
+                if(state.isInGame(policyIdTranslationMap.getInGameEntityId(toUpdatePolicy.getPolicyId()))) {
+                    toUpdatePolicy.updateStateOnPlayedActions(actionList);
+                }
             }
         }
         StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(action);

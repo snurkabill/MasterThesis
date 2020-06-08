@@ -14,6 +14,16 @@ public class MCTSMetadataFactory<
     TState extends State<TAction, TObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TObservation, MCTSMetadata, TState> {
 
+    private final int inGameEntityCount;
+
+    public MCTSMetadataFactory(int inGameEntityCount) {
+        this.inGameEntityCount = inGameEntityCount;
+    }
+
+    @Override
+    public int getInGameEntityCount() {
+        return inGameEntityCount;
+    }
 
     @Override
     public MCTSMetadata createSearchNodeMetadata(SearchNode<TAction, TObservation, MCTSMetadata, TState> parent,
@@ -30,7 +40,7 @@ public class MCTSMetadataFactory<
     }
 
     @Override
-    public MCTSMetadata createEmptyNodeMetadata(int entityInGameCount) {
-        return new MCTSMetadata(DoubleVectorRewardAggregator.emptyReward(entityInGameCount), DoubleVectorRewardAggregator.emptyReward(entityInGameCount));
+    public MCTSMetadata createEmptyNodeMetadata() {
+        return new MCTSMetadata(DoubleVectorRewardAggregator.emptyReward(inGameEntityCount), DoubleVectorRewardAggregator.emptyReward(inGameEntityCount));
     }
 }

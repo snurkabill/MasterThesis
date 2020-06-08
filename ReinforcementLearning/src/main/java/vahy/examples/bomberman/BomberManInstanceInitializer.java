@@ -12,7 +12,7 @@ import java.util.SplittableRandom;
 public class BomberManInstanceInitializer extends AbstractInitialStateSupplier<BomberManConfig, BomberManAction, DoubleVector, BomberManState> {
 
 
-    protected BomberManInstanceInitializer(BomberManConfig problemConfig, SplittableRandom random) {
+    public BomberManInstanceInitializer(BomberManConfig problemConfig, SplittableRandom random) {
         super(problemConfig, random);
     }
 

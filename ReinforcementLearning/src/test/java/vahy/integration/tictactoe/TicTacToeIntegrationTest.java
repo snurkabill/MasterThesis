@@ -5,8 +5,6 @@ import org.testng.annotations.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicySupplierImpl;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.tictactoe.AlwaysStartAtMiddlePolicy;
@@ -31,14 +29,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class TicTacToeIntegrationTest {
 
     @Test
     public void emptyDomainIntegrationTest() {
 
-        var ticTacConfig = new TicTacToeConfig(3);
+        var ticTacConfig = new TicTacToeConfig();
         var systemConfig = new SystemConfig(987568, true, Runtime.getRuntime().availableProcessors() - 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -103,7 +100,7 @@ public class TicTacToeIntegrationTest {
     @Test
     public void emptyDomainIntegrationReversedTest() {
 
-        var ticTacConfig = new TicTacToeConfig(3);
+        var ticTacConfig = new TicTacToeConfig();
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -171,7 +168,7 @@ public class TicTacToeIntegrationTest {
     @Test
     public void trainablePolicyTest() {
 
-        var ticTacConfig = new TicTacToeConfig(3);
+        var ticTacConfig = new TicTacToeConfig();
 //        var systemConfig = new SystemConfig(987568, true, Runtime.getRuntime().availableProcessors() - 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
         var systemConfig = new SystemConfig(987568, false, 10, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 

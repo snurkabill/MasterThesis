@@ -19,7 +19,7 @@ public class TicTacToeTwoRandomExample {
 
     public static void main(String[] args) {
 
-        var ticTacConfig = new TicTacToeConfig(3);
+        var ticTacConfig = new TicTacToeConfig();
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {

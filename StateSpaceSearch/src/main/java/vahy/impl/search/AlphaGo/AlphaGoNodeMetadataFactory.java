@@ -6,11 +6,9 @@ import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeMetadataFactory;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.model.reward.DoubleScalarRewardAggregator;
 import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 
 public class AlphaGoNodeMetadataFactory<
     TAction extends Enum<TAction> & Action,
@@ -19,13 +17,26 @@ public class AlphaGoNodeMetadataFactory<
     implements SearchNodeMetadataFactory<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
 
     private final Class<TAction> actionClazz;
+    private final int inGameEntityCount;
+    private final int totalActionCount;
 
-    public AlphaGoNodeMetadataFactory(Class<TAction> actionClazz) {
+    public AlphaGoNodeMetadataFactory(Class<TAction> actionClazz, int inGameEntityCount) {
         this.actionClazz = actionClazz;
+        this.inGameEntityCount = inGameEntityCount;
+        this.totalActionCount = actionClazz.getEnumConstants().length;
+    }
+
+    public int getTotalActionCount() {
+        return totalActionCount;
     }
 
     @Override
-    public AlphaGoNodeMetadata<TAction> createEmptyNodeMetadata(int inGameEntityCount) {
+    public int getInGameEntityCount() {
+        return inGameEntityCount;
+    }
+
+    @Override
+    public AlphaGoNodeMetadata<TAction> createEmptyNodeMetadata() {
         return new AlphaGoNodeMetadata<TAction>(
             DoubleVectorRewardAggregator.emptyReward(inGameEntityCount),
             DoubleVectorRewardAggregator.emptyReward(inGameEntityCount),

@@ -90,6 +90,11 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
     }
 
     @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return !isPlayerTurn;
+    }
+
+    @Override
     public boolean isInGame(int playerId) {
         return true;
     }

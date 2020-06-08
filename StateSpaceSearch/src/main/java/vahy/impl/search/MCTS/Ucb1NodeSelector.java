@@ -1,12 +1,10 @@
 package vahy.impl.search.MCTS;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.nodeSelector.NodeSelector;
+import vahy.api.search.nodeSelector.RandomizedNodeSelector;
 
 import java.util.SplittableRandom;
 
@@ -14,17 +12,14 @@ public class Ucb1NodeSelector<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    implements NodeSelector<TAction, TObservation, MCTSMetadata, TState> {
+    extends RandomizedNodeSelector<TAction, TObservation, MCTSMetadata, TState> {
 
-    private final Logger logger = LoggerFactory.getLogger(Ucb1NodeSelector.class);
-
-    protected final SplittableRandom random;
     protected final double cpuctParameter;
     private final double[] valueArray;
     private final int[] indexArray;
 
     public Ucb1NodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
-        this.random = random;
+        super(random);
         this.cpuctParameter = cpuctParameter;
         this.indexArray = new int[maxBranchingCount];
         this.valueArray = new double[maxBranchingCount];

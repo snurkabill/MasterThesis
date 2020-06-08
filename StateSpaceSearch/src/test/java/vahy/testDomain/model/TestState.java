@@ -112,6 +112,11 @@ public class TestState implements State<TestAction, DoubleVector, TestState>, Ob
     }
 
     @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return false;
+    }
+
+    @Override
     public boolean isInGame(int inGameEntityId) {
         return true;
     }
