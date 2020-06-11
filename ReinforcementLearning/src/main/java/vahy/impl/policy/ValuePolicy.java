@@ -71,6 +71,6 @@ public class ValuePolicy<TAction extends Enum<TAction> & Action, TObservation ex
 
     @Override
     public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
-        return new PolicyRecordBase(getActionProbabilityDistribution(gameState), getMaxActionValuePair(gameState).getFirst());
+        return new PolicyRecordBase(new double[0], getMaxActionValuePair(gameState).getFirst());
     }
 }

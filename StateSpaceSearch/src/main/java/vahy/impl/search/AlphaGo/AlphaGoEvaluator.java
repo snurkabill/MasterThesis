@@ -49,8 +49,10 @@ public class AlphaGoEvaluator<
 
         var metadata = selectedNode.getSearchNodeMetadata();
         var predictedReward = metadata.getPredictedReward();
+        var expectedReward = metadata.getExpectedReward();
 
-        System.arraycopy(prediction, Q_VALUE_INDEX, predictedReward, 0, predictedReward.length);
+        System.arraycopy(prediction, 0, predictedReward, 0, predictedReward.length);
+        System.arraycopy(prediction, 0, expectedReward, 0, expectedReward.length);
 
         var totalActionCount = searchNodeMetadataFactory.getTotalActionCount();
         double[] distribution = new double[totalActionCount];

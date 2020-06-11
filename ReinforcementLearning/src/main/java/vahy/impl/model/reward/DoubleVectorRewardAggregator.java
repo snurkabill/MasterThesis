@@ -30,6 +30,16 @@ public class DoubleVectorRewardAggregator {
         return copy;
     }
 
+
+    public static void aggregateInFirstPlace(double[] first, double[] second) {
+        if(first.length != second.length) {
+            throw new IllegalStateException("Different array lengths");
+        }
+        for (int i = 0; i < first.length; i++) {
+            first[i] += second[i];
+        }
+    }
+
 //    public static double[] aggregate(double[][] rewardArray) {
 //        double sum = 0.0;
 //        for (int i = 0; i < rewardArray.length; i++) {
@@ -60,6 +70,16 @@ public class DoubleVectorRewardAggregator {
         }
         return array;
     }
+
+    public static void aggregateDiscountInFirstPlace(double[] first, double[] second, double discountFactor) {
+        if(first.length != second.length) {
+            throw new IllegalStateException("Different array lengths");
+        }
+        for (int i = 0; i < first.length; i++) {
+            first[i] += discountFactor * second[i];
+        }
+    }
+
 //
 //    public static double aggregateDiscount(double[] rewardArray, double discountFactor) {
 //        double discountedSum = 0.0;

@@ -24,9 +24,9 @@ public class MCTSPolicy<
     }
 
     private double[] innerActionProbabilityDistribution() {
-        var distribution = new double[countOfAllActionFromSameEntity];
+        var distribution = new double[countOfAllActions];
         var root = searchTree.getRoot();
-        var actionIndex =  getBestAction(root.getStateWrapper(), root).getLocalIndex();
+        var actionIndex =  getBestAction(root.getStateWrapper(), root).ordinal();
         distribution[actionIndex] = 1.0;
         return distribution;
     }

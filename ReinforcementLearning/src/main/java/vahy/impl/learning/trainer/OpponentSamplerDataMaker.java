@@ -13,12 +13,14 @@ import vahy.utils.ImmutableTuple;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class OpponentSamplerDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecordBase>
     implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
 
     private final int allOpponentActions;
     private final int playerPolicyId;
     private final int opponentPolicyId;
+
 
     public OpponentSamplerDataMaker(int allOpponentActions, int playerPolicyId, int opponentPolicyId) {
         this.allOpponentActions = allOpponentActions;

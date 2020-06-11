@@ -109,13 +109,9 @@ public class EpisodeSimulatorImpl<
 
         var rewards = step.getReward();
         for (int i = 0; i < rewards.length; i++) {
-            var inGameEntityId = translationMap.getInGameEntityId(i);
-            totalCumulativePayoffList.set(i, totalCumulativePayoffList.get(i) + rewards[inGameEntityId]);
+            var policyId = translationMap.getPolicyId(i);
+            totalCumulativePayoffList.set(policyId, totalCumulativePayoffList.get(policyId) + rewards[i]);
         }
-//        var rewards = step.getReward();
-//        for (int i = 0; i < rewards.length; i++) {
-//            totalCumulativePayoffList.set(i, totalCumulativePayoffList.get(i) + rewards[i]);
-//        }
     }
 
     private EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord> makePolicyStep(TState state,
