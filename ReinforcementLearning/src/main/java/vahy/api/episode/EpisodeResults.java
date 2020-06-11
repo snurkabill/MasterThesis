@@ -24,6 +24,8 @@ public interface EpisodeResults<
 
     List<Integer> getPlayerStepCountList();
 
+    List<Double> getAverageDurationPerDecision();
+
     List<Double> getTotalPayoff();
 
     Duration getDuration();

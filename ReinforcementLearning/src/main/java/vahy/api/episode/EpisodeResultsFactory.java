@@ -19,6 +19,7 @@ public interface EpisodeResultsFactory<
         PolicyIdTranslationMap policyIdTranslationMap,
         int policyCount,
         List<Integer> playerStepCountList,
+        List<Double> averageDurationPerDecision,
         int totalStepCount,
         List<Double> totalCumulativePayoffList,
         Duration duration

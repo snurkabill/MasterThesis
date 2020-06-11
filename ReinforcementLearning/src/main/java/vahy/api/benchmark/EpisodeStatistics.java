@@ -11,6 +11,10 @@ public interface EpisodeStatistics {
 
     List<Double> getStdevPlayerStepCount();
 
+    List<Double> getAverageDecisionTimeInMillis();
+
+    List<Double> getStdevDecisionTimeInMillis();
+
     double getAverageMillisPerEpisode();
 
     double getStdevMillisPerEpisode();

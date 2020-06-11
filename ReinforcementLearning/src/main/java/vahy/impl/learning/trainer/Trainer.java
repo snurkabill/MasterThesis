@@ -19,7 +19,6 @@ import java.awt.Color;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class Trainer<
@@ -90,7 +89,8 @@ public class Trainer<
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Total Payoff", EpisodeStatistics::getTotalPayoffAverage));
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", x -> List.of(x.getAverageMillisPerEpisode())));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", x -> List.of(x.getStdevMillisPerEpisode())));
+//        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", x -> List.of(x.getStdevMillisPerEpisode())));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Average decision [ms]", EpisodeStatistics::getAverageDecisionTimeInMillis));
         return dataPointGeneratorList;
     }
 

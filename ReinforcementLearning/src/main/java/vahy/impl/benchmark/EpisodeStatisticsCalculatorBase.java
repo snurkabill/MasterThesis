@@ -31,6 +31,15 @@ public class EpisodeStatisticsCalculatorBase<
             stdevPlayerStepCount.add(MathStreamUtils.calculateStdev(episodeResultsList, value -> value.getPlayerStepCountList().get(index), average));
         }
 
+        List<Double> averagePlayerDecisionTime = new ArrayList<>(policyCount);
+        List<Double> stdevPlayerDecisionTime = new ArrayList<>(policyCount);
+        for (int i = 0; i < policyCount; i++) {
+            var index = i;
+            var average = MathStreamUtils.calculateAverage(episodeResultsList, value -> value.getAverageDurationPerDecision().get(index));
+            averagePlayerDecisionTime.add(average);
+            stdevPlayerDecisionTime.add(MathStreamUtils.calculateStdev(episodeResultsList, value -> value.getPlayerStepCountList().get(index), average));
+        }
+
         List<Double> totalPayoffAverage = new ArrayList<>(policyCount);
         List<Double> totalPayoffStdev = new ArrayList<>(policyCount);
         for (int i = 0; i < policyCount; i++) {
@@ -42,6 +51,16 @@ public class EpisodeStatisticsCalculatorBase<
         }
         var averageMillisPerEpisode = MathStreamUtils.calculateAverage(episodeResultsList, (x) -> x.getDuration().toMillis());
         var stdevMillisPerEpisode = MathStreamUtils.calculateStdev(episodeResultsList, (x) -> x.getDuration().toMillis());
-        return new EpisodeStatisticsBase(durations, policyCount, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
+        return new EpisodeStatisticsBase(
+            durations,
+            policyCount,
+            averagePlayerStepCount,
+            stdevPlayerStepCount,
+            averagePlayerDecisionTime,
+            stdevPlayerDecisionTime,
+            averageMillisPerEpisode,
+            stdevMillisPerEpisode,
+            totalPayoffAverage,
+            totalPayoffStdev);
     }
 }

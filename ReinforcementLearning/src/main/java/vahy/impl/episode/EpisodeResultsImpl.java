@@ -23,6 +23,7 @@ public class EpisodeResultsImpl<
     private final PolicyIdTranslationMap getPolicyIdTranslationMap;
     private final int policyCount;
     private final List<Integer> playerStepCountList;
+    private final List<Double> averageDurationPerDecision;
     private final int totalStepCount;
     private final List<Double> totalPayoff;
     private final Duration duration;
@@ -31,6 +32,7 @@ public class EpisodeResultsImpl<
                               PolicyIdTranslationMap getPolicyIdTranslationMap,
                               int policyCount,
                               List<Integer> playerStepCountList,
+                              List<Double> averageDurationPerDecision,
                               int totalStepCount,
                               List<Double> totalPayoff,
                               Duration duration) {
@@ -38,6 +40,7 @@ public class EpisodeResultsImpl<
         this.getPolicyIdTranslationMap = getPolicyIdTranslationMap;
         this.policyCount = policyCount;
         this.playerStepCountList = playerStepCountList;
+        this.averageDurationPerDecision = averageDurationPerDecision;
         this.totalStepCount = totalStepCount;
         this.totalPayoff = totalPayoff;
         this.duration = duration;
@@ -66,6 +69,11 @@ public class EpisodeResultsImpl<
     @Override
     public List<Integer> getPlayerStepCountList() {
         return playerStepCountList;
+    }
+
+    @Override
+    public List<Double> getAverageDurationPerDecision() {
+        return averageDurationPerDecision;
     }
 
     @Override

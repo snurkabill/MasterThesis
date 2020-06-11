@@ -24,10 +24,11 @@ public class EpisodeResultsFactoryBase<
                                                                                       PolicyIdTranslationMap policyIdTranslationMap,
                                                                                       int policyCount,
                                                                                       List<Integer> playerStepCount,
+                                                                                      List<Double> averageDurationPerDecision,
                                                                                       int totalStepCountList,
                                                                                       List<Double> totalCumulativePayoff,
                                                                                       Duration duration)
     {
-        return new EpisodeResultsImpl<>(episodeHistory, policyIdTranslationMap, policyCount, playerStepCount, totalStepCountList, totalCumulativePayoff, duration);
+        return new EpisodeResultsImpl<>(episodeHistory, policyIdTranslationMap, policyCount, playerStepCount, averageDurationPerDecision, totalStepCountList, totalCumulativePayoff, duration);
     }
 }
