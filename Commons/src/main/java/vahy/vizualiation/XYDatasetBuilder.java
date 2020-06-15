@@ -20,7 +20,7 @@ public class XYDatasetBuilder {
             List<ImmutableTuple<Double, List<Double>>> data = seriesMetadata.getData();
 
             for (int i = 0; i < data.get(0).getSecond().size(); i++) {
-                XYSeries series = new XYSeries(seriesMetadata.getDataTitle() + " " + i);
+                XYSeries series = new XYSeries(i);
                 for (int j = 0; j < data.size(); j++) {
                     series.add(data.get(j).getFirst(), data.get(j).getSecond().get(i));
                 }

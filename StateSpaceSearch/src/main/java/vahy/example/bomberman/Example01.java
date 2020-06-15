@@ -71,7 +71,7 @@ public class Example01 {
         int totalEntityCount = asdf.getTotalEntityCount();
 
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
-        var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>();
+        var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
 
 //        var mctsRolloutSupplier = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, cpuct, treeExpansionCount, discountFactor, rolloutCount);
 

@@ -71,12 +71,12 @@ public class DoubleVectorRewardAggregator {
         return array;
     }
 
-    public static void aggregateDiscountInFirstPlace(double[] first, double[] second, double discountFactor) {
+    public static void aggregateDiscountInSecondPlace(double[] first, double[] second, double discountFactor) {
         if(first.length != second.length) {
             throw new IllegalStateException("Different array lengths");
         }
         for (int i = 0; i < first.length; i++) {
-            first[i] += discountFactor * second[i];
+            second[i] = first[i] + discountFactor * second[i];
         }
     }
 

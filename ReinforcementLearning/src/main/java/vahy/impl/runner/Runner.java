@@ -97,7 +97,7 @@ public class Runner<
 
         var trainer = new Trainer<>(
             gameSampler,
-            runnerArguments.getPolicyDefinitionList().stream().flatMap(x -> x.getTrainablePredictorSetupList().stream()).collect(Collectors.toList()),
+            runnerArguments.getPolicyDefinitionList().stream().flatMap(x -> x.getTrainablePredictorSetupList().stream()).distinct().collect(Collectors.toList()),
             progressTrackerSettings,
             runnerArguments.getProblemConfig(),
             runnerArguments.getEpisodeStatisticsCalculator(),

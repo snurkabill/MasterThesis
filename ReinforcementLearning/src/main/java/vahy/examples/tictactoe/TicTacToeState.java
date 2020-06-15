@@ -260,4 +260,28 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     public boolean isFinalState() {
         return turnsLeft == 0 || hasOneWin(Player_inner.PLAYER_ZERO, playground) || hasOneWin(Player_inner.PLAYER_ONE, playground);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TicTacToeState that = (TicTacToeState) o;
+
+        if (dimension != that.dimension) return false;
+        if (isPlayerZeroOnTurn != that.isPlayerZeroOnTurn) return false;
+        if (turnsLeft != that.turnsLeft) return false;
+        if (!Arrays.deepEquals(playground, that.playground)) return false;
+        return enabledActions.equals(that.enabledActions);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = dimension;
+        result = 31 * result + Arrays.deepHashCode(playground);
+        result = 31 * result + (isPlayerZeroOnTurn ? 1 : 0);
+        result = 31 * result + turnsLeft;
+        result = 31 * result + enabledActions.hashCode();
+        return result;
+    }
 }

@@ -10,20 +10,20 @@ import vahy.api.predictor.TrainablePredictor;
 
 public class PredictorTrainingSetup<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord> {
 
-    private final int predictorPredictingId;
+    private final int predictorTrainingSetupId;
     private final TrainablePredictor trainablePredictor;
     private final EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker;
     private final DataAggregator dataAggregator;
 
-    public PredictorTrainingSetup(int predictorPredictingId, TrainablePredictor trainablePredictor, EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker, DataAggregator dataAggregator) {
-        this.predictorPredictingId = predictorPredictingId;
+    public PredictorTrainingSetup(int predictorTrainingSetupId, TrainablePredictor trainablePredictor, EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker, DataAggregator dataAggregator) {
+        this.predictorTrainingSetupId = predictorTrainingSetupId;
         this.trainablePredictor = trainablePredictor;
         this.episodeDataMaker = episodeDataMaker;
         this.dataAggregator = dataAggregator;
     }
 
-    public int getPredictorPredictingId() {
-        return predictorPredictingId;
+    public int getPredictorTrainingSetupId() {
+        return predictorTrainingSetupId;
     }
 
     public TrainablePredictor getTrainablePredictor() {

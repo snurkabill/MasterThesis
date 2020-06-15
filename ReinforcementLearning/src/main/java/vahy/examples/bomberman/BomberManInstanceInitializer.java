@@ -6,23 +6,24 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.SplittableRandom;
 
 public class BomberManInstanceInitializer extends AbstractInitialStateSupplier<BomberManConfig, BomberManAction, DoubleVector, BomberManState> {
 
+    private final BomberManStaticPart staticPart;
+    private final ArrayList<ImmutableTuple<Integer, Integer>> freeSpotCoordinates;
 
     public BomberManInstanceInitializer(BomberManConfig problemConfig, SplittableRandom random) {
         super(problemConfig, random);
+
+        var staticPartWithFreeCoordinates = initialize(problemConfig);
+        this.staticPart = staticPartWithFreeCoordinates.getFirst();
+        this.freeSpotCoordinates = staticPartWithFreeCoordinates.getSecond();
     }
 
-    @Override
-    protected BomberManState createState_inner(BomberManConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
-
+    private ImmutableTuple<BomberManStaticPart, ArrayList<ImmutableTuple<Integer, Integer>>> initialize(BomberManConfig  problemConfig) {
         var gameMatrix = problemConfig.getGameMatrix();
         var startingPlayerCount = problemConfig.getPlayerCount();
-        var isInGameArray = new boolean[startingPlayerCount];
-        Arrays.fill(isInGameArray, true);
 
         var walls = new boolean[gameMatrix.length][];
         var goldSpawnSpots = new boolean[gameMatrix.length][];
@@ -50,27 +51,9 @@ public class BomberManInstanceInitializer extends AbstractInitialStateSupplier<B
                 }
             }
         }
-        var goldInPlaceArray = new boolean[goldId];
-        Arrays.fill(goldInPlaceArray, true);
 
         var environmentEntitiesCount = goldId + 1;
         var totalEntitiesCount = startingPlayerCount + environmentEntitiesCount;
-        var entityIdOnTurn = environmentEntitiesCount;
-
-
-        var playerXCoordinates = new int[startingPlayerCount];
-        var playerYCoordinates = new int[startingPlayerCount];
-
-
-        for (int i = 0; i < startingPlayerCount; i++) {
-            int index = random.nextInt(freeSpotCoordinates.size());
-            var coordinates = freeSpotCoordinates.remove(index);
-            playerXCoordinates[i] = coordinates.getFirst();
-            playerYCoordinates[i] = coordinates.getSecond();
-        }
-
-        var playerLivesCount = new int[startingPlayerCount];
-        Arrays.fill(playerLivesCount, problemConfig.getPlayerLivesAtStart());
 
         var staticPart = new BomberManStaticPart(
             walls,
@@ -87,6 +70,20 @@ public class BomberManInstanceInitializer extends AbstractInitialStateSupplier<B
             problemConfig.getBombCountDown(),
             problemConfig.getPlayerLivesAtStart(),
             problemConfig.getMaximalStepCountBound());
-        return new BomberManState(staticPart, playerXCoordinates, playerYCoordinates, entityIdOnTurn);
+        return new ImmutableTuple<>(staticPart, freeSpotCoordinates);
+    }
+
+    @Override
+    protected BomberManState createState_inner(BomberManConfig problemConfig, SplittableRandom random, PolicyMode policyMode) {
+        var startingPlayerCount = problemConfig.getPlayerCount();
+        var playerXCoordinates = new int[startingPlayerCount];
+        var playerYCoordinates = new int[startingPlayerCount];
+        for (int i = 0; i < startingPlayerCount; i++) {
+            int index = random.nextInt(freeSpotCoordinates.size());
+            var coordinates = freeSpotCoordinates.remove(index);
+            playerXCoordinates[i] = coordinates.getFirst();
+            playerYCoordinates[i] = coordinates.getSecond();
+        }
+        return new BomberManState(staticPart, playerXCoordinates, playerYCoordinates, staticPart.getGoldWithEnvironmentEntityCount());
     }
 }

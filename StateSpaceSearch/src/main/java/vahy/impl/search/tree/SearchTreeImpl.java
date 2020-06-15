@@ -160,7 +160,7 @@ public class SearchTreeImpl<
             throw new IllegalArgumentException("Cannot expand final node");
         }
         if(root.isLeaf()) {
-            if(DEBUG_ENABLED) {
+            if(TRACE_ENABLED) {
                 logger.debug("Expanding root since it is not final node and has no children expanded");
             }
             expandAndEvaluateNode(root);
