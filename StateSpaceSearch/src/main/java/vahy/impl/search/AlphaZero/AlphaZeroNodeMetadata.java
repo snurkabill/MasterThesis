@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import vahy.api.model.Action;
 import vahy.api.search.node.ProbabilisticNodeMetadata;
@@ -6,12 +6,12 @@ import vahy.impl.search.MCTS.MCTSMetadata;
 
 import java.util.EnumMap;
 
-public class AlphaGoNodeMetadata<TAction extends Enum<TAction> & Action> extends MCTSMetadata implements ProbabilisticNodeMetadata<TAction> {
+public class AlphaZeroNodeMetadata<TAction extends Enum<TAction> & Action> extends MCTSMetadata implements ProbabilisticNodeMetadata<TAction> {
 
     private final double priorProbability; /// P value
     private final EnumMap<TAction, Double> childPriorProbabilities;
 
-    public AlphaGoNodeMetadata(double[] cumulativeReward, double[] gainedReward, double priorProbability, EnumMap<TAction, Double> childPriorProbabilities) {
+    public AlphaZeroNodeMetadata(double[] cumulativeReward, double[] gainedReward, double priorProbability, EnumMap<TAction, Double> childPriorProbabilities) {
         super(cumulativeReward, gainedReward);
         this.priorProbability = priorProbability;
         this.childPriorProbabilities = childPriorProbabilities;

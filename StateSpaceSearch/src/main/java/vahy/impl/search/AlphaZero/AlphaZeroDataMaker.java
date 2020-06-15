@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import vahy.api.episode.EpisodeResults;
 import vahy.api.learning.trainer.EpisodeDataMaker;
@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AlphaGoDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord>
+public class AlphaZeroDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord>
     implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
 
     private final double discountFactor;
     private final int playerPolicyId;
 
-    public AlphaGoDataMaker(int playerPolicyId, double discountFactor) {
+    public AlphaZeroDataMaker(int playerPolicyId, double discountFactor) {
         this.discountFactor = discountFactor;
         this.playerPolicyId = playerPolicyId;
     }

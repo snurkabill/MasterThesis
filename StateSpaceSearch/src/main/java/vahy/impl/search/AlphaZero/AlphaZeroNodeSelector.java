@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -8,14 +8,14 @@ import vahy.impl.search.nodeSelector.AbstractSamplingNodeSelector;
 
 import java.util.SplittableRandom;
 
-public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
-    extends AbstractSamplingNodeSelector<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
+public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
+    extends AbstractSamplingNodeSelector<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     private final double[] valueArray;
     private final int[] indexArray;
 
-    public AlphaGoNodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
+    public AlphaZeroNodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
         super(random);
         this.cpuctParameter = cpuctParameter;
         this.indexArray = new int[maxBranchingCount];
@@ -23,7 +23,7 @@ public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObserv
     }
 
 
-    private TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> node) {
+    private TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
@@ -98,7 +98,7 @@ public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObserv
         }
     }
 
-    private TAction getBestAction(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> node) {
+    private TAction getBestAction(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
         if(node.getStateWrapper().isEnvironmentEntityOnTurn()) {
             return sampleAction(node);
         } else {
@@ -107,7 +107,7 @@ public class AlphaGoNodeSelector<TAction extends Enum<TAction> & Action, TObserv
     }
 
     @Override
-    public SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> selectNextNode(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> root) {
+    public SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> selectNextNode(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> root) {
         var node = root;
         while(!node.isLeaf()) {
             node = node.getChildNodeMap().get(getBestAction(node));

@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -10,17 +10,17 @@ import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 
 import java.util.EnumMap;
 
-public class AlphaGoNodeMetadataFactory<
+public class AlphaZeroNodeMetadataFactory<
     TAction extends Enum<TAction> & Action,
     TObservation extends DoubleVector,
     TState extends State<TAction, TObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
+    implements SearchNodeMetadataFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 
     private final Class<TAction> actionClazz;
     private final int inGameEntityCount;
     private final int totalActionCount;
 
-    public AlphaGoNodeMetadataFactory(Class<TAction> actionClazz, int inGameEntityCount) {
+    public AlphaZeroNodeMetadataFactory(Class<TAction> actionClazz, int inGameEntityCount) {
         this.actionClazz = actionClazz;
         this.inGameEntityCount = inGameEntityCount;
         this.totalActionCount = actionClazz.getEnumConstants().length;
@@ -36,8 +36,8 @@ public class AlphaGoNodeMetadataFactory<
     }
 
     @Override
-    public AlphaGoNodeMetadata<TAction> createEmptyNodeMetadata() {
-        return new AlphaGoNodeMetadata<TAction>(
+    public AlphaZeroNodeMetadata<TAction> createEmptyNodeMetadata() {
+        return new AlphaZeroNodeMetadata<TAction>(
             DoubleVectorRewardAggregator.emptyReward(inGameEntityCount),
             DoubleVectorRewardAggregator.emptyReward(inGameEntityCount),
             Double.NaN,
@@ -45,19 +45,19 @@ public class AlphaGoNodeMetadataFactory<
     }
 
     @Override
-    public AlphaGoNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> parent,
-                                                                 StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
-                                                                 TAction appliedAction) {
+    public AlphaZeroNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> parent,
+                                                                   StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
+                                                                   TAction appliedAction) {
         var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
         if(parent == null) {
-            return new AlphaGoNodeMetadata<TAction>(
+            return new AlphaZeroNodeMetadata<TAction>(
                 allPlayerRewards,
                 allPlayerRewards,
                 Double.NaN,
                 new EnumMap<TAction, Double>(actionClazz));
         } else {
             var metadata = parent.getSearchNodeMetadata();
-            return new AlphaGoNodeMetadata<TAction>(
+            return new AlphaZeroNodeMetadata<TAction>(
                 DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
                 allPlayerRewards,
                 metadata.getChildPriorProbabilities().get(appliedAction),

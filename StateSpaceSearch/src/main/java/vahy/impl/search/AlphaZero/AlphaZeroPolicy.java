@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -13,13 +13,13 @@ import vahy.impl.search.tree.SearchTreeImpl;
 import java.util.Comparator;
 import java.util.SplittableRandom;
 
-public class AlphaGoPolicy<
+public class AlphaZeroPolicy<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState, PolicyRecordBase> {
+    extends AbstractTreeSearchPolicy<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState, PolicyRecordBase> {
 
-    public AlphaGoPolicy(int policyId, SplittableRandom random, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> searchTree) {
+    public AlphaZeroPolicy(int policyId, SplittableRandom random, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> searchTree) {
         super(policyId, random, treeUpdateCondition, searchTree);
     }
 
@@ -40,7 +40,7 @@ public class AlphaGoPolicy<
         return getBestAction(gameState, searchTree.getRoot());
     }
 
-    private TAction getBestAction(StateWrapper<TAction, TObservation, TState> gameState, SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> root) {
+    private TAction getBestAction(StateWrapper<TAction, TObservation, TState> gameState, SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> root) {
         return root.getChildNodeStream().max(Comparator.comparing(x -> x.getSearchNodeMetadata().getExpectedReward()[gameState.getInGameEntityIdWrapper()])).orElseThrow().getAppliedAction();
     }
 

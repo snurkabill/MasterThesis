@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,30 +13,30 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.Arrays;
 
-public class AlphaGoEvaluator<
+public class AlphaZeroEvaluator<
     TAction extends Enum<TAction> & Action,
     TObservation extends DoubleVector,
     TState extends State<TAction, TObservation, TState>>
-    implements NodeEvaluator<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> {
+    implements NodeEvaluator<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 
-    protected static final Logger logger = LoggerFactory.getLogger(AlphaGoEvaluator.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AlphaZeroEvaluator.class);
     protected static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     public static final int Q_VALUE_INDEX = 0;
 
-    private final SearchNodeFactory<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> searchNodeFactory;
-    private final AlphaGoNodeMetadataFactory<TAction, TObservation, TState> searchNodeMetadataFactory;
+    private final SearchNodeFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory;
+    private final AlphaZeroNodeMetadataFactory<TAction, TObservation, TState> searchNodeMetadataFactory;
     private final TrainablePredictor predictor;
 
 
-    public AlphaGoEvaluator(SearchNodeFactory<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> searchNodeFactory, TrainablePredictor predictor) {
+    public AlphaZeroEvaluator(SearchNodeFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory, TrainablePredictor predictor) {
         this.searchNodeFactory = searchNodeFactory;
-        this.searchNodeMetadataFactory = (AlphaGoNodeMetadataFactory<TAction, TObservation, TState>) searchNodeFactory.getSearchNodeMetadataFactory();
+        this.searchNodeMetadataFactory = (AlphaZeroNodeMetadataFactory<TAction, TObservation, TState>) searchNodeFactory.getSearchNodeMetadataFactory();
         this.predictor = predictor;
     }
 
     @Override
-    public int evaluateNode(SearchNode<TAction, TObservation, AlphaGoNodeMetadata<TAction>, TState> selectedNode) {
+    public int evaluateNode(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> selectedNode) {
         if(selectedNode.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }

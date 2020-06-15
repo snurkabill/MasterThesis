@@ -31,9 +31,9 @@ import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tf.TFHelper;
 import vahy.impl.predictor.tf.TFModelImproved;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.search.AlphaGo.AlphaGoDataMaker;
-import vahy.impl.search.AlphaGo.AlphaGoPolicyDefinitionSupplier;
-import vahy.impl.search.AlphaGo.AlphaGoTablePredictor;
+import vahy.impl.search.AlphaZero.AlphaZeroDataMaker;
+import vahy.impl.search.AlphaZero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.search.AlphaZero.AlphaZeroTablePredictor;
 import vahy.impl.search.MCTS.MCTSPolicyDefinitionSupplier;
 
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class Example03_TF {
 
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
-        var alphaGoPolicySupplier = new AlphaGoPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
+        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
 
 
 
@@ -231,8 +231,8 @@ public class Example03_TF {
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
             defaultPrediction[i] = 1.0 / (totalActionCount);
         }
-        var trainablePredictorAlphaGoEval_1 = new AlphaGoTablePredictor(defaultPrediction, totalEntityCount, 0.1, totalActionCount);
-        var episodeDataMakerAlphaGoEval_1 = new AlphaGoDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(environmentPolicyCount + 4, discountFactor);
+        var trainablePredictorAlphaGoEval_1 = new AlphaZeroTablePredictor(defaultPrediction, totalEntityCount, 0.1, totalActionCount);
+        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(environmentPolicyCount + 4, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(

@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaGo;
+package vahy.impl.search.AlphaZero;
 
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.DataTablePredictor;
@@ -7,14 +7,14 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.List;
 
-public class AlphaGoTablePredictor extends DataTablePredictor {
+public class AlphaZeroTablePredictor extends DataTablePredictor {
 
     private final int entityCount;
     private final int actionCount;
     private final double learningRate;
     private final double[] killMeNow;
 
-    public AlphaGoTablePredictor(double[] defaultPrediction, int entityCount, double learningRate, int actionCount) {
+    public AlphaZeroTablePredictor(double[] defaultPrediction, int entityCount, double learningRate, int actionCount) {
         super(defaultPrediction);
         this.entityCount = entityCount;
         this.actionCount = actionCount;
