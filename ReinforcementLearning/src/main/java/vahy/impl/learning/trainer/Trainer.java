@@ -61,8 +61,8 @@ public class Trainer<
         this.statisticsCalculator = statisticsCalculator;
 
         this.trainingProgressTracker = new ProgressTracker(progressTrackerSettings, "Training stats", Color.BLUE);
-        this.samplingProgressTracker = new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.RED);
-        this.evaluationProgressTracker = new ProgressTracker(progressTrackerSettings, "Eval stats", Color.RED);
+        this.samplingProgressTracker = new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.GREEN);
+        this.evaluationProgressTracker = new ProgressTracker(progressTrackerSettings, "Eval stats", Color.ORANGE);
 
         var baseDataGenerators = addBaseDataGenerators(additionalDataPointGeneratorList);
 

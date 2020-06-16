@@ -13,10 +13,12 @@ import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.search.tree.treeUpdateCondition.TreeUpdateConditionSuplierCountBased;
+import vahy.utils.EnumUtils;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action, TObservation extends  DoubleVector, TState extends State<TAction, TObservation, TState>> {
 
@@ -42,11 +44,11 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
         );
     }
 
-    public PolicyDefinition<TAction, TObservation, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, TObservation, TState, PolicyRecordBase> predictorSetup) {
+    public PolicyDefinition<TAction, TObservation, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, Supplier<Double> explorationConstantSupplier, double cpuctParameter, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, TObservation, TState, PolicyRecordBase> predictorSetup) {
         return new PolicyDefinition<>(
             policyId,
             categoryId,
-            getPolicyDefinitionSupplierWithPredictor(cpuctParameter, treeExpansionCountPerStep, predictorSetup.getTrainablePredictor()),
+            getPolicyDefinitionSupplierWithPredictor(cpuctParameter, explorationConstantSupplier, treeExpansionCountPerStep, predictorSetup.getTrainablePredictor()),
             List.of(predictorSetup)
         );
     }
@@ -59,7 +61,7 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
     {
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
-            return new MCTSPolicy<TAction, TObservation, TState>(policyId_, random_, new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep),
+            return new MCTSPolicy<TAction, TObservation, TState>(policyId_, random_, 0.0, new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep),
                 new SearchTreeImpl<>(
                     searchNodeFactory, root,
                     new Ucb1NodeSelector<>(random_, cpuctParameter, enumConstantsLength),
@@ -70,17 +72,28 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
     }
 
     @NotNull
-    private OuterDefPolicySupplier<TAction, TObservation, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter, int treeExpansionCountPerStep, TrainablePredictor predictor)
+    private OuterDefPolicySupplier<TAction, TObservation, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter,
+                                                                                                                             Supplier<Double> explorationConstantSupplier,
+                                                                                                                             int treeExpansionCountPerStep,
+                                                                                                                             TrainablePredictor predictor)
     {
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
-            return new MCTSPolicy<TAction, TObservation, TState>(policyId_, random_, new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep),
-                new SearchTreeImpl<>(
-                    searchNodeFactory, root,
-                    new Ucb1NodeSelector<>(random_, cpuctParameter, enumConstantsLength),
-                    new MCTSTreeUpdater<>(),
-                    new MCTSPredictionEvaluator<>(searchNodeFactory, predictor)
-                ));
+            var searchTree = new SearchTreeImpl<>(
+                searchNodeFactory, root,
+                new Ucb1NodeSelector<>(random_, cpuctParameter, enumConstantsLength),
+                new MCTSTreeUpdater<>(),
+                new MCTSPredictionEvaluator<>(searchNodeFactory, predictor)
+            );
+            var treeUpdaterCondition = new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep);
+            switch (policyMode_) {
+                case INFERENCE:
+                    return new MCTSPolicy<TAction, TObservation, TState>(policyId_, random_, 0.0, treeUpdaterCondition, searchTree);
+                case TRAINING:
+                    return new MCTSPolicy<TAction, TObservation, TState>(policyId_, random_, explorationConstantSupplier.get(), treeUpdaterCondition, searchTree);
+                default:
+                    throw EnumUtils.createExceptionForUnknownEnumValue(policyMode_);
+            }
         };
     }
 }

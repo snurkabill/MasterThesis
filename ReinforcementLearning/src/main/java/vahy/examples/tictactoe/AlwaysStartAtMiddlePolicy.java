@@ -2,11 +2,10 @@ package vahy.examples.tictactoe;
 
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyRecordBase;
+import vahy.api.policy.RandomizedPolicy;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.RandomizedPolicy;
 import vahy.impl.policy.UniformRandomWalkPolicy;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
 public class AlwaysStartAtMiddlePolicy extends RandomizedPolicy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> {
@@ -17,11 +16,6 @@ public class AlwaysStartAtMiddlePolicy extends RandomizedPolicy<TicTacToeAction,
     public AlwaysStartAtMiddlePolicy(SplittableRandom random, int policyId) {
         super(random, policyId);
         this.randomWalkPolicy = new UniformRandomWalkPolicy<>(random, policyId);
-    }
-
-    @Override
-    public double[] getActionProbabilityDistribution(StateWrapper<TicTacToeAction, DoubleVector, TicTacToeState> gameState) {
-        return new double[0];
     }
 
     @Override
@@ -44,7 +38,7 @@ public class AlwaysStartAtMiddlePolicy extends RandomizedPolicy<TicTacToeAction,
     }
 
     @Override
-    public void updateStateOnPlayedActions(List<TicTacToeAction> opponentActionList) {
+    public void updateStateOnPlayedAction(TicTacToeAction ticTacToeAction) {
 
     }
 

@@ -6,6 +6,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.ExploringPolicy;
 import vahy.api.policy.PolicyRecord;
 import vahy.api.search.node.NodeMetadata;
 import vahy.api.search.node.SearchNode;
@@ -13,7 +14,6 @@ import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.timer.SimpleTimer;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
 
@@ -23,7 +23,7 @@ public abstract class AbstractTreeSearchPolicy<
         TSearchNodeMetadata extends NodeMetadata,
         TState extends State<TAction, TObservation, TState>,
         TPolicyRecord extends PolicyRecord>
-    extends RandomizedPolicy<TAction, TObservation, TState, TPolicyRecord> {
+    extends ExploringPolicy<TAction, TObservation, TState, TPolicyRecord> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
@@ -37,8 +37,8 @@ public abstract class AbstractTreeSearchPolicy<
     protected final int countOfAllActionFromSameEntity;
     protected final int countOfAllActions;
 
-    public AbstractTreeSearchPolicy(int policyId, SplittableRandom random, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
-        super(random, policyId);
+    public AbstractTreeSearchPolicy(int policyId, SplittableRandom random, double exploringConstant, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
+        super(random, policyId, exploringConstant);
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
         this.countOfAllActionFromSameEntity = obtainCountOfAllActionFromSameEntity(searchTree.getRoot());
@@ -62,10 +62,8 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     @Override
-    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
-        for (TAction action : opponentActionList) {
-            searchTree.applyAction(action);
-        }
+    public void updateStateOnPlayedAction(TAction action) {
+        searchTree.applyAction(action);
     }
 
     protected void expandSearchTree(StateWrapper<TAction, TObservation, TState> gameState) {

@@ -1,10 +1,7 @@
 package vahy.example.bomberman;
 
-import vahy.api.experiment.ApproximatorConfig;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.learning.ApproximatorType;
-import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
@@ -38,6 +35,7 @@ import vahy.impl.search.MCTS.MCTSPolicyDefinitionSupplier;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -127,23 +125,13 @@ public class Example03_TF {
         );
         var valuePolicyPlayer_1 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 1, 1, () -> 0.1, predictorTrainingSetup);
 // ----------------------------------------------------------------------------------------
-
+//        Paths.get("PythonScripts", "tensorflow_models", )
 
         var defaultPrediction_value = new double[] {0.0};
         var modelInputSize = asdf.getInGameEntityObservation(5).getObservedVector().length;
 
-        var approximatorConfig = new ApproximatorConfig(
-            "value/create_value_model.py",
-            128,
-            1,
-            ApproximatorType.TF_NN,
-            DataAggregationAlgorithm.REPLAY_BUFFER,
-            10,
-            0.01,
-            0.8
-        );
-
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(approximatorConfig, systemConfig, modelInputSize, 0);
+        var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_model.py");
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig, modelInputSize, totalEntityCount, 0);
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_value.length,
@@ -223,8 +211,8 @@ public class Example03_TF {
             dataAggregatorMCTSEval_2
         );
 // ----------------------------------------------------------------------------------------
-        var mctsEvalPlayer_1 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1);
-        var mctsEvalPlayer_2 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, cpuct, treeExpansionCount * 4, predictorTrainingSetupMCTSEval_2);
+        var mctsEvalPlayer_1 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1);
+        var mctsEvalPlayer_2 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, () -> 0.1, cpuct, treeExpansionCount * 4, predictorTrainingSetupMCTSEval_2);
 
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
@@ -242,7 +230,7 @@ public class Example03_TF {
             dataAggregatorAlphaGoEval_1
         );
 
-        var alphaGoPlayer_1 = alphaGoPolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, 1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2);
+        var alphaGoPlayer_1 = alphaGoPolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2);
 // ----------------------------------------------------------------------------------------
         var policyArgumentsList = List.of(
 //            playerOneSupplier

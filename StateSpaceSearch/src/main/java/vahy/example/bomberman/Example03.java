@@ -135,8 +135,8 @@ public class Example03 {
             dataAggregatorMCTSEval_2
         );
 // ----------------------------------------------------------------------------------------
-        var mctsEvalPlayer_1 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 2, 1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1);
-        var mctsEvalPlayer_2 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, cpuct, treeExpansionCount * 4, predictorTrainingSetupMCTSEval_2);
+        var mctsEvalPlayer_1 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 2, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1);
+        var mctsEvalPlayer_2 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, () -> 0.1, cpuct, treeExpansionCount * 4, predictorTrainingSetupMCTSEval_2);
 
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
@@ -154,7 +154,7 @@ public class Example03 {
             dataAggregatorAlphaGoEval_1
         );
 
-        var alphaGoPlayer_1 = alphaGoPolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, 1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2);
+        var alphaGoPlayer_1 = alphaGoPolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2);
 // ----------------------------------------------------------------------------------------
         var policyArgumentsList = List.of(
 //            playerOneSupplier

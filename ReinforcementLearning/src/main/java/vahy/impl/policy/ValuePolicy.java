@@ -3,24 +3,22 @@ package vahy.impl.policy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
+import vahy.api.policy.ExploringPolicy;
+import vahy.api.policy.PlayingDistribution;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.api.predictor.Predictor;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
-public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>>
-    extends RandomizedPolicy<TAction, DoubleVector, TState, PolicyRecordBase> {
+public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> extends ExploringPolicy<TAction, DoubleVector, TState, PolicyRecordBase> {
 
     private final Predictor<DoubleVector> valuePredictor;
-    private final double explorationConstant;
 
     public ValuePolicy(SplittableRandom random, int policyId, Predictor<DoubleVector> valuePredictor, double explorationConstant) {
-        super(random, policyId);
+        super(random, policyId, explorationConstant);
         this.valuePredictor = valuePredictor;
-        this.explorationConstant = explorationConstant;
     }
 
     private ImmutableTuple<Double, TAction> getMaxActionValuePair(StateWrapper<TAction, DoubleVector, TState> gameState) {
@@ -38,7 +36,6 @@ public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends 
         }
         var predictions = valuePredictor.apply(observations);
 
-
         double max = rewards[0] + predictions[0][0];
         TAction maxAction = actions[0];
         for (int i = 1; i < actions.length; i++) {
@@ -52,34 +49,28 @@ public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends 
     }
 
     @Override
-    public int getPolicyId() {
-        return policyId;
-    }
-
-    @Override
-    public double[] getActionProbabilityDistribution(StateWrapper<TAction, DoubleVector, TState> gameState) {
-        return new double[0];
-    }
-
-    @Override
-    public TAction getDiscreteAction(StateWrapper<TAction, DoubleVector, TState> gameState) {
-        if(explorationConstant == 0.0) {
-            return getMaxActionValuePair(gameState).getSecond();
-        } else if(random.nextDouble() < explorationConstant) {
-            TAction[] actions = gameState.getAllPossibleActions();
-            return actions[random.nextInt(actions.length)];
-        } else {
-            return getMaxActionValuePair(gameState).getSecond();
-        }
-    }
-
-    @Override
-    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
+    public void updateStateOnPlayedAction(TAction action) {
         // this is it
     }
 
     @Override
     public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, DoubleVector, TState> gameState) {
-        return new PolicyRecordBase(new double[0], 0.0);
+        return new PolicyRecordBase(this.playingDistribution.getDistribution(), this.playingDistribution.getPredictedReward());
+    }
+
+    @Override
+    protected PlayingDistribution<TAction> inferenceBranch(StateWrapper<TAction, DoubleVector, TState> gameState) {
+        var actionValuePair = getMaxActionValuePair(gameState);
+        return new PlayingDistribution<>(actionValuePair.getSecond(), actionValuePair.getFirst(), EMPTY_ARRAY);
+    }
+
+    @Override
+    protected PlayingDistribution<TAction> explorationBranch(StateWrapper<TAction, DoubleVector, TState> gameState) {
+        TAction[] actions = gameState.getAllPossibleActions();
+        var actionIndex = random.nextInt(actions.length);
+        var action = actions[actionIndex];
+        var applied = gameState.applyAction(action);
+        var value = applied.getReward() + valuePredictor.apply(applied.getState().getObservation())[0];
+        return new PlayingDistribution<>(action, value, EMPTY_ARRAY);
     }
 }

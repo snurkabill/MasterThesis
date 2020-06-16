@@ -2,7 +2,6 @@ package vahy.impl.predictor.tf;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.experiment.ApproximatorConfig;
 import vahy.api.experiment.SystemConfig;
 
 import java.io.BufferedReader;
@@ -10,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -18,16 +18,18 @@ public class TFHelper {
 
     public static final Logger logger = LoggerFactory.getLogger(TFHelper.class.getName());
 
-    public static byte[] loadTensorFlowModel(ApproximatorConfig approximatorConfig, SystemConfig systemConfig, int inputCount, int outputActionCount) throws IOException, InterruptedException {
+    public static byte[] loadTensorFlowModel(Path scriptPath, SystemConfig systemConfig, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
         var modelName = "tfModel_" + LocalDateTime.now().atZone(ZoneOffset.UTC);
         modelName = modelName.replace(":", "_");
         Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath()
             + " " +
-            Paths.get("PythonScripts", "tensorflow_models", approximatorConfig.getCreatingScript()) +
+            scriptPath +
             " " +
             modelName +
             " " +
             inputCount +
+            " " +
+            valueOutputCount +
             " " +
             outputActionCount +
             " " +

@@ -91,6 +91,9 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
                 }
             }
         }
+        if(maxIndex == -1) {
+            System.out.println("asdf");
+        }
         if(maxIndexCount == 0) {
             return possibleActions[maxIndex];
         } else {

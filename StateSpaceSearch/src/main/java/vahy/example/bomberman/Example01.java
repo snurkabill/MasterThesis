@@ -112,8 +112,8 @@ public class Example01 {
             dataAggregatorMCTSEval_2
         );
 
-        var mctsEvalPlayer_1 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 1, 1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1);
-        var mctsEvalPlayer_2 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 2, 1, cpuct, treeExpansionCount * 4, predictorTrainingSetupMCTSEval_2);
+        var mctsEvalPlayer_1 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 1, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1);
+        var mctsEvalPlayer_2 = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 2, 1, () -> 0.1, cpuct, treeExpansionCount * 4, predictorTrainingSetupMCTSEval_2);
 
         var policyArgumentsList = List.of(
 //            playerOneSupplier

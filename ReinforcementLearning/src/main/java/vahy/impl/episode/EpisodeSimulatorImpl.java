@@ -20,7 +20,6 @@ import vahy.utils.ImmutableTuple;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class EpisodeSimulatorImpl<
@@ -142,13 +141,12 @@ public class EpisodeSimulatorImpl<
         TAction action = onTurnPolicy.getDiscreteAction(stateWrapper);
         var decisionInMs = System.currentTimeMillis() - start;
         var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(stateWrapper);
-        onTurnPolicy.updateStateOnPlayedActions(Collections.singletonList(action));
-        var actionList = Collections.singletonList(action);
+        onTurnPolicy.updateStateOnPlayedAction(action);
         for (var entry : allPolicyList) {
             if(entry.getPolicyId() != policyIdOnTurn) {
                 var toUpdatePolicy = entry.getPolicy();
                 if(state.isInGame(policyIdTranslationMap.getInGameEntityId(toUpdatePolicy.getPolicyId()))) {
-                    toUpdatePolicy.updateStateOnPlayedActions(actionList);
+                    toUpdatePolicy.updateStateOnPlayedAction(action);
                 }
             }
         }

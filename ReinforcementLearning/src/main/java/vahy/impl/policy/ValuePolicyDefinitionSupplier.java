@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public class ValuePolicyDefinitionSupplier<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> {
 
     public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, Supplier<Double> explorationConstnatSupplier, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> trainablePredictor) {
-        return new PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase>(
+        return new PolicyDefinition<>(
             policyId,
             categoryId,
             getValuePolicySupplier(explorationConstnatSupplier, (Predictor<DoubleVector>)trainablePredictor.getTrainablePredictor()),

@@ -5,23 +5,17 @@ import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyRecordBase;
+import vahy.api.policy.RandomizedPolicy;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.SplittableRandom;
 
 public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
     extends RandomizedPolicy<TAction, TObservation, TState, PolicyRecordBase> {
 
+    private TAction action;
+
     public UniformRandomWalkPolicy(SplittableRandom random, int policyId) {
         super(random, policyId);
-    }
-
-    @Override
-    public double[] getActionProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
-        double[] probabilities = new double[gameState.getAllPossibleActions().length];
-        Arrays.fill(probabilities, 1.0 / (double) probabilities.length);
-        return probabilities;
     }
 
     @Override
@@ -31,12 +25,15 @@ public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action, TOb
     }
 
     @Override
-    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
+    public void updateStateOnPlayedAction(TAction opponentAction) {
         // this is it
     }
 
     @Override
     public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
-        return new PolicyRecordBase(new double[0], 0.0);
+        if(action == null) {
+            action = gameState.getAllPossibleActions()[0];
+        }
+        return new PolicyRecordBase(EMPTY_ARRAY, 0.0);
     }
 }
