@@ -1,7 +1,7 @@
 package vahy.integration.simplifiedHallway;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -106,7 +106,7 @@ public class SHTest05 {
             .setPlayerPolicySupplierList(List.of(player));
         var result = roundBuilder.execute();
 
-        Assert.assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(playerId), 288.0, Math.pow(10, -10));
+        assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(playerId), 288.0, Math.pow(10, -10));
     }
 
 }

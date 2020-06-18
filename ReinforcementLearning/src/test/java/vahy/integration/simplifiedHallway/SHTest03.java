@@ -1,12 +1,10 @@
 package vahy.integration.simplifiedHallway;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicySupplierImpl;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.simplifiedHallway.SHAction;
@@ -30,7 +28,6 @@ import vahy.impl.runner.PolicyDefinition;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class SHTest03 {
 
@@ -110,7 +107,7 @@ public class SHTest03 {
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        Assert.assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 80, Math.pow(10, -10));
+        assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 80, Math.pow(10, -10));
     }
 
     @Test
@@ -188,7 +185,7 @@ public class SHTest03 {
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        Assert.assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 60, Math.pow(10, -10));
+        assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 60, Math.pow(10, -10));
     }
 
     @Test
@@ -266,6 +263,6 @@ public class SHTest03 {
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) > 74);
+        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) > 74);
     }
 }

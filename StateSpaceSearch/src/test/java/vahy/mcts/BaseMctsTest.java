@@ -1,7 +1,9 @@
 package vahy.mcts;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -113,9 +115,9 @@ public class BaseMctsTest {
         System.out.println("Static policy result: " + result.getEvaluationStatistics().getTotalPayoffAverage().get(0));
         System.out.println("Trainable policy result: " + result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
 
-        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) < result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
-        Assert.assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) + result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 0.0, Math.pow(10, -10));
-        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) > 0.3);
+        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) < result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
+        assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) + result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 0.0, Math.pow(10, -10));
+        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) > 0.3);
     }
 
 

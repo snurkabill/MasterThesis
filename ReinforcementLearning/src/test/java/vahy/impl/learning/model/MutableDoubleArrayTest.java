@@ -1,7 +1,7 @@
 package vahy.impl.learning.model;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 public class MutableDoubleArrayTest {
 
@@ -11,12 +11,12 @@ public class MutableDoubleArrayTest {
     public void initializeTest() {
 
         var mda = new MutableDoubleArray(new double[] {0.0, 0.0, 0.0}, true);
-        Assert.assertEquals(mda.getCounter(), 0);
-        Assert.assertEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0});
+        assertEquals(mda.getCounter(), 0);
+        assertEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0});
 
         var mda2 = new MutableDoubleArray(new double[] {1.0, 2.0, 3.0}, false);
-        Assert.assertEquals(mda2.getCounter(), 1);
-        Assert.assertEquals(mda2.getDoubleArray(), new double[] {1.0, 2.0, 3.0});
+        assertEquals(mda2.getCounter(), 1);
+        assertEquals(mda2.getDoubleArray(), new double[] {1.0, 2.0, 3.0});
     }
 
     @Test
@@ -24,13 +24,13 @@ public class MutableDoubleArrayTest {
         var mda = new MutableDoubleArray(new double[] {0.0, 0.0, 0.0, 0.0}, true);
         mda.addDataSample(new double[] {0.1, 0.2, 0.3, 0.4});
 
-        Assert.assertEquals(mda.getCounter(), 1);
-        Assert.assertEquals(mda.getDoubleArray(), new double[] {0.1, 0.2, 0.3, 0.4});
+        assertEquals(mda.getCounter(), 1);
+        assertEquals(mda.getDoubleArray(), new double[] {0.1, 0.2, 0.3, 0.4});
 
         mda.addDataSample(new double[] {-0.1, -0.2, -0.3, -0.4});
 
-        Assert.assertEquals(mda.getCounter(), 2);
-        Assert.assertEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0, 0.0});
+        assertEquals(mda.getCounter(), 2);
+        assertEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0, 0.0});
 
     }
 

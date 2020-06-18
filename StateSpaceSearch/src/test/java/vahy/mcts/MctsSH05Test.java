@@ -1,7 +1,7 @@
 package vahy.mcts;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -119,7 +119,7 @@ public class MctsSH05Test {
             .setPlayerPolicySupplierList(List.of(player));
         var result = roundBuilder.execute();
 
-        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(playerId) >= 288.0);
+        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(playerId) >= 288.0);
     }
 
 
@@ -213,7 +213,7 @@ public class MctsSH05Test {
             .setPlayerPolicySupplierList(List.of(player));
         var result = roundBuilder.execute();
 
-        Assert.assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(playerId) >= 288.0);
+        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(playerId) >= 288.0);
     }
 
 

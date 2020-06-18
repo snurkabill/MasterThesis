@@ -1,7 +1,7 @@
 package vahy.impl.predictor;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
@@ -11,10 +11,10 @@ public class DataTablePredictorTest {
     public void defaultPredictionTest() {
         DataTablePredictor dataTablePredictor = new DataTablePredictor(new double[] {1, 2, 3});
 
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{-123})), new double[] {1, 2, 3});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{-1, 2, 3})), new double[] {1, 2, 3});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{123})), new double[] {1, 2, 3});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{42, 84})), new double[] {1, 2, 3});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{-123})), new double[] {1, 2, 3});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{-1, 2, 3})), new double[] {1, 2, 3});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{123})), new double[] {1, 2, 3});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{42, 84})), new double[] {1, 2, 3});
     }
 
     @Test
@@ -35,12 +35,12 @@ public class DataTablePredictorTest {
         };
         var data = new ImmutableTuple<>(doubleVectors, predictions);
         dataTablePredictor.train(data);
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{1})), new double[] {0, 0, 1});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{2})), new double[] {0, 1, 0});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{3})), new double[] {0, 1, 1});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{4})), new double[] {1, 0, 0});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{0})), new double[] {1, 1, 1});
-        Assert.assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{5})), new double[] {1, 1, 1});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{1})), new double[] {0, 0, 1});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{2})), new double[] {0, 1, 0});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{3})), new double[] {0, 1, 1});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{4})), new double[] {1, 0, 0});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{0})), new double[] {1, 1, 1});
+        assertEquals(dataTablePredictor.apply(new DoubleVector(new double[]{5})), new double[] {1, 1, 1});
     }
 
 
