@@ -3,6 +3,7 @@ package vahy.impl.search.node.nodeMetadata;
 import vahy.api.search.node.NodeMetadata;
 
 import java.util.Arrays;
+
 public class BaseNodeMetadata implements NodeMetadata {
 
     private final double[] cumulativeReward;
@@ -37,16 +38,10 @@ public class BaseNodeMetadata implements NodeMetadata {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(System.lineSeparator()).append("CumulativeRew: ");
+        stringBuilder.append("\\n").append("CumulativeRew: ");
         stringBuilder.append(Arrays.toString(this.cumulativeReward));
-        stringBuilder.append(System.lineSeparator()).append("GainedReward: ");
+        stringBuilder.append("\\n").append("GainedReward: ");
         stringBuilder.append(Arrays.toString(this.gainedReward));
-
-//        stringBuilder.append(System.lineSeparator()).append("PriorProbability: ");
-//        stringBuilder.append(this.priorProbability);
-//        stringBuilder.append(System.lineSeparator()).append("ChildProbabilities: ");
-//        stringBuilder.append(System.lineSeparator()).append(childProbabilities.toString());
-
         return stringBuilder.toString();
     }
 }

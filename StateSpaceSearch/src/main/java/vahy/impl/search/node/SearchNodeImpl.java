@@ -53,10 +53,10 @@ public class SearchNodeImpl<TAction extends Enum<TAction> & Action, TObservation
     public String toString() {
         String metadataString = this.getSearchNodeMetadata().toString();
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(System.lineSeparator()).append("nnodeId: ");
+        stringBuilder.append("\\n").append("nodeId: ");
         stringBuilder.append(nodeId);
         stringBuilder.append(metadataString);
-        stringBuilder.append(System.lineSeparator()).append("nisLeaf: ");
+        stringBuilder.append("\\n").append("isLeaf: ");
         stringBuilder.append(isLeaf());
         return stringBuilder.toString();
     }

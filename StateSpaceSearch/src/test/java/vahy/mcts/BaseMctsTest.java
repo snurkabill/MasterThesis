@@ -17,7 +17,6 @@ import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.search.MCTS.MCTSPolicyDefinitionSupplier;
@@ -74,7 +73,7 @@ public class BaseMctsTest {
         var treeExpansionCount = 10;
         var cpuct = 1.0;
 
-        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<TicTacToeAction, DoubleVector, TicTacToeState>(actionClass, 2);
+        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>(actionClass, 2);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>();
 
         var playerOneSupplier = mctsPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, 1.0, rolloutCount);

@@ -73,9 +73,9 @@ public class Example03 {
         var asdf = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         int totalEntityCount = asdf.getTotalEntityCount();
 
-        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
+        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
-        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
+        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount, config);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
         var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, environmentPolicyCount + 0);
@@ -144,7 +144,7 @@ public class Example03 {
             defaultPrediction[i] = 1.0 / (totalActionCount);
         }
         var trainablePredictorAlphaGoEval_1 = new AlphaZeroTablePredictor(defaultPrediction, totalEntityCount, 0.1, totalActionCount);
-        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(environmentPolicyCount + 4, discountFactor);
+        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(environmentPolicyCount + 4, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(

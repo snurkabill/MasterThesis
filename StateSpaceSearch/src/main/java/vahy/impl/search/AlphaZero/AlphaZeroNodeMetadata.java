@@ -32,7 +32,7 @@ public class AlphaZeroNodeMetadata<TAction extends Enum<TAction> & Action> exten
         String baseString = super.toString();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(baseString);
-        stringBuilder.append(System.lineSeparator()).append("PriorProbability: ");
+        stringBuilder.append("\\n").append("PriorProbability: ");
         stringBuilder.append(this.priorProbability);
         return stringBuilder.toString();
     }

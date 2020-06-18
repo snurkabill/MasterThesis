@@ -61,11 +61,14 @@ public class SearchTreeImpl<
         this.treeUpdater = treeUpdater;
         this.nodeEvaluator = nodeEvaluator;
 
-        expandTreeToNextPlayerLevel();
+//        expandTreeToNextPlayerLevel();
     }
 
     @Override
-    public boolean updateTree() {
+    public boolean expandTree() {
+        if(root.isFinalNode()) {
+            return false;
+        }
         SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion = nodeSelector.selectNextNode(this.root);
         if(selectedNodeForExpansion == null) {
             return false;
@@ -124,9 +127,10 @@ public class SearchTreeImpl<
                 string.append(" -> ");
                 string.append("\"").append(child.toString()).append("\"");
                 string.append(" ");
-                string.append("[ label = \"P(");
+                string.append("[ label = \"");
                 string.append(entry.getKey());
-                string.append("\" ];").append(System.lineSeparator());
+                string.append("\"];");
+                string.append(System.lineSeparator());
             }
         }
         string.append(end);

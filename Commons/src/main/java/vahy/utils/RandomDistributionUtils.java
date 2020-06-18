@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class RandomDistributionUtils {
     public static int SAMPLING_RANDOM_INDEX_TRIAL_COUNT = 10;
     public static double TOLERANCE = Math.pow(10, -5);
 
-    public static <T> boolean isDistribution(Map<T, Double> map, double tolerance) {
+    public static <T extends Enum<T>> boolean isDistribution(EnumMap<T, Double> map, double tolerance) {
         double cumulativeSum = 0.0;
         for (Double v : map.values()) {
             cumulativeSum += v;
@@ -67,7 +68,7 @@ public class RandomDistributionUtils {
 //        return normalizedDistribution;
 //    }
 
-    public static <T extends Enum<T>> T getRandomElementFromMapDistribution(Map<T, Double> map, SplittableRandom random) {
+    public static <T extends Enum<T>> T getRandomElementFromMapDistribution(EnumMap<T, Double> map, SplittableRandom random) {
         if(!isDistribution(map, Math.pow(10, -5))) {
             throw new IllegalArgumentException("Given map does not represent probability distribution over keys. Map: [" + map.toString() + "]");
         }

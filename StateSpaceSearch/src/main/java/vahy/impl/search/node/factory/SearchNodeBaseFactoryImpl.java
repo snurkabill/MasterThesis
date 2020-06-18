@@ -28,13 +28,10 @@ public class SearchNodeBaseFactoryImpl<TAction extends Enum<TAction> & Action, T
     @Override
     public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> createNode(StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
                                                                                      SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent,
-                                                                                     TAction action) {
-        return new SearchNodeImpl<>(
-            stateRewardReturn.getState(),
-            searchNodeMetadataFactory.createSearchNodeMetadata(parent, stateRewardReturn, action),
-            new EnumMap<>(actionClass),
-            parent,
-            action);
+                                                                                     TAction action)
+    {
+        var searchNodeMetadata = searchNodeMetadataFactory.createSearchNodeMetadata(parent, stateRewardReturn, action);
+        return new SearchNodeImpl<>(stateRewardReturn.getState(), searchNodeMetadata, new EnumMap<>(actionClass), parent, action);
     }
 
     @Override

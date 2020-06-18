@@ -40,6 +40,8 @@ public class AlphaZeroTablePredictor extends DataTablePredictor {
         }
         RandomDistributionUtils.applySoftmax(killMeNow);
         System.arraycopy(killMeNow, 0, newPrediction, entityCount, actionCount);
+//        System.arraycopy(defaultPrediction, entityCount, newPrediction, entityCount, actionCount);
+
 
         predictionMap.put(observation, newPrediction);
     }

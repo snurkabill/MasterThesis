@@ -19,10 +19,12 @@ public class AlphaZeroDataMaker<TAction extends Enum<TAction> & Action, TState e
 
     private final double discountFactor;
     private final int playerPolicyId;
+    private final int actionCount;
 
-    public AlphaZeroDataMaker(int playerPolicyId, double discountFactor) {
+    public AlphaZeroDataMaker(int playerPolicyId, int actionCount, double discountFactor) {
         this.discountFactor = discountFactor;
         this.playerPolicyId = playerPolicyId;
+        this.actionCount = actionCount;
     }
 
     @Override
@@ -36,8 +38,16 @@ public class AlphaZeroDataMaker<TAction extends Enum<TAction> & Action, TState e
         var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(episodeResults.getPlayerStepCountList().get(inGameEntityId));
         while(iterator.hasPrevious()) {
             var previous = iterator.previous();
-            if(previous.getFromState().isInGame(inGameEntityId)) {
+            if (previous.getFromState().isEnvironmentEntityOnTurn()) {
+                var action = previous.getAction();
+                var actionId = action.ordinal();
+                var doubleArray = new double[entityInGameCount + actionCount];
+                System.arraycopy(aggregatedTotalPayoff, 0, doubleArray, 0, aggregatedTotalPayoff.length);
+                doubleArray[entityInGameCount + actionId] = 1.0;
+                mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(inGameEntityId), new MutableDoubleArray(doubleArray, false)));
+            } else if (previous.getFromState().isInGame(inGameEntityId)) {
                 aggregatedTotalPayoff = DoubleVectorRewardAggregator.aggregateDiscount(previous.getReward(), aggregatedTotalPayoff, discountFactor);
+
                 if(previous.getPolicyIdOnTurn() == playerPolicyId) {
                     var policyArray = previous.getPolicyStepRecord().getPolicyProbabilities();
                     var doubleArray = new double[entityInGameCount + policyArray.length];

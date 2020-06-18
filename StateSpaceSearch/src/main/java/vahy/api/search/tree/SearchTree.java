@@ -12,6 +12,6 @@ public interface SearchTree<TAction extends Enum<TAction> & Action, TObservation
 
     void applyAction(TAction action);
 
-    boolean updateTree();
+    boolean expandTree();
 
 }

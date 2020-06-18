@@ -76,7 +76,7 @@ public abstract class AbstractTreeSearchPolicy<
             if(TRACE_ENABLED) {
                 logger.trace("Performing tree update for [{}]th iteration", i);
             }
-            searchTree.updateTree();
+            searchTree.expandTree();
         }
         treeUpdateCondition.treeUpdateFinished();
         timer.stopTimer();

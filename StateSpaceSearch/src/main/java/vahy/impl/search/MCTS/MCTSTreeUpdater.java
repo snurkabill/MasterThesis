@@ -23,9 +23,10 @@ public class MCTSTreeUpdater<
         int i = 0;
         var stateWrapper = expandedNode.getStateWrapper();
         var nodeMetadata = expandedNode.getSearchNodeMetadata();
+        var cumulativeReward = nodeMetadata.getCumulativeReward();
         double[] estimatedLeafReward = stateWrapper.isFinalState() ?
-            DoubleVectorRewardAggregator.aggregate(DoubleVectorRewardAggregator.emptyReward(nodeMetadata.getGainedReward().length), expandedNode.getSearchNodeMetadata().getCumulativeReward()) :
-            DoubleVectorRewardAggregator.aggregate(expandedNode.getSearchNodeMetadata().getPredictedReward(), expandedNode.getSearchNodeMetadata().getCumulativeReward());
+            DoubleVectorRewardAggregator.aggregate(DoubleVectorRewardAggregator.emptyReward(nodeMetadata.getGainedReward().length), cumulativeReward) :
+            DoubleVectorRewardAggregator.aggregate(nodeMetadata.getExpectedReward(), cumulativeReward);
 
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward);

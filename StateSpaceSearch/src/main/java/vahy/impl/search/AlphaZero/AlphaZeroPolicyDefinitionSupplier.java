@@ -1,6 +1,7 @@
 package vahy.impl.search.AlphaZero;
 
 import org.jetbrains.annotations.NotNull;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.OuterDefPolicySupplier;
@@ -25,12 +26,14 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
     private final int enumConstantsLength;
     private final SearchNodeFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory;
     private final AlphaZeroNodeMetadataFactory<TAction, TObservation, TState> metadataFactory;
+    private final boolean isModelKnown;
 
-    public AlphaZeroPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount) {
+    public AlphaZeroPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, ProblemConfig problemConfi) {
         this.actionClass = actionClass;
         this.enumConstantsLength = actionClass.getEnumConstants().length;
         this.metadataFactory = new AlphaZeroNodeMetadataFactory<>(actionClass, inGameEntityCount);
         this.searchNodeFactory = new SearchNodeBaseFactoryImpl<>(actionClass, metadataFactory);
+        this.isModelKnown = problemConfi.isModelKnown();
     }
 
 
@@ -49,10 +52,11 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
             var searchTree = new SearchTreeImpl<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState>(
-                searchNodeFactory, root,
+                searchNodeFactory,
+                root,
                 new AlphaZeroNodeSelector<>(random_, cpuctParameter, enumConstantsLength),
                 new AlphaZeroTreeUpdater<>(),
-                new AlphaZeroEvaluator<>(searchNodeFactory, predictor)
+                new AlphaZeroEvaluator<>(searchNodeFactory, predictor, isModelKnown)
             );
             var searchExpansionCondition = new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep);
             switch (policyMode_) {

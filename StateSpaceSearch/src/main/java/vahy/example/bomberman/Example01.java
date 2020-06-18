@@ -19,7 +19,6 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.search.MCTS.MCTSPolicyDefinitionSupplier;
@@ -70,7 +69,7 @@ public class Example01 {
         var asdf = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         int totalEntityCount = asdf.getTotalEntityCount();
 
-        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount);
+        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
 
 //        var mctsRolloutSupplier = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, cpuct, treeExpansionCount, discountFactor, rolloutCount);
