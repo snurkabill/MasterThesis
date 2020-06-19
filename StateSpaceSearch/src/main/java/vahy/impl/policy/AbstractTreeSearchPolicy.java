@@ -12,7 +12,6 @@ import vahy.api.search.node.NodeMetadata;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
 import vahy.impl.search.tree.SearchTreeImpl;
-import vahy.timer.SimpleTimer;
 
 import java.util.SplittableRandom;
 
@@ -30,7 +29,6 @@ public abstract class AbstractTreeSearchPolicy<
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
     private final TreeUpdateCondition treeUpdateCondition;
-    private final SimpleTimer timer = new SimpleTimer(); // TODO: take as arg in constructor
 
     protected final SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree;
 
@@ -70,7 +68,6 @@ public abstract class AbstractTreeSearchPolicy<
         if(DEBUG_ENABLED) {
             checkStateRoot(gameState);
         }
-        timer.startTimer();
         treeUpdateCondition.treeUpdateRequired();
         for (int i = 0; treeUpdateCondition.isConditionSatisfied(); i++) {
             if(TRACE_ENABLED) {
@@ -79,7 +76,6 @@ public abstract class AbstractTreeSearchPolicy<
             searchTree.expandTree();
         }
         treeUpdateCondition.treeUpdateFinished();
-        timer.stopTimer();
     }
 
     protected void checkStateRoot(StateWrapper<TAction, TObservation, TState> gameState) {

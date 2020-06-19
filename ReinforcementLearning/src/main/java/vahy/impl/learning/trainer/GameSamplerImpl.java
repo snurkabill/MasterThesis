@@ -72,6 +72,7 @@ public class GameSamplerImpl<
         this.totalPolicyCount = policyCategoryList.stream().mapToInt(x -> x.getPolicySupplierList().size()).sum();
         this.policyShuffleStrategy = policyShuffleStrategy;
         this.expectedPolicyCategoryInfoList = expectedPolicyCategoryInfoList;
+        checkPolicyCount(expectedPolicyCategoryInfoList, policyCategoryList);
     }
 
     private void checkPolicyCount(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> providedPolicyCategories) {
@@ -90,7 +91,6 @@ public class GameSamplerImpl<
     }
 
     private PolicyIdTranslationMap createPolicyTranslationMap(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> providedPolicyCategories) {
-        checkPolicyCount(requestedCategoryList, providedPolicyCategories); // TODO: move to constructor
         var map = new PolicyIdTranslationMap(this.totalPolicyCount);
 
         switch (policyShuffleStrategy) {

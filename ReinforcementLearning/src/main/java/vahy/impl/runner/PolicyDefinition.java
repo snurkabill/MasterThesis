@@ -17,6 +17,7 @@ public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservati
     private final int categoryId;
     private final PolicySupplierFactory<TAction, TObservation, TState, TPolicyRecord> policySupplierFactory;
     private final List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
+    private final OuterDefPolicySupplier<TAction, TObservation, TState, TPolicyRecord> outerDefPolicySupplier;
 
     public PolicyDefinition(int policyId,
                             int categoryId,
@@ -26,6 +27,7 @@ public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservati
         this.categoryId = categoryId;
         this.policySupplierFactory = (policyId_, categoryId_, random_) -> new PolicySupplierImpl<>(policyId_, categoryId_, random_, outerDefPolicySupplier);
         this.trainablePredictorSetupList = trainablePredictorSetupList;
+        this.outerDefPolicySupplier = outerDefPolicySupplier;
     }
 
     public int getPolicyId() {
@@ -42,5 +44,15 @@ public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservati
 
     public List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> getTrainablePredictorSetupList() {
         return trainablePredictorSetupList;
+    }
+
+    @Override
+    public String toString() {
+        return "PolicyDefinition{" +
+            "policyId=" + policyId +
+            ", categoryId=" + categoryId +
+            ", OuterDefPolicySupplier=" + outerDefPolicySupplier +
+            ", trainablePredictorSetupList=" + trainablePredictorSetupList +
+            '}';
     }
 }

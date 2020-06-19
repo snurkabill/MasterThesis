@@ -113,8 +113,9 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
         if(DEBUG_ENABLED) {
             logger.debug("Partially fitting TF model on [{}] inputs with random.nextInt(): [{}]", input.length, random.nextInt());
+            timer.startTimer();
         }
-        timer.startTimer();
+
         int[] order = new int[input.length];
         for (int i = 0; i < order.length; i++) {
             order[i] = i;
@@ -148,8 +149,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
                 tfTarget.close();
             }
         }
-        timer.stopTimer();
         if(DEBUG_ENABLED) {
+            timer.stopTimer();
             logger.debug("Training of [{}] inputs with minibatch size [{}] took [{}] milliseconds. Samples per sec: [{}], Ending with random.nextInt(): [{}]",
                 input.length, batchSize, timer.getTotalTimeInMillis() / 1000.0, timer.samplesPerSec(input.length), random.nextInt());
         }

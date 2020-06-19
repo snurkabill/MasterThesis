@@ -37,6 +37,13 @@ public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObserva
         return outerDefPolicySupplier.apply(initialState, policyMode, policyId, random.split());
     }
 
-
-
+    @Override
+    public String toString() {
+        return "PolicySupplierImpl{" +
+            "policyId=" + policyId +
+            ", policyCategoryId=" + policyCategoryId +
+            ", random=" + random +
+            ", outerDefPolicySupplier=" + outerDefPolicySupplier +
+            '}';
+    }
 }
