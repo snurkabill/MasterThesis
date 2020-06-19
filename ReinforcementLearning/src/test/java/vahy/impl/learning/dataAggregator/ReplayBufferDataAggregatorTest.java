@@ -1,5 +1,6 @@
 package vahy.impl.learning.dataAggregator;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import vahy.impl.learning.model.MutableDoubleArray;
@@ -33,8 +34,8 @@ public class ReplayBufferDataAggregatorTest {
         assertEquals(targets.length, 6);
 
         for (int i = 0; i < inputs.length; i++) {
-            assertEquals(inputs[i].getObservedVector(), data.get(i).getFirst().getObservedVector());
-            assertEquals(targets[i], data.get(i).getSecond().getDoubleArray());
+            assertArrayEquals(inputs[i].getObservedVector(), data.get(i).getFirst().getObservedVector());
+            assertArrayEquals(targets[i], data.get(i).getSecond().getDoubleArray());
         }
 
     }
@@ -71,8 +72,8 @@ public class ReplayBufferDataAggregatorTest {
         assertEquals(targets.length, 6);
 
         for (int i = 0; i < inputs.length; i++) {
-            assertEquals(inputs[i].getObservedVector(), data.get(i).getFirst().getObservedVector());
-            assertEquals(targets[i], data.get(i).getSecond().getDoubleArray());
+            assertArrayEquals(inputs[i].getObservedVector(), data.get(i).getFirst().getObservedVector());
+            assertArrayEquals(targets[i], data.get(i).getSecond().getDoubleArray());
         }
 
     }
@@ -116,13 +117,13 @@ public class ReplayBufferDataAggregatorTest {
         assertEquals(targets.length, 9);
 
         for (int i = 0; i < data2.size(); i++) {
-            assertEquals(inputs[i].getObservedVector(), data2.get(i).getFirst().getObservedVector());
-            assertEquals(targets[i], data2.get(i).getSecond().getDoubleArray());
+            assertArrayEquals(inputs[i].getObservedVector(), data2.get(i).getFirst().getObservedVector());
+            assertArrayEquals(targets[i], data2.get(i).getSecond().getDoubleArray());
         }
 
         for (int i = data2.size(); i < data2.size() + data3.size(); i++) {
-            assertEquals(inputs[i].getObservedVector(), data3.get(i - data2.size()).getFirst().getObservedVector());
-            assertEquals(targets[i], data3.get(i - data2.size()).getSecond().getDoubleArray());
+            assertArrayEquals(inputs[i].getObservedVector(), data3.get(i - data2.size()).getFirst().getObservedVector());
+            assertArrayEquals(targets[i], data3.get(i - data2.size()).getSecond().getDoubleArray());
         }
 
     }

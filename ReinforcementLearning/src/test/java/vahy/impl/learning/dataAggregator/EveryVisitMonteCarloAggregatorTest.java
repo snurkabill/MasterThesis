@@ -1,5 +1,6 @@
 package vahy.impl.learning.dataAggregator;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import vahy.impl.learning.model.MutableDoubleArray;
@@ -31,13 +32,13 @@ public class EveryVisitMonteCarloAggregatorTest {
         assertEquals(inputs.length, 3);
         assertEquals(targets.length, 3);
 
-        assertEquals(targets[0], new double[] {2, 0});
-        assertEquals(targets[1], new double[] {3, 0});
-        assertEquals(targets[2], new double[] {4, 0});
+        assertArrayEquals(targets[0], new double[] {2, 0});
+        assertArrayEquals(targets[1], new double[] {3, 0});
+        assertArrayEquals(targets[2], new double[] {4, 0});
 
-        assertEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
-        assertEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
-        assertEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
+        assertArrayEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
+        assertArrayEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
+        assertArrayEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
     }
 
     @Test
@@ -65,13 +66,13 @@ public class EveryVisitMonteCarloAggregatorTest {
         assertEquals(inputs.length, 3);
         assertEquals(targets.length, 3);
 
-        assertEquals(targets[0], new double[] {2, 1});
-        assertEquals(targets[1], new double[] {3, 2});
-        assertEquals(targets[2], new double[] {4, 3});
+        assertArrayEquals(targets[0], new double[] {2, 1});
+        assertArrayEquals(targets[1], new double[] {3, 2});
+        assertArrayEquals(targets[2], new double[] {4, 3});
 
-        assertEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
-        assertEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
-        assertEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
+        assertArrayEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
+        assertArrayEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
+        assertArrayEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
     }
 
     @Test
@@ -102,12 +103,12 @@ public class EveryVisitMonteCarloAggregatorTest {
         assertEquals(inputs.length, 3);
         assertEquals(targets.length, 3);
 
-        assertEquals(targets[0], new double[] {3, 1});
-        assertEquals(targets[1], new double[] {4, 2});
-        assertEquals(targets[2], new double[] {5, 3});
+        assertArrayEquals(targets[0], new double[] {3, 1});
+        assertArrayEquals(targets[1], new double[] {4, 2});
+        assertArrayEquals(targets[2], new double[] {5, 3});
 
-        assertEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
-        assertEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
-        assertEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
+        assertArrayEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
+        assertArrayEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
+        assertArrayEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
     }
 }
