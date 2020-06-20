@@ -1,4 +1,4 @@
-package vahy.impl.search.alphazero;
+package vahy.impl.policy.alphazero;
 
 import vahy.api.episode.EpisodeResults;
 import vahy.api.learning.trainer.EpisodeDataMaker;

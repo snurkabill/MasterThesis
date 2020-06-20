@@ -21,7 +21,7 @@ import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
-import vahy.impl.search.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 
 import java.io.IOException;
 import java.nio.file.Path;

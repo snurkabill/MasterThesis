@@ -23,9 +23,9 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.search.alphazero.AlphaZeroDataMaker;
-import vahy.impl.search.alphazero.AlphaZeroDataTablePredictor;
-import vahy.impl.search.alphazero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
+import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

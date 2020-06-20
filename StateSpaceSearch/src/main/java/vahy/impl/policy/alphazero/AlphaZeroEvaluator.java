@@ -1,4 +1,4 @@
-package vahy.impl.search.alphazero;
+package vahy.impl.policy.alphazero;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

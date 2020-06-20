@@ -21,10 +21,10 @@ import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.DataTablePredictorWithLr;
-import vahy.impl.search.alphazero.AlphaZeroDataMaker;
-import vahy.impl.search.alphazero.AlphaZeroDataTablePredictor;
-import vahy.impl.search.alphazero.AlphaZeroPolicyDefinitionSupplier;
-import vahy.impl.search.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
+import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 
 import java.io.IOException;
 import java.nio.file.Path;

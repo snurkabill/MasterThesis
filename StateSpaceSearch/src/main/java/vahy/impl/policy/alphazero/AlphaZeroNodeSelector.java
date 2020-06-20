@@ -1,31 +1,29 @@
-package vahy.impl.search.mcts;
+package vahy.impl.policy.alphazero;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.nodeSelector.RandomizedNodeSelector;
+import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.search.nodeSelector.AbstractSamplingNodeSelector;
 
 import java.util.SplittableRandom;
 
-public class Ucb1NodeSelector<
-    TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>>
-    extends RandomizedNodeSelector<TAction, TObservation, MCTSMetadata, TState> {
+public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
+    extends AbstractSamplingNodeSelector<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 
-    protected final double cpuctParameter;
+    private final double cpuctParameter;
     private final double[] valueArray;
     private final int[] indexArray;
 
-    public Ucb1NodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
+    public AlphaZeroNodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
         super(random);
         this.cpuctParameter = cpuctParameter;
         this.indexArray = new int[maxBranchingCount];
         this.valueArray = new double[maxBranchingCount];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TObservation, MCTSMetadata, TState> node) {
+
+    private TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
@@ -54,7 +52,7 @@ public class Ucb1NodeSelector<
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
                 var vValue = (valueArray[i] - min) / norm;
-                var uValue = cpuctParameter * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
+                var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
                 var quValue = vValue + uValue;
 //                logger.trace("Index: [{}], qValue[{}]", i, quValue);
                 if(quValue > maxValue) {
@@ -75,7 +73,7 @@ public class Ucb1NodeSelector<
         } else {
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
-                var quValue = cpuctParameter * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
+                var quValue = cpuctParameter * metadata.getPriorProbability() *  Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
 //                logger.trace("Index: [{}], qValue[{}]", i, quValue);
                 if(quValue > maxValue) {
                     maxIndex = i;
@@ -93,6 +91,9 @@ public class Ucb1NodeSelector<
                 }
             }
         }
+        if(maxIndex == -1) {
+            System.out.println("asdf");
+        }
         if(maxIndexCount == 0) {
             return possibleActions[maxIndex];
         } else {
@@ -100,33 +101,20 @@ public class Ucb1NodeSelector<
         }
     }
 
+    private TAction getBestAction(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
+        if(node.getStateWrapper().isEnvironmentEntityOnTurn()) {
+            return sampleAction(node);
+        } else {
+            return getBestAction_inner(node);
+        }
+    }
+
     @Override
-    public SearchNode<TAction, TObservation, MCTSMetadata, TState> selectNextNode(SearchNode<TAction, TObservation, MCTSMetadata, TState> root) {
+    public SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> selectNextNode(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> root) {
         var node = root;
         while(!node.isLeaf()) {
-            var bestAction = getBestAction(node);
-            node = node.getChildNodeMap().get(bestAction);
-//
-//            int nodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
-//            var entityInGameId = node.getStateWrapper().getInGameEntityOnTurnId();
-//            var action = node.getChildNodeStream()
-//                .collect(StreamUtils.toRandomizedMaxCollector(
-//                    Comparator.comparing(
-//                        o -> calculateUCBValue( // TODO: optimize
-//                            o.getSearchNodeMetadata().getExpectedReward()[entityInGameId] + o.getSearchNodeMetadata().getGainedReward()[entityInGameId],
-//                            explorationConstant,
-//                            nodeVisitCount,
-//                            o.getSearchNodeMetadata().getVisitCounter())),
-//                    random))
-//                .getAppliedAction();
-//            node = node.getChildNodeMap().get(action);
+            node = node.getChildNodeMap().get(getBestAction(node));
         }
         return node;
     }
-
-    protected double calculateUCBValue(double estimatedValue, double explorationConstant, int parentVisitCount, int actionVisitCount) {
-        return estimatedValue + explorationConstant * Math.sqrt(Math.log(parentVisitCount) / (1.0 + actionVisitCount));
-
-    }
-
 }

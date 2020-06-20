@@ -25,7 +25,7 @@ import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.search.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.utils.JUnitParameterizedTestHelper;
 
 import java.nio.file.Path;

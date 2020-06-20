@@ -1,4 +1,4 @@
-package vahy.impl.search.mcts;
+package vahy.impl.policy.mcts;
 
 import vahy.impl.search.node.nodeMetadata.BaseNodeMetadata;
 

@@ -1,4 +1,4 @@
-package vahy.impl.search.mcts;
+package vahy.impl.policy.mcts;
 
 import org.jetbrains.annotations.NotNull;
 import vahy.api.model.Action;

@@ -1,4 +1,4 @@
-package vahy.impl.search.alphazero;
+package vahy.impl.policy.alphazero;
 
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.DataTablePredictor;

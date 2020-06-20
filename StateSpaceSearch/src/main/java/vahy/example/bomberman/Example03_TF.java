@@ -29,10 +29,10 @@ import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tf.TFHelper;
 import vahy.impl.predictor.tf.TFModelImproved;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.search.alphazero.AlphaZeroDataMaker;
-import vahy.impl.search.alphazero.AlphaZeroPolicyDefinitionSupplier;
-import vahy.impl.search.alphazero.AlphaZeroTablePredictor;
-import vahy.impl.search.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.policy.alphazero.AlphaZeroTablePredictor;
+import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 
 import java.io.IOException;
 import java.nio.file.Path;
