@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaZero;
+package vahy.impl.search.alphazero;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;

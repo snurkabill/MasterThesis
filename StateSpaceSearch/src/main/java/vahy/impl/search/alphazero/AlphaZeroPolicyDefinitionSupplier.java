@@ -1,4 +1,4 @@
-package vahy.impl.search.AlphaZero;
+package vahy.impl.search.alphazero;
 
 import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.ProblemConfig;

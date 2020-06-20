@@ -5,7 +5,7 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.RandomizedNodeSelector;
-import vahy.impl.search.MCTS.MCTSMetadata;
+import vahy.impl.search.mcts.MCTSMetadata;
 import vahy.utils.StreamUtils;
 
 import java.util.Comparator;

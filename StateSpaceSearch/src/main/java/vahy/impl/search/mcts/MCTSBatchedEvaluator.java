@@ -1,4 +1,4 @@
-package vahy.impl.search.MCTS;
+package vahy.impl.search.mcts;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

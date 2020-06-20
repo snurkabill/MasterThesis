@@ -1,4 +1,4 @@
-package vahy.mcts;
+package vahy.alphazero;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,9 +23,9 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.search.AlphaZero.AlphaZeroDataMaker;
-import vahy.impl.search.AlphaZero.AlphaZeroDataTablePredictor;
-import vahy.impl.search.AlphaZero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.search.alphazero.AlphaZeroDataMaker;
+import vahy.impl.search.alphazero.AlphaZeroDataTablePredictor;
+import vahy.impl.search.alphazero.AlphaZeroPolicyDefinitionSupplier;
 
 import java.nio.file.Path;
 import java.util.ArrayList;

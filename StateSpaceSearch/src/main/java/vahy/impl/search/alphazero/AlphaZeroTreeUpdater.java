@@ -1,4 +1,4 @@
-package vahy.impl.search.MCTS;
+package vahy.impl.search.alphazero;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,17 +9,17 @@ import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 
-public class MCTSTreeUpdater<
+public class AlphaZeroTreeUpdater<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    implements TreeUpdater<TAction, TObservation, MCTSMetadata, TState> {
+    implements TreeUpdater<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MCTSTreeUpdater.class);
+    private static final Logger logger = LoggerFactory.getLogger(AlphaZeroTreeUpdater.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     @Override
-    public void updateTree(SearchNode<TAction, TObservation, MCTSMetadata, TState> expandedNode) {
+    public void updateTree(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> expandedNode) {
         int i = 0;
         var stateWrapper = expandedNode.getStateWrapper();
         var nodeMetadata = expandedNode.getSearchNodeMetadata();
@@ -39,8 +39,8 @@ public class MCTSTreeUpdater<
         }
     }
 
-    private void updateNode(SearchNode<TAction, TObservation, MCTSMetadata, TState> expandedNode, double[] estimatedLeafReward) {
-        MCTSMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
+    private void updateNode(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> expandedNode, double[] estimatedLeafReward) {
+        AlphaZeroNodeMetadata<TAction> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
         var totalEstimations = searchNodeMetadata.getSumOfTotalEstimations();
         if(searchNodeMetadata.getVisitCounter() == 1) {

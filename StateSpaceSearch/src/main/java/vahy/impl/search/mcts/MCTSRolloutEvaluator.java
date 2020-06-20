@@ -1,4 +1,4 @@
-package vahy.impl.search.MCTS;
+package vahy.impl.search.mcts;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -35,7 +35,11 @@ public class MCTSRolloutEvaluator<
 
     @Override
     protected ImmutableTuple<double[], Integer> estimateRewards(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNode) {
+        if(selectedNode.isFinalNode()) {
+            return new ImmutableTuple<>(new double[selectedNode.getSearchNodeMetadata().getExpectedReward().length], 0);
+        }
         List<ImmutableTuple<double[], Integer>> rewardList = new ArrayList<>(rolloutCount);
+
         for (int i = 0; i < rolloutCount; i++) {
             rewardList.add(runRandomWalkSimulation(selectedNode));
         }

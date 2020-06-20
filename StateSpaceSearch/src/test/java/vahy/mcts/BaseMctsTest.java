@@ -21,7 +21,7 @@ import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
-import vahy.impl.search.MCTS.MCTSPolicyDefinitionSupplier;
+import vahy.impl.search.mcts.MCTSPolicyDefinitionSupplier;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;

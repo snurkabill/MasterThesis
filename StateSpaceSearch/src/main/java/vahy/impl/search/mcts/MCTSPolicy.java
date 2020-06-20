@@ -1,4 +1,4 @@
-package vahy.impl.search.MCTS;
+package vahy.impl.search.mcts;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;

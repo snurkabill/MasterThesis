@@ -1,8 +1,8 @@
-package vahy.impl.search.AlphaZero;
+package vahy.impl.search.alphazero;
 
 import vahy.api.model.Action;
 import vahy.api.search.node.ProbabilisticNodeMetadata;
-import vahy.impl.search.MCTS.MCTSMetadata;
+import vahy.impl.search.mcts.MCTSMetadata;
 
 import java.util.EnumMap;
 
