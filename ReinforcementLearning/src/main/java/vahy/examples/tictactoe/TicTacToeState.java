@@ -228,7 +228,31 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
 
     @Override
     public String readableStringRepresentation() {
-        return "DummySoFar";
+        StringBuilder builder = new StringBuilder((dimension + 2) * (dimension + 2));
+        for (int i = 0; i < dimension + 2; i++) {
+            for (int j = 0; j < dimension + 2; j++) {
+                if(i == 0 || i == dimension + 1) {
+                    builder.append("-");
+                } else if(j == 0 || j == dimension + 1) {
+                    builder.append("|");
+                } else {
+                    switch (playground[i - 1][j - 1]) {
+                        case EMPTY:
+                            builder.append(" ");
+                            break;
+                        case PLAYER_ZERO_SYMBOL:
+                            builder.append("0");
+                            break;
+                        case PLAYER_ONE_SYMBOL:
+                            builder.append("X");
+                            break;
+                        default: throw new IllegalStateException("wtf" + playground[i - 1][j - 1]);
+                    }
+                }
+            }
+            builder.append(System.lineSeparator());
+        }
+        return builder.toString();
     }
 
     @Override
