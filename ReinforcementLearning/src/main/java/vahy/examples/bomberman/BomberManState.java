@@ -8,6 +8,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -754,6 +755,15 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     prediction[i] = apply(observationArray[i]);
                 }
                 return prediction;
+            }
+
+            @Override
+            public List<double[]> apply(List<BomberManState> observationArray) {
+                var output = new ArrayList<double[]>(observationArray.size());
+                for (int i = 0; i < observationArray.size(); i++) {
+                    output.add(apply(observationArray.get(i)));
+                }
+                return output;
             }
         };
     }

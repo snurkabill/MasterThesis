@@ -31,9 +31,6 @@ public abstract class AbstractNodeEvaluator<
         if(selectedNode.isFinalNode()) {
             throw new IllegalStateException("Final node cannot be expanded.");
         }
-        if(selectedNode.getSearchNodeMetadata().isEvaluated()) {
-            throw new IllegalStateException("Node is already evaluated");
-        }
         var expandedNodes = 0;
         if(selectedNode.isRoot()) {
             expandedNodes += evaluateNode_inner(selectedNode);

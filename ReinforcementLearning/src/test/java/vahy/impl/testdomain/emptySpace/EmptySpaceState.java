@@ -7,6 +7,7 @@ import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,6 +66,15 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
                 var prediction = new double[observationArray.length][];
                 Arrays.fill(prediction, fixedPrediction);
                 return prediction;
+            }
+
+            @Override
+            public List<double[]> apply(List<EmptySpaceState> observationArray) {
+                var output = new ArrayList<double[]>(observationArray.size());
+                for (int i = 0; i < observationArray.size(); i++) {
+                    output.add(apply(observationArray.get(i)));
+                }
+                return output;
             }
         };
     }

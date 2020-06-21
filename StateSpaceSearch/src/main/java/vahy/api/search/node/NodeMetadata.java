@@ -6,10 +6,6 @@ public interface NodeMetadata {
 
     double[] getGainedReward();
 
-    boolean isEvaluated();
-
-    void setEvaluated();
-
 //    EnumMap<TAction, Double> getChildPriorProbabilities();
 //
 //    double getPriorProbability();

@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.nodeSelector.RandomizedNodeSelector;
+import vahy.impl.search.nodeSelector.EnvironmentSamplingNodeSelector;
 
 import java.util.SplittableRandom;
 
@@ -12,7 +12,7 @@ public class Ucb1NodeSelector<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends RandomizedNodeSelector<TAction, TObservation, MCTSMetadata, TState> {
+    extends EnvironmentSamplingNodeSelector<TAction, TObservation, MCTSMetadata, TState> {
 
     protected final double cpuctParameter;
     private final double[] valueArray;
@@ -25,7 +25,8 @@ public class Ucb1NodeSelector<
         this.valueArray = new double[maxBranchingCount];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TObservation, MCTSMetadata, TState> node) {
+    @Override
+    protected TAction getBestAction_inner(SearchNode<TAction, TObservation, MCTSMetadata, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();

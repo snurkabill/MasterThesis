@@ -23,16 +23,16 @@ import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
+import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.predictor.DataTablePredictorWithLr;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tf.TFHelper;
 import vahy.impl.predictor.tf.TFModelImproved;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
-import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
-import vahy.impl.policy.alphazero.AlphaZeroTablePredictor;
-import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -196,7 +196,7 @@ public class Example03_TF {
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
             defaultPrediction[i] = 1.0 / (totalActionCount);
         }
-        var trainablePredictorAlphaGoEval_1 = new AlphaZeroTablePredictor(defaultPrediction, totalEntityCount, 0.1, totalActionCount);
+        var trainablePredictorAlphaGoEval_1 = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount);
         var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(environmentPolicyCount + 4, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 

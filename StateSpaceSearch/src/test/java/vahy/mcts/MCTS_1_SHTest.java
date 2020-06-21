@@ -113,7 +113,7 @@ public class MCTS_1_SHTest {
             .isModelKnown(true)
             .reward(100)
             .gameStringRepresentation(SHInstance.BENCHMARK_03)
-            .maximalStepCountBound(500)
+            .maximalStepCountBound(100)
             .stepPenalty(10)
             .trapProbability(trapProbability)
             .buildConfig();
@@ -158,7 +158,7 @@ public class MCTS_1_SHTest {
             .isModelKnown(true)
             .reward(100)
             .gameStringRepresentation(SHInstance.BENCHMARK_05)
-            .maximalStepCountBound(500)
+            .maximalStepCountBound(100)
             .stepPenalty(1)
             .trapProbability(trapProbability)
             .buildConfig();
@@ -203,7 +203,7 @@ public class MCTS_1_SHTest {
             .isModelKnown(true)
             .reward(100)
             .gameStringRepresentation(SHInstance.BENCHMARK_12)
-            .maximalStepCountBound(500)
+            .maximalStepCountBound(100)
             .stepPenalty(10)
             .trapProbability(trapProbability)
             .buildConfig();

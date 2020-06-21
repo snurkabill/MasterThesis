@@ -10,6 +10,7 @@ import vahy.utils.ArrayUtils;
 import vahy.utils.EnumUtils;
 import vahy.utils.ImmutableTuple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -20,7 +21,8 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     public static final int REWARD_OBSERVATION_SHIFT = 3;
     public static final int ENVIRONMENT_ID = 0;
     public static final int PLAYER_ID = 1;
-    public static final SHAction[] ENVIRONMENT_ACTION_ARRAY = new SHAction[] {SHAction.NO_ACTION, SHAction.TRAP};
+    public static final SHAction[] ENVIRONMENT_NO_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.NO_ACTION};
+    public static final SHAction[] ENVIRONMENT_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.TRAP, SHAction.NO_ACTION};
     public static final SHAction[] PLAYER_ENTITY_ACTION_ARRAY = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
 
     private final int agentXCoordination;
@@ -92,7 +94,12 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
         if(isAgentTurn) {
             return PLAYER_ENTITY_ACTION_ARRAY;
         } else {
-            return this.getEnvironmentProbabilities().keySet().toArray(new SHAction[0]);
+            var traps = staticPart.getTrapProbabilities();
+            if(traps[agentXCoordination][agentYCoordination] != 0) {
+                return ENVIRONMENT_TRAP_ACTION_ARRAY;
+            } else {
+                return ENVIRONMENT_NO_TRAP_ACTION_ARRAY;
+            }
         }
     }
 
@@ -233,6 +240,15 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                     prediction[i] = apply(observationArray[i]);
                 }
                 return prediction;
+            }
+
+            @Override
+            public List<double[]> apply(List<SHState> shStates) {
+                var output = new ArrayList<double[]>(shStates.size());
+                for (int i = 0; i < shStates.size(); i++) {
+                    output.add(apply(shStates.get(i)));
+                }
+                return output;
             }
         };
     }

@@ -4,12 +4,12 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.search.nodeSelector.AbstractSamplingNodeSelector;
+import vahy.impl.search.nodeSelector.EnvironmentSamplingNodeSelector;
 
 import java.util.SplittableRandom;
 
 public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
-    extends AbstractSamplingNodeSelector<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
+    extends EnvironmentSamplingNodeSelector<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     private final double[] valueArray;
@@ -22,8 +22,8 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
         this.valueArray = new double[maxBranchingCount];
     }
 
-
-    private TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
+    @Override
+    protected TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
@@ -98,14 +98,6 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
             return possibleActions[maxIndex];
         } else {
             return possibleActions[indexArray[random.nextInt(maxIndexCount)]];
-        }
-    }
-
-    private TAction getBestAction(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
-        if(node.getStateWrapper().isEnvironmentEntityOnTurn()) {
-            return sampleAction(node);
-        } else {
-            return getBestAction_inner(node);
         }
     }
 

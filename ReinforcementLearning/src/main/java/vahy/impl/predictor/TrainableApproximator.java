@@ -6,6 +6,8 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,6 +54,18 @@ public class TrainableApproximator implements TrainablePredictor {
             input[i] = doubleVectorialObservationArray[i].getObservedVector();
         }
         return supervisedTrainableModel.predict(input);
+    }
+
+    @Override
+    public List<double[]> apply(List<DoubleVector> doubleVectors) {
+        double[][] inputArray = new double[doubleVectors.size()][];
+        for (int i = 0; i < doubleVectors.size(); i++) {
+            inputArray[i] = doubleVectors.get(i).getObservedVector();
+        }
+        var output = supervisedTrainableModel.predict(inputArray);
+        var outputList = new ArrayList<double[]>(output.length);
+        outputList.addAll(Arrays.asList(output));
+        return outputList;
     }
 
     @Override

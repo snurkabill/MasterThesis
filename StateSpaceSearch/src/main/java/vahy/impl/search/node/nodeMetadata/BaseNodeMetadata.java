@@ -8,7 +8,6 @@ public class BaseNodeMetadata implements NodeMetadata {
 
     private final double[] cumulativeReward;
     private final double[] gainedReward;
-    private boolean isEvaluated;
 
     public BaseNodeMetadata(double[] cumulativeReward, double[] gainedReward) {
         this.cumulativeReward = cumulativeReward;
@@ -23,16 +22,6 @@ public class BaseNodeMetadata implements NodeMetadata {
     @Override
     public double[] getGainedReward() {
         return this.gainedReward;
-    }
-
-    @Override
-    public boolean isEvaluated() {
-        return this.isEvaluated;
-    }
-
-    @Override
-    public void setEvaluated() {
-        this.isEvaluated = true;
     }
 
     @Override

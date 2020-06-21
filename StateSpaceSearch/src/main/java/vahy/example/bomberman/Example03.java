@@ -21,11 +21,11 @@ import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
-import vahy.impl.policy.alphazero.AlphaZeroTablePredictor;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.predictor.DataTablePredictor;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -143,7 +143,7 @@ public class Example03 {
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
             defaultPrediction[i] = 1.0 / (totalActionCount);
         }
-        var trainablePredictorAlphaGoEval_1 = new AlphaZeroTablePredictor(defaultPrediction, totalEntityCount, 0.1, totalActionCount);
+        var trainablePredictorAlphaGoEval_1 = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount);
         var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(environmentPolicyCount + 4, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
