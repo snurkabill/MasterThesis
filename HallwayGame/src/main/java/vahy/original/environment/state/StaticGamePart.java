@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 public class StaticGamePart {
 
+    private static final double[] emptyReward = new double[] {0.0, 0.0};
     private final StateRepresentation stateRepresentation;
     private final double[][] trapProbabilities;
     private final double[][] rewardsAtStart;
@@ -57,6 +58,10 @@ public class StaticGamePart {
                 }
             }
         }
+    }
+
+    public static double[] getEmptyReward() {
+        return emptyReward;
     }
 
     public double[][] getTrapProbabilities() {

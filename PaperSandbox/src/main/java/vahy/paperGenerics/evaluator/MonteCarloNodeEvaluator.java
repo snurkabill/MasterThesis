@@ -1,7 +1,8 @@
 package vahy.paperGenerics.evaluator;
 
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapper;
 import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -70,19 +71,19 @@ public class MonteCarloNodeEvaluator<
 
     protected ImmutableTriple<Double, Boolean, Integer> runRandomWalkSimulation(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
         List<Double> rewardList = new ArrayList<>();
-        TState wrappedState = node.getStateWrapper();
+        var wrappedState = node.getStateWrapper();
         var nodeCounter = 0;
         while (!wrappedState.isFinalState()) {
-            TAction action = getNextAction(wrappedState);
-            StateRewardReturn<TAction, DoubleVector, TState> stateRewardReturn = wrappedState.applyAction(action);
+            var action = getNextAction(wrappedState);
+            var stateRewardReturn = wrappedState.applyAction(action);
             rewardList.add(stateRewardReturn.getReward());
             wrappedState = stateRewardReturn.getState();
             nodeCounter++;
         }
-        return new ImmutableTriple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit(), nodeCounter);
+        return new ImmutableTriple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), ((PaperStateWrapper<TAction, DoubleVector, TState>)wrappedState).isRiskHit(), nodeCounter);
     }
 
-    protected TAction getNextAction(TState wrappedState) {
+    protected TAction getNextAction(StateWrapper<TAction, DoubleVector, TState> wrappedState) {
         if(wrappedState.isPlayerTurn()) {
             TAction[] actions = wrappedState.getAllPossibleActions();
             int actionIndex = random.nextInt(actions.length);
@@ -90,7 +91,7 @@ public class MonteCarloNodeEvaluator<
         } else {
             TAction[] actions = wrappedState.getAllPossibleActions();
             if(knownModel != null) {
-                double[] probabilities = knownModel.apply(wrappedState);
+                double[] probabilities = knownModel.apply(wrappedState.getWrappedState());
                 return actions[RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random)];
             } else {
                 int actionIndex = random.nextInt(actions.length);

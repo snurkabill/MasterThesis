@@ -2,8 +2,8 @@ package vahy.paperGenerics.evaluator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
-import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 import vahy.api.search.node.SearchNode;
@@ -46,13 +46,13 @@ public class RamcpNodeEvaluator<
         List<Double> rewardList = new ArrayList<>();
         var nodeCounter = 0;
         List<SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState>> nodeList = new ArrayList<>();
-        TState wrappedState = node.getStateWrapper();
+        var wrappedState = node.getStateWrapper();
         while (!parent.isFinalNode()) {
 
             initializeChildNodePrioriProbabilityMap(parent);
 
-            TAction action = getNextAction(wrappedState);
-            StateRewardReturn<TAction, DoubleVector, TState> stateRewardReturn = wrappedState.applyAction(action);
+            var action = getNextAction(wrappedState);
+            var stateRewardReturn = wrappedState.applyAction(action);
             var nextNode = searchNodeFactory.createNode(stateRewardReturn, parent, action);
             nodeList.add(nextNode);
             rewardList.add(stateRewardReturn.getReward());
@@ -61,13 +61,13 @@ public class RamcpNodeEvaluator<
             parent = nextNode;
             nodeCounter++;
         }
-        if(!parent.getStateWrapper().isRiskHit()) {
+        if(!((PaperStateWrapper<TAction, DoubleVector, TState>)parent.getStateWrapper()).isRiskHit()) {
             nodeCounter += createSuccessfulBranch(node, nodeList);
         }  else {
             node.getChildNodeMap().clear();
             node.getSearchNodeMetadata().getChildPriorProbabilities().clear();
         }
-        return new ImmutableTriple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), wrappedState.isRiskHit(), nodeCounter);
+        return new ImmutableTriple<>(DoubleScalarRewardAggregator.aggregateDiscount(rewardList, discountFactor), ((PaperStateWrapper<TAction, DoubleVector, TState>)wrappedState).isRiskHit(), nodeCounter);
     }
 
     private void initializeChildNodePrioriProbabilityMap(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node) {
@@ -96,7 +96,7 @@ public class RamcpNodeEvaluator<
         }
 
         var reward = parent.getSearchNodeMetadata().getCumulativeReward();
-        var risk = parent.getStateWrapper().isRiskHit() ? 1.0 : 0.0;
+        var risk = ((PaperStateWrapper<TAction, DoubleVector, TState>)parent.getStateWrapper()).isRiskHit() ? 1.0 : 0.0;
         parent = parent.getParent();
         if(!parent.isRoot()) {
             while(!parent.equals(node)) {

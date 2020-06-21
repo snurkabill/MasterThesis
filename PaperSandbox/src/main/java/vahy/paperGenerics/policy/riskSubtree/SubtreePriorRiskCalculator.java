@@ -1,5 +1,6 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -25,7 +26,7 @@ public class SubtreePriorRiskCalculator<
             var node = queue.poll();
             if(node.getFirst().isLeaf()) {
                 if(node.getFirst().isFinalNode()) {
-                    totalRisk += node.getFirst().getStateWrapper().isRiskHit() ? node.getSecond() : 0.0;
+                    totalRisk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getFirst().getStateWrapper()).isRiskHit() ? node.getSecond() : 0.0;
                 } else {
                     totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getPredictedRisk();
                 }

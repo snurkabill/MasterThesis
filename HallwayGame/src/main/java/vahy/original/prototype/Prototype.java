@@ -1,32 +1,49 @@
 package vahy.original.prototype;
 
 import vahy.api.experiment.ApproximatorConfigBuilder;
+import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.StochasticStrategy;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.experiment.SystemConfigBuilder;
 import vahy.api.learning.ApproximatorType;
 import vahy.api.learning.dataAggregator.DataAggregationAlgorithm;
+import vahy.api.learning.trainer.EpisodeDataMaker;
 import vahy.config.AlgorithmConfigBuilder;
 import vahy.config.EvaluatorType;
 import vahy.config.PaperAlgorithmConfig;
 import vahy.config.SelectorType;
+import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
+import vahy.impl.learning.trainer.PredictorTrainingSetup;
+import vahy.impl.model.observation.DoubleVector;
+import vahy.impl.predictor.DataTableDistributionPredictorWithLr;
+import vahy.impl.runner.PolicyDefinition;
+import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.HallwayStateImpl;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.HallwayGameInitialInstanceSupplier;
 import vahy.original.game.HallwayInstance;
-import vahy.paperGenerics.PaperExperimentBuilder;
+import vahy.paperGenerics.PaperRound;
+import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
+import vahy.paperGenerics.metadata.PaperMetadata;
+import vahy.paperGenerics.metadata.PaperMetadataFactory;
+import vahy.paperGenerics.policy.PaperPolicyRecord;
+import vahy.paperGenerics.policy.PaperPolicySupplierImpl;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
+import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V1;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -38,16 +55,87 @@ public class Prototype {
         var systemConfig = getSystemConfig();
         var problemConfig = getGameConfig();
 
-        var paperExperimentBuilder = new PaperExperimentBuilder<GameConfig, HallwayAction, HallwayStateImpl, HallwayStateImpl>()
-            .setActionClass(HallwayAction.class)
+        var commonAlgorithmConfig = new CommonAlgorithmConfig() {
+
+            @Override
+            public String toLog() {
+                return "";
+            }
+
+            @Override
+            public String toFile() {
+                return "";
+            }
+
+            @Override
+            public int getBatchEpisodeCount() {
+                return 1000;
+            }
+
+            @Override
+            public int getStageCount() {
+                return 1000;
+            }
+        };
+
+        EpisodeDataMaker<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord> dataMaker = new PaperEpisodeDataMaker_V1<>(1.0, 1);
+        var predictor = new DataTableDistributionPredictorWithLr(new double[] {0.0, 0.0, 0.0, 0.0, 0.0}, 0.001);
+
+        PredictorTrainingSetup<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord> predictorSetup = new PredictorTrainingSetup<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord>(
+            1,
+            predictor,
+            dataMaker,
+            new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>()));
+
+        var metadataFactory = new PaperMetadataFactory<HallwayAction, DoubleVector, HallwayStateImpl>(HallwayAction.class);
+        var paperTreeUpdater = new PaperTreeUpdater<HallwayAction, DoubleVector, HallwayStateImpl>();
+        var actionClazz = HallwayAction.class;
+
+        var strategiesProvider = new StrategiesProvider<HallwayAction, DoubleVector, PaperMetadata<HallwayAction>, HallwayStateImpl>(
+            actionClazz,
+            InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
+            InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
+            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+            ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
+            FlowOptimizerType.HARD_HARD,
+            SubTreeRiskCalculatorType.FLOW_SUM,
+            SubTreeRiskCalculatorType.PRIOR_SUM,
+            NoiseStrategy.NOISY_05_06);
+
+        PolicyDefinition<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord> policyDefinition = new PolicyDefinition<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord>(
+            1,
+            1,
+            new PaperPolicySupplierImpl<HallwayAction, DoubleVector, PaperMetadata<HallwayAction>, HallwayStateImpl>(
+                    actionClazz,
+                    metadataFactory,
+                    1.0,
+                    null,
+                    new PaperNodeEvaluator<>(
+                        new SearchNodeBaseFactoryImpl<HallwayAction, DoubleVector, PaperMetadata<HallwayAction>, HallwayStateImpl>(HallwayAction.class, metadataFactory),
+                        predictor,
+                        null,
+                        null,
+                        HallwayAction.playerActions,
+                        HallwayAction.environmentActions),
+                    paperTreeUpdater,
+                    new FixedUpdateCountTreeConditionFactory(100),
+                    strategiesProvider,
+                    () -> 0.5,
+                    () -> 1.0,
+                    () -> 1.0
+                ),
+            List.of(predictorSetup)
+            );
+
+
+        var roundBuilder = new PaperRound<GameConfig, HallwayAction, HallwayStateImpl>()
             .setSystemConfig(systemConfig)
-            .setAlgorithmConfigList(List.of(algorithmConfig))
             .setProblemConfig(problemConfig)
-            .setOpponentSupplier(HallwayPolicySupplier::new)
-            .setProblemInstanceInitializerSupplier(HallwayGameInitialInstanceSupplier::new);
+            .setCommonAlgorithmConfig(commonAlgorithmConfig)
+            .setInitialStateSupplier(HallwayGameInitialInstanceSupplier::new)
+            .setPolicyDefinitionList(List.of(policyDefinition));
 
-        paperExperimentBuilder.execute();
-
+        roundBuilder.execute();
     }
 
     private static GameConfig getGameConfig() {

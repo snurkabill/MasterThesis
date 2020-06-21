@@ -14,9 +14,9 @@ public interface PlayingDistributionProvider<
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>> {
 
-    PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
-                                                                                                                           double temperature,
-                                                                                                                           SplittableRandom random,
-                                                                                                                           double totalRiskAllowed);
+    PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
+                                                                                                       double temperature,
+                                                                                                       SplittableRandom random,
+                                                                                                       double totalRiskAllowed);
 
 }

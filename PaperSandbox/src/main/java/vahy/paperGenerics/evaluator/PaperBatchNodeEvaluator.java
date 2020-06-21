@@ -26,7 +26,7 @@ public class PaperBatchNodeEvaluator<
     private final int maximalEvaluationDepth;
     private final TState[] stateArray;
 
-    public PaperBatchNodeEvaluator(int policyId,
+    public PaperBatchNodeEvaluator(
                                    SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory,
                                    Predictor<DoubleVector> trainablePredictor,
                                    Predictor<DoubleVector> opponentApproximator,
@@ -35,7 +35,7 @@ public class PaperBatchNodeEvaluator<
                                    TAction[] allOpponentActions,
                                    int maximalEvaluationDepth,
                                    TState[] stateArray) {
-        super(policyId, searchNodeFactory, trainablePredictor, opponentApproximator, knownModel, allPlayerActions, allOpponentActions);
+        super(searchNodeFactory, trainablePredictor, opponentApproximator, knownModel, allPlayerActions, allOpponentActions);
         this.maximalEvaluationDepth = maximalEvaluationDepth;
         this.stateArray = stateArray;
     }

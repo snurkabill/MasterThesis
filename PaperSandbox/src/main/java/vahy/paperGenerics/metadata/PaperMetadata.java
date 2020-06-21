@@ -2,7 +2,7 @@ package vahy.paperGenerics.metadata;
 
 import com.quantego.clp.CLPVariable;
 import vahy.api.model.Action;
-import vahy.impl.search.MCTS.MonteCarloTreeSearchMetadata;
+import vahy.impl.policy.mcts.MonteCarloTreeSearchMetadata;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -86,15 +86,15 @@ public class PaperMetadata<TAction extends Enum<TAction> & Action> extends Monte
         String baseString = super.toString();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(baseString);
-        stringBuilder.append("\\nPriorProbability: ");
+        stringBuilder.append(System.lineSeparator()).append("nPriorProbability: ");
         stringBuilder.append(this.priorProbability);
-        stringBuilder.append("\\nPredictedRisk: ");
+        stringBuilder.append(System.lineSeparator()).append("nPredictedRisk: ");
         stringBuilder.append(this.predictedRisk);
-        stringBuilder.append("\\nSumOfPredictedRisk: ");
+        stringBuilder.append(System.lineSeparator()).append("nSumOfPredictedRisk: ");
         stringBuilder.append(this.sumOfRisk);
-        stringBuilder.append("\\nCalculatedFlow: ");
+        stringBuilder.append(System.lineSeparator()).append("nCalculatedFlow: ");
         stringBuilder.append(nodeProbabilityFlow != null ? this.nodeProbabilityFlow.getSolution() : null);
-        stringBuilder.append("\\nFinalFlow: ");
+        stringBuilder.append(System.lineSeparator()).append("nFinalFlow: ");
         stringBuilder.append(getFlow());
         return stringBuilder.toString();
     }

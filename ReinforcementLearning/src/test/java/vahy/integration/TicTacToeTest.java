@@ -34,12 +34,12 @@ import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.utils.JUnitParameterizedTestHelper;
+import vahy.utils.StreamUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -74,10 +74,6 @@ public class TicTacToeTest {
         );
     }
 
-    private static Stream<Long> getSeedStream(int streamSize) {
-        return new Random(0).longs(streamSize).boxed();
-    }
-
     private static Stream<Arguments> nonTrainableParams() {
         return JUnitParameterizedTestHelper.cartesian(
             Stream.of(
@@ -89,7 +85,7 @@ public class TicTacToeTest {
                 Arguments.of(createAtMiddlePolicy(0), createAtCornerPolicy(1), 0.17),
                 Arguments.of(createAtCornerPolicy(0), createAtCornerPolicy(1), 0.02)
             ),
-            getSeedStream(10)
+            StreamUtils.getSeedStream(10)
         );
     }
 
@@ -98,15 +94,15 @@ public class TicTacToeTest {
             JUnitParameterizedTestHelper.cartesian(
                 Stream.of(
                     Arguments.of(createUniformPolicy(0), -0.82),
-                    Arguments.of(createAtMiddlePolicy(0), -0.84),
-                    Arguments.of(createAtCornerPolicy(0), -0.84)
+                    Arguments.of(createAtMiddlePolicy(0), -0.83),
+                    Arguments.of(createAtCornerPolicy(0), -0.83)
                 ),
                 Stream.of(
                     (Supplier<DataAggregator>) () -> new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>()),
                     (Supplier<DataAggregator>) () -> new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>())
                 )
             ),
-            getSeedStream(5)
+            StreamUtils.getSeedStream(5)
         );
     }
 

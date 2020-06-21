@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.search.node.SearchNode;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.EmptyPredictor;
@@ -11,6 +12,7 @@ import vahy.impl.search.node.SearchNodeImpl;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
+import vahy.impl.testdomain.emptySpace.EmptySpaceState;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.metadata.PaperMetadata;
@@ -34,20 +36,20 @@ public class FlowConstraintCalculatorTest {
     @Test
     public void optimalFlowHardConstraintComparisonTest() {
         var random = new SplittableRandom(0);
-        EmptySpaceAction spaceAction = EmptySpaceAction.A;
-        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(1, random, spaceAction.getAllPlayerActions().length);
+        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(1, random, EmptySpaceAction.playerActions.length);
 
-        EmptySpaceRiskState state = new EmptySpaceRiskState(true, random, false, 0.05);
+        EmptySpaceState innerState = new EmptySpaceState(true);
+        PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
 
-        EmptySpaceAction[] playerActions = Arrays.stream(spaceAction.getAllPlayerActions()).toArray(EmptySpaceAction[]::new);
-        EmptySpaceAction[] opponentActions = Arrays.stream(spaceAction.getAllOpponentActions()).toArray(EmptySpaceAction[]::new);
+        EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
+        EmptySpaceAction[] opponentActions = Arrays.stream(EmptySpaceAction.opponentActions).toArray(EmptySpaceAction[]::new);
 
         var actionCount = playerActions.length;
 
-        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(EmptySpaceAction.class);
+        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class);
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
-        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
 
 
         var total = 0;
@@ -63,9 +65,9 @@ public class FlowConstraintCalculatorTest {
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
                 long start = System.currentTimeMillis();
-                var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
-                var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
 
                 start = System.currentTimeMillis();
                 boolean firstSolvable = calculator.optimizeFlow(searchTree.getRoot());
@@ -82,7 +84,7 @@ public class FlowConstraintCalculatorTest {
                 assertResults(firstSolvable, values, secondSolvable, values2);
 
                 total++;
-                if (total % 100 == 0) {
+                if (total % 1 == 0) {
                     printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, k, j);
                 }
             }
@@ -93,22 +95,20 @@ public class FlowConstraintCalculatorTest {
     @Test
     public void optimalFlowSoftConstraintComparisonTest() {
         var random = new SplittableRandom(0);
-        EmptySpaceAction spaceAction = EmptySpaceAction.A;
-        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(1, random, spaceAction.getAllPlayerActions().length);
+        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(1, random, EmptySpaceAction.playerActions.length);
 
-        EmptySpaceRiskState state = new EmptySpaceRiskState(true, random, false, 0.05);
+        EmptySpaceState innerState = new EmptySpaceState(true);
+        PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
 
-        EmptySpaceAction[] playerActions = Arrays.stream(spaceAction.getAllPlayerActions()).toArray(EmptySpaceAction[]::new);
-        EmptySpaceAction[] opponentActions = Arrays.stream(spaceAction.getAllOpponentActions()).toArray(EmptySpaceAction[]::new);
+        EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
+        EmptySpaceAction[] opponentActions = Arrays.stream(EmptySpaceAction.opponentActions).toArray(EmptySpaceAction[]::new);
 
         var actionCount = playerActions.length;
 
-        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(EmptySpaceAction.class);
+        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class);
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
-
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
-
-        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
 
 
         var total = 0;
@@ -124,9 +124,9 @@ public class FlowConstraintCalculatorTest {
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
                 long start = System.currentTimeMillis();
-                var calculator = new OptimalFlowSoftConstraintCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.5, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator = new OptimalFlowSoftConstraintCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.5, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
-                var calculator2 = new OptimalFlowSoftConstraintDeprecateed<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.5, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator2 = new OptimalFlowSoftConstraintDeprecateed<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.5, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
 
                 start = System.currentTimeMillis();
                 boolean firstSolvable = calculator.optimizeFlow(searchTree.getRoot());
@@ -153,22 +153,20 @@ public class FlowConstraintCalculatorTest {
     @Test
     public void minimalRiskReachabilityCalculatorTest() {
         var random = new SplittableRandom(0);
-        EmptySpaceAction spaceAction = EmptySpaceAction.A;
-        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(1, random, spaceAction.getAllPlayerActions().length);
+        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(1, random, EmptySpaceAction.playerActions.length);
 
-        EmptySpaceRiskState state = new EmptySpaceRiskState(true, random, false, 0.05);
+        EmptySpaceState innerState = new EmptySpaceState(true);
+        PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
 
-        EmptySpaceAction[] playerActions = Arrays.stream(spaceAction.getAllPlayerActions()).toArray(EmptySpaceAction[]::new);
-        EmptySpaceAction[] opponentActions = Arrays.stream(spaceAction.getAllOpponentActions()).toArray(EmptySpaceAction[]::new);
+        EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
+        EmptySpaceAction[] opponentActions = Arrays.stream(EmptySpaceAction.opponentActions).toArray(EmptySpaceAction[]::new);
 
         var actionCount = playerActions.length;
 
-        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>(EmptySpaceAction.class);
+        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class);
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
-
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
-
-        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
 
 
         var total = 0;
@@ -189,10 +187,10 @@ public class FlowConstraintCalculatorTest {
 
 
                 long start = System.currentTimeMillis();
-                var calculator = new MinimalRiskReachAbilityCalculator<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>();
+                var calculator = new MinimalRiskReachAbilityCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>();
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
 
-                var calculator2 = new MinimalRiskReachAbilityCalculatorDeprecated<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class);
+                var calculator2 = new MinimalRiskReachAbilityCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class);
                 start = System.currentTimeMillis();
                 double solution1 = calculator.calculateRisk(searchTree.getRoot());
                 sum_BUILD_SOLVE_1 += System.currentTimeMillis() - start;
@@ -201,7 +199,7 @@ public class FlowConstraintCalculatorTest {
                 double solution2 = calculator2.calculateRisk(searchTree.getRoot());
                 sum_BUILD_SOLVE_2 += System.currentTimeMillis() - start;
 
-                Assert.assertEquals(solution1, solution2, TOLERANCE, "Solutions are different");
+                assertEquals(solution1, solution2, TOLERANCE, "Solutions are different");
 
                 total++;
                 if (total % 100 == 0) {
@@ -211,7 +209,7 @@ public class FlowConstraintCalculatorTest {
         }
     }
 
-    private static double[] fillArray(SearchNode<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> root, int actionCount) {
+    private static double[] fillArray(SearchNode<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> root, int actionCount) {
         double[] values = new double[actionCount];
         int index = 0;
         for (var entry : root.getChildNodeMap().entrySet()) {
@@ -221,27 +219,29 @@ public class FlowConstraintCalculatorTest {
         return values;
     }
 
-    private SearchTreeImpl<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> initializeTree(
-        PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState> paperNodeSelector, EmptySpaceRiskState state,
-        PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> nodeEvaluator)
+    private SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> initializeTree(
+        PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> paperNodeSelector,
+        PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state,
+        PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> nodeEvaluator
+    )
     {
         var root = new SearchNodeImpl<>(
             state,
             new PaperMetadata<>(0.0, 0.0, 0.0, 0.0, 0.0, new EnumMap<>(EmptySpaceAction.class)),
-            new EnumMap<>(EmptySpaceAction.class)
-        );
+            new EnumMap<>(EmptySpaceAction.class),
+            searchNodeMetadataFactory);
         return new SearchTreeImpl<>(
-            root,
+            searchNodeFactory, root,
             paperNodeSelector,
             new PaperTreeUpdater<>(),
             nodeEvaluator
         );
     }
 
-    private double buildTree(double sum_UCB, int k, SearchTreeImpl<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchTree) {
+    private double buildTree(double sum_UCB, int k, SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchTree) {
         var start = System.currentTimeMillis();
         for (int i = 0; i < k; i++) {
-            searchTree.updateTree();
+            searchTree.expandTree();
         }
         sum_UCB += System.currentTimeMillis() - start;
         return sum_UCB;
@@ -258,10 +258,10 @@ public class FlowConstraintCalculatorTest {
     }
 
     private void assertResults(boolean firstSolvable, double[] values, boolean secondSolvable, double[] values2) {
-        Assert.assertEquals(secondSolvable, firstSolvable, "Solutions differs");
+        assertEquals(secondSolvable, firstSolvable, "Solutions differs");
         if(firstSolvable) {
             for (int i = 0; i < 2; i++) {
-                Assert.assertEquals(values[i], values2[i], TOLERANCE, "Different results. First: " + Arrays.toString(values) + " second: " + Arrays.toString(values2)+ ".");
+                assertEquals(values[i], values2[i], TOLERANCE, "Different results. First: " + Arrays.toString(values) + " second: " + Arrays.toString(values2)+ ".");
             }
         } else {
             logger.info("Unsolvable problem.");

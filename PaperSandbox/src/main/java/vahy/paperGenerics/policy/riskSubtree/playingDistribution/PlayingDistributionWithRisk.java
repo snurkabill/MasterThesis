@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class PlayingDistribution<
+public class PlayingDistributionWithRisk<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -25,12 +25,12 @@ public class PlayingDistribution<
 
     private final Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap;
 
-    public PlayingDistribution(TAction expectedPlayerAction,
-                               int expectedPlayerActionIndex,
-                               double[] playerDistribution,
-                               double[] riskOnPlayerSubNodes,
-                               List<TAction> actionList,
-                               Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap) {
+    public PlayingDistributionWithRisk(TAction expectedPlayerAction,
+                                       int expectedPlayerActionIndex,
+                                       double[] playerDistribution,
+                                       double[] riskOnPlayerSubNodes,
+                                       List<TAction> actionList,
+                                       Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap) {
         this.expectedPlayerAction = expectedPlayerAction;
         this.expectedPlayerActionIndex = expectedPlayerActionIndex;
         this.playerDistribution = playerDistribution;

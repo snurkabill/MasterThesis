@@ -3,6 +3,7 @@ package vahy.paperGenerics.policy.linearProgram.deprecated;
 import com.quantego.clp.CLPExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -35,7 +36,8 @@ public class OptimalFlowSoftConstraintDeprecateed<
 
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        if(node.getStateWrapper().isRiskHit()) {
+
+        if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
             totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         } else {
             totalRiskExpression.add(0.0, node.getSearchNodeMetadata().getNodeProbabilityFlow());

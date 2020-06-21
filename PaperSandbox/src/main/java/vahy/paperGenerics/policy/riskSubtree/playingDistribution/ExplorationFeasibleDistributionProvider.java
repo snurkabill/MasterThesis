@@ -40,7 +40,7 @@ public class ExplorationFeasibleDistributionProvider<
     }
 
     @Override
-    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
+    public PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
         SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
         double temperature,
         SplittableRandom random,
@@ -87,7 +87,7 @@ public class ExplorationFeasibleDistributionProvider<
                     riskBound);
                 if(suitableExplorationDistribution.getFirst()) {
                     int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution.getSecond(), random);
-                    return new PlayingDistribution<>(actionList.get(index), index, suitableExplorationDistribution.getSecond(), riskArray, actionList, riskSupplierMap);
+                    return new PlayingDistributionWithRisk<>(actionList.get(index), index, suitableExplorationDistribution.getSecond(), riskArray, actionList, riskSupplierMap);
                 }
             }
             throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found. Total risk allowed: [" + totalRiskAllowed +
@@ -98,7 +98,7 @@ public class ExplorationFeasibleDistributionProvider<
                 "] This is probably due to numeric inconsistency. Boltzmann exploration can have such effect with SOFT flow optimizer when allowed risk is 0.");
         } else {
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionAsArray, random);
-            return new PlayingDistribution<>(actionList.get(index), index, distributionAsArray, riskArray, actionList, riskSupplierMap);
+            return new PlayingDistributionWithRisk<>(actionList.get(index), index, distributionAsArray, riskArray, actionList, riskSupplierMap);
         }
     }
 }

@@ -26,7 +26,7 @@ public class InferenceFeasibleDistributionProvider<
     }
 
     @Override
-    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
+    public PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
         SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
         double temperature,
         SplittableRandom random,
@@ -50,6 +50,6 @@ public class InferenceFeasibleDistributionProvider<
         RandomDistributionUtils.tryToRoundDistribution(distributionArray, TOLERANCE);
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionArray, random);
         TAction action = actionList.get(index);
-        return new PlayingDistribution<>(action, index, distributionArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
+        return new PlayingDistributionWithRisk<>(action, index, distributionArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
     }
 }

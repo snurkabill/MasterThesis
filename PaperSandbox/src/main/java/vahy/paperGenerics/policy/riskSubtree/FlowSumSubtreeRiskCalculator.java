@@ -1,10 +1,11 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.LinkedList;
 
@@ -24,7 +25,7 @@ public class FlowSumSubtreeRiskCalculator<
             var node = queue.poll();
             if(node.isLeaf()) {
                 if(node.isFinalNode()) {
-                    risk += node.getStateWrapper().isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
+                    risk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
                 } else {
                     risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getFlow();
                 }

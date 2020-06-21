@@ -27,7 +27,7 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
         double reward = stateRewardReturn.getReward();
         StateWrapper<TAction, TObservation, TState> state = stateRewardReturn.getState();
         //TODO THIS IS DIRTY:
-        int policyId = state.getinGameEntityIdWrapper();
+        int policyId = state.getInGameEntityIdWrapper();
         if(parent != null) {
             var searchNodeMetadata = parent.getSearchNodeMetadata();
             return new PaperMetadata<>(

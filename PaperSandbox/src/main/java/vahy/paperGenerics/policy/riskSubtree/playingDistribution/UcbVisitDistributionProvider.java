@@ -25,7 +25,7 @@ public class UcbVisitDistributionProvider<
     }
 
     @Override
-    public PlayingDistribution<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
+    public PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
         SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
         double temperature,
         SplittableRandom random,
@@ -55,7 +55,7 @@ public class UcbVisitDistributionProvider<
         }
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(rewardArray, random);
         TAction action = actionList.get(index);
-        return new PlayingDistribution<>(action, index, rewardArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
+        return new PlayingDistributionWithRisk<>(action, index, rewardArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
     }
 
 }

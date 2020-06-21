@@ -4,6 +4,7 @@ import com.quantego.clp.CLPExpression;
 import com.quantego.clp.CLPVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -36,7 +37,7 @@ public class OptimalFlowSoftConstraintCalculator<
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         var metadata = node.getSearchNodeMetadata();
-        totalRiskExpression.add(node.getStateWrapper().isRiskHit() ? 1.0 : 0.0, metadata.getNodeProbabilityFlow());
+        totalRiskExpression.add(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : 0.0, metadata.getNodeProbabilityFlow());
         double cumulativeReward = metadata.getCumulativeReward();
         double expectedReward = metadata.getExpectedReward();
         double predictedRisk = metadata.getPredictedRisk();
@@ -50,7 +51,7 @@ public class OptimalFlowSoftConstraintCalculator<
         for (SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> entry : nodeList) {
             var metadata = entry.getSearchNodeMetadata();
             double priorProbability = metadata.getPriorProbability();
-            totalRiskExpression.add((entry.getStateWrapper().isRiskHit() ? 1.0 : 0.0) * priorProbability, parentFlow);
+            totalRiskExpression.add((((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : 0.0) * priorProbability, parentFlow);
             double cumulativeReward = metadata.getCumulativeReward();
             double expectedReward = metadata.getExpectedReward();
             double predictedRisk = metadata.getPredictedRisk();

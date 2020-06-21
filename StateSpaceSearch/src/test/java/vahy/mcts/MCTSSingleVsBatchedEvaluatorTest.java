@@ -24,20 +24,14 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictorWithLr;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.utils.StreamUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Stream;
 
 public class MCTSSingleVsBatchedEvaluatorTest {
-
-
-    private static Stream<Long> getSeedStream(int count) {
-        return new Random(0).longs(count).boxed();
-    }
 
     private PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> getPlayerSupplier(int batchSize) {
 
@@ -109,7 +103,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
 
     @Test
     public void singleVsBatchedEvaluatorTest() {
-        var seedStream = getSeedStream(10);
+        var seedStream = StreamUtils.getSeedStream(10);
         var trialCount = 5;
 
         var list = new ArrayList<Double>();

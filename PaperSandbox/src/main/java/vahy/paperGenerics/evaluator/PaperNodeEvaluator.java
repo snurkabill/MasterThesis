@@ -24,7 +24,6 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
-    protected final int policyId;
     protected final SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory;
     protected final Predictor<DoubleVector> trainablePredictor;
     protected final Predictor<DoubleVector> opponentPredictor;
@@ -32,14 +31,12 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
     protected final TAction[] allPlayerActions;
     protected final TAction[] allOpponentActions;
 
-    public PaperNodeEvaluator(int policyId,
-                              SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory,
+    public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory,
                               Predictor<DoubleVector> trainablePredictor,
                               Predictor<DoubleVector> opponentPredictor,
                               Predictor<TState> knownModel,
                               TAction[] allPlayerActions,
                               TAction[] allOpponentActions) {
-        this.policyId = policyId;
         this.searchNodeFactory = searchNodeFactory;
         this.trainablePredictor = trainablePredictor;
         this.opponentPredictor = opponentPredictor;
@@ -96,13 +93,6 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
 
     private void evaluatePlayerNode(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node, Map<TAction, Double> childPriorProbabilities, double[] prediction) {
         TAction[] allPossibleActions = node.getAllPossibleActions();
-        if(DEBUG_ENABLED) {
-            for (TAction allPossibleAction : allPossibleActions) {
-                if (allPossibleAction.isOpponentAction(policyId)) {
-                    throw new IllegalStateException("Only player actions are available. Action set: [" + Arrays.toString(allPossibleActions) + "]");
-                }
-            }
-        }
         if(allPlayerActions.length == allPossibleActions.length) {
             for (int i = 0; i < allPlayerActions.length; i++) {
                 childPriorProbabilities.put(allPlayerActions[i], prediction[i + PaperModel.POLICY_START_INDEX]);
@@ -112,11 +102,11 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
             System.arraycopy(prediction, PaperModel.POLICY_START_INDEX, distribution, 0, distribution.length);
             boolean[] mask = new boolean[allPlayerActions.length];
             for (int i = 0; i < allPossibleActions.length; i++) {
-                mask[allPossibleActions[i].getActionIndexInPlayerActions(policyId)] = true;
+                mask[allPossibleActions[i].getLocalIndex()] = true;
             }
             RandomDistributionUtils.applyMaskToRandomDistribution(distribution, mask);
             for (TAction key : allPossibleActions) {
-                childPriorProbabilities.put(key, distribution[key.getActionIndexInPlayerActions(policyId)]);
+                childPriorProbabilities.put(key, distribution[key.getLocalIndex()]);
             }
         }
     }
@@ -125,14 +115,6 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
 
         //TODO: THIS METHOD IS UGLY
         TAction[] allPossibleActions = node.getAllPossibleActions();
-        if(DEBUG_ENABLED) {
-            for (TAction allPossibleAction : allPossibleActions) {
-                if (allPossibleAction.isPlayerAction(policyId)) {
-                    throw new IllegalStateException("Only opponent actions are available. Action set: [" + Arrays.toString(allPossibleActions) + "]");
-                }
-            }
-        }
-
         if(knownModel == null) {
             if(allOpponentActions.length == allPossibleActions.length) {
                 for (int i = 0; i < allOpponentActions.length; i++) {
@@ -143,11 +125,11 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
                 System.arraycopy(probabilities, 0, distribution, 0, distribution.length);
                 boolean[] mask = new boolean[allOpponentActions.length];
                 for (int i = 0; i < allPossibleActions.length; i++) {
-                    mask[allPossibleActions[i].getActionIndexInOpponentActions(policyId)] = true;
+                    mask[allPossibleActions[i].getLocalIndex()] = true;
                 }
                 RandomDistributionUtils.applyMaskToRandomDistribution(distribution, mask);
                 for (TAction key : allPossibleActions) {
-                    childPriorProbabilities.put(key, distribution[key.getActionIndexInOpponentActions(policyId)]);
+                    childPriorProbabilities.put(key, distribution[key.getLocalIndex()]);
                 }
             }
         } else {
@@ -159,10 +141,10 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
                 double[] distribution = new double[allOpponentActions.length];
                 for (int i = 0; i < allPossibleActions.length; i++) {
                     var possibleAction = allPossibleActions[i];
-                    distribution[possibleAction.getActionIndexInOpponentActions(policyId)] = probabilities[i];
+                    distribution[possibleAction.getLocalIndex()] = probabilities[i];
                 }
                 for (TAction key : allPossibleActions) {
-                    childPriorProbabilities.put(key, distribution[key.getActionIndexInOpponentActions(policyId)]);
+                    childPriorProbabilities.put(key, distribution[key.getLocalIndex()]);
                 }
             }
         }

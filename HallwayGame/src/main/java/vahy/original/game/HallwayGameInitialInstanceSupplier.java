@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupplier<GameConfig, HallwayAction,  DoubleVector, HallwayStateImpl, HallwayStateImpl> {
+public class HallwayGameInitialInstanceSupplier extends AbstractInitialStateSupplier<GameConfig, HallwayAction,  DoubleVector, HallwayStateImpl> {
 
     public HallwayGameInitialInstanceSupplier(GameConfig gameConfig, SplittableRandom random) {
         super(gameConfig, random);

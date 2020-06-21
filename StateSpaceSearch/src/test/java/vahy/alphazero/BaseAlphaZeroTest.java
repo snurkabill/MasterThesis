@@ -42,7 +42,7 @@ public class BaseAlphaZeroTest {
             987568,
             false,
             Runtime.getRuntime().availableProcessors() - 1,
-            false,
+            true,
             10000,
             100,
             true,
@@ -144,7 +144,7 @@ public class BaseAlphaZeroTest {
         System.out.println("AlphaZero policy result: " + result.getEvaluationStatistics().getTotalPayoffAverage().get(0));
         System.out.println("Value policy result: " + result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
 
-        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) > result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
+        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) >= result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
         assertEquals(result.getEvaluationStatistics().getTotalPayoffAverage().get(0) + result.getEvaluationStatistics().getTotalPayoffAverage().get(1), 0.0, Math.pow(10, -10));
 //        assertTrue(result.getEvaluationStatistics().getTotalPayoffAverage().get(1) > 0.3);
     }

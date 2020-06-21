@@ -1,6 +1,7 @@
 package vahy.paperGenerics.reinforcement.episode;
 
 import vahy.api.episode.EpisodeStepRecord;
+import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.impl.episode.EpisodeResultsImpl;
@@ -22,12 +23,13 @@ public class PaperEpisodeResults<
     private final List<Boolean> isRiskHitList;
 
     public PaperEpisodeResults(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+                               PolicyIdTranslationMap policyIdTranslationMap,
                                int policyCount,
                                List<Integer> playerStepCount,
                                int totalStepCount,
                                List<Double> totalPayoff,
                                Duration duration) {
-        super(episodeHistory, policyCount, playerStepCount, totalStepCount, totalPayoff, duration);
+        super(episodeHistory, policyIdTranslationMap, policyCount, playerStepCount, totalStepCount, totalPayoff, duration);
         isRiskHitList = new ArrayList<>(policyCount);
         for (int i = 0; i < policyCount; i++) {
             isRiskHitList.add(getFinalState().isRiskHit(i));

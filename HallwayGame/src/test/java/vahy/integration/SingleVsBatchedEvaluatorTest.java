@@ -16,7 +16,6 @@ import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.original.environment.HallwayAction;
-import vahy.original.environment.agent.policy.environment.HallwayPolicySupplier;
 import vahy.original.environment.config.ConfigBuilder;
 import vahy.original.environment.config.GameConfig;
 import vahy.original.environment.state.HallwayStateImpl;
@@ -50,9 +49,9 @@ public class SingleVsBatchedEvaluatorTest {
             for (int i = 0; i < entry.getTrainingStatisticsList().size(); i++) {
                 var record_0 = results.get(0).getTrainingStatisticsList().get(i);
                 var record_1 = entry.getTrainingStatisticsList().get(i);
-                Assert.assertEquals(record_0.getTotalPayoffAverage(), record_1.getTotalPayoffAverage(), Math.pow(10, -10));
-                Assert.assertEquals(record_0.getTotalPayoffStdev(),   record_1.getTotalPayoffStdev(),   Math.pow(10, -10));
-                Assert.assertEquals(record_0.getRiskHitCounter(),     record_1.getRiskHitCounter());
+                assertEquals(record_0.getTotalPayoffAverage(), record_1.getTotalPayoffAverage(), Math.pow(10, -10));
+                assertEquals(record_0.getTotalPayoffStdev(),   record_1.getTotalPayoffStdev(),   Math.pow(10, -10));
+                assertEquals(record_0.getRiskHitCounter(),     record_1.getRiskHitCounter());
             }
         }
     }

@@ -28,12 +28,12 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.utils.StreamUtils;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -89,10 +89,6 @@ public class ReproducibilityTest {
             },
             List.of(predictorTrainingSetup)
         );
-    }
-
-    private static Stream<Long> getSeedStream(int streamSize) {
-        return new Random(0).longs(streamSize).boxed();
     }
 
     private static Stream<Arguments> params() {
@@ -175,7 +171,7 @@ public class ReproducibilityTest {
     public void reproducibilityTest(Supplier<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>> playerOne,
                                     Supplier<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>> playerTwo) {
 
-        var seedStream = getSeedStream(10);
+        var seedStream = StreamUtils.getSeedStream(10);
         var trialCount = 3;
 
         var list = new ArrayList<Double>();

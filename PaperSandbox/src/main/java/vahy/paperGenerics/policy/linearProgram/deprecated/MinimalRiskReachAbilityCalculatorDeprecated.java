@@ -2,11 +2,12 @@ package vahy.paperGenerics.policy.linearProgram.deprecated;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 
@@ -30,13 +31,13 @@ public class MinimalRiskReachAbilityCalculatorDeprecated<
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
         if(subtreeRoot.isLeaf()) {
-            return subtreeRoot.getStateWrapper().isRiskHit() ?  1.0 : 0.0;
+            return ((PaperStateWrapper<TAction, TObservation, TState>)subtreeRoot.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
         }
 
         var linProgram = new AbstractLinearProgramOnTreeDeprecated<TAction, TObservation, TSearchNodeMetadata, TState>(actionClass, false, null, NoiseStrategy.NONE) {
             @Override
             protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-                if(node.getStateWrapper().isRiskHit()) {
+                if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
                 } else {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getPredictedRisk());

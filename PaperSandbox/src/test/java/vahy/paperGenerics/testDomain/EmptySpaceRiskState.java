@@ -6,83 +6,90 @@ import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
+import vahy.impl.testdomain.emptySpace.EmptySpaceState;
 import vahy.paperGenerics.PaperState;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState>, Observation {
+public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>, Observation  {
 
+    private final EmptySpaceState innerState;
     private final SplittableRandom random;
     private final boolean isRiskHit;
     private final double riskProbability;
-    private final boolean isPlayerTurn;
 
-    public EmptySpaceRiskState(boolean isPlayerTurn, SplittableRandom random, boolean isRiskHit, double riskProbability) {
-        this.isPlayerTurn = isPlayerTurn;
-        this.riskProbability = riskProbability;
+    public EmptySpaceRiskState(EmptySpaceState innerState, SplittableRandom random,  boolean isRiskHit, double riskProbability) {
+        this.innerState = innerState;
         this.random = random;
+        this.riskProbability = riskProbability;
         this.isRiskHit = isRiskHit;
     }
 
     @Override
     public EmptySpaceAction[] getAllPossibleActions() {
-        if(isPlayerTurn) {
-            return EmptySpaceAction.playerActions;
-        } else {
-            return  EmptySpaceAction.opponentActions;
-        }
+        return innerState.getAllPossibleActions();
     }
 
     @Override
-    public EmptySpaceAction[] getPossiblePlayerActions() {
-        return getAllPossibleActions();
+    public int getTotalEntityCount() {
+        return innerState.getTotalEntityCount();
     }
 
     @Override
-    public EmptySpaceAction[] getPossibleOpponentActions() {
-        return getAllPossibleActions();
+    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> applyAction(EmptySpaceAction actionType) {
+        var applied = innerState.applyAction(actionType);
+        return new ImmutableStateRewardReturn<>(new EmptySpaceRiskState(applied.getState(), random, random.nextDouble() < riskProbability, riskProbability), new double[] {random.nextDouble()});
     }
 
     @Override
-    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceRiskState, EmptySpaceRiskState> applyAction(EmptySpaceAction actionType) {
-        return new ImmutableStateRewardReturn<>(new EmptySpaceRiskState(!isPlayerTurn, random, random.nextDouble() < riskProbability, riskProbability), random.nextDouble());
+    public DoubleVector getInGameEntityObservation(int inGameEntityId) {
+        return innerState.getInGameEntityObservation(inGameEntityId);
     }
 
     @Override
-    public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {0.0});
-    }
-
-    @Override
-    public EmptySpaceRiskState getOpponentObservation() {
-        return this;
+    public DoubleVector getCommonObservation(int inGameEntityId) {
+        return innerState.getCommonObservation(inGameEntityId);
     }
 
     @Override
     public Predictor<EmptySpaceRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<>() {
+        return new Predictor<EmptySpaceRiskState>() {
 
-            private double[] fixedPrediction = new double[] {1/3., 2/3.0};
+            private Predictor<EmptySpaceState> innerPredictor;
 
             @Override
             public double[] apply(EmptySpaceRiskState observation) {
-                return fixedPrediction;
+                if(innerPredictor == null) {
+                    innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
+                }
+                return innerPredictor.apply(observation.innerState);
             }
 
             @Override
             public double[][] apply(EmptySpaceRiskState[] observationArray) {
                 var prediction = new double[observationArray.length][];
-                Arrays.fill(prediction, fixedPrediction);
+                for (int i = 0; i < prediction.length; i++) {
+                    prediction[i] = apply(observationArray[i]);
+                }
                 return prediction;
+            }
+
+            @Override
+            public List<double[]> apply(List<EmptySpaceRiskState> observationArray) {
+                var output = new ArrayList<double[]>(observationArray.size());
+                for (int i = 0; i < observationArray.size(); i++) {
+                    output.add(apply(observationArray.get(i)));
+                }
+                return output;
             }
         };
     }
 
     @Override
     public String readableStringRepresentation() {
-        return null;
+        return "NOT IMPLEMENTED - readableStringRepresentation";
     }
 
     @Override
@@ -96,8 +103,13 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public boolean isOpponentTurn() {
-        return !isPlayerTurn;
+    public int getInGameEntityIdOnTurn() {
+        return innerState.getInGameEntityIdOnTurn();
+    }
+
+    @Override
+    public boolean isInGame(int inGameEntityId) {
+        return innerState.isInGame(inGameEntityId);
     }
 
     @Override
@@ -106,7 +118,7 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public boolean isRiskHit() {
+    public boolean isRiskHit(int playerId) {
         return isRiskHit;
     }
 }
