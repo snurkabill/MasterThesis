@@ -2,6 +2,8 @@ package vahy.api.policy;
 
 import vahy.api.model.Action;
 
+import java.util.Arrays;
+
 public class PlayingDistribution<TAction extends Enum<TAction> & Action>
 {
     private final TAction playedAction;
@@ -24,5 +26,14 @@ public class PlayingDistribution<TAction extends Enum<TAction> & Action>
 
     public double[] getDistribution() {
         return distribution;
+    }
+
+    @Override
+    public String toString() {
+        return "PlayingDistribution{" +
+            "action=" + playedAction +
+            ", predictedReward=" + predictedReward +
+            ", distribution=" + Arrays.toString(distribution) +
+            '}';
     }
 }

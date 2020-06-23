@@ -19,7 +19,6 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
 import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
@@ -75,7 +74,7 @@ public class Example02 {
 
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
-        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount, config);
+        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config);
 
 //        var mctsRolloutSupplier = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, cpuct, treeExpansionCount, discountFactor, rolloutCount);
 
@@ -148,7 +147,7 @@ public class Example02 {
             dataAggregatorAlphaGoEval_1
         );
 
-        var alphaGoPlayer_1 = alphaGoPolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2);
+        var alphaGoPlayer_1 = alphaGoPolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, 1, () -> 0.1, treeExpansionCount * 4, predictorTrainingSetupAlphaGoEval_2);
 
         var policyArgumentsList = List.of(
 //            playerOneSupplier

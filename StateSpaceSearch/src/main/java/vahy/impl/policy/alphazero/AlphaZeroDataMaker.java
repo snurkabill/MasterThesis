@@ -48,14 +48,16 @@ public class AlphaZeroDataMaker<TAction extends Enum<TAction> & Action, TState e
                     var action = previous.getAction();
                     var actionId = action.ordinal();
                     doubleArray[entityInGameCount + actionId] = 1.0;
+                    System.arraycopy(aggregatedTotalPayoff, 0, doubleArray, 0, aggregatedTotalPayoff.length);
+                    mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(inGameEntityId), new MutableDoubleArray(doubleArray, false)));
                 } else {
                     if (previous.getPolicyIdOnTurn() == playerPolicyId) {
                         var policyArray = previous.getPolicyStepRecord().getPolicyProbabilities();
                         System.arraycopy(policyArray, 0, doubleArray, entityInGameCount, policyArray.length);
+                        System.arraycopy(aggregatedTotalPayoff, 0, doubleArray, 0, aggregatedTotalPayoff.length);
+                        mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(inGameEntityId), new MutableDoubleArray(doubleArray, false)));
                     }
                 }
-                System.arraycopy(aggregatedTotalPayoff, 0, doubleArray, 0, aggregatedTotalPayoff.length);
-                mutableDataSampleList.add(new ImmutableTuple<>(previous.getFromState().getInGameEntityObservation(inGameEntityId), new MutableDoubleArray(doubleArray, false)));
             }
         }
         Collections.reverse(mutableDataSampleList);

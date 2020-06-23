@@ -74,7 +74,7 @@ public class AlphaZero_10_SHTest {
         Supplier<Double> explorationSupplier2 = () -> 0.5;
 
 
-        return new AlphaZeroPolicyDefinitionSupplier<SHAction, DoubleVector, SHState>(SHAction.class, totalEntityCount, config).getPolicyDefinition(
+        return new AlphaZeroPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, totalEntityCount, config).getPolicyDefinition(
             playerId,
             1,
             1,

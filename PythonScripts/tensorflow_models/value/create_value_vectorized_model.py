@@ -16,10 +16,10 @@ print("INITIALIZING TF MODEL WITH SEED" + str(seed))
 hidden_count_1 = 128
 hidden_count_2 = 64
 hidden_count_3 = 32
-hidden_count_4 = 16
-hidden_count_5 = 8
+hidden_count_4 = 32
+hidden_count_5 = 32
 
-output_count = 1
+output_count = value_output_count
 
 tf.reset_default_graph()
 tf.random.set_random_seed(seed)

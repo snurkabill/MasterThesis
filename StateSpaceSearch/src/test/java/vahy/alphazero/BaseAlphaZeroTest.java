@@ -80,7 +80,7 @@ public class BaseAlphaZeroTest {
         var treeExpansionCount = 10;
         var cpuct = 1.0;
 
-        var alphaZeroPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<TicTacToeAction, DoubleVector, TicTacToeState>(actionClass, 2, ticTacConfig);
+        var alphaZeroPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>(actionClass, 2, ticTacConfig);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>();
 
         var totalEntityCount = 2;

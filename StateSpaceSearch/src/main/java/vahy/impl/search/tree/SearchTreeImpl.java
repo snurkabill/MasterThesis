@@ -152,7 +152,8 @@ public class SearchTreeImpl<
     protected void innerApplyAction(TAction action) {
         if(!root.getChildNodeMap().containsKey(action)) {
             var stateRewardReturn = root.applyAction(action);
-            root = searchNodeFactory.createNode(stateRewardReturn, null, action);
+            root = searchNodeFactory.createNode(stateRewardReturn, root, action);
+            root.makeRoot();
         } else {
             root = root.getChildNodeMap().get(action);
             root.makeRoot();

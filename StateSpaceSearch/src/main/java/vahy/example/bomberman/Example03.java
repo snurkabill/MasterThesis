@@ -19,7 +19,6 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
 import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
@@ -36,7 +35,7 @@ import java.util.SplittableRandom;
 public class Example03 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
-        var config = new BomberManConfig(500, true, 100, 1, 2, 3, 3, 1, 10, 0.1, BomberManInstance.BM_01);
+        var config = new BomberManConfig(500, true, 100, 1, 2, 3, 3, 1, 5, 0.1, BomberManInstance.BM_02);
         var systemConfig = new SystemConfig(987567, false, 7, true, 1000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -75,7 +74,7 @@ public class Example03 {
 
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
-        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, DoubleVector, BomberManState>(actionClass, totalEntityCount, config);
+        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
         var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, environmentPolicyCount + 0);
@@ -101,14 +100,6 @@ public class Example03 {
             dataAggregator2
         );
         var valuePolicyPlayer_2 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 1, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_3 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 2, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_4 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 3, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_5 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 4, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_6 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 5, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_7 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 6, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_8 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 7, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_9 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 8, 1, () -> 0.01, predictorTrainingSetup2);
-        var valuePolicyPlayer_10 = valuePolicySupplier.getPolicyDefinition(environmentPolicyCount + 9, 1, () -> 0.01, predictorTrainingSetup2);
 // ----------------------------------------------------------------------------------------
 
 
@@ -161,17 +152,9 @@ public class Example03 {
 //            mctsRolloutSupplier
             valuePolicyPlayer_1
             ,valuePolicyPlayer_2
-            ,valuePolicyPlayer_3
-            ,valuePolicyPlayer_4
-            ,valuePolicyPlayer_5
-            ,valuePolicyPlayer_6
-            ,valuePolicyPlayer_7
-            ,valuePolicyPlayer_8
-            ,valuePolicyPlayer_9
-            ,valuePolicyPlayer_10
-//            ,mctsEvalPlayer_1
-//            ,mctsEvalPlayer_2
-//            ,alphaGoPlayer_1
+            ,mctsEvalPlayer_1
+            ,mctsEvalPlayer_2
+            ,alphaGoPlayer_1
         );
         var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, PolicyRecordBase, EpisodeStatisticsBase>()
             .setRoundName("BomberManIntegrationTest")

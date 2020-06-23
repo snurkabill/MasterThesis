@@ -60,7 +60,7 @@ public class AlphaZero_1_SHTest {
             dataAggregator
         );
 
-        return new AlphaZeroPolicyDefinitionSupplier<SHAction, DoubleVector, SHState>(SHAction.class, totalEntityCount, config).getPolicyDefinition(
+        return new AlphaZeroPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, totalEntityCount, config).getPolicyDefinition(
             playerId,
             1,
             1,

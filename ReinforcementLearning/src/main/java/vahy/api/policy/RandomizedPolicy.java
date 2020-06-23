@@ -1,5 +1,7 @@
 package vahy.api.policy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -10,6 +12,10 @@ public abstract class RandomizedPolicy<TAction extends Enum<TAction> & Action, T
     implements Policy<TAction, TObservation, TState, TPolicyRecord> {
 
     protected static final double[] EMPTY_ARRAY = new double[0];
+
+    protected static final Logger logger = LoggerFactory.getLogger(RandomizedPolicy.class);
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
     protected final SplittableRandom random;
     protected final int policyId;

@@ -25,6 +25,13 @@ public abstract class ExploringPolicy<TAction extends Enum<TAction> & Action, TO
     public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
         boolean exploitation = isExplorationDisabled || random.nextDouble() > explorationConstant;
         playingDistribution = exploitation ? inferenceBranch(gameState) : explorationBranch(gameState);
+        if(DEBUG_ENABLED) {
+            if(exploitation) {
+                logger.debug("Exploitation action: [{}]", playingDistribution.toString());
+            } else {
+                logger.debug("Exploration action: [{}]", playingDistribution.toString());
+            }
+        }
         return playingDistribution.getPlayedAction();
     }
 

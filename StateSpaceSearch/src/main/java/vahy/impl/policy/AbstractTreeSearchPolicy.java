@@ -1,7 +1,5 @@
 package vahy.impl.policy;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
@@ -23,10 +21,6 @@ public abstract class AbstractTreeSearchPolicy<
         TState extends State<TAction, TObservation, TState>,
         TPolicyRecord extends PolicyRecord>
     extends ExploringPolicy<TAction, TObservation, TState, TPolicyRecord> {
-
-    private static final Logger logger = LoggerFactory.getLogger(AbstractTreeSearchPolicy.class);
-    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
-    public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
     private final TreeUpdateCondition treeUpdateCondition;
 

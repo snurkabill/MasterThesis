@@ -71,6 +71,9 @@ public class MCTSPolicy<
         for (var entry : childMap.entrySet()) {
             var expectedReward = entry.getValue().getSearchNodeMetadata().getExpectedReward()[inGameId];
             var gainedReward = entry.getValue().getSearchNodeMetadata().getGainedReward()[inGameId];
+            if(DEBUG_ENABLED) {
+                logger.debug("Expected reward: [{}], gained reward: [{}]", expectedReward, gainedReward);
+            }
             var actionValue = expectedReward + gainedReward;
             if(actionValue > max) {
                 max = actionValue;

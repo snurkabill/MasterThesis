@@ -158,7 +158,7 @@
                     <version>2.22.2</version>
                     <configuration>
                         <argLine>
-                            --illegal-access=permit -XX:+UseParallelGC
+                            --illegal-access=permit -XX:+UseParallelGC -server
                         </argLine>
                     </configuration>
                 </plugin>

@@ -20,12 +20,12 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>> {
+public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> {
 
     private final Class<TAction> actionClass;
     private final int enumConstantsLength;
-    private final SearchNodeFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory;
-    private final AlphaZeroNodeMetadataFactory<TAction, TObservation, TState> metadataFactory;
+    private final SearchNodeFactory<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory;
+    private final AlphaZeroNodeMetadataFactory<TAction, DoubleVector, TState> metadataFactory;
     private final boolean isModelKnown;
 
     public AlphaZeroPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, ProblemConfig problemConfi) {
@@ -36,34 +36,39 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
         this.isModelKnown = problemConfi.isModelKnown();
     }
 
-
-    public PolicyDefinition<TAction, TObservation, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, TObservation, TState, PolicyRecordBase> predictorSetup) {
+    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup, int maxDepthEvaluations) {
         return new PolicyDefinition<>(
             policyId,
             categoryId,
-            getPolicyDefinitionSupplierWithPredictor(cpuctParameter, exploration, treeExpansionCountPerStep, predictorSetup.getTrainablePredictor()),
+            getPolicyDefinitionSupplierWithPredictor(cpuctParameter, exploration, treeExpansionCountPerStep, predictorSetup.getTrainablePredictor(), maxDepthEvaluations),
             List.of(predictorSetup)
         );
     }
 
+    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup) {
+        return getPolicyDefinition(policyId, categoryId, cpuctParameter, exploration, treeExpansionCountPerStep, predictorSetup, 0);
+    }
+
     @NotNull
-    private OuterDefPolicySupplier<TAction, TObservation, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, TrainablePredictor predictor)
+    private OuterDefPolicySupplier<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, TrainablePredictor predictor, int maximalDepthEvaluation)
     {
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
-            var searchTree = new SearchTreeImpl<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState>(
+            var searchTree = new SearchTreeImpl<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState>(
                 searchNodeFactory,
                 root,
                 new AlphaZeroNodeSelector<>(random_, cpuctParameter, enumConstantsLength),
                 new AlphaZeroTreeUpdater<>(),
-                new AlphaZeroEvaluator<>(searchNodeFactory, predictor, isModelKnown)
+                maximalDepthEvaluation == 0 ?
+                    new AlphaZeroEvaluator<>(searchNodeFactory, predictor, isModelKnown) :
+                    new AlphaZeroBatchedEvaluator<TAction, TState>(searchNodeFactory, predictor, maximalDepthEvaluation, isModelKnown)
             );
             var searchExpansionCondition = new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep);
             switch (policyMode_) {
                 case INFERENCE:
                     return new AlphaZeroPolicy<>(policyId_, random_, 0.0, searchExpansionCondition, searchTree);
                 case TRAINING:
-                    return new AlphaZeroPolicy<TAction, TObservation, TState>(policyId_, random_, exploration.get(), searchExpansionCondition, searchTree);
+                    return new AlphaZeroPolicy<TAction, DoubleVector, TState>(policyId_, random_, exploration.get(), searchExpansionCondition, searchTree);
                 default:
                     throw EnumUtils.createExceptionForUnknownEnumValue(policyMode_);
             }

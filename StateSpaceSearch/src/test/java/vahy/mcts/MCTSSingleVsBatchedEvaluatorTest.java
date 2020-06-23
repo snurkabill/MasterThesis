@@ -1,6 +1,6 @@
 package vahy.mcts;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
@@ -30,6 +30,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MCTSSingleVsBatchedEvaluatorTest {
 
@@ -59,17 +60,17 @@ public class MCTSSingleVsBatchedEvaluatorTest {
         );
     }
 
-    private double runExperiment(PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> policy, long seed) {
+    private List<Double> runExperiment(PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> policy, long seed) {
         var config = new SHConfigBuilder()
             .isModelKnown(true)
             .reward(100)
             .gameStringRepresentation(SHInstance.BENCHMARK_12)
             .maximalStepCountBound(100)
             .stepPenalty(1)
-            .trapProbability(0.5)
+            .trapProbability(0.1)
             .buildConfig();
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(5, 10);
+        var algorithmConfig = new CommonAlgorithmConfigBase(50, 100);
 
         var systemConfig = new SystemConfig(
             seed,
@@ -98,7 +99,8 @@ public class MCTSSingleVsBatchedEvaluatorTest {
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
-        return result.getEvaluationStatistics().getTotalPayoffAverage().get(policy.getPolicyId());
+        return result.getTrainingStatisticsList().stream().map(x -> x.getTotalPayoffAverage().get(policy.getPolicyId())).collect(Collectors.toList());
+//        return result.getEvaluationStatistics().getTotalPayoffAverage().get(policy.getPolicyId());
     }
 
     @Test
@@ -106,22 +108,24 @@ public class MCTSSingleVsBatchedEvaluatorTest {
         var seedStream = StreamUtils.getSeedStream(10);
         var trialCount = 5;
 
-        var list = new ArrayList<Double>();
+        var list = new ArrayList<List<Double>>();
         for (Long seed : (Iterable<Long>)seedStream::iterator) {
             System.out.println("seed: " + seed);
             var start = System.currentTimeMillis();
-            double result = runExperiment(getPlayerSupplier(0), seed);
+            List<Double> result = runExperiment(getPlayerSupplier(0), seed);
+            System.out.println("Result: " + result);
             System.out.println(System.currentTimeMillis() - start);
             for (int i = 1; i <= trialCount; i++) {
                 System.out.println("trial: " + i);
                 start = System.currentTimeMillis();
-                double tmp = runExperiment(getPlayerSupplier(i), seed);
+                List<Double> tmp = runExperiment(getPlayerSupplier(i), seed);
+                System.out.println("Result tmp: " + tmp);
                 System.out.println(System.currentTimeMillis() - start);
-                assertEquals(result, tmp, Math.pow(10, -10));
+                assertIterableEquals(result, tmp);
             }
             list.add(result);
         }
-        assertNotEquals(1, list.stream().distinct().count());
+        assertNotEquals(1, list.stream().map(List::hashCode).distinct().count());
     }
 
 }
