@@ -26,7 +26,7 @@ public class TFWrapper implements Closeable {
     private final long[] singleInputShape;
     private final long[] batchedInputShape;
 
-    private Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
+    private final Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
 
     public TFWrapper(int inputDimension, int outputDimension, Session sess) {
         this.inputDimension = inputDimension;
@@ -47,8 +47,7 @@ public class TFWrapper implements Closeable {
         singleInputDoubleBuffer.position(0);
         singleInputDoubleBuffer.put(input);
         singleInputDoubleBuffer.flip();
-        List<Tensor<?>> tensors = evaluateTensor(singleInputShape, singleInputDoubleBuffer);
-        var output = tensors.get(0);
+        Tensor<?> output = evaluateTensor(singleInputShape, singleInputDoubleBuffer);
         output.writeTo(singleOutputDoubleBuffer);
         singleOutputDoubleBuffer.position(0);
         output.close();
@@ -62,19 +61,22 @@ public class TFWrapper implements Closeable {
         }
         doubleBuffer.position(0);
         batchedInputShape[0] = input.length;
-        List<Tensor<?>> tensors = evaluateTensor(batchedInputShape, doubleBuffer);
+        Tensor<?> output = evaluateTensor(batchedInputShape, doubleBuffer);
+
+        DoubleBuffer outputDoubleBuffer = DoubleBuffer.allocate(input.length * outputDimension);
+        output.writeTo(outputDoubleBuffer);
+        var oneDArray = outputDoubleBuffer.array();
         double[][] outputMatrix = new double[input.length][];
         for (int i = 0; i < outputMatrix.length; i++) {
             outputMatrix[i] = new double[outputDimension];
+            System.arraycopy(oneDArray, i * outputDimension, outputMatrix[i], 0, outputDimension);
         }
-        var output = tensors.get(0);
-        output.copyTo(outputMatrix);
         output.close();
         return outputMatrix;
     }
 
-    private List<Tensor<?>> evaluateTensor(long[] singleInputShape, DoubleBuffer singleInputDoubleBuffer) {
-        var inputTensor = Tensor.create(singleInputShape, singleInputDoubleBuffer);
+    private Tensor<?> evaluateTensor(long[] singleInputShape, DoubleBuffer singleInputDoubleBuffer) {
+        Tensor<?> inputTensor = Tensor.create(singleInputShape, singleInputDoubleBuffer);
         List<Tensor<?>> tensors = sess
             .runner()
             .feed("input_node", inputTensor)
@@ -83,9 +85,9 @@ public class TFWrapper implements Closeable {
             .run();
         inputTensor.close();
         if (tensors.size() != 1) {
-            throw new IllegalStateException("There should be only one output tensor.");
+            throw new IllegalStateException("There is expected only one output tensor in this scenario. If multiple tensors present on output, different method should be written to handle it. Got tensors: [" + tensors.size() + "]");
         }
-        return tensors;
+        return tensors.get(0);
     }
 
     @Override
