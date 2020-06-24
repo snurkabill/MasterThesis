@@ -50,17 +50,18 @@ public class AlphaZeroNodeMetadataFactory<
                                                                    TAction appliedAction) {
         var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
         if(parent == null) {
-            return new AlphaZeroNodeMetadata<TAction>(
-                allPlayerRewards,
-                allPlayerRewards,
-                Double.NaN,
-                new EnumMap<TAction, Double>(actionClazz));
+            throw new IllegalStateException("Parent is null.");
+//            return new AlphaZeroNodeMetadata<TAction>(
+//                allPlayerRewards,
+//                allPlayerRewards,
+//                Double.NaN,
+//                new EnumMap<TAction, Double>(actionClazz));
         } else {
             var metadata = parent.getSearchNodeMetadata();
             return new AlphaZeroNodeMetadata<TAction>(
                 DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
                 allPlayerRewards,
-                metadata.getChildPriorProbabilities().get(appliedAction),
+                metadata.getChildPriorProbabilities().size() == 0 ? Double.NaN : metadata.getChildPriorProbabilities().get(appliedAction),
                 new EnumMap<TAction, Double>(actionClazz));
         }
 

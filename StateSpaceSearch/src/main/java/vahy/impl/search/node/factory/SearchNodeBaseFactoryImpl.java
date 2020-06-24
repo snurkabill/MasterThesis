@@ -35,7 +35,9 @@ public class SearchNodeBaseFactoryImpl<TAction extends Enum<TAction> & Action, T
     }
 
     @Override
-    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> createNode(StateWrapper<TAction, TObservation, TState> initialState, TSearchNodeMetadata metadata, Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
+    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> createNode(StateWrapper<TAction, TObservation, TState> initialState,
+                                                                                     TSearchNodeMetadata metadata,
+                                                                                     Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap) {
         return new SearchNodeImpl<>(initialState, metadata, childNodeMap);
     }
 

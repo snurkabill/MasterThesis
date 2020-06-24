@@ -8,7 +8,8 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.ui.ApplicationFrame;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridLayout;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
     private final List<ChartPanel> chartPanelList = new ArrayList<>();
 
     public MyShittyFrameVisualization(String windowTitle, List<String> titleList, String xAxisLabelList, String yAxisLabelList, Color color) {
-        this(windowTitle, titleList, xAxisLabelList, yAxisLabelList, 400, 280, color);
+        this(windowTitle, titleList, xAxisLabelList, yAxisLabelList, 500, 400, color);
     }
 
     public MyShittyFrameVisualization(String windowTitle, List<String> titleList, String xAxisLabelList, String yAxisLabelList, int width, int height, Color color) {

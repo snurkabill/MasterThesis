@@ -3,7 +3,7 @@ package vahy.vizualiation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,7 +62,7 @@ public class ProgressTracker {
         }
         gatherData();
 
-        if(dataSeriesCollectorList.stream().anyMatch(dataSeriesCollector -> dataSeriesCollector.getData().stream().anyMatch(x -> x.getSecond() == null))) {
+        if(dataSeriesCollectorList.stream().anyMatch(dataSeriesCollector -> dataSeriesCollector.getData().stream().anyMatch(x -> x.getyAxisValueList() == null))) {
             return;
         }
 
@@ -70,12 +70,12 @@ public class ProgressTracker {
             var stringBuilder = new StringBuilder();
             stringBuilder.append(System.lineSeparator());
             stringBuilder.append("Iteration: [");
-            stringBuilder.append(dataSeriesCollectorList.get(0).getLatest().getFirst());
+            stringBuilder.append(dataSeriesCollectorList.get(0).getLatest().getxAxisValue());
             stringBuilder.append("] ").append(System.lineSeparator());
             for (DataSeriesCollector dataSeriesCollector : dataSeriesCollectorList) {
                 stringBuilder.append(dataSeriesCollector.getDataTitle());
                 stringBuilder.append(" [");
-                stringBuilder.append(dataSeriesCollector.getLatest().getSecond());
+                stringBuilder.append(dataSeriesCollector.getLatest().getyAxisValueList());
                 stringBuilder.append("]");
                 stringBuilder.append(System.lineSeparator());
             }

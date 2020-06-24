@@ -6,26 +6,22 @@ import vahy.api.model.StateWrapper;
 import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 
-public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
-    implements SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> {
+public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
+    implements SearchNode<TAction, TObservation, TMetadata, TState> {
 
     protected final boolean isFinalState;
     protected final boolean isOpponentTurn;
     protected final TAction[] allPossibleActions;
     protected final StateWrapper<TAction, TObservation, TState> wrappedState;
-    private final TSearchNodeMetadata searchNodeMetadata;
-    private SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent;
+    private final TMetadata searchNodeMetadata;
+    private SearchNode<TAction, TObservation, TMetadata, TState> parent;
     private TAction appliedParentAction;
 
     private boolean isLeaf = true;
 
-    protected AbstractSearchNode(
-        StateWrapper<TAction, TObservation, TState> wrappedState,
-        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> parent,
-        TAction appliedParentAction,
-        TSearchNodeMetadata searchNodeMetadata) {
+    protected AbstractSearchNode(StateWrapper<TAction, TObservation, TState> wrappedState, SearchNode<TAction, TObservation, TMetadata, TState> parent, TAction appliedParentAction, TMetadata nodeMetadata) {
         this.wrappedState = wrappedState;
-        this.searchNodeMetadata = searchNodeMetadata;
+        this.searchNodeMetadata = nodeMetadata;
         this.parent = parent;
         this.appliedParentAction = appliedParentAction;
         this.isFinalState = wrappedState.isFinalState();
@@ -52,7 +48,7 @@ public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action,
     }
 
     @Override
-    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getParent() {
+    public SearchNode<TAction, TObservation, TMetadata, TState> getParent() {
         return parent;
     }
 
@@ -63,7 +59,7 @@ public abstract class AbstractSearchNode<TAction extends Enum<TAction> & Action,
     }
 
     @Override
-    public TSearchNodeMetadata getSearchNodeMetadata() {
+    public TMetadata getSearchNodeMetadata() {
         return searchNodeMetadata;
     }
 

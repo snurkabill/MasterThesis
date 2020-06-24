@@ -53,14 +53,14 @@ public class Example_random_01 {
             3,
             3,
             1,
-            2,
+            3,
             0.1,
-            BomberManInstance.BM_01);
+            BomberManInstance.BM_02);
         var systemConfig = new SystemConfig(
             987567,
             false,
-            1,
-//            Runtime.getRuntime().availableProcessors(),
+//            1,
+            Runtime.getRuntime().availableProcessors(),
             true,
             50_000,
             0,
@@ -98,7 +98,7 @@ public class Example_random_01 {
         var actionClass = BomberManAction.class;
         var discountFactor = 1.0;
         var rolloutCount = 1;
-        var treeExpansionCount = 20;
+        var treeExpansionCount = 30;
         var cpuct = 1.0;
 
         var sampleState = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
@@ -127,7 +127,7 @@ public class Example_random_01 {
         // ----------------------------------------------------------------------------------------------
         // ALPHAZERO WITH APPROXIMATOR
 
-        var alphaGoPolicy = getAlphaGoPolicy(config, systemConfig, environmentPolicyCount + 2, actionClass, discountFactor, treeExpansionCount, sampleState, totalEntityCount, 2);
+        var alphaGoPolicy = getAlphaGoPolicy(config, systemConfig, environmentPolicyCount + 2, actionClass, discountFactor, cpuct, treeExpansionCount, sampleState, totalEntityCount, 2);
 
 
 
@@ -138,7 +138,7 @@ public class Example_random_01 {
             new ArrayList<>())).collect(Collectors.toList());
 
 
-        var policyList = List.of(valuePolicy, mctsPlayer_1);// , alphaGoPolicy);
+        var policyList = List.of(valuePolicy, mctsPlayer_1, alphaGoPolicy);
 
         var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, PolicyRecordBase, EpisodeStatisticsBase>()
             .setRoundName("BomberManIntegrationTest")
@@ -213,6 +213,7 @@ public class Example_random_01 {
                                                                                                                       int policyId,
                                                                                                                       Class<BomberManAction> actionClass,
                                                                                                                       double discountFactor,
+                                                                                                                      double cpuct,
                                                                                                                       int treeExpansionCount,
                                                                                                                       BomberManState sampleState,
                                                                                                                       int totalEntityCount,
@@ -251,7 +252,7 @@ public class Example_random_01 {
         );
         var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config);
 
-        return alphaGoPolicySupplier.getPolicyDefinition(policyId, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2, evaluationDepth);
+        return alphaGoPolicySupplier.getPolicyDefinition(policyId, 1, cpuct, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2, evaluationDepth);
     }
 
 

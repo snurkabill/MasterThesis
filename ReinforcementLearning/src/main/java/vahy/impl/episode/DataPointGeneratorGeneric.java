@@ -1,11 +1,10 @@
 package vahy.impl.episode;
 
-import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.DataPointGenerator;
+import vahy.vizualiation.DataSample;
 
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerator {
 
@@ -26,14 +25,9 @@ public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerato
     }
 
     @Override
-    public ImmutableTuple<Double, List<Double>> get() {
-        return new ImmutableTuple<>((double) counter, valueList);
+    public DataSample get() {
+        return new DataSample((double) counter, valueList);
     }
-//
-//    public void addNewValue(List<TDataSource> dataSource) {
-//        counter++;
-//        valueList = dataSource.stream().map(function).collect(Collectors.toList());
-//    }
 
     public void addNewValue(TDataSource dataSource) {
         counter++;

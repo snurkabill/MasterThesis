@@ -5,27 +5,19 @@ import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 import vahy.utils.ImmutableTuple;
 
-import java.util.Collections;
 import java.util.List;
 
 public class XYDatasetBuilder {
 
     public static XYDataset createDataset(DataSeriesCollector dataSeriesCollector) {
-        return createDataset(Collections.singletonList(dataSeriesCollector));
-    }
-
-    public static XYDataset createDataset(List<DataSeriesCollector> dataSeriesCollector) {
         XYSeriesCollection collectionOfSeries = new XYSeriesCollection();
-        for (DataSeriesCollector seriesMetadata : dataSeriesCollector) {
-            List<ImmutableTuple<Double, List<Double>>> data = seriesMetadata.getData();
-
-            for (int i = 0; i < data.get(0).getSecond().size(); i++) {
-                XYSeries series = new XYSeries(i);
-                for (int j = 0; j < data.size(); j++) {
-                    series.add(data.get(j).getFirst(), data.get(j).getSecond().get(i));
-                }
-                collectionOfSeries.addSeries(series);
+        List<DataSample> data = dataSeriesCollector.getData();
+        for (int i = 0; i < data.get(0).getyAxisValueList().size(); i++) {
+            XYSeries series = new XYSeries(i);
+            for (DataSample sample : data) {
+                series.add(sample.getxAxisValue(), sample.getyAxisValueList().get(i));
             }
+            collectionOfSeries.addSeries(series);
         }
         return collectionOfSeries;
     }
