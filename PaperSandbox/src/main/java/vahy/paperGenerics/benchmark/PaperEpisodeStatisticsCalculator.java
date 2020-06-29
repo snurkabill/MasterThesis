@@ -23,7 +23,6 @@ public class PaperEpisodeStatisticsCalculator<TAction extends Enum<TAction> & Ac
     public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration) {
         EpisodeStatisticsBase base = baseCalculator.calculateStatistics(episodeResultsList, duration);
 
-
         var policyCount = episodeResultsList.get(0).getPolicyCount();
         List<Long> riskHitCounter = new ArrayList<>(policyCount);
         List<Double> riskHitRatio = new ArrayList<>(policyCount);
@@ -35,17 +34,6 @@ public class PaperEpisodeStatisticsCalculator<TAction extends Enum<TAction> & Ac
             riskHitRatio.add(riskHitCount / (double) episodeResultsList.size());
             riskHitStdev.add(MathStreamUtils.calculateStdev(episodeResultsList, value -> value.getFinalState().isRiskHit(index) ? 1.0 : 0.0));
         }
-        return new PaperEpisodeStatistics(
-            duration,
-            base.getPlayerCount(),
-            base.getAveragePlayerStepCount(),
-            base.getStdevPlayerStepCount(),
-            base.getAverageMillisPerEpisode(),
-            base.getStdevMillisPerEpisode(),
-            base.getTotalPayoffAverage(),
-            base.getTotalPayoffStdev(),
-            riskHitCounter,
-            riskHitRatio,
-            riskHitStdev);
+        return new PaperEpisodeStatistics(base, riskHitCounter, riskHitRatio, riskHitStdev);
     }
 }

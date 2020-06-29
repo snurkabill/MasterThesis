@@ -20,7 +20,7 @@ public class EpisodeResultsImpl<
     implements EpisodeResults<TAction, TObservation, TState, TPolicyRecord> {
 
     private final List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory;
-    private final PolicyIdTranslationMap getPolicyIdTranslationMap;
+    private final PolicyIdTranslationMap policyIdTranslationMap;
     private final int policyCount;
     private final List<Integer> playerStepCountList;
     private final List<Double> averageDurationPerDecision;
@@ -29,7 +29,7 @@ public class EpisodeResultsImpl<
     private final Duration duration;
 
     public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
-                              PolicyIdTranslationMap getPolicyIdTranslationMap,
+                              PolicyIdTranslationMap policyIdTranslationMap,
                               int policyCount,
                               List<Integer> playerStepCountList,
                               List<Double> averageDurationPerDecision,
@@ -37,7 +37,7 @@ public class EpisodeResultsImpl<
                               List<Double> totalPayoff,
                               Duration duration) {
         this.episodeHistory = episodeHistory;
-        this.getPolicyIdTranslationMap = getPolicyIdTranslationMap;
+        this.policyIdTranslationMap = policyIdTranslationMap;
         this.policyCount = policyCount;
         this.playerStepCountList = playerStepCountList;
         this.averageDurationPerDecision = averageDurationPerDecision;
@@ -63,7 +63,7 @@ public class EpisodeResultsImpl<
 
     @Override
     public PolicyIdTranslationMap getPolicyIdTranslationMap() {
-        return getPolicyIdTranslationMap;
+        return policyIdTranslationMap;
     }
 
     @Override

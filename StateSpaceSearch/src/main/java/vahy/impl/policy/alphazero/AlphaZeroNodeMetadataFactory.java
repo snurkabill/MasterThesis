@@ -47,8 +47,8 @@ public class AlphaZeroNodeMetadataFactory<
     @Override
     public AlphaZeroNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> parent,
                                                                    StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
-                                                                   TAction appliedAction) {
-        var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
+                                                                   TAction appliedAction)
+    {
         if(parent == null) {
             throw new IllegalStateException("Parent is null.");
 //            return new AlphaZeroNodeMetadata<TAction>(
@@ -57,6 +57,7 @@ public class AlphaZeroNodeMetadataFactory<
 //                Double.NaN,
 //                new EnumMap<TAction, Double>(actionClazz));
         } else {
+            var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
             var metadata = parent.getSearchNodeMetadata();
             return new AlphaZeroNodeMetadata<TAction>(
                 DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
