@@ -2,11 +2,11 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PlayingDistribution;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -14,53 +14,27 @@ public class PlayingDistributionWithRisk<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TObservation, TState>> {
+    TState extends PaperState<TAction, TObservation, TState>> extends PlayingDistribution<TAction> {
 
-    private final TAction expectedPlayerAction;
-    private final int expectedPlayerActionIndex;
-
-    private final double[] playerDistribution;
-    private final double[] riskOnPlayerSubNodes;
-    private final List<TAction> actionList;
-
+    private final double[] riskOnSubNodes;
     private final Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap;
 
-    public PlayingDistributionWithRisk(TAction expectedPlayerAction,
-                                       int expectedPlayerActionIndex,
-                                       double[] playerDistribution,
-                                       double[] riskOnPlayerSubNodes,
-                                       List<TAction> actionList,
+    public PlayingDistributionWithRisk(TAction action,
+                                       double expectedReward,
+                                       double[] distribution,
+                                       double[] riskOnSubNodes,
                                        Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> usedSubTreeRiskCalculatorSupplierMap) {
-        this.expectedPlayerAction = expectedPlayerAction;
-        this.expectedPlayerActionIndex = expectedPlayerActionIndex;
-        this.playerDistribution = playerDistribution;
-        this.riskOnPlayerSubNodes = riskOnPlayerSubNodes;
-        this.actionList = actionList;
+        super(action, expectedReward, distribution);
+        this.riskOnSubNodes = riskOnSubNodes;
         this.usedSubTreeRiskCalculatorSupplierMap = usedSubTreeRiskCalculatorSupplierMap;
 
-        if(playerDistribution.length != riskOnPlayerSubNodes.length) {
+        if(distribution.length != riskOnSubNodes.length) {
             throw new IllegalArgumentException("Player distribution and risks on subnodes differ in length");
         }
     }
 
-    public TAction getExpectedPlayerAction() {
-        return expectedPlayerAction;
-    }
-
-    public int getExpectedPlayerActionIndex() {
-        return expectedPlayerActionIndex;
-    }
-
-    public double[] getPlayerDistribution() {
-        return playerDistribution;
-    }
-
-    public double[] getRiskOnPlayerSubNodes() {
-        return riskOnPlayerSubNodes;
-    }
-
-    public List<TAction> getActionList() {
-        return actionList;
+    public double[] getRiskOnSubNodes() {
+        return riskOnSubNodes;
     }
 
     public Map<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>> getUsedSubTreeRiskCalculatorSupplierMap() {

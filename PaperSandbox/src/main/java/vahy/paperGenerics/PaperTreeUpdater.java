@@ -19,7 +19,7 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
         int i = 0;
 
         double estimatedLeafReward = expandedNode.getSearchNodeMetadata().getCumulativeReward() + (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
-        double estimatedLeafRisk = expandedNode.isFinalNode() ? (((PaperStateWrapper<TAction, TObservation, TState>)expandedNode.getStateWrapper()).isRiskHit() ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getPredictedRisk();
+        double estimatedLeafRisk = expandedNode.isFinalNode() ? (((PaperStateWrapper<TAction, TObservation, TState>)expandedNode.getStateWrapper()).isRiskHit() ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getExpectedRisk();
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
             expandedNode = expandedNode.getParent();
@@ -52,7 +52,7 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
                 searchNodeMetadata.setSumOfRisk(searchNodeMetadata.getSumOfRisk() + estimatedRisk);
             }
             searchNodeMetadata.setExpectedReward(searchNodeMetadata.getSumOfTotalEstimations() / searchNodeMetadata.getVisitCounter());
-            searchNodeMetadata.setPredictedRisk(searchNodeMetadata.getSumOfRisk() / searchNodeMetadata.getVisitCounter());
+            searchNodeMetadata.setExpectedRisk(searchNodeMetadata.getSumOfRisk() / searchNodeMetadata.getVisitCounter());
         }
     }
 }

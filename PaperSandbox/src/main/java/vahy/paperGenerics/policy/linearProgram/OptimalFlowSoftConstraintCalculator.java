@@ -40,7 +40,7 @@ public class OptimalFlowSoftConstraintCalculator<
         totalRiskExpression.add(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : 0.0, metadata.getNodeProbabilityFlow());
         double cumulativeReward = metadata.getCumulativeReward();
         double expectedReward = metadata.getExpectedReward();
-        double predictedRisk = metadata.getPredictedRisk();
+        double predictedRisk = metadata.getExpectedRisk();
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
         model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), addNoiseToLeaf(leafCoefficient));
     }
@@ -54,7 +54,7 @@ public class OptimalFlowSoftConstraintCalculator<
             totalRiskExpression.add((((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : 0.0) * priorProbability, parentFlow);
             double cumulativeReward = metadata.getCumulativeReward();
             double expectedReward = metadata.getExpectedReward();
-            double predictedRisk = metadata.getPredictedRisk();
+            double predictedRisk = metadata.getExpectedRisk();
             double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
             sum += leafCoefficient * priorProbability;
         }

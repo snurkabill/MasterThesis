@@ -28,7 +28,7 @@ public class SubtreePriorRiskCalculator<
                 if(node.getFirst().isFinalNode()) {
                     totalRisk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getFirst().getStateWrapper()).isRiskHit() ? node.getSecond() : 0.0;
                 } else {
-                    totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getPredictedRisk();
+                    totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getExpectedRisk();
                 }
             } else {
                 for (var entry : node.getFirst().getChildNodeMap().entrySet()) {

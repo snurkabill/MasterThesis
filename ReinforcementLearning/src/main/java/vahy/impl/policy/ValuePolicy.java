@@ -55,7 +55,7 @@ public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends 
 
     @Override
     public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, DoubleVector, TState> gameState) {
-        return new PolicyRecordBase(this.playingDistribution.getDistribution(), this.playingDistribution.getPredictedReward());
+        return new PolicyRecordBase(this.playingDistribution.getDistribution(), this.playingDistribution.getExpectedReward());
     }
 
     @Override

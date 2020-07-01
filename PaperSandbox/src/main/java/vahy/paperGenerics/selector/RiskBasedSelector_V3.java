@@ -54,7 +54,7 @@ public class RiskBasedSelector_V3<
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
                 var normalizedReward = (valueArray[i] - min) / norm;
-                var risk = metadata.getPredictedRisk();
+                var risk = metadata.getExpectedRisk();
                 var vValue = normalizedReward * (1 - risk * currentRiskWeight);
                 var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
                 var quValue = vValue + uValue;
@@ -70,7 +70,7 @@ public class RiskBasedSelector_V3<
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
                 var reward = metadata.getExpectedReward() + metadata.getGainedReward();
                 var normalizedReward = (max == min ? 0.5 : ((reward - min) / (max - min)));
-                var risk = metadata.getPredictedRisk();
+                var risk = metadata.getExpectedRisk();
                 var vValue = normalizedReward * (1 - risk * currentRiskWeight);
                 var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
                 var quValue = vValue + uValue;

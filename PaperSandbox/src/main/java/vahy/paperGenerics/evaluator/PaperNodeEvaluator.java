@@ -79,7 +79,7 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
         searchMetadata.setPredictedReward(prediction[PaperModel.Q_VALUE_INDEX]);
         searchMetadata.setExpectedReward(prediction[PaperModel.Q_VALUE_INDEX]);
         if(!node.isFinalNode()) {
-            searchMetadata.setPredictedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
+            searchMetadata.setExpectedRisk(prediction[PaperModel.RISK_VALUE_INDEX]);
         }
         Map<TAction, Double> childPriorProbabilities = searchMetadata.getChildPriorProbabilities();
 

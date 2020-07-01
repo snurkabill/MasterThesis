@@ -9,27 +9,27 @@ import java.util.EnumMap;
 public class PaperMetadata<TAction extends Enum<TAction> & Action> extends AlphaZeroNodeMetadata<TAction> {
 
     private CLPVariable nodeProbabilityFlow;
-    private double predictedRisk;
+    private double expectedRisk;
     private double sumOfRisk;
     private double flow;
 
     public PaperMetadata(double[] cumulativeReward,
                          double[] gainedReward,
                          double priorProbability,
-                         double predictedRisk,
+                         double expectedRisk,
                          EnumMap<TAction, Double> childPriorProbabilities) {
         super(cumulativeReward, gainedReward, priorProbability, childPriorProbabilities);
-        this.predictedRisk = predictedRisk;
-        this.sumOfRisk = predictedRisk;
+        this.expectedRisk = expectedRisk;
+        this.sumOfRisk = expectedRisk;
         this.flow = 0.0;
     }
 
-    public double getPredictedRisk() {
-        return predictedRisk;
+    public double getExpectedRisk() {
+        return expectedRisk;
     }
 
-    public void setPredictedRisk(double predictedRisk) {
-        this.predictedRisk = predictedRisk;
+    public void setExpectedRisk(double expectedRisk) {
+        this.expectedRisk = expectedRisk;
     }
 
     public CLPVariable getNodeProbabilityFlow() {
@@ -69,7 +69,7 @@ public class PaperMetadata<TAction extends Enum<TAction> & Action> extends Alpha
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(baseString);
         stringBuilder.append("\\n").append("nPredictedRisk: ");
-        stringBuilder.append(this.predictedRisk);
+        stringBuilder.append(this.expectedRisk);
         stringBuilder.append("\\n").append("nSumOfPredictedRisk: ");
         stringBuilder.append(this.sumOfRisk);
         stringBuilder.append("\\n").append("nCalculatedFlow: ");

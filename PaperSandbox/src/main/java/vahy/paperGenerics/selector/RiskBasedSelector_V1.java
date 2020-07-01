@@ -88,7 +88,7 @@ public class RiskBasedSelector_V1<
 
         double minimalRisk = node
             .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getPredictedRisk())
+            .mapToDouble(x -> x.getSearchNodeMetadata().getExpectedRisk())
             .min()
             .orElseThrow(() -> new IllegalStateException("Minimal risk does not exist"));
 
@@ -113,7 +113,7 @@ public class RiskBasedSelector_V1<
                     CLPVariable probabilityVariable = model.addVariable().lb(0.0).ub(1.0);
                     model.setObjectiveCoefficient(probabilityVariable, x.getSecond());
                     totalRiskExpression.add(probabilityVariable,
-                        finalNodeReference.getChildNodeMap().get(x.getFirst()).getSearchNodeMetadata().getPredictedRisk());
+                        finalNodeReference.getChildNodeMap().get(x.getFirst()).getSearchNodeMetadata().getExpectedRisk());
                     sumToOneExpression.add(probabilityVariable, 1.0);
                     return new ImmutableTuple<>(x, probabilityVariable);
                 })

@@ -44,7 +44,7 @@ public class OptimalFlowSoftConstraintDeprecateed<
         }
         double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward();
         double expectedReward = node.getSearchNodeMetadata().getExpectedReward();
-        double predictedRisk = node.getSearchNodeMetadata().getPredictedRisk();
+        double predictedRisk = node.getSearchNodeMetadata().getExpectedRisk();
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
 
         if(strategy != NoiseStrategy.NONE) {

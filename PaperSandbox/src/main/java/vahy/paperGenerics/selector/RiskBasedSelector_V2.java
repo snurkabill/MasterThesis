@@ -103,7 +103,7 @@ public class RiskBasedSelector_V2<
             .stream()
             .map(x -> {
                 CLPVariable probabilityVariable = model.addVariable().lb(0.0).ub(1.0);
-                model.setObjectiveCoefficient(probabilityVariable, x.getSecond() * (1 - finalNodeReference.getChildNodeMap().get(x.getFirst()).getSearchNodeMetadata().getPredictedRisk()));
+                model.setObjectiveCoefficient(probabilityVariable, x.getSecond() * (1 - finalNodeReference.getChildNodeMap().get(x.getFirst()).getSearchNodeMetadata().getExpectedRisk()));
                 sumToOneExpression.add(probabilityVariable, 1.0);
                 return new ImmutableTuple<>(x, probabilityVariable);
             })

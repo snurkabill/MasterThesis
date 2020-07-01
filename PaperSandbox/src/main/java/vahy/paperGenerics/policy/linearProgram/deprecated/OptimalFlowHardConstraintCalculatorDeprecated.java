@@ -35,7 +35,7 @@ public class OptimalFlowHardConstraintCalculatorDeprecated<
 
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getPredictedRisk();
+        double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getExpectedRisk();
         totalRiskExpression.add(nodeRisk, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward();
         double expectedReward = node.getSearchNodeMetadata().getExpectedReward();

@@ -27,7 +27,7 @@ public class FlowSumSubtreeRiskCalculator<
                 if(node.isFinalNode()) {
                     risk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
                 } else {
-                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getFlow();
+                    risk += node.getSearchNodeMetadata().getExpectedRisk() * node.getSearchNodeMetadata().getFlow();
                 }
             } else {
                 for (var entry : node.getChildNodeMap().entrySet()) {

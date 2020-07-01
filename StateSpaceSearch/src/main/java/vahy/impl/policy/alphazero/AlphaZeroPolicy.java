@@ -82,7 +82,7 @@ public class AlphaZeroPolicy<
         if(DEBUG_ENABLED) {
             checkStateRoot(gameState);
         }
-        return new PolicyRecordBase(playingDistribution.getDistribution(), playingDistribution.getPredictedReward());
+        return new PolicyRecordBase(playingDistribution.getDistribution(), playingDistribution.getExpectedReward());
     }
 
     private double[] innerActionProbabilityDistribution(TAction selectedAction) {

@@ -20,7 +20,7 @@ public class PlayingDistribution<TAction extends Enum<TAction> & Action>
         return playedAction;
     }
 
-    public double getPredictedReward() {
+    public double getExpectedReward() {
         return predictedReward;
     }
 

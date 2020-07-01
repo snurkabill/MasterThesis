@@ -64,6 +64,16 @@ public class SearchTreeImpl<
 //        expandTreeToNextPlayerLevel();
     }
 
+    public int getTotalNodesExpanded() {
+        return totalNodesExpanded;
+    }
+
+    @Override
+    public void applyAction(TAction action) {
+        checkApplicableAction(action);
+        innerApplyAction(action);
+    }
+
     @Override
     public boolean expandTree() {
         if(root.isFinalNode()) {
@@ -83,14 +93,10 @@ public class SearchTreeImpl<
         return true;
     }
 
-    public void applyAction(TAction action) {
-        checkApplicableAction(action);
-        innerApplyAction(action);
+    private void expandAndEvaluateNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
+        totalNodesExpanded += nodeEvaluator.evaluateNode(selectedNodeForExpansion);
     }
 
-    public int getTotalNodesExpanded() {
-        return totalNodesExpanded;
-    }
 
     @Override
     public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getRoot() {
@@ -100,41 +106,6 @@ public class SearchTreeImpl<
     @Override
     public String toString() {
         return dumpTreeToString(Integer.MAX_VALUE);
-    }
-
-    public String toStringWithBoundedDepth(int depth) {
-        return dumpTreeToString(depth);
-    }
-
-    private String dumpTreeToString(int depth) {
-        LinkedList<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Integer>> queue = new LinkedList<>();
-        queue.addFirst(new ImmutableTuple<>(this.getRoot(), 0));
-
-        StringBuilder string = new StringBuilder();
-        String start = "digraph G {";
-        String end = "}";
-
-        string.append(start);
-        while(!queue.isEmpty()) {
-            var node = queue.poll();
-            for (var entry : node.getFirst().getChildNodeMap().entrySet()) {
-                var child = entry.getValue();
-                if(node.getSecond() < depth) {
-                    queue.addLast(new ImmutableTuple<>(child, node.getSecond() + 1));
-                }
-
-                string.append("\"").append(node.getFirst().toString()).append("\"");
-                string.append(" -> ");
-                string.append("\"").append(child.toString()).append("\"");
-                string.append(" ");
-                string.append("[ label = \"");
-                string.append(entry.getKey());
-                string.append("\"];");
-                string.append(System.lineSeparator());
-            }
-        }
-        string.append(end);
-        return string.toString();
     }
 
     protected void checkApplicableAction(TAction action) {
@@ -183,6 +154,41 @@ public class SearchTreeImpl<
         }
     }
 
+    public String toStringWithBoundedDepth(int depth) {
+        return dumpTreeToString(depth);
+    }
+
+    private String dumpTreeToString(int depth) {
+        LinkedList<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Integer>> queue = new LinkedList<>();
+        queue.addFirst(new ImmutableTuple<>(this.getRoot(), 0));
+
+        StringBuilder string = new StringBuilder();
+        String start = "digraph G {";
+        String end = "}";
+
+        string.append(start);
+        while(!queue.isEmpty()) {
+            var node = queue.poll();
+            for (var entry : node.getFirst().getChildNodeMap().entrySet()) {
+                var child = entry.getValue();
+                if(node.getSecond() < depth) {
+                    queue.addLast(new ImmutableTuple<>(child, node.getSecond() + 1));
+                }
+
+                string.append("\"").append(node.getFirst().toString()).append("\"");
+                string.append(" -> ");
+                string.append("\"").append(child.toString()).append("\"");
+                string.append(" ");
+                string.append("[ label = \"");
+                string.append(entry.getKey());
+                string.append("\"];");
+                string.append(System.lineSeparator());
+            }
+        }
+        string.append(end);
+        return string.toString();
+    }
+
     public void printTreeToFile(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot, String fileName, int depthBound) {
         while (depthBound >= 1) {
             try {
@@ -229,10 +235,6 @@ public class SearchTreeImpl<
         } catch (IOException e) {
             throw new IllegalStateException("Saving into graph failed", e);
         }
-    }
-
-    private void expandAndEvaluateNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNodeForExpansion) {
-        totalNodesExpanded += nodeEvaluator.evaluateNode(selectedNodeForExpansion);
     }
 
 }

@@ -89,6 +89,6 @@ public class MCTSPolicy<
         if(DEBUG_ENABLED) {
             checkStateRoot(gameState);
         }
-        return new PolicyRecordBase(playingDistribution.getDistribution(), playingDistribution.getPredictedReward());
+        return new PolicyRecordBase(playingDistribution.getDistribution(), playingDistribution.getExpectedReward());
     }
 }

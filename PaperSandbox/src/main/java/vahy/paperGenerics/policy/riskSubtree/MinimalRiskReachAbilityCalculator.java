@@ -43,12 +43,13 @@ public class MinimalRiskReachAbilityCalculator<
 
     private double resolveNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
         var linProgram = new AbstractLinearProgramOnTree<TAction, TObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
+
             @Override
             protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
                 if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
                 } else {
-                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getPredictedRisk());
+                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getExpectedRisk());
                 }
             }
 
@@ -57,7 +58,7 @@ public class MinimalRiskReachAbilityCalculator<
                 double sum = 0.0;
                 for (var entry : searchNodes) {
                     var metadata = entry.getSearchNodeMetadata();
-                    sum += (((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getPredictedRisk()) * metadata.getPriorProbability();
+                    sum += (((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()) * metadata.getPriorProbability();
                 }
                 model.setObjectiveCoefficient(parentFlow, sum);
             }
