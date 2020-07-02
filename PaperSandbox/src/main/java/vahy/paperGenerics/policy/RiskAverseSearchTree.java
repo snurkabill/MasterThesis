@@ -15,6 +15,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.flowOptimizer.AbstractFlowOptimizer;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionProvider;
+import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionWithWithActionMap;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 
@@ -213,18 +214,18 @@ public class RiskAverseSearchTree<
 
 
     private void processPlayerAction(TAction action) {
-        var playerActionDistribution = playingDistribution.getDistribution();
+        var playerActionDistribution = ((PlayingDistributionWithWithActionMap<TAction>) playingDistribution).getActionMap(); // TODO: casting is little dirty here.
         var riskOfOtherPlayerActions = 0.0d;
         for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
             childRisk = roundRiskIfBelowZero(riskOfOtherPlayerActions, "RiskOfPlayerAction");
             anyRiskEstimated += childRisk;
             if(entry.getKey().ordinal() != action.ordinal()) {
-                riskOfOtherPlayerActions += childRisk * playerActionDistribution[entry.getKey().ordinal()];
+                riskOfOtherPlayerActions += childRisk * playerActionDistribution.get(entry.getKey());
             }
         }
         cumulativeNominator += riskOfOtherPlayerActions;
-        cumulativeDenominator *= playerActionDistribution[action.ordinal()];
+        cumulativeDenominator *= playerActionDistribution.get(action);
     }
 
     private void processOpponentAction(TAction action) {

@@ -2,13 +2,12 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PlayingDistribution;
+import vahy.api.policy.RandomizedPolicy;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.riskSubtree.ConstantRiskCalculator;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.SplittableRandom;
 
@@ -20,45 +19,23 @@ public class MaxUcbVisitDistributionProvider<
     extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     public MaxUcbVisitDistributionProvider() {
-        super(false, () -> new ConstantRiskCalculator<>(1.0));
+        super(false);
     }
 
     @Override
-    public PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
-        double temperature,
-        SplittableRandom random,
-        double totalRiskAllowed)
+    public PlayingDistribution<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
-        int childCount = node.getChildNodeMap().size();
-        double totalVisitSum = node
-            .getChildNodeStream()
-            .mapToDouble(x -> x.getSearchNodeMetadata().getVisitCounter())
-            .sum();
-
-        List<TAction> actionList = new ArrayList<>(childCount);
-        double[] rewardArray = new double[childCount];
-        double[] riskArray = new double[childCount];
-
-        int j = 0;
-        for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
-            actionList.add(entry.getKey());
-            var metadata = entry.getValue().getSearchNodeMetadata();
-            rewardArray[j] = metadata.getVisitCounter() / totalVisitSum;
-            riskArray[j] = 1.0d;
-            j++;
-        }
-
-        var max = rewardArray[0];
-        var index = 0;
-        for (int i = 1; i < childCount; i++) {
-            var value = rewardArray[i];
-            if(max < value) {
-                max = value;
-                index = i;
+        int inGameEntityId = node.getStateWrapper().getInGameEntityIdWrapper();
+        var max = Integer.MIN_VALUE;
+        TAction action = null;
+        var childNodeMap = node.getChildNodeMap();
+        for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : childNodeMap.entrySet()) {
+            var visitCounter = entry.getValue().getSearchNodeMetadata().getVisitCounter();
+            if(visitCounter > max) {
+                max = visitCounter;
+                action = entry.getKey();
             }
         }
-        TAction action = actionList.get(index);
-        return new PlayingDistributionWithRisk<>(action, index, rewardArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
+        return new PlayingDistribution<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], RandomizedPolicy.EMPTY_ARRAY);
     }
 }

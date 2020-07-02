@@ -1,5 +1,6 @@
 package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
@@ -12,7 +13,7 @@ import vahy.utils.RandomDistributionUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
@@ -29,27 +30,23 @@ public class ExplorationFeasibleDistributionProvider<
     private static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
     private static final double RISK_BOUND_DELTA = 0.01;
 
-    private final Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow;
-    private final Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow;
+    private final Class<TAction> clazz;
 
-    public ExplorationFeasibleDistributionProvider(Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForKnownFlow,
-                                                   Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplierForUnknownFlow) {
-        super(true, null);
-        this.subtreeRiskCalculatorSupplierForKnownFlow = subtreeRiskCalculatorSupplierForKnownFlow;
-        this.subtreeRiskCalculatorSupplierForUnknownFlow = subtreeRiskCalculatorSupplierForUnknownFlow;
+    private final Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier;
+
+    public ExplorationFeasibleDistributionProvider(Class<TAction> clazz, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> subtreeRiskCalculatorSupplier) {
+        super(true);
+        this.clazz = clazz;
+        this.subtreeRiskCalculatorSupplier = subtreeRiskCalculatorSupplier;
     }
 
     @Override
-    public PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
-        double temperature,
-        SplittableRandom random,
-        double totalRiskAllowed)
+    public PlayingDistributionWithWithActionMap<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
+        int inGameEntityId = node.getStateWrapper().getInGameEntityIdWrapper();
         var childMap = node.getChildNodeMap();
         var childCount = childMap.size();
         var actionList = new ArrayList<TAction>(childCount);
-        var riskSupplierMap = new HashMap<TAction, Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>>>(childCount);
         var distributionAsArray = new double[childCount];
         var riskArray = new double[childCount];
 
@@ -58,19 +55,10 @@ public class ExplorationFeasibleDistributionProvider<
             actionList.add(entry.getKey());
             var metadata = entry.getValue().getSearchNodeMetadata();
             distributionAsArray[j] = metadata.getFlow();
-            var riskSupplier = distributionAsArray[j] - TOLERANCE <= 0.0 ? subtreeRiskCalculatorSupplierForUnknownFlow : subtreeRiskCalculatorSupplierForKnownFlow;
-            riskSupplierMap.put(entry.getKey(), riskSupplier);
-            var minimalRiskReachAbilityCalculator = riskSupplier.get();
-
-            if(DEBUG_ENABLED) {
-                logger.debug("Calculating risk using [{}] risk calculator", minimalRiskReachAbilityCalculator.toLog());
-            }
-            riskArray[j] = minimalRiskReachAbilityCalculator.calculateRisk(entry.getValue());
+            riskArray[j] = subtreeRiskCalculatorSupplier.get().calculateRisk(entry.getValue());
             j++;
         }
 
-        double[] originalDistributionAsArray = new double[distributionAsArray.length];
-        System.arraycopy(distributionAsArray, 0, originalDistributionAsArray, 0, distributionAsArray.length);
         RandomDistributionUtils.tryToRoundDistribution(distributionAsArray, TOLERANCE);
         RandomDistributionUtils.applyBoltzmannNoise(distributionAsArray, temperature);
 
@@ -87,18 +75,32 @@ public class ExplorationFeasibleDistributionProvider<
                     riskBound);
                 if(suitableExplorationDistribution.getFirst()) {
                     int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution.getSecond(), random);
-                    return new PlayingDistributionWithRisk<>(actionList.get(index), index, suitableExplorationDistribution.getSecond(), riskArray, actionList, riskSupplierMap);
+                    return getActionPlayingDistributionWithWithActionMap(inGameEntityId, childMap, actionList, distributionAsArray, index);
                 }
             }
             throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found. Total risk allowed: [" + totalRiskAllowed +
                 "] alternated probabilityDistribution: [" + Arrays.toString(distributionAsArray) +
                 "] action risk array: [" + Arrays.toString(riskArray) +
                 "] summed risk for original distribution with boltzmann noise: [" + sum +
-                "] original probability array: [" + Arrays.toString(originalDistributionAsArray) +
                 "] This is probably due to numeric inconsistency. Boltzmann exploration can have such effect with SOFT flow optimizer when allowed risk is 0.");
         } else {
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionAsArray, random);
-            return new PlayingDistributionWithRisk<>(actionList.get(index), index, distributionAsArray, riskArray, actionList, riskSupplierMap);
+            return getActionPlayingDistributionWithWithActionMap(inGameEntityId, childMap, actionList, distributionAsArray, index);
         }
+    }
+
+    @NotNull
+    private PlayingDistributionWithWithActionMap<TAction> getActionPlayingDistributionWithWithActionMap(int inGameEntityId,
+                                                                                                        Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childMap,
+                                                                                                        ArrayList<TAction> actionList,
+                                                                                                        double[] distributionAsArray,
+                                                                                                        int index)
+    {
+        var action = actionList.get(index);
+        EnumMap<TAction, Double> enumMap = new EnumMap<>(clazz);
+        for (int i = 0; i < actionList.size(); i++) { // TODO: sample action right away from enum map
+            enumMap.put(actionList.get(i), distributionAsArray[i]);
+        }
+        return new PlayingDistributionWithWithActionMap<>(action, childMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], distributionAsArray, enumMap);
     }
 }

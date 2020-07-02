@@ -35,7 +35,7 @@ public class FlowSumSubtreeRiskCalculator<
                 }
             }
         }
-        return risk;
+        return risk / subTreeRoot.getSearchNodeMetadata().getFlow(); // dividing risk by flow in the root since flow might be smaller than one and we want to return risk as we already were in subroot.
     }
 
     @Override

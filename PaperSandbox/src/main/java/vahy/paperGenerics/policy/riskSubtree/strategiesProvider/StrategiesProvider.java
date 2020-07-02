@@ -42,8 +42,7 @@ public class StrategiesProvider<
     private final ExplorationExistingFlowStrategy explorationExistingFlowStrategy;
     private final ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy;
     private final FlowOptimizerType flowOptimizerType;
-    private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow;
-    private final SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow;
+    private final SubTreeRiskCalculatorType subTreeRiskCalculatorType;
     private final NoiseStrategy noiseStrategy;
 
     public StrategiesProvider(Class<TAction> actionClass, InferenceExistingFlowStrategy inferenceExistingFlowStrategy,
@@ -51,8 +50,7 @@ public class StrategiesProvider<
                               ExplorationExistingFlowStrategy explorationExistingFlowStrategy,
                               ExplorationNonExistingFlowStrategy explorationNonExistingFlowStrategy,
                               FlowOptimizerType flowOptimizerType,
-                              SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForKnownFlow,
-                              SubTreeRiskCalculatorType subTreeRiskCalculatorTypeForUnknownFlow,
+                              SubTreeRiskCalculatorType subTreeRiskCalculatorType,
                               NoiseStrategy noiseStrategy) {
         this.actionClass = actionClass;
         this.inferenceExistingFlowStrategy = inferenceExistingFlowStrategy;
@@ -60,15 +58,14 @@ public class StrategiesProvider<
         this.explorationExistingFlowStrategy = explorationExistingFlowStrategy;
         this.explorationNonExistingFlowStrategy = explorationNonExistingFlowStrategy;
         this.flowOptimizerType = flowOptimizerType;
-        this.subTreeRiskCalculatorTypeForKnownFlow = subTreeRiskCalculatorTypeForKnownFlow;
-        this.subTreeRiskCalculatorTypeForUnknownFlow = subTreeRiskCalculatorTypeForUnknownFlow;
+        this.subTreeRiskCalculatorType = subTreeRiskCalculatorType;
         this.noiseStrategy = noiseStrategy;
     }
 
     public PlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> provideInferenceExistingFlowStrategy() {
         switch(inferenceExistingFlowStrategy) {
             case SAMPLE_OPTIMAL_FLOW:
-                return new InferenceFeasibleDistributionProvider<>(provideRiskCalculatorForKnownFlow());
+                return new InferenceFeasibleDistributionProvider<>(actionClass);
             case MAX_UCB_VISIT:
                 return new MaxUcbVisitDistributionProvider<>();
             case MAX_UCB_VALUE:
@@ -92,9 +89,9 @@ public class StrategiesProvider<
     public PlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> provideExplorationExistingFlowStrategy() {
         switch(explorationExistingFlowStrategy){
             case SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE:
-                return new ExplorationFeasibleDistributionProvider<>(provideRiskCalculatorForKnownFlow(), provideRiskCalculatorForUnknownFlow());
+                return new ExplorationFeasibleDistributionProvider<>(actionClass, provideRiskCalculator(subTreeRiskCalculatorType));
             case SAMPLE_OPTIMAL_FLOW:
-                return new InferenceFeasibleDistributionProvider<>(provideRiskCalculatorForKnownFlow());
+                return new InferenceFeasibleDistributionProvider<>(actionClass);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(explorationExistingFlowStrategy);
         }
@@ -145,14 +142,6 @@ public class StrategiesProvider<
             default:
                 throw EnumUtils.createExceptionForNotExpectedEnumValue(subTreeRiskCalculatorType);
         }
-    }
-
-    public Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> provideRiskCalculatorForKnownFlow() {
-        return provideRiskCalculator(subTreeRiskCalculatorTypeForKnownFlow);
-    }
-
-    public Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> provideRiskCalculatorForUnknownFlow() {
-        return provideRiskCalculator(subTreeRiskCalculatorTypeForUnknownFlow);
     }
 
 }

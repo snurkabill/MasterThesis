@@ -2,6 +2,7 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PlayingDistribution;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
@@ -14,9 +15,6 @@ public interface PlayingDistributionProvider<
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>> {
 
-    PlayingDistributionWithRisk<TAction, TObservation, TSearchNodeMetadata, TState> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node,
-                                                                                                       double temperature,
-                                                                                                       SplittableRandom random,
-                                                                                                       double totalRiskAllowed);
+    PlayingDistribution<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed);
 
 }

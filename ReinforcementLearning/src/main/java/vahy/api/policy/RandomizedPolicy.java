@@ -11,7 +11,7 @@ import java.util.SplittableRandom;
 public abstract class RandomizedPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord>
     implements Policy<TAction, TObservation, TState, TPolicyRecord> {
 
-    protected static final double[] EMPTY_ARRAY = new double[0];
+    public static final double[] EMPTY_ARRAY = new double[0];
 
     protected static final Logger logger = LoggerFactory.getLogger(RandomizedPolicy.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
