@@ -43,7 +43,7 @@ public class ExplorationFeasibleDistributionProvider<
     @Override
     public PlayingDistributionWithWithActionMap<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
-        int inGameEntityId = node.getStateWrapper().getInGameEntityIdWrapper();
+        int inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var childMap = node.getChildNodeMap();
         var childCount = childMap.size();
         var actionList = new ArrayList<TAction>(childCount);

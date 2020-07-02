@@ -41,7 +41,7 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.getKnownModelWithPerfectObservationPredictor();
     }
 
-    public int getInGameEntityIdWrapper() {
+    public int getInGameEntityId() {
         return inGameEntityId;
     }
 

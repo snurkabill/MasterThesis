@@ -25,7 +25,7 @@ public class MaxUcbVisitDistributionProvider<
     @Override
     public PlayingDistribution<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
-        int inGameEntityId = node.getStateWrapper().getInGameEntityIdWrapper();
+        int inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var max = Integer.MIN_VALUE;
         TAction action = null;
         var childNodeMap = node.getChildNodeMap();

@@ -39,7 +39,12 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
                                                            TAction appliedAction)
     {
         StateWrapper<TAction, TObservation, TState> stateWrapper = stateRewardReturn.getState();
-        int policyId = stateWrapper.getInGameEntityIdWrapper();
+        int policyId = stateWrapper.getInGameEntityId();
+        var riskVector = stateWrapper.getWrappedState().getRiskVector();
+        var riskAsDoubles = new double[riskVector.length];
+        for (int i = 0; i < riskAsDoubles.length; i++) {
+            riskAsDoubles[i] = riskVector[i] ? 1.0 : 0.0;
+        }
         if(parent != null) {
             var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
             var metadata = parent.getSearchNodeMetadata();
@@ -47,7 +52,7 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
                 DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
                 allPlayerRewards,
                 metadata.getChildPriorProbabilities().size() == 0 ? Double.NaN : metadata.getChildPriorProbabilities().get(appliedAction),
-                stateWrapper.isFinalState() ? (stateWrapper.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
+                riskAsDoubles,
                 new EnumMap<>(actionClazz)
             );
         } else {
@@ -69,7 +74,7 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
             DoubleVectorRewardAggregator.emptyReward(inGameEntityCount),
             DoubleVectorRewardAggregator.emptyReward(inGameEntityCount),
             Double.NaN,
-            0.0,
+            new double[inGameEntityCount],
             new EnumMap<TAction, Double>(actionClazz));
     }
 }

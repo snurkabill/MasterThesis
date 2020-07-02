@@ -52,7 +52,7 @@ public class MCTSPolicy<
     }
 
     private PlayingDistribution<TAction> getExploringAction(StateWrapper<TAction, TObservation, TState> gameState, SearchNode<TAction, TObservation, MCTSMetadata, TState> root) {
-        var inGameId = gameState.getInGameEntityIdWrapper();
+        var inGameId = gameState.getInGameEntityId();
         TAction[] actions = gameState.getAllPossibleActions();
         var actionIndex = random.nextInt(actions.length);
         var action = actions[actionIndex];
@@ -63,7 +63,7 @@ public class MCTSPolicy<
     }
 
     private PlayingDistribution<TAction> getBestAction(StateWrapper<TAction, TObservation, TState> gameState, SearchNode<TAction, TObservation, MCTSMetadata, TState> root) {
-        var inGameId = gameState.getInGameEntityIdWrapper();
+        var inGameId = gameState.getInGameEntityId();
         var childMap = root.getChildNodeMap();
 
         var max = -Double.MAX_VALUE;

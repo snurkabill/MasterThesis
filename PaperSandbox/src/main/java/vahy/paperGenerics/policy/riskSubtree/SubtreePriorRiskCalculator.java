@@ -20,6 +20,7 @@ public class SubtreePriorRiskCalculator<
     @Override
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
         double totalRisk = 0;
+        var inGameEntityId = subtreeRoot.getStateWrapper().getInGameEntityId();
         var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Double>>();
         queue.add(new ImmutableTuple<>(subtreeRoot, 1.0));
         while(!queue.isEmpty()) {
@@ -28,7 +29,7 @@ public class SubtreePriorRiskCalculator<
                 if(node.getFirst().isFinalNode()) {
                     totalRisk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getFirst().getStateWrapper()).isRiskHit() ? node.getSecond() : 0.0;
                 } else {
-                    totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getExpectedRisk();
+                    totalRisk += node.getSecond() * node.getFirst().getSearchNodeMetadata().getExpectedRisk()[inGameEntityId];
                 }
             } else {
                 for (var entry : node.getFirst().getChildNodeMap().entrySet()) {

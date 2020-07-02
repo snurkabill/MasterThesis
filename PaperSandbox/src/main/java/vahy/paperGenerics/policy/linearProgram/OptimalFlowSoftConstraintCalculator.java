@@ -36,11 +36,12 @@ public class OptimalFlowSoftConstraintCalculator<
 
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var metadata = node.getSearchNodeMetadata();
         totalRiskExpression.add(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : 0.0, metadata.getNodeProbabilityFlow());
-        double cumulativeReward = metadata.getCumulativeReward();
-        double expectedReward = metadata.getExpectedReward();
-        double predictedRisk = metadata.getExpectedRisk();
+        double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
+        double expectedReward = metadata.getExpectedReward()[inGameEntityId];
+        double predictedRisk = metadata.getExpectedRisk()[inGameEntityId];
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
         model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), addNoiseToLeaf(leafCoefficient));
     }
@@ -49,12 +50,13 @@ public class OptimalFlowSoftConstraintCalculator<
     protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow) {
         double sum = 0.0;
         for (SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> entry : nodeList) {
+            var inGameEntityId = entry.getStateWrapper().getInGameEntityId();
             var metadata = entry.getSearchNodeMetadata();
             double priorProbability = metadata.getPriorProbability();
             totalRiskExpression.add((((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : 0.0) * priorProbability, parentFlow);
-            double cumulativeReward = metadata.getCumulativeReward();
-            double expectedReward = metadata.getExpectedReward();
-            double predictedRisk = metadata.getExpectedRisk();
+            double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
+            double expectedReward = metadata.getExpectedReward()[inGameEntityId];
+            double predictedRisk = metadata.getExpectedRisk()[inGameEntityId];
             double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
             sum += leafCoefficient * priorProbability;
         }

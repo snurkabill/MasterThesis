@@ -46,10 +46,11 @@ public class MinimalRiskReachAbilityCalculator<
 
             @Override
             protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+                var inGameEntityId = node.getStateWrapper().getInGameEntityId();
                 if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
                     model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
                 } else {
-                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getExpectedRisk());
+                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId]);
                 }
             }
 
@@ -57,8 +58,9 @@ public class MinimalRiskReachAbilityCalculator<
             protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> searchNodes, CLPVariable parentFlow) {
                 double sum = 0.0;
                 for (var entry : searchNodes) {
+                    var inGameEntityId = entry.getStateWrapper().getInGameEntityId();
                     var metadata = entry.getSearchNodeMetadata();
-                    sum += (((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()) * metadata.getPriorProbability();
+                    sum += (((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId]) * metadata.getPriorProbability();
                 }
                 model.setObjectiveCoefficient(parentFlow, sum);
             }

@@ -18,7 +18,7 @@ public class RiskBasedSelector_V3<TAction extends Enum<TAction> & Action, TObser
     @Override
     protected TAction getBestAction_inner(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
         var wrapper = node.getStateWrapper();
-        if(wrapper.getInGameEntityIdWrapper() == wrapper.getInGameEntityOnTurnId()) {
+        if(wrapper.getInGameEntityId() == wrapper.getInGameEntityOnTurnId()) {
             return getBestActionWithRisk(node, allowedRiskInRoot);
         } else {
             return super.getBestAction_inner(node);

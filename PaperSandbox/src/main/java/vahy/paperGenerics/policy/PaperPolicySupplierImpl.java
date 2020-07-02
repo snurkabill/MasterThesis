@@ -82,12 +82,13 @@ public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TOb
         if(DEBUG_ENABLED) {
             logger.debug("Initialized INFERENCE policy. AllowedRisk: [{}]", totalRiskAllowedInference);
         }
-        var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass), searchNodeMetadataFactory);
+        var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
         return new PaperPolicyImpl<>(
             policyId,
             random,
             treeUpdateConditionFactory.create(),
-            new RiskAverseSearchTree<>(
+            new RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState>(
+                searchNodeMetadataFactory,
                 node,
                 nodeSelectorSupplier.get(),
                 treeUpdater,
@@ -101,7 +102,7 @@ public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TOb
         if(DEBUG_ENABLED) {
             logger.debug("Initialized TRAINING policy. Exploration constant: [{}], Temperature: [{}], Risk: [{}]", explorationConstant, temperature, totalRiskAllowed);
         }
-        var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass), searchNodeMetadataFactory);
+        var node = new SearchNodeImpl<>(initialState, searchNodeMetadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
         return new PaperPolicyImpl<>(
             policyId,
             random,

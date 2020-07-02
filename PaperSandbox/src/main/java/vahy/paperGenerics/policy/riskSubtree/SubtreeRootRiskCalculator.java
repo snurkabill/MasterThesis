@@ -15,7 +15,7 @@ public class SubtreeRootRiskCalculator<
 
     @Override
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
-        return subtreeRoot.getSearchNodeMetadata().getExpectedRisk();
+        return subtreeRoot.getSearchNodeMetadata().getExpectedRisk()[subtreeRoot.getStateWrapper().getInGameEntityId()];
     }
 
     @Override

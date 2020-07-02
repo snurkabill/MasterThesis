@@ -153,9 +153,9 @@ public abstract class AbstractLinearProgramOnTree<
         return true;
     }
 
-    protected final double getNodeValue(TSearchNodeMetadata metadata) {
-        double cumulativeReward = metadata.getCumulativeReward();
-        double expectedReward = metadata.getExpectedReward();
+    protected final double getNodeValue(TSearchNodeMetadata metadata, int inGameEntityId) {
+        double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
+        double expectedReward = metadata.getExpectedReward()[inGameEntityId];
         return addNoiseToLeaf(cumulativeReward + expectedReward);
     }
 

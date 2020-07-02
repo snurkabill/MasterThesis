@@ -19,6 +19,7 @@ public class FlowSumSubtreeRiskCalculator<
     @Override
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
+        int inGameEntityId = subTreeRoot.getStateWrapper().getInGameEntityId();
         var queue = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         queue.addFirst(subTreeRoot);
         while(!queue.isEmpty()) {
@@ -27,7 +28,7 @@ public class FlowSumSubtreeRiskCalculator<
                 if(node.isFinalNode()) {
                     risk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
                 } else {
-                    risk += node.getSearchNodeMetadata().getExpectedRisk() * node.getSearchNodeMetadata().getFlow();
+                    risk += node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId] * node.getSearchNodeMetadata().getFlow();
                 }
             } else {
                 for (var entry : node.getChildNodeMap().entrySet()) {

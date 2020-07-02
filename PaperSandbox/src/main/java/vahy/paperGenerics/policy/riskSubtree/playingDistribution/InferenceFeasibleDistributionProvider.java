@@ -31,7 +31,7 @@ public class InferenceFeasibleDistributionProvider<
     @Override
     public PlayingDistribution<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
-        int inGameEntityId = node.getStateWrapper().getInGameEntityIdWrapper();
+        int inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var childNodeMap = node.getChildNodeMap();
 
         int childCount = node.getChildNodeMap().size();

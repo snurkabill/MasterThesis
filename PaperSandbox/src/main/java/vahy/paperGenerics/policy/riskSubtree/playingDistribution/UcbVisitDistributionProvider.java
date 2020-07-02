@@ -26,7 +26,7 @@ public class UcbVisitDistributionProvider<
     @Override
     public PlayingDistribution<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
-        int inGameEntityId = node.getStateWrapper().getInGameEntityIdWrapper();
+        int inGameEntityId = node.getStateWrapper().getInGameEntityId();
         Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap = node.getChildNodeMap();
         int childCount = childNodeMap.size();
         int totalVisitSum = 0;

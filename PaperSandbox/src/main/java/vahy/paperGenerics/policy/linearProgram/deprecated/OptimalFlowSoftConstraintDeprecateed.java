@@ -36,15 +36,15 @@ public class OptimalFlowSoftConstraintDeprecateed<
 
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-
+        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
         if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
             totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         } else {
             totalRiskExpression.add(0.0, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         }
-        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward();
-        double expectedReward = node.getSearchNodeMetadata().getExpectedReward();
-        double predictedRisk = node.getSearchNodeMetadata().getExpectedRisk();
+        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward()[inGameEntityId];
+        double expectedReward = node.getSearchNodeMetadata().getExpectedReward()[inGameEntityId];
+        double predictedRisk = node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId];
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
 
         if(strategy != NoiseStrategy.NONE) {

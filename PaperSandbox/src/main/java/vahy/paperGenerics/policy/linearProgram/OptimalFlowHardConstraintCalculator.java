@@ -34,21 +34,23 @@ public class OptimalFlowHardConstraintCalculator<
 
     @Override
     protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var metadata = node.getSearchNodeMetadata();
-        double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk();
+        double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
         totalRiskExpression.add(nodeRisk, metadata.getNodeProbabilityFlow());
-        model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), getNodeValue(metadata));
+        model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), getNodeValue(metadata, inGameEntityId));
     }
 
     @Override
     protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> nodeList, CLPVariable parentFlow) {
         double sum = 0.0;
         for (SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> entry : nodeList) {
+            var inGameEntityId = entry.getStateWrapper().getInGameEntityId();
             var metadata = entry.getSearchNodeMetadata();
-            double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk();
+            double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
             double priorProbability = metadata.getPriorProbability();
             totalRiskExpression.add(nodeRisk * priorProbability, parentFlow);
-            sum += getNodeValue(metadata) * priorProbability;
+            sum += getNodeValue(metadata, inGameEntityId) * priorProbability;
         }
         model.setObjectiveCoefficient(parentFlow, sum);
     }

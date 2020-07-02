@@ -164,7 +164,7 @@ public class PaperPolicyImpl<
         return new PaperPolicyRecord(
             playingDistribution.getDistribution(),
             playingDistribution.getExpectedReward(),
-            riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedRisk(),
+            riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedRisk()[gameState.getInGameEntityId()],
             riskAverseSearchTree.getTotalRiskAllowed(),
             riskAverseSearchTree.getTotalNodesExpanded());
     }
