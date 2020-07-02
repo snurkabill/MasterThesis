@@ -119,7 +119,7 @@ public class Example_random_01 {
 
         // MCTS WITH APPROXIMATOR
 
-        var mctsPlayer_1 = getMCTSPolicy(systemConfig, environmentPolicyCount + 1, actionClass, discountFactor, treeExpansionCount, cpuct, sampleState, totalEntityCount, 2);
+        var mctsPlayer_1 = getMCTSPolicy(config, systemConfig, environmentPolicyCount + 1, actionClass, discountFactor, treeExpansionCount, cpuct, sampleState, totalEntityCount, 2);
 
 
         // ----------------------------------------------------------------------------------------------
@@ -168,7 +168,8 @@ public class Example_random_01 {
 
     }
 
-    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> getMCTSPolicy(SystemConfig systemConfig,
+    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> getMCTSPolicy(BomberManConfig bomBerManConfig,
+                                                                                                                   SystemConfig systemConfig,
                                                                                                                    int policyId,
                                                                                                                    Class<BomberManAction> actionClass,
                                                                                                                    double discountFactor,
@@ -204,7 +205,7 @@ public class Example_random_01 {
         );
 
 
-        var mctsSupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
+        var mctsSupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, bomBerManConfig.isModelKnown());
         return mctsSupplier.getPolicyDefinition(policyId, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1, batchEvalSize);
     }
 

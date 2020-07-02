@@ -72,7 +72,7 @@ public class Example03 {
         var asdf = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         int totalEntityCount = asdf.getTotalEntityCount();
 
-        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
+        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config.isModelKnown());
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
         var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config);
 

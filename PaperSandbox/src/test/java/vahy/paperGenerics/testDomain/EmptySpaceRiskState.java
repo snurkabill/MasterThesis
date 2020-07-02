@@ -15,6 +15,9 @@ import java.util.SplittableRandom;
 
 public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>, Observation  {
 
+    private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
+    private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
+
     private final EmptySpaceState innerState;
     private final SplittableRandom random;
     private final boolean isRiskHit;
@@ -108,6 +111,11 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return false;
+    }
+
+    @Override
     public boolean isInGame(int inGameEntityId) {
         return innerState.isInGame(inGameEntityId);
     }
@@ -120,5 +128,10 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     @Override
     public boolean isRiskHit(int playerId) {
         return isRiskHit;
+    }
+
+    @Override
+    public boolean[] getRiskVector() {
+        return isRiskHit ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
     }
 }

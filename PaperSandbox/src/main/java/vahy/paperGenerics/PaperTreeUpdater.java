@@ -6,6 +6,7 @@ import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.update.TreeUpdater;
+import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
@@ -14,12 +15,31 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
     protected static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
+    private double[] resolveRisk(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode) {
+        if(expandedNode.isFinalNode()) {
+            var riskVector = ((PaperStateWrapper<TAction, TObservation, TState>) expandedNode.getStateWrapper()).getRiskVector();
+            var asDoubles = new double[riskVector.length];
+            for (int i = 0; i < riskVector.length; i++) {
+                asDoubles[i] = riskVector[i] ? 1.0 : 0.0;
+            }
+            return asDoubles;
+        } else {
+            return expandedNode.getSearchNodeMetadata().getExpectedRisk();
+        }
+    }
+
     @Override
     public void updateTree(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode) {
         int i = 0;
+        var stateWrapper = expandedNode.getStateWrapper();
+        var nodeMetadata = expandedNode.getSearchNodeMetadata();
+        var cumulativeReward = nodeMetadata.getCumulativeReward();
+        double[] estimatedLeafReward = stateWrapper.isFinalState() ?
+            DoubleVectorRewardAggregator.aggregate(DoubleVectorRewardAggregator.emptyReward(nodeMetadata.getCumulativeReward().length), cumulativeReward) :
+            DoubleVectorRewardAggregator.aggregate(nodeMetadata.getExpectedReward(), cumulativeReward);
 
-        double estimatedLeafReward = expandedNode.getSearchNodeMetadata().getCumulativeReward() + (expandedNode.isFinalNode() ? 0.0d : expandedNode.getSearchNodeMetadata().getPredictedReward());
-        double estimatedLeafRisk = expandedNode.isFinalNode() ? (((PaperStateWrapper<TAction, TObservation, TState>)expandedNode.getStateWrapper()).isRiskHit() ? 1.0 : 0.0) : expandedNode.getSearchNodeMetadata().getExpectedRisk();
+        double[] estimatedLeafRisk = resolveRisk(expandedNode);
+
         while (!expandedNode.isRoot()) {
             updateNode(expandedNode, estimatedLeafReward, estimatedLeafRisk);
             expandedNode = expandedNode.getParent();
@@ -31,28 +51,28 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
         }
     }
 
-    private void updateNode(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> updatedNode, double estimatedLeafReward, double estimatedRisk) {
-        if(TRACE_ENABLED) {
-            logger.trace("Updating search node: [{}]", updatedNode);
-        }
-        PaperMetadata<TAction> searchNodeMetadata = updatedNode.getSearchNodeMetadata();
+    private void updateNode(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode, double[] estimatedLeafReward, double[] estimatedLeafRisk) {
+        PaperMetadata<TAction> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
+        var totalRewardEstimations = searchNodeMetadata.getSumOfTotalEstimations();
+        var totalRiskEstimations = searchNodeMetadata.getSumOfRisk();
+        var cumulativeRewards = searchNodeMetadata.getCumulativeReward();
 
-        if(updatedNode.isFinalNode()) {
-            if(searchNodeMetadata.getVisitCounter() == 1) {
-                searchNodeMetadata.setSumOfTotalEstimations(0.0);
-                searchNodeMetadata.setSumOfRisk(estimatedRisk);
-            }
+        if(searchNodeMetadata.getVisitCounter() == 1) {
+            System.arraycopy(estimatedLeafReward, 0, totalRewardEstimations, 0, estimatedLeafReward.length);
+            System.arraycopy(estimatedLeafRisk, 0, totalRiskEstimations, 0, estimatedLeafReward.length);
         } else {
-            if(searchNodeMetadata.getVisitCounter() == 1) {
-                searchNodeMetadata.setSumOfTotalEstimations(searchNodeMetadata.getPredictedReward());
-                searchNodeMetadata.setSumOfRisk(estimatedRisk);
-            } else {
-                searchNodeMetadata.setSumOfTotalEstimations(searchNodeMetadata.getSumOfTotalEstimations() + (estimatedLeafReward - searchNodeMetadata.getCumulativeReward()));
-                searchNodeMetadata.setSumOfRisk(searchNodeMetadata.getSumOfRisk() + estimatedRisk);
+            for (int i = 0; i < totalRewardEstimations.length; i++) {
+                totalRewardEstimations[i] += estimatedLeafReward[i] - cumulativeRewards[i];
+                totalRiskEstimations[i] += estimatedLeafRisk[i];
             }
-            searchNodeMetadata.setExpectedReward(searchNodeMetadata.getSumOfTotalEstimations() / searchNodeMetadata.getVisitCounter());
-            searchNodeMetadata.setExpectedRisk(searchNodeMetadata.getSumOfRisk() / searchNodeMetadata.getVisitCounter());
+        }
+        var expectedRewards = searchNodeMetadata.getExpectedReward();
+        var expectedRisks = searchNodeMetadata.getExpectedRisk();
+        var visitCounter = searchNodeMetadata.getVisitCounter();
+        for (int i = 0; i < expectedRewards.length; i++) {
+            expectedRewards[i] = totalRewardEstimations[i] / visitCounter;
+            expectedRisks[i] = totalRiskEstimations[i] / visitCounter;
         }
     }
 }

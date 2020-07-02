@@ -22,17 +22,18 @@ import java.util.function.Supplier;
 
 public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> {
 
-
     private final Class<TAction> actionClass;
     private final int enumConstantsLength;
     private final SearchNodeFactory<TAction, DoubleVector, MCTSMetadata, TState> searchNodeFactory;
     private final MCTSMetadataFactory<TAction, DoubleVector, TState> metadataFactory;
+    private final boolean isModelKnown;
 
-    public MCTSPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount) {
+    public MCTSPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, boolean isModelKnown) {
         this.actionClass = actionClass;
         this.enumConstantsLength = actionClass.getEnumConstants().length;
         this.metadataFactory = new MCTSMetadataFactory<>(inGameEntityCount);
         this.searchNodeFactory = new SearchNodeBaseFactoryImpl<>(actionClass, metadataFactory);
+        this.isModelKnown = isModelKnown;
     }
 
     public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, int treeExpansionCountPerStep, double discountFactor, int rolloutCount) {
@@ -68,7 +69,7 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
             return new MCTSPolicy<TAction, DoubleVector, TState>(policyId_, random_, 0.0, new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep),
                 new SearchTreeImpl<>(
                     searchNodeFactory, root,
-                    new Ucb1NodeSelector<>(random_, cpuctParameter, enumConstantsLength),
+                    new Ucb1NodeSelector<>(random_, isModelKnown, cpuctParameter, enumConstantsLength),
                     new MCTSTreeUpdater<>(),
                     new MCTSRolloutEvaluator<>(searchNodeFactory, random_, discountFactor, rolloutCount)
                 ));
@@ -86,7 +87,7 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
             var searchTree = new SearchTreeImpl<>(
                 searchNodeFactory, root,
-                new Ucb1NodeSelector<>(random_, cpuctParameter, enumConstantsLength),
+                new Ucb1NodeSelector<>(random_, isModelKnown, cpuctParameter, enumConstantsLength),
 //                new UnfairUcb1NodeSelector<>(random_, cpuctParameter, enumConstantsLength),
                 new MCTSTreeUpdater<>(),
                 maximalEvaluationDepth == 0 ? new MCTSPredictionEvaluator<>(searchNodeFactory, predictor) : new MCTSBatchedEvaluator<>(searchNodeFactory, predictor, maximalEvaluationDepth)

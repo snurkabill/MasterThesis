@@ -15,8 +15,8 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
     private final double[] valueArray;
     private final int[] indexArray;
 
-    public AlphaZeroNodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
-        super(random);
+    public AlphaZeroNodeSelector(SplittableRandom random, boolean isModelKnown, double cpuctParameter, int maxBranchingCount) {
+        super(random, isModelKnown);
         this.cpuctParameter = cpuctParameter;
         this.indexArray = new int[maxBranchingCount];
         this.valueArray = new double[maxBranchingCount];
@@ -90,9 +90,6 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
                     }
                 }
             }
-        }
-        if(maxIndex == -1) {
-            System.out.println("asdf");
         }
         if(maxIndexCount == 0) {
             return possibleActions[maxIndex];

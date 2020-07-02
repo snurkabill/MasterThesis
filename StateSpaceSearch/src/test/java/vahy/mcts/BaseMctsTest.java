@@ -75,7 +75,7 @@ public class BaseMctsTest {
         var treeExpansionCount = 10;
         var cpuct = 1.0;
 
-        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>(actionClass, 2);
+        var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>(actionClass, 2, ticTacConfig.isModelKnown());
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<TicTacToeAction, TicTacToeState>();
 
         var playerOneSupplier = mctsPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, 1.0, rolloutCount);

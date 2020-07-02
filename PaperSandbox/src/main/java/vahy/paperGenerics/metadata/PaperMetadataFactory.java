@@ -38,8 +38,8 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
                                                            StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
                                                            TAction appliedAction)
     {
-        StateWrapper<TAction, TObservation, TState> state = stateRewardReturn.getState();
-        int policyId = state.getInGameEntityIdWrapper();
+        StateWrapper<TAction, TObservation, TState> stateWrapper = stateRewardReturn.getState();
+        int policyId = stateWrapper.getInGameEntityIdWrapper();
         if(parent != null) {
             var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
             var metadata = parent.getSearchNodeMetadata();
@@ -47,7 +47,7 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
                 DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
                 allPlayerRewards,
                 metadata.getChildPriorProbabilities().size() == 0 ? Double.NaN : metadata.getChildPriorProbabilities().get(appliedAction),
-                state.isFinalState() ? (state.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
+                stateWrapper.isFinalState() ? (stateWrapper.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
                 new EnumMap<>(actionClazz)
             );
         } else {
@@ -57,7 +57,7 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
 //                reward,
 //                DoubleScalarRewardAggregator.emptyReward(),
 //                Double.NaN,
-//                state.isFinalState() ? (state.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
+//                stateWrapper.isFinalState() ? (stateWrapper.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
 //                new EnumMap<>(actionClass)
 //            );
         }

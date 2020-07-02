@@ -19,9 +19,11 @@ public abstract class EnvironmentSamplingNodeSelector<
     extends RandomizedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private Predictor<TState> perfectPredictor;
+    private final boolean isModelKnown;
 
-    public EnvironmentSamplingNodeSelector(SplittableRandom random) {
+    public EnvironmentSamplingNodeSelector(SplittableRandom random, boolean isModelKnown) {
         super(random);
+        this.isModelKnown = isModelKnown;
     }
 
     protected final TAction sampleAction(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
@@ -46,7 +48,10 @@ public abstract class EnvironmentSamplingNodeSelector<
     protected abstract TAction getBestAction_inner(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node);
 
     protected final TAction getBestAction(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        if(node.getStateWrapper().isEnvironmentEntityOnTurn()) {
+        if(node.getStateWrapper().isEnvironmentEntityOnTurn() && !isModelKnown) {
+            throw new UnsupportedOperationException("Model is set to be unknown for algorithm but there are environmental nodes. Sampling environment is not implemented yet");
+        }
+        if(node.getStateWrapper().isEnvironmentEntityOnTurn() && isModelKnown) {
             return sampleAction(node);
         } else {
             return getBestAction_inner(node);

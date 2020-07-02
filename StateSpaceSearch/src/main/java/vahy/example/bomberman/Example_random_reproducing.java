@@ -118,7 +118,7 @@ public class Example_random_reproducing {
 
         var batchEvalSize = 3;
 
-        var mctsSupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount);
+        var mctsSupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config.isModelKnown());
         var mctsPlayer_1 = mctsSupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1, batchEvalSize);
 
 

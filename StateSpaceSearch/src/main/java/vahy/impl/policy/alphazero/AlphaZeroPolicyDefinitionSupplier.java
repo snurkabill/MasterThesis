@@ -28,12 +28,12 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
     private final AlphaZeroNodeMetadataFactory<TAction, DoubleVector, TState> metadataFactory;
     private final boolean isModelKnown;
 
-    public AlphaZeroPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, ProblemConfig problemConfi) {
+    public AlphaZeroPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, ProblemConfig problemConfig) {
         this.actionClass = actionClass;
         this.enumConstantsLength = actionClass.getEnumConstants().length;
         this.metadataFactory = new AlphaZeroNodeMetadataFactory<>(actionClass, inGameEntityCount);
         this.searchNodeFactory = new SearchNodeBaseFactoryImpl<>(actionClass, metadataFactory);
-        this.isModelKnown = problemConfi.isModelKnown();
+        this.isModelKnown = problemConfig.isModelKnown();
     }
 
     public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup, int maxDepthEvaluations) {
@@ -57,7 +57,7 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
             var searchTree = new SearchTreeImpl<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState>(
                 searchNodeFactory,
                 root,
-                new AlphaZeroNodeSelector<>(random_, cpuctParameter, enumConstantsLength),
+                new AlphaZeroNodeSelector<>(random_, isModelKnown, cpuctParameter, enumConstantsLength),
                 new AlphaZeroTreeUpdater<>(),
                 maximalDepthEvaluation == 0 ?
                     new AlphaZeroEvaluator<>(searchNodeFactory, predictor, isModelKnown) :

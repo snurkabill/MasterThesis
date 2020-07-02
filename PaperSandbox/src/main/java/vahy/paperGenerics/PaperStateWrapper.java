@@ -23,4 +23,8 @@ public class PaperStateWrapper<TAction extends Enum<TAction> & Action, TObservat
         return state.isRiskHit(inGameEntityId);
     }
 
+    public boolean[] getRiskVector() {
+        return state.getRiskVector();
+    }
+
 }

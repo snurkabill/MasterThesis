@@ -49,7 +49,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
             episodeDataMaker,
             dataAggregator
         );
-        return new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2).getPolicyDefinition(
+        return new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2, true).getPolicyDefinition(
             playerId,
             1,
             () -> 0.2,

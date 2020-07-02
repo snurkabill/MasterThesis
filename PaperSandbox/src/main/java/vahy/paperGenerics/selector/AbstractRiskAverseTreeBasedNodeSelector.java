@@ -6,53 +6,40 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.node.SearchNodeMetadata;
-import vahy.impl.search.nodeSelector.AbstractTreeBasedNodeSelector;
+import vahy.impl.search.nodeSelector.EnvironmentSamplingNodeSelector;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.utils.RandomDistributionUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 
 public abstract class AbstractRiskAverseTreeBasedNodeSelector<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata,
+    TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends State<TAction, TObservation, TState>>
-    extends AbstractTreeBasedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState>
+    extends EnvironmentSamplingNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState>
     implements RiskAverseNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     protected static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
-    protected final SplittableRandom random;
     protected double allowedRiskInRoot;
 
-    protected AbstractRiskAverseTreeBasedNodeSelector(SplittableRandom random) {
-        this.random = random;
-    }
-
-    protected final TAction sampleOpponentAction(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
-        var actions = new ArrayList<TAction>(node.getChildNodeMap().size());
-        var priorProbabilities = new double[node.getChildNodeMap().size()];
-        int index = 0;
-        for(var entry : node.getChildNodeMap().values()) {
-            actions.add(entry.getAppliedAction());
-            priorProbabilities[index] = entry.getSearchNodeMetadata().getPriorProbability();
-            index++;
-        }
-        int randomIndex = RandomDistributionUtils.getRandomIndexFromDistribution(priorProbabilities, random);
-        TAction action = actions.get(randomIndex);
-        if(TRACE_ENABLED) {
-            logger.trace("Sampled [{}] action from opponent's actions: [{}] by random index [{}] from [{}] distribution.", action, actions.stream().map(Object::toString).collect(Collectors.joining(", ")), randomIndex, Arrays.toString(priorProbabilities));
-        }
-        return action;
+    protected AbstractRiskAverseTreeBasedNodeSelector(SplittableRandom random, boolean isModelKnown) {
+        super(random, isModelKnown);
     }
 
     @Override
     public void setAllowedRiskInRoot(double allowedRiskInRoot) {
         this.allowedRiskInRoot = allowedRiskInRoot;
     }
+
+    @Override
+    public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectNextNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
+        var node = root;
+        while(!node.isLeaf()) {
+            node = node.getChildNodeMap().get(getBestAction(node));
+        }
+        return node;
+    }
+
 }

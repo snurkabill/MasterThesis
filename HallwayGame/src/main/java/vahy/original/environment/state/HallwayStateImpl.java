@@ -27,6 +27,9 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     public static final int TRAP_LOCATION_REPRESENTATION = -2;
     public static final int WALL_LOCATION_REPRESENTATION = -1;
 
+    private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
+    private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
+
     private final StaticGamePart staticGamePart;
     private final double[][] rewards;
     private final int rewardsLeft;
@@ -367,6 +370,15 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
                 }
                 return prediction;
             }
+
+            @Override
+            public List<double[]> apply(List<HallwayStateImpl> observationArray) {
+                var output = new ArrayList<double[]>(observationArray.size());
+                for (int i = 0; i < observationArray.size(); i++) {
+                    output.add(apply(observationArray.get(i)));
+                }
+                return output;
+            }
         };
 
     }
@@ -534,6 +546,11 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
     }
 
     @Override
+    public boolean isEnvironmentEntityOnTurn() {
+        return !isAgentTurn;
+    }
+
+    @Override
     public boolean isInGame(int inGameEntityId) {
         if(inGameEntityId == 1) {
             return !isAgentKilled;
@@ -644,7 +661,12 @@ public class HallwayStateImpl implements PaperState<HallwayAction, DoubleVector,
 
     @Override
     public boolean isRiskHit(int playerId) {
-        return false;
+        return isAgentKilled && (playerId == 1);
+    }
+
+    @Override
+    public boolean[] getRiskVector() {
+        return isAgentKilled ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
     }
 
     @Override

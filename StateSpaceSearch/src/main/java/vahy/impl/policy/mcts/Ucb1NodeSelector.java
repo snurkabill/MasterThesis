@@ -18,8 +18,8 @@ public class Ucb1NodeSelector<
     private final double[] valueArray;
     private final int[] indexArray;
 
-    public Ucb1NodeSelector(SplittableRandom random, double cpuctParameter, int maxBranchingCount) {
-        super(random);
+    public Ucb1NodeSelector(SplittableRandom random, boolean isModelKnown,  double cpuctParameter, int maxBranchingCount) {
+        super(random, isModelKnown);
         this.cpuctParameter = cpuctParameter;
         this.indexArray = new int[maxBranchingCount];
         this.valueArray = new double[maxBranchingCount];

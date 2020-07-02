@@ -55,7 +55,7 @@ public class MCTS_10_SHTest {
             dataAggregator
         );
 
-        playerSupplier = new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2).getPolicyDefinition(
+        playerSupplier = new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2, true).getPolicyDefinition(
             playerId,
             1,
             () -> 0.5,
