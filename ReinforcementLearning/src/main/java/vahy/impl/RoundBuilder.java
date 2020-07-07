@@ -2,6 +2,7 @@ package vahy.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
@@ -12,7 +13,6 @@ import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.PolicyRecord;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
@@ -34,7 +34,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord, TStatistics extends EpisodeStatisticsBase> {
+public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord, TStatistics extends EpisodeStatistics> {
 
     private static final Logger logger = LoggerFactory.getLogger(RoundBuilder.class);
 

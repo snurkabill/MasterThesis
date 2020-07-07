@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AlphaZeroDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord>
+public class AlphaZeroDataMaker_V1<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord>
     implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
 
     private final double discountFactor;
     private final int playerPolicyId;
     private final int actionCount;
 
-    public AlphaZeroDataMaker(int playerPolicyId, int actionCount, double discountFactor) {
+    public AlphaZeroDataMaker_V1(int playerPolicyId, int actionCount, double discountFactor) {
         this.discountFactor = discountFactor;
         this.playerPolicyId = playerPolicyId;
         this.actionCount = actionCount;

@@ -22,7 +22,7 @@ import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.runner.PolicyDefinition;
@@ -50,7 +50,7 @@ public class AlphaZero_1_SHTest {
         }
 
         var trainablePredictor = new AlphaZeroDataTablePredictor(defaultPrediction, 0.25, totalEntityCount);
-        var episodeDataMaker = new AlphaZeroDataMaker<SHAction, SHState, PolicyRecordBase>(playerId, totalActionCount, discountFactor);
+        var episodeDataMaker = new AlphaZeroDataMaker_V1<SHAction, SHState, PolicyRecordBase>(playerId, totalActionCount, discountFactor);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(

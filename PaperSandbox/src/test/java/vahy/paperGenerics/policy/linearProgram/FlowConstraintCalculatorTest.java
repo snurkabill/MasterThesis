@@ -1,11 +1,12 @@
 package vahy.paperGenerics.policy.linearProgram;
 
+import junit.framework.Assert;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
-import org.testng.annotations.Test;
-import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.search.node.SearchNode;
+import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.predictor.EmptyPredictor;
 import vahy.impl.search.node.SearchNodeImpl;
@@ -13,6 +14,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.SearchTreeImpl;
 import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
 import vahy.impl.testdomain.emptySpace.EmptySpaceState;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.PaperTreeUpdater;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.metadata.PaperMetadata;
@@ -36,7 +38,7 @@ public class FlowConstraintCalculatorTest {
     @Test
     public void optimalFlowHardConstraintComparisonTest() {
         var random = new SplittableRandom(0);
-        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(1, random, EmptySpaceAction.playerActions.length);
+        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(random, true, 1.0, EmptySpaceAction.playerActions.length);
 
         EmptySpaceState innerState = new EmptySpaceState(true);
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
@@ -44,12 +46,12 @@ public class FlowConstraintCalculatorTest {
         EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
         EmptySpaceAction[] opponentActions = Arrays.stream(EmptySpaceAction.opponentActions).toArray(EmptySpaceAction[]::new);
 
-        var actionCount = playerActions.length;
+        var actionCount = EmptySpaceAction.values().length;
 
-        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class);
+        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class, innerState.getTotalEntityCount());
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
-        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 * 2 + actionCount]), true);
 
 
         var total = 0;
@@ -59,9 +61,9 @@ public class FlowConstraintCalculatorTest {
         var sum_BUILD_SOLVE_1 = 0.0;
         var sum_BUILD_SOLVE_2 = 0.0;
 
-        for (int k = 0; k < 500; k++) {
+        for (int k = 1; k < 500; k++) {
             for (int j = 0; j < 20; j++) {
-                var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator);
+                var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator, nodeFactory, metadataFactory);
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
                 long start = System.currentTimeMillis();
@@ -95,7 +97,7 @@ public class FlowConstraintCalculatorTest {
     @Test
     public void optimalFlowSoftConstraintComparisonTest() {
         var random = new SplittableRandom(0);
-        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(1, random, EmptySpaceAction.playerActions.length);
+        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(random, true, 1,  EmptySpaceAction.playerActions.length);
 
         EmptySpaceState innerState = new EmptySpaceState(true);
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
@@ -103,12 +105,12 @@ public class FlowConstraintCalculatorTest {
         EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
         EmptySpaceAction[] opponentActions = Arrays.stream(EmptySpaceAction.opponentActions).toArray(EmptySpaceAction[]::new);
 
-        var actionCount = playerActions.length;
+        var actionCount = EmptySpaceAction.values().length;
 
-        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class);
+        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class, innerState.getTotalEntityCount());
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
-        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 * 2 + actionCount]), true);
 
 
         var total = 0;
@@ -118,9 +120,9 @@ public class FlowConstraintCalculatorTest {
         var sum_BUILD_SOLVE_1 = 0.0;
         var sum_BUILD_SOLVE_2 = 0.0;
 
-        for (int k = 0; k < 500; k++) {
+        for (int k = 1; k < 500; k++) {
             for (int j = 0; j < 20; j++) {
-                var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator);
+                var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator, nodeFactory, metadataFactory);
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
                 long start = System.currentTimeMillis();
@@ -153,7 +155,7 @@ public class FlowConstraintCalculatorTest {
     @Test
     public void minimalRiskReachabilityCalculatorTest() {
         var random = new SplittableRandom(0);
-        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(1, random, EmptySpaceAction.playerActions.length);
+        var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(random,true, 1.0,  EmptySpaceAction.playerActions.length);
 
         EmptySpaceState innerState = new EmptySpaceState(true);
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
@@ -161,12 +163,12 @@ public class FlowConstraintCalculatorTest {
         EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
         EmptySpaceAction[] opponentActions = Arrays.stream(EmptySpaceAction.opponentActions).toArray(EmptySpaceAction[]::new);
 
-        var actionCount = playerActions.length;
+        var actionCount = EmptySpaceAction.values().length;
 
-        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class);
+        var metadataFactory = new PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(EmptySpaceAction.class, innerState.getTotalEntityCount());
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
-        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 + actionCount]), null, knownModel, playerActions, opponentActions);
+        var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 * 2 + actionCount]), true);
 
 
         var total = 0;
@@ -178,7 +180,7 @@ public class FlowConstraintCalculatorTest {
 
         for (int k = 0; k < 500; k++) {
             for (int j = 0; j < 20; j++) {
-                var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator);
+                var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator, nodeFactory, metadataFactory);
                 sum_UCB = buildTree(sum_UCB, k, searchTree);
 
                 if(j % 2 == 0) {
@@ -199,7 +201,7 @@ public class FlowConstraintCalculatorTest {
                 double solution2 = calculator2.calculateRisk(searchTree.getRoot());
                 sum_BUILD_SOLVE_2 += System.currentTimeMillis() - start;
 
-                assertEquals(solution1, solution2, TOLERANCE, "Solutions are different");
+                Assert.assertEquals("Solutions are different", solution1, solution2, TOLERANCE);
 
                 total++;
                 if (total % 100 == 0) {
@@ -222,16 +224,18 @@ public class FlowConstraintCalculatorTest {
     private SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> initializeTree(
         PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> paperNodeSelector,
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state,
-        PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> nodeEvaluator
+        PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> nodeEvaluator,
+        SearchNodeFactory<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchNodeFactory,
+        PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> searchNodeMetadataFactory
     )
     {
-        var root = new SearchNodeImpl<>(
+        var root = new SearchNodeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(
             state,
-            new PaperMetadata<>(0.0, 0.0, 0.0, 0.0, 0.0, new EnumMap<>(EmptySpaceAction.class)),
-            new EnumMap<>(EmptySpaceAction.class),
-            searchNodeMetadataFactory);
+            searchNodeMetadataFactory.createEmptyNodeMetadata(),
+            new EnumMap<>(EmptySpaceAction.class));
         return new SearchTreeImpl<>(
-            searchNodeFactory, root,
+            searchNodeFactory,
+            root,
             paperNodeSelector,
             new PaperTreeUpdater<>(),
             nodeEvaluator
@@ -258,10 +262,10 @@ public class FlowConstraintCalculatorTest {
     }
 
     private void assertResults(boolean firstSolvable, double[] values, boolean secondSolvable, double[] values2) {
-        assertEquals(secondSolvable, firstSolvable, "Solutions differs");
+        Assertions.assertEquals(secondSolvable, firstSolvable, "Solutions differs");
         if(firstSolvable) {
             for (int i = 0; i < 2; i++) {
-                assertEquals(values[i], values2[i], TOLERANCE, "Different results. First: " + Arrays.toString(values) + " second: " + Arrays.toString(values2)+ ".");
+                Assertions.assertEquals(values[i], values2[i], TOLERANCE, "Different results. First: " + Arrays.toString(values) + " second: " + Arrays.toString(values2)+ ".");
             }
         } else {
             logger.info("Unsolvable problem.");

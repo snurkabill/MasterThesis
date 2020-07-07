@@ -89,7 +89,7 @@ public class StrategiesProvider<
     public PlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> provideExplorationExistingFlowStrategy() {
         switch(explorationExistingFlowStrategy){
             case SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE:
-                return new ExplorationFeasibleDistributionProvider<>(actionClass, provideRiskCalculator(subTreeRiskCalculatorType));
+                return new ExplorationFeasibleDistributionProvider<>(actionClass, provideRiskCalculator());
             case SAMPLE_OPTIMAL_FLOW:
                 return new InferenceFeasibleDistributionProvider<>(actionClass);
             default:
@@ -129,7 +129,7 @@ public class StrategiesProvider<
         }
     }
 
-    public Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> provideRiskCalculator(SubTreeRiskCalculatorType subTreeRiskCalculatorType) {
+    public Supplier<SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState>> provideRiskCalculator() {
         switch(subTreeRiskCalculatorType) {
             case FLOW_SUM:
                 return FlowSumSubtreeRiskCalculator::new;

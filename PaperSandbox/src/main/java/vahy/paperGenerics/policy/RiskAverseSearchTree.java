@@ -76,6 +76,7 @@ public class RiskAverseSearchTree<
         this.explorationExistingFlowDistribution = strategyProvider.provideExplorationExistingFlowStrategy();
         this.explorationNonExistingFlowDistribution = strategyProvider.provideExplorationNonExistingFlowStrategy();
         this.flowOptimizer = strategyProvider.provideFlowOptimizer(random);
+        this.subtreeRiskCalculator = strategyProvider.provideRiskCalculator().get();
     }
 
     public PlayingDistribution<TAction> inferencePolicyBranch() {

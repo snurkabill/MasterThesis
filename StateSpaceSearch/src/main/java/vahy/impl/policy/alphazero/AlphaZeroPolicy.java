@@ -24,15 +24,6 @@ public class AlphaZeroPolicy<
     }
 
     @Override
-    public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
-        if(DEBUG_ENABLED) {
-            checkStateRoot(gameState);
-        }
-        expandSearchTree(gameState);
-        return super.getDiscreteAction(gameState);
-    }
-
-    @Override
     protected PlayingDistribution<TAction> inferenceBranch(StateWrapper<TAction, TObservation, TState> gameState) {
         return getBestAction(gameState, searchTree.getRoot());
     }

@@ -37,7 +37,7 @@ public class PaperPolicyImpl<
         this(policyId, random, treeUpdateCondition, searchTree, 0.0, 0.0);
     }
 
-    private PaperPolicyImpl(int policyId,
+    public PaperPolicyImpl(int policyId,
                             SplittableRandom random,
                             TreeUpdateCondition treeUpdateCondition,
                             RiskAverseSearchTree<TAction, TObservation, TSearchNodeMetadata, TState> searchTree,
@@ -161,8 +161,11 @@ public class PaperPolicyImpl<
     @Override
     public PaperPolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
         checkStateRoot(gameState);
+
+        var distribution = new double[countOfAllActions];
+        distribution[playingDistribution.getPlayedAction().ordinal()] = 1.0;
         return new PaperPolicyRecord(
-            playingDistribution.getDistribution(),
+            distribution,
             playingDistribution.getExpectedReward(),
             riskAverseSearchTree.getRoot().getSearchNodeMetadata().getExpectedRisk()[gameState.getInGameEntityId()],
             riskAverseSearchTree.getTotalRiskAllowed(),

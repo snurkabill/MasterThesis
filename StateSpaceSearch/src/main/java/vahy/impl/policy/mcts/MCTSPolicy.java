@@ -32,16 +32,6 @@ public class MCTSPolicy<
 //    }
 
     @Override
-    public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
-        if(DEBUG_ENABLED) {
-            checkStateRoot(gameState);
-        }
-        expandSearchTree(gameState);
-        return super.getDiscreteAction(gameState);
-//        return getBestAction(gameState, searchTree.getRoot());
-    }
-
-    @Override
     protected PlayingDistribution<TAction> inferenceBranch(StateWrapper<TAction, TObservation, TState> gameState) {
         return getBestAction(gameState, searchTree.getRoot());
     }

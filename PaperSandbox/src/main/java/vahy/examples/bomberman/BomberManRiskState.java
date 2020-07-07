@@ -1,10 +1,8 @@
-package vahy.domain;
+package vahy.examples.bomberman;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.examples.simplifiedHallway.SHAction;
-import vahy.examples.simplifiedHallway.SHState;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -12,29 +10,31 @@ import vahy.paperGenerics.PaperState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskState>, Observation {
+public class BomberManRiskState implements PaperState<BomberManAction, DoubleVector, BomberManRiskState>, Observation {
 
-    private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
-    private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
+    private final BomberManState innerState;
+    private final boolean[] riskArray;
 
-    private final SHState innerState;
-
-    public SHRiskState(SHState innerState) {
+    public BomberManRiskState(BomberManState innerState) {
         this.innerState = innerState;
+        this.riskArray = new boolean[innerState.getTotalEntityCount()];
+        for (int i = 0; i < riskArray.length; i++) {
+            riskArray[i] = !innerState.isInGame(i);
+        }
     }
 
     @Override
     public boolean isRiskHit(int playerId) {
-        return innerState.isAgentKilled();
+        return riskArray[playerId];
     }
 
     @Override
     public boolean[] getRiskVector() {
-        return innerState.isAgentKilled() ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
+        return riskArray;
     }
 
     @Override
-    public SHAction[] getAllPossibleActions() {
+    public BomberManAction[] getAllPossibleActions() {
         return innerState.getAllPossibleActions();
     }
 
@@ -44,9 +44,9 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     }
 
     @Override
-    public StateRewardReturn<SHAction, DoubleVector, SHRiskState> applyAction(SHAction actionType) {
+    public StateRewardReturn<BomberManAction, DoubleVector, BomberManRiskState> applyAction(BomberManAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new SHRiskState(applied.getState()), applied.getReward());
+        return new ImmutableStateRewardReturn<>(new BomberManRiskState(applied.getState()), applied.getReward());
     }
 
     @Override
@@ -60,13 +60,13 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     }
 
     @Override
-    public Predictor<SHRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<SHRiskState>() {
+    public Predictor<BomberManRiskState> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<BomberManRiskState>() {
 
-            private Predictor<SHState> innerPredictor;
+            private Predictor<BomberManState> innerPredictor;
 
             @Override
-            public double[] apply(SHRiskState observation) {
+            public double[] apply(BomberManRiskState observation) {
                 if(innerPredictor == null) {
                     innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
                 }
@@ -74,11 +74,11 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
             }
 
             @Override
-            public double[][] apply(SHRiskState[] observationArray) {
+            public double[][] apply(BomberManRiskState[] observationArray) {
                 if(innerPredictor == null) {
                     innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
                 }
-                var innerStateObservationArray = new SHState[observationArray.length];
+                var innerStateObservationArray = new BomberManState[observationArray.length];
                 for (int i = 0; i < innerStateObservationArray.length; i++) {
                     innerStateObservationArray[i] = observationArray[i].innerState;
                 }
@@ -86,7 +86,7 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
             }
 
             @Override
-            public List<double[]> apply(List<SHRiskState> observationArray) {
+            public List<double[]> apply(List<BomberManRiskState> observationArray) {
                 var output = new ArrayList<double[]>(observationArray.size());
                 for (int i = 0; i < observationArray.size(); i++) {
                     output.add(apply(observationArray.get(i)));
@@ -130,4 +130,5 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     public boolean isFinalState() {
         return innerState.isFinalState();
     }
+
 }

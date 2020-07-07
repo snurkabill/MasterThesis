@@ -285,6 +285,13 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
         return turnsLeft == 0 || hasOneWin(Player_inner.PLAYER_ZERO, playground) || hasOneWin(Player_inner.PLAYER_ONE, playground);
     }
 
+    public TicTacToeResult getResult() {
+        if(!isFinalState()) {
+            throw new IllegalStateException("can't get result since state is not final");
+        }
+        return hasOneWin(Player_inner.PLAYER_ZERO, playground) ? TicTacToeResult.WIN_0 : hasOneWin(Player_inner.PLAYER_ONE, playground) ? TicTacToeResult.WIN_1 : TicTacToeResult.DRAW; // TODO: cache values
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

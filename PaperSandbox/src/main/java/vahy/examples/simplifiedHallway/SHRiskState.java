@@ -1,37 +1,38 @@
-package vahy.paperGenerics.testDomain;
+package vahy.examples.simplifiedHallway;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
-import vahy.impl.testdomain.emptySpace.EmptySpaceState;
 import vahy.paperGenerics.PaperState;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SplittableRandom;
 
-public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>, Observation  {
+public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskState>, Observation {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
     private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
 
-    private final EmptySpaceState innerState;
-    private final SplittableRandom random;
-    private final boolean isRiskHit;
-    private final double riskProbability;
+    private final SHState innerState;
 
-    public EmptySpaceRiskState(EmptySpaceState innerState, SplittableRandom random,  boolean isRiskHit, double riskProbability) {
+    public SHRiskState(SHState innerState) {
         this.innerState = innerState;
-        this.random = random;
-        this.riskProbability = riskProbability;
-        this.isRiskHit = isRiskHit;
     }
 
     @Override
-    public EmptySpaceAction[] getAllPossibleActions() {
+    public boolean isRiskHit(int playerId) {
+        return innerState.isAgentKilled();
+    }
+
+    @Override
+    public boolean[] getRiskVector() {
+        return innerState.isAgentKilled() ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
+    }
+
+    @Override
+    public SHAction[] getAllPossibleActions() {
         return innerState.getAllPossibleActions();
     }
 
@@ -41,9 +42,9 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> applyAction(EmptySpaceAction actionType) {
+    public StateRewardReturn<SHAction, DoubleVector, SHRiskState> applyAction(SHAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new EmptySpaceRiskState(applied.getState(), random, random.nextDouble() < riskProbability, riskProbability), new double[] {random.nextDouble(), random.nextDouble()});
+        return new ImmutableStateRewardReturn<>(new SHRiskState(applied.getState()), applied.getReward());
     }
 
     @Override
@@ -57,13 +58,13 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public Predictor<EmptySpaceRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<EmptySpaceRiskState>() {
+    public Predictor<SHRiskState> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<SHRiskState>() {
 
-            private Predictor<EmptySpaceState> innerPredictor;
+            private Predictor<SHState> innerPredictor;
 
             @Override
-            public double[] apply(EmptySpaceRiskState observation) {
+            public double[] apply(SHRiskState observation) {
                 if(innerPredictor == null) {
                     innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
                 }
@@ -71,16 +72,19 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
             }
 
             @Override
-            public double[][] apply(EmptySpaceRiskState[] observationArray) {
-                var prediction = new double[observationArray.length][];
-                for (int i = 0; i < prediction.length; i++) {
-                    prediction[i] = apply(observationArray[i]);
+            public double[][] apply(SHRiskState[] observationArray) {
+                if(innerPredictor == null) {
+                    innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
                 }
-                return prediction;
+                var innerStateObservationArray = new SHState[observationArray.length];
+                for (int i = 0; i < innerStateObservationArray.length; i++) {
+                    innerStateObservationArray[i] = observationArray[i].innerState;
+                }
+                return innerPredictor.apply(innerStateObservationArray);
             }
 
             @Override
-            public List<double[]> apply(List<EmptySpaceRiskState> observationArray) {
+            public List<double[]> apply(List<SHRiskState> observationArray) {
                 var output = new ArrayList<double[]>(observationArray.size());
                 for (int i = 0; i < observationArray.size(); i++) {
                     output.add(apply(observationArray.get(i)));
@@ -92,17 +96,17 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
 
     @Override
     public String readableStringRepresentation() {
-        return "NOT IMPLEMENTED - readableStringRepresentation";
+        return innerState.readableStringRepresentation();
     }
 
     @Override
     public List<String> getCsvHeader() {
-        return null;
+        return innerState.getCsvHeader();
     }
 
     @Override
     public List<String> getCsvRecord() {
-        return null;
+        return innerState.getCsvRecord();
     }
 
     @Override
@@ -112,7 +116,7 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
 
     @Override
     public boolean isEnvironmentEntityOnTurn() {
-        return false;
+        return innerState.isEnvironmentEntityOnTurn();
     }
 
     @Override
@@ -122,16 +126,21 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
 
     @Override
     public boolean isFinalState() {
-        return isRiskHit;
+        return innerState.isFinalState();
     }
 
     @Override
-    public boolean isRiskHit(int playerId) {
-        return isRiskHit;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        SHRiskState that = (SHRiskState) o;
+
+        return innerState.equals(that.innerState);
     }
 
     @Override
-    public boolean[] getRiskVector() {
-        return isRiskHit ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
+    public int hashCode() {
+        return innerState.hashCode();
     }
 }

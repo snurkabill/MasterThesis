@@ -22,7 +22,7 @@ import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
@@ -242,7 +242,7 @@ public class Example_random_01 {
 
 
         var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(tfModel);
-        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(policyId, totalActionCount, discountFactor);
+        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState, PolicyRecordBase>(policyId, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(

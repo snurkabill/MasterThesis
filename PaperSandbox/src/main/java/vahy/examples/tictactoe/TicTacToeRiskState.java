@@ -1,10 +1,8 @@
-package vahy.domain;
+package vahy.examples.tictactoe;
 
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.examples.simplifiedHallway.SHAction;
-import vahy.examples.simplifiedHallway.SHState;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -12,29 +10,40 @@ import vahy.paperGenerics.PaperState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskState>, Observation {
+public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVector, TicTacToeRiskState>, Observation {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
     private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
 
-    private final SHState innerState;
+    private final TicTacToeState innerState;
 
-    public SHRiskState(SHState innerState) {
+    public TicTacToeRiskState(TicTacToeState innerState) {
         this.innerState = innerState;
     }
 
     @Override
     public boolean isRiskHit(int playerId) {
-        return innerState.isAgentKilled();
+        if(innerState.isFinalState()) {
+            var ticTacToeResult = innerState.getResult();
+            if(playerId == 0) {
+                return ticTacToeResult == TicTacToeResult.WIN_1;
+            } else if(playerId == 1) {
+                return ticTacToeResult == TicTacToeResult.WIN_0;
+            } else {
+                throw new IllegalStateException("Not expected player id: [" + playerId + "]");
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override
     public boolean[] getRiskVector() {
-        return innerState.isAgentKilled() ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
+        return isFinalState() ? RISK_HIT_ARRAY : NO_RISK_ARRAY;
     }
 
     @Override
-    public SHAction[] getAllPossibleActions() {
+    public TicTacToeAction[] getAllPossibleActions() {
         return innerState.getAllPossibleActions();
     }
 
@@ -44,9 +53,9 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     }
 
     @Override
-    public StateRewardReturn<SHAction, DoubleVector, SHRiskState> applyAction(SHAction actionType) {
+    public StateRewardReturn<TicTacToeAction, DoubleVector, TicTacToeRiskState> applyAction(TicTacToeAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new SHRiskState(applied.getState()), applied.getReward());
+        return new ImmutableStateRewardReturn<>(new TicTacToeRiskState(applied.getState()), applied.getReward());
     }
 
     @Override
@@ -60,13 +69,13 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     }
 
     @Override
-    public Predictor<SHRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<SHRiskState>() {
+    public Predictor<TicTacToeRiskState> getKnownModelWithPerfectObservationPredictor() {
+        return new Predictor<TicTacToeRiskState>() {
 
-            private Predictor<SHState> innerPredictor;
+            private Predictor<TicTacToeState> innerPredictor;
 
             @Override
-            public double[] apply(SHRiskState observation) {
+            public double[] apply(TicTacToeRiskState observation) {
                 if(innerPredictor == null) {
                     innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
                 }
@@ -74,11 +83,11 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
             }
 
             @Override
-            public double[][] apply(SHRiskState[] observationArray) {
+            public double[][] apply(TicTacToeRiskState[] observationArray) {
                 if(innerPredictor == null) {
                     innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
                 }
-                var innerStateObservationArray = new SHState[observationArray.length];
+                var innerStateObservationArray = new TicTacToeState[observationArray.length];
                 for (int i = 0; i < innerStateObservationArray.length; i++) {
                     innerStateObservationArray[i] = observationArray[i].innerState;
                 }
@@ -86,7 +95,7 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
             }
 
             @Override
-            public List<double[]> apply(List<SHRiskState> observationArray) {
+            public List<double[]> apply(List<TicTacToeRiskState> observationArray) {
                 var output = new ArrayList<double[]>(observationArray.size());
                 for (int i = 0; i < observationArray.size(); i++) {
                     output.add(apply(observationArray.get(i)));

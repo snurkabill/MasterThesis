@@ -23,7 +23,7 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.impl.policy.alphazero.AlphaZeroDataMaker;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 
@@ -93,7 +93,7 @@ public class BaseAlphaZeroTest {
         var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
             0,
             new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount),
-            new AlphaZeroDataMaker<>(0, totalActionCount, 1.0),
+            new AlphaZeroDataMaker_V1<>(0, totalActionCount, 1.0),
             new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>())
         );
 

@@ -72,6 +72,13 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
         return state.readableStringRepresentation();
     }
 
+    public boolean wrappedStatesEquals(Object o) {
+        StateWrapper<?, ?, ?> that = (StateWrapper<?, ?, ?>) o;
+
+        if (inGameEntityId != that.inGameEntityId) return false;
+        return state.equals(that.state);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

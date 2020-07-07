@@ -103,7 +103,7 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
         }
 
         if(root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getFlow()).mapToDouble(x -> x).sum() < FLOW_TOLERANCE) {
-            throw new IllegalStateException("Flow is not equal to 1");
+            throw new IllegalStateException("Flow is not equal to 1. Else got: [" + root.getChildNodeStream().map(x -> x.getSearchNodeMetadata().getFlow()).mapToDouble(x -> x).sum() + "]");
         }
         long finishOptimization = System.currentTimeMillis();
         if(DEBUG_ENABLED) {

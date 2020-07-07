@@ -107,7 +107,7 @@ public class Prototype {
             1,
             new PaperPolicySupplierImpl<HallwayAction, DoubleVector, PaperMetadata<HallwayAction>, HallwayStateImpl>(
                     actionClazz,
-                    metadataFactory,
+                searchNodeFactory, metadataFactory,
                     1.0,
                     null,
                     new PaperNodeEvaluator<>(

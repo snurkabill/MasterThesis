@@ -54,6 +54,15 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     @Override
+    public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
+        if(DEBUG_ENABLED) {
+            checkStateRoot(gameState);
+        }
+        expandSearchTree(gameState);
+        return super.getDiscreteAction(gameState);
+    }
+
+    @Override
     public void updateStateOnPlayedAction(TAction action) {
         searchTree.applyAction(action);
     }
@@ -73,7 +82,7 @@ public abstract class AbstractTreeSearchPolicy<
     }
 
     protected void checkStateRoot(StateWrapper<TAction, TObservation, TState> gameState) {
-        if (!searchTree.getRoot().getStateWrapper().equals(gameState)) {
+        if (!searchTree.getRoot().getStateWrapper().wrappedStatesEquals(gameState)) {
             throw new IllegalStateException("Tree PaperPolicy has invalid state in root or gameState argument itself is invalid. Possible issues: " + System.lineSeparator() +
                 "1. missing or invalid equals method on state implementation. Proper equals method does not have to take into account static parts of state" + System.lineSeparator() +
                 "2. wrong logic in applying actons on states, leading in inconsistency" + System.lineSeparator() +
