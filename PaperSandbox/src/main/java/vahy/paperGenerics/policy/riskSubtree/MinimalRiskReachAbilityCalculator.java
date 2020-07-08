@@ -1,18 +1,15 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
-import com.quantego.clp.CLPVariable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTree;
+import vahy.paperGenerics.policy.linearProgram.AbstractLinearProgramOnTreeWithFixedOpponents;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
-
-import java.util.List;
 
 public class MinimalRiskReachAbilityCalculator<
     TAction extends Enum<TAction> & Action,
@@ -42,28 +39,34 @@ public class MinimalRiskReachAbilityCalculator<
     }
 
     private double resolveNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-        var linProgram = new AbstractLinearProgramOnTree<TAction, TObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
+
+        if(node.isLeaf()) {
+            return ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
+        }
+
+        var linProgram = new AbstractLinearProgramOnTreeWithFixedOpponents<TAction, TObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
 
             @Override
-            protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+            protected void setLeafObjective(InnerElement element) {
+                var node = element.getNode();
                 var inGameEntityId = node.getStateWrapper().getInGameEntityId();
                 if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
-                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), 1.0);
+                    element.getFlowWithCoefficient().setCoefficient(element.getFlowWithCoefficient().getCoefficient() + (1.0 * element.getModifier()));
                 } else {
-                    model.setObjectiveCoefficient(node.getSearchNodeMetadata().getNodeProbabilityFlow(), node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId]);
+                    element.getFlowWithCoefficient().setCoefficient(element.getFlowWithCoefficient().getCoefficient() + (node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId] * element.getModifier()));
                 }
             }
 
-            @Override
-            protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> searchNodes, CLPVariable parentFlow) {
-                double sum = 0.0;
-                for (var entry : searchNodes) {
-                    var inGameEntityId = entry.getStateWrapper().getInGameEntityId();
-                    var metadata = entry.getSearchNodeMetadata();
-                    sum += (((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId]) * metadata.getPriorProbability();
-                }
-                model.setObjectiveCoefficient(parentFlow, sum);
-            }
+//            @Override
+//            protected void setLeafObjectiveWithFlow(List<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> searchNodes, CLPVariable parentFlow) {
+//                double sum = 0.0;
+//                for (var entry : searchNodes) {
+//                    var inGameEntityId = entry.getStateWrapper().getInGameEntityId();
+//                    var metadata = entry.getSearchNodeMetadata();
+//                    sum += (((PaperStateWrapper<TAction, TObservation, TState>)entry.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId]) * metadata.getPriorProbability();
+//                }
+//                model.setObjectiveCoefficient(parentFlow, sum);
+//            }
 
             @Override
             protected void finalizeHardConstraints() {

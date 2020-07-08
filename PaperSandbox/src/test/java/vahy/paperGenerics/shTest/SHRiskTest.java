@@ -169,7 +169,7 @@ public class SHRiskTest {
 
                 Arguments.of(0.0, 80.0, 80.0, 0.50),
                 Arguments.of(1.0, 60.0, 60.0, 0.50),
-                Arguments.of(0.1, 63.0, 64.0, 0.05)
+                Arguments.of(0.1, 63.0, 65.0, 0.05)
             ),
             StreamUtils.getSeedStream(9548681, 3)
         );
@@ -294,7 +294,7 @@ public class SHRiskTest {
             @Override
             public Double get() {
                 callCount++;
-                var x = Math.exp(-callCount / 1000.0) * 3;
+                var x = Math.exp(-callCount / 5000.0) * 4;
                 return x;
             }
         };

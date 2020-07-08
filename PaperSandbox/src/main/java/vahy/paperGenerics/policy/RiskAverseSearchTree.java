@@ -192,13 +192,6 @@ public class RiskAverseSearchTree<
                 totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
             }
         }
-        if(DEBUG_ENABLED) {
-            logger.debug("Playing action: [{}]. Old risk: [{}], new risk: [{}]",
-                playingDistribution.getPlayedAction(),
-                oldRisk,
-                totalRiskAllowed
-            );
-        }
         if(totalRiskAllowed > 1.0 - NUMERICAL_RISK_DIFF_TOLERANCE) {
             if(DEBUG_ENABLED) {
                 logger.debug("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");

@@ -61,15 +61,15 @@ public class FlowConstraintCalculatorTest {
         var sum_BUILD_SOLVE_1 = 0.0;
         var sum_BUILD_SOLVE_2 = 0.0;
 
-        for (int k = 1; k < 500; k++) {
+        for (int expandIterationCount = 1; expandIterationCount < 500; expandIterationCount++) {
             for (int j = 0; j < 20; j++) {
                 var searchTree = initializeTree(paperNodeSelector, state, nodeEvaluator, nodeFactory, metadataFactory);
-                sum_UCB = buildTree(sum_UCB, k, searchTree);
+                sum_UCB = buildTree(sum_UCB, expandIterationCount, searchTree);
 
                 long start = System.currentTimeMillis();
-                var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.25, new SplittableRandom(0), NoiseStrategy.NONE);
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
-                var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.25, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.25, new SplittableRandom(0), NoiseStrategy.NONE);
 
                 start = System.currentTimeMillis();
                 boolean firstSolvable = calculator.optimizeFlow(searchTree.getRoot());
@@ -86,8 +86,8 @@ public class FlowConstraintCalculatorTest {
                 assertResults(firstSolvable, values, secondSolvable, values2);
 
                 total++;
-                if (total % 1 == 0) {
-                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, k, j);
+                if (total % 100 == 0) {
+                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, expandIterationCount, j);
                 }
             }
         }
@@ -242,17 +242,17 @@ public class FlowConstraintCalculatorTest {
         );
     }
 
-    private double buildTree(double sum_UCB, int k, SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchTree) {
+    private double buildTree(double sum_UCB, int expandIterationCount, SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchTree) {
         var start = System.currentTimeMillis();
-        for (int i = 0; i < k; i++) {
+        for (int i = 0; i < expandIterationCount; i++) {
             searchTree.expandTree();
         }
         sum_UCB += System.currentTimeMillis() - start;
         return sum_UCB;
     }
 
-    private void printStatistics(int total, double sum_UCB, double sum_BUILD_CALC_1, double sum_BUILD_SOLVE_1, double sum_BUILD_SOLVE_2, int k, int j) {
-        logger.debug("------------------------" + k + "------------------------");
+    private void printStatistics(int total, double sum_UCB, double sum_BUILD_CALC_1, double sum_BUILD_SOLVE_1, double sum_BUILD_SOLVE_2, int expandIterationCount, int j) {
+        logger.debug("------------------------" + expandIterationCount + "------------------------");
         logger.debug("------------------------" + j + "------------------------");
         logger.debug("------------------------" + total + "------------------------");
         logger.debug("Tree update took: [{}] milliseconds", sum_UCB / total);
