@@ -39,33 +39,20 @@ public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObser
                                                            TAction appliedAction)
     {
         StateWrapper<TAction, TObservation, TState> stateWrapper = stateRewardReturn.getState();
-        int policyId = stateWrapper.getInGameEntityId();
         var riskVector = stateWrapper.getWrappedState().getRiskVector();
         var riskAsDoubles = new double[riskVector.length];
         for (int i = 0; i < riskAsDoubles.length; i++) {
             riskAsDoubles[i] = riskVector[i] ? 1.0 : 0.0;
         }
-        if(parent != null) {
-            var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
-            var metadata = parent.getSearchNodeMetadata();
-            return new PaperMetadata<>(
-                DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
-                allPlayerRewards,
-                metadata.getChildPriorProbabilities().size() == 0 ? Double.NaN : metadata.getChildPriorProbabilities().get(appliedAction),
-                riskAsDoubles,
-                new EnumMap<>(actionClazz)
-            );
-        } else {
-            throw new IllegalStateException("Parent is null.");
-//            return new PaperMetadata<>(
-//                reward,
-//                reward,
-//                DoubleScalarRewardAggregator.emptyReward(),
-//                Double.NaN,
-//                stateWrapper.isFinalState() ? (stateWrapper.getWrappedState().isRiskHit(policyId) ? 1.0 : 0.0) : Double.NaN,
-//                new EnumMap<>(actionClass)
-//            );
-        }
+        var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
+        var metadata = parent.getSearchNodeMetadata();
+        return new PaperMetadata<>(
+            DoubleVectorRewardAggregator.aggregate(metadata.getCumulativeReward(), stateRewardReturn.getAllPlayerRewards()),
+            allPlayerRewards,
+            metadata.getChildPriorProbabilities().size() == 0 ? Double.NaN : metadata.getChildPriorProbabilities().get(appliedAction),
+            riskAsDoubles,
+            new EnumMap<>(actionClazz)
+        );
     }
 
     @Override

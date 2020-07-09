@@ -16,9 +16,11 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
     public static final DoubleVector FIXED_OBSERVATION = new DoubleVector(new double[] {0.0});
     public static final double[] FIXED_REWARD = new double[] {0.0, 0.0};
 
+    protected final boolean changeTurn;
     protected final boolean isPlayerTurn;
 
-    public EmptySpaceState(boolean isPlayerTurn) {
+    public EmptySpaceState(boolean changeTurn, boolean isPlayerTurn) {
+        this.changeTurn = changeTurn;
         this.isPlayerTurn = isPlayerTurn;
     }
 
@@ -38,7 +40,7 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
 
     @Override
     public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceState> applyAction(EmptySpaceAction actionType) {
-        return new ImmutableStateRewardReturn<>(new EmptySpaceState(!isPlayerTurn), FIXED_REWARD);
+        return new ImmutableStateRewardReturn<>(new EmptySpaceState(!changeTurn, changeTurn ? !isPlayerTurn : isPlayerTurn), FIXED_REWARD);
     }
 
     @Override

@@ -16,7 +16,7 @@ import java.util.SplittableRandom;
 public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>, Observation  {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
-    private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
+    private static final boolean[] RISK_HIT_ARRAY = new boolean[] {true, true};
 
     private final EmptySpaceState innerState;
     private final SplittableRandom random;

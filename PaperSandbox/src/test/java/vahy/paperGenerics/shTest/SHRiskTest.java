@@ -179,12 +179,16 @@ public class SHRiskTest {
         return JUnitParameterizedTestHelper.cartesian(
             Stream.of(
                 Arguments.of(0.0, 290.0, 290.0, 1.0),
-                Arguments.of(1.0, 288.0, 288.0, 1.0),
-                Arguments.of(0.5, 288.0, 288.0, 1.0),
+                Arguments.of(1.0, 288.0, 290.0, 1.0),
+                Arguments.of(0.5, 288.0, 290.0, 1.0),
 
                 Arguments.of(0.0, 290.0, 290.0, 0.0),
                 Arguments.of(1.0, 288.0, 290.0, 0.0),
-                Arguments.of(0.5, 288.0, 290.0, 0.0)
+                Arguments.of(0.5, 288.0, 290.0, 0.0),
+
+                Arguments.of(0.0, 290.0, 290.0, 0.5),
+                Arguments.of(1.0, 288.0, 290.0, 0.5),
+                Arguments.of(0.5, 288.0, 290.0, 0.5)
             ),
             StreamUtils.getSeedStream(4567, 3)
         );
@@ -223,7 +227,7 @@ public class SHRiskTest {
             false,
             Runtime.getRuntime().availableProcessors() - 1,
             false,
-            10000,
+            5000,
             0,
             false,
             false,
@@ -231,14 +235,14 @@ public class SHRiskTest {
             Path.of("TEST_PATH"),
             null);
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(50, 50);
+        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
 
         Supplier<Double> temperatureSupplier = new Supplier<>() {
             private int callCount = 0;
             @Override
             public Double get() {
                 callCount++;
-                var x = Math.exp(-callCount / 1000.0);
+                var x = Math.exp(-callCount / 5000.0);
                 return x;
             }
         };
@@ -294,7 +298,7 @@ public class SHRiskTest {
             @Override
             public Double get() {
                 callCount++;
-                var x = Math.exp(-callCount / 5000.0) * 4;
+                var x = Math.exp(-callCount / 10000.0) * 4;
                 return x;
             }
         };

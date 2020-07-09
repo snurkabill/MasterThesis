@@ -40,7 +40,7 @@ public class FlowConstraintCalculatorTest {
         var random = new SplittableRandom(0);
         var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(random, true, 1.0, EmptySpaceAction.playerActions.length);
 
-        EmptySpaceState innerState = new EmptySpaceState(true);
+        EmptySpaceState innerState = new EmptySpaceState(true, true);
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
 
         EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
@@ -69,7 +69,10 @@ public class FlowConstraintCalculatorTest {
                 long start = System.currentTimeMillis();
                 var calculator = new OptimalFlowHardConstraintCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.25, new SplittableRandom(0), NoiseStrategy.NONE);
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
+
+                start = System.currentTimeMillis();
                 var calculator2 = new OptimalFlowHardConstraintCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.25, new SplittableRandom(0), NoiseStrategy.NONE);
+                sum_BUILD_CALC_2 += System.currentTimeMillis() - start;
 
                 start = System.currentTimeMillis();
                 boolean firstSolvable = calculator.optimizeFlow(searchTree.getRoot());
@@ -87,7 +90,7 @@ public class FlowConstraintCalculatorTest {
 
                 total++;
                 if (total % 100 == 0) {
-                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, expandIterationCount, j);
+                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_CALC_2, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, expandIterationCount, j);
                 }
             }
         }
@@ -99,7 +102,7 @@ public class FlowConstraintCalculatorTest {
         var random = new SplittableRandom(0);
         var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(random, true, 1,  EmptySpaceAction.playerActions.length);
 
-        EmptySpaceState innerState = new EmptySpaceState(true);
+        EmptySpaceState innerState = new EmptySpaceState(true, true);
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
 
         EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
@@ -128,7 +131,10 @@ public class FlowConstraintCalculatorTest {
                 long start = System.currentTimeMillis();
                 var calculator = new OptimalFlowSoftConstraintCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(0.5, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
+
+                start = System.currentTimeMillis();
                 var calculator2 = new OptimalFlowSoftConstraintDeprecateed<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, 0.5, new SplittableRandom(0), NoiseStrategy.NOISY_05_06);
+                sum_BUILD_CALC_2 += System.currentTimeMillis() - start;
 
                 start = System.currentTimeMillis();
                 boolean firstSolvable = calculator.optimizeFlow(searchTree.getRoot());
@@ -146,7 +152,7 @@ public class FlowConstraintCalculatorTest {
 
                 total++;
                 if (total % 100 == 0) {
-                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, k, j);
+                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_CALC_2, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, k, j);
                 }
             }
         }
@@ -157,7 +163,7 @@ public class FlowConstraintCalculatorTest {
         var random = new SplittableRandom(0);
         var paperNodeSelector = new PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>(random,true, 1.0,  EmptySpaceAction.playerActions.length);
 
-        EmptySpaceState innerState = new EmptySpaceState(true);
+        EmptySpaceState innerState = new EmptySpaceState(true, true);
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state = new PaperStateWrapper<>(0, new EmptySpaceRiskState(innerState, random,false, 0.05));
 
         EmptySpaceAction[] playerActions = Arrays.stream(EmptySpaceAction.playerActions).toArray(EmptySpaceAction[]::new);
@@ -169,7 +175,6 @@ public class FlowConstraintCalculatorTest {
         var nodeFactory = new SearchNodeBaseFactoryImpl<>(EmptySpaceAction.class, metadataFactory);
         var knownModel = state.getKnownModelWithPerfectObservationPredictor();
         var nodeEvaluator = new PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(nodeFactory, new EmptyPredictor(new double[2 * 2 + actionCount]), true);
-
 
         var total = 0;
         var sum_UCB = 0.0;
@@ -192,10 +197,13 @@ public class FlowConstraintCalculatorTest {
                 var calculator = new MinimalRiskReachAbilityCalculator<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>();
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
 
-                var calculator2 = new MinimalRiskReachAbilityCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class);
                 start = System.currentTimeMillis();
                 double solution1 = calculator.calculateRisk(searchTree.getRoot());
                 sum_BUILD_SOLVE_1 += System.currentTimeMillis() - start;
+
+                start = System.currentTimeMillis();
+                var calculator2 = new MinimalRiskReachAbilityCalculatorDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class);
+                sum_BUILD_CALC_2 += System.currentTimeMillis() - start;
 
                 start = System.currentTimeMillis();
                 double solution2 = calculator2.calculateRisk(searchTree.getRoot());
@@ -205,7 +213,7 @@ public class FlowConstraintCalculatorTest {
 
                 total++;
                 if (total % 100 == 0) {
-                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, k, j);
+                    printStatistics(total, sum_UCB, sum_BUILD_CALC_1, sum_BUILD_CALC_2, sum_BUILD_SOLVE_1, sum_BUILD_SOLVE_2, k, j);
                 }
             }
         }
@@ -251,12 +259,13 @@ public class FlowConstraintCalculatorTest {
         return sum_UCB;
     }
 
-    private void printStatistics(int total, double sum_UCB, double sum_BUILD_CALC_1, double sum_BUILD_SOLVE_1, double sum_BUILD_SOLVE_2, int expandIterationCount, int j) {
+    private void printStatistics(int total, double sum_UCB, double sum_BUILD_CALC_1, double sum_BUILD_CALC_2, double sum_BUILD_SOLVE_1, double sum_BUILD_SOLVE_2, int expandIterationCount, int j) {
         logger.debug("------------------------" + expandIterationCount + "------------------------");
         logger.debug("------------------------" + j + "------------------------");
         logger.debug("------------------------" + total + "------------------------");
         logger.debug("Tree update took: [{}] milliseconds", sum_UCB / total);
         logger.debug("Calculator creation took: [{}] milliseconds", sum_BUILD_CALC_1 / total);
+        logger.debug("Calculator_2 creation took: [{}] milliseconds", sum_BUILD_CALC_2 / total);
         logger.debug("Optimizing FLOW_1 took: [{}] milliseconds", sum_BUILD_SOLVE_1 / total);
         logger.debug("Optimizing FLOW_2 took: [{}] milliseconds", sum_BUILD_SOLVE_2 / total);
     }

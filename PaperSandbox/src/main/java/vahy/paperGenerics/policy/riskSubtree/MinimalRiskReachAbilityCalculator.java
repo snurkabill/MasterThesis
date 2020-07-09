@@ -23,19 +23,21 @@ public class MinimalRiskReachAbilityCalculator<
     @Override
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
 
-        if(subtreeRoot.isLeaf()) {
-            return ((PaperStateWrapper<TAction, TObservation, TState>)subtreeRoot.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
-        }
+        return resolveNode(subtreeRoot);
 
-        var sum = 0.0;
-        if(subtreeRoot.isPlayerTurn()) {
-            return resolveNode(subtreeRoot);
-        } else {
-            for (var entry : subtreeRoot.getChildNodeMap().values()) {
-                sum += entry.getSearchNodeMetadata().getPriorProbability() * resolveNode(entry);
-            }
-        }
-        return sum;
+//        if(subtreeRoot.isLeaf()) {
+//            return ((PaperStateWrapper<TAction, TObservation, TState>)subtreeRoot.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
+//        }
+//
+//        var sum = 0.0;
+//        if(subtreeRoot.isPlayerTurn()) {
+//            return resolveNode(subtreeRoot);
+//        } else {
+//            for (var entry : subtreeRoot.getChildNodeMap().values()) {
+//                sum += entry.getSearchNodeMetadata().getPriorProbability() * resolveNode(entry);
+//            }
+//        }
+//        return sum;
     }
 
     private double resolveNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {

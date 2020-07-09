@@ -113,11 +113,12 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     }
 
     public boolean optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
-        if(root.isPlayerTurn()) {
-            return optimizePlayerNode(root);
-        } else {
-            return optimizeOpponentNode(root);
-        }
+//        if(root.isPlayerTurn()) {
+//            return optimizePlayerNode(root);
+//        } else {
+//            return optimizeOpponentNode(root);
+//        }
+        return optimizePlayerNode(root);
     }
 
     public void finalizeFlowCoefficients() {
@@ -241,7 +242,9 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
 
     private void initializeQueues(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
-        masterQueue.addFirst(new InnerElement(root, 1.0, new FlowWithCoefficient(root.getSearchNodeMetadata().getNodeProbabilityFlow())));
+        var flow = new FlowWithCoefficient(root.getSearchNodeMetadata().getNodeProbabilityFlow());
+        masterQueue.addFirst(new InnerElement(root, 1.0, flow));
+        flowList.add(flow);
     }
 
 //    private void resolveNonLeafSubChild(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> opponentNode, CLPVariable childFlow) {
