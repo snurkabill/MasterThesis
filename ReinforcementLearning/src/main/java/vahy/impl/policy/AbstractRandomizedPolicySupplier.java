@@ -15,7 +15,7 @@ public abstract class AbstractRandomizedPolicySupplier<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord> implements PolicySupplier<TAction, TObservation, TState, TPolicyRecord> {
+    TPolicyRecord extends PolicyRecord> implements PolicySupplier<TAction, TObservation, TState> {
 
     private final SplittableRandom random;
     private final int policyId;
@@ -38,9 +38,9 @@ public abstract class AbstractRandomizedPolicySupplier<
     }
 
     @Override
-    public Policy<TAction, TObservation, TState, TPolicyRecord> initializePolicy(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode) {
+    public Policy<TAction, TObservation, TState> initializePolicy(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode) {
         return initializePolicy_inner(initialState, policyMode, random.split());
     }
 
-    protected abstract Policy<TAction, TObservation, TState, TPolicyRecord> initializePolicy_inner(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode, SplittableRandom random);
+    protected abstract Policy<TAction, TObservation, TState> initializePolicy_inner(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode, SplittableRandom random);
 }

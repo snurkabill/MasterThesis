@@ -6,7 +6,6 @@ import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -16,14 +15,13 @@ import java.util.stream.Collectors;
 public class PaperEpisodeResults<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends PaperState<TAction, TObservation, TState>,
-    TPolicyRecord extends PaperPolicyRecord>
-    implements EpisodeResults<TAction, TObservation, TState, TPolicyRecord> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements EpisodeResults<TAction, TObservation, TState> {
 
-    private final EpisodeResults<TAction, TObservation, TState, TPolicyRecord> base;
+    private final EpisodeResults<TAction, TObservation, TState> base;
     private final List<Boolean> isRiskHitList;
 
-    public PaperEpisodeResults(EpisodeResults<TAction, TObservation, TState, TPolicyRecord> base) {
+    public PaperEpisodeResults(EpisodeResults<TAction, TObservation, TState> base) {
         this.base = base;
         isRiskHitList = new ArrayList<>(base.getPolicyCount());
         for (int i = 0; i < base.getPolicyCount(); i++) {
@@ -40,7 +38,7 @@ public class PaperEpisodeResults<
     }
 
     @Override
-    public List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> getEpisodeHistory() {
+    public List<EpisodeStepRecord<TAction, TObservation, TState>> getEpisodeHistory() {
         return base.getEpisodeHistory();
     }
 

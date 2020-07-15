@@ -9,7 +9,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.benchmark.OptimizedPolicy;
@@ -32,13 +31,12 @@ public class Runner<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private static final Logger logger = LoggerFactory.getLogger(Runner.class);
 
-    private ImmutableTuple<Duration, List<TStatistics>> optimizePolicies(RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
-        if(runnerArguments.getPolicyDefinitionList().stream().mapToLong(x -> x.getTrainablePredictorSetupList().size()).sum() > 0) {
+    private ImmutableTuple<Duration, List<TStatistics>> optimizePolicies(RunnerArguments<TConfig, TAction, TObservation, TState, TStatistics> runnerArguments) {
+        if (runnerArguments.getPolicyDefinitionList().stream().mapToLong(x -> x.getTrainablePredictorSetupList().size()).sum() > 0) {
             return optimizePolicies_inner(runnerArguments);
         } else {
             logger.info("There is no trainable predictors within policies. Skipping training.");
@@ -46,9 +44,8 @@ public class Runner<
         }
     }
 
-    public PolicyResults<TAction, TObservation, TState, TPolicyRecord, TStatistics> run(RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments,
-                                                                                        EvaluationArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> evaluationArguments) throws IOException
-    {
+    public PolicyResults<TAction, TObservation, TState, TStatistics> run(RunnerArguments<TConfig, TAction, TObservation, TState, TStatistics> runnerArguments,
+                                                                         EvaluationArguments<TConfig, TAction, TObservation, TState, TStatistics> evaluationArguments) throws IOException {
         var trainingStatistics = optimizePolicies(runnerArguments);
         var optimizedPolicyList = runnerArguments.getPolicyDefinitionList().stream().map(x ->
             new OptimizedPolicy<>(
@@ -62,7 +59,7 @@ public class Runner<
         return new PolicyResults<>(runnerArguments.getRunName(), optimizedPolicyList, trainingStatistics.getSecond(), evaluationResults.getFirst(), trainingStatistics.getFirst(), evaluationResults.getSecond());
     }
 
-    private void closeResources(List<PredictorTrainingSetup<TAction, TObservation, TState, TPolicyRecord>> predictorList) throws IOException {
+    private void closeResources(List<PredictorTrainingSetup<TAction, TObservation, TState>> predictorList) throws IOException {
         var referenceSet = predictorList.stream().map(PredictorTrainingSetup::getTrainablePredictor).collect(Collectors.toSet());
         for (TrainablePredictor trainablePredictor : referenceSet) {
             trainablePredictor.close();
@@ -70,11 +67,11 @@ public class Runner<
         logger.debug("Resources of trainable predictors closed.");
     }
 
-    private ImmutableTuple<Duration, List<TStatistics>> optimizePolicies_inner(RunnerArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> runnerArguments) {
+    private ImmutableTuple<Duration, List<TStatistics>> optimizePolicies_inner(RunnerArguments<TConfig, TAction, TObservation, TState, TStatistics> runnerArguments) {
         var progressTrackerSettings = new ProgressTrackerSettings(true, runnerArguments.getSystemConfig().isDrawWindow(), false, false);
         var random = runnerArguments.getFinalMasterRandom();
 
-        List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategories = runnerArguments.getPolicyDefinitionList()
+        List<PolicyCategory<TAction, TObservation, TState>> policyCategories = runnerArguments.getPolicyDefinitionList()
             .stream()
             .map(x -> x.getPolicySupplierFactory().createPolicySupplier(x.getPolicyId(), x.getCategoryId(), random.split()))
             .collect(Collectors.groupingBy(
@@ -112,14 +109,13 @@ public class Runner<
         return durationWithStatistics;
     }
 
-    public ImmutableTuple<TStatistics, Duration> evaluatePolicies(List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList,
-                                                                  EvaluationArguments<TConfig, TAction, TObservation, TState, TPolicyRecord, TStatistics> evaluationArguments)
-    {
+    public ImmutableTuple<TStatistics, Duration> evaluatePolicies(List<OptimizedPolicy<TAction, TObservation, TState>> policyList,
+                                                                  EvaluationArguments<TConfig, TAction, TObservation, TState, TStatistics> evaluationArguments) {
         var systemConfig = evaluationArguments.getSystemConfig();
         var random = evaluationArguments.getFinalMasterRandom();
         logger.info("Running evaluation inference of [{}] policy for [{}] iterations", evaluationArguments.getRunName(), systemConfig.getEvalEpisodeCount());
 
-        List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategories = policyList
+        List<PolicyCategory<TAction, TObservation, TState>> policyCategories = policyList
             .stream()
             .map(x -> x.getPolicySupplierFactory().createPolicySupplier(x.getPolicyId(), x.getPolicyCategoryId(), random.split()))
             .collect(Collectors.groupingBy(
@@ -145,7 +141,7 @@ public class Runner<
         logger.info("Evaluation of [{}] policy in [{}] runs took [{}] milliseconds", evaluationArguments.getRunName(), systemConfig.getEvalEpisodeCount(), end - start);
         var duration = Duration.ofMillis(end - start);
 
-        if(systemConfig.dumpEvaluationData()) {
+        if (systemConfig.dumpEvaluationData()) {
             evaluationArguments.getEpisodeWriter().writeEvaluationEpisode(episodeList);
         }
         return new ImmutableTuple<>(evaluationArguments.getEpisodeStatisticsCalculator().calculateStatistics(episodeList, duration), duration);

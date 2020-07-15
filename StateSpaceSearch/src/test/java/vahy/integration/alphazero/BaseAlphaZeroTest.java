@@ -1,4 +1,4 @@
-package vahy.alphazero;
+package vahy.integration.alphazero;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.tictactoe.TicTacToeAction;
 import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
@@ -21,11 +20,11 @@ import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.predictor.DataTablePredictor;
-import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
+import vahy.impl.predictor.DataTablePredictor;
+import vahy.impl.runner.PolicyDefinition;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -90,7 +89,7 @@ public class BaseAlphaZeroTest {
             defaultPrediction[i] = 1.0 / (totalActionCount);
         }
 
-        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
             0,
             new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount),
             new AlphaZeroDataMaker_V1<>(0, totalActionCount, 1.0),
@@ -99,7 +98,7 @@ public class BaseAlphaZeroTest {
 
 //        var playerOneSupplier = alphaZeroPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, predictorSetup);
 
-        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
             0,
             1,
             (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState>(random, 0),
@@ -110,7 +109,7 @@ public class BaseAlphaZeroTest {
 
 //        var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState, PolicyRecordBase>(discountFactor, 1);
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
@@ -128,7 +127,7 @@ public class BaseAlphaZeroTest {
         );
 
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -231,7 +230,7 @@ public class BaseAlphaZeroTest {
 //        var dataAggregator_first_visit = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 ////        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
 //
-//        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+//        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,
 //            trainablePredictor_alpha_zero_2,
 //            new AlphaZeroDataMaker<>(0, totalActionCount, 1.0),
@@ -240,7 +239,7 @@ public class BaseAlphaZeroTest {
 //
 ////        var playerOneSupplier = alphaZeroPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, predictorSetup);
 //
-//        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+//        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,
 //            1,
 //            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState>(random, 0),
@@ -251,7 +250,7 @@ public class BaseAlphaZeroTest {
 //
 ////        var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
 //        var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-//        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState, PolicyRecordBase>(discountFactor, 1);
+//        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1);
 //        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 //
 //        var predictorTrainingSetup = new PredictorTrainingSetup<>(
@@ -269,7 +268,7 @@ public class BaseAlphaZeroTest {
 //        );
 //
 //
-//        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+//        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
 //            .setRoundName("TicTacToeIntegrationTest")
 //            .setAdditionalDataPointGeneratorListSupplier(null)
 //            .setCommonAlgorithmConfig(algorithmConfig)
@@ -375,7 +374,7 @@ public class BaseAlphaZeroTest {
 //        var dataAggregator_first_visit = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 ////        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
 //
-//        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+//        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,
 //            trainablePredictor_alpha_zero_2,
 //            new AlphaZeroDataMaker<>(0, totalActionCount, 1.0),
@@ -384,7 +383,7 @@ public class BaseAlphaZeroTest {
 //
 ////        var playerOneSupplier = alphaZeroPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, predictorSetup);
 //
-//        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+//        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,
 //            1,
 //            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState>(random, 0),
@@ -395,7 +394,7 @@ public class BaseAlphaZeroTest {
 //
 ////        var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
 //        var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-//        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState, PolicyRecordBase>(discountFactor, 1);
+//        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1);
 //        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 //
 //        var predictorTrainingSetup = new PredictorTrainingSetup<>(
@@ -413,7 +412,7 @@ public class BaseAlphaZeroTest {
 //        );
 //
 //
-//        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+//        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
 //            .setRoundName("TicTacToeIntegrationTest")
 //            .setAdditionalDataPointGeneratorListSupplier(null)
 //            .setCommonAlgorithmConfig(algorithmConfig)

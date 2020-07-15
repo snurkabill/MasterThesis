@@ -2,7 +2,6 @@ package vahy.examples.tictactoe;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
@@ -45,13 +44,13 @@ public class TrainingVsStaticExample {
             }
         };
 
-        var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var playerOneSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
             0,
             1,
             (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId),
             new ArrayList<>()
         );
-        var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var playerTwoSupplier = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
             1,
             1,
             (initialState, policyMode, policyId, random) -> new AlwaysStartAtMiddlePolicy(random, policyId),
@@ -63,7 +62,7 @@ public class TrainingVsStaticExample {
             playerTwoSupplier
         );
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

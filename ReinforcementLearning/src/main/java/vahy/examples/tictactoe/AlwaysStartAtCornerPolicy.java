@@ -8,7 +8,7 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 
 import java.util.SplittableRandom;
 
-public class AlwaysStartAtCornerPolicy extends RandomizedPolicy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> {
+public class AlwaysStartAtCornerPolicy extends RandomizedPolicy<TicTacToeAction, DoubleVector, TicTacToeState> {
 
     private boolean isAnyCornerAlreadyPlayed = false;
     private final UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState> randomWalkPolicy;

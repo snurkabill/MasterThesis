@@ -6,7 +6,6 @@ import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 
 import java.time.Duration;
 import java.util.List;
@@ -15,11 +14,10 @@ import java.util.stream.Collectors;
 public class EpisodeResultsImpl<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    implements EpisodeResults<TAction, TObservation, TState, TPolicyRecord> {
+    TState extends State<TAction, TObservation, TState>>
+    implements EpisodeResults<TAction, TObservation, TState> {
 
-    private final List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory;
+    private final List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory;
     private final PolicyIdTranslationMap policyIdTranslationMap;
     private final int policyCount;
     private final List<Integer> playerStepCountList;
@@ -28,7 +26,7 @@ public class EpisodeResultsImpl<
     private final List<Double> totalPayoff;
     private final Duration duration;
 
-    public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+    public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
                               PolicyIdTranslationMap policyIdTranslationMap,
                               int policyCount,
                               List<Integer> playerStepCountList,
@@ -47,7 +45,7 @@ public class EpisodeResultsImpl<
     }
 
     @Override
-    public List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> getEpisodeHistory() {
+    public List<EpisodeStepRecord<TAction, TObservation, TState>> getEpisodeHistory() {
         return episodeHistory;
     }
 

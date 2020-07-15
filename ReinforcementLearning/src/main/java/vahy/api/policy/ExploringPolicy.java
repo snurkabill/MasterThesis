@@ -7,8 +7,8 @@ import vahy.api.model.observation.Observation;
 
 import java.util.SplittableRandom;
 
-public abstract class ExploringPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord>
-    extends RandomizedPolicy<TAction, TObservation, TState, TPolicyRecord> {
+public abstract class ExploringPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+    extends RandomizedPolicy<TAction, TObservation, TState> {
 
     private final boolean isExplorationDisabled;
     private final double explorationConstant;

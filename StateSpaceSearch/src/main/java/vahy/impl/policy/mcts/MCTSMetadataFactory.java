@@ -27,15 +27,8 @@ public class MCTSMetadataFactory<
 
     @Override
     public MCTSMetadata createSearchNodeMetadata(SearchNode<TAction, TObservation, MCTSMetadata, TState> parent, StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn, TAction appliedAction) {
-        if(parent == null) {
-            throw new IllegalStateException("Parent can't be null");
-        }
         var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();
-//        if(parent == null) {
-//            return new MCTSMetadata(allPlayerRewards, allPlayerRewards);
-//        } else {
-            return new MCTSMetadata(DoubleVectorRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), allPlayerRewards), allPlayerRewards);
-//        }
+        return new MCTSMetadata(DoubleVectorRewardAggregator.aggregate(parent.getSearchNodeMetadata().getCumulativeReward(), allPlayerRewards), allPlayerRewards);
     }
 
     @Override

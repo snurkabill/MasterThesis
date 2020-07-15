@@ -5,7 +5,7 @@ import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 
-public interface Policy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord> {
+public interface Policy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
 
     int getPolicyId();
 
@@ -13,6 +13,6 @@ public interface Policy<TAction extends Enum<TAction> & Action, TObservation ext
 
     void updateStateOnPlayedAction(TAction action);
 
-    TPolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState);
+    PolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState);
 
 }

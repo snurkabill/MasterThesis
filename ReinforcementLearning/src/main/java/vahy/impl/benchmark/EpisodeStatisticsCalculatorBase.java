@@ -5,7 +5,6 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 import vahy.utils.MathStreamUtils;
 
 import java.time.Duration;
@@ -15,12 +14,11 @@ import java.util.List;
 public class EpisodeStatisticsCalculatorBase<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, EpisodeStatisticsBase> {
+    TState extends State<TAction, TObservation, TState>>
+    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, EpisodeStatisticsBase> {
 
     @Override
-    public EpisodeStatisticsBase calculateStatistics(List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResultsList, Duration durations) {
+    public EpisodeStatisticsBase calculateStatistics(List<EpisodeResults<TAction, TObservation, TState>> episodeResultsList, Duration durations) {
         var policyCount = episodeResultsList.get(0).getPolicyCount();
         List<Double> averagePlayerStepCount = new ArrayList<>(policyCount);
         List<Double> stdevPlayerStepCount = new ArrayList<>(policyCount);

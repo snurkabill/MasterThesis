@@ -10,7 +10,7 @@ import vahy.api.policy.RandomizedPolicy;
 import java.util.SplittableRandom;
 
 public class UniformRandomWalkPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
-    extends RandomizedPolicy<TAction, TObservation, TState, PolicyRecordBase> {
+    extends RandomizedPolicy<TAction, TObservation, TState> {
 
     private TAction action;
 

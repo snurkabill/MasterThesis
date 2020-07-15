@@ -13,18 +13,17 @@ public class PolicyResults<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private final String runName;
-    private final List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList;
+    private final List<OptimizedPolicy<TAction, TObservation, TState>> policyList;
     private final List<TStatistics> trainingStatisticsList;
     private final TStatistics evaluationStatistics;
     private final Duration trainingDuration;
     private final Duration benchmarkingDuration;
 
     public PolicyResults(String runName,
-                         List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> policyList,
+                         List<OptimizedPolicy<TAction, TObservation, TState>> policyList,
                          List<TStatistics> trainingStatisticsList,
                          TStatistics evaluationStatistics,
                          Duration trainingDuration,
@@ -41,7 +40,7 @@ public class PolicyResults<
         return runName;
     }
 
-    public List<OptimizedPolicy<TAction, TObservation, TState, TPolicyRecord>> getPolicyList() {
+    public List<OptimizedPolicy<TAction, TObservation, TState>> getPolicyList() {
         return policyList;
     }
 

@@ -4,7 +4,7 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
+import vahy.api.policy.PolicyRecordBase;
 import vahy.api.policy.RandomizedPolicy;
 import vahy.api.predictor.Predictor;
 import vahy.utils.RandomDistributionUtils;
@@ -14,9 +14,8 @@ import java.util.SplittableRandom;
 public class KnownModelPolicy<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    extends RandomizedPolicy<TAction, TObservation, TState, TPolicyRecord> {
+    TState extends State<TAction, TObservation, TState>>
+    extends RandomizedPolicy<TAction, TObservation, TState> {
 
     private Predictor<TState> perfectPredictor;
 
@@ -50,7 +49,7 @@ public class KnownModelPolicy<
     }
 
     @Override
-    public TPolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
+    public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
         return null;
     }
 }

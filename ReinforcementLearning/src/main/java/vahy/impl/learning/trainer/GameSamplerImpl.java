@@ -6,8 +6,8 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.GameSampler;
 import vahy.api.episode.InitialStateSupplier;
-import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.episode.PolicyCategory;
+import vahy.api.episode.PolicyCategoryInfo;
 import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.episode.RegisteredPolicy;
@@ -16,7 +16,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecord;
 import vahy.api.policy.PolicySupplier;
 import vahy.impl.episode.EpisodeSetupImpl;
 import vahy.impl.episode.EpisodeSimulatorImpl;
@@ -36,28 +35,27 @@ import java.util.stream.Collectors;
 public class GameSamplerImpl<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    implements GameSampler<TAction, TObservation, TState, TPolicyRecord> {
+    TState extends State<TAction, TObservation, TState>>
+    implements GameSampler<TAction, TObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(GameSamplerImpl.class.getName());
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
     private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
-    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory;
+    private final EpisodeResultsFactory<TAction, TObservation, TState> resultsFactory;
     private final int processingUnitCount;
 
     private final int totalPolicyCount;
     private final List<PolicyCategoryInfo> expectedPolicyCategoryInfoList;
-    private final List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategoryList;
+    private final List<PolicyCategory<TAction, TObservation, TState>> policyCategoryList;
     private final PolicyShuffleStrategy policyShuffleStrategy;
 
     private final Random random;
 
     public GameSamplerImpl(InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                            StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
-                           EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> resultsFactory,
-                           List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> policyCategoryList,
+                           EpisodeResultsFactory<TAction, TObservation, TState> resultsFactory,
+                           List<PolicyCategory<TAction, TObservation, TState>> policyCategoryList,
                            PolicyShuffleStrategy policyShuffleStrategy,
                            int processingUnitCount,
                            List<PolicyCategoryInfo> expectedPolicyCategoryInfoList,
@@ -75,7 +73,7 @@ public class GameSamplerImpl<
         checkPolicyCount(expectedPolicyCategoryInfoList, policyCategoryList);
     }
 
-    private void checkPolicyCount(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> providedPolicyCategories) {
+    private void checkPolicyCount(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState>> providedPolicyCategories) {
         for (int i = 0; i < requestedCategoryList.size(); i++) {
             var requestedCategory = requestedCategoryList.get(i);
             var providedCategory = providedPolicyCategories.get(i);
@@ -90,7 +88,7 @@ public class GameSamplerImpl<
         }
     }
 
-    private PolicyIdTranslationMap createPolicyTranslationMap(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState, TPolicyRecord>> providedPolicyCategories) {
+    private PolicyIdTranslationMap createPolicyTranslationMap(List<PolicyCategoryInfo> requestedCategoryList, List<PolicyCategory<TAction, TObservation, TState>> providedPolicyCategories) {
         var map = new PolicyIdTranslationMap(this.totalPolicyCount);
 
         switch (policyShuffleStrategy) {
@@ -127,8 +125,8 @@ public class GameSamplerImpl<
         return map;
     }
 
-    private List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> initializeAndRegisterPolicies(TState initialState, PolicyMode policyMode, PolicyIdTranslationMap policyIdTranslationMap) {
-        var registeredPolicyList = new ArrayList<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>>(this.totalPolicyCount);
+    private List<RegisteredPolicy<TAction, TObservation, TState>> initializeAndRegisterPolicies(TState initialState, PolicyMode policyMode, PolicyIdTranslationMap policyIdTranslationMap) {
+        var registeredPolicyList = new ArrayList<RegisteredPolicy<TAction, TObservation, TState>>(this.totalPolicyCount);
         for (var category : this.policyCategoryList) {
             for (var entry : category.getPolicySupplierList()) {
                 var inGameEntityId = policyIdTranslationMap.getInGameEntityId(entry.getPolicyId());
@@ -138,11 +136,11 @@ public class GameSamplerImpl<
         return registeredPolicyList;
     }
 
-    public List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
+    public List<EpisodeResults<TAction, TObservation, TState>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
-        var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>>>(episodeBatchSize);
+        var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TObservation, TState>>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState(policyMode);
             var policyIdTranslationMap = createPolicyTranslationMap(expectedPolicyCategoryInfoList, policyCategoryList);

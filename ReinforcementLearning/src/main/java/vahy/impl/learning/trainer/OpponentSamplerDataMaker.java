@@ -5,7 +5,6 @@ import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.learning.trainer.EpisodeDataMaker;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
@@ -14,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Deprecated
-public class OpponentSamplerDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecordBase>
-    implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
+public class OpponentSamplerDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>>
+    implements EpisodeDataMaker<TAction, DoubleVector, TState> {
 
     private final int allOpponentActions;
     private final int playerPolicyId;
@@ -29,10 +28,10 @@ public class OpponentSamplerDataMaker<TAction extends Enum<TAction> & Action, TS
     }
 
     @Override
-    public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState, TPolicyRecord> episodeResults) {
+    public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState> episodeResults) {
         var episodeHistory = episodeResults.getEpisodeHistory();
         var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(episodeResults.getPlayerStepCountList().get(opponentPolicyId));
-        for (EpisodeStepRecord<TAction, DoubleVector, TState, TPolicyRecord> entry : episodeHistory) {
+        for (EpisodeStepRecord<TAction, DoubleVector, TState> entry : episodeHistory) {
             if(entry.getPolicyIdOnTurn() == opponentPolicyId) {
                 var doubleArray = new double[allOpponentActions];
                 doubleArray[entry.getAction().getLocalIndex()] = 1.0;

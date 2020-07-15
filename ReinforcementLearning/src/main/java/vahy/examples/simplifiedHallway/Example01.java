@@ -2,11 +2,7 @@ package vahy.examples.simplifiedHallway;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicySupplierImpl;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
@@ -23,7 +19,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class Example01 {
 
@@ -67,7 +62,7 @@ public class Example01 {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, 1);
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
@@ -77,7 +72,7 @@ public class Example01 {
             dataAggregator
         );
 
-        var playerSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var playerSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState>(
             1,
             1,
             (initialState, policyMode, policyId, random) -> {
@@ -89,10 +84,10 @@ public class Example01 {
             List.of(predictorTrainingSetup)
         );
 
-        var policyArgumentsList = new ArrayList<PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>>();
+        var policyArgumentsList = new ArrayList<PolicyDefinition<SHAction, DoubleVector, SHState>>();
         policyArgumentsList.add(playerSupplier);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
             .setRoundName("SHIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

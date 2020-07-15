@@ -13,14 +13,13 @@ import java.util.List;
 public class EpisodeStepRecordImpl<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    implements EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord> {
+    TState extends State<TAction, TObservation, TState>>
+    implements EpisodeStepRecord<TAction, TObservation, TState> {
 
     private final int policyIdOnTurn;
     private final int inGameEntityId;
     private final TAction playedAction;
-    private final TPolicyRecord policyStepRecord;
+    private final PolicyRecord policyStepRecord;
     private final TState fromState;
     private final TState toState;
     private final double[] reward;
@@ -28,7 +27,7 @@ public class EpisodeStepRecordImpl<
     public EpisodeStepRecordImpl(int policyIdOnTurn,
                                  int inGameEntityId,
                                  TAction playedAction,
-                                 TPolicyRecord policyStepRecord,
+                                 PolicyRecord policyStepRecord,
                                  TState fromState,
                                  TState toState,
                                  double[] reward) {
@@ -57,7 +56,7 @@ public class EpisodeStepRecordImpl<
     }
 
     @Override
-    public TPolicyRecord getPolicyStepRecord() {
+    public PolicyRecord getPolicyStepRecord() {
         return policyStepRecord;
     }
 

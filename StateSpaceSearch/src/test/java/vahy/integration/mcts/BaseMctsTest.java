@@ -1,4 +1,4 @@
-package vahy.mcts;
+package vahy.integration.mcts;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.tictactoe.TicTacToeAction;
 import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
@@ -20,8 +19,8 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.predictor.DataTablePredictor;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -81,7 +80,7 @@ public class BaseMctsTest {
         var playerOneSupplier = mctsPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, 1.0, rolloutCount);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState, PolicyRecordBase>(discountFactor, 1);
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
@@ -99,7 +98,7 @@ public class BaseMctsTest {
         );
 
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

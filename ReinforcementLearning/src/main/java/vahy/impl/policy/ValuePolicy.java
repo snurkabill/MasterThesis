@@ -12,7 +12,7 @@ import vahy.utils.ImmutableTuple;
 
 import java.util.SplittableRandom;
 
-public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> extends ExploringPolicy<TAction, DoubleVector, TState, PolicyRecordBase> {
+public class ValuePolicy<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> extends ExploringPolicy<TAction, DoubleVector, TState> {
 
     private final Predictor<DoubleVector> valuePredictor;
 

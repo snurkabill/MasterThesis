@@ -5,7 +5,6 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.OuterDefPolicySupplier;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -36,7 +35,7 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
         this.isModelKnown = problemConfig.isModelKnown();
     }
 
-    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup, int maxDepthEvaluations) {
+    public PolicyDefinition<TAction, DoubleVector, TState> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState> predictorSetup, int maxDepthEvaluations) {
         return new PolicyDefinition<>(
             policyId,
             categoryId,
@@ -45,12 +44,12 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
         );
     }
 
-    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup) {
+    public PolicyDefinition<TAction, DoubleVector, TState> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState> predictorSetup) {
         return getPolicyDefinition(policyId, categoryId, cpuctParameter, exploration, treeExpansionCountPerStep, predictorSetup, 0);
     }
 
     @NotNull
-    private OuterDefPolicySupplier<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, TrainablePredictor predictor, int maximalDepthEvaluation)
+    private OuterDefPolicySupplier<TAction, DoubleVector, TState> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, TrainablePredictor predictor, int maximalDepthEvaluation)
     {
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));

@@ -7,20 +7,19 @@ import vahy.api.model.observation.Observation;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.utils.MathStreamUtils;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PaperEpisodeStatisticsCalculator<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>, TPolicyRecord extends PaperPolicyRecord>
-    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, PaperEpisodeStatistics> {
+public class PaperEpisodeStatisticsCalculator<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
+    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, PaperEpisodeStatistics> {
 
-    private final EpisodeStatisticsCalculatorBase<TAction, TObservation, TState, TPolicyRecord> baseCalculator = new EpisodeStatisticsCalculatorBase<>();
+    private final EpisodeStatisticsCalculatorBase<TAction, TObservation, TState> baseCalculator = new EpisodeStatisticsCalculatorBase<>();
 
     @Override
-    public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResultsList, Duration duration) {
+    public PaperEpisodeStatistics calculateStatistics(List<EpisodeResults<TAction, TObservation, TState>> episodeResultsList, Duration duration) {
         EpisodeStatisticsBase base = baseCalculator.calculateStatistics(episodeResultsList, duration);
 
         var policyCount = episodeResultsList.get(0).getPolicyCount();

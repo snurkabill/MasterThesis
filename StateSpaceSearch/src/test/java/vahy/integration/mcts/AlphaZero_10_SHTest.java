@@ -1,14 +1,13 @@
-package vahy.mcts;
+package vahy.integration.mcts;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.simplifiedHallway.SHAction;
 import vahy.examples.simplifiedHallway.SHConfig;
 import vahy.examples.simplifiedHallway.SHConfigBuilder;
@@ -21,10 +20,10 @@ import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
-import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
-import vahy.impl.predictor.DataTablePredictorWithLr;
+import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
+import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
+import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
@@ -32,40 +31,57 @@ import vahy.utils.StreamUtils;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class MCTS_10_SHTest {
+public class AlphaZero_10_SHTest {
 
-    private PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> playerSupplier;
-
-    @BeforeEach
-    private void init() {
+    private PolicyDefinition<SHAction, DoubleVector, SHState> getPlayer(ProblemConfig config) {
 
         var playerId = 1;
         double discountFactor = 1;
 
-        var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0, 0.0}, 0.25);
-        var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, playerId);
+        var actionClass = SHAction.class;
+        var totalEntityCount = 2;
+        var totalActionCount = actionClass.getEnumConstants().length;
+        var defaultPrediction = new double[totalEntityCount + totalActionCount];
+        for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
+            defaultPrediction[i] = 1.0 / (totalActionCount);
+        }
+
+        var trainablePredictor = new AlphaZeroDataTablePredictor(defaultPrediction, 0.25, totalEntityCount);
+        var episodeDataMaker = new AlphaZeroDataMaker_V1<SHAction, SHState>(playerId, totalActionCount, discountFactor);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
-        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState>(
             playerId,
             trainablePredictor,
             episodeDataMaker,
             dataAggregator
         );
 
-        playerSupplier = new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2, true).getPolicyDefinition(
+
+        Supplier<Double> explorationSupplier = new Supplier<Double>() {
+            private int callCount = 0;
+            @Override
+            public Double get() {
+                callCount++;
+                return Math.exp(-callCount / 10000.0);
+            }
+        };
+
+        Supplier<Double> explorationSupplier2 = () -> 0.5;
+
+
+        return new AlphaZeroPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, totalEntityCount, config).getPolicyDefinition(
             playerId,
             1,
-            () -> 0.5,
             1,
+            explorationSupplier2,
             10,
             predictorTrainingSetup
         );
     }
-
-
 
     private static Stream<Arguments> SHTest03Params() {
         return JUnitParameterizedTestHelper.cartesian(
@@ -85,7 +101,7 @@ public class MCTS_10_SHTest {
                 Arguments.of(1.0, 288.0),
                 Arguments.of(0.5, 288.0)
             ),
-            StreamUtils.getSeedStream(987,5)
+            StreamUtils.getSeedStream(4567, 5)
         );
     }
 
@@ -131,9 +147,11 @@ public class MCTS_10_SHTest {
 
         var algorithmConfig = new CommonAlgorithmConfigBase(10, 50);
 
-        var policyArgumentsList = List.of(playerSupplier);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var player = getPlayer(config);
+        var policyArgumentsList = List.of(player);
+
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
             .setRoundName("SH03Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -146,7 +164,7 @@ public class MCTS_10_SHTest {
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()));
+        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
     }
 
     @ParameterizedTest(name = "Trap probability {0} to reach {1} payoff with seed {2}")
@@ -161,7 +179,7 @@ public class MCTS_10_SHTest {
             .trapProbability(trapProbability)
             .buildConfig();
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(50, 50);
 
         var systemConfig = new SystemConfig(
             seed,
@@ -176,9 +194,10 @@ public class MCTS_10_SHTest {
             Path.of("TEST_PATH"),
             null);
 
-        var policyArgumentsList = List.of(playerSupplier);
+        var player = getPlayer(config);
+        var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
             .setRoundName("SH05Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -191,7 +210,7 @@ public class MCTS_10_SHTest {
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 
-        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()));
+        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
     }
 
 //    @ParameterizedTest(name = "Trap probability {0} to reach {1} expectedPayoff with seed {2}")
@@ -221,9 +240,10 @@ public class MCTS_10_SHTest {
 //
 //        var algorithmConfig = new CommonAlgorithmConfigBase(500, 100);
 //
-//        var policyArgumentsList = List.of(playerSupplier);
+//        var player = getPlayer(config);
+//        var policyArgumentsList = List.of(player);
 //
-//        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+//        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
 //            .setRoundName("SH03Test")
 //            .setAdditionalDataPointGeneratorListSupplier(null)
 //            .setCommonAlgorithmConfig(algorithmConfig)
@@ -236,7 +256,7 @@ public class MCTS_10_SHTest {
 //            .setPlayerPolicySupplierList(policyArgumentsList);
 //        var result = roundBuilder.execute();
 //
-//        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()));
+//        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
 //    }
 
 

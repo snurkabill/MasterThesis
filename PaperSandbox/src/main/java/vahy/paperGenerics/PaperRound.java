@@ -25,7 +25,7 @@ public class PaperRound<TConfig extends ProblemConfig, TAction extends Enum<TAct
     private CommonAlgorithmConfig commonAlgorithmConfig;
     private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TState>> initialStateSupplier;
 
-    private List<PolicyDefinition<TAction, DoubleVector, TState, PaperPolicyRecord>> policyDefinitionList;
+    private List<PolicyDefinition<TAction, DoubleVector, TState>> policyDefinitionList;
 
     public PaperRound<TConfig, TAction, TState> setProblemConfig(TConfig problemConfig) {
         this.problemConfig = problemConfig;
@@ -47,7 +47,7 @@ public class PaperRound<TConfig extends ProblemConfig, TAction extends Enum<TAct
         return this;
     }
 
-    public PaperRound<TConfig, TAction, TState> setPolicyDefinitionList(List<PolicyDefinition<TAction, DoubleVector, TState, PaperPolicyRecord>> policyDefinitionList) {
+    public PaperRound<TConfig, TAction, TState> setPolicyDefinitionList(List<PolicyDefinition<TAction, DoubleVector, TState>> policyDefinitionList) {
         this.policyDefinitionList = policyDefinitionList;
         return this;
     }
@@ -73,9 +73,9 @@ public class PaperRound<TConfig extends ProblemConfig, TAction extends Enum<TAct
         }
     }
 
-    public PolicyResults<TAction, DoubleVector, TState, PaperPolicyRecord, PaperEpisodeStatistics> execute() {
+    public PolicyResults<TAction, DoubleVector, TState, PaperEpisodeStatistics> execute() {
         finalizeSetup();
-        var roundBuilder = new RoundBuilder<TConfig, TAction, TState, PaperPolicyRecord, PaperEpisodeStatistics>()
+        var roundBuilder = new RoundBuilder<TConfig, TAction, TState, PaperEpisodeStatistics>()
             .setRoundName("Idk")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(commonAlgorithmConfig)

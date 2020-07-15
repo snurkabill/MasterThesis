@@ -8,7 +8,6 @@ import vahy.api.model.Action;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 
 import java.time.Duration;
 import java.util.List;
@@ -16,14 +15,13 @@ import java.util.List;
 public class PaperEpisodeResultsFactory<
     TAction extends Enum<TAction> & Action,
     TObservation extends DoubleVector,
-    TState extends PaperState<TAction, TObservation, TState>,
-    TPolicyRecord extends PaperPolicyRecord>
-    implements EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements EpisodeResultsFactory<TAction, TObservation, TState> {
 
-    private final EpisodeResultsFactoryBase<TAction, TObservation, TState, TPolicyRecord> baseFactory = new EpisodeResultsFactoryBase<>();
+    private final EpisodeResultsFactoryBase<TAction, TObservation, TState> baseFactory = new EpisodeResultsFactoryBase<>();
 
     @Override
-    public EpisodeResults<TAction, TObservation, TState, TPolicyRecord> createResults(List<EpisodeStepRecord<TAction, TObservation, TState, TPolicyRecord>> episodeHistory,
+    public EpisodeResults<TAction, TObservation, TState> createResults(List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
                                                                                       PolicyIdTranslationMap policyIdTranslationMap,
                                                                                       int policyCount,
                                                                                       List<Integer> playerStepCountList,

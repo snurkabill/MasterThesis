@@ -2,6 +2,9 @@ package vahy.examples.simplifiedHallway;
 
 public enum SHInstance {
 
+    TEST_00("examples/simplifiedHalllway/test/benchmark_00.txt"),
+
+
     DEMO_01("examples/simplifiedHalllway/benchmark/hallway_demo0.txt"),
 
     GOLD_EVERYWHERE("examples/simplifiedHalllway/benchmark/goldEverywhere.txt"),

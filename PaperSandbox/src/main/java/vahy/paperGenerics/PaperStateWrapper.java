@@ -27,4 +27,13 @@ public class PaperStateWrapper<TAction extends Enum<TAction> & Action, TObservat
         return state.getRiskVector();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }

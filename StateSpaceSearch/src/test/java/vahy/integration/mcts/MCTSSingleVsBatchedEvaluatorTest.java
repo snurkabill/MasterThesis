@@ -1,4 +1,4 @@
-package vahy.mcts;
+package vahy.integration.mcts;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.simplifiedHallway.SHAction;
 import vahy.examples.simplifiedHallway.SHConfig;
 import vahy.examples.simplifiedHallway.SHConfigBuilder;
@@ -34,16 +33,16 @@ import java.util.stream.Collectors;
 
 public class MCTSSingleVsBatchedEvaluatorTest {
 
-    private PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> getPlayerSupplier(int batchSize) {
+    private PolicyDefinition<SHAction, DoubleVector, SHState> getPlayerSupplier(int batchSize) {
 
         var playerId = 1;
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0, 0.0}, 0.1);
-        var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, playerId);
+        var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState>(discountFactor, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
-        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState>(
             playerId,
             trainablePredictor,
             episodeDataMaker,
@@ -60,7 +59,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
         );
     }
 
-    private List<Double> runExperiment(PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> policy, long seed) {
+    private List<Double> runExperiment(PolicyDefinition<SHAction, DoubleVector, SHState> policy, long seed) {
         var config = new SHConfigBuilder()
             .isModelKnown(true)
             .reward(100)
@@ -87,7 +86,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
 
         var policyArgumentsList = List.of(policy);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
             .setRoundName("SH05Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

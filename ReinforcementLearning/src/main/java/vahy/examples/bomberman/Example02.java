@@ -1,13 +1,10 @@
 package vahy.examples.bomberman;
 
 import org.jetbrains.annotations.NotNull;
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
-import vahy.api.policy.PolicySupplierImpl;
-import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
@@ -26,13 +23,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.SplittableRandom;
 
 public class Example02 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
 
-        var config = new BomberManConfig(500, true, 100, 1, 1, 4, 3, 1, 2, 0.1, BomberManInstance.BM_00);
+        var config = new BomberManConfig(500, true, 100, 1, 1, 4, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(987567, true, 7, true, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -63,25 +59,25 @@ public class Example02 {
         var playerCount = config.getPlayerCount();
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
-        var policyArgumentsList = new ArrayList<PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>>();
+        var policyArgumentsList = new ArrayList<PolicyDefinition<BomberManAction, DoubleVector, BomberManState>>();
 
         for (int i = 0; i < playerCount; i++) {
             policyArgumentsList.add(createPolicyArgument(discountFactor, i + environmentPolicyCount, 1));
         }
 //        policyArgumentsList.add(createPolicyArgument(discountFactor, environmentPolicyCount, 1));
-//        policyArgumentsList.add(new PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>(
+//        policyArgumentsList.add(new PolicyDefinition<BomberManAction, DoubleVector, BomberManState>(
 //            environmentPolicyCount + 1,
 //            1,
 //            (policyId, categoryId, random) -> new AbstractPolicySupplier<>(policyId, categoryId, random) {
 //                @Override
-//                protected Policy<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> createState_inner(StateWrapper<BomberManAction, DoubleVector, BomberManState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+//                protected Policy<BomberManAction, DoubleVector, BomberManState> createState_inner(StateWrapper<BomberManAction, DoubleVector, BomberManState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
 //                    return new UniformRandomWalkPolicy<>(random.split(), policyId);
 //                }
 //            },
 //            new ArrayList<>()
 //        ));
 
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase>()
             .setRoundName("BomberManIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -98,9 +94,9 @@ public class Example02 {
     }
 
     @NotNull
-    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> createPolicyArgument(double discountFactor, int policyId, int categoryId) {
+    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> createPolicyArgument(double discountFactor, int policyId, int categoryId) {
         var predictor = new DataTablePredictor(new double[]{0.0});
-        var predictorTrainingSetup = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>(
+        var predictorTrainingSetup = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManState>(
             policyId,
             predictor,
             new ValueDataMaker<>(discountFactor, policyId),

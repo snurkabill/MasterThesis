@@ -9,7 +9,6 @@ import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.simplifiedHallway.SHAction;
 import vahy.examples.simplifiedHallway.SHConfig;
 import vahy.examples.simplifiedHallway.SHConfigBuilder;
@@ -37,7 +36,7 @@ import java.util.stream.Stream;
 
 public class SHTest {
 
-    private PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase> playerSupplier;
+    private PolicyDefinition<SHAction, DoubleVector, SHState> playerSupplier;
 
     @BeforeEach
     private void init() {
@@ -46,17 +45,17 @@ public class SHTest {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0}, 0.2);
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState, PolicyRecordBase>(discountFactor, playerId);
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState>(discountFactor, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
-        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState>(
             playerId,
             trainablePredictor,
             episodeDataMaker,
             dataAggregator
         );
 
-        playerSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState, PolicyRecordBase>(
+        playerSupplier = new PolicyDefinition<SHAction, DoubleVector, SHState>(
             playerId,
             1,
             (initialState, policyMode, policyId, random) -> {
@@ -135,7 +134,7 @@ public class SHTest {
 
         var policyArgumentsList = List.of(playerSupplier);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
             .setRoundName("SH03Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -180,7 +179,7 @@ public class SHTest {
 
         var policyArgumentsList = List.of(playerSupplier);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
             .setRoundName("SH05Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -225,7 +224,7 @@ public class SHTest {
 //
 //        var policyArgumentsList = List.of(playerSupplier);
 //
-//        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, PolicyRecordBase, EpisodeStatisticsBase>()
+//        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
 //            .setRoundName("SH03Test")
 //            .setAdditionalDataPointGeneratorListSupplier(null)
 //            .setCommonAlgorithmConfig(algorithmConfig)

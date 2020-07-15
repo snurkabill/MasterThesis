@@ -4,7 +4,6 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.learning.trainer.EpisodeDataMaker;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleVectorRewardAggregator;
@@ -14,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AlphaZeroDataMaker_V1<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord>
-    implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
+public class AlphaZeroDataMaker_V1<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>>
+    implements EpisodeDataMaker<TAction, DoubleVector, TState> {
 
     private final double discountFactor;
     private final int playerPolicyId;
@@ -28,7 +27,7 @@ public class AlphaZeroDataMaker_V1<TAction extends Enum<TAction> & Action, TStat
     }
 
     @Override
-    public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState, TPolicyRecord> episodeResults) {
+    public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState> episodeResults) {
         var episodeHistory = episodeResults.getEpisodeHistory();
         var entityInGameCount = episodeHistory.get(0).getFromState().getTotalEntityCount();
         var translationMap = episodeResults.getPolicyIdTranslationMap();

@@ -9,8 +9,6 @@ import vahy.utils.ImmutableTuple;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class BomberManConfig extends ProblemConfig {
 
@@ -38,7 +36,8 @@ public class BomberManConfig extends ProblemConfig {
                            int playerLivesAtStart,
                            int playerCount,
                            double goldRespawnProbability,
-                           BomberManInstance bomberManInstance) throws IOException, InvalidInstanceSetupException {
+                           BomberManInstance bomberManInstance,
+                           PolicyShuffleStrategy policyShuffleStrategy) throws IOException, InvalidInstanceSetupException {
         this(maximalStepCountBound,
             isModelKnown,
             goldReward,
@@ -49,7 +48,8 @@ public class BomberManConfig extends ProblemConfig {
             playerLivesAtStart,
             playerCount,
             goldRespawnProbability,
-            bomberManInstance.getAsPlayground()
+            bomberManInstance.getAsPlayground(),
+            policyShuffleStrategy
             );
     }
 
@@ -63,7 +63,8 @@ public class BomberManConfig extends ProblemConfig {
                               int playerLivesAtStart,
                               int playerCount,
                               double goldRespawnProbability,
-                              ImmutableTuple<char[][], Integer> gamePlayground) {
+                              ImmutableTuple<char[][], Integer> gamePlayground,
+                              PolicyShuffleStrategy policyShuffleStrategy) {
         super(maximalStepCountBound,
             isModelKnown,
             gamePlayground.getSecond() + 1,
@@ -71,7 +72,7 @@ public class BomberManConfig extends ProblemConfig {
             List.of(
                 new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID, gamePlayground.getSecond() + 1),
                 new PolicyCategoryInfo(true, RoundBuilder.ENVIRONMENT_CATEGORY_ID + 1, playerCount)),
-            PolicyShuffleStrategy.CATEGORY_SHUFFLE);
+            policyShuffleStrategy);
 
         this.goldReward = goldReward;
         this.stepPenalty = stepPenalty;

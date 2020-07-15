@@ -11,7 +11,6 @@ import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class RunnerArguments<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private final String runName;
@@ -33,13 +31,13 @@ public class RunnerArguments<TConfig extends ProblemConfig,
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
     private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
-    private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
+    private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> episodeStatisticsCalculator;
     private final List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
-    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
+    private final EpisodeResultsFactory<TAction, TObservation, TState> episodeResultsFactory;
 
-    private final List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> policyDefinitionList;
+    private final List<PolicyDefinition<TAction, TObservation, TState>> policyDefinitionList;
 
-    private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
+    private final EpisodeWriter<TAction, TObservation, TState> episodeWriter;
 
     public RunnerArguments(String runName,
                            TConfig problemConfig,
@@ -48,11 +46,11 @@ public class RunnerArguments<TConfig extends ProblemConfig,
                            SplittableRandom finalMasterRandom,
                            InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                            StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
-                           EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
-                           EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
+                           EpisodeResultsFactory<TAction, TObservation, TState> episodeResultsFactory,
+                           EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> episodeStatisticsCalculator,
                            List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList,
-                           EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
-                           List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> policyDefinitionList) {
+                           EpisodeWriter<TAction, TObservation, TState> episodeWriter,
+                           List<PolicyDefinition<TAction, TObservation, TState>> policyDefinitionList) {
         this.runName = runName;
         this.problemConfig = problemConfig;
         this.systemConfig = systemConfig;
@@ -91,11 +89,11 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         return stateStateWrapperInitializer;
     }
 
-    public EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> getEpisodeResultsFactory() {
+    public EpisodeResultsFactory<TAction, TObservation, TState> getEpisodeResultsFactory() {
         return episodeResultsFactory;
     }
 
-    public EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> getEpisodeStatisticsCalculator() {
+    public EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> getEpisodeStatisticsCalculator() {
         return episodeStatisticsCalculator;
     }
 
@@ -103,11 +101,11 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         return additionalDataPointGeneratorList;
     }
 
-    public EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> getEpisodeWriter() {
+    public EpisodeWriter<TAction, TObservation, TState> getEpisodeWriter() {
         return episodeWriter;
     }
 
-    public List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> getPolicyDefinitionList() {
+    public List<PolicyDefinition<TAction, TObservation, TState>> getPolicyDefinitionList() {
         return policyDefinitionList;
     }
 

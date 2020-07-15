@@ -8,7 +8,6 @@ import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,8 +22,7 @@ import java.util.List;
 public class EpisodeWriter<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
-    TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord> {
+    TState extends State<TAction, TObservation, TState>> {
 
     private final Path rootPath;
     private final Path fullPath;
@@ -75,7 +73,7 @@ public class EpisodeWriter<
         }
     }
 
-    public void writeTrainingEpisode(int stageId, List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResults)  {
+    public void writeTrainingEpisode(int stageId, List<EpisodeResults<TAction, TObservation, TState>> episodeResults)  {
         for (int i = 0; i < episodeResults.size(); i++) {
             var formatted = String.format("%0" + String.valueOf(episodeResults.size()).length() + "d" , i);
             Path path = Paths.get(fullPath.toString(), "training", "stageId_" + stageId, "episodeId_" + formatted);
@@ -83,7 +81,7 @@ public class EpisodeWriter<
         }
     }
 
-    public void writeEvaluationEpisode(List<EpisodeResults<TAction, TObservation, TState, TPolicyRecord>> episodeResultsList) {
+    public void writeEvaluationEpisode(List<EpisodeResults<TAction, TObservation, TState>> episodeResultsList) {
         for (int i = 0; i < episodeResultsList.size(); i++) {
             var formatted = String.format("%0" + String.valueOf(episodeResultsList.size()).length() + "d" , i);
             Path path = Paths.get(fullPath.toString(),"evaluation", "episodeId_" + formatted);
@@ -91,7 +89,7 @@ public class EpisodeWriter<
         }
     }
 
-    private void createDirAndWriteData(EpisodeResults<TAction, TObservation, TState, TPolicyRecord> episodeResults, Path path) {
+    private void createDirAndWriteData(EpisodeResults<TAction, TObservation, TState> episodeResults, Path path) {
         File file = new File(path.toUri());
         if(!file.exists()) {
             checkFolderCreated(file, file.mkdirs());
@@ -120,7 +118,7 @@ public class EpisodeWriter<
         }
     }
 
-    private void writeEpisodeMetadata(String filename, EpisodeResults<TAction, TObservation, TState, TPolicyRecord> episodeResults) throws IOException {
+    private void writeEpisodeMetadata(String filename, EpisodeResults<TAction, TObservation, TState> episodeResults) throws IOException {
         BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/metadata"));
         outputWriter.write(episodeResults.episodeMetadataToFile());
         outputWriter.flush();

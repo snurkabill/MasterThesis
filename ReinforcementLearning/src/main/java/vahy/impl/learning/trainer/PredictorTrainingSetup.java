@@ -5,17 +5,16 @@ import vahy.api.learning.trainer.EpisodeDataMaker;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 import vahy.api.predictor.TrainablePredictor;
 
-public class PredictorTrainingSetup<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord> {
+public class PredictorTrainingSetup<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
 
     private final int predictorTrainingSetupId;
     private final TrainablePredictor trainablePredictor;
-    private final EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker;
+    private final EpisodeDataMaker<TAction, TObservation, TState> episodeDataMaker;
     private final DataAggregator dataAggregator;
 
-    public PredictorTrainingSetup(int predictorTrainingSetupId, TrainablePredictor trainablePredictor, EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> episodeDataMaker, DataAggregator dataAggregator) {
+    public PredictorTrainingSetup(int predictorTrainingSetupId, TrainablePredictor trainablePredictor, EpisodeDataMaker<TAction, TObservation, TState> episodeDataMaker, DataAggregator dataAggregator) {
         this.predictorTrainingSetupId = predictorTrainingSetupId;
         this.trainablePredictor = trainablePredictor;
         this.episodeDataMaker = episodeDataMaker;
@@ -30,7 +29,7 @@ public class PredictorTrainingSetup<TAction extends Enum<TAction> & Action, TObs
         return trainablePredictor;
     }
 
-    public EpisodeDataMaker<TAction, TObservation, TState, TPolicyRecord> getEpisodeDataMaker() {
+    public EpisodeDataMaker<TAction, TObservation, TState> getEpisodeDataMaker() {
         return episodeDataMaker;
     }
 

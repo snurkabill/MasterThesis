@@ -1,10 +1,10 @@
 package vahy.example.bomberman;
 
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.bomberman.BomberManAction;
 import vahy.examples.bomberman.BomberManConfig;
 import vahy.examples.bomberman.BomberManInstance;
@@ -55,7 +55,8 @@ public class Example_random_01 {
             1,
             3,
             0.1,
-            BomberManInstance.BM_02);
+            BomberManInstance.BM_02,
+            PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(
             987567,
             false,
@@ -131,7 +132,7 @@ public class Example_random_01 {
 
 
 
-        var randomPolicyList = IntStream.of(1, 2, 3, 4).mapToObj(x -> new PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>(
+        var randomPolicyList = IntStream.of(1, 2, 3, 4).mapToObj(x -> new PolicyDefinition<BomberManAction, DoubleVector, BomberManState>(
             environmentPolicyCount + x,
             1,
             (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<BomberManAction, DoubleVector, BomberManState>(random, environmentPolicyCount + x),
@@ -140,7 +141,7 @@ public class Example_random_01 {
 
         var policyList = List.of(valuePolicy, mctsPlayer_1, alphaGoPolicy);
 
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase>()
             .setRoundName("BomberManIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -168,7 +169,7 @@ public class Example_random_01 {
 
     }
 
-    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> getMCTSPolicy(BomberManConfig bomBerManConfig,
+    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> getMCTSPolicy(BomberManConfig bomBerManConfig,
                                                                                                                    SystemConfig systemConfig,
                                                                                                                    int policyId,
                                                                                                                    Class<BomberManAction> actionClass,
@@ -195,7 +196,7 @@ public class Example_random_01 {
 
 
         var trainablePredictorMCTSEval_1 = new TrainableApproximator(tfModel);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, policyId);
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId);
         var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             policyId,
@@ -209,7 +210,7 @@ public class Example_random_01 {
         return mctsSupplier.getPolicyDefinition(policyId, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1, batchEvalSize);
     }
 
-    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> getAlphaGoPolicy(BomberManConfig config,
+    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> getAlphaGoPolicy(BomberManConfig config,
                                                                                                                       SystemConfig systemConfig,
                                                                                                                       int policyId,
                                                                                                                       Class<BomberManAction> actionClass,
@@ -242,7 +243,7 @@ public class Example_random_01 {
 
 
         var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(tfModel);
-        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState, PolicyRecordBase>(policyId, totalActionCount, discountFactor);
+        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(policyId, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
@@ -257,7 +258,7 @@ public class Example_random_01 {
     }
 
 
-    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase> getValuePolicy(SystemConfig systemConfig, int policyId, BomberManState sampleState) throws IOException, InterruptedException {
+    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> getValuePolicy(SystemConfig systemConfig, int policyId, BomberManState sampleState) throws IOException, InterruptedException {
         var modelInputSize = sampleState.getInGameEntityObservation(5).getObservedVector().length;
         var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_model.py");
         var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig, modelInputSize, 1, 0);
@@ -273,7 +274,7 @@ public class Example_random_01 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictor2 = new TrainableApproximator(tfModel_value);
-        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(1.0, policyId);
+        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(1.0, policyId);
         var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(

@@ -9,7 +9,6 @@ import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.tictactoe.AlwaysStartAtCornerPolicy;
 import vahy.examples.tictactoe.AlwaysStartAtMiddlePolicy;
 import vahy.examples.tictactoe.TicTacToeAction;
@@ -39,7 +38,7 @@ import java.util.stream.Stream;
 
 public class ReproducibilityTest {
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createUniformPolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createUniformPolicy(int policyId_) {
         return new PolicyDefinition<>(
             policyId_,
             1,
@@ -48,7 +47,7 @@ public class ReproducibilityTest {
         );
     }
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createAtMiddlePolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createAtMiddlePolicy(int policyId_) {
         return new PolicyDefinition<>(
             policyId_,
             1,
@@ -57,7 +56,7 @@ public class ReproducibilityTest {
         );
     }
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createAtCornerPolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createAtCornerPolicy(int policyId_) {
         return new PolicyDefinition<>(
             policyId_,
             1,
@@ -66,11 +65,11 @@ public class ReproducibilityTest {
         );
     }
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createTrainablePolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createTrainablePolicy(int policyId_) {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictor(new double[]{0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState, PolicyRecordBase>(discountFactor, policyId_);
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, policyId_);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             policyId_,
@@ -78,7 +77,7 @@ public class ReproducibilityTest {
             episodeDataMaker,
             new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>())
         );
-        return new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        return new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
             policyId_,
             1,
             (initialState, policyMode, policyId, random) -> {
@@ -101,8 +100,8 @@ public class ReproducibilityTest {
         );
     }
 
-    private Double calculateResults(PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> playerOne,
-                                    PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> playerTwo,
+    private Double calculateResults(PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> playerOne,
+                                    PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> playerTwo,
                                     long seed) {
         var ticTacConfig = new TicTacToeConfig();
         var systemConfig = new SystemConfig(
@@ -147,7 +146,7 @@ public class ReproducibilityTest {
             playerTwo
         );
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -168,8 +167,8 @@ public class ReproducibilityTest {
 
     @ParameterizedTest
     @MethodSource("params")
-    public void reproducibilityTest(Supplier<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>> playerOne,
-                                    Supplier<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>> playerTwo) {
+    public void reproducibilityTest(Supplier<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>> playerOne,
+                                    Supplier<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>> playerTwo) {
 
         var seedStream = StreamUtils.getSeedStream(10);
         var trialCount = 3;

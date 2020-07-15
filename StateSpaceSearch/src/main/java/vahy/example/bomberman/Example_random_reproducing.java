@@ -1,10 +1,10 @@
 package vahy.example.bomberman;
 
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.bomberman.BomberManAction;
 import vahy.examples.bomberman.BomberManConfig;
 import vahy.examples.bomberman.BomberManInstance;
@@ -49,7 +49,8 @@ public class Example_random_reproducing {
             1,
             2,
             0.1,
-            BomberManInstance.BM_01);
+            BomberManInstance.BM_01,
+            PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(
             987567,
             false,
@@ -106,7 +107,7 @@ public class Example_random_reproducing {
         var defPred = new double[totalEntityCount];
         Arrays.fill(defPred, 10.0);
         var trainablePredictorMCTSEval_1 = new DataTablePredictorWithLr(defPred, 0.1);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, environmentPolicyCount + 0);
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
 //        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
@@ -122,7 +123,7 @@ public class Example_random_reproducing {
         var mctsPlayer_1 = mctsSupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1, batchEvalSize);
 
 
-        var policyArgumentsList = IntStream.of(1).mapToObj(x -> new PolicyDefinition<BomberManAction, DoubleVector, BomberManState, PolicyRecordBase>(
+        var policyArgumentsList = IntStream.of(1).mapToObj(x -> new PolicyDefinition<BomberManAction, DoubleVector, BomberManState>(
             environmentPolicyCount + x,
             1,
             (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<BomberManAction, DoubleVector, BomberManState>(random, environmentPolicyCount + x),
@@ -134,7 +135,7 @@ public class Example_random_reproducing {
 
 
 
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase>()
             .setRoundName("BomberManIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

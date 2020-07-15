@@ -1,10 +1,10 @@
 package vahy.example.bomberman;
 
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.bomberman.BomberManAction;
 import vahy.examples.bomberman.BomberManConfig;
 import vahy.examples.bomberman.BomberManInstance;
@@ -20,8 +20,8 @@ import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
+import vahy.impl.predictor.DataTablePredictor;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,7 +32,7 @@ import java.util.SplittableRandom;
 public class Example01 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
-        var config = new BomberManConfig(500, true, 100, 1, 2, 3, 3, 1, 3, 0.1, BomberManInstance.BM_00);
+        var config = new BomberManConfig(500, true, 100, 1, 2, 3, 3, 1, 3, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(987567, false, 7, true, 500, 0, false, false, false, Path.of("TEST_PATH"), null);
 
         var algorithmConfig = new CommonAlgorithmConfig() {
@@ -75,7 +75,7 @@ public class Example01 {
 //        var mctsRolloutSupplier = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, cpuct, treeExpansionCount, discountFactor, rolloutCount);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, environmentPolicyCount + 0);
+        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
@@ -89,7 +89,7 @@ public class Example01 {
 
 
         var trainablePredictorMCTSEval_1 = new DataTablePredictor(new double[totalEntityCount]);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, environmentPolicyCount + 1);
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 1);
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
@@ -101,7 +101,7 @@ public class Example01 {
 
 
         var trainablePredictorMCTSEval_2 = new DataTablePredictor(new double[totalEntityCount]);
-        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManState, PolicyRecordBase>(discountFactor, environmentPolicyCount + 2);
+        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 2);
         var dataAggregatorMCTSEval_2 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetupMCTSEval_2 = new PredictorTrainingSetup<>(
@@ -121,7 +121,7 @@ public class Example01 {
             ,mctsEvalPlayer_1
             ,mctsEvalPlayer_2
         );
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase>()
             .setRoundName("BomberManIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

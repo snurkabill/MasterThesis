@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.OuterDefPolicySupplier;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.factory.SearchNodeFactory;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -36,16 +35,16 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
         this.isModelKnown = isModelKnown;
     }
 
-    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, int treeExpansionCountPerStep, double discountFactor, int rolloutCount) {
-        return new PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase>(
+    public PolicyDefinition<TAction, DoubleVector, TState> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, int treeExpansionCountPerStep, double discountFactor, int rolloutCount) {
+        return new PolicyDefinition<TAction, DoubleVector, TState>(
             policyId,
             categoryId,
-            getPolicyDefinitionSupplierWithRollout(cpuctParameter,treeExpansionCountPerStep, discountFactor, rolloutCount),
+            getPolicyDefinitionSupplierWithRollout(cpuctParameter, treeExpansionCountPerStep, discountFactor, rolloutCount),
             new ArrayList<>(0)
         );
     }
 
-    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, Supplier<Double> explorationConstantSupplier, double cpuctParameter, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup, int maximalEvaluationDepth) {
+    public PolicyDefinition<TAction, DoubleVector, TState> getPolicyDefinition(int policyId, int categoryId, Supplier<Double> explorationConstantSupplier, double cpuctParameter, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState> predictorSetup, int maximalEvaluationDepth) {
         return new PolicyDefinition<>(
             policyId,
             categoryId,
@@ -54,16 +53,15 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
         );
     }
 
-    public PolicyDefinition<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinition(int policyId, int categoryId, Supplier<Double> explorationConstantSupplier, double cpuctParameter, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState, PolicyRecordBase> predictorSetup) {
+    public PolicyDefinition<TAction, DoubleVector, TState> getPolicyDefinition(int policyId, int categoryId, Supplier<Double> explorationConstantSupplier, double cpuctParameter, int treeExpansionCountPerStep, PredictorTrainingSetup<TAction, DoubleVector, TState> predictorSetup) {
         return getPolicyDefinition(policyId, categoryId, explorationConstantSupplier, cpuctParameter, treeExpansionCountPerStep, predictorSetup, 0);
     }
 
     @NotNull
-    private OuterDefPolicySupplier<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithRollout(double cpuctParameter,
-                                                                                                                           int treeExpansionCountPerStep,
-                                                                                                                           double discountFactor,
-                                                                                                                           int rolloutCount)
-    {
+    private OuterDefPolicySupplier<TAction, DoubleVector, TState> getPolicyDefinitionSupplierWithRollout(double cpuctParameter,
+                                                                                                         int treeExpansionCountPerStep,
+                                                                                                         double discountFactor,
+                                                                                                         int rolloutCount) {
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
             return new MCTSPolicy<TAction, DoubleVector, TState>(policyId_, random_, 0.0, new TreeUpdateConditionSuplierCountBased(treeExpansionCountPerStep),
@@ -77,12 +75,11 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
     }
 
     @NotNull
-    private OuterDefPolicySupplier<TAction, DoubleVector, TState, PolicyRecordBase> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter,
-                                                                                                                             Supplier<Double> explorationConstantSupplier,
-                                                                                                                             int treeExpansionCountPerStep,
-                                                                                                                             TrainablePredictor predictor,
-                                                                                                                             int maximalEvaluationDepth)
-    {
+    private OuterDefPolicySupplier<TAction, DoubleVector, TState> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter,
+                                                                                                           Supplier<Double> explorationConstantSupplier,
+                                                                                                           int treeExpansionCountPerStep,
+                                                                                                           TrainablePredictor predictor,
+                                                                                                           int maximalEvaluationDepth) {
         return (initialState_, policyMode_, policyId_, random_) -> {
             var root = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
             var searchTree = new SearchTreeImpl<>(

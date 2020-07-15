@@ -244,7 +244,9 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
         var flow = new FlowWithCoefficient(root.getSearchNodeMetadata().getNodeProbabilityFlow());
         masterQueue.addFirst(new InnerElement(root, 1.0, flow));
-        flowList.add(flow);
+        if(!root.isPlayerTurn()) {
+            flowList.add(flow);
+        }
     }
 
 //    private void resolveNonLeafSubChild(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> opponentNode, CLPVariable childFlow) {

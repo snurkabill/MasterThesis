@@ -12,7 +12,6 @@ import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.model.observation.DoubleVector;
@@ -34,7 +33,7 @@ import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord, TStatistics extends EpisodeStatistics> {
+public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TStatistics extends EpisodeStatistics> {
 
     private static final Logger logger = LoggerFactory.getLogger(RoundBuilder.class);
 
@@ -48,62 +47,62 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     private SystemConfig systemConfig;
     private CommonAlgorithmConfig commonAlgorithmConfig;
 
-    private List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> playerPolicyArgumentList;
+    private List<PolicyDefinition<TAction, DoubleVector, TState>> playerPolicyArgumentList;
 
-    private EpisodeStatisticsCalculator<TAction, DoubleVector, TState, TPolicyRecord, TStatistics> statisticsCalculator;
-    private EpisodeResultsFactory<TAction, DoubleVector, TState, TPolicyRecord> resultsFactory;
+    private EpisodeStatisticsCalculator<TAction, DoubleVector, TState, TStatistics> statisticsCalculator;
+    private EpisodeResultsFactory<TAction, DoubleVector, TState> resultsFactory;
 
     private BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TState>> instanceInitializerFactory;
     private StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer;
 
     private List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setRoundName(String roundName) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setRoundName(String roundName) {
         this.roundName = roundName;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setProblemConfig(TConfig problemConfig) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setProblemConfig(TConfig problemConfig) {
         this.problemConfig = problemConfig;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setSystemConfig(SystemConfig systemConfig) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setSystemConfig(SystemConfig systemConfig) {
         this.systemConfig = systemConfig;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setCommonAlgorithmConfig(CommonAlgorithmConfig commonAlgorithmConfig) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setCommonAlgorithmConfig(CommonAlgorithmConfig commonAlgorithmConfig) {
         this.commonAlgorithmConfig = commonAlgorithmConfig;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setPlayerPolicySupplierList(List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> policyDefinitionList) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setPlayerPolicySupplierList(List<PolicyDefinition<TAction, DoubleVector, TState>> policyDefinitionList) {
         this.playerPolicyArgumentList = policyDefinitionList;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setStatisticsCalculator(EpisodeStatisticsCalculator<TAction, DoubleVector, TState, TPolicyRecord, TStatistics> statisticsCalculator) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setStatisticsCalculator(EpisodeStatisticsCalculator<TAction, DoubleVector, TState, TStatistics> statisticsCalculator) {
         this.statisticsCalculator = statisticsCalculator;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setResultsFactory(EpisodeResultsFactory<TAction, DoubleVector, TState, TPolicyRecord> resultsFactory) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setResultsFactory(EpisodeResultsFactory<TAction, DoubleVector, TState> resultsFactory) {
         this.resultsFactory = resultsFactory;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setAdditionalDataPointGeneratorListSupplier(List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setAdditionalDataPointGeneratorListSupplier(List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
         this.additionalDataPointGeneratorList = additionalDataPointGeneratorList;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setProblemInstanceInitializerSupplier(BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TState>> instanceInitializerFactory) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setProblemInstanceInitializerSupplier(BiFunction<TConfig, SplittableRandom, InitialStateSupplier<TAction, DoubleVector, TState>> instanceInitializerFactory) {
         this.instanceInitializerFactory = instanceInitializerFactory;
         return this;
     }
 
-    public RoundBuilder<TConfig, TAction, TState, TPolicyRecord, TStatistics> setStateStateWrapperInitializer(StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer) {
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setStateStateWrapperInitializer(StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer) {
         this.stateStateWrapperInitializer  = stateStateWrapperInitializer;
         return this;
     }
@@ -142,9 +141,9 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         dumpData = (systemConfig.dumpEvaluationData() || systemConfig.dumpTrainingData());
     }
 
-    private void checkPolicyArgumentList(List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> policyDefinitionList) {
+    private void checkPolicyArgumentList(List<PolicyDefinition<TAction, DoubleVector, TState>> policyDefinitionList) {
         Set<Integer> policyIdSet = new HashSet<>();
-        for (PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord> entry : policyDefinitionList) {
+        for (PolicyDefinition<TAction, DoubleVector, TState> entry : policyDefinitionList) {
             if(policyIdSet.contains(entry.getPolicyId())) {
                 throw new IllegalStateException("Two or more policies have policy id: [" + entry.getPolicyId() + "]");
             } else {
@@ -159,11 +158,11 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         }
     }
 
-    public PolicyResults<TAction, DoubleVector, TState, TPolicyRecord, TStatistics> execute() {
+    public PolicyResults<TAction, DoubleVector, TState, TStatistics> execute() {
         finalizeSetup();
-        var runner = new Runner<TConfig, TAction, DoubleVector, TState, TPolicyRecord, TStatistics>();
+        var runner = new Runner<TConfig, TAction, DoubleVector, TState, TStatistics>();
         try {
-            var episodeWriter = dumpData ? new EpisodeWriter<TAction, DoubleVector, TState, TPolicyRecord>(problemConfig, commonAlgorithmConfig, systemConfig, timestamp, roundName) : null;
+            var episodeWriter = dumpData ? new EpisodeWriter<TAction, DoubleVector, TState>(problemConfig, commonAlgorithmConfig, systemConfig, timestamp, roundName) : null;
             var runnerArguments = buildRunnerArguments(episodeWriter);
             var evaluationArguments = buildEvaluationArguments(episodeWriter);
             return runner.run(runnerArguments, evaluationArguments);
@@ -172,7 +171,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         }
     }
 
-    private RunnerArguments<TConfig, TAction, DoubleVector, TState, TPolicyRecord, TStatistics> buildRunnerArguments(EpisodeWriter<TAction, DoubleVector, TState, TPolicyRecord> episodeWriter) {
+    private RunnerArguments<TConfig, TAction, DoubleVector, TState, TStatistics> buildRunnerArguments(EpisodeWriter<TAction, DoubleVector, TState> episodeWriter) {
         final var finalRandomSeed = systemConfig.getRandomSeed();
         final var masterRandom = new SplittableRandom(finalRandomSeed);
 
@@ -194,7 +193,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             policyList);
     }
 
-    private EvaluationArguments<TConfig, TAction, DoubleVector, TState, TPolicyRecord, TStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TState, TPolicyRecord> episodeWriter) {
+    private EvaluationArguments<TConfig, TAction, DoubleVector, TState, TStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TState> episodeWriter) {
         final var finalRandomSeed = systemConfig.getRandomSeed();
         final var masterRandom = new SplittableRandom(finalRandomSeed + EVALUATION_SEED_SHIFT);
 
@@ -214,10 +213,10 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             policyList);
     }
 
-    private List<PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>> createEnvironmentPolicySuppliers(ProblemConfig config) {
+    private List<PolicyDefinition<TAction, DoubleVector, TState>> createEnvironmentPolicySuppliers(ProblemConfig config) {
         return IntStream.range(0, config.getEnvironmentPolicyCount())
             .mapToObj(x ->
-                new PolicyDefinition<TAction, DoubleVector, TState, TPolicyRecord>(
+                new PolicyDefinition<TAction, DoubleVector, TState>(
                     x,
                     ENVIRONMENT_CATEGORY_ID,
                     (initialState, policyMode, policyId, random) -> new KnownModelPolicy<>(random, policyId),

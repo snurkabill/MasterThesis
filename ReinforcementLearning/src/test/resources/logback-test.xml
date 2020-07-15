@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <encoder>
+            <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
+            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>
+        </encoder>
+        <append>false</append>
+        <!--        <file>local/log/logFile-${bySecond}.log</file>-->
+        <file>local/log/logFile.log</file>
+    </appender>
+
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
+            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>
+        </encoder>
+        <!--        <filter class="ch.qos.logback.classic.filter.LevelFilter">-->
+        <!--            <level>INFO</level>-->
+        <!--            <onMatch>ACCEPT</onMatch>-->
+        <!--            <onMismatch>DENY</onMismatch>-->
+        <!--        </filter>-->
+    </appender>
+
+    <root name="vahy" level="warn">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+
+</configuration>

@@ -8,6 +8,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BomberManRiskState implements PaperState<BomberManAction, DoubleVector, BomberManRiskState>, Observation {
@@ -131,4 +132,21 @@ public class BomberManRiskState implements PaperState<BomberManAction, DoubleVec
         return innerState.isFinalState();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BomberManRiskState that = (BomberManRiskState) o;
+
+        if (!innerState.equals(that.innerState)) return false;
+        return Arrays.equals(riskArray, that.riskArray);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = innerState.hashCode();
+        result = 31 * result + Arrays.hashCode(riskArray);
+        return result;
+    }
 }

@@ -24,7 +24,7 @@ import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends PaperMetadata<TAction>, TState extends PaperState<TAction, TObservation, TState>>
-    implements OuterDefPolicySupplier<TAction, TObservation, TState, PaperPolicyRecord> {
+    implements OuterDefPolicySupplier<TAction, TObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicySupplierImpl.class.getName());
     private static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
@@ -71,7 +71,7 @@ public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TOb
     }
 
     @Override
-    public Policy<TAction, TObservation, TState, PaperPolicyRecord> apply(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
+    public Policy<TAction, TObservation, TState> apply(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
         switch(policyMode) {
             case INFERENCE:
                 return createPolicy(initialState, random, policyId);
@@ -81,7 +81,7 @@ public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TOb
         }
     }
 
-    protected Policy<TAction, TObservation, TState, PaperPolicyRecord> createPolicy(StateWrapper<TAction, TObservation, TState> initialState, SplittableRandom random, int policyId) {
+    protected Policy<TAction, TObservation, TState> createPolicy(StateWrapper<TAction, TObservation, TState> initialState, SplittableRandom random, int policyId) {
         if(DEBUG_ENABLED) {
             logger.debug("Initialized INFERENCE policy. AllowedRisk: [{}]", totalRiskAllowedInference);
         }
@@ -101,7 +101,7 @@ public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TOb
                 strategiesProvider));
     }
 
-    protected Policy<TAction, TObservation, TState, PaperPolicyRecord> createPolicy(StateWrapper<TAction, TObservation, TState> initialState, SplittableRandom random, int policyId, double explorationConstant, double temperature, double totalRiskAllowed) {
+    protected Policy<TAction, TObservation, TState> createPolicy(StateWrapper<TAction, TObservation, TState> initialState, SplittableRandom random, int policyId, double explorationConstant, double temperature, double totalRiskAllowed) {
         if(DEBUG_ENABLED) {
             logger.debug("Initialized TRAINING policy. Exploration constant: [{}], Temperature: [{}], Risk: [{}]", explorationConstant, temperature, totalRiskAllowed);
         }

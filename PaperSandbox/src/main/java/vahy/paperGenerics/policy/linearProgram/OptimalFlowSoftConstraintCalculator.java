@@ -36,7 +36,7 @@ public class OptimalFlowSoftConstraintCalculator<
         var node = element.node;
         var inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var metadata = node.getSearchNodeMetadata();
-        var nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : 0.0;
+        var nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
         totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.closestParentFlow);
         double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
         double expectedReward = metadata.getExpectedReward()[inGameEntityId];

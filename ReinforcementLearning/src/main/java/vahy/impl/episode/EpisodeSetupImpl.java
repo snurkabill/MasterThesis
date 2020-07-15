@@ -6,21 +6,20 @@ import vahy.api.episode.RegisteredPolicy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 
 import java.util.List;
 
-public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord>
-    implements EpisodeSetup<TAction, TObservation, TState, TPolicyRecord> {
+public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+    implements EpisodeSetup<TAction, TObservation, TState> {
 
     private final TState initialState;
     private final PolicyIdTranslationMap policyIdTranslationMap;
-    private final List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> registeredPolicyList;
+    private final List<RegisteredPolicy<TAction, TObservation, TState>> registeredPolicyList;
     private final int stepCountLimit;
 
     public EpisodeSetupImpl(TState initialState,
                             PolicyIdTranslationMap policyIdTranslationMap,
-                            List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> registeredPolicyList,
+                            List<RegisteredPolicy<TAction, TObservation, TState>> registeredPolicyList,
                             int stepCountLimit) {
         checkIfSorted(registeredPolicyList);
         this.initialState = initialState;
@@ -29,7 +28,7 @@ public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservati
         this.stepCountLimit = stepCountLimit;
     }
 
-    private void checkIfSorted(List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> registeredPolicyList) {
+    private void checkIfSorted(List<RegisteredPolicy<TAction, TObservation, TState>> registeredPolicyList) {
         for (int i = 0; i < registeredPolicyList.size(); i++) {
             if(i != registeredPolicyList.get(i).getPolicyId()) {
                 throw new IllegalStateException("Registered policies are in wrong order.");
@@ -47,7 +46,7 @@ public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservati
     }
 
     @Override
-    public List<RegisteredPolicy<TAction, TObservation, TState, TPolicyRecord>> getRegisteredPolicyList() {
+    public List<RegisteredPolicy<TAction, TObservation, TState>> getRegisteredPolicyList() {
         return registeredPolicyList;
     }
 

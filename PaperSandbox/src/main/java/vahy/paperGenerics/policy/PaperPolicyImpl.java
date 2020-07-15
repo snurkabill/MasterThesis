@@ -18,7 +18,7 @@ public class PaperPolicyImpl<
     TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TObservation, TSearchNodeMetadata, TState, PaperPolicyRecord> {
+    extends AbstractTreeSearchPolicy<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicyImpl.class.getName());
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();

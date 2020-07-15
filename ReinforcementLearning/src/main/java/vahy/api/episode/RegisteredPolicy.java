@@ -4,19 +4,18 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.Policy;
-import vahy.api.policy.PolicyRecord;
 
-public class RegisteredPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord> {
+public class RegisteredPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
 
-    private final Policy<TAction, TObservation, TState, TPolicyRecord> policy;
+    private final Policy<TAction, TObservation, TState> policy;
     private final int inGameEntityId;
 
-    public RegisteredPolicy(Policy<TAction, TObservation, TState, TPolicyRecord> policy, int inGameEntityId) {
+    public RegisteredPolicy(Policy<TAction, TObservation, TState> policy, int inGameEntityId) {
         this.policy = policy;
         this.inGameEntityId = inGameEntityId;
     }
 
-    public Policy<TAction, TObservation, TState, TPolicyRecord> getPolicy() {
+    public Policy<TAction, TObservation, TState> getPolicy() {
         return policy;
     }
 

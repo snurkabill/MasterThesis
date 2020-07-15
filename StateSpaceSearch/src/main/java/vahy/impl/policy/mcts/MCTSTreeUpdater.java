@@ -25,7 +25,7 @@ public class MCTSTreeUpdater<
         var nodeMetadata = expandedNode.getSearchNodeMetadata();
         var cumulativeReward = nodeMetadata.getCumulativeReward();
         double[] estimatedLeafReward = stateWrapper.isFinalState() ?
-            DoubleVectorRewardAggregator.aggregate(DoubleVectorRewardAggregator.emptyReward(nodeMetadata.getGainedReward().length), cumulativeReward) :
+            cumulativeReward :
             DoubleVectorRewardAggregator.aggregate(nodeMetadata.getExpectedReward(), cumulativeReward);
 
         while (!expandedNode.isRoot()) {
@@ -42,18 +42,20 @@ public class MCTSTreeUpdater<
     private void updateNode(SearchNode<TAction, TObservation, MCTSMetadata, TState> expandedNode, double[] estimatedLeafReward) {
         MCTSMetadata searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
+        var expectedRewards = searchNodeMetadata.getExpectedReward();
         var totalEstimations = searchNodeMetadata.getSumOfTotalEstimations();
         if(searchNodeMetadata.getVisitCounter() == 1) {
-            System.arraycopy(estimatedLeafReward, 0, totalEstimations, 0, estimatedLeafReward.length);
+            System.arraycopy(expectedRewards, 0, totalEstimations, 0, estimatedLeafReward.length);
         } else {
+            var cumulativeRewards = searchNodeMetadata.getCumulativeReward();
             for (int i = 0; i < totalEstimations.length; i++) {
-                totalEstimations[i] += estimatedLeafReward[i];
+                totalEstimations[i] += estimatedLeafReward[i] - cumulativeRewards[i];
             }
-        }
-        var expectedRewards = searchNodeMetadata.getExpectedReward();
-        var visitCounter = searchNodeMetadata.getVisitCounter();
-        for (int i = 0; i < expectedRewards.length; i++) {
-            expectedRewards[i] = totalEstimations[i] / visitCounter;
+
+            var visitCounter = searchNodeMetadata.getVisitCounter();
+            for (int i = 0; i < expectedRewards.length; i++) {
+                expectedRewards[i] = totalEstimations[i] / visitCounter;
+            }
         }
     }
 }

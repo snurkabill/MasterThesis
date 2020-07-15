@@ -4,7 +4,6 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.learning.trainer.EpisodeDataMaker;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
@@ -15,8 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class ValueMultiPolicyDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>, TPolicyRecord extends PolicyRecord>
-    implements EpisodeDataMaker<TAction, DoubleVector, TState, TPolicyRecord> {
+public class ValueMultiPolicyDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>>
+    implements EpisodeDataMaker<TAction, DoubleVector, TState> {
 
     private final double discountFactor;
     private final Set<Integer> allowedPolicyId;
@@ -27,7 +26,7 @@ public class ValueMultiPolicyDataMaker<TAction extends Enum<TAction> & Action, T
     }
 
     @Override
-    public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState, TPolicyRecord> episodeResults) {
+    public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState> episodeResults) {
         var episodeHistory = episodeResults.getEpisodeHistory();
         var translationMap = episodeResults.getPolicyIdTranslationMap();
 

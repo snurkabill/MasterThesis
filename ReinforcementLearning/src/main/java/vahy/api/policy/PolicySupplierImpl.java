@@ -7,15 +7,15 @@ import vahy.api.model.observation.Observation;
 
 import java.util.SplittableRandom;
 
-public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>, TPolicyRecord extends PolicyRecord>
-    implements PolicySupplier<TAction, TObservation, TState, TPolicyRecord> {
+public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+    implements PolicySupplier<TAction, TObservation, TState> {
 
     private final int policyId;
     private final int policyCategoryId;
     private final SplittableRandom random;
-    private final OuterDefPolicySupplier<TAction, TObservation, TState, TPolicyRecord> outerDefPolicySupplier;
+    private final OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier;
 
-    public PolicySupplierImpl(int policyId, int policyCategoryId, SplittableRandom random, OuterDefPolicySupplier<TAction, TObservation, TState, TPolicyRecord> outerDefPolicySupplier) {
+    public PolicySupplierImpl(int policyId, int policyCategoryId, SplittableRandom random, OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier) {
         this.policyId = policyId;
         this.policyCategoryId = policyCategoryId;
         this.random = random;
@@ -33,7 +33,7 @@ public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObserva
     }
 
     @Override
-    public Policy<TAction, TObservation, TState, TPolicyRecord> initializePolicy(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode) {
+    public Policy<TAction, TObservation, TState> initializePolicy(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode) {
         return outerDefPolicySupplier.apply(initialState, policyMode, policyId, random.split());
     }
 

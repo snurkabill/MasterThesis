@@ -5,7 +5,6 @@ import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.ExploringPolicy;
-import vahy.api.policy.PolicyRecord;
 import vahy.api.search.node.NodeMetadata;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.tree.treeUpdateCondition.TreeUpdateCondition;
@@ -18,9 +17,8 @@ public abstract class AbstractTreeSearchPolicy<
         TAction extends Enum<TAction> & Action,
         TObservation extends Observation,
         TSearchNodeMetadata extends NodeMetadata,
-        TState extends State<TAction, TObservation, TState>,
-        TPolicyRecord extends PolicyRecord>
-    extends ExploringPolicy<TAction, TObservation, TState, TPolicyRecord> {
+        TState extends State<TAction, TObservation, TState>>
+    extends ExploringPolicy<TAction, TObservation, TState> {
 
     private final TreeUpdateCondition treeUpdateCondition;
 
@@ -83,7 +81,7 @@ public abstract class AbstractTreeSearchPolicy<
 
     protected void checkStateRoot(StateWrapper<TAction, TObservation, TState> gameState) {
         if (!searchTree.getRoot().getStateWrapper().wrappedStatesEquals(gameState)) {
-            throw new IllegalStateException("Tree PaperPolicy has invalid state in root or gameState argument itself is invalid. Possible issues: " + System.lineSeparator() +
+            throw new IllegalStateException("Tree Policy has invalid state in root or gameState argument itself is invalid. Possible issues: " + System.lineSeparator() +
                 "1. missing or invalid equals method on state implementation. Proper equals method does not have to take into account static parts of state" + System.lineSeparator() +
                 "2. wrong logic in applying actons on states, leading in inconsistency" + System.lineSeparator() +
                 "Expected state as string: " + System.lineSeparator() + searchTree.getRoot().getStateWrapper().getReadableStringRepresentation() + System.lineSeparator() +

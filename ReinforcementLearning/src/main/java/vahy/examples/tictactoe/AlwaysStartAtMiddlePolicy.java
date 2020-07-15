@@ -8,7 +8,7 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 
 import java.util.SplittableRandom;
 
-public class AlwaysStartAtMiddlePolicy extends RandomizedPolicy<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> {
+public class AlwaysStartAtMiddlePolicy extends RandomizedPolicy<TicTacToeAction, DoubleVector, TicTacToeState> {
 
     private boolean isMiddleAlreadyPlayed = false;
     private final UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState> randomWalkPolicy;

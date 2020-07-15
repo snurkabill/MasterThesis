@@ -13,7 +13,6 @@ import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecordBase;
 import vahy.examples.tictactoe.AlwaysStartAtCornerPolicy;
 import vahy.examples.tictactoe.AlwaysStartAtMiddlePolicy;
 import vahy.examples.tictactoe.TicTacToeAction;
@@ -47,7 +46,7 @@ public class TicTacToeTest {
 
     public static final Logger ticTacToeLogger = LoggerFactory.getLogger(TicTacToeTest.class);
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createUniformPolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createUniformPolicy(int policyId_) {
         return new PolicyDefinition<>(
             policyId_,
             1,
@@ -56,7 +55,7 @@ public class TicTacToeTest {
         );
     }
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createAtMiddlePolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createAtMiddlePolicy(int policyId_) {
         return new PolicyDefinition<>(
             policyId_,
             1,
@@ -65,7 +64,7 @@ public class TicTacToeTest {
         );
     }
 
-    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> createAtCornerPolicy(int policyId_) {
+    private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createAtCornerPolicy(int policyId_) {
         return new PolicyDefinition<>(
             policyId_,
             1,
@@ -108,8 +107,8 @@ public class TicTacToeTest {
 
     @ParameterizedTest(name = "Policy_0 {0} vs policy_1 {1} with expected diff: {2} and seed {3}")
     @MethodSource("nonTrainableParams")
-    public void nonTrainablePoliciesTest(PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> playerOne,
-                                         PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> playerTwo,
+    public void nonTrainablePoliciesTest(PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> playerOne,
+                                         PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> playerTwo,
                                          double maximalExpectedPlayerOneDiffFromZeroBound,
                                          long seed) {
 
@@ -131,7 +130,7 @@ public class TicTacToeTest {
 
         var policyArgumentsList = List.of(playerOne, playerTwo);
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -153,7 +152,7 @@ public class TicTacToeTest {
 
     @ParameterizedTest(name = "Policy_0 {0} powered by data aggregator {1} with expected diff: {2} and seed {3}")
     @MethodSource("trainableParams")
-    public void trainablePolicyTest(PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase> playerOne,
+    public void trainablePolicyTest(PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> playerOne,
                                     double maximalPlayerOneScoreBound,
                                     Supplier<DataAggregator> dataAggregatorSupplier,
                                     long seed) {
@@ -199,7 +198,7 @@ public class TicTacToeTest {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState, PolicyRecordBase>(discountFactor, 1);
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             1,
@@ -208,7 +207,7 @@ public class TicTacToeTest {
             dataAggregatorSupplier.get()
         );
 
-        var playerTwo = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState, PolicyRecordBase>(
+        var playerTwo = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
             1,
             1,
             (initialState, policyMode, policyId, random) -> {
@@ -225,7 +224,7 @@ public class TicTacToeTest {
             playerTwo
         );
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, PolicyRecordBase, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

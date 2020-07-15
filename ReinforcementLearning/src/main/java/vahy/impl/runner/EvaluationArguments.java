@@ -10,7 +10,6 @@ import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -19,7 +18,6 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private final String runName;
@@ -30,10 +28,10 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
 
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
     private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
-    private final EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory;
-    private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator;
-    private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
-    private final List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> environmentPolicyArgumemntList;
+    private final EpisodeResultsFactory<TAction, TObservation, TState> episodeResultsFactory;
+    private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> episodeStatisticsCalculator;
+    private final EpisodeWriter<TAction, TObservation, TState> episodeWriter;
+    private final List<PolicyDefinition<TAction, TObservation, TState>> environmentPolicyArgumemntList;
 
     public EvaluationArguments(String runName,
                                TConfig problemConfig,
@@ -41,10 +39,10 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
                                SplittableRandom finalMasterRandom,
                                InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                                StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
-                               EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> episodeResultsFactory,
-                               EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> episodeStatisticsCalculator,
-                               EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
-                               List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> environmentPolicyArgumemntList)
+                               EpisodeResultsFactory<TAction, TObservation, TState> episodeResultsFactory,
+                               EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> episodeStatisticsCalculator,
+                               EpisodeWriter<TAction, TObservation, TState> episodeWriter,
+                               List<PolicyDefinition<TAction, TObservation, TState>> environmentPolicyArgumemntList)
     {
         this.runName = runName;
         this.problemConfig = problemConfig;
@@ -78,19 +76,19 @@ public class EvaluationArguments<TConfig extends ProblemConfig,
         return stateStateWrapperInitializer;
     }
 
-    public EpisodeResultsFactory<TAction, TObservation, TState, TPolicyRecord> getEpisodeResultsFactory() {
+    public EpisodeResultsFactory<TAction, TObservation, TState> getEpisodeResultsFactory() {
         return episodeResultsFactory;
     }
 
-    public EpisodeStatisticsCalculator<TAction, TObservation, TState, TPolicyRecord, TStatistics> getEpisodeStatisticsCalculator() {
+    public EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> getEpisodeStatisticsCalculator() {
         return episodeStatisticsCalculator;
     }
 
-    public EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> getEpisodeWriter() {
+    public EpisodeWriter<TAction, TObservation, TState> getEpisodeWriter() {
         return episodeWriter;
     }
 
-    public List<PolicyDefinition<TAction, TObservation, TState, TPolicyRecord>> getEnvironmentPolicyArgumemntList() {
+    public List<PolicyDefinition<TAction, TObservation, TState>> getEnvironmentPolicyArgumemntList() {
         return environmentPolicyArgumemntList;
     }
 

@@ -35,7 +35,7 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
         var nodeMetadata = expandedNode.getSearchNodeMetadata();
         var cumulativeReward = nodeMetadata.getCumulativeReward();
         double[] estimatedLeafReward = stateWrapper.isFinalState() ?
-            DoubleVectorRewardAggregator.aggregate(DoubleVectorRewardAggregator.emptyReward(nodeMetadata.getCumulativeReward().length), cumulativeReward) :
+            cumulativeReward :
             DoubleVectorRewardAggregator.aggregate(nodeMetadata.getExpectedReward(), cumulativeReward);
 
         double[] estimatedLeafRisk = resolveRisk(expandedNode);
@@ -54,25 +54,26 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
     private void updateNode(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode, double[] estimatedLeafReward, double[] estimatedLeafRisk) {
         PaperMetadata<TAction> searchNodeMetadata = expandedNode.getSearchNodeMetadata();
         searchNodeMetadata.increaseVisitCounter();
+
+        var expectedRewards = searchNodeMetadata.getExpectedReward();
         var totalRewardEstimations = searchNodeMetadata.getSumOfTotalEstimations();
         var totalRiskEstimations = searchNodeMetadata.getSumOfRisk();
-        var cumulativeRewards = searchNodeMetadata.getCumulativeReward();
 
         if(searchNodeMetadata.getVisitCounter() == 1) {
-            System.arraycopy(estimatedLeafReward, 0, totalRewardEstimations, 0, estimatedLeafReward.length);
+            System.arraycopy(expectedRewards, 0, totalRewardEstimations, 0, estimatedLeafReward.length);
             System.arraycopy(estimatedLeafRisk, 0, totalRiskEstimations, 0, estimatedLeafReward.length);
         } else {
+            var cumulativeRewards = searchNodeMetadata.getCumulativeReward();
             for (int i = 0; i < totalRewardEstimations.length; i++) {
                 totalRewardEstimations[i] += estimatedLeafReward[i] - cumulativeRewards[i];
                 totalRiskEstimations[i] += estimatedLeafRisk[i];
             }
-        }
-        var expectedRewards = searchNodeMetadata.getExpectedReward();
-        var expectedRisks = searchNodeMetadata.getExpectedRisk();
-        var visitCounter = searchNodeMetadata.getVisitCounter();
-        for (int i = 0; i < expectedRewards.length; i++) {
-            expectedRewards[i] = totalRewardEstimations[i] / visitCounter;
-            expectedRisks[i] = totalRiskEstimations[i] / visitCounter;
+            var expectedRisks = searchNodeMetadata.getExpectedRisk();
+            var visitCounter = searchNodeMetadata.getVisitCounter();
+            for (int i = 0; i < expectedRewards.length; i++) {
+                expectedRewards[i] = totalRewardEstimations[i] / visitCounter;
+                expectedRisks[i] = totalRiskEstimations[i] / visitCounter;
+            }
         }
     }
 }

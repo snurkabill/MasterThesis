@@ -29,7 +29,6 @@ import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.paperGenerics.policy.PaperPolicyImpl;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 import vahy.paperGenerics.policy.RiskAverseSearchTree;
 import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
@@ -55,7 +54,7 @@ import java.util.stream.Stream;
 
 public class SHRiskTest {
 
-    private PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState, PaperPolicyRecord> getTrainingSetup(int playerId, int totalEntityCount, int totalActionCount) {
+    private PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState> getTrainingSetup(int playerId, int totalEntityCount, int totalActionCount) {
         double discountFactor = 1;
 
         var defaultPrediction = new double[totalEntityCount * 2 + totalActionCount];
@@ -65,10 +64,10 @@ public class SHRiskTest {
         }
 
         var trainablePredictor = new PaperDataTablePredictorWithLr(defaultPrediction, 0.25, totalActionCount, totalEntityCount);
-        var episodeDataMaker = new PaperEpisodeDataMaker_V1<SHAction, SHRiskState, PaperPolicyRecord>(discountFactor, totalActionCount, playerId);
+        var episodeDataMaker = new PaperEpisodeDataMaker_V1<SHAction, SHRiskState>(discountFactor, totalActionCount, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
-        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState, PaperPolicyRecord>(
+        var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState>(
             playerId,
             trainablePredictor,
             episodeDataMaker,
@@ -79,7 +78,7 @@ public class SHRiskTest {
         return predictorTrainingSetup;
     }
 
-    private PolicyDefinition<SHAction, DoubleVector, SHRiskState, PaperPolicyRecord> getPlayer(ProblemConfig config, int treeUpdateCount, Supplier<Double> temperatureSupplier, double riskAllowed) {
+    private PolicyDefinition<SHAction, DoubleVector, SHRiskState> getPlayer(ProblemConfig config, int treeUpdateCount, Supplier<Double> temperatureSupplier, double riskAllowed) {
 
         var playerId = 1;
         var totalEntityCount = 2;
@@ -112,7 +111,7 @@ public class SHRiskTest {
         var cpuctParameter = 1.0;
 
 
-        return new PolicyDefinition<SHAction, DoubleVector, SHRiskState, PaperPolicyRecord>(
+        return new PolicyDefinition<SHAction, DoubleVector, SHRiskState>(
             playerId,
             1,
             (initialState_, policyMode_, policyId_, random_) -> {
@@ -235,22 +234,26 @@ public class SHRiskTest {
             Path.of("TEST_PATH"),
             null);
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(10, 50);
 
-        Supplier<Double> temperatureSupplier = new Supplier<>() {
-            private int callCount = 0;
-            @Override
-            public Double get() {
-                callCount++;
-                var x = Math.exp(-callCount / 5000.0);
-                return x;
-            }
-        };
+//        Supplier<Double> temperatureSupplier = new Supplier<>() {
+//            private int callCount = 0;
+//            @Override
+//            public Double get() {
+//                callCount++;
+//                var x = Math.exp(-callCount / 5000.0);
+//                return x;
+//            }
+//        };
+
+
+        Supplier<Double> temperatureSupplier = () -> 0.7;
+
 
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
         var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PaperPolicyRecord, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, EpisodeStatisticsBase>()
             .setRoundName("SH03Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -306,7 +309,7 @@ public class SHRiskTest {
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
         var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PaperPolicyRecord, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, EpisodeStatisticsBase>()
             .setRoundName("SH05Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

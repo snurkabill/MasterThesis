@@ -8,7 +8,6 @@ import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.learning.trainer.Trainer;
 import vahy.utils.ImmutableTuple;
 
@@ -20,21 +19,20 @@ public class PolicyTrainingCycle<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
     TStatistics extends EpisodeStatistics> {
 
     private static Logger logger = LoggerFactory.getLogger(PolicyTrainingCycle.class.getName());
 
     private final SystemConfig systemConfig;
     private final CommonAlgorithmConfig algorithmConfig;
-    private final EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter;
-    private final Trainer<TAction, TObservation, TState, TPolicyRecord, TStatistics> trainer;
+    private final EpisodeWriter<TAction, TObservation, TState> episodeWriter;
+    private final Trainer<TAction, TObservation, TState, TStatistics> trainer;
 
 
     public PolicyTrainingCycle(SystemConfig systemConfig,
                                CommonAlgorithmConfig algorithmConfig,
-                               EpisodeWriter<TAction, TObservation, TState, TPolicyRecord> episodeWriter,
-                               Trainer<TAction, TObservation, TState, TPolicyRecord, TStatistics> trainer) {
+                               EpisodeWriter<TAction, TObservation, TState> episodeWriter,
+                               Trainer<TAction, TObservation, TState, TStatistics> trainer) {
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
         this.episodeWriter = episodeWriter;

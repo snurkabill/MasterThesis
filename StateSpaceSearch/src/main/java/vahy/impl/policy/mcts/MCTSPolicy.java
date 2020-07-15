@@ -17,7 +17,7 @@ public class MCTSPolicy<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    extends AbstractTreeSearchPolicy<TAction, TObservation, MCTSMetadata, TState, PolicyRecordBase> {
+    extends AbstractTreeSearchPolicy<TAction, TObservation, MCTSMetadata, TState> {
 
     public MCTSPolicy(int policyId, SplittableRandom random, double explorationConstant, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, MCTSMetadata, TState> searchTree) {
         super(policyId, random, explorationConstant, treeUpdateCondition, searchTree);
