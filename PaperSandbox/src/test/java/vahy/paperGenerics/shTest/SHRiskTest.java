@@ -234,21 +234,17 @@ public class SHRiskTest {
             Path.of("TEST_PATH"),
             null);
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(10, 50);
+        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
 
-//        Supplier<Double> temperatureSupplier = new Supplier<>() {
-//            private int callCount = 0;
-//            @Override
-//            public Double get() {
-//                callCount++;
-//                var x = Math.exp(-callCount / 5000.0);
-//                return x;
-//            }
-//        };
-
-
-        Supplier<Double> temperatureSupplier = () -> 0.7;
-
+        Supplier<Double> temperatureSupplier = new Supplier<>() {
+            private int callCount = 0;
+            @Override
+            public Double get() {
+                callCount++;
+                var x = Math.exp(-callCount / 5000.0);
+                return x;
+            }
+        };
 
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
         var policyArgumentsList = List.of(player);
