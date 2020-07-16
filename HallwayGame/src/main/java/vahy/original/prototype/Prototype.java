@@ -78,7 +78,7 @@ public class Prototype {
             }
         };
 
-        EpisodeDataMaker<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord> dataMaker = new PaperEpisodeDataMaker_V1<>(1.0, 1);
+        EpisodeDataMaker<HallwayAction, DoubleVector, HallwayStateImpl> dataMaker = new PaperEpisodeDataMaker_V1<>(1.0, 1);
         var predictor = new DataTableDistributionPredictorWithLr(new double[] {0.0, 0.0, 0.0, 0.0, 0.0}, 0.001);
 
         PredictorTrainingSetup<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord> predictorSetup = new PredictorTrainingSetup<HallwayAction, DoubleVector, HallwayStateImpl, PaperPolicyRecord>(

@@ -1,6 +1,9 @@
 package vahy.original.environment.config;
 
+import vahy.api.episode.PolicyCategoryInfo;
+import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.ProblemConfig;
+import vahy.impl.RoundBuilder;
 import vahy.original.environment.state.StateRepresentation;
 import vahy.original.game.cell.Cell;
 
@@ -25,7 +28,9 @@ public class GameConfig extends ProblemConfig {
                       StateRepresentation stateRepresentation,
                       String gameStringRepresentation,
                       List<List<Cell>> gameMatrix) {
-        super(maximalStepCountBound, isModelKnown);
+        super(maximalStepCountBound, isModelKnown, 2, 2, List.of(
+            new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID, 1),
+            new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID + 1, 1)), PolicyShuffleStrategy.NO_SHUFFLE);
         this.goalReward = goalReward;
         this.stepPenalty = stepPenalty;
         this.trapProbability = trapProbability;
