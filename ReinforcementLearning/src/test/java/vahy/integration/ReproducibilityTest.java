@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import vahy.AbstractConvergenceTest;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -36,7 +37,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class ReproducibilityTest {
+public class ReproducibilityTest extends AbstractConvergenceTest {
 
     private static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createUniformPolicy(int policyId_) {
         return new PolicyDefinition<>(
@@ -107,7 +108,7 @@ public class ReproducibilityTest {
         var systemConfig = new SystemConfig(
             seed,
             false,
-            Runtime.getRuntime().availableProcessors() - 1,
+            TEST_THREAD_COUNT,
             false,
             1_000,
             0,
@@ -178,7 +179,7 @@ public class ReproducibilityTest {
             double result = calculateResults(playerOne.get(), playerTwo.get(), seed);
             for (int i = 0; i < trialCount; i++) {
                 double tmp = calculateResults(playerOne.get(), playerTwo.get(), seed);
-                assertEquals(result, tmp, Math.pow(10, -10));
+                assertEquals(result, tmp, TEST_CONVERGENCE_ASSERT_TOLERANCE);
             }
             list.add(result);
         }
