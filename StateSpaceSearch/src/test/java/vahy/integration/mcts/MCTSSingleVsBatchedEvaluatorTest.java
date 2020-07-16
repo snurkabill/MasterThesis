@@ -53,7 +53,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
             1,
             () -> 0.2,
             1,
-            30,
+            10,
             predictorTrainingSetup,
             batchSize
         );
@@ -69,7 +69,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
             .trapProbability(0.1)
             .buildConfig();
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(50, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(50, 50);
 
         var systemConfig = new SystemConfig(
             seed,
