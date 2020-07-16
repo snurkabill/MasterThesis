@@ -206,7 +206,7 @@ public class Example_random_01 {
         );
 
 
-        var mctsSupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, bomBerManConfig.isModelKnown());
+        var mctsSupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, bomBerManConfig);
         return mctsSupplier.getPolicyDefinition(policyId, 1, () -> 0.1, cpuct, treeExpansionCount, predictorTrainingSetupMCTSEval_1, batchEvalSize);
     }
 

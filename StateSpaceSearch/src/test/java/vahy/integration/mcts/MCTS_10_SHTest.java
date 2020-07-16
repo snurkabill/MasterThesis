@@ -57,7 +57,7 @@ public class MCTS_10_SHTest {
 
         Supplier<Double> explorationSupplier = () -> 0.5;
 
-        playerSupplier = new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2, true).getPolicyDefinition(
+        playerSupplier = new MCTSPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, 2, null).getPolicyDefinition(
             playerId,
             1,
             explorationSupplier,

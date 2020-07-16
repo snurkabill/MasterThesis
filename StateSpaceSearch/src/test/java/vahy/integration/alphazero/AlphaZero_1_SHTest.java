@@ -1,4 +1,4 @@
-package vahy.integration.mcts;
+package vahy.integration.alphazero;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,10 +31,9 @@ import vahy.utils.StreamUtils;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class AlphaZero_10_SHTest {
+public class AlphaZero_1_SHTest {
 
     private PolicyDefinition<SHAction, DoubleVector, SHState> getPlayer(ProblemConfig config) {
 
@@ -60,25 +59,12 @@ public class AlphaZero_10_SHTest {
             dataAggregator
         );
 
-
-        Supplier<Double> explorationSupplier = new Supplier<Double>() {
-            private int callCount = 0;
-            @Override
-            public Double get() {
-                callCount++;
-                return Math.exp(-callCount / 10000.0);
-            }
-        };
-
-        Supplier<Double> explorationSupplier2 = () -> 0.5;
-
-
         return new AlphaZeroPolicyDefinitionSupplier<SHAction, SHState>(SHAction.class, totalEntityCount, config).getPolicyDefinition(
             playerId,
             1,
             1,
-            explorationSupplier2,
-            10,
+            () -> 0.5,
+            1,
             predictorTrainingSetup
         );
     }
@@ -88,7 +74,7 @@ public class AlphaZero_10_SHTest {
             Stream.of(
                 Arguments.of(0.0, 80.0),
                 Arguments.of(1.0, 60.0),
-                Arguments.of(0.05, 74.0)
+                Arguments.of(0.05, 75.0)
             ),
             StreamUtils.getSeedStream(5)
         );
@@ -101,7 +87,7 @@ public class AlphaZero_10_SHTest {
                 Arguments.of(1.0, 288.0),
                 Arguments.of(0.5, 288.0)
             ),
-            StreamUtils.getSeedStream(4567, 5)
+            StreamUtils.getSeedStream(947, 5)
         );
     }
 
@@ -110,7 +96,7 @@ public class AlphaZero_10_SHTest {
             Stream.of(
                 Arguments.of(0.0, 600.0 - 120),
                 Arguments.of(1.0, 600.0 - 240),
-                Arguments.of(0.1, 335.0)
+                Arguments.of(0.1, 300.0)
             ),
             StreamUtils.getSeedStream(5)
         );
@@ -179,7 +165,7 @@ public class AlphaZero_10_SHTest {
             .trapProbability(trapProbability)
             .buildConfig();
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(50, 50);
+        var algorithmConfig = new CommonAlgorithmConfigBase(50, 100);
 
         var systemConfig = new SystemConfig(
             seed,
@@ -238,7 +224,7 @@ public class AlphaZero_10_SHTest {
 //            Path.of("TEST_PATH"),
 //            null);
 //
-//        var algorithmConfig = new CommonAlgorithmConfigBase(500, 100);
+//        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 //
 //        var player = getPlayer(config);
 //        var policyArgumentsList = List.of(player);

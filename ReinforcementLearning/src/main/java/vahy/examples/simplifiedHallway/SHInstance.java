@@ -3,6 +3,7 @@ package vahy.examples.simplifiedHallway;
 public enum SHInstance {
 
     TEST_00("examples/simplifiedHalllway/test/benchmark_00.txt"),
+    TEST_03("examples/simplifiedHalllway/test/benchmark_03.txt"),
 
 
     DEMO_01("examples/simplifiedHalllway/benchmark/hallway_demo0.txt"),

@@ -22,7 +22,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import java.util.EnumMap;
 import java.util.SplittableRandom;
 
-public class SearchTreeBuildTest {
+public class SearchTreeUpdateSimpleTest {
 
     private MCTSMetadataFactory<SHAction, DoubleVector, SHState> metadataFactory;
     private SearchNodeBaseFactoryImpl<SHAction, DoubleVector, MCTSMetadata, SHState> nodeFactory;

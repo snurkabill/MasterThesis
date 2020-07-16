@@ -19,8 +19,6 @@ import java.util.List;
 
 public abstract class AbstractSHConvergenceTest extends AbstractConvergenceTest {
 
-    protected abstract PolicyDefinition<SHAction, DoubleVector, SHState> getPolicyDefinition();
-
     protected RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase> getRoundBuilder(SHConfig config,
                                                                                                CommonAlgorithmConfigBase algorithmConfig,
                                                                                                SystemConfig systemConfig,

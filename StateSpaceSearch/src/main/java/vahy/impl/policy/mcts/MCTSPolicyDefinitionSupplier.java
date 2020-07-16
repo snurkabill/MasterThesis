@@ -1,6 +1,7 @@
 package vahy.impl.policy.mcts;
 
 import org.jetbrains.annotations.NotNull;
+import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.OuterDefPolicySupplier;
@@ -27,12 +28,12 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
     private final MCTSMetadataFactory<TAction, DoubleVector, TState> metadataFactory;
     private final boolean isModelKnown;
 
-    public MCTSPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, boolean isModelKnown) {
+    public MCTSPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, ProblemConfig problemConfig) {
         this.actionClass = actionClass;
         this.enumConstantsLength = actionClass.getEnumConstants().length;
         this.metadataFactory = new MCTSMetadataFactory<>(inGameEntityCount);
         this.searchNodeFactory = new SearchNodeBaseFactoryImpl<>(actionClass, metadataFactory);
-        this.isModelKnown = isModelKnown;
+        this.isModelKnown = problemConfig.isModelKnown();
     }
 
     public PolicyDefinition<TAction, DoubleVector, TState> getPolicyDefinition(int policyId, int categoryId, double cpuctParameter, int treeExpansionCountPerStep, double discountFactor, int rolloutCount) {

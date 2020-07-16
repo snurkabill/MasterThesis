@@ -17,7 +17,6 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictorWithLr;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.integration.SH.AbstractSHConvergenceTest;
 import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
 
@@ -28,8 +27,7 @@ import java.util.stream.Stream;
 
 public class ValuePolicySH03Test extends AbstractSHConvergenceTest {
 
-    @Override
-    protected PolicyDefinition<SHAction, DoubleVector, SHState> getPolicyDefinition() {
+    private PolicyDefinition<SHAction, DoubleVector, SHState> getPolicyDefinition() {
         var playerId = 1;
         double discountFactor = 1;
 
