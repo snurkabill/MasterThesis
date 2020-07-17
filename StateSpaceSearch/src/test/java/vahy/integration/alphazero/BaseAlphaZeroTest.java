@@ -228,7 +228,7 @@ public class BaseAlphaZeroTest {
 ////        var trainablePredictor_alpha_zero = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount),
 //        var trainablePredictor_alpha_zero_2 = new TrainableApproximator(tfModel);
 //        var dataAggregator_first_visit = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-////        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+////        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 //
 //        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,
@@ -372,7 +372,7 @@ public class BaseAlphaZeroTest {
 ////        var trainablePredictor_alpha_zero = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount),
 //        var trainablePredictor_alpha_zero_2 = new TrainableApproximator(tfModel);
 //        var dataAggregator_first_visit = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-////        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+////        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 //
 //        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,

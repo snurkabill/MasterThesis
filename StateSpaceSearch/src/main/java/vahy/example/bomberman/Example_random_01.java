@@ -20,7 +20,6 @@ import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
@@ -33,14 +32,12 @@ import vahy.impl.runner.PolicyDefinition;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class Example_random_01 {
+
+    private Example_random_01() {}
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
 
@@ -98,7 +95,6 @@ public class Example_random_01 {
 
         var actionClass = BomberManAction.class;
         var discountFactor = 1.0;
-        var rolloutCount = 1;
         var treeExpansionCount = 30;
         var cpuct = 1.0;
 
@@ -132,11 +128,11 @@ public class Example_random_01 {
 
 
 
-        var randomPolicyList = IntStream.of(1, 2, 3, 4).mapToObj(x -> new PolicyDefinition<BomberManAction, DoubleVector, BomberManState>(
-            environmentPolicyCount + x,
-            1,
-            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<BomberManAction, DoubleVector, BomberManState>(random, environmentPolicyCount + x),
-            new ArrayList<>())).collect(Collectors.toList());
+//        var randomPolicyList = IntStream.of(1, 2, 3, 4).mapToObj(x -> new PolicyDefinition<BomberManAction, DoubleVector, BomberManState>(
+//            environmentPolicyCount + x,
+//            1,
+//            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<BomberManAction, DoubleVector, BomberManState>(random, environmentPolicyCount + x),
+//            new ArrayList<>())).collect(Collectors.toList());
 
 
         var policyList = List.of(valuePolicy, mctsPlayer_1, alphaGoPolicy);
@@ -147,7 +143,7 @@ public class Example_random_01 {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((BomberManConfig, splittableRandom) -> policyMode -> (new BomberManInstanceInitializer(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
@@ -197,7 +193,7 @@ public class Example_random_01 {
 
         var trainablePredictorMCTSEval_1 = new TrainableApproximator(tfModel);
         var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId);
-        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             policyId,
             trainablePredictorMCTSEval_1,
@@ -225,7 +221,7 @@ public class Example_random_01 {
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction_alpha = new double[totalEntityCount + totalActionCount];
         for (int i = totalEntityCount; i < defaultPrediction_alpha.length; i++) {
-            defaultPrediction_alpha[i] = 1.0 / (totalActionCount);
+            defaultPrediction_alpha[i] = 1.0 / totalActionCount;
         }
 
         var path = Paths.get("PythonScripts", "tensorflow_models", "alphazero", "create_alphazero_prototype.py");
@@ -244,7 +240,7 @@ public class Example_random_01 {
 
         var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(tfModel);
         var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(policyId, totalActionCount, discountFactor);
-        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
             policyId,
@@ -275,7 +271,7 @@ public class Example_random_01 {
 
         var trainablePredictor2 = new TrainableApproximator(tfModel_value);
         var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(1.0, policyId);
-        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(
             policyId,
