@@ -97,7 +97,7 @@ public class AlphaZeroSH05Test extends AbstractSHConvergenceTest {
             Path.of("TEST_PATH"),
             null);
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(100, 150);
 
         var playerSupplier = getPolicyDefinition(config, treeUpdateCount);
         var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, playerSupplier);
