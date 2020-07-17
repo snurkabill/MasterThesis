@@ -2,32 +2,28 @@ package vahy.api.search.node;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
+import vahy.api.model.StateWrapper;
+import vahy.api.model.StateWrapperRewardReturn;
 import vahy.api.model.observation.Observation;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface SearchNode<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+public interface SearchNode<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>> {
 
-    SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> getParent();
+    SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getParent();
 
     TAction getAppliedAction();
 
-    Map<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
+    Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> getChildNodeMap();
 
-    StateRewardReturn<TAction, TPlayerObservation, TOpponentObservation, TState> applyAction(TAction action);
+    StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction action);
 
     TAction[] getAllPossibleActions();
 
     TSearchNodeMetadata getSearchNodeMetadata();
 
-    TState getWrappedState();
+    StateWrapper<TAction, TObservation, TState> getStateWrapper();
 
     boolean isFinalNode();
 
@@ -45,7 +41,7 @@ public interface SearchNode<
         return !isOpponentTurn();
     }
 
-    default Stream<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> getChildNodeStream() {
+    default Stream<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> getChildNodeStream() {
         return getChildNodeMap().values().stream();
     }
 

@@ -10,26 +10,24 @@ import java.util.SplittableRandom;
 
 public class PaperNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
+    protected final double cpuctParameter;
+    protected final int[] indexArray;
+    protected final double[] valueArray;
 
-    private final double cpuctParameter;
-    private final int totalPlayerActions;
-    private final int[] indexArray;
-    private final double[] valueArray;
-
-    public PaperNodeSelector(double cpuctParameter, SplittableRandom random, int totalPlayerActions) {
-        super(random);
+    public PaperNodeSelector(SplittableRandom random, boolean isModelKnown, double cpuctParameter, int totalActionCount) {
+        super(random, isModelKnown);
         this.cpuctParameter = cpuctParameter;
-        this.totalPlayerActions = totalPlayerActions;
-        this.indexArray = new int[totalPlayerActions];
-        this.valueArray =  new double[totalPlayerActions];
+        this.indexArray = new int[totalActionCount];
+        this.valueArray =  new double[totalActionCount];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node) {
+    @Override
+    protected TAction getBestAction_inner(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
+        var entityInGameOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
 
@@ -37,14 +35,14 @@ public class PaperNodeSelector<
         double min = Double.MAX_VALUE;
         for (int i = 0; i < possibleActions.length; i++) {
             var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
-            double value = metadata.getExpectedReward() + metadata.getGainedReward();
-            if(max < value) {
-                max = value;
+            double reward = metadata.getExpectedReward()[entityInGameOnTurn] + metadata.getGainedReward()[entityInGameOnTurn];
+            if(max < reward) {
+                max = reward;
             }
-            if(min > value) {
-                min = value;
+            if(min > reward) {
+                min = reward;
             }
-            valueArray[i] = value;
+            valueArray[i] = reward;
         }
 
         int maxIndex = -1;
@@ -101,20 +99,5 @@ public class PaperNodeSelector<
         } else {
             return possibleActions[indexArray[random.nextInt(maxIndexCount)]];
         }
-    }
-
-    protected double calculateUValue(double priorProbability, int childVisitCount, int nodeTotalVisitCount) {
-        return cpuctParameter * priorProbability * Math.sqrt(nodeTotalVisitCount / (1.0 + childVisitCount));
-    }
-
-    @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> selectNextNode() {
-        checkRoot();
-        var node = root;
-        while(!node.isLeaf()) {
-            var action = node.isPlayerTurn() ? getBestAction(node) : sampleOpponentAction(node);
-            node = node.getChildNodeMap().get(action);
-        }
-        return node;
     }
 }

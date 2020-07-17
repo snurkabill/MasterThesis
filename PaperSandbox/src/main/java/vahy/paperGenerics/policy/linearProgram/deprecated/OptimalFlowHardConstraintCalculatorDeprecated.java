@@ -3,11 +3,12 @@ package vahy.paperGenerics.policy.linearProgram.deprecated;
 import com.quantego.clp.CLPExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
 import java.util.SplittableRandom;
@@ -15,11 +16,10 @@ import java.util.SplittableRandom;
 @Deprecated
 public class OptimalFlowHardConstraintCalculatorDeprecated<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractLinearProgramOnTreeDeprecated<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractLinearProgramOnTreeDeprecated<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(OptimalFlowHardConstraintCalculatorDeprecated.class.getName());
 
@@ -34,11 +34,12 @@ public class OptimalFlowHardConstraintCalculatorDeprecated<
 
 
     @Override
-    protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        double nodeRisk = node.getWrappedState().isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getPredictedRisk();
+    protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
+        double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId];
         totalRiskExpression.add(nodeRisk, node.getSearchNodeMetadata().getNodeProbabilityFlow());
-        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward();
-        double expectedReward = node.getSearchNodeMetadata().getExpectedReward();
+        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward()[inGameEntityId];
+        double expectedReward = node.getSearchNodeMetadata().getExpectedReward()[inGameEntityId];
         double leafCoefficient = cumulativeReward + expectedReward;
 
         if(strategy != NoiseStrategy.NONE) {

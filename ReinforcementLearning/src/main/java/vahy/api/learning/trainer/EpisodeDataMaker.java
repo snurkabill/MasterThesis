@@ -4,7 +4,6 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
@@ -13,10 +12,8 @@ import java.util.List;
 
 public interface EpisodeDataMaker<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>> {
 
-    List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeResults);
+    List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, TObservation, TState> episodeResults);
 }

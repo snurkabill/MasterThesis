@@ -3,15 +3,12 @@ package vahy.api.episode;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 
 public interface EpisodeSimulator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>> {
 
-    EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> calculateEpisode(EpisodeSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeSetup);
+    EpisodeResults<TAction, TObservation, TState> calculateEpisode(EpisodeSetup<TAction, TObservation, TState> episodeSetup);
 
 }

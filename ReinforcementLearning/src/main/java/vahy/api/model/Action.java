@@ -2,17 +2,12 @@ package vahy.api.model;
 
 public interface Action {
 
-    Action[] getAllPlayerActions();
+//    boolean isPlayerAction(int playerId);
 
-    Action[] getAllOpponentActions();
+//    boolean isOpponentAction(int playerId, int opponentId);
 
-    boolean isPlayerAction();
+    int getLocalIndex();
 
-    boolean isOpponentAction();
+    int getCountOfAllActionsFromSameEntity();
 
-    int getGlobalIndex();
-
-    int getActionIndexInPlayerActions();
-
-    int getActionIndexInOpponentActions();
 }

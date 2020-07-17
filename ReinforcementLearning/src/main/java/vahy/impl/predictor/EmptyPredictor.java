@@ -4,6 +4,7 @@ import vahy.api.predictor.TrainablePredictor;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,6 +33,15 @@ public class EmptyPredictor implements TrainablePredictor {
     public double[][] apply(DoubleVector[] doubleObservationArray) {
         var output = new double[doubleObservationArray.length][];
         Arrays.fill(output, defaultPrediction);
+        return output;
+    }
+
+    @Override
+    public List<double[]> apply(List<DoubleVector> doubleVectors) {
+        var output = new ArrayList<double[]>(doubleVectors.size());
+        for (int i = 0; i < doubleVectors.size(); i++) {
+            output.add(defaultPrediction);
+        }
         return output;
     }
 

@@ -2,64 +2,42 @@ package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
+import vahy.api.policy.PlayingDistribution;
+import vahy.api.policy.RandomizedPolicy;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.policy.riskSubtree.ConstantRiskCalculator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.SplittableRandom;
 
 public class MaxUcbValueDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractPlayingDistributionProvider<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     public MaxUcbValueDistributionProvider() {
-        super(false, () -> new ConstantRiskCalculator<>(1.0));
+        super(false);
     }
 
     @Override
-    public PlayingDistribution<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> createDistribution(
-        SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node,
-        double temperature,
-        SplittableRandom random,
-        double totalRiskAllowed)
+    public PlayingDistribution<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
+        int inGameEntityId = node.getStateWrapper().getInGameEntityId();
+        var childNodeMap = node.getChildNodeMap();
 
-        int childCount = node.getChildNodeMap().size();
-        double originMin = node.getChildNodeStream().mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward() + x.getSearchNodeMetadata().getGainedReward()).min().orElseThrow(() -> new IllegalStateException("Min does not exist"));
-        double originMax = node.getChildNodeStream().mapToDouble(x -> x.getSearchNodeMetadata().getExpectedReward() + x.getSearchNodeMetadata().getGainedReward()).max().orElseThrow(() -> new IllegalStateException("Min does not exist"));
+        double max = -Double.MAX_VALUE;
+        TAction action = null;
 
-        List<TAction> actionList = new ArrayList<>(childCount);
-        double[] rewardArray = new double[childCount];
-        double[] riskArray = new double[childCount];
-
-        int j = 0;
-        for (Map.Entry<TAction, SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>> entry : node.getChildNodeMap().entrySet()) {
-            actionList.add(entry.getKey());
+        for (var entry : childNodeMap.entrySet()) {
             var metadata = entry.getValue().getSearchNodeMetadata();
-            rewardArray[j] = originMin == originMax ? 1.0 / childCount : (((metadata.getExpectedReward() + metadata.getGainedReward()) - originMin) / (originMax - originMin));
-            riskArray[j] = 1.0d;
-            j++;
-        }
-
-        var max = rewardArray[0];
-        var index = 0;
-        for (int i = 1; i < childCount; i++) {
-            var value = rewardArray[i];
-            if(max < value) {
+            var value = metadata.getExpectedReward()[inGameEntityId] + metadata.getGainedReward()[inGameEntityId];
+            if(value > max) {
                 max = value;
-                index = i;
+                action = entry.getKey();
             }
         }
-
-        TAction action = actionList.get(index);
-        return new PlayingDistribution<>(action, index, rewardArray, riskArray, actionList, Map.of(action, subtreeRiskCalculatorSupplier));
+        return new PlayingDistribution<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId],RandomizedPolicy.EMPTY_ARRAY);
     }
 }

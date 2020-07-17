@@ -12,10 +12,9 @@ import java.util.SplittableRandom;
 public abstract class AbstractInitialStateSupplier<
     TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements InitialStateSupplier<TAction, TPlayerObservation, TOpponentObservation, TState> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    implements InitialStateSupplier<TAction, TObservation, TState> {
 
     private final TConfig problemConfig;
     private final SplittableRandom random;

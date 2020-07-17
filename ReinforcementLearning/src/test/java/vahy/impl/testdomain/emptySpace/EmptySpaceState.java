@@ -4,17 +4,23 @@ import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturnTuple;
+import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, EmptySpaceState, EmptySpaceState>, Observation {
+public class EmptySpaceState implements Observation, State<EmptySpaceAction, DoubleVector, EmptySpaceState> {
 
-    private final boolean isPlayerTurn;
+    public static final DoubleVector FIXED_OBSERVATION = new DoubleVector(new double[] {0.0});
+    public static final double[] FIXED_REWARD = new double[] {0.0, 0.0};
 
-    public EmptySpaceState(boolean isPlayerTurn) {
+    protected final boolean changeTurn;
+    protected final boolean isPlayerTurn;
+
+    public EmptySpaceState(boolean changeTurn, boolean isPlayerTurn) {
+        this.changeTurn = changeTurn;
         this.isPlayerTurn = isPlayerTurn;
     }
 
@@ -28,34 +34,29 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
     }
 
     @Override
-    public EmptySpaceAction[] getPossiblePlayerActions() {
-        return getAllPossibleActions();
+    public int getTotalEntityCount() {
+        return 2;
     }
 
     @Override
-    public EmptySpaceAction[] getPossibleOpponentActions() {
-        return getAllPossibleActions();
+    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceState> applyAction(EmptySpaceAction actionType) {
+        return new ImmutableStateRewardReturn<>(new EmptySpaceState(!changeTurn, changeTurn ? !isPlayerTurn : isPlayerTurn), FIXED_REWARD);
     }
 
     @Override
-    public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceState, EmptySpaceState> applyAction(EmptySpaceAction actionType) {
-        return new ImmutableStateRewardReturnTuple<>(new EmptySpaceState(!isPlayerTurn), 0.0);
+    public DoubleVector getInGameEntityObservation(int inGameEntityId) {
+        return getCommonObservation(0);
     }
 
     @Override
-    public DoubleVector getPlayerObservation() {
-        return new DoubleVector(new double[] {0.0});
-    }
-
-    @Override
-    public EmptySpaceState getOpponentObservation() {
-        return this;
+    public DoubleVector getCommonObservation(int playerId) {
+        return FIXED_OBSERVATION;
     }
 
     @Override
     public Predictor<EmptySpaceState> getKnownModelWithPerfectObservationPredictor() {
         return new Predictor<>() {
-            private double[] fixedPrediction = new double[]{1 / 3., 2 / 3.0};
+            private final double[] fixedPrediction = new double[]{1 / 3., 2 / 3.0};
 
             @Override
             public double[] apply(EmptySpaceState observation) {
@@ -67,6 +68,15 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
                 var prediction = new double[observationArray.length][];
                 Arrays.fill(prediction, fixedPrediction);
                 return prediction;
+            }
+
+            @Override
+            public List<double[]> apply(List<EmptySpaceState> observationArray) {
+                var output = new ArrayList<double[]>(observationArray.size());
+                for (int i = 0; i < observationArray.size(); i++) {
+                    output.add(apply(observationArray.get(i)));
+                }
+                return output;
             }
         };
     }
@@ -87,8 +97,18 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
     }
 
     @Override
-    public boolean isOpponentTurn() {
+    public int getInGameEntityIdOnTurn() {
+        return isPlayerTurn ? 0 : 1;
+    }
+
+    @Override
+    public boolean isEnvironmentEntityOnTurn() {
         return !isPlayerTurn;
+    }
+
+    @Override
+    public boolean isInGame(int playerId) {
+        return true;
     }
 
     @Override

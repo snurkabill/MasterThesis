@@ -2,57 +2,54 @@ package vahy.impl.policy;
 
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
+import vahy.api.policy.PolicyRecordBase;
+import vahy.api.policy.RandomizedPolicy;
 import vahy.api.predictor.Predictor;
 import vahy.utils.RandomDistributionUtils;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
 public class KnownModelPolicy<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> extends RandomizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    extends RandomizedPolicy<TAction, TObservation, TState> {
 
     private Predictor<TState> perfectPredictor;
 
-    protected KnownModelPolicy(SplittableRandom random) {
-        super(random);
+    public KnownModelPolicy(SplittableRandom random, int policyId) {
+        super(random, policyId);
     }
 
     @Override
-    public double[] getActionProbabilityDistribution(TState gameState) {
+    public TAction getDiscreteAction(StateWrapper<TAction, TObservation, TState> gameState) {
         if(perfectPredictor == null) {
             perfectPredictor = gameState.getKnownModelWithPerfectObservationPredictor();
-        }
-        return perfectPredictor.apply(gameState);
-    }
-
-    @Override
-    public TAction getDiscreteAction(TState gameState) {
-        if(perfectPredictor == null) {
-            perfectPredictor = gameState.getKnownModelWithPerfectObservationPredictor();
+            checkIfStillNull();
         }
         var actions = gameState.getAllPossibleActions();
-        var probabilities = perfectPredictor.apply(gameState);
+        var probabilities = perfectPredictor.apply(gameState.getWrappedState());
         if(actions.length != probabilities.length) {
-            perfectPredictor.apply(gameState);
-            gameState.getAllPossibleActions();
             throw new IllegalStateException("Action count differ from probability length");
         }
         return actions[RandomDistributionUtils.getRandomIndexFromDistribution(probabilities, random)];
     }
 
+    private void checkIfStillNull() {
+        if(perfectPredictor == null) {
+            throw new IllegalStateException("Perfect state predictor is requested, but implementation is missing.");
+        }
+    }
+
     @Override
-    public void updateStateOnPlayedActions(List<TAction> opponentActionList) {
+    public void updateStateOnPlayedAction(TAction action) {
         // this is it
     }
 
     @Override
-    public TPolicyRecord getPolicyRecord(TState gameState) {
+    public PolicyRecordBase getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {
         return null;
     }
 }

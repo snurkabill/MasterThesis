@@ -14,29 +14,28 @@ import java.util.SplittableRandom;
 
 public class HardHardFlowOptimizer<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractFlowOptimizer<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata , TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractFlowOptimizer<TAction, TObservation, TSearchNodeMetadata , TState> {
 
     public HardHardFlowOptimizer(SplittableRandom random, NoiseStrategy noiseStrategy) {
         super(random, noiseStrategy);
     }
 
     @Override
-    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
-        var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+    public ImmutableTuple<Double, Boolean> optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double totalRiskAllowed) {
+        var optimalFlowCalculator = new OptimalFlowHardConstraintCalculator<TAction, TObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
         boolean optimalSolutionExists = optimalFlowCalculator.optimizeFlow(node);
 
         if(optimalSolutionExists) {
             return new ImmutableTuple<>(totalRiskAllowed, optimalSolutionExists);
         }
 
-        var minimalRiskReachAbilityCalculator = new MinimalRiskReachAbilityCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>();
+        var minimalRiskReachAbilityCalculator = new MinimalRiskReachAbilityCalculator<TAction, TObservation, TSearchNodeMetadata, TState>();
         totalRiskAllowed = minimalRiskReachAbilityCalculator.calculateRisk(node);
 
-        var optimalFlowCalculatorWithFixedRisk = new OptimalFlowHardConstraintCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
+        var optimalFlowCalculatorWithFixedRisk = new OptimalFlowHardConstraintCalculator<TAction, TObservation, TSearchNodeMetadata, TState>(totalRiskAllowed, random, noiseStrategy);
         optimalSolutionExists = optimalFlowCalculatorWithFixedRisk.optimizeFlow(node);
         return new ImmutableTuple<>(totalRiskAllowed, optimalSolutionExists);
     }

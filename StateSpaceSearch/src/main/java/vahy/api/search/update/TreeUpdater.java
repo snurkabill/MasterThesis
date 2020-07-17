@@ -4,14 +4,9 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.api.search.node.SearchNodeMetadata;
+import vahy.api.search.node.NodeMetadata;
 
-public interface TreeUpdater<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TSearchNodeMetadata extends SearchNodeMetadata,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>> {
+public interface TreeUpdater<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>> {
 
-    void updateTree(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> expandedNode);
+    void updateTree(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> expandedNode);
 }

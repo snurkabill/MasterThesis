@@ -1,41 +1,95 @@
 package vahy.paperGenerics.reinforcement.episode;
 
+import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeStepRecord;
+import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
-import vahy.impl.episode.EpisodeResultsImpl;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PaperEpisodeResults<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PaperPolicyRecord>
-    extends EpisodeResultsImpl<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    TObservation extends Observation,
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements EpisodeResults<TAction, TObservation, TState> {
 
-    public PaperEpisodeResults(List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory,
-                               int playerStepCount,
-                               int totalStepCount,
-                               double totalPayoff,
-                               Duration duration) {
-        super(episodeHistory, playerStepCount, totalStepCount, totalPayoff, duration);
+    private final EpisodeResults<TAction, TObservation, TState> base;
+    private final List<Boolean> isRiskHitList;
+
+    public PaperEpisodeResults(EpisodeResults<TAction, TObservation, TState> base) {
+        this.base = base;
+        isRiskHitList = new ArrayList<>(base.getPolicyCount());
+        for (int i = 0; i < base.getPolicyCount(); i++) {
+            isRiskHitList.add(getFinalState().isRiskHit(i));
+        }
     }
 
-    public boolean isRiskHit() {
-        return getFinalState().isRiskHit();
+    public List<Boolean> isRiskHit() {
+        return isRiskHitList;
+    }
+
+    public boolean isRiskHit(int playerId) {
+        return isRiskHitList.get(playerId);
+    }
+
+    @Override
+    public List<EpisodeStepRecord<TAction, TObservation, TState>> getEpisodeHistory() {
+        return base.getEpisodeHistory();
+    }
+
+    @Override
+    public int getPolicyCount() {
+        return base.getPolicyCount();
+    }
+
+    @Override
+    public int getTotalStepCount() {
+        return base.getTotalStepCount();
+    }
+
+    @Override
+    public PolicyIdTranslationMap getPolicyIdTranslationMap() {
+        return base.getPolicyIdTranslationMap();
+    }
+
+    @Override
+    public List<Integer> getPlayerStepCountList() {
+        return base.getPlayerStepCountList();
+    }
+
+    @Override
+    public List<Double> getAverageDurationPerDecision() {
+        return base.getAverageDurationPerDecision();
+    }
+
+    @Override
+    public List<Double> getTotalPayoff() {
+        return base.getTotalPayoff();
+    }
+
+    @Override
+    public Duration getDuration() {
+        return base.getDuration();
+    }
+
+    @Override
+    public TState getFinalState() {
+        return base.getFinalState();
     }
 
     @Override
     public String episodeMetadataToFile() {
-        String super_ =  super.episodeMetadataToFile();
+        String super_ =  base.episodeMetadataToFile();
         var sb = new StringBuilder(super_);
-        appendLine(sb, "Risk Hit", String.valueOf(getFinalState().isRiskHit()));
+        sb.append("Risk Hit");
+        sb.append(", ");
+        sb.append(isRiskHitList.stream().map(Object::toString).collect(Collectors.joining(", ")));
+        sb.append(System.lineSeparator());
         return sb.toString();
     }
 }

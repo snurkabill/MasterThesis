@@ -8,34 +8,32 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.SplittableRandom;
 
-public class RiskBasedSelector_V3<
-    TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> {
+public class RiskBasedSelector_V3<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> extends PaperNodeSelector<TAction, TObservation, TState> {
 
-    private final double cpuctParameter;
-    private final int totalPlayerActions;
-    private final int[] indexArray;
-    private final double[] valueArray;
+    public RiskBasedSelector_V3(SplittableRandom random, boolean isModelKnown, double cpuctParameter, int totalActionCount) {
+        super(random, isModelKnown, cpuctParameter, totalActionCount);
 
-    public RiskBasedSelector_V3(double cpuctParameter, SplittableRandom random, int playerTotalActionCount) {
-        super(random);
-        this.cpuctParameter = cpuctParameter;
-        this.totalPlayerActions = playerTotalActionCount;
-        this.indexArray = new int[totalPlayerActions];
-        this.valueArray =  new double[totalPlayerActions];
     }
 
-    protected TAction getBestAction(SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> node, double currentRisk) {
+    @Override
+    protected TAction getBestAction_inner(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node) {
+        var wrapper = node.getStateWrapper();
+        if(wrapper.getInGameEntityId() == wrapper.getInGameEntityOnTurnId()) {
+            return getBestActionWithRisk(node, allowedRiskInRoot);
+        } else {
+            return super.getBestAction_inner(node);
+        }
+    }
+
+    protected TAction getBestActionWithRisk(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> node, double currentRisk) {
+        var entityInGameOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         double max = -Double.MAX_VALUE;
         double min = Double.MAX_VALUE;
         for (int i = 0; i < possibleActions.length; i++) {
             var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
-            double reward = metadata.getExpectedReward() + metadata.getGainedReward();
+            double reward = metadata.getExpectedReward()[entityInGameOnTurn] + metadata.getGainedReward()[entityInGameOnTurn];
             if(max < reward) {
                 max = reward;
             }
@@ -55,7 +53,7 @@ public class RiskBasedSelector_V3<
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
                 var normalizedReward = (valueArray[i] - min) / norm;
-                var risk = metadata.getPredictedRisk();
+                var risk = metadata.getExpectedRisk()[entityInGameOnTurn];
                 var vValue = normalizedReward * (1 - risk * currentRiskWeight);
                 var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
                 var quValue = vValue + uValue;
@@ -69,9 +67,9 @@ public class RiskBasedSelector_V3<
             int maxIndexCount = 0;
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();
-                var reward = metadata.getExpectedReward() + metadata.getGainedReward();
+                var reward = metadata.getExpectedReward()[entityInGameOnTurn] + metadata.getGainedReward()[entityInGameOnTurn];
                 var normalizedReward = (max == min ? 0.5 : ((reward - min) / (max - min)));
-                var risk = metadata.getPredictedRisk();
+                var risk = metadata.getExpectedRisk()[entityInGameOnTurn];
                 var vValue = normalizedReward * (1 - risk * currentRiskWeight);
                 var uValue = cpuctParameter * metadata.getPriorProbability() * Math.sqrt(totalNodeVisitCount / (1.0 + metadata.getVisitCounter()));
                 var quValue = vValue + uValue;
@@ -92,18 +90,6 @@ public class RiskBasedSelector_V3<
             }
             return maxIndexCount == 0 ? possibleActions[maxIndex] : possibleActions[indexArray[random.nextInt(maxIndexCount)]];
         }
-    }
-
-
-    @Override
-    public SearchNode<TAction, TPlayerObservation, TOpponentObservation, PaperMetadata<TAction>, TState> selectNextNode() {
-        checkRoot();
-        var node = root;
-        while(!node.isLeaf()) {
-            var action = node.isPlayerTurn() ? getBestAction(node, allowedRiskInRoot) : sampleOpponentAction(node);
-            node = node.getChildNodeMap().get(action);
-        }
-        return node;
     }
 
 }

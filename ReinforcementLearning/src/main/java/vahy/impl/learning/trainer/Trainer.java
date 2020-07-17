@@ -9,7 +9,6 @@ import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.utils.ImmutableTuple;
 import vahy.vizualiation.ProgressTracker;
@@ -23,37 +22,35 @@ import java.util.stream.Collectors;
 
 public class Trainer<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 
     private final ProblemConfig problemConfig;
-    private final GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler;
+    private final GameSampler<TAction, TObservation, TState> gameSampler;
     private final ProgressTracker trainingProgressTracker;
     private final ProgressTracker samplingProgressTracker;
     private final ProgressTracker evaluationProgressTracker;
-    private final EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> statisticsCalculator;
+    private final EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> statisticsCalculator;
 
-    private final List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList;
+    private final List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList;
 
     private final List<DataPointGeneratorGeneric<TStatistics>> samplingDataGeneratorList;
     private final List<DataPointGeneratorGeneric<TStatistics>> evalDataGeneratorList;
 
-    private final DataPointGeneratorGeneric<Double> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", x -> x);
-    private final DataPointGeneratorGeneric<Double> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", x -> x);
-    private final DataPointGeneratorGeneric<Double> trainingSampleCount = new DataPointGeneratorGeneric<>("Training sample count", x -> x);
-    private final DataPointGeneratorGeneric<Double> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
-    private final DataPointGeneratorGeneric<Double> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
+    private final DataPointGeneratorGeneric<Double> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", List::of);
+    private final DataPointGeneratorGeneric<Double> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", List::of);
+    private final DataPointGeneratorGeneric<List<Double>> trainingSampleCount = new DataPointGeneratorGeneric<>("Training sample count", x -> x);
+    private final DataPointGeneratorGeneric<List<Double>> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
+    private final DataPointGeneratorGeneric<List<Double>> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
 
-    public Trainer(GameSampler<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> gameSampler,
-                   List<PredictorTrainingSetup<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> trainablePredictorSetupList,
+    public Trainer(GameSampler<TAction, TObservation, TState> gameSampler,
+                   List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList,
                    ProgressTrackerSettings progressTrackerSettings,
                    ProblemConfig problemConfig,
-                   EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> statisticsCalculator,
+                   EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> statisticsCalculator,
                    List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
-        if(trainablePredictorSetupList.isEmpty()) {
+        if (trainablePredictorSetupList.isEmpty()) {
             throw new IllegalArgumentException("TrainablePredictorSetupList can't be empty");
         }
         this.problemConfig = problemConfig;
@@ -62,8 +59,8 @@ public class Trainer<
         this.statisticsCalculator = statisticsCalculator;
 
         this.trainingProgressTracker = new ProgressTracker(progressTrackerSettings, "Training stats", Color.BLUE);
-        this.samplingProgressTracker =  new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.RED);
-        this.evaluationProgressTracker =  new ProgressTracker(progressTrackerSettings, "Eval stats", Color.RED);
+        this.samplingProgressTracker = new ProgressTracker(progressTrackerSettings, "Sampling stats", Color.GREEN);
+        this.evaluationProgressTracker = new ProgressTracker(progressTrackerSettings, "Eval stats", Color.ORANGE);
 
         var baseDataGenerators = addBaseDataGenerators(additionalDataPointGeneratorList);
 
@@ -89,8 +86,9 @@ public class Trainer<
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Player Step Count", EpisodeStatistics::getAveragePlayerStepCount));
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Total Payoff", EpisodeStatistics::getTotalPayoffAverage));
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", EpisodeStatistics::getAverageMillisPerEpisode));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", EpisodeStatistics::getStdevMillisPerEpisode));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", x -> List.of(x.getAverageMillisPerEpisode())));
+//        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", x -> List.of(x.getStdevMillisPerEpisode())));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Average decision [ms]", EpisodeStatistics::getAverageDecisionTimeInMillis));
         return dataPointGeneratorList;
     }
 
@@ -100,20 +98,20 @@ public class Trainer<
         }
     }
 
-    public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> sampleTraining(int episodeBatchSize) {
+    public ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> sampleTraining(int episodeBatchSize) {
         var result = run(episodeBatchSize, samplingDataGeneratorList, PolicyMode.TRAINING);
-        oobAvgMsPerEpisode.addNewValue(result.getSecond().getTotalDuration().toMillis() /(double) episodeBatchSize);
+        oobAvgMsPerEpisode.addNewValue(result.getSecond().getTotalDuration().toMillis() / (double) episodeBatchSize);
         oobSamplingTime.addNewValue(result.getSecond().getTotalDuration().toMillis() / 1000.0);
         return result;
     }
 
-    public ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> evaluate(int episodeBatchSize) {
+    public ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> evaluate(int episodeBatchSize) {
         return run(episodeBatchSize, evalDataGeneratorList, PolicyMode.INFERENCE);
     }
 
-    private ImmutableTuple<List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>>, TStatistics> run(int episodeBatchSize,
-                                                                                                                                            List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList,
-                                                                                                                                            PolicyMode policyMode) {
+    private ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> run(int episodeBatchSize,
+                                                                                                                List<DataPointGeneratorGeneric<TStatistics>> dataPointGeneratorList,
+                                                                                                                PolicyMode policyMode) {
         var start = System.currentTimeMillis();
         var episodes = gameSampler.sampleEpisodes(episodeBatchSize, problemConfig.getMaximalStepCountBound(), policyMode);
         var samplingTime = System.currentTimeMillis() - start;
@@ -132,7 +130,7 @@ public class Trainer<
         samplingProgressTracker.onNextLog();
     }
 
-    public void trainPredictors(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodes) {
+    public void trainPredictors(List<EpisodeResults<TAction, TObservation, TState>> episodes) {
         var trainingSampleCountList = new ArrayList<Double>(trainablePredictorSetupList.size());
         var trainingTimeList = new ArrayList<Double>(trainablePredictorSetupList.size());
         var trainingMsPerSampleList = new ArrayList<Double>(trainablePredictorSetupList.size());
@@ -149,7 +147,7 @@ public class Trainer<
             entry.getTrainablePredictor().train(trainingDataset);
             var endTraining = System.currentTimeMillis() - startTraining;
 
-            trainingSampleCountList.add((double)datasetSize);
+            trainingSampleCountList.add((double) datasetSize);
             trainingTimeList.add(endTraining / 1000.0);
             trainingMsPerSampleList.add(endTraining / (double) datasetSize);
 

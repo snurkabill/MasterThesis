@@ -1,14 +1,12 @@
 package vahy.vizualiation;
 
-import vahy.utils.ImmutableTuple;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class DataSeriesCollector {
 
     private final String dataTitle;
-    private final List<ImmutableTuple<Double, List<Double>>> data = new ArrayList<>();
+    private final List<DataSample> data = new ArrayList<>();
 
     public DataSeriesCollector(String dataTitle) {
         this.dataTitle = dataTitle;
@@ -18,15 +16,15 @@ public class DataSeriesCollector {
         return dataTitle;
     }
 
-    public void addDataEntry(ImmutableTuple<Double, List<Double>> entry) {
-        data.add(entry);
+    public void addDataEntry(DataSample sample) {
+        data.add(sample);
     }
 
-    public List<ImmutableTuple<Double, List<Double>>> getData() {
+    public List<DataSample> getData() {
         return data;
     }
 
-    public ImmutableTuple<Double, List<Double>> getLatest() {
+    public DataSample getLatest() {
         return data.get(data.size() - 1);
     }
 

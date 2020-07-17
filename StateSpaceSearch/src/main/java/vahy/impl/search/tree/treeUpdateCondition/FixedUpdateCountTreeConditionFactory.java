@@ -8,6 +8,9 @@ public class FixedUpdateCountTreeConditionFactory implements TreeUpdateCondition
     private final int countOfEnabledUpdates;
 
     public FixedUpdateCountTreeConditionFactory(int countOfEnabledUpdates) {
+        if(countOfEnabledUpdates <= 0) {
+            throw new IllegalArgumentException("Tree update count must be positive. Value: [" + countOfEnabledUpdates + "]");
+        }
         this.countOfEnabledUpdates = countOfEnabledUpdates;
     }
 

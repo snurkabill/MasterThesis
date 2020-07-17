@@ -10,8 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SplittableRandom;
@@ -23,6 +25,17 @@ public class RandomDistributionUtils {
 
     public static int SAMPLING_RANDOM_INDEX_TRIAL_COUNT = 10;
     public static double TOLERANCE = Math.pow(10, -5);
+
+    public static <T extends Enum<T>> boolean isDistribution(EnumMap<T, Double> map, double tolerance) {
+        double cumulativeSum = 0.0;
+        for (Double v : map.values()) {
+            cumulativeSum += v;
+            if(v < 0.0 - tolerance || v > 1.0 + tolerance) {
+                return false;
+            }
+        }
+        return Math.abs(1 - cumulativeSum) < tolerance;
+    }
 
     public static boolean isDistribution(List<Double> distribution, double tolerance) {
         double cumulativeSum = 0.0;
@@ -54,6 +67,24 @@ public class RandomDistributionUtils {
 //        }
 //        return normalizedDistribution;
 //    }
+
+    public static <T extends Enum<T>> T getRandomElementFromMapDistribution(EnumMap<T, Double> map, SplittableRandom random) {
+        if(!isDistribution(map, Math.pow(10, -5))) {
+            throw new IllegalArgumentException("Given map does not represent probability distribution over keys. Map: [" + map.toString() + "]");
+        }
+
+        for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
+            double value = random.nextDouble();
+            double cumulativeSum = 0.0;
+            for (Map.Entry<T, Double> tDoubleEntry : map.entrySet()) {
+                cumulativeSum += tDoubleEntry.getValue();
+                if(value <= cumulativeSum) {
+                    return tDoubleEntry.getKey();
+                }
+            }
+        }
+        throw new IllegalStateException("Numerically unstable probability calculation from distribution: [" + map.toString() + "]");
+    }
 
     public static int getRandomIndexFromDistribution(List<Double> distribution, SplittableRandom random) {
         if(!isDistribution(distribution, Math.pow(10, -5))) {

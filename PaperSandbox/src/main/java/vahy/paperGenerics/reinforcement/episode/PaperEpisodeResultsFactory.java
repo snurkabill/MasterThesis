@@ -3,26 +3,34 @@ package vahy.paperGenerics.reinforcement.episode;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.EpisodeStepRecord;
+import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
-import vahy.api.model.observation.Observation;
+import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.policy.PaperPolicyRecord;
 
 import java.time.Duration;
 import java.util.List;
 
 public class PaperEpisodeResultsFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PaperPolicyRecord>
-    implements EpisodeResultsFactory<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> {
+    TObservation extends DoubleVector,
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements EpisodeResultsFactory<TAction, TObservation, TState> {
+
+    private final EpisodeResultsFactoryBase<TAction, TObservation, TState> baseFactory = new EpisodeResultsFactoryBase<>();
 
     @Override
-    public EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> createResults(
-        List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory, int playerStepCount, int totalStepCount, double totalCumulativePayoff, Duration duration) {
-        return new PaperEpisodeResults<>(episodeHistory, playerStepCount, totalStepCount, totalCumulativePayoff, duration);
+    public EpisodeResults<TAction, TObservation, TState> createResults(List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
+                                                                                      PolicyIdTranslationMap policyIdTranslationMap,
+                                                                                      int policyCount,
+                                                                                      List<Integer> playerStepCountList,
+                                                                                      List<Double> averageDurationPerDecision,
+                                                                                      int totalStepCount,
+                                                                                      List<Double> totalCumulativePayoffList,
+                                                                                      Duration duration) {
+
+        var base = baseFactory.createResults(episodeHistory, policyIdTranslationMap, policyCount, playerStepCountList, averageDurationPerDecision, totalStepCount, totalCumulativePayoffList, duration);
+        return new PaperEpisodeResults<>(base);
     }
 }

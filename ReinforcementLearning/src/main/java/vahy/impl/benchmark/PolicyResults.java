@@ -11,32 +11,37 @@ import java.util.List;
 
 public class PolicyResults<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 
-    private final OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy;
+    private final String runName;
+    private final List<OptimizedPolicy<TAction, TObservation, TState>> policyList;
     private final List<TStatistics> trainingStatisticsList;
-    private final TStatistics episodeStatistics;
+    private final TStatistics evaluationStatistics;
     private final Duration trainingDuration;
     private final Duration benchmarkingDuration;
 
-    public PolicyResults(OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> policy,
+    public PolicyResults(String runName,
+                         List<OptimizedPolicy<TAction, TObservation, TState>> policyList,
                          List<TStatistics> trainingStatisticsList,
-                         TStatistics episodeStatistics,
+                         TStatistics evaluationStatistics,
                          Duration trainingDuration,
                          Duration benchmarkingDuration) {
-        this.policy = policy;
+        this.runName = runName;
+        this.policyList = policyList;
         this.trainingStatisticsList = trainingStatisticsList;
-        this.episodeStatistics = episodeStatistics;
+        this.evaluationStatistics = evaluationStatistics;
         this.trainingDuration = trainingDuration;
         this.benchmarkingDuration = benchmarkingDuration;
     }
 
-    public OptimizedPolicy<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> getPolicy() {
-        return policy;
+    public String getRunName() {
+        return runName;
+    }
+
+    public List<OptimizedPolicy<TAction, TObservation, TState>> getPolicyList() {
+        return policyList;
     }
 
     public List<TStatistics> getTrainingStatisticsList() {
@@ -51,8 +56,8 @@ public class PolicyResults<
         return benchmarkingDuration;
     }
 
-    public TStatistics getEpisodeStatistics() {
-        return episodeStatistics;
+    public TStatistics getEvaluationStatistics() {
+        return evaluationStatistics;
     }
 
 }

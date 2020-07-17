@@ -26,7 +26,7 @@ public class PolicyRecordBase implements PolicyRecord {
 
     @Override
     public List<String> getCsvHeader() {
-        var list = new ArrayList<String>();
+        var list = new ArrayList<String>(policyProbabilities.length + 1);
         for (int i = 0; i < policyProbabilities.length; i++) {
             list.add("PolicyProbabilities_" + i);
         }
@@ -36,7 +36,7 @@ public class PolicyRecordBase implements PolicyRecord {
 
     @Override
     public List<String> getCsvRecord() {
-        var list = new ArrayList<String>();
+        var list = new ArrayList<String>(policyProbabilities.length + 1);
         for (int i = 0; i < policyProbabilities.length; i++) {
             list.add(Double.toString(policyProbabilities[i]));
         }

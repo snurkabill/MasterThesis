@@ -3,6 +3,7 @@ package vahy.paperGenerics.policy.linearProgram.deprecated;
 import com.quantego.clp.CLPExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -15,11 +16,10 @@ import java.util.SplittableRandom;
 @Deprecated
 public class OptimalFlowSoftConstraintDeprecateed<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    extends AbstractLinearProgramOnTreeDeprecated<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    extends AbstractLinearProgramOnTreeDeprecated<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(OptimalFlowSoftConstraintDeprecateed.class.getName());
 
@@ -35,15 +35,16 @@ public class OptimalFlowSoftConstraintDeprecateed<
     }
 
     @Override
-    protected void setLeafObjective(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> node) {
-        if(node.getWrappedState().isRiskHit()) {
+    protected void setLeafObjective(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
+        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
+        if(((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit()) {
             totalRiskExpression.add(RISK_COEFFICIENT, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         } else {
             totalRiskExpression.add(0.0, node.getSearchNodeMetadata().getNodeProbabilityFlow());
         }
-        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward();
-        double expectedReward = node.getSearchNodeMetadata().getExpectedReward();
-        double predictedRisk = node.getSearchNodeMetadata().getPredictedRisk();
+        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward()[inGameEntityId];
+        double expectedReward = node.getSearchNodeMetadata().getExpectedReward()[inGameEntityId];
+        double predictedRisk = node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId];
         double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
 
         if(strategy != NoiseStrategy.NONE) {

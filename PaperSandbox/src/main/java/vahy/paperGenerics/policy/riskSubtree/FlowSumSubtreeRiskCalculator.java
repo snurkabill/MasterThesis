@@ -1,33 +1,34 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.LinkedList;
 
 public class FlowSumSubtreeRiskCalculator<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
+    TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
-    TState extends PaperState<TAction, TPlayerObservation, TOpponentObservation, TState>>
-    implements SubtreeRiskCalculator<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> {
+    TState extends PaperState<TAction, TObservation, TState>>
+    implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     @Override
-    public double calculateRisk(SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState> subTreeRoot) {
+    public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
-        var queue = new LinkedList<SearchNode<TAction, TPlayerObservation, TOpponentObservation, TSearchNodeMetadata, TState>>();
+        int inGameEntityId = subTreeRoot.getStateWrapper().getInGameEntityId();
+        var queue = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         queue.addFirst(subTreeRoot);
         while(!queue.isEmpty()) {
             var node = queue.poll();
             if(node.isLeaf()) {
                 if(node.isFinalNode()) {
-                    risk += node.getWrappedState().isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
+                    risk += ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? node.getSearchNodeMetadata().getFlow() : 0.0;
                 } else {
-                    risk += node.getSearchNodeMetadata().getPredictedRisk() * node.getSearchNodeMetadata().getFlow();
+                    risk += node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId] * node.getSearchNodeMetadata().getFlow();
                 }
             } else {
                 for (var entry : node.getChildNodeMap().entrySet()) {
@@ -35,7 +36,7 @@ public class FlowSumSubtreeRiskCalculator<
                 }
             }
         }
-        return risk;
+        return risk / subTreeRoot.getSearchNodeMetadata().getFlow(); // dividing risk by flow in the root since flow might be smaller than 1.0 and we want to return risk as we already were in subtree.
     }
 
     @Override

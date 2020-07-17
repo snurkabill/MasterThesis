@@ -3,23 +3,23 @@ package vahy.api.episode;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 
 import java.time.Duration;
 import java.util.List;
 
 public interface EpisodeResultsFactory<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>> {
 
-    EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> createResults(
-        List<EpisodeStepRecord<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeHistory,
-        int playerStepCount,
+    EpisodeResults<TAction, TObservation, TState> createResults(
+        List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
+        PolicyIdTranslationMap policyIdTranslationMap,
+        int policyCount,
+        List<Integer> playerStepCountList,
+        List<Double> averageDurationPerDecision,
         int totalStepCount,
-        double totalCumulativePayoff,
+        List<Double> totalCumulativePayoffList,
         Duration duration
     );
 }

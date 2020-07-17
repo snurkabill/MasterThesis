@@ -5,29 +5,60 @@ import vahy.api.episode.EpisodeResults;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.MathStreamUtils;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EpisodeStatisticsCalculatorBase<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends DoubleVector,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord>
-    implements EpisodeStatisticsCalculator<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, EpisodeStatisticsBase> {
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>>
+    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, EpisodeStatisticsBase> {
 
     @Override
-    public EpisodeStatisticsBase calculateStatistics(List<EpisodeResults<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord>> episodeResultsList, Duration durations) {
-        var averagePlayerStepCount = MathStreamUtils.calculateAverage(episodeResultsList, EpisodeResults::getPlayerStepCount);
-        var stdevPlayerStepCount = MathStreamUtils.calculateStdev(episodeResultsList, EpisodeResults::getPlayerStepCount);
-        var totalPayoffAverage = MathStreamUtils.calculateAverage(episodeResultsList, EpisodeResults::getTotalPayoff);
-        var totalPayoffStdev = MathStreamUtils.calculateStdev(episodeResultsList, EpisodeResults::getTotalPayoff, totalPayoffAverage);
+    public EpisodeStatisticsBase calculateStatistics(List<EpisodeResults<TAction, TObservation, TState>> episodeResultsList, Duration durations) {
+        var policyCount = episodeResultsList.get(0).getPolicyCount();
+        List<Double> averagePlayerStepCount = new ArrayList<>(policyCount);
+        List<Double> stdevPlayerStepCount = new ArrayList<>(policyCount);
+        for (int i = 0; i < policyCount; i++) {
+            var index = i;
+            var average = MathStreamUtils.calculateAverage(episodeResultsList, value -> value.getPlayerStepCountList().get(index));
+            averagePlayerStepCount.add(average);
+            stdevPlayerStepCount.add(MathStreamUtils.calculateStdev(episodeResultsList, value -> value.getPlayerStepCountList().get(index), average));
+        }
+
+        List<Double> averagePlayerDecisionTime = new ArrayList<>(policyCount);
+        List<Double> stdevPlayerDecisionTime = new ArrayList<>(policyCount);
+        for (int i = 0; i < policyCount; i++) {
+            var index = i;
+            var average = MathStreamUtils.calculateAverage(episodeResultsList, value -> value.getAverageDurationPerDecision().get(index));
+            averagePlayerDecisionTime.add(average);
+            stdevPlayerDecisionTime.add(MathStreamUtils.calculateStdev(episodeResultsList, value -> value.getPlayerStepCountList().get(index), average));
+        }
+
+        List<Double> totalPayoffAverage = new ArrayList<>(policyCount);
+        List<Double> totalPayoffStdev = new ArrayList<>(policyCount);
+        for (int i = 0; i < policyCount; i++) {
+            var index_i = i;
+            var average = MathStreamUtils.calculateAverage(episodeResultsList, x -> x.getTotalPayoff().get(index_i));
+            var stdev = MathStreamUtils.calculateStdev(episodeResultsList, x -> x.getTotalPayoff().get(index_i));
+            totalPayoffAverage.add(average);
+            totalPayoffStdev.add(stdev);
+        }
         var averageMillisPerEpisode = MathStreamUtils.calculateAverage(episodeResultsList, (x) -> x.getDuration().toMillis());
         var stdevMillisPerEpisode = MathStreamUtils.calculateStdev(episodeResultsList, (x) -> x.getDuration().toMillis());
-        return new EpisodeStatisticsBase(durations, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
+        return new EpisodeStatisticsBase(
+            durations,
+            policyCount,
+            averagePlayerStepCount,
+            stdevPlayerStepCount,
+            averagePlayerDecisionTime,
+            stdevPlayerDecisionTime,
+            averageMillisPerEpisode,
+            stdevMillisPerEpisode,
+            totalPayoffAverage,
+            totalPayoffStdev);
     }
 }

@@ -3,12 +3,11 @@ package vahy.impl.runner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatistics;
-import vahy.api.experiment.AlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.policy.PolicyRecord;
 import vahy.impl.learning.trainer.Trainer;
 import vahy.utils.ImmutableTuple;
 
@@ -18,24 +17,22 @@ import java.util.List;
 
 public class PolicyTrainingCycle<
     TAction extends Enum<TAction> & Action,
-    TPlayerObservation extends Observation,
-    TOpponentObservation extends Observation,
-    TState extends State<TAction, TPlayerObservation, TOpponentObservation, TState>,
-    TPolicyRecord extends PolicyRecord,
+    TObservation extends Observation,
+    TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 
     private static Logger logger = LoggerFactory.getLogger(PolicyTrainingCycle.class.getName());
 
     private final SystemConfig systemConfig;
-    private final AlgorithmConfig algorithmConfig;
-    private final EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter;
-    private final Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> trainer;
+    private final CommonAlgorithmConfig algorithmConfig;
+    private final EpisodeWriter<TAction, TObservation, TState> episodeWriter;
+    private final Trainer<TAction, TObservation, TState, TStatistics> trainer;
 
 
     public PolicyTrainingCycle(SystemConfig systemConfig,
-                               AlgorithmConfig algorithmConfig,
-                               EpisodeWriter<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord> episodeWriter,
-                               Trainer<TAction, TPlayerObservation, TOpponentObservation, TState, TPolicyRecord, TStatistics> trainer) {
+                               CommonAlgorithmConfig algorithmConfig,
+                               EpisodeWriter<TAction, TObservation, TState> episodeWriter,
+                               Trainer<TAction, TObservation, TState, TStatistics> trainer) {
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
         this.episodeWriter = episodeWriter;

@@ -1,7 +1,8 @@
 package vahy.impl.learning.dataAggregator;
 
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
@@ -28,16 +29,16 @@ public class FirstVisitMonteCarloAggregatorTest {
         var inputs = trainingDataset.getFirst();
         var targets = trainingDataset.getSecond();
 
-        Assert.assertEquals(inputs.length, 3);
-        Assert.assertEquals(targets.length, 3);
+        assertEquals(inputs.length, 3);
+        assertEquals(targets.length, 3);
 
-        Assert.assertEquals(targets[0], new double[] {1, 0});
-        Assert.assertEquals(targets[1], new double[] {2, 0});
-        Assert.assertEquals(targets[2], new double[] {3, 0});
+        assertArrayEquals(targets[0], new double[] {1, 0});
+        assertArrayEquals(targets[1], new double[] {2, 0});
+        assertArrayEquals(targets[2], new double[] {3, 0});
 
-        Assert.assertEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
-        Assert.assertEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
-        Assert.assertEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
+        assertArrayEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
+        assertArrayEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
+        assertArrayEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
     }
 
     @Test
@@ -62,16 +63,16 @@ public class FirstVisitMonteCarloAggregatorTest {
         var inputs = trainingDataset.getFirst();
         var targets = trainingDataset.getSecond();
 
-        Assert.assertEquals(inputs.length, 3);
-        Assert.assertEquals(targets.length, 3);
+        assertEquals(inputs.length, 3);
+        assertEquals(targets.length, 3);
 
-        Assert.assertEquals(targets[0], new double[] {2, 1});
-        Assert.assertEquals(targets[1], new double[] {3, 2});
-        Assert.assertEquals(targets[2], new double[] {4, 3});
+        assertArrayEquals(targets[0], new double[] {2, 1});
+        assertArrayEquals(targets[1], new double[] {3, 2});
+        assertArrayEquals(targets[2], new double[] {4, 3});
 
-        Assert.assertEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
-        Assert.assertEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
-        Assert.assertEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
+        assertArrayEquals(inputs[0].getObservedVector(), new double[] {0, 0, 1});
+        assertArrayEquals(inputs[1].getObservedVector(), new double[] {0, 1, 0});
+        assertArrayEquals(inputs[2].getObservedVector(), new double[] {1, 0, 0});
 
     }
 }

@@ -1,61 +1,107 @@
 package vahy.paperGenerics.benchmark;
 
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
 
 import java.time.Duration;
+import java.util.List;
 
-public class PaperEpisodeStatistics extends EpisodeStatisticsBase {
+public class PaperEpisodeStatistics implements EpisodeStatistics {
 
-    private final long riskHitCounter;
-    private final double riskHitRatio;
-    private final double riskHitStdev;
+    private final EpisodeStatisticsBase base;
+    private final List<Long> riskHitCounter;
+    private final List<Double> riskHitRatio;
+    private final List<Double> riskHitStdev;
 
-    public PaperEpisodeStatistics(Duration totalDuration,
-                                  double averagePlayerStepCount,
-                                  double stdevPlayerStepCount,
-                                  double averageMillisPerEpisode,
-                                  double stdevMillisPerEpisode,
-                                  double totalPayoffAverage,
-                                  double totalPayoffStdev,
-                                  long riskHitCounter,
-                                  double riskHitRatio,
-                                  double riskHitStdev) {
-        super(totalDuration, averagePlayerStepCount, stdevPlayerStepCount, averageMillisPerEpisode, stdevMillisPerEpisode, totalPayoffAverage, totalPayoffStdev);
+    public PaperEpisodeStatistics(EpisodeStatisticsBase base, List<Long> riskHitCounter, List<Double> riskHitRatio, List<Double> riskHitStdev) {
+        this.base = base;
         this.riskHitCounter = riskHitCounter;
         this.riskHitRatio = riskHitRatio;
         this.riskHitStdev = riskHitStdev;
     }
 
-    public long getRiskHitCounter() {
+    public List<Long> getRiskHitCounter() {
         return riskHitCounter;
     }
 
-    public double getRiskHitRatio() {
+    public List<Double> getRiskHitRatio() {
         return riskHitRatio;
     }
 
-    public double getRiskHitStdev() {
+    public List<Double> getRiskHitStdev() {
         return riskHitStdev;
+    }
+
+
+    @Override
+    public Duration getTotalDuration() {
+        return base.getTotalDuration();
+    }
+
+    @Override
+    public List<Double> getAveragePlayerStepCount() {
+        return base.getAveragePlayerStepCount();
+    }
+
+    @Override
+    public List<Double> getStdevPlayerStepCount() {
+        return base.getStdevPlayerStepCount();
+    }
+
+    @Override
+    public List<Double> getAverageDecisionTimeInMillis() {
+        return base.getAverageDecisionTimeInMillis();
+    }
+
+    @Override
+    public List<Double> getStdevDecisionTimeInMillis() {
+        return base.getStdevDecisionTimeInMillis();
+    }
+
+    @Override
+    public double getAverageMillisPerEpisode() {
+        return base.getAverageMillisPerEpisode();
+    }
+
+    @Override
+    public double getStdevMillisPerEpisode() {
+        return base.getStdevMillisPerEpisode();
+    }
+
+    @Override
+    public List<Double> getTotalPayoffAverage() {
+        return base.getTotalPayoffAverage();
+    }
+
+    @Override
+    public List<Double> getTotalPayoffStdev() {
+        return base.getTotalPayoffStdev();
     }
 
     @Override
     public String printToLog() {
         StringBuilder sb = new StringBuilder();
-        sb.append(super.printToLog());
+        sb.append(base.printToLog());
         sb.append(System.lineSeparator());
 
         sb.append("Empirical risk average: [");
-        sb.append(riskHitRatio);
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] StepCount:").append(riskHitRatio.get(i));
+        }
         sb.append("]");
         sb.append(System.lineSeparator());
 
         sb.append("Risk episodes count: [");
-        sb.append(riskHitCounter);
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskHitCounter:").append(riskHitCounter.get(i));
+        }
         sb.append("]");
         sb.append(System.lineSeparator());
 
         sb.append("Empirical risk stdev: [");
-        sb.append(riskHitStdev);
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskHitStdev:").append(riskHitStdev.get(i));
+        }
         sb.append("]");
         sb.append(System.lineSeparator());
 

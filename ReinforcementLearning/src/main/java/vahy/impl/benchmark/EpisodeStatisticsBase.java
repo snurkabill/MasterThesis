@@ -3,21 +3,37 @@ package vahy.impl.benchmark;
 import vahy.api.benchmark.EpisodeStatistics;
 
 import java.time.Duration;
+import java.util.List;
 
 public class EpisodeStatisticsBase implements EpisodeStatistics {
 
     private final Duration totalDuration;
-    private final double averagePlayerStepCount;
-    private final double stdevPlayerStepCount;
+    private final int playerCount;
+    private final List<Double> averagePlayerStepCount;
+    private final List<Double> stdevPlayerStepCount;
+    private final List<Double> averageDecisionTimeInMillis;
+    private final List<Double> stdevDecisionTimeInMillis;
     private final double averageMillisPerEpisode;
     private final double stdevMillisPerEpisode;
-    private final double totalPayoffAverage;
-    private final double totalPayoffStdev;
+    private final List<Double> totalPayoffAverage;
+    private final List<Double> totalPayoffStdev;
 
-    public EpisodeStatisticsBase(Duration totalDuration, double averagePlayerStepCount, double stdevPlayerStepCount, double averageMillisPerEpisode, double stdevMillisPerEpisode, double totalPayoffAverage, double totalPayoffStdev) {
+    public EpisodeStatisticsBase(Duration totalDuration,
+                                 int playerCount,
+                                 List<Double> averagePlayerStepCount,
+                                 List<Double> stdevPlayerStepCount,
+                                 List<Double> averageDecisionTimeInMillis,
+                                 List<Double> stdevDecisionTimeInMillis,
+                                 double averageMillisPerEpisode,
+                                 double stdevMillisPerEpisode,
+                                 List<Double> totalPayoffAverage,
+                                 List<Double> totalPayoffStdev) {
         this.totalDuration = totalDuration;
+        this.playerCount = playerCount;
         this.averagePlayerStepCount = averagePlayerStepCount;
         this.stdevPlayerStepCount = stdevPlayerStepCount;
+        this.averageDecisionTimeInMillis = averageDecisionTimeInMillis;
+        this.stdevDecisionTimeInMillis = stdevDecisionTimeInMillis;
         this.averageMillisPerEpisode = averageMillisPerEpisode;
         this.stdevMillisPerEpisode = stdevMillisPerEpisode;
         this.totalPayoffAverage = totalPayoffAverage;
@@ -36,18 +52,36 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         return sb.toString();
     }
 
+    public int getPlayerCount() {
+        return playerCount;
+    }
+
+    @Override
     public Duration getTotalDuration() {
         return totalDuration;
     }
 
-    public double getAveragePlayerStepCount() {
+    @Override
+    public List<Double> getAveragePlayerStepCount() {
         return averagePlayerStepCount;
     }
 
-    public double getStdevPlayerStepCount() {
+    @Override
+    public List<Double> getStdevPlayerStepCount() {
         return stdevPlayerStepCount;
     }
 
+    @Override
+    public List<Double> getAverageDecisionTimeInMillis() {
+        return averageDecisionTimeInMillis;
+    }
+
+    @Override
+    public List<Double> getStdevDecisionTimeInMillis() {
+        return stdevDecisionTimeInMillis;
+    }
+
+    @Override
     public double getAverageMillisPerEpisode() {
         return averageMillisPerEpisode;
     }
@@ -57,11 +91,13 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         return stdevMillisPerEpisode;
     }
 
-    public double getTotalPayoffAverage() {
+    @Override
+    public List<Double> getTotalPayoffAverage() {
         return totalPayoffAverage;
     }
 
-    public double getTotalPayoffStdev() {
+    @Override
+    public List<Double> getTotalPayoffStdev() {
         return totalPayoffStdev;
     }
 
@@ -71,8 +107,12 @@ public class EpisodeStatisticsBase implements EpisodeStatistics {
         sb.append(System.lineSeparator());
         sb.append("TotalDuration [").append(totalDuration.toMillis()).append("] ms");
         sb.append(System.lineSeparator());
-        sb.append(printOneProperty("Player Step Count", averagePlayerStepCount, stdevPlayerStepCount));
-        sb.append(printOneProperty("Total Payoff", totalPayoffAverage, totalPayoffStdev));
+        for (int i = 0; i < playerCount; i++) {
+            sb.append(printOneProperty("Player " + i + " StepCount", averagePlayerStepCount.get(i), stdevPlayerStepCount.get(i)));
+            sb.append(printOneProperty("Total payoff for " + i + "th player", totalPayoffAverage.get(i), totalPayoffStdev.get(i)));
+            sb.append(printOneProperty("Avg decision time " + i + "th player", averageDecisionTimeInMillis.get(i), stdevDecisionTimeInMillis.get(i)));
+
+        }
         sb.append(printOneProperty("Ms per episode", averageMillisPerEpisode, stdevMillisPerEpisode));
         sb.append(System.lineSeparator());
         return sb.toString();
