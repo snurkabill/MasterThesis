@@ -11,13 +11,9 @@
 
     <modules>
         <module>Commons</module>
-        <module>HallwayGame</module>
         <module>StateSpaceSearch</module>
         <module>ReinforcementLearning</module>
         <module>PaperSandbox</module>
-        <module>RandomWalk</module>
-        <module>SimplifiedHallway</module>
-        <!--        <module>../Examples</module>-->
     </modules>
 
     <properties>
