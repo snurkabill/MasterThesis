@@ -5,19 +5,19 @@ import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ReplayBufferDataAggregator implements DataAggregator {
 
     private final int bufferSize;
-    private final LinkedList<List<ImmutableTuple<DoubleVector, MutableDoubleArray>>> buffer;
+    private final ArrayDeque<List<ImmutableTuple<DoubleVector, MutableDoubleArray>>> buffer;
 
-    public ReplayBufferDataAggregator(int bufferSize, LinkedList<List<ImmutableTuple<DoubleVector, MutableDoubleArray>>> buffer) {
+    public ReplayBufferDataAggregator(int bufferSize) {
         this.bufferSize = bufferSize;
-        this.buffer = buffer;
+        this.buffer = new ArrayDeque<>(bufferSize);
     }
 
     @Override

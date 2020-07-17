@@ -2,7 +2,7 @@ package vahy.examples.simplifiedHallway;
 
 import java.util.Arrays;
 
-public class SHStaticPart {
+public final class SHStaticPart {
 
     private final double[] noRewardGained;
     private final double[] environmentMovementReward;

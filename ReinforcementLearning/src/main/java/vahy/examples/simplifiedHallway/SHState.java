@@ -297,16 +297,30 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (!(o instanceof  SHState)) {
+            return false;
+        }
 
         SHState shState = (SHState) o;
 
-        if (agentXCoordination != shState.agentXCoordination) return false;
-        if (agentYCoordination != shState.agentYCoordination) return false;
-        if (isAgentTurn != shState.isAgentTurn) return false;
-        if (isAgentKilled != shState.isAgentKilled) return false;
-        if (rewardsLeft != shState.rewardsLeft) return false;
+        if (agentXCoordination != shState.agentXCoordination) {
+            return false;
+        }
+        if (agentYCoordination != shState.agentYCoordination) {
+            return false;
+        }
+        if (isAgentTurn != shState.isAgentTurn) {
+            return false;
+        }
+        if (isAgentKilled != shState.isAgentKilled) {
+            return false;
+        }
+        if (rewardsLeft != shState.rewardsLeft) {
+            return false;
+        }
         return Arrays.deepEquals(rewards, shState.rewards);
     }
 

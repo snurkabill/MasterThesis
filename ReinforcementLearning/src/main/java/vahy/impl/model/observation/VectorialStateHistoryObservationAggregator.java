@@ -3,12 +3,12 @@ package vahy.impl.model.observation;
 import vahy.api.model.Action;
 import vahy.api.model.observation.AbstractObservationAggregator;
 
+import java.util.ArrayDeque;
 import java.util.Iterator;
-import java.util.LinkedList;
 
 public class VectorialStateHistoryObservationAggregator<TAction extends Enum<TAction> & Action> extends AbstractObservationAggregator<TAction, DoubleVector, DoubleVectorialObservationAggregation> {
 
-    private final LinkedList<DoubleVector> observationQueue = new LinkedList<>();
+    private final ArrayDeque<DoubleVector> observationQueue = new ArrayDeque<>();
 
     protected VectorialStateHistoryObservationAggregator(int aggregationQueueSize) {
         super(aggregationQueueSize);

@@ -26,6 +26,8 @@ import java.util.List;
 
 public class Example02 {
 
+    private Example02() {}
+
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
 
         var config = new BomberManConfig(500, true, 100, 1, 1, 4, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
@@ -83,7 +85,7 @@ public class Example02 {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((BomberManConfig, splittableRandom) -> policyMode -> (new BomberManInstanceInitializer(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setPlayerPolicySupplierList(policyArgumentsList);

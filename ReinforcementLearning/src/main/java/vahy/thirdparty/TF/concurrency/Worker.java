@@ -7,11 +7,8 @@ import java.util.concurrent.Callable;
 public class Worker implements Callable<double[][]> {
 
     private final TFModelImproved wrapper;
-    private final int startFromIndex;
-    private final int endAtIndex;
-    private final int batchSize;
     private final double[][][] batches;
-    private double[][][] predictions;
+    private final double[][][] predictions;
 
     public Worker(TFModelImproved wrapper, int startFromIndex, int endAtIndex, double[][] sourceData, int batchSize) {
         if((endAtIndex - startFromIndex) % batchSize != 0) {
@@ -31,10 +28,6 @@ public class Worker implements Callable<double[][]> {
             }
         }
         this.wrapper = wrapper;
-        this.startFromIndex = startFromIndex;
-        this.endAtIndex = endAtIndex;
-
-        this.batchSize = batchSize;
         this.predictions = new double[batchCount][][];
     }
 

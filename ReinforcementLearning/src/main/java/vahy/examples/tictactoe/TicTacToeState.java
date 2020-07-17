@@ -295,7 +295,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!( o instanceof TicTacToeState)) return false;
 
         TicTacToeState that = (TicTacToeState) o;
 

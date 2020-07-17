@@ -63,7 +63,7 @@ public abstract class AbstractTicTacToeConvergenceTest extends AbstractConvergen
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(ticTacConfig)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new TicTacToeStateInitializer(config_, splittableRandom_).createInitialState(policyMode))
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())

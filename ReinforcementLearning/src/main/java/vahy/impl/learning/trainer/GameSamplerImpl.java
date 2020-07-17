@@ -136,6 +136,7 @@ public class GameSamplerImpl<
         return registeredPolicyList;
     }
 
+    @Override
     public List<EpisodeResults<TAction, TObservation, TState>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);

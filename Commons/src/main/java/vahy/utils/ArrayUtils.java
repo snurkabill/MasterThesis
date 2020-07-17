@@ -7,6 +7,9 @@ import java.util.stream.Collectors;
 
 public class ArrayUtils {
 
+    private ArrayUtils() {
+    }
+
     public static <T> boolean hasRectangleShape(List<List<T>> matrix) {
         return matrix.stream().collect(Collectors.groupingBy(List::size)).values().size() == 1;
     }
@@ -144,7 +147,8 @@ public class ArrayUtils {
      * @throws IllegalArgumentException if the array types are incompatible
      * @since 2.1
      */
-    public static <T> T[] addAll(final T[] array1, final T... array2) {
+
+    public static <T> T[] addAll(final T[] array1, final T[] array2) {
         if (array1 == null) {
             return clone(array2);
         } else if (array2 == null) {

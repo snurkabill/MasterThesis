@@ -34,8 +34,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
 
     private final Graph commonGraph;
     private final Session trainingSession;
-    private final Tensor trainingKeepProbability;
-    private final Tensor learningRate;
+    private final Tensor<?> trainingKeepProbability;
+    private final Tensor<?> learningRate;
 
     private final DoubleBuffer inputDoubleBuffer;
     private final DoubleBuffer targetDoubleBuffer;

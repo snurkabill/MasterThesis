@@ -29,7 +29,7 @@ public abstract class AbstractSHConvergenceTest extends AbstractConvergenceTest 
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setStateStateWrapperInitializer(StateWrapper::new)

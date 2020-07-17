@@ -30,7 +30,7 @@ public class TFModel_deprecated implements SupervisedTrainableModel, AutoCloseab
     private final SimpleTimer timer = new SimpleTimer();
 
 //    private double[][] inputMatrixForOneVector;
-    private Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
+    private final Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
 
     public TFModel_deprecated(int inputDimension, int outputDimension, int trainingIterations, int batchSize, byte[] bytes, SplittableRandom random) {
         this.inputDimension = inputDimension;
@@ -68,6 +68,7 @@ public class TFModel_deprecated implements SupervisedTrainableModel, AutoCloseab
         }
     }
 
+    @Override
     public void fit(double[][] input, double[][] target) {
         if(input.length != target.length) {
             throw new IllegalArgumentException("Input and target lengths differ");
@@ -107,6 +108,7 @@ public class TFModel_deprecated implements SupervisedTrainableModel, AutoCloseab
         }
     }
 
+    @Override
     public double[] predict(double[] input) {
         var matrix = new double[1][input.length]; // TODO: get rid of allocation
         System.arraycopy(input, 0, matrix[0], 0, inputDimension);
@@ -128,6 +130,7 @@ public class TFModel_deprecated implements SupervisedTrainableModel, AutoCloseab
         }
     }
 
+    @Override
     public double[][] predict(double[][] input) {
         try (Tensor<Double> tfInput = Tensors.create(input)) {
             double[] outputBuffer = new double[outputDimension * input.length];
@@ -150,10 +153,12 @@ public class TFModel_deprecated implements SupervisedTrainableModel, AutoCloseab
         }
     }
 
+    @Override
     public int getInputDimension() {
         return inputDimension;
     }
 
+    @Override
     public int getOutputDimension() {
         return outputDimension;
     }

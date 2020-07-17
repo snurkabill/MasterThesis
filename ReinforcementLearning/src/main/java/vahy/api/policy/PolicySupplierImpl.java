@@ -42,7 +42,6 @@ public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObserva
         return "PolicySupplierImpl{" +
             "policyId=" + policyId +
             ", policyCategoryId=" + policyCategoryId +
-            ", random=" + random +
             ", outerDefPolicySupplier=" + outerDefPolicySupplier +
             '}';
     }

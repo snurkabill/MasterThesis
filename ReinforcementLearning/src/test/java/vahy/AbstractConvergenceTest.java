@@ -6,10 +6,10 @@ import org.junit.platform.commons.logging.LoggerFactory;
 
 public abstract class AbstractConvergenceTest {
 
-    public static double TEST_CONVERGENCE_ASSERT_TOLERANCE = Math.pow(10, -10);
-    public static Logger logger = LoggerFactory.getLogger(AbstractConvergenceTest.class);
+    public static final double TEST_CONVERGENCE_ASSERT_TOLERANCE = Math.pow(10, -10);
+    public static final Logger logger = LoggerFactory.getLogger(AbstractConvergenceTest.class);
 
-    public static int TEST_THREAD_COUNT = Runtime.getRuntime().availableProcessors() - 1;
+    public static final int TEST_THREAD_COUNT = Runtime.getRuntime().availableProcessors() - 1;
 
     public static void assertConvergenceResult(double expectedMin, double expectedMax, double actual, String propertyName) {
         if(expectedMin > expectedMax) {

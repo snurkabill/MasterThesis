@@ -11,10 +11,10 @@ import vahy.api.model.observation.Observation;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -59,10 +59,10 @@ public class EpisodeWriter<
     private void printConfig(Config config, String configName, File resultSubfolder) {
         File experimentSetupFile = new File(resultSubfolder, configName);
         try {
-            var out = new PrintWriter(experimentSetupFile);
+            var out = new PrintWriter(experimentSetupFile, Charset.defaultCharset());
             out.print(config.toFile());
             out.close();
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -97,7 +97,7 @@ public class EpisodeWriter<
         var filename = file.getAbsolutePath();
         try {
             writeEpisodeMetadata(filename, episodeResults);
-            BufferedWriter outputWriter = new BufferedWriter(new FileWriter(Paths.get(filename, "data").toFile()));
+            BufferedWriter outputWriter = new BufferedWriter(new FileWriter(Paths.get(filename, "data").toFile(), Charset.defaultCharset()));
             outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getCsvHeader()) + System.lineSeparator());
             for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
                 outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getCsvRecord()) + System.lineSeparator());
@@ -105,7 +105,7 @@ public class EpisodeWriter<
             outputWriter.flush();
             outputWriter.close();
 
-            BufferedWriter outputWriterStates = new BufferedWriter(new FileWriter(filename + "/stateDump"));
+            BufferedWriter outputWriterStates = new BufferedWriter(new FileWriter(filename + "/stateDump", Charset.defaultCharset()));
             outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getFromState().getCsvHeader()) + System.lineSeparator());
             for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
                 outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getFromState().getCsvRecord()) + System.lineSeparator());
@@ -119,7 +119,7 @@ public class EpisodeWriter<
     }
 
     private void writeEpisodeMetadata(String filename, EpisodeResults<TAction, TObservation, TState> episodeResults) throws IOException {
-        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/metadata"));
+        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/metadata", Charset.defaultCharset()));
         outputWriter.write(episodeResults.episodeMetadataToFile());
         outputWriter.flush();
         outputWriter.close();

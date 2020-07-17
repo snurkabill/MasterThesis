@@ -4,6 +4,9 @@ import java.util.Random;
 
 public class EnumUtils {
 
+    private EnumUtils() {
+    }
+
     public static <T extends Enum<?>> T generateRandomEnumUniformly(Class<T> clazz, Random random){
         int x = random.nextInt(clazz.getEnumConstants().length);
         return clazz.getEnumConstants()[x];
@@ -20,11 +23,11 @@ public class EnumUtils {
         return mask;
     }
 
-    public static IllegalArgumentException createExceptionForUnknownEnumValue(Enum enumValue) {
+    public static <A extends Enum<A>> IllegalArgumentException createExceptionForUnknownEnumValue(Enum<A> enumValue) {
         return new IllegalArgumentException("Unknown enum value: [" + enumValue + "]");
     }
 
-    public static IllegalStateException createExceptionForNotExpectedEnumValue(Enum enumValue) {
+    public static <A extends Enum<A>> IllegalStateException createExceptionForNotExpectedEnumValue(Enum<A> enumValue) {
         return new IllegalStateException("Not expected enum value: [" + enumValue + "])");
     }
 

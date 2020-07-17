@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 public class CollectionUtils {
 
+    private CollectionUtils() {
+    }
+
     public static<T> List<List<T>> split(List<T> list, int index) {
         return new ArrayList<>(
             list.stream()

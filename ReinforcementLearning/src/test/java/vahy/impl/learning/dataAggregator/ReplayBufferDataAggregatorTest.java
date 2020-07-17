@@ -14,7 +14,7 @@ public class ReplayBufferDataAggregatorTest {
 
     @Test
     public void basicTest() {
-        var replayBuffer = new ReplayBufferDataAggregator(2, new LinkedList<>());
+        var replayBuffer = new ReplayBufferDataAggregator(2);
 
         var data = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>();
         data.add(new ImmutableTuple<>(new DoubleVector(new double[] {0, 0, 1}), new MutableDoubleArray(new double[] {1, 0}, false)));
@@ -42,7 +42,7 @@ public class ReplayBufferDataAggregatorTest {
 
     @Test
     public void twoAdditionTest() {
-        var replayBuffer = new ReplayBufferDataAggregator(1, new LinkedList<>());
+        var replayBuffer = new ReplayBufferDataAggregator(1);
 
         var data = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>();
         data.add(new ImmutableTuple<>(new DoubleVector(new double[] {0, 0, 1}), new MutableDoubleArray(new double[] {1, 0}, false)));
@@ -80,7 +80,7 @@ public class ReplayBufferDataAggregatorTest {
 
     @Test
     public void multiAdditionTest() {
-        var replayBuffer = new ReplayBufferDataAggregator(2, new LinkedList<>());
+        var replayBuffer = new ReplayBufferDataAggregator(2);
 
         var data = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>();
         data.add(new ImmutableTuple<>(new DoubleVector(new double[] {0, 0, 1}), new MutableDoubleArray(new double[] {1, 0}, false)));

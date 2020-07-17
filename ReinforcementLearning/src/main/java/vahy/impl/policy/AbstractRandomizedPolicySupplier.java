@@ -28,6 +28,7 @@ public abstract class AbstractRandomizedPolicySupplier<
         this.policyCategoryId = policyCategoryId;
     }
 
+    @Override
     public int getPolicyId() {
         return policyId;
     }
