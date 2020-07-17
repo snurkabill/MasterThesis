@@ -1,13 +1,11 @@
 package vahy.paperGenerics.policy.linearProgram.deprecated;
 
 import com.quantego.clp.CLPExpression;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
@@ -20,8 +18,6 @@ public class OptimalFlowHardConstraintCalculatorDeprecated<
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractLinearProgramOnTreeDeprecated<TAction, TObservation, TSearchNodeMetadata, TState> {
-
-    private static final Logger logger = LoggerFactory.getLogger(OptimalFlowHardConstraintCalculatorDeprecated.class.getName());
 
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;

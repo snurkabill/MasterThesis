@@ -39,6 +39,7 @@ public class PaperPolicyRecord extends PolicyRecordBase {
                 '}';
     }
 
+    @Override
     public List<String> getCsvHeader() {
         var list = new ArrayList<>(super.getCsvHeader());
         list.add("Predicted risk");
@@ -47,6 +48,7 @@ public class PaperPolicyRecord extends PolicyRecordBase {
         return list;
     }
 
+    @Override
     public List<String> getCsvRecord() {
         var list = new ArrayList<>(super.getCsvRecord());
         list.add(Double.toString(predictedRisk));

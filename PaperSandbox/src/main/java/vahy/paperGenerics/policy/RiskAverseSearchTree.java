@@ -183,7 +183,6 @@ public class RiskAverseSearchTree<
     }
 
     private void updateRiskLevel() {
-        var oldRisk = totalRiskAllowed;
         if(anyRiskEstimated > 0.0) {
             if(cumulativeNominator > totalRiskAllowed) {
                 totalRiskAllowed = 0;
@@ -212,7 +211,7 @@ public class RiskAverseSearchTree<
         var riskOfOtherPlayerActions = 0.0d;
         for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
-            childRisk = roundRiskIfBelowZero(riskOfOtherPlayerActions, "RiskOfPlayerAction");
+            childRisk = roundRiskIfBelowZero(childRisk, "RiskOfPlayerAction");
             anyRiskEstimated += childRisk;
             if(entry.getKey().ordinal() != action.ordinal()) {
                 riskOfOtherPlayerActions += childRisk * playerActionDistribution.get(entry.getKey());
@@ -226,7 +225,7 @@ public class RiskAverseSearchTree<
         var riskOfOtherOpponentActions = 0.0;
         for (var entry : getRoot().getChildNodeMap().entrySet()) {
             var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
-            childRisk = roundRiskIfBelowZero(riskOfOtherOpponentActions, "RiskOfOpponentAction");
+            childRisk = roundRiskIfBelowZero(childRisk, "RiskOfOpponentAction");
             anyRiskEstimated += childRisk;
             if(entry.getKey().ordinal() != action.ordinal()) {
                 riskOfOtherOpponentActions += childRisk * entry.getValue().getSearchNodeMetadata().getPriorProbability() * cumulativeDenominator;

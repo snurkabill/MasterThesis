@@ -132,7 +132,7 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SHRiskState)) return false;
 
         SHRiskState that = (SHRiskState) o;
 

@@ -10,6 +10,9 @@ import java.util.concurrent.Future;
 
 public class CLPMultiThreadTest {
 
+    private CLPMultiThreadTest() {
+    }
+
     public static void main(String[] args) throws InterruptedException, ExecutionException {
 
         int seed = 0;          // random number seed
@@ -50,13 +53,13 @@ public class CLPMultiThreadTest {
                 }
             }
 
-            var singleThreaded = new Worker(cost, -1);
+            var singleThreaded = new Worker(cost);
 
             singleThreaded.run();
             double referenceSolution = singleThreaded.getSolution();
             double[][] referenceSolutionArr = singleThreaded.getAssigemment();
 
-            var singleThreaded2 = new Worker(cost, -2);
+            var singleThreaded2 = new Worker(cost);
             singleThreaded2.run();
             double referenceSolution2 = singleThreaded2.getSolution();
             double[][] referenceSolutionArr2 = singleThreaded2.getAssigemment();
@@ -67,10 +70,10 @@ public class CLPMultiThreadTest {
 
             var list = new ArrayList<Worker>();
             for (int i = 0; i < 1000; i += 4) {
-                list.add(new Worker(cost, i));
-                list.add(new Worker(cost2, i + 1));
-                list.add(new Worker(cost3, i + 2));
-                list.add(new Worker(cost4, i + 3));
+                list.add(new Worker(cost));
+                list.add(new Worker(cost2));
+                list.add(new Worker(cost3));
+                list.add(new Worker(cost4));
             }
             ExecutorService executorService = Executors.newFixedThreadPool(50);
             List<Future<Worker>> futures = executorService.invokeAll(list);

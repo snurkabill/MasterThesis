@@ -255,7 +255,7 @@ public class SHRiskTest {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHRiskInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> (new SHRiskInstanceSupplier(config_, splittableRandom_)).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
@@ -311,7 +311,7 @@ public class SHRiskTest {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHRiskInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> (new SHRiskInstanceSupplier(config_, splittableRandom_)).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
@@ -320,52 +320,6 @@ public class SHRiskTest {
 
         assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
     }
-
-//    @ParameterizedTest(name = "Trap probability {0} to reach {1} expectedPayoff with seed {2}")
-//    @MethodSource("SHTest12Params")
-//    public void convergence12Test(double trapProbability, double expectedPayoff, long seed) {
-//        var config = new SHConfigBuilder()
-//            .isModelKnown(true)
-//            .reward(100)
-//            .gameStringRepresentation(SHInstance.BENCHMARK_12)
-//            .maximalStepCountBound(100)
-//            .stepPenalty(10)
-//            .trapProbability(trapProbability)
-//            .buildConfig();
-//
-//        var systemConfig = new SystemConfig(
-//            seed,
-//            false,
-//            Runtime.getRuntime().availableProcessors() - 1,
-//            false,
-//            10000,
-//            0,
-//            false,
-//            false,
-//            false,
-//            Path.of("TEST_PATH"),
-//            null);
-//
-//        var algorithmConfig = new CommonAlgorithmConfigBase(500, 100);
-//
-//        var player = getPlayer(config);
-//        var policyArgumentsList = List.of(player);
-//
-//        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PolicyRecordBase, EpisodeStatisticsBase>()
-//            .setRoundName("SH03Test")
-//            .setAdditionalDataPointGeneratorListSupplier(null)
-//            .setCommonAlgorithmConfig(algorithmConfig)
-//            .setProblemConfig(config)
-//            .setSystemConfig(systemConfig)
-//            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
-//            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-//            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-//            .setStateStateWrapperInitializer(StateWrapper::new)
-//            .setPlayerPolicySupplierList(policyArgumentsList);
-//        var result = roundBuilder.execute();
-//
-//        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
-//    }
 
 
 }

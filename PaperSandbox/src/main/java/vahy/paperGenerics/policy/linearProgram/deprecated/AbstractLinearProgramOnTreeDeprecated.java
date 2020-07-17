@@ -12,8 +12,9 @@ import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.EnumMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.SplittableRandom;
 
@@ -34,7 +35,6 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
     private static final double UPPER_BOUND = 1.0;
     private static final double CHILD_VARIABLE_COEFFICIENT = 1.0;
     private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
-    private static final double RISK_COEFFICIENT = 1.0;
 
     private final Class<TAction> actionClass;
     private final boolean maximize;
@@ -43,12 +43,12 @@ public abstract class AbstractLinearProgramOnTreeDeprecated<
     protected final double noiseUpperBound;
     protected final double noiseLowerBound;
     protected CLP model;
-    protected LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> queue;
+    protected Deque<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> queue;
 
     protected AbstractLinearProgramOnTreeDeprecated(Class<TAction> actionClass, boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
         this.actionClass = actionClass;
         this.model = new CLP();
-        this.queue = new LinkedList<>();
+        this.queue = new ArrayDeque<>();
         this.maximize = maximize;
         this.random = random;
         this.strategy = strategy;

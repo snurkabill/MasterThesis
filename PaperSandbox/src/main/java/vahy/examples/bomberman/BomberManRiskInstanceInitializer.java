@@ -29,7 +29,6 @@ public class BomberManRiskInstanceInitializer extends AbstractInitialStateSuppli
         var goldSpawnSpots = new boolean[gameMatrix.length][];
         var goldReference = new int[gameMatrix.length][];
         var goldId = 0;
-        var freeSpotCount = 0;
         var freeSpotCoordinates = new ArrayList<ImmutableTuple<Integer, Integer>>();
         for (int i = 0; i < walls.length; i++) {
             walls[i] = new boolean[gameMatrix[i].length];
@@ -46,7 +45,6 @@ public class BomberManRiskInstanceInitializer extends AbstractInitialStateSuppli
                     goldReference[i][j] = -1;
                 }
                 if(gameMatrix[i][j] == ' ') {
-                    freeSpotCount++;
                     freeSpotCoordinates.add(new ImmutableTuple<>(i, j));
                 }
             }

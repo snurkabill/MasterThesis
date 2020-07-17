@@ -27,6 +27,7 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
     private final boolean isModelKnown;
     private Predictor<TState> perfectEnvironmentPredictor;
 
+    @SuppressWarnings("unchecked")
     public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory, TrainablePredictor trainablePredictor, boolean isModelKnown) {
         super(searchNodeFactory);
         this.searchNodeMetadataFactory = (PaperMetadataFactory<TAction, DoubleVector, TState>)searchNodeFactory.getSearchNodeMetadataFactory();

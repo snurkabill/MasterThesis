@@ -1,7 +1,5 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -18,32 +16,10 @@ public class MinimalRiskReachAbilityCalculator<
     TState extends PaperState<TAction, TObservation, TState>>
     implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(MinimalRiskReachAbilityCalculator.class.getName());
-
     @Override
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
-
-        return resolveNode(subtreeRoot);
-
-//        if(subtreeRoot.isLeaf()) {
-//            return ((PaperStateWrapper<TAction, TObservation, TState>)subtreeRoot.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
-//        }
-//
-//        var sum = 0.0;
-//        if(subtreeRoot.isPlayerTurn()) {
-//            return resolveNode(subtreeRoot);
-//        } else {
-//            for (var entry : subtreeRoot.getChildNodeMap().values()) {
-//                sum += entry.getSearchNodeMetadata().getPriorProbability() * resolveNode(entry);
-//            }
-//        }
-//        return sum;
-    }
-
-    private double resolveNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-
-        if(node.isLeaf()) {
-            return ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
+        if(subtreeRoot.isLeaf()) {
+            return ((PaperStateWrapper<TAction, TObservation, TState>)subtreeRoot.getStateWrapper()).isRiskHit() ?  1.0 : 0.0;
         }
 
         var linProgram = new AbstractLinearProgramOnTreeWithFixedOpponents<TAction, TObservation, TSearchNodeMetadata, TState>(false, null, NoiseStrategy.NONE) {
@@ -76,7 +52,7 @@ public class MinimalRiskReachAbilityCalculator<
             }
         };
 
-        var isFeasible = linProgram.optimizeFlow(node);
+        var isFeasible = linProgram.optimizeFlow(subtreeRoot);
         if(!isFeasible) {
             throw new IllegalStateException("Minimal risk reachAbility is not feasible. Should not happen. Investigate.");
         }

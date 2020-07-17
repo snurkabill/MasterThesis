@@ -5,7 +5,6 @@ import java.util.concurrent.Callable;
 
 public class Worker implements Callable<Worker> {
 
-    private final int id;
     private final CLPTestModel clp;
     private double result;
 
@@ -21,8 +20,7 @@ public class Worker implements Callable<Worker> {
         return result;
     }
 
-    public Worker(double[][] input, int id) {
-        this.id = id;
+    public Worker(double[][] input) {
         this.clp = new CLPTestModel(Worker.deepCopy(input));
     }
 
@@ -39,7 +37,7 @@ public class Worker implements Callable<Worker> {
     }
 
     @Override
-    public Worker call() throws Exception {
+    public Worker call() {
         run();
         return this;
     }

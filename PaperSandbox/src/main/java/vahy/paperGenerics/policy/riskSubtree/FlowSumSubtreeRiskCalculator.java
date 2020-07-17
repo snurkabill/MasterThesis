@@ -1,13 +1,13 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
-import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 public class FlowSumSubtreeRiskCalculator<
     TAction extends Enum<TAction> & Action,
@@ -20,7 +20,7 @@ public class FlowSumSubtreeRiskCalculator<
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subTreeRoot) {
         double risk = 0;
         int inGameEntityId = subTreeRoot.getStateWrapper().getInGameEntityId();
-        var queue = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
+        var queue = new ArrayDeque<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         queue.addFirst(subTreeRoot);
         while(!queue.isEmpty()) {
             var node = queue.poll();

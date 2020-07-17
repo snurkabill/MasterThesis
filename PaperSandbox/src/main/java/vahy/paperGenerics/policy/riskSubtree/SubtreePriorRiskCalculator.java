@@ -1,14 +1,14 @@
 package vahy.paperGenerics.policy.riskSubtree;
 
-import vahy.paperGenerics.PaperStateWrapper;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
-import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.PaperStateWrapper;
+import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.utils.ImmutableTuple;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 public class SubtreePriorRiskCalculator<
     TAction extends Enum<TAction> & Action,
@@ -21,7 +21,7 @@ public class SubtreePriorRiskCalculator<
     public double calculateRisk(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subtreeRoot) {
         double totalRisk = 0;
         var inGameEntityId = subtreeRoot.getStateWrapper().getInGameEntityId();
-        var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Double>>();
+        var queue = new ArrayDeque<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Double>>();
         queue.add(new ImmutableTuple<>(subtreeRoot, 1.0));
         while(!queue.isEmpty()) {
             var node = queue.poll();
