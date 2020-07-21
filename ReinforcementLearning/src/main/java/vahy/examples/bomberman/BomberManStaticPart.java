@@ -2,6 +2,8 @@ package vahy.examples.bomberman;
 
 public class BomberManStaticPart {
 
+    private static final int OBSERVATION_ONTURN_INDEX = 0;
+
     private final boolean[][] walls;
 
     private final boolean[][] goldEntitiesArray;
@@ -26,7 +28,6 @@ public class BomberManStaticPart {
 
     private final int totalStepsAllowed;
 
-    private final int observation_onTurnIndex = 0;
     private final int[] observation_playerIndexes;
     private final int[] observation_bombIndexes;
     private final int observation_goldInPlaceIndex;
@@ -134,7 +135,7 @@ public class BomberManStaticPart {
     }
 
     public int getObservation_onTurnIndex() {
-        return observation_onTurnIndex;
+        return OBSERVATION_ONTURN_INDEX;
     }
 
     public int[] getObservation_playerIndexes() {

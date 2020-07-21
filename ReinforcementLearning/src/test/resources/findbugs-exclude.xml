@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <Match>
+        <Class name="vahy.impl.learning.model.MutableDoubleArray"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.model.observation.DoubleVector"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.model.observation.DoubleVectorialObservationAggregation"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.predictor.EmptyPredictor"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.predictor.DataTablePredictor"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.predictor.DataTablePredictorWithLr"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.api.policy.PlayingDistribution"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.api.policy.PolicyRecordBase"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.episode.EpisodeStepRecordImpl"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+
+    <Match>
+        <Package name="~vahy\.examples\.bomberman"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Package name="~vahy\.examples\.simplifiedHallway"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Package name="~vahy\.examples\.tictactoe"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+</FindBugsFilter>

@@ -25,7 +25,7 @@ public class SHConfigBuilder {
     private double goalReward;
     private double stepPenalty;
     private double trapProbability;
-    private SHInstance hallwayGameInstance;
+    private SHInstance hallwayGameInstance = null;
 
     public SHConfigBuilder reward(double goalReward) {
         this.goalReward = goalReward;

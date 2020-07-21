@@ -21,9 +21,9 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     public static final int REWARD_OBSERVATION_SHIFT = 3;
     public static final int ENVIRONMENT_ID = 0;
     public static final int PLAYER_ID = 1;
-    public static final SHAction[] ENVIRONMENT_NO_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.NO_ACTION};
-    public static final SHAction[] ENVIRONMENT_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.TRAP, SHAction.NO_ACTION};
-    public static final SHAction[] PLAYER_ENTITY_ACTION_ARRAY = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
+    static final SHAction[] ENVIRONMENT_NO_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.NO_ACTION};
+    static final SHAction[] ENVIRONMENT_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.TRAP, SHAction.NO_ACTION};
+    static final SHAction[] PLAYER_ENTITY_ACTION_ARRAY = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
 
     private final int agentXCoordination;
     private final int agentYCoordination;
@@ -33,6 +33,57 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     private final double[][] rewards;
     private final int rewardsLeft;
     private final double[] doubleObservation;
+
+
+    public static class SHPerfectPredictor implements Predictor<SHState> {
+
+        private EnumMap<SHAction, Double> getEnvironmentProbabilities(SHState state) {
+            var actionMap = new EnumMap<SHAction, Double>(SHAction.class);
+            if(state.isAgentTurn) {
+                return actionMap;
+            }
+            var sum = 0.0;
+            var traps = state.staticPart.getTrapProbabilities();
+            if(traps[state.agentXCoordination][state.agentYCoordination] != 0) {
+                actionMap.put(SHAction.TRAP, traps[state.agentXCoordination][state.agentYCoordination]);
+                sum += traps[state.agentXCoordination][state.agentYCoordination];
+            }
+            actionMap.put(SHAction.NO_ACTION, 1.0 - sum);
+            return actionMap;
+        }
+
+
+        @Override
+        public double[] apply(SHState observation) {
+            var probs = getEnvironmentProbabilities(observation);
+            var prediction = new double[probs.size()];
+            int index = 0;
+            for (Map.Entry<SHAction, Double> entry : probs.entrySet()) {
+                prediction[index] = entry.getValue(); // entryMap is always sorted
+                index++;
+            }
+            return prediction;
+        }
+
+        @Override
+        public double[][] apply(SHState[] observationArray) {
+            var prediction = new double[observationArray.length][];
+            for (int i = 0; i < prediction.length; i++) {
+                prediction[i] = apply(observationArray[i]);
+            }
+            return prediction;
+        }
+
+        @Override
+        public List<double[]> apply(List<SHState> shStates) {
+            var output = new ArrayList<double[]>(shStates.size());
+            for (int i = 0; i < shStates.size(); i++) {
+                output.add(apply(shStates.get(i)));
+            }
+            return output;
+        }
+    }
+
 
     private static double getXPortion(SHStaticPart staticPart, int x) {
         int xTotal = staticPart.getWalls().length - 3;
@@ -74,20 +125,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
         this.doubleObservation = doubleObservation;
     }
 
-    private EnumMap<SHAction, Double> getEnvironmentProbabilities() {
-        var actionMap = new EnumMap<SHAction, Double>(SHAction.class);
-        if(isAgentTurn) {
-            return actionMap;
-        }
-        var sum = 0.0;
-        var traps = staticPart.getTrapProbabilities();
-        if(traps[agentXCoordination][agentYCoordination] != 0) {
-            actionMap.put(SHAction.TRAP, traps[agentXCoordination][agentYCoordination]);
-            sum += traps[agentXCoordination][agentYCoordination];
-        }
-        actionMap.put(SHAction.NO_ACTION, 1.0 - sum);
-        return actionMap;
-    }
+
 
     @Override
     public SHAction[] getAllPossibleActions() {
@@ -219,38 +257,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
 
     @Override
     public Predictor<SHState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<>() {
-
-            @Override
-            public double[] apply(SHState observation) {
-                var probs = observation.getEnvironmentProbabilities();
-                var prediction = new double[probs.size()];
-                int index = 0;
-                for (Map.Entry<SHAction, Double> entry : probs.entrySet()) {
-                    prediction[index] = entry.getValue(); // entryMap is always sorted
-                    index++;
-                }
-                return prediction;
-            }
-
-            @Override
-            public double[][] apply(SHState[] observationArray) {
-                var prediction = new double[observationArray.length][];
-                for (int i = 0; i < prediction.length; i++) {
-                    prediction[i] = apply(observationArray[i]);
-                }
-                return prediction;
-            }
-
-            @Override
-            public List<double[]> apply(List<SHState> shStates) {
-                var output = new ArrayList<double[]>(shStates.size());
-                for (int i = 0; i < shStates.size(); i++) {
-                    output.add(apply(shStates.get(i)));
-                }
-                return output;
-            }
-        };
+        return new SHPerfectPredictor();
     }
 
     @Override

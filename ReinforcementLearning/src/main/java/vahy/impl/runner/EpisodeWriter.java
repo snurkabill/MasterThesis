@@ -97,32 +97,32 @@ public class EpisodeWriter<
         var filename = file.getAbsolutePath();
         try {
             writeEpisodeMetadata(filename, episodeResults);
-            BufferedWriter outputWriter = new BufferedWriter(new FileWriter(Paths.get(filename, "data").toFile(), Charset.defaultCharset()));
-            outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getCsvHeader()) + System.lineSeparator());
-            for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
-                outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getCsvRecord()) + System.lineSeparator());
+            try(BufferedWriter outputWriter = new BufferedWriter(new FileWriter(Paths.get(filename, "data").toFile(), Charset.defaultCharset()))) {
+                outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getCsvHeader()) + System.lineSeparator());
+                for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
+                    outputWriter.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getCsvRecord()) + System.lineSeparator());
+                }
+                outputWriter.flush();
             }
-            outputWriter.flush();
-            outputWriter.close();
 
-            BufferedWriter outputWriterStates = new BufferedWriter(new FileWriter(filename + "/stateDump", Charset.defaultCharset()));
-            outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getFromState().getCsvHeader()) + System.lineSeparator());
-            for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
-                outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getFromState().getCsvRecord()) + System.lineSeparator());
+            try(BufferedWriter outputWriterStates = new BufferedWriter(new FileWriter(filename + "/stateDump", Charset.defaultCharset()))) {
+                outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(0).getFromState().getCsvHeader()) + System.lineSeparator());
+                for (int i = 0; i < episodeResults.getEpisodeHistory().size(); i++) {
+                    outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(i).getFromState().getCsvRecord()) + System.lineSeparator());
+                }
+                outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(episodeResults.getEpisodeHistory().size() - 1).getToState().getCsvRecord()) + System.lineSeparator());
+                outputWriterStates.flush();
             }
-            outputWriterStates.write(String.join(",", episodeResults.getEpisodeHistory().get(episodeResults.getEpisodeHistory().size() - 1).getToState().getCsvRecord()) + System.lineSeparator());
-            outputWriterStates.flush();
-            outputWriterStates.close();
-        } catch (Exception e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void writeEpisodeMetadata(String filename, EpisodeResults<TAction, TObservation, TState> episodeResults) throws IOException {
-        BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/metadata", Charset.defaultCharset()));
-        outputWriter.write(episodeResults.episodeMetadataToFile());
-        outputWriter.flush();
-        outputWriter.close();
+        try(BufferedWriter outputWriter = new BufferedWriter(new FileWriter(filename + "/metadata", Charset.defaultCharset()))) {
+            outputWriter.write(episodeResults.episodeMetadataToFile());
+            outputWriter.flush();
+        }
     }
 
 }

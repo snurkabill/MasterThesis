@@ -21,10 +21,10 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     public static final int ENVIRONMENT_ENTITY_ID = 0;
     public static final int ENTITY_ON_TURN_INDEX = 0;
 
-    public static final BomberManAction[] ENVIRONMENT_ACTION_ARRAY_NO_BOMB = new BomberManAction[] {BomberManAction.NO_ACTION};
-    public static final BomberManAction[] ENVIRONMENT_ACTION_ARRAY_DETONATE = new BomberManAction[] {BomberManAction.DETONATE_BOMB};
-    public static final BomberManAction[] REWARD_ACTION_ARRAY = new BomberManAction[] {BomberManAction.NO_ACTION_REWARD, BomberManAction.RESPAWN_REWARD};
-    public static final BomberManAction[] PLAYER_ACTION_ARRAY = new BomberManAction[] {BomberManAction.UP, BomberManAction.DOWN, BomberManAction.LEFT, BomberManAction.RIGHT, BomberManAction.DROP_BOMB};
+    static final BomberManAction[] ENVIRONMENT_ACTION_ARRAY_NO_BOMB = new BomberManAction[] {BomberManAction.NO_ACTION};
+    static final BomberManAction[] ENVIRONMENT_ACTION_ARRAY_DETONATE = new BomberManAction[] {BomberManAction.DETONATE_BOMB};
+    static final BomberManAction[] REWARD_ACTION_ARRAY = new BomberManAction[] {BomberManAction.NO_ACTION_REWARD, BomberManAction.RESPAWN_REWARD};
+    static final BomberManAction[] PLAYER_ACTION_ARRAY = new BomberManAction[] {BomberManAction.UP, BomberManAction.DOWN, BomberManAction.LEFT, BomberManAction.RIGHT, BomberManAction.DROP_BOMB};
 
     private static int calculatePlayerId(int entityId, int totalGoldCount) {
         if(entityId == 0) {

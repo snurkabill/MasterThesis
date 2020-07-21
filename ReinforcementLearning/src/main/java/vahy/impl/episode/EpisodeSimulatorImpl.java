@@ -108,8 +108,9 @@ public class EpisodeSimulatorImpl<
             }
 
             return resultsFactory.createResults(episodeHistoryList, policyIdTranslationMap, policyList.size(), playerStepsDone, averageDecisionDuration, totalStepsDone, totalCumulativePayoffList, Duration.ofMillis(end - episodeStart));
-        } catch(Exception e) {
-            throw new IllegalStateException(createErrorMsg(episodeHistoryList), e);
+        } catch(RuntimeException e) {
+            logger.error(createErrorMsg(episodeHistoryList));
+            throw e;
         }
     }
 

@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 
 public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState>, Observation {
 
-    public static final double[] PLAYER_ZERO_WON_REWARD = new double[] {1.0, -1.0};
-    public static final double[] PLAYER_ONE_WON_REWARD = new double[] {-1.0, 1.0};
-    public static final double[] IN_GAME_REWARD = new double[] {0.0, 0.0};
+    static final double[] PLAYER_ZERO_WON_REWARD = new double[] {1.0, -1.0};
+    static final double[] PLAYER_ONE_WON_REWARD = new double[] {-1.0, 1.0};
+    static final double[] IN_GAME_REWARD = new double[] {0.0, 0.0};
 
     private enum Player_inner {
         PLAYER_ZERO(Symbol.PLAYER_ZERO_SYMBOL),
