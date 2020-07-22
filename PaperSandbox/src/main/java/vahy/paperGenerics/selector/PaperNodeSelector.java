@@ -50,7 +50,7 @@ public class PaperNodeSelector<
 
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
         int maxIndexCount = 0;
-        if(max != min) {
+        if(max > min) {
             var norm = max - min;
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();

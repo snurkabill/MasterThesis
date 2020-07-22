@@ -46,12 +46,7 @@ public class UcbValueDistributionProvider<
             }
         }
 
-        if(min == max) {
-            var index = random.nextInt(childCount);
-            TAction[] allPossibleActions = node.getAllPossibleActions();
-            var action = allPossibleActions[index];
-            return new PlayingDistribution<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], RandomizedPolicy.EMPTY_ARRAY);
-        } else {
+        if(max > min) {
             List<TAction> actionList = new ArrayList<>(childCount);
             double[] rewardArray = new double[childCount];
             int j = 0;
@@ -67,6 +62,11 @@ public class UcbValueDistributionProvider<
             int index = RandomDistributionUtils.getRandomIndexFromDistribution(rewardArray, random);
             TAction action = actionList.get(index);
             return new PlayingDistribution<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId],RandomizedPolicy.EMPTY_ARRAY);
+        } else {
+            var index = random.nextInt(childCount);
+            TAction[] allPossibleActions = node.getAllPossibleActions();
+            var action = allPossibleActions[index];
+            return new PlayingDistribution<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], RandomizedPolicy.EMPTY_ARRAY);
         }
     }
 }

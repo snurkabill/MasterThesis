@@ -11,8 +11,8 @@ import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
 import java.util.SplittableRandom;
 
-@Deprecated
-public class OptimalFlowSoftConstraintDeprecateed<
+
+public class OptimalFlowSoftConstraintDeprecated<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
@@ -24,7 +24,7 @@ public class OptimalFlowSoftConstraintDeprecateed<
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
 
-    public OptimalFlowSoftConstraintDeprecateed(Class<TAction> actionClass, double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
+    public OptimalFlowSoftConstraintDeprecated(Class<TAction> actionClass, double totalRiskAllowed, SplittableRandom random, NoiseStrategy strategy) {
         super(actionClass, true, random, strategy);
         this.totalRiskExpression = model.createExpression();
         this.totalRiskAllowed = totalRiskAllowed;

@@ -11,7 +11,7 @@ import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
 
 import java.util.SplittableRandom;
 
-@Deprecated
+
 public class OptimalFlowHardConstraintCalculatorDeprecated<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,

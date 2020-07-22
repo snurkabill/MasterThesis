@@ -60,41 +60,43 @@ public class BomberManRiskState implements PaperState<BomberManAction, DoubleVec
         return innerState.getCommonObservation(inGameEntityId);
     }
 
+    private static class PerfectBomberManPredictor implements Predictor<BomberManRiskState> {
+
+        private Predictor<BomberManState> innerPredictor;
+
+        @Override
+        public double[] apply(BomberManRiskState observation) {
+            if(innerPredictor == null) {
+                innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
+            }
+            return innerPredictor.apply(observation.innerState);
+        }
+
+        @Override
+        public double[][] apply(BomberManRiskState[] observationArray) {
+            if(innerPredictor == null) {
+                innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
+            }
+            var innerStateObservationArray = new BomberManState[observationArray.length];
+            for (int i = 0; i < innerStateObservationArray.length; i++) {
+                innerStateObservationArray[i] = observationArray[i].innerState;
+            }
+            return innerPredictor.apply(innerStateObservationArray);
+        }
+
+        @Override
+        public List<double[]> apply(List<BomberManRiskState> observationArray) {
+            var output = new ArrayList<double[]>(observationArray.size());
+            for (int i = 0; i < observationArray.size(); i++) {
+                output.add(apply(observationArray.get(i)));
+            }
+            return output;
+        }
+    }
+
     @Override
     public Predictor<BomberManRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<BomberManRiskState>() {
-
-            private Predictor<BomberManState> innerPredictor;
-
-            @Override
-            public double[] apply(BomberManRiskState observation) {
-                if(innerPredictor == null) {
-                    innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
-                }
-                return innerPredictor.apply(observation.innerState);
-            }
-
-            @Override
-            public double[][] apply(BomberManRiskState[] observationArray) {
-                if(innerPredictor == null) {
-                    innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
-                }
-                var innerStateObservationArray = new BomberManState[observationArray.length];
-                for (int i = 0; i < innerStateObservationArray.length; i++) {
-                    innerStateObservationArray[i] = observationArray[i].innerState;
-                }
-                return innerPredictor.apply(innerStateObservationArray);
-            }
-
-            @Override
-            public List<double[]> apply(List<BomberManRiskState> observationArray) {
-                var output = new ArrayList<double[]>(observationArray.size());
-                for (int i = 0; i < observationArray.size(); i++) {
-                    output.add(apply(observationArray.get(i)));
-                }
-                return output;
-            }
-        };
+        return new PerfectBomberManPredictor();
     }
 
     @Override

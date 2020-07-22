@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <Match>
+        <Class name="vahy.paperGenerics.metadata.PaperMetadata"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.PaperTreeUpdater"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.policy.RiskAverseSearchTree"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.policy.linearProgram.deprecated.MinimalRiskReachAbilityCalculatorDeprecated$InnerRiskCalculator"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.policy.linearProgram.deprecated.MinimalRiskReachAbilityCalculatorDeprecated"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowHardConstraintCalculatorDeprecated"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowSoftConstraintDeprecated"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+
+
+    <Match>
+        <Package name="~vahy\.paperGenerics\.policy\.riskSubtree"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST, BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Package name="~vahy\.paperGenerics\.policy\.linearProgram"/>
+        <Bug pattern="BC_UNCONFIRMED_CAST, BC_UNCONFIRMED_CAST_OF_RETURN_VALUE"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.selector.PaperNodeSelector"/>
+        <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.paperGenerics.selector.RiskBasedSelector_V3"/>
+        <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.examples.bomberman.BomberManRiskState"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.examples.simplifiedHallway.SHRiskState"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.examples.tictactoe.TicTacToeRiskState"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+
+
+</FindBugsFilter>

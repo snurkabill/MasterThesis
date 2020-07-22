@@ -18,7 +18,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.SplittableRandom;
 
-@Deprecated
+
 public abstract class AbstractLinearProgramOnTreeDeprecated<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
