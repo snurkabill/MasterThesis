@@ -60,6 +60,13 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <excludeFilterFile>${project.basedir}/src/test/resources/findbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

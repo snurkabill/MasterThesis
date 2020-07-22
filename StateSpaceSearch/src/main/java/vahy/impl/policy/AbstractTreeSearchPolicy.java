@@ -24,24 +24,24 @@ public abstract class AbstractTreeSearchPolicy<
 
     protected final SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree;
 
-    protected final int countOfAllActionFromSameEntity;
+//    protected final int countOfAllActionFromSameEntity;
     protected final int countOfAllActions;
 
     public AbstractTreeSearchPolicy(int policyId, SplittableRandom random, double exploringConstant, TreeUpdateCondition treeUpdateCondition, SearchTreeImpl<TAction, TObservation, TSearchNodeMetadata, TState> searchTree) {
         super(random, policyId, exploringConstant);
         this.treeUpdateCondition = treeUpdateCondition;
         this.searchTree = searchTree;
-        this.countOfAllActionFromSameEntity = obtainCountOfAllActionFromSameEntity(searchTree.getRoot());
+//        this.countOfAllActionFromSameEntity = obtainCountOfAllActionFromSameEntity(searchTree.getRoot());
         this.countOfAllActions = obtainCountOfAllActions(searchTree.getRoot());
     }
 
-    private int obtainCountOfAllActionFromSameEntity(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> gameState) {
-        var actionArray = gameState.getAllPossibleActions();
-        if(actionArray.length == 0) {
-            throw new IllegalStateException("There must be at least one playable action.");
-        }
-        return actionArray[0].getCountOfAllActionsFromSameEntity();
-    }
+//    private int obtainCountOfAllActionFromSameEntity(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> gameState) {
+//        var actionArray = gameState.getAllPossibleActions();
+//        if(actionArray.length == 0) {
+//            throw new IllegalStateException("There must be at least one playable action.");
+//        }
+//        return actionArray[0].getCountOfAllActionsFromSameEntity();
+//    }
 
     private int obtainCountOfAllActions(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> gameState) {
         var actionArray = gameState.getAllPossibleActions();

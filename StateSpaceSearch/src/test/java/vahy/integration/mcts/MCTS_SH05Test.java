@@ -36,7 +36,7 @@ public class MCTS_SH05Test extends AbstractSHConvergenceTest {
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
-            defaultPrediction[i] = 1.0 / (totalActionCount);
+            defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0, 0.0}, 0.25);
@@ -60,7 +60,7 @@ public class MCTS_SH05Test extends AbstractSHConvergenceTest {
         );
     }
 
-    private static Stream<Arguments> params() {
+    public static Stream<Arguments> params() {
         return JUnitParameterizedTestHelper.cartesian(
             JUnitParameterizedTestHelper.cartesian(
                 Stream.of(

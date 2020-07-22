@@ -35,7 +35,7 @@ public class AlphaZeroSH03Test extends AbstractSHConvergenceTest {
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
-            defaultPrediction[i] = 1.0 / (totalActionCount);
+            defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
         var trainablePredictor = new AlphaZeroDataTablePredictor(defaultPrediction, 0.25, totalEntityCount);
@@ -59,7 +59,7 @@ public class AlphaZeroSH03Test extends AbstractSHConvergenceTest {
         );
     }
 
-    private static Stream<Arguments> params() {
+    public static Stream<Arguments> params() {
         return JUnitParameterizedTestHelper.cartesian(
             JUnitParameterizedTestHelper.cartesian(
                 Stream.of(

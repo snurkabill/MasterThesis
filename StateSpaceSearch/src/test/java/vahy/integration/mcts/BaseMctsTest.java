@@ -104,7 +104,7 @@ public class BaseMctsTest {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(ticTacConfig)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((ticTacToeConfig_, splittableRandom_) -> policyMode -> (new TicTacToeStateInitializer(ticTacToeConfig_, splittableRandom_)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((ticTacToeConfig_, splittableRandom_) -> policyMode -> new TicTacToeStateInitializer(ticTacToeConfig_, splittableRandom_).createInitialState(policyMode))
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())

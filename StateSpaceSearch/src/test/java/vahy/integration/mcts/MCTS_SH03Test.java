@@ -36,10 +36,10 @@ public class MCTS_SH03Test extends AbstractSHConvergenceTest {
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
-            defaultPrediction[i] = 1.0 / (totalActionCount);
+            defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
-        var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0, 0.0}, 0.1);
+        var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0, 0.0}, 0.25);
         var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState>(1, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
@@ -55,12 +55,12 @@ public class MCTS_SH03Test extends AbstractSHConvergenceTest {
             1,
             explorationSupplier,
             1,
-            10,
+            treeExpansionCount,
             predictorTrainingSetup
         );
     }
 
-    private static Stream<Arguments> params() {
+    public static Stream<Arguments> params() {
         return JUnitParameterizedTestHelper.cartesian(
             JUnitParameterizedTestHelper.cartesian(
                 Stream.of(
