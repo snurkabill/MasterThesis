@@ -57,41 +57,43 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
         return innerState.getCommonObservation(inGameEntityId);
     }
 
+    private static class PerfectShRiskPredictor implements Predictor<SHRiskState> {
+
+        private Predictor<SHState> innerPredictor;
+
+        @Override
+        public double[] apply(SHRiskState observation) {
+            if(innerPredictor == null) {
+                innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
+            }
+            return innerPredictor.apply(observation.innerState);
+        }
+
+        @Override
+        public double[][] apply(SHRiskState[] observationArray) {
+            if(innerPredictor == null) {
+                innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
+            }
+            var innerStateObservationArray = new SHState[observationArray.length];
+            for (int i = 0; i < innerStateObservationArray.length; i++) {
+                innerStateObservationArray[i] = observationArray[i].innerState;
+            }
+            return innerPredictor.apply(innerStateObservationArray);
+        }
+
+        @Override
+        public List<double[]> apply(List<SHRiskState> observationArray) {
+            var output = new ArrayList<double[]>(observationArray.size());
+            for (int i = 0; i < observationArray.size(); i++) {
+                output.add(apply(observationArray.get(i)));
+            }
+            return output;
+        }
+    };
+
     @Override
     public Predictor<SHRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<SHRiskState>() {
-
-            private Predictor<SHState> innerPredictor;
-
-            @Override
-            public double[] apply(SHRiskState observation) {
-                if(innerPredictor == null) {
-                    innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
-                }
-                return innerPredictor.apply(observation.innerState);
-            }
-
-            @Override
-            public double[][] apply(SHRiskState[] observationArray) {
-                if(innerPredictor == null) {
-                    innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
-                }
-                var innerStateObservationArray = new SHState[observationArray.length];
-                for (int i = 0; i < innerStateObservationArray.length; i++) {
-                    innerStateObservationArray[i] = observationArray[i].innerState;
-                }
-                return innerPredictor.apply(innerStateObservationArray);
-            }
-
-            @Override
-            public List<double[]> apply(List<SHRiskState> observationArray) {
-                var output = new ArrayList<double[]>(observationArray.size());
-                for (int i = 0; i < observationArray.size(); i++) {
-                    output.add(apply(observationArray.get(i)));
-                }
-                return output;
-            }
-        };
+        return new PerfectShRiskPredictor();
     }
 
     @Override
@@ -132,7 +134,7 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof SHRiskState)) return false;
 
         SHRiskState that = (SHRiskState) o;
 

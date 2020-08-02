@@ -8,18 +8,23 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 
 public class TFHelper {
 
     public static final Logger logger = LoggerFactory.getLogger(TFHelper.class.getName());
 
+    private TFHelper() {
+    }
+
     public static byte[] loadTensorFlowModel(Path scriptPath, SystemConfig systemConfig, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
-        var modelName = "tfModel_" + LocalDateTime.now().atZone(ZoneOffset.UTC);
+        var modelName = "tfModel_" + LocalDateTime.now(ZoneId.systemDefault()).atZone(ZoneOffset.UTC);
         modelName = modelName.replace(":", "_");
         Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath()
             + " " +
@@ -37,8 +42,8 @@ public class TFHelper {
             " " +
             (int)systemConfig.getRandomSeed());
 
-        try(BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+        try(BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.defaultCharset()));
+            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charset.defaultCharset()))) {
             String line;
             String line2;
 

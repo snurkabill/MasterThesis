@@ -2,9 +2,11 @@ package vahy.utils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class ReflectionHacks {
+
+    private ReflectionHacks() {
+    }
 
     @SuppressWarnings("unchecked")
     public static <Type> Type[] arrayFromGenericClass(final Class<Type> typeClass, int length)
@@ -27,27 +29,27 @@ public class ReflectionHacks {
         }
     }
 
-    public static <EnumType> EnumType[] getEnumValues(Class<EnumType> enumClass) {
-        try {
-            return ((EnumType[]) enumClass.getMethod("values", null).invoke(null, null));
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
+    public static <EnumType extends Enum<EnumType>> EnumType[] getEnumValues(Class<EnumType> enumClass) {
+        EnumType[] constants = enumClass.getEnumConstants();
+        if(constants == null) {
+            throw new IllegalStateException("Passed class: [ " + enumClass + " ] is not enum class.");
         }
+        return constants;
     }
 
-    public static <TInvokedOn, TReturnValue> TReturnValue invokeMethod(final TInvokedOn object,
-                                             final String methodName,
-                                             final Class<?>[] argumentTypeArray,
-                                             final Object[] argumentArray) {
-        try {
-            Method method = object.getClass().getMethod(methodName, argumentTypeArray);
-            Object returnValue = method.invoke(object, argumentArray);
-            @SuppressWarnings("unchecked")
-            TReturnValue returnValue1 = (TReturnValue) returnValue;
-            return returnValue1;
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static <TInvokedOn, TReturnValue> TReturnValue invokeMethod(final TInvokedOn object,
+//                                             final String methodName,
+//                                             final Class<?>[] argumentTypeArray,
+//                                             final Object[] argumentArray) {
+//        try {
+//            Method method = object.getClass().getMethod(methodName, argumentTypeArray);
+//            Object returnValue = method.invoke(object, argumentArray);
+//            @SuppressWarnings("unchecked")
+//            TReturnValue returnValue1 = (TReturnValue) returnValue;
+//            return returnValue1;
+//        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 }

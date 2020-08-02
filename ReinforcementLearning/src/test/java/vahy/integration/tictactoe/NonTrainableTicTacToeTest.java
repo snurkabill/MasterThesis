@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.examples.tictactoe.TicTacToeAction;
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
 
 public class NonTrainableTicTacToeTest extends  AbstractTicTacToeConvergenceTest {
 
-    private static Stream<Arguments> params() {
+    protected static Stream<Arguments> params() {
         return JUnitParameterizedTestHelper.cartesian(
             Stream.of(
                 Arguments.of(createUniformPolicy(0), createUniformPolicy(1), 0.02),
@@ -45,7 +46,7 @@ public class NonTrainableTicTacToeTest extends  AbstractTicTacToeConvergenceTest
         var systemConfig = new SystemConfig(
             seed,
             false,
-            TEST_THREAD_COUNT,
+            ConvergenceAssert.TEST_THREAD_COUNT,
             false,
             20_000,
             0,
@@ -63,7 +64,7 @@ public class NonTrainableTicTacToeTest extends  AbstractTicTacToeConvergenceTest
         var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(0);
         var playerTwoResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(1);
 
-        assertEquals(0.0, playerOneResult + playerTwoResult, TEST_CONVERGENCE_ASSERT_TOLERANCE);
-        assertConvergenceResult(0.0, maximalExpectedPlayerOneDiffFromZeroBound, Math.abs(playerOneResult), "PlayerOneResult");
+        assertEquals(0.0, playerOneResult + playerTwoResult, ConvergenceAssert.TEST_CONVERGENCE_ASSERT_TOLERANCE);
+        ConvergenceAssert.assertConvergenceResult(0.0, maximalExpectedPlayerOneDiffFromZeroBound, Math.abs(playerOneResult), "PlayerOneResult");
     }
 }

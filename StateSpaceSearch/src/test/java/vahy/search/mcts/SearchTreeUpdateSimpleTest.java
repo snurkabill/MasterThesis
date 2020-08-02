@@ -30,7 +30,7 @@ public class SearchTreeUpdateSimpleTest {
     private MCTSPredictionEvaluator<SHAction, DoubleVector, MCTSMetadata, SHState> evaluator;
 
     @BeforeEach
-    private void init() {
+    protected void init() {
         metadataFactory = new MCTSMetadataFactory<SHAction, DoubleVector, SHState>(2);
         nodeFactory = new SearchNodeBaseFactoryImpl<>(SHAction.class, metadataFactory);
         updater = new MCTSTreeUpdater<SHAction, DoubleVector, SHState>();
@@ -175,8 +175,8 @@ public class SearchTreeUpdateSimpleTest {
 
         updater.updateTree(child3);
         assertNodeMetadata(child3.getSearchNodeMetadata(), 1, new double[] {0.0, 0.0}, new double[]{0.0, -stepPenalty}, new double[]{0.0, 2 * -stepPenalty}, new double[]{0.0, 0.0});
-        assertNodeMetadata(child2.getSearchNodeMetadata(), 2, new double[] {0.0, -stepPenalty}, new double[]{0.0, 0.0}, new double[]{0.0, -stepPenalty}, new double[]{0.0, (-stepPenalty) / 2});
-        assertNodeMetadata(child.getSearchNodeMetadata(), 3, new double[] {0.0, -stepPenalty}, new double[]{0.0, -stepPenalty}, new double[]{0.0, -stepPenalty}, new double[]{0.0, (-stepPenalty) / 3});
+        assertNodeMetadata(child2.getSearchNodeMetadata(), 2, new double[] {0.0, -stepPenalty}, new double[]{0.0, 0.0}, new double[]{0.0, -stepPenalty}, new double[]{0.0, -stepPenalty / 2});
+        assertNodeMetadata(child.getSearchNodeMetadata(), 3, new double[] {0.0, -stepPenalty}, new double[]{0.0, -stepPenalty}, new double[]{0.0, -stepPenalty}, new double[]{0.0, -stepPenalty / 3});
         assertNodeMetadata(rootNode.getSearchNodeMetadata(), 4, new double[] {0.0, 4 * -stepPenalty}, new double[]{0.0, 0.0}, new double[]{0.0, 0.0}, new double[]{0.0, (4 * - stepPenalty) / 4} );
 
         updater.updateTree(child3);

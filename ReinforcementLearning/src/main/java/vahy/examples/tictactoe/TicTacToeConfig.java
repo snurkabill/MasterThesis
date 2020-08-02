@@ -8,10 +8,10 @@ import java.util.List;
 
 public class TicTacToeConfig extends ProblemConfig {
 
-    private static final int dimension = 3;
+    private static final int DIMENSION = 3;
 
     public TicTacToeConfig() {
-        super(dimension * dimension,
+        super(DIMENSION * DIMENSION,
             false,
             0,
             2,
@@ -20,7 +20,7 @@ public class TicTacToeConfig extends ProblemConfig {
     }
 
     public int getDimension() {
-        return dimension;
+        return DIMENSION;
     }
 
     @Override

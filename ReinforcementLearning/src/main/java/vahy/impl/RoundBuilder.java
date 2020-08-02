@@ -23,6 +23,7 @@ import vahy.impl.runner.Runner;
 import vahy.impl.runner.RunnerArguments;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -136,7 +137,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             throw new IllegalArgumentException("Missing policyArgumentList");
         }
         checkPolicyArgumentList(playerPolicyArgumentList);
-        timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
+        timestamp = LocalDateTime.now(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
         logger.info("Finalized setup with timestamp [{}]", timestamp);
         dumpData = (systemConfig.dumpEvaluationData() || systemConfig.dumpTrainingData());
     }

@@ -36,6 +36,8 @@ import java.util.stream.IntStream;
 
 public class Example_random_reproducing {
 
+    private Example_random_reproducing() {}
+
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
 
         var config = new BomberManConfig(
@@ -91,7 +93,6 @@ public class Example_random_reproducing {
 
         var actionClass = BomberManAction.class;
         var discountFactor = 1.0;
-        var rolloutCount = 1;
         var treeExpansionCount = 10;
         var cpuct = 1.0;
 
@@ -108,7 +109,7 @@ public class Example_random_reproducing {
         Arrays.fill(defPred, 10.0);
         var trainablePredictorMCTSEval_1 = new DataTablePredictorWithLr(defPred, 0.1);
         var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
-//        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+//        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 0,
@@ -141,7 +142,7 @@ public class Example_random_reproducing {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((BomberManConfig, splittableRandom) -> policyMode -> (new BomberManInstanceInitializer(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -60,7 +61,7 @@ public class SHRiskTest {
         var defaultPrediction = new double[totalEntityCount * 2 + totalActionCount];
         for (int i = totalEntityCount * 2; i < defaultPrediction.length; i++) {
 
-            defaultPrediction[i] = 1.0 / (totalActionCount);
+            defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
         var trainablePredictor = new PaperDataTablePredictorWithLr(defaultPrediction, 0.25, totalActionCount, totalEntityCount);
@@ -107,7 +108,7 @@ public class SHRiskTest {
                     NoiseStrategy.NOISY_05_06);
 
         var updater = new PaperTreeUpdater<SHAction, DoubleVector, SHRiskState>();
-        var nodeEvaluator = new PaperNodeEvaluator<SHAction, PaperMetadata<SHAction>, SHRiskState>(searchNodeFactory, trainablePredictor, config.isModelKnown());
+        var nodeEvaluator = new PaperNodeEvaluator<SHAction, SHRiskState>(searchNodeFactory, trainablePredictor, config.isModelKnown());
         var cpuctParameter = 1.0;
 
 
@@ -155,7 +156,7 @@ public class SHRiskTest {
         );
     }
 
-    private static Stream<Arguments> SHTest03Params() {
+    protected static Stream<Arguments> SHTest03Params() {
         return JUnitParameterizedTestHelper.cartesian(
             Stream.of(
                 Arguments.of(0.0, 80.0, 80.0, 1.0),
@@ -174,7 +175,7 @@ public class SHRiskTest {
         );
     }
 
-    private static Stream<Arguments> SHTest05Params() {
+    protected static Stream<Arguments> SHTest05Params() {
         return JUnitParameterizedTestHelper.cartesian(
             Stream.of(
                 Arguments.of(0.0, 290.0, 290.0, 1.0),
@@ -193,7 +194,7 @@ public class SHRiskTest {
         );
     }
 
-    private static Stream<Arguments> SHTest12Params() {
+    protected static Stream<Arguments> SHTest12Params() {
         return JUnitParameterizedTestHelper.cartesian(
             Stream.of(
                 Arguments.of(0.0, 600.0 - 120),
@@ -224,7 +225,7 @@ public class SHRiskTest {
         var systemConfig = new SystemConfig(
             seed,
             false,
-            Runtime.getRuntime().availableProcessors() - 1,
+            ConvergenceAssert.TEST_THREAD_COUNT,
             false,
             5000,
             0,
@@ -241,8 +242,7 @@ public class SHRiskTest {
             @Override
             public Double get() {
                 callCount++;
-                var x = Math.exp(-callCount / 5000.0);
-                return x;
+                return Math.exp(-callCount / 5000.0);
             }
         };
 
@@ -255,7 +255,7 @@ public class SHRiskTest {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHRiskInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
@@ -282,7 +282,7 @@ public class SHRiskTest {
         var systemConfig = new SystemConfig(
             seed,
             false,
-            Runtime.getRuntime().availableProcessors() - 1,
+            ConvergenceAssert.TEST_THREAD_COUNT,
             false,
             10000,
             0,
@@ -297,8 +297,7 @@ public class SHRiskTest {
             @Override
             public Double get() {
                 callCount++;
-                var x = Math.exp(-callCount / 10000.0) * 4;
-                return x;
+                return Math.exp(-callCount / 10000.0) * 4;
             }
         };
 
@@ -311,7 +310,7 @@ public class SHRiskTest {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHRiskInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
@@ -320,52 +319,6 @@ public class SHRiskTest {
 
         assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
     }
-
-//    @ParameterizedTest(name = "Trap probability {0} to reach {1} expectedPayoff with seed {2}")
-//    @MethodSource("SHTest12Params")
-//    public void convergence12Test(double trapProbability, double expectedPayoff, long seed) {
-//        var config = new SHConfigBuilder()
-//            .isModelKnown(true)
-//            .reward(100)
-//            .gameStringRepresentation(SHInstance.BENCHMARK_12)
-//            .maximalStepCountBound(100)
-//            .stepPenalty(10)
-//            .trapProbability(trapProbability)
-//            .buildConfig();
-//
-//        var systemConfig = new SystemConfig(
-//            seed,
-//            false,
-//            Runtime.getRuntime().availableProcessors() - 1,
-//            false,
-//            10000,
-//            0,
-//            false,
-//            false,
-//            false,
-//            Path.of("TEST_PATH"),
-//            null);
-//
-//        var algorithmConfig = new CommonAlgorithmConfigBase(500, 100);
-//
-//        var player = getPlayer(config);
-//        var policyArgumentsList = List.of(player);
-//
-//        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PolicyRecordBase, EpisodeStatisticsBase>()
-//            .setRoundName("SH03Test")
-//            .setAdditionalDataPointGeneratorListSupplier(null)
-//            .setCommonAlgorithmConfig(algorithmConfig)
-//            .setProblemConfig(config)
-//            .setSystemConfig(systemConfig)
-//            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
-//            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-//            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-//            .setStateStateWrapperInitializer(StateWrapper::new)
-//            .setPlayerPolicySupplierList(policyArgumentsList);
-//        var result = roundBuilder.execute();
-//
-//        assertConvergenceResult(expectedPayoff, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
-//    }
 
 
 }

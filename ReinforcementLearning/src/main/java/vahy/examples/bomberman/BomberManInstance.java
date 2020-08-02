@@ -17,7 +17,7 @@ public enum BomberManInstance {
     BM_02("examples/bomberman/02.txt"),
     BM_05("examples/bomberman/05.txt");
 
-    private String path;
+    private final String path;
 
     BomberManInstance(String path) {
         this.path = path;
@@ -28,17 +28,17 @@ public enum BomberManInstance {
     }
 
     public ImmutableTuple<char[][], Integer> getAsPlayground() throws IOException, InvalidInstanceSetupException {
-        var resource = this.getClass().getClassLoader().getResource(getPath());
+        var resource = BomberManInstance.class.getClassLoader().getResource(getPath());
         var lines = Files.readAllLines(Paths.get(resource.getPath()));
         return deserialize(lines);
     }
 
     private ImmutableTuple<char[][], Integer> deserialize(List<String> lines) throws InvalidInstanceSetupException {
-        List<List<Character>> list = new ArrayList<>();
+        List<List<Character>> list = new ArrayList<>(0);
         int goldCount = 0;
         for (int i = 0; i < lines.size(); i++) {
             char[] chars = lines.get(i).toCharArray();
-            List<Character> innerList = new ArrayList<>();
+            List<Character> innerList = new ArrayList<>(0);
             for (int j = 0; j < chars.length; j++) {
                 innerList.add(chars[j]);
                 if(chars[j] == 'G') {

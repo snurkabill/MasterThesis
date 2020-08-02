@@ -17,16 +17,17 @@ import java.util.stream.Collectors;
 
 public class ConcurrencyTesting {
 
+    private ConcurrencyTesting() {
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(ConcurrencyTesting.class.getName());
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         runTest(ConcurrencyTesting.class.getClassLoader().getResourceAsStream("tfModel/graph_FastTF.pb").readAllBytes(), false);
         runTest(ConcurrencyTesting.class.getClassLoader().getResourceAsStream("tfModel/graph_FastTF_probs.pb").readAllBytes(), true);
     }
 
-
-
-    public static void runTest(byte[] modelRepresentation, boolean predictProbability) {
+    public static void runTest(byte[] modelRepresentation, boolean predictProbability) throws InterruptedException {
         SplittableRandom random = new SplittableRandom(987412365);
 
         int instanceCount = 10_000;
@@ -116,8 +117,6 @@ public class ConcurrencyTesting {
                 logger.info("Index: [{}]", i);
 
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -138,7 +137,7 @@ public class ConcurrencyTesting {
     }
 
     public static void printFirstPredictions(double[][] outputData, int predictionCount) {
-        for (int j = 0; j < (Math.min(predictionCount, outputData.length)); j++) {
+        for (int j = 0; j < Math.min(predictionCount, outputData.length); j++) {
             logger.info("Prediction: [{}]", Arrays.toString(outputData[j]));
         }
     }

@@ -34,8 +34,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
 
     private final Graph commonGraph;
     private final Session trainingSession;
-    private final Tensor trainingKeepProbability;
-    private final Tensor learningRate;
+    private final Tensor<?> trainingKeepProbability;
+    private final Tensor<?> learningRate;
 
     private final DoubleBuffer inputDoubleBuffer;
     private final DoubleBuffer targetDoubleBuffer;
@@ -66,7 +66,7 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         this.trainingKeepProbability = Tensor.create(keepProb);
         this.learningRate = Tensor.create(learningRate);
 
-        this.pool = new ArrayBlockingQueue<>(poolSize, true);
+        this.pool = new ArrayBlockingQueue<>(poolSize);
         for (int i = 0; i < poolSize; i++) {
             this.pool.add(new TFWrapper(inputDimension, outputDimension, trainingSession));
         }

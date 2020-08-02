@@ -13,11 +13,11 @@ public class MutableDoubleArrayTest {
 
         var mda = new MutableDoubleArray(new double[] {0.0, 0.0, 0.0}, true);
         assertEquals(mda.getCounter(), 0);
-        assertArrayEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0});
+        assertArrayEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0}, DOUBLE_TOLERANCE);
 
         var mda2 = new MutableDoubleArray(new double[] {1.0, 2.0, 3.0}, false);
         assertEquals(mda2.getCounter(), 1);
-        assertArrayEquals(mda2.getDoubleArray(), new double[] {1.0, 2.0, 3.0});
+        assertArrayEquals(mda2.getDoubleArray(), new double[] {1.0, 2.0, 3.0}, DOUBLE_TOLERANCE);
     }
 
     @Test
@@ -26,12 +26,12 @@ public class MutableDoubleArrayTest {
         mda.addDataSample(new double[] {0.1, 0.2, 0.3, 0.4});
 
         assertEquals(mda.getCounter(), 1);
-        assertArrayEquals(mda.getDoubleArray(), new double[] {0.1, 0.2, 0.3, 0.4});
+        assertArrayEquals(mda.getDoubleArray(), new double[] {0.1, 0.2, 0.3, 0.4}, DOUBLE_TOLERANCE);
 
         mda.addDataSample(new double[] {-0.1, -0.2, -0.3, -0.4});
 
         assertEquals(mda.getCounter(), 2);
-        assertArrayEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0, 0.0});
+        assertArrayEquals(mda.getDoubleArray(), new double[] {0.0, 0.0, 0.0, 0.0}, DOUBLE_TOLERANCE);
 
     }
 

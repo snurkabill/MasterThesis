@@ -9,6 +9,9 @@ import java.util.stream.Stream;
 
 public class JUnitParameterizedTestHelper {
 
+    private JUnitParameterizedTestHelper() {
+    }
+
     /**
      * creates the cartesian product of two argument streams
      * <p>
@@ -18,19 +21,17 @@ public class JUnitParameterizedTestHelper {
      * @param b stream of JUnit5 arguments
      * @return the cartesian product where each tuple of arguments of stream a is multiplied by the tuple of arguments of stream b
      */
-    @SuppressWarnings("unchecked")
-    public static Stream<Arguments> cartesian(Stream a, Stream b) {
-        List argumentsA = (List) a.collect(Collectors.toList());
-        List argumentsB = (List) b.collect(Collectors.toList());
+    public static <A, B> Stream<Arguments> cartesian(Stream<A> a, Stream<B> b) {
+        List<A> argumentsA = a.collect(Collectors.toList());
+        List<B> argumentsB = b.collect(Collectors.toList());
 
         List<Arguments> result = cartesian(argumentsA, argumentsB);
 
         return result.stream();
     }
 
-    @SuppressWarnings("unchecked")
-    static List<Arguments> cartesian(List argumentsA, List argumentsB) {
-        List<Arguments> result = new ArrayList();
+    private static <A, B> List<Arguments> cartesian(List<A> argumentsA, List<B> argumentsB) {
+        List<Arguments> result = new ArrayList<>(argumentsA.size());
         for (Object o : argumentsA) {
             Object[] objects = asArray(o);
             for (Object o1 : argumentsB) {

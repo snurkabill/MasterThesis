@@ -21,7 +21,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.paperGenerics.policy.linearProgram.deprecated.MinimalRiskReachAbilityCalculatorDeprecated;
 import vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowHardConstraintCalculatorDeprecated;
-import vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowSoftConstraintDeprecateed;
+import vahy.paperGenerics.policy.linearProgram.deprecated.OptimalFlowSoftConstraintDeprecated;
 import vahy.paperGenerics.policy.riskSubtree.MinimalRiskReachAbilityCalculator;
 import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.paperGenerics.testDomain.EmptySpaceRiskState;
@@ -134,7 +134,7 @@ public class FlowConstraintCalculatorTest {
                 sum_BUILD_CALC_1 += System.currentTimeMillis() - start;
 
                 start = System.currentTimeMillis();
-                var calculator2 = new OptimalFlowSoftConstraintDeprecateed<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, risk, null, noiseStrategy);
+                var calculator2 = new OptimalFlowSoftConstraintDeprecated<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState>(EmptySpaceAction.class, risk, null, noiseStrategy);
                 sum_BUILD_CALC_2 += System.currentTimeMillis() - start;
 
                 start = System.currentTimeMillis();
@@ -229,7 +229,7 @@ public class FlowConstraintCalculatorTest {
     private SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> initializeTree(
         PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> paperNodeSelector,
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state,
-        PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> nodeEvaluator,
+        PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState> nodeEvaluator,
         SearchNodeFactory<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchNodeFactory,
         PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> searchNodeMetadataFactory
     )

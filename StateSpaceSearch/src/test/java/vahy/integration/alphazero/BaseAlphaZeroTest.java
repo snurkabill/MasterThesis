@@ -18,16 +18,13 @@ import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictor;
-import vahy.impl.runner.PolicyDefinition;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -75,7 +72,6 @@ public class BaseAlphaZeroTest {
 
         var actionClass = TicTacToeAction.class;
         var discountFactor = 1.0;
-        var rolloutCount = 1;
         var treeExpansionCount = 10;
         var cpuct = 1.0;
 
@@ -86,7 +82,7 @@ public class BaseAlphaZeroTest {
         var totalActionCount = 9;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
-            defaultPrediction[i] = 1.0 / (totalActionCount);
+            defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
         var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
@@ -98,11 +94,11 @@ public class BaseAlphaZeroTest {
 
 //        var playerOneSupplier = alphaZeroPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, predictorSetup);
 
-        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
-            0,
-            1,
-            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState>(random, 0),
-            new ArrayList<>());
+//        var randomizedPlayer_0 = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
+//            0,
+//            1,
+//            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<TicTacToeAction, DoubleVector, TicTacToeState>(random, 0),
+//            new ArrayList<>());
 
         var playerOneSupplier =  alphaZeroPolicySupplier.getPolicyDefinition(0, 1, cpuct, () -> 0.1, treeExpansionCount, predictorSetup);
 //        var playerOneSupplier =  randomizedPlayer_0;
@@ -133,7 +129,7 @@ public class BaseAlphaZeroTest {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(ticTacConfig)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((ticTacToeConfig, splittableRandom) -> policyMode -> (new TicTacToeStateInitializer(ticTacConfig, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((ticTacToeConfig_, splittableRandom_) -> policyMode -> new TicTacToeStateInitializer(ticTacToeConfig_, splittableRandom_).createInitialState(policyMode))
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
@@ -228,7 +224,7 @@ public class BaseAlphaZeroTest {
 ////        var trainablePredictor_alpha_zero = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount),
 //        var trainablePredictor_alpha_zero_2 = new TrainableApproximator(tfModel);
 //        var dataAggregator_first_visit = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-////        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+////        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 //
 //        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,
@@ -372,7 +368,7 @@ public class BaseAlphaZeroTest {
 ////        var trainablePredictor_alpha_zero = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount),
 //        var trainablePredictor_alpha_zero_2 = new TrainableApproximator(tfModel);
 //        var dataAggregator_first_visit = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-////        var dataAggregator2 = new ReplayBufferDataAggregator(1000, new LinkedList<>());
+////        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 //
 //        var predictorSetup = new PredictorTrainingSetup<TicTacToeAction, DoubleVector, TicTacToeState>(
 //            0,

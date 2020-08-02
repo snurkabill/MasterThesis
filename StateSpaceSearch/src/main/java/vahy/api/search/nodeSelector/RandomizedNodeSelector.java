@@ -16,7 +16,7 @@ public abstract class RandomizedNodeSelector<
     TState extends State<TAction, TObservation, TState>>
     implements NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    protected static Logger logger = LoggerFactory.getLogger(RandomizedNodeSelector.class.getName());
+    protected static final Logger logger = LoggerFactory.getLogger(RandomizedNodeSelector.class.getName());
     protected static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     protected static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 

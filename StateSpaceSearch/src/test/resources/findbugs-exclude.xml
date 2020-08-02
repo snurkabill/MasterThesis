@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <Match>
+        <Class name="vahy.api.search.node.AbstractSearchNode"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.search.node.nodeMetadata.BaseNodeMetadata"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.policy.mcts.MCTSMetadata"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.policy.mcts.MCTSMetadata"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.policy.mcts.Ucb1NodeSelector"/>
+        <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.impl.policy.alphazero.AlphaZeroNodeSelector"/>
+        <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    </Match>
+
+</FindBugsFilter>

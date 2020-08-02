@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 public class SHRiskInstanceSupplier extends AbstractInitialStateSupplier<SHConfig, SHAction,  DoubleVector, SHRiskState> {
 
-    public SHRiskInstanceSupplier(SHConfig SHConfig, SplittableRandom random) {
-        super(SHConfig, random);
+    public SHRiskInstanceSupplier(SHConfig config, SplittableRandom random) {
+        super(config, random);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class SHRiskInstanceSupplier extends AbstractInitialStateSupplier<SHConfi
         return new ImmutableTuple<>(startingLocation.getCellPosition().getX(), startingLocation.getCellPosition().getY());
     }
 
-    private SHRiskState createImmutableInitialState(List<List<Cell>> gameSetup, SHConfig SHConfig, SplittableRandom random) {
+    private SHRiskState createImmutableInitialState(List<List<Cell>> gameSetup, SHConfig config, SplittableRandom random) {
         boolean[][] walls = new boolean[gameSetup.size()][gameSetup.get(0).size()];
         double[][] rewards = new double[gameSetup.size()][gameSetup.get(0).size()];
         double[][] trapProbabilities = new double[gameSetup.size()][gameSetup.get(0).size()];
@@ -39,8 +39,8 @@ public class SHRiskInstanceSupplier extends AbstractInitialStateSupplier<SHConfi
             .flatMap(List::stream)
             .forEach(cell -> {
                 walls[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.WALL;
-                rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? SHConfig.getGoalReward() : 0.0;
-                trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? SHConfig.getTrapProbability() : 0.0;
+                rewards[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.GOAL ? config.getGoalReward() : 0.0;
+                trapProbabilities[cell.getCellPosition().getX()][cell.getCellPosition().getY()] = cell.getCellType() == CellType.TRAP ? config.getTrapProbability() : 0.0;
             });
 
 
@@ -56,7 +56,7 @@ public class SHRiskInstanceSupplier extends AbstractInitialStateSupplier<SHConfi
             }
         }
 
-        SHStaticPart staticGamePart = new SHStaticPart(walls, trapProbabilities, rewardIds, SHConfig.getStepPenalty());
+        SHStaticPart staticGamePart = new SHStaticPart(walls, trapProbabilities, rewardIds, config.getStepPenalty());
         ImmutableTuple<Integer, Integer> agentStartingPosition = generateInitialAgentCoordinates(gameSetup, random);
         return new SHRiskState(new SHState(staticGamePart, agentStartingPosition.getFirst(), agentStartingPosition.getSecond(), true, false, rewards, rewardCounter));
     }

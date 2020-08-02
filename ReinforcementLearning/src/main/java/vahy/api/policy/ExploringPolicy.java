@@ -13,7 +13,7 @@ public abstract class ExploringPolicy<TAction extends Enum<TAction> & Action, TO
     private final boolean isExplorationDisabled;
     private final double explorationConstant;
 
-    protected PlayingDistribution<TAction> playingDistribution;
+    protected PlayingDistribution<TAction> playingDistribution = null;
 
     protected ExploringPolicy(SplittableRandom random, int policyId, double explorationConstant) {
         super(random, policyId);

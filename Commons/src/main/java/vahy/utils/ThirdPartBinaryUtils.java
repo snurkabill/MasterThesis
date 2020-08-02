@@ -8,8 +8,10 @@ import java.util.Arrays;
 
 public class ThirdPartBinaryUtils {
 
+    private ThirdPartBinaryUtils() {
+    }
+
     public static void cleanUpNativeTempFiles() {
-        System.gc();
         String bridJFolderNameStart = "BridJExtractedLibraries";
         String CLPFolderNameStart = "CLPExtractedLib";
         String TFFolderNameStart = "tensorflow_native_libraries";
@@ -21,7 +23,7 @@ public class ThirdPartBinaryUtils {
                 try {
                     FileUtils.deleteDirectory(new File(tempPath + "/" + x));
                 } catch (IOException e) {
-                    e.printStackTrace(); // todo: deal with this later
+                    throw new RuntimeException("Not able to clear temp files.", e);
                 }
             });
         }

@@ -26,7 +26,8 @@ import vahy.utils.ImmutableTuple;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -142,7 +143,7 @@ public class SearchTreeImpl<
             expandAndEvaluateNode(root);
             treeUpdater.updateTree(root);
         }
-        var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(LinkedList::new));
+        var queue = root.getChildNodeStream().filter(SearchNode::isOpponentTurn).collect(Collectors.toCollection(ArrayDeque::new));
         while(!queue.isEmpty()) {
             var node = queue.pop();
             if(node.isLeaf() && !node.isFinalNode()) {
@@ -159,7 +160,7 @@ public class SearchTreeImpl<
     }
 
     private String dumpTreeToString(int depth) {
-        LinkedList<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Integer>> queue = new LinkedList<>();
+        Deque<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Integer>> queue = new ArrayDeque<>();
         queue.addFirst(new ImmutableTuple<>(this.getRoot(), 0));
 
         StringBuilder string = new StringBuilder();
@@ -205,7 +206,7 @@ public class SearchTreeImpl<
                                            String fileName,
                                            int depthBound,
                                            Function<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Boolean> filter) {
-        var queue = new LinkedList<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Integer>>();
+        var queue = new ArrayDeque<ImmutableTuple<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>, Integer>>();
         queue.addFirst(new ImmutableTuple<>(subtreeRoot, 0));
 
         Graph graph = graph("example1")

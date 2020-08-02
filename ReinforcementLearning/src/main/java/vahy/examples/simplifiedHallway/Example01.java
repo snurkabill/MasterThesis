@@ -2,6 +2,7 @@ package vahy.examples.simplifiedHallway;
 
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
 import vahy.impl.benchmark.EpisodeStatisticsBase;
@@ -21,6 +22,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 public class Example01 {
+
+    private Example01() {
+    }
 
     public static void main(String[] args) {
 
@@ -93,9 +97,10 @@ public class Example01 {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
+            .setStateStateWrapperInitializer(StateWrapper::new)
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
 

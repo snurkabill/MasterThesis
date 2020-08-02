@@ -20,7 +20,7 @@ public class SearchNodeImpl<TAction extends Enum<TAction> & Action, TObservation
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || TRACE_ENABLED;
 
-    public static AtomicLong nodeInstanceId = new AtomicLong(0);
+    public static final AtomicLong nodeInstanceId = new AtomicLong(0);
     public final long nodeId;
 
     private final Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childNodeMap;

@@ -1,8 +1,6 @@
 package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -25,9 +23,6 @@ public class ExplorationFeasibleDistributionProvider<
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExplorationFeasibleDistributionProvider.class.getName());
-    private static final boolean TRACE_ENABLED = logger.isTraceEnabled();
-    private static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
     private static final double RISK_BOUND_DELTA = 0.01;
 
     private final Class<TAction> clazz;

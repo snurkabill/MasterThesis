@@ -68,41 +68,43 @@ public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVec
         return innerState.getCommonObservation(inGameEntityId);
     }
 
+    private static class PerfectTicTacToePredictor implements Predictor<TicTacToeRiskState> {
+
+        private Predictor<TicTacToeState> innerPredictor;
+
+        @Override
+        public double[] apply(TicTacToeRiskState observation) {
+            if(innerPredictor == null) {
+                innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
+            }
+            return innerPredictor.apply(observation.innerState);
+        }
+
+        @Override
+        public double[][] apply(TicTacToeRiskState[] observationArray) {
+            if(innerPredictor == null) {
+                innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
+            }
+            var innerStateObservationArray = new TicTacToeState[observationArray.length];
+            for (int i = 0; i < innerStateObservationArray.length; i++) {
+                innerStateObservationArray[i] = observationArray[i].innerState;
+            }
+            return innerPredictor.apply(innerStateObservationArray);
+        }
+
+        @Override
+        public List<double[]> apply(List<TicTacToeRiskState> observationArray) {
+            var output = new ArrayList<double[]>(observationArray.size());
+            for (int i = 0; i < observationArray.size(); i++) {
+                output.add(apply(observationArray.get(i)));
+            }
+            return output;
+        }
+    };
+
     @Override
     public Predictor<TicTacToeRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<TicTacToeRiskState>() {
-
-            private Predictor<TicTacToeState> innerPredictor;
-
-            @Override
-            public double[] apply(TicTacToeRiskState observation) {
-                if(innerPredictor == null) {
-                    innerPredictor = observation.innerState.getKnownModelWithPerfectObservationPredictor();
-                }
-                return innerPredictor.apply(observation.innerState);
-            }
-
-            @Override
-            public double[][] apply(TicTacToeRiskState[] observationArray) {
-                if(innerPredictor == null) {
-                    innerPredictor = observationArray[0].innerState.getKnownModelWithPerfectObservationPredictor();
-                }
-                var innerStateObservationArray = new TicTacToeState[observationArray.length];
-                for (int i = 0; i < innerStateObservationArray.length; i++) {
-                    innerStateObservationArray[i] = observationArray[i].innerState;
-                }
-                return innerPredictor.apply(innerStateObservationArray);
-            }
-
-            @Override
-            public List<double[]> apply(List<TicTacToeRiskState> observationArray) {
-                var output = new ArrayList<double[]>(observationArray.size());
-                for (int i = 0; i < observationArray.size(); i++) {
-                    output.add(apply(observationArray.get(i)));
-                }
-                return output;
-            }
-        };
+        return new PerfectTicTacToePredictor();
     }
 
     @Override

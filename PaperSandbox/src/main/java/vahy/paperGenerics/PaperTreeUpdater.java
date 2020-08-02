@@ -17,7 +17,8 @@ public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservati
 
     private double[] resolveRisk(SearchNode<TAction, TObservation, PaperMetadata<TAction>, TState> expandedNode) {
         if(expandedNode.isFinalNode()) {
-            var riskVector = ((PaperStateWrapper<TAction, TObservation, TState>) expandedNode.getStateWrapper()).getRiskVector();
+            PaperStateWrapper<TAction, TObservation, TState> wrapper = (PaperStateWrapper<TAction, TObservation, TState>) expandedNode.getStateWrapper();
+            var riskVector = wrapper.getRiskVector();
             var asDoubles = new double[riskVector.length];
             for (int i = 0; i < riskVector.length; i++) {
                 asDoubles[i] = riskVector[i] ? 1.0 : 0.0;

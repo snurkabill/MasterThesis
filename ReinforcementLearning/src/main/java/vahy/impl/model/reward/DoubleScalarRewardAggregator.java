@@ -6,6 +6,9 @@ import java.util.stream.Stream;
 
 public class DoubleScalarRewardAggregator {
 
+    private DoubleScalarRewardAggregator() {
+    }
+
     public static double emptyReward() {
         return 0.0;
     }

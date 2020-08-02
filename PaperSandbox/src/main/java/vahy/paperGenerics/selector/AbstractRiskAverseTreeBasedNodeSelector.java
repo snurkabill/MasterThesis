@@ -19,7 +19,7 @@ public abstract class AbstractRiskAverseTreeBasedNodeSelector<
     extends EnvironmentSamplingNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState>
     implements RiskAverseNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    protected static Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
+    protected static final Logger logger = LoggerFactory.getLogger(PaperNodeSelector.class.getName());
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
     protected double allowedRiskInRoot;

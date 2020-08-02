@@ -144,19 +144,19 @@ public class PaperPolicyImpl<
 //
 
 
-    private double[] innerPriorProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
-        if(!gameState.isPlayerTurn()) {
-            throw new IllegalStateException("Player is not on turn.");
-        }
-        double[] priorProbabilities = new double[gameState.getAllPossibleActions().length];
-        for (var entry : this.riskAverseSearchTree.getRoot().getChildNodeMap().entrySet()) {
-            var action = entry.getValue().getAppliedAction();
-            int actionIndex = action.getLocalIndex();
-            priorProbabilities[actionIndex] = entry.getValue().getSearchNodeMetadata().getPriorProbability();
-        }
-
-        return priorProbabilities;
-    }
+//    private double[] innerPriorProbabilityDistribution(StateWrapper<TAction, TObservation, TState> gameState) {
+//        if(!gameState.isPlayerTurn()) {
+//            throw new IllegalStateException("Player is not on turn.");
+//        }
+//        double[] priorProbabilities = new double[gameState.getAllPossibleActions().length];
+//        for (var entry : this.riskAverseSearchTree.getRoot().getChildNodeMap().entrySet()) {
+//            var action = entry.getValue().getAppliedAction();
+//            int actionIndex = action.getLocalIndex();
+//            priorProbabilities[actionIndex] = entry.getValue().getSearchNodeMetadata().getPriorProbability();
+//        }
+//
+//        return priorProbabilities;
+//    }
 
     @Override
     public PaperPolicyRecord getPolicyRecord(StateWrapper<TAction, TObservation, TState> gameState) {

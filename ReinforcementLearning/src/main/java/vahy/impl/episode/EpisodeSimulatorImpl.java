@@ -38,6 +38,7 @@ public class EpisodeSimulatorImpl<
         this.resultsFactory = resultsFactory;
     }
 
+    @Override
     public EpisodeResults<TAction, TObservation, TState> calculateEpisode(EpisodeSetup<TAction, TObservation, TState> episodeSetup)
     {
         TState state = episodeSetup.getInitialState();
@@ -107,8 +108,9 @@ public class EpisodeSimulatorImpl<
             }
 
             return resultsFactory.createResults(episodeHistoryList, policyIdTranslationMap, policyList.size(), playerStepsDone, averageDecisionDuration, totalStepsDone, totalCumulativePayoffList, Duration.ofMillis(end - episodeStart));
-        } catch(Exception e) {
-            throw new IllegalStateException(createErrorMsg(episodeHistoryList), e);
+        } catch(RuntimeException e) {
+            e.printStackTrace();
+            throw new RuntimeException(createErrorMsg(episodeHistoryList), e);
         }
     }
 

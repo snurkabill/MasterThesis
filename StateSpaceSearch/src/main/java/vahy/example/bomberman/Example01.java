@@ -31,6 +31,8 @@ import java.util.SplittableRandom;
 
 public class Example01 {
 
+    private Example01() {}
+
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
         var config = new BomberManConfig(500, true, 100, 1, 2, 3, 3, 1, 3, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(987567, false, 7, true, 500, 0, false, false, false, Path.of("TEST_PATH"), null);
@@ -62,7 +64,6 @@ public class Example01 {
 
         var actionClass = BomberManAction.class;
         var discountFactor = 1.0;
-        var rolloutCount = 1;
         var treeExpansionCount = 20;
         var cpuct = 1.0;
 
@@ -71,8 +72,6 @@ public class Example01 {
 
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config);
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
-
-//        var mctsRolloutSupplier = mctsPolicySupplier.getPolicyDefinition(environmentPolicyCount + 0, 1, cpuct, treeExpansionCount, discountFactor, rolloutCount);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
         var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
@@ -127,7 +126,7 @@ public class Example01 {
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((BomberManConfig, splittableRandom) -> policyMode -> (new BomberManInstanceInitializer(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
             .setStateStateWrapperInitializer(StateWrapper::new)
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())

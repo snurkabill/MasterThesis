@@ -3,6 +3,7 @@ package vahy.integration.alphazero;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -35,7 +36,7 @@ public class AlphaZeroSH05Test extends AbstractSHConvergenceTest {
         var totalActionCount = actionClass.getEnumConstants().length;
         var defaultPrediction = new double[totalEntityCount + totalActionCount];
         for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
-            defaultPrediction[i] = 1.0 / (totalActionCount);
+            defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
         var trainablePredictor = new AlphaZeroDataTablePredictor(defaultPrediction, 0.25, totalEntityCount);
@@ -59,7 +60,7 @@ public class AlphaZeroSH05Test extends AbstractSHConvergenceTest {
         );
     }
 
-    private static Stream<Arguments> params() {
+    public static Stream<Arguments> params() {
         return JUnitParameterizedTestHelper.cartesian(
             JUnitParameterizedTestHelper.cartesian(
                 Stream.of(
@@ -87,7 +88,7 @@ public class AlphaZeroSH05Test extends AbstractSHConvergenceTest {
         var systemConfig = new SystemConfig(
             seed,
             false,
-            TEST_THREAD_COUNT,
+            ConvergenceAssert.TEST_THREAD_COUNT,
             false,
             10000,
             0,
@@ -103,7 +104,7 @@ public class AlphaZeroSH05Test extends AbstractSHConvergenceTest {
         var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, playerSupplier);
         var result = roundBuilder.execute();
 
-        assertConvergenceResult(expectedMin, expectedMax, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()), "Payoff");
+        ConvergenceAssert.assertConvergenceResult(expectedMin, expectedMax, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()), "Payoff");
     }
 
 

@@ -49,8 +49,8 @@ hidden_3 = Dense(Dropout(hidden_2, keep_prob=keep_prob), hidden_count_3, tf.nn.r
 hidden_4 = Dense(Dropout(hidden_3, keep_prob=keep_prob), hidden_count_4, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_4")
 hidden_5 = Dense(Dropout(hidden_4, keep_prob=keep_prob), hidden_count_5, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_5")
 
-Q_output      = tf.layers.dense(hidden_1, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
-action_output = tf.layers.dense(hidden_1, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
+Q_output      = tf.layers.dense(hidden_5, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
+action_output = tf.layers.dense(hidden_5, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
 
 prediction = tf.concat([Q_output, action_output], 1, name = "concat_node")
 prediction_identity = tf.identity(prediction, name = "prediction_node")

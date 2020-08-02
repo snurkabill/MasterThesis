@@ -8,6 +8,9 @@ import java.util.stream.Stream;
 
 public class DoubleVectorRewardAggregator {
 
+    private DoubleVectorRewardAggregator() {
+    }
+
     public static double[] emptyReward(int size) {
         return new double[size];
     }
@@ -21,7 +24,7 @@ public class DoubleVectorRewardAggregator {
 
     public static double[] aggregate(double[] first, double[] second) {
         if(first.length != second.length) {
-            throw new IllegalStateException("Different array lengths");
+            throw new IllegalStateException("Different array lengths. First: [" + first.length + "] and second: [" + second.length + "]");
         }
         var copy = Arrays.copyOf(first, first.length);
         for (int i = 0; i < copy.length; i++) {
@@ -71,6 +74,21 @@ public class DoubleVectorRewardAggregator {
         return array;
     }
 
+    public static double[] aggregateDiscount(List<double[]> doubleRewards, double discountFactor) {
+        var sum = new double[doubleRewards.get(0).length];
+        int iteration = 0;
+        for (double[] entry : doubleRewards) {
+            var multiplier = Math.pow(discountFactor, iteration);
+            for (int i = 0; i < entry.length; i++) {
+                sum[i] += multiplier * entry[i];
+            }
+            iteration++;
+        }
+        return sum;
+    }
+
+
+
     public static void aggregateDiscountInSecondPlace(double[] first, double[] second, double discountFactor) {
         if(first.length != second.length) {
             throw new IllegalStateException("Different array lengths");
@@ -88,19 +106,6 @@ public class DoubleVectorRewardAggregator {
 //        }
 //        return discountedSum;
 //    }
-
-    public static double[] aggregateDiscount(List<double[]> doubleRewards, double discountFactor) {
-        var sum = new double[doubleRewards.get(0).length];
-        int iteration = 0;
-        for (double[] entry : doubleRewards) {
-            var multiplier = Math.pow(discountFactor, iteration);
-            for (int i = 0; i < entry.length; i++) {
-                sum[i] += multiplier * entry[i];
-            }
-            iteration++;
-        }
-        return sum;
-    }
 
 //    public static double aggregateDiscount(Stream<Double> rewards, double discountFactor) {
 //        return aggregateDiscount(rewards.collect(Collectors.toList()), discountFactor);

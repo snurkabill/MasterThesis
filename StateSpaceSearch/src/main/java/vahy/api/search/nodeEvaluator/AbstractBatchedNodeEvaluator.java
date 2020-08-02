@@ -14,7 +14,9 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.search.node.nodeMetadata.BaseNodeMetadata;
 import vahy.utils.ImmutableTuple;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
 
 public abstract class AbstractBatchedNodeEvaluator<
     TAction extends Enum<TAction> & Action,
@@ -23,6 +25,7 @@ public abstract class AbstractBatchedNodeEvaluator<
 
     protected static final Logger logger = LoggerFactory.getLogger(AbstractBatchedNodeEvaluator.class);
     protected static final boolean TRACE_ENABLED = logger.isTraceEnabled();
+    protected static final boolean DEBUG_ENABLED = logger.isDebugEnabled() || logger.isTraceEnabled();
 
     private final SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory;
     private final Predictor<DoubleVector> predictor;
@@ -42,6 +45,9 @@ public abstract class AbstractBatchedNodeEvaluator<
         selectedNode.unmakeLeaf();
 
         if(selectedNode.isRoot() || selectedNode.getChildNodeMap().isEmpty()) {
+            if(DEBUG_ENABLED) {
+                logger.debug("Expanding batched subtree");
+            }
             return createSubtree(selectedNode);
         }
         return 0;
@@ -55,21 +61,22 @@ public abstract class AbstractBatchedNodeEvaluator<
 
         var observationBatch = createObservationBatch(stateRewardOrder);
         var predictions = predictor.apply(observationBatch);
-        finalizeTreeState(rootNode, stateRewardOrder, predictions);
+
+        finalizeTreeState(rootNode, stateRewardOrder, predictions, observationBatch);
         return nodeCount;
     }
 
-    private LinkedList<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>> createTreeStateSkeleton(StateWrapper<TAction, DoubleVector, TState> rootState) {
-        var queue = new LinkedList<ImmutableTuple<StateWrapper<TAction, DoubleVector, TState>, Integer>>();
-        var nodeOrder = new LinkedList<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>>();
+    private Deque<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>> createTreeStateSkeleton(StateWrapper<TAction, DoubleVector, TState> rootState) {
+        var queue = new ArrayDeque<ImmutableTuple<StateWrapper<TAction, DoubleVector, TState>, Integer>>();
+        var nodeOrder = new ArrayDeque<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>>();
 
         int check = 0;
-        queue.add(new ImmutableTuple<>(rootState, 0));
-        nodeOrder.add(new ImmutableTuple<>(check, new ImmutableStateWrapperRewardReturn<TAction, DoubleVector, TState>(rootState, 0.0, null)));
+        queue.addLast(new ImmutableTuple<>(rootState, 0));
+        nodeOrder.addLast(new ImmutableTuple<>(check, new ImmutableStateWrapperRewardReturn<TAction, DoubleVector, TState>(rootState, 0.0, null)));
         check++;
 
         while(!queue.isEmpty()) {
-            var stateTuple = queue.pop();
+            var stateTuple = queue.pollFirst();
             var depth = stateTuple.getSecond();
             var state = stateTuple.getFirst();
 
@@ -77,10 +84,10 @@ public abstract class AbstractBatchedNodeEvaluator<
                 TAction[] allPossibleActions = state.getAllPossibleActions();
                 for (TAction nextAction : allPossibleActions) {
                     var childStateReward = state.applyAction(nextAction);
-                    nodeOrder.add(new ImmutableTuple<>(check, childStateReward));
+                    nodeOrder.addLast(new ImmutableTuple<>(check, childStateReward));
                     check++;
                     if(depth + 1 <= maximalEvaluationDepth) {
-                        queue.add(new ImmutableTuple<>(childStateReward.getState(), depth + 1));
+                        queue.addLast(new ImmutableTuple<>(childStateReward.getState(), depth + 1));
                     }
                 }
             }
@@ -89,19 +96,24 @@ public abstract class AbstractBatchedNodeEvaluator<
     }
 
     private void finalizeTreeState(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> rootNode,
-                                   LinkedList<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>> stateOrder,
-                                   double[][] predictionBatch) {
+                                   Deque<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>> stateOrder,
+                                   double[][] predictionBatch,
+                                   DoubleVector[] observationBatch) {
         if(predictionBatch.length != stateOrder.size()) {
             throw new IllegalStateException("Different count of predictions [" + predictionBatch.length + "] and nodes to be evaluated [" + stateOrder.size() + "]");
         }
-        var queue = new LinkedList<SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState>>();
+        var queue = new ArrayDeque<SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState>>(stateOrder.size());
+
+        if(!rootNode.getStateWrapper().getObservation().equals(observationBatch[0])) {
+            throw new IllegalStateException("Inconsistency in order of nodes according to observation batch. Got: [" + Arrays.toString(rootNode.getStateWrapper().getObservation().getObservedVector()) + "] and [" + Arrays.toString(observationBatch[0].getObservedVector()) + "]");
+        }
 
         int processedNodeCount = 0;
         fillNode(rootNode, predictionBatch[processedNodeCount]);
         processedNodeCount++;
         stateOrder.pop();
 
-        queue.add(rootNode);
+        queue.addLast(rootNode);
         while(processedNodeCount < predictionBatch.length) {
             var node = queue.pop();
             if(!node.isFinalNode()) {
@@ -115,10 +127,14 @@ public abstract class AbstractBatchedNodeEvaluator<
                     if(processedNodeCount != stateRewardReturn.getFirst()) {
                         throw new IllegalStateException("Inconsistency");
                     }
+                    if(!stateRewardReturn.getSecond().getState().getObservation().equals(observationBatch[processedNodeCount])) {
+                        throw new IllegalStateException("Inconsistency in order of nodes according to observation batch. Got: [" + Arrays.toString(node.getStateWrapper().getObservation().getObservedVector()) + "] and [" + Arrays.toString(observationBatch[processedNodeCount].getObservedVector()) + "]");
+                    }
 
-                    var childNode = createChildNode(node, nextAction, stateRewardReturn.getSecond(), predictionBatch[processedNodeCount]);
+                    var originPrediction = predictionBatch[processedNodeCount];
+                    var childNode = createChildNode(node, nextAction, stateRewardReturn.getSecond(), originPrediction);
                     childNodeMap.put(nextAction, childNode);
-                    queue.add(childNode);
+                    queue.addLast(childNode);
                     processedNodeCount++;
                 }
             }
@@ -138,7 +154,7 @@ public abstract class AbstractBatchedNodeEvaluator<
 
     protected abstract void fillNode(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> node, double[] prediction);
 
-    protected DoubleVector[] createObservationBatch(LinkedList<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>> stateOrder)
+    protected DoubleVector[] createObservationBatch(Deque<ImmutableTuple<Integer, StateWrapperRewardReturn<TAction, DoubleVector, TState>>> stateOrder)
     {
         var stateCount = stateOrder.size();
         var observationBatch = new DoubleVector[stateCount];

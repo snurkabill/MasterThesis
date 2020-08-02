@@ -1,6 +1,5 @@
 package vahy.integration.SH;
 
-import vahy.AbstractConvergenceTest;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -17,7 +16,7 @@ import vahy.impl.runner.PolicyDefinition;
 
 import java.util.List;
 
-public abstract class AbstractSHConvergenceTest extends AbstractConvergenceTest {
+public abstract class AbstractSHConvergenceTest {
 
     protected RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase> getRoundBuilder(SHConfig config,
                                                                                                CommonAlgorithmConfigBase algorithmConfig,
@@ -29,7 +28,7 @@ public abstract class AbstractSHConvergenceTest extends AbstractConvergenceTest 
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((SHConfig, splittableRandom) -> policyMode -> (new SHInstanceSupplier(config, splittableRandom)).createInitialState(policyMode))
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
             .setStateStateWrapperInitializer(StateWrapper::new)

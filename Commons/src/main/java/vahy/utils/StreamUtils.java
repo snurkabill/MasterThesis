@@ -14,6 +14,9 @@ import java.util.stream.StreamSupport;
 
 public class StreamUtils {
 
+    private StreamUtils() {
+    }
+
     public static Stream<Long> getSeedStream(long seed, int streamSize) {
         return new SplittableRandom(seed).longs(streamSize).boxed();
     }

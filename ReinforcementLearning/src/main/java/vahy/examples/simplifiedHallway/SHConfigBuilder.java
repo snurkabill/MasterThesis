@@ -11,17 +11,21 @@ import vahy.utils.ArrayUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class SHConfigBuilder {
 
+    private static final Pattern LINE_SPLIT_PATTERN = Pattern.compile("\\n");
+    private static final Pattern CHAR_SPLIT_PATTERN = Pattern.compile(" ");
     private int maximalStepCountBound;
     private boolean isModelKnown = true;
     private double goalReward;
     private double stepPenalty;
     private double trapProbability;
-    private SHInstance hallwayGameInstance;
+    private SHInstance hallwayGameInstance = null;
 
     public SHConfigBuilder reward(double goalReward) {
         this.goalReward = goalReward;
@@ -57,7 +61,7 @@ public class SHConfigBuilder {
         InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(hallwayGameInstance.getPath());
         try {
             var bytes = resourceAsStream.readAllBytes();
-            var representation = new String(bytes);
+            var representation = new String(bytes, Charset.defaultCharset());
             return new SHConfig(maximalStepCountBound, isModelKnown, goalReward, stepPenalty, trapProbability, representation, deserialize(representation));
         } catch (IOException | InvalidInstanceSetupException e) {
             throw new RuntimeException(e);
@@ -65,10 +69,10 @@ public class SHConfigBuilder {
     }
 
     private List<List<Cell>> deserialize(String representation) throws InvalidInstanceSetupException {
-        String[] lines = representation.replace("\r\n", "\n").replace("\r", "\n").split("\\n");
+        String[] lines = LINE_SPLIT_PATTERN.split(representation.replace("\r\n", "\n").replace("\r", "\n"));
         List<List<Cell>> list = new ArrayList<>();
         for (int i = 0; i < lines.length; i++) {
-            String[] cells = lines[i].split(" ");
+            String[] cells = CHAR_SPLIT_PATTERN.split(lines[i]);
             List<Cell> innerList = new ArrayList<>();
 
             for (int j = 0; j < cells.length; j++) {

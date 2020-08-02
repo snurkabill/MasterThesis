@@ -15,8 +15,8 @@ import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.utils.EnumUtils;
 import vahy.utils.RandomDistributionUtils;
 
-public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchNodeMetadata extends PaperMetadata<TAction>, TState extends PaperState<TAction, DoubleVector, TState>>
-    extends AbstractNodeEvaluator<TAction, DoubleVector, TSearchNodeMetadata, TState> {
+public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TState extends PaperState<TAction, DoubleVector, TState>>
+    extends AbstractNodeEvaluator<TAction, DoubleVector, PaperMetadata<TAction>, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperNodeEvaluator.class);
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
@@ -27,7 +27,8 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
     private final boolean isModelKnown;
     private Predictor<TState> perfectEnvironmentPredictor;
 
-    public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory, TrainablePredictor trainablePredictor, boolean isModelKnown) {
+    @SuppressWarnings("unchecked")
+    public PaperNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, PaperMetadata<TAction>, TState> searchNodeFactory, TrainablePredictor trainablePredictor, boolean isModelKnown) {
         super(searchNodeFactory);
         this.searchNodeMetadataFactory = (PaperMetadataFactory<TAction, DoubleVector, TState>)searchNodeFactory.getSearchNodeMetadataFactory();
         this.trainablePredictor = trainablePredictor;
@@ -35,7 +36,7 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
     }
 
     @Override
-    protected int evaluateNode_inner(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> selectedNode) {
+    protected int evaluateNode_inner(SearchNode<TAction, DoubleVector, PaperMetadata<TAction>, TState> selectedNode) {
         var prediction = trainablePredictor.apply(selectedNode.getStateWrapper().getObservation());
         var entityInGameCount = selectedNode.getStateWrapper().getTotalEntityCount();
 
@@ -66,7 +67,7 @@ public class PaperNodeEvaluator<TAction extends Enum<TAction> & Action, TSearchN
         return 1;
     }
 
-    private void useKnownModelPredictor(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> selectedNode, double[] distribution, TAction[] allPossibleActions) {
+    private void useKnownModelPredictor(SearchNode<TAction, DoubleVector, PaperMetadata<TAction>, TState> selectedNode, double[] distribution, TAction[] allPossibleActions) {
         if (perfectEnvironmentPredictor == null) {
             perfectEnvironmentPredictor = selectedNode.getStateWrapper().getKnownModelWithPerfectObservationPredictor();
         }

@@ -46,7 +46,7 @@ public class UnfairUcb1NodeSelector<
         double maxValue = -Double.MAX_VALUE;
 
         int totalNodeVisitCount = node.getSearchNodeMetadata().getVisitCounter();
-        if(max != min) {
+        if(max > min) {
             var norm = max - min;
             for (int i = 0; i < possibleActions.length; i++) {
                 var metadata = searchNodeMap.get(possibleActions[i]).getSearchNodeMetadata();

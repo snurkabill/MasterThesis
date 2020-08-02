@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -136,6 +135,7 @@ public class GameSamplerImpl<
         return registeredPolicyList;
     }
 
+    @Override
     public List<EpisodeResults<TAction, TObservation, TState>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
         ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
         logger.info("Initialized [{}] executors for sampling", processingUnitCount);
@@ -154,14 +154,16 @@ public class GameSamplerImpl<
             var paperEpisodeHistoryList = results.stream().map(x -> {
                 try {
                     return x.get();
-                } catch (InterruptedException | ExecutionException e) {
+                } catch (Exception e) {
+                    e.printStackTrace();
                     throw new IllegalStateException("Parallel episodes were interrupted.", e);
                 }
             }).collect(Collectors.toList());
 
             executorService.shutdown();
             return paperEpisodeHistoryList;
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new IllegalStateException("Parallel episodes were interrupted.", e);
         }
     }

@@ -18,27 +18,15 @@ import java.util.Set;
 
 public class BomberManState implements State<BomberManAction, DoubleVector, BomberManState> {
 
-    public static int ENVIRONMENT_ENTITY_ID = 0;
-    public static int ENTITY_ON_TURN_INDEX = 0;
+    public static final int ENVIRONMENT_ENTITY_ID = 0;
+    public static final int ENTITY_ON_TURN_INDEX = 0;
 
-    public static BomberManAction[] ENVIRONMENT_ACTION_ARRAY_NO_BOMB = new BomberManAction[] {BomberManAction.NO_ACTION};
-    public static BomberManAction[] ENVIRONMENT_ACTION_ARRAY_DETONATE = new BomberManAction[] {BomberManAction.DETONATE_BOMB};
-    public static BomberManAction[] REWARD_ACTION_ARRAY = new BomberManAction[] {BomberManAction.NO_ACTION_REWARD, BomberManAction.RESPAWN_REWARD};
-    public static BomberManAction[] PLAYER_ACTION_ARRAY = new BomberManAction[] {BomberManAction.UP, BomberManAction.DOWN, BomberManAction.LEFT, BomberManAction.RIGHT, BomberManAction.DROP_BOMB};
+    static final BomberManAction[] ENVIRONMENT_ACTION_ARRAY_NO_BOMB = new BomberManAction[] {BomberManAction.NO_ACTION};
+    static final BomberManAction[] ENVIRONMENT_ACTION_ARRAY_DETONATE = new BomberManAction[] {BomberManAction.DETONATE_BOMB};
+    static final BomberManAction[] REWARD_ACTION_ARRAY = new BomberManAction[] {BomberManAction.NO_ACTION_REWARD, BomberManAction.RESPAWN_REWARD};
+    static final BomberManAction[] PLAYER_ACTION_ARRAY = new BomberManAction[] {BomberManAction.UP, BomberManAction.DOWN, BomberManAction.LEFT, BomberManAction.RIGHT, BomberManAction.DROP_BOMB};
 
-    private static double getXPortion(BomberManStaticPart staticPart, int x) {
-        int xTotal = staticPart.getWalls().length - 3;
-        int xAgentFixed = x - 1;
-        return xTotal == 0 ? 0.0 : ((xAgentFixed / (double) xTotal) - 0.5);
-    }
-
-    private static double getYPortion(BomberManStaticPart staticPart, int y) {
-        int yTotal = staticPart.getWalls()[0].length - 3;
-        int yAgentFixed = y - 1;
-        return yTotal == 0 ? 0.0 : ((yAgentFixed / (double) yTotal) - 0.5);
-    }
-
-    private static int calculatePlayerId(int entityId, int totalGoldCount, int totalPlayerCount) {
+    private static int calculatePlayerId(int entityId, int totalGoldCount) {
         if(entityId == 0) {
             return -1;
         }
@@ -49,7 +37,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
         }
     }
 
-    private static int calculateGoldId(int entityId, int totalGoldCount, int totalPlayerCount) {
+    private static int calculateGoldId(int entityId, int totalGoldCount) {
         if(entityId == 0) {
             return -1;
         }
@@ -123,8 +111,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                           int[] playerYCoordinates,
                           int entityIdOnTurn) {
         var playerCount = staticPart.getStartingPlayerCount();
-        goldIdOnTurn = calculateGoldId(entityIdOnTurn, staticPart.getGoldEntityCount(), playerCount);
-        playerIdOnTurn = calculatePlayerId(entityIdOnTurn, staticPart.getGoldEntityCount(), playerCount);
+        goldIdOnTurn = calculateGoldId(entityIdOnTurn, staticPart.getGoldEntityCount());
+        playerIdOnTurn = calculatePlayerId(entityIdOnTurn, staticPart.getGoldEntityCount());
         if (entityIdOnTurn == 0) {
             throw new IllegalStateException("Environment can't start");
         }
@@ -691,8 +679,8 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     @Override
     public StateRewardReturn<BomberManAction, DoubleVector, BomberManState> applyAction(BomberManAction actionType) {
         var newIdOnTurn = nextEntityIdOnTurn();
-        var newPlayerIdOnTurn = calculatePlayerId(newIdOnTurn, staticPart.getGoldEntityCount(), staticPart.getStartingPlayerCount());
-        var newGoldIdOnTurn = calculateGoldId(newIdOnTurn, staticPart.getGoldEntityCount(), staticPart.getStartingPlayerCount());
+        var newPlayerIdOnTurn = calculatePlayerId(newIdOnTurn, staticPart.getGoldEntityCount());
+        var newGoldIdOnTurn = calculateGoldId(newIdOnTurn, staticPart.getGoldEntityCount());
         if (actionType.isEnvironmentalAction()) {
             return playEnvironmentAction(actionType, newIdOnTurn, newPlayerIdOnTurn, newGoldIdOnTurn);
         } else if (actionType.isGoldAction()) {
@@ -866,7 +854,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof  BomberManState)) return false;
 
         BomberManState that = (BomberManState) o;
 

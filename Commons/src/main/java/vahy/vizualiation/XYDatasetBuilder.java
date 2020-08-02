@@ -9,6 +9,9 @@ import java.util.List;
 
 public class XYDatasetBuilder {
 
+    private XYDatasetBuilder() {
+    }
+
     public static XYDataset createDataset(DataSeriesCollector dataSeriesCollector) {
         XYSeriesCollection collectionOfSeries = new XYSeriesCollection();
         List<DataSample> data = dataSeriesCollector.getData();
@@ -17,6 +20,23 @@ public class XYDatasetBuilder {
             for (DataSample sample : data) {
                 series.add(sample.getxAxisValue(), sample.getyAxisValueList().get(i));
             }
+            collectionOfSeries.addSeries(series);
+        }
+        return collectionOfSeries;
+    }
+
+    public static XYDataset createDataset(List<List<ImmutableTuple<Double, Double>>> dataSeriesList, List<String> titleList) {
+        if(dataSeriesList.size() != titleList.size()) {
+            throw new IllegalArgumentException("Different lengths in inputs. [" + dataSeriesList.size() + "] and [" + titleList.size() + "]");
+        }
+        XYSeriesCollection collectionOfSeries = new XYSeriesCollection();
+        int index = 0;
+        for (List<ImmutableTuple<Double, Double>> data : dataSeriesList) {
+            XYSeries series = new XYSeries(titleList.get(index));
+            for (ImmutableTuple<Double, Double> dataPoint : data) {
+                series.add(dataPoint.getFirst(), dataPoint.getSecond());
+            }
+            index++;
             collectionOfSeries.addSeries(series);
         }
         return collectionOfSeries;
@@ -39,21 +59,5 @@ public class XYDatasetBuilder {
         return collectionOfSeries;
     }
 
-    public static XYDataset createDataset(List<List<ImmutableTuple<Double, Double>>> dataSeriesList, List<String> titleList) {
-        if(dataSeriesList.size() != titleList.size()) {
-            throw new IllegalArgumentException("Different lengths in inputs. [" + dataSeriesList.size() + "] and [" + titleList.size() + "]");
-        }
-        XYSeriesCollection collectionOfSeries = new XYSeriesCollection();
-        int index = 0;
-        for (List<ImmutableTuple<Double, Double>> data : dataSeriesList) {
-            XYSeries series = new XYSeries(titleList.get(index));
-            for (ImmutableTuple<Double, Double> dataPoint : data) {
-                series.add(dataPoint.getFirst(), dataPoint.getSecond());
-            }
-            index++;
-            collectionOfSeries.addSeries(series);
-        }
-        return collectionOfSeries;
-    }
 }
 

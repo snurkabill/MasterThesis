@@ -33,7 +33,7 @@ public enum SHInstance {
     BENCHMARK_18("examples/simplifiedHalllway/benchmark/benchmark_18.txt"),
     BENCHMARK_19("examples/simplifiedHalllway/benchmark/benchmark_19.txt");
 
-    private String path;
+    private final String path;
 
     SHInstance(String path) {
         this.path = path;

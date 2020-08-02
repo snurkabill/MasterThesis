@@ -13,7 +13,7 @@ public class RandomIterator<T> implements Iterator<T> {
     private final Iterator<T> iterator;
 
     public RandomIterator(final Iterator<T> i, SplittableRandom random) {
-        final List<T> items = new ArrayList<>();
+        final List<T> items = new ArrayList<>(0);
         while (i.hasNext()) {
             final T item;
             item = i.next();
@@ -23,14 +23,17 @@ public class RandomIterator<T> implements Iterator<T> {
         iterator = items.iterator();
     }
 
+    @Override
     public boolean hasNext() {
         return (iterator.hasNext());
     }
 
+    @Override
     public T next() {
         return (iterator.next());
     }
 
+    @Override
     public void remove() {
         iterator.remove();
     }

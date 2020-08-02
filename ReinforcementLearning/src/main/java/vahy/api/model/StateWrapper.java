@@ -81,12 +81,18 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o){
+            return true;
+        }
+        if (!(o instanceof StateWrapper)) {
+            return false;
+        }
 
         StateWrapper<?, ?, ?> that = (StateWrapper<?, ?, ?>) o;
 
-        if (inGameEntityId != that.inGameEntityId) return false;
+        if (inGameEntityId != that.inGameEntityId){
+            return false;
+        }
         return state.equals(that.state);
     }
 

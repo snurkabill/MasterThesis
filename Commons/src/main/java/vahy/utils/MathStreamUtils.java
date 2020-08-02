@@ -6,6 +6,9 @@ import java.util.stream.Stream;
 
 public class MathStreamUtils {
 
+    private MathStreamUtils() {
+    }
+
     public static double calculateAverage(List<Double> data) {
         return calculateAverage(data.stream(), value -> value);
     }

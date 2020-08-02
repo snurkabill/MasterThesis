@@ -4,18 +4,7 @@ import vahy.api.model.observation.Observation;
 
 import java.util.Arrays;
 
-public class DoubleVector implements Observation {
-
-    private static final double[] primeNumbers = {
-        127, 271, 331, 397, 547,
-        631, 919, 1657, 1801, 1951,
-        2269, 2437, 2791, 3169, 3571,
-        4219, 4447, 5167, 5419, 6211,
-        7057, 7351, 8269, 9241, 10267,
-        11719, 12097, 13267, 13669, 16651,
-        19441, 19927, 22447, 23497, 24571,
-        25117, 26227, 27361, 33391, 35317};
-
+public final class DoubleVector implements Observation {
 
     private static final double[] PRIME_NUMBERS = {
         30402457, 32582657, 37156667, 42643801, 43112609,
@@ -27,8 +16,7 @@ public class DoubleVector implements Observation {
         521, 607, 1279, 2203, 2281,
         666649, 946669, 60000049, 66000049, 66600049,
         10619863, 6620830889d, 80630964769d, 228204732751d, 1171432692373d,
-        1398341745571d, 10963707205259d, 15285151248481d, 10657331232548839d, 790738119649411319d,
-        18987964267331664557d,
+        1398341745571d, 10963707205259d, 15285151248481d
     };
 
     private final double[] observedVector;
@@ -40,14 +28,14 @@ public class DoubleVector implements Observation {
         this.isHashCalculated = false;
     }
 
-    public double[] getObservedVector() {
+    public final double[] getObservedVector() {
         return observedVector;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DoubleVector)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
         DoubleVector that = (DoubleVector) o;
 
@@ -61,7 +49,7 @@ public class DoubleVector implements Observation {
 
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         if(!isHashCalculated) {
             var doubleArrayForHash = new double[observedVector.length];
 

@@ -1,12 +1,9 @@
 package vahy.paperGenerics.policy.linearProgram;
 
 import com.quantego.clp.CLPExpression;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.paperGenerics.PaperState;
-import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.SplittableRandom;
@@ -17,10 +14,6 @@ public class OptimalFlowSoftConstraintCalculator<
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractLinearProgramOnTreeWithFixedOpponents<TAction, TObservation, TSearchNodeMetadata, TState> {
-
-    private static final Logger logger = LoggerFactory.getLogger(OptimalFlowSoftConstraintCalculator.class.getName());
-
-    private static final double RISK_COEFFICIENT = 1.0;
 
     private final CLPExpression totalRiskExpression;
     private final double totalRiskAllowed;
@@ -33,17 +26,18 @@ public class OptimalFlowSoftConstraintCalculator<
 
     @Override
     protected void setLeafObjective(InnerElement element) {
-        var node = element.node;
-        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
-        var metadata = node.getSearchNodeMetadata();
-        var nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
-        totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.closestParentFlow);
-        double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
-        double expectedReward = metadata.getExpectedReward()[inGameEntityId];
-        double predictedRisk = metadata.getExpectedRisk()[inGameEntityId];
-        double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
-//        model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), addNoiseToLeaf(leafCoefficient));
-        element.flowWithCoefficient.coefficient += getNodeValue(metadata, inGameEntityId) * element.modifier;
+        throw new IllegalStateException("BROKEN AND KNOWN. Fix me.");
+//        var node = element.node;
+//        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
+//        var metadata = node.getSearchNodeMetadata();
+//        var nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
+//        totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.closestParentFlow);
+//        double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
+//        double expectedReward = metadata.getExpectedReward()[inGameEntityId];
+//        double predictedRisk = metadata.getExpectedRisk()[inGameEntityId];
+//        double leafCoefficient = cumulativeReward + (expectedReward * (1 - predictedRisk));
+////        model.setObjectiveCoefficient(metadata.getNodeProbabilityFlow(), addNoiseToLeaf(leafCoefficient));
+//        element.flowWithCoefficient.coefficient += getNodeValue(metadata, inGameEntityId) * element.modifier;
     }
 
 //    @Override

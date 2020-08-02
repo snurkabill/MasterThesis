@@ -11,9 +11,8 @@ import vahy.api.search.node.SearchNode;
 import vahy.paperGenerics.PaperState;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.SplittableRandom;
 
 public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
@@ -23,19 +22,17 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     TState extends PaperState<TAction, TObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTreeWithFixedOpponents.class.getName());
-    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled() || DEBUG_ENABLED;
 
     private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -10);
 
     private static final double LOWER_BOUND = 0.0;
     private static final double UPPER_BOUND = 1.0;
     private static final double CHILD_VARIABLE_COEFFICIENT = 1.0;
-    private static final double PARENT_VARIABLE_COEFFICIENT = -1.0;
-    private static final double RISK_COEFFICIENT = 1.0;
 
+    protected static class FlowWithCoefficient {
 
-    protected class FlowWithCoefficient {
         protected final CLPVariable closestParentFlow;
         protected double coefficient;
 
@@ -88,14 +85,14 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     private final double noiseLowerBound;
     protected CLP model;
 
-    private LinkedList<InnerElement> masterQueue;
-    private List<FlowWithCoefficient> flowList;
+    private final Deque<InnerElement> masterQueue;
+    private final Deque<FlowWithCoefficient> flowList;
 
     protected AbstractLinearProgramOnTreeWithFixedOpponents(boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
         this.model = new CLP();
 //        this.model.algorithm(CLP.ALGORITHM.PRIMAL);
-        this.masterQueue = new LinkedList<>();
-        this.flowList = new ArrayList<>(); // TODO: redo to LinkedList?
+        this.masterQueue = new ArrayDeque<>();
+        this.flowList = new ArrayDeque<>();
         this.maximize = maximize;
         this.random = random;
         this.strategy = strategy;
@@ -113,25 +110,6 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     }
 
     public boolean optimizeFlow(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
-//        if(root.isPlayerTurn()) {
-//            return optimizePlayerNode(root);
-//        } else {
-//            return optimizeOpponentNode(root);
-//        }
-        return optimizePlayerNode(root);
-    }
-
-    public void finalizeFlowCoefficients() {
-        for (FlowWithCoefficient flowWithCoefficient : flowList) {
-            model.setObjectiveCoefficient(flowWithCoefficient.closestParentFlow, addNoiseToLeaf(flowWithCoefficient.coefficient));
-        }
-    }
-
-    private boolean optimizeOpponentNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
-        throw new UnsupportedOperationException("Linear optimization of opponent node is not supported for now");
-    }
-
-    private boolean optimizePlayerNode(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         long startBuildingLinearProgram = System.currentTimeMillis();
         initializeQueues(root);
         while(!masterQueue.isEmpty()) {
@@ -161,8 +139,8 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
 
         finalizeFlowCoefficients();
         finalizeHardConstraints();
-        if(DEBUG_ENABLED) {
-            logger.debug("Building linear program took [{}]ms", System.currentTimeMillis() - startBuildingLinearProgram);
+        if(TRACE_ENABLED) {
+            logger.trace("Building linear program took [{}]ms", System.currentTimeMillis() - startBuildingLinearProgram);
         }
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
@@ -171,7 +149,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
             return false;
         }
 
-        var queue2 = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
+        var queue2 = new ArrayDeque<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
         queue2.addFirst(root);
 
         while(!queue2.isEmpty()) {
@@ -196,35 +174,17 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
                 throw new IllegalStateException("Flow is not equal to 1");
             }
         }
-        if(DEBUG_ENABLED) {
-            logger.debug("Optimizing linear program took [{}] ms", System.currentTimeMillis() - startOptimization);
+        if(TRACE_ENABLED) {
+            logger.trace("Optimizing linear program took [{}] ms", System.currentTimeMillis() - startOptimization);
         }
         return true;
     }
 
-//    private List<InnerElement> getAllDirectLeafList(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> subRoot) {
-//        LinkedList<InnerElement> opponentNodeQueue = new LinkedList<>();
-//        List<InnerElement> leafList = new ArrayList<>();
-//        opponentNodeQueue.addFirst(new InnerElement(subRoot, 1.0));
-//        while(!opponentNodeQueue.isEmpty()) {
-//            var innerElement = opponentNodeQueue.pop();
-//            if(!innerElement.node.isLeaf()) {
-//                for (var node : innerElement.node.getChildNodeMap().values()) {
-//
-//                }
-//            } else {
-//                leafList.add(new InnerElement(innerElement.node, innerElement.modifier));
-//            }
-//        }
-//        return leafList;
-//    }
-//
-//    private void resolvePlayerNode(CLPExpression parentFlowDistribution, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node) {
-//        CLPVariable childFlow = model.addVariable().lb(LOWER_BOUND).ub(UPPER_BOUND);
-//        node.getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
-//        parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlow);
-//        masterQueue.add(new InnerElement(node, 1.0, childFlow));
-//    }
+    public void finalizeFlowCoefficients() {
+        for (FlowWithCoefficient flowWithCoefficient : flowList) {
+            model.setObjectiveCoefficient(flowWithCoefficient.closestParentFlow, addNoiseToLeaf(flowWithCoefficient.coefficient));
+        }
+    }
 
     protected final double getNodeValue(TSearchNodeMetadata metadata, int inGameEntityId) {
         double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
@@ -249,16 +209,4 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         }
     }
 
-//    private void resolveNonLeafSubChild(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> opponentNode, CLPVariable childFlow) {
-//        var leafSubParentNodeList = new LinkedList<SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>>();
-//        for (var playerNode : opponentNode.getChildNodeMap().values()) {
-//            var priorProbability = playerNode.getSearchNodeMetadata().getPriorProbability();
-//            if(playerNode.isLeaf()) {
-//                leafSubParentNodeList.add(playerNode);
-//            } else {
-//                masterQueue.addLast(new InnerElement(playerNode, priorProbability));
-//            }
-//        }
-//        setLeafObjectiveWithFlow(leafSubParentNodeList, opponentNode.getSearchNodeMetadata().getNodeProbabilityFlow());
-//    }
 }
