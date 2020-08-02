@@ -26,7 +26,7 @@
 
 <!--    <logger name="vahy" level="debug"/>-->
 
-    <root level="info">
+    <root level="warn">
         <appender-ref ref="consoleAppender" />
     </root>
 

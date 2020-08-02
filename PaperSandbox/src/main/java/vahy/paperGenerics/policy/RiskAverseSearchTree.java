@@ -222,17 +222,21 @@ public class RiskAverseSearchTree<
     }
 
     private void processOpponentAction(TAction action) {
-        var riskOfOtherOpponentActions = 0.0;
-        for (var entry : getRoot().getChildNodeMap().entrySet()) {
-            var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
-            childRisk = roundRiskIfBelowZero(childRisk, "RiskOfOpponentAction");
-            anyRiskEstimated += childRisk;
-            if(entry.getKey().ordinal() != action.ordinal()) {
-                riskOfOtherOpponentActions += childRisk * entry.getValue().getSearchNodeMetadata().getPriorProbability() * cumulativeDenominator;
+        if(getRoot().getChildNodeMap().containsKey(action)) {
+            var riskOfOtherOpponentActions = 0.0;
+            for (var entry : getRoot().getChildNodeMap().entrySet()) {
+                var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
+                childRisk = roundRiskIfBelowZero(childRisk, "RiskOfOpponentAction");
+                anyRiskEstimated += childRisk;
+                if(entry.getKey().ordinal() != action.ordinal()) {
+                    riskOfOtherOpponentActions += childRisk * entry.getValue().getSearchNodeMetadata().getPriorProbability() * cumulativeDenominator;
+                }
             }
+            cumulativeNominator += riskOfOtherOpponentActions;
+            cumulativeDenominator *= getRoot().getSearchNodeMetadata().getChildPriorProbabilities().get(action);
+        } else {
+            // TODO: what to do here? do nothing?
         }
-        cumulativeNominator += riskOfOtherOpponentActions;
-        cumulativeDenominator *= getRoot().getSearchNodeMetadata().getChildPriorProbabilities().get(action);
     }
 
     @Override

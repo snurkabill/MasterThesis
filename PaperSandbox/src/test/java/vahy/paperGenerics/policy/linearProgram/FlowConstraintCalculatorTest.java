@@ -229,7 +229,7 @@ public class FlowConstraintCalculatorTest {
     private SearchTreeImpl<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> initializeTree(
         PaperNodeSelector<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> paperNodeSelector,
         PaperStateWrapper<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> state,
-        PaperNodeEvaluator<EmptySpaceAction, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> nodeEvaluator,
+        PaperNodeEvaluator<EmptySpaceAction, EmptySpaceRiskState> nodeEvaluator,
         SearchNodeFactory<EmptySpaceAction, DoubleVector, PaperMetadata<EmptySpaceAction>, EmptySpaceRiskState> searchNodeFactory,
         PaperMetadataFactory<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> searchNodeMetadataFactory
     )

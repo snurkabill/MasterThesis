@@ -22,8 +22,8 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     TState extends PaperState<TAction, TObservation, TState>>  {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractLinearProgramOnTreeWithFixedOpponents.class.getName());
-    public static final boolean TRACE_ENABLED = logger.isTraceEnabled();
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
+    public static final boolean TRACE_ENABLED = logger.isTraceEnabled() || DEBUG_ENABLED;
 
     private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -10);
 
@@ -139,8 +139,8 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
 
         finalizeFlowCoefficients();
         finalizeHardConstraints();
-        if(DEBUG_ENABLED) {
-            logger.debug("Building linear program took [{}]ms", System.currentTimeMillis() - startBuildingLinearProgram);
+        if(TRACE_ENABLED) {
+            logger.trace("Building linear program took [{}]ms", System.currentTimeMillis() - startBuildingLinearProgram);
         }
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
@@ -174,8 +174,8 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
                 throw new IllegalStateException("Flow is not equal to 1");
             }
         }
-        if(DEBUG_ENABLED) {
-            logger.debug("Optimizing linear program took [{}] ms", System.currentTimeMillis() - startOptimization);
+        if(TRACE_ENABLED) {
+            logger.trace("Optimizing linear program took [{}] ms", System.currentTimeMillis() - startOptimization);
         }
         return true;
     }

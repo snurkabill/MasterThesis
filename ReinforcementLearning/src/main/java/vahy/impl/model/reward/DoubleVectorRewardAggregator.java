@@ -24,7 +24,7 @@ public class DoubleVectorRewardAggregator {
 
     public static double[] aggregate(double[] first, double[] second) {
         if(first.length != second.length) {
-            throw new IllegalStateException("Different array lengths");
+            throw new IllegalStateException("Different array lengths. First: [" + first.length + "] and second: [" + second.length + "]");
         }
         var copy = Arrays.copyOf(first, first.length);
         for (int i = 0; i < copy.length; i++) {

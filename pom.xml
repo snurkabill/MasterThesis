@@ -218,7 +218,7 @@
                         <target>${java.version}</target>
                         <release>${java.version}</release>
                         <compilerArgs combine.self="override">
-<!--                            <arg>-Werror</arg>-->
+                            <arg>-Werror</arg>
                             <arg>-Xlint:all,-fallthrough,-processing,-serial,-classfile,-path</arg>
                             <arg>-parameters</arg>
                             <arg>-XDcompilePolicy=simple</arg>

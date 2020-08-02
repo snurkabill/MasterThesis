@@ -26,7 +26,7 @@ public class OptimalFlowSoftConstraintCalculator<
 
     @Override
     protected void setLeafObjective(InnerElement element) {
-        throw new IllegalStateException("Fix me.");
+        throw new IllegalStateException("BROKEN AND KNOWN. Fix me.");
 //        var node = element.node;
 //        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
 //        var metadata = node.getSearchNodeMetadata();

@@ -240,7 +240,7 @@ public class ExampleRisk01 {
             NoiseStrategy.NOISY_05_06);
 
         var updater = new PaperTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
-        var nodeEvaluator = new PaperNodeEvaluator<BomberManAction, PaperMetadata<BomberManAction>, BomberManRiskState>(searchNodeFactory, trainablePredictor_risk, config.isModelKnown());
+        var nodeEvaluator = new PaperNodeEvaluator<BomberManAction, BomberManRiskState>(searchNodeFactory, trainablePredictor_risk, config.isModelKnown());
         var cpuctParameter = 1.0;
 
 

@@ -14,9 +14,7 @@ seed = int(sys.argv[6])
 
 print("INITIALIZING TF MODEL WITH SEED" + str(seed))
 
-hidden_count_1 = 100
-hidden_count_2 = 100
-hidden_count_3 = 100
+hidden_count_1 = 128
 
 Q_output_count = value_output_count
 
@@ -42,17 +40,22 @@ Q_target = tf.slice(target, [0, 0], [-1, Q_output_count], name = "Q_slice_node")
 action_target = tf.slice(target, [0, Q_output_count], [-1, action_output_count], name = "action_slice_node")
 
 hidden_1 = Dense(x,        hidden_count_1, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_1")
-# hidden_2 = Dense(Dropout(hidden_1, keep_prob=keep_prob), hidden_count_2, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_2")
-# hidden_3 = Dense(Dropout(hidden_2, keep_prob=keep_prob), hidden_count_3, tf.nn.relu, use_bias = True, kernel_initializer = tf.glorot_normal_initializer(), name = "hidden_3")
 
-Q_output      = tf.layers.dense(hidden_1, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
-action_output = tf.layers.dense(hidden_1, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
+Q_output_raw      = tf.layers.dense(hidden_1, Q_output_count,                   use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = 'Q_output_node')
+Q_output_ = tf.multiply(Q_output_raw, 100000)
+Q_output_ = tf.round(Q_output_)
+Q_output = tf.div(Q_output_, 100000)
+
+action_output_raw = tf.layers.dense(hidden_1, action_output_count, tf.nn.softmax, use_bias = True, kernel_initializer = tf.zeros_initializer, bias_initializer = tf.zeros_initializer, name = "action_output_node")
+action_output_ = tf.multiply(action_output_raw, 100000)
+action_output_ = tf.round(action_output_)
+action_output = tf.div(action_output_, 100000)
 
 prediction = tf.concat([Q_output, action_output], 1, name = "concat_node")
 prediction_identity = tf.identity(prediction, name = "prediction_node")
 
-Q_loss = tf.keras.losses.mean_squared_error(y_true = Q_target, y_pred = Q_output)
-policy_loss = tf.keras.losses.categorical_crossentropy(y_true = action_target, y_pred = action_output)
+Q_loss = tf.keras.losses.mean_squared_error(y_true = Q_target, y_pred = Q_output_raw)
+policy_loss = tf.keras.losses.categorical_crossentropy(y_true = action_target, y_pred = action_output_raw)
 
 total_loss = Q_loss + policy_loss
 train_op = tf.train.AdamOptimizer(learning_rate = learning_rate, name = "Optimizer").minimize(total_loss, name = 'optimize_node')

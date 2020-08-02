@@ -1,6 +1,5 @@
 package vahy.integration.tictactoe;
 
-import vahy.AbstractConvergenceTest;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -21,7 +20,7 @@ import vahy.impl.runner.PolicyDefinition;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractTicTacToeConvergenceTest extends AbstractConvergenceTest {
+public abstract class AbstractTicTacToeConvergenceTest {
 
 
     protected static PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState> createUniformPolicy(int policyId_) {

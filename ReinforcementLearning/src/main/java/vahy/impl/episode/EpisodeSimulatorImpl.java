@@ -109,8 +109,8 @@ public class EpisodeSimulatorImpl<
 
             return resultsFactory.createResults(episodeHistoryList, policyIdTranslationMap, policyList.size(), playerStepsDone, averageDecisionDuration, totalStepsDone, totalCumulativePayoffList, Duration.ofMillis(end - episodeStart));
         } catch(RuntimeException e) {
-            logger.error(createErrorMsg(episodeHistoryList));
-            throw e;
+            e.printStackTrace();
+            throw new RuntimeException(createErrorMsg(episodeHistoryList), e);
         }
     }
 

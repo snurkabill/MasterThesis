@@ -262,8 +262,32 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
 
     @Override
     public String readableStringRepresentation() {
-        return "TODO: Implement this...";
+        boolean[][] walls = staticPart.getWalls();
+        double[][] trapProbabilities = staticPart.getTrapProbabilities();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < walls.length; i++) {
+            for (int j = 0; j < walls[0].length; j++) {
+                builder.append(walls[i][j]
+                    ? "W "
+                    : i == agentXCoordination && j == agentYCoordination
+                    ? "A "
+                    : trapProbabilities[i][j] != 0.0
+                    ? "X "
+                    // : String.valueOf(rewards[i][j]));
+                    : rewards[i][j] == 0
+                    ? "  "
+                    : "G ");
+            }
+            builder.append(System.lineSeparator());
+        }
+        builder.append(isAgentStandingOnTrap() ? "T " : "N ");
+        return builder.toString();
     }
+
+    private boolean isAgentStandingOnTrap() {
+        return staticPart.getTrapProbabilities()[agentXCoordination][agentYCoordination] != 0.0;
+    }
+
 
     @Override
     public List<String> getCsvHeader() {
