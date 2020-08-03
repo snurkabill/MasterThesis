@@ -21,8 +21,9 @@ import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
-import vahy.impl.predictor.tf.TFHelper;
-import vahy.impl.predictor.tf.TFModelImproved;
+import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -146,7 +147,7 @@ public class ExampleRisk02 {
 
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "alphazero", "create_alphazero_prototype.py");
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig, modelInputSize, totalEntityCount, totalActionCount);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount * 2 + totalActionCount,
@@ -158,7 +159,7 @@ public class ExampleRisk02 {
             systemConfig.getParallelThreadsCount(),
             new SplittableRandom(systemConfig.getRandomSeed()));
 
-        var trainablePredictor_risk = new TrainableApproximator(tfModel_);
+        var trainablePredictor_risk = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
         var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(discountFactor, totalActionCount, policyId);
 //        var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var dataAggregator_risk = new ReplayBufferDataAggregator(1000);
@@ -256,7 +257,7 @@ public class ExampleRisk02 {
         var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, totalEntityCount, config);
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "alphazero", "create_alphazero_prototype.py");
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig, modelInputSize, totalEntityCount, actionCount);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, actionCount);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount + actionCount,
@@ -268,7 +269,7 @@ public class ExampleRisk02 {
             systemConfig.getParallelThreadsCount(),
             new SplittableRandom(systemConfig.getRandomSeed()));
 
-        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(tfModel_);
+        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
         var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor);
 //        var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
@@ -287,7 +288,7 @@ public class ExampleRisk02 {
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, inGameEntityCount, problemConfig);
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_vectorized_model.py");
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig, modelInputSize, totalEntityCount, 0);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount,
@@ -299,7 +300,7 @@ public class ExampleRisk02 {
             systemConfig.getParallelThreadsCount(),
             new SplittableRandom(systemConfig.getRandomSeed()));
 
-        var trainablePredictorMCTSEval_1 = new TrainableApproximator(tfModel_);
+        var trainablePredictorMCTSEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
         var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId);
 //        var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
@@ -318,7 +319,7 @@ public class ExampleRisk02 {
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManRiskState>();
 
         var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_model.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig, modelInputSize, 1, 0);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_value.length,
@@ -333,7 +334,7 @@ public class ExampleRisk02 {
 
         var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId);
 
-        var trainablePredictor2 = new TrainableApproximator(tfModel);
+        var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
         var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(

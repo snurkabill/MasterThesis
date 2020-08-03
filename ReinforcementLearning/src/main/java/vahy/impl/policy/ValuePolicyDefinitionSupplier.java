@@ -1,6 +1,5 @@
 package vahy.impl.policy;
 
-import org.jetbrains.annotations.NotNull;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.policy.OuterDefPolicySupplier;
@@ -24,7 +23,6 @@ public class ValuePolicyDefinitionSupplier<TAction extends Enum<TAction> & Actio
         );
     }
 
-    @NotNull
     private OuterDefPolicySupplier<TAction, DoubleVector, TState> getValuePolicySupplier(Supplier<Double> explorationConstantSupplier, Predictor<DoubleVector> trainablePredictor) {
         return (initialState, policyMode, policyId, random) -> {
             if (policyMode == PolicyMode.INFERENCE) {

@@ -1,6 +1,5 @@
 package vahy.examples.bomberman;
 
-import org.jetbrains.annotations.NotNull;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
@@ -85,7 +84,6 @@ public class Example01 {
 
     }
 
-    @NotNull
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> createPolicyArgument(double discountFactor,
                                                                                                                           int policyId,
                                                                                                                           int categoryId) {

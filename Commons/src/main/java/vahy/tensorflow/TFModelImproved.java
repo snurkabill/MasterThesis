@@ -1,11 +1,10 @@
-package vahy.impl.predictor.tf;
+package vahy.tensorflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import vahy.api.learning.model.SupervisedTrainableModel;
 import vahy.timer.SimpleTimer;
 
 import java.nio.DoubleBuffer;
@@ -13,7 +12,7 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable {
+public class TFModelImproved implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(TFModelImproved.class.getName());
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
@@ -32,7 +31,6 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
     private final long[] trainInputShape;
     private final long[] trainTargetShape;
 
-    private final Graph commonGraph;
     private final Session trainingSession;
     private final Tensor<?> trainingKeepProbability;
     private final Tensor<?> learningRate;
@@ -59,8 +57,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         this.inputDoubleBuffer = DoubleBuffer.allocate(batchSize * inputDimension);
         this.targetDoubleBuffer = DoubleBuffer.allocate(batchSize * outputDimension);
 
-        this.commonGraph = new Graph();
-        this.commonGraph.importGraphDef(bytes);
+        Graph commonGraph = new Graph();
+        commonGraph.importGraphDef(bytes);
         this.trainingSession = new Session(commonGraph);
         this.trainingSession.runner().addTarget("init").run();
         this.trainingKeepProbability = Tensor.create(keepProb);
@@ -72,7 +70,6 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
     }
 
-    @Override
     public double[] predict(double[] input) {
         try {
             var tfWrapper = pool.take();
@@ -84,7 +81,6 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
     }
 
-    @Override
     public double[][] predict(double[][] input) {
         try {
             var tfWrapper = pool.take();
@@ -96,17 +92,14 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
     }
 
-    @Override
     public int getInputDimension() {
         return inputDimension;
     }
 
-    @Override
     public int getOutputDimension() {
         return outputDimension;
     }
 
-    @Override
     public void fit(double[][] input, double[][] target) {
         if(input.length != target.length) {
             throw new IllegalArgumentException("Input and target lengths differ");
