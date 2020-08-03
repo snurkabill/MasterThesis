@@ -1,8 +1,7 @@
-package vahy.thirdparty.TF.concurrency;
+package vahy.tensorflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.impl.predictor.tf.TFModelImproved;
 import vahy.utils.RandomDistributionUtils;
 
 import java.io.IOException;

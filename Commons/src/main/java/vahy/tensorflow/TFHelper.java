@@ -1,8 +1,7 @@
-package vahy.impl.predictor.tf;
+package vahy.tensorflow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.api.experiment.SystemConfig;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,10 +22,10 @@ public class TFHelper {
     private TFHelper() {
     }
 
-    public static byte[] loadTensorFlowModel(Path scriptPath, SystemConfig systemConfig, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
+    public static byte[] loadTensorFlowModel(Path scriptPath, String pythonVirtualEnvPath, long randomSeed, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
         var modelName = "tfModel_" + LocalDateTime.now(ZoneId.systemDefault()).atZone(ZoneOffset.UTC);
         modelName = modelName.replace(":", "_");
-        Process process = Runtime.getRuntime().exec(systemConfig.getPythonVirtualEnvPath()
+        Process process = Runtime.getRuntime().exec(pythonVirtualEnvPath
             + " " +
             scriptPath +
             " " +
@@ -40,7 +39,7 @@ public class TFHelper {
             " " +
             Paths.get("PythonScripts", "generated_models") +
             " " +
-            (int)systemConfig.getRandomSeed());
+            (int) randomSeed);
 
         try(BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream(), Charset.defaultCharset()));
             BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream(), Charset.defaultCharset()))) {

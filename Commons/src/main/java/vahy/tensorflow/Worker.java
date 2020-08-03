@@ -1,6 +1,4 @@
-package vahy.thirdparty.TF.concurrency;
-
-import vahy.impl.predictor.tf.TFModelImproved;
+package vahy.tensorflow;
 
 import java.util.concurrent.Callable;
 

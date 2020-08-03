@@ -1,6 +1,5 @@
 package vahy.impl.policy.mcts;
 
-import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -58,7 +57,6 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
         return getPolicyDefinition(policyId, categoryId, explorationConstantSupplier, cpuctParameter, treeExpansionCountPerStep, predictorSetup, 0);
     }
 
-    @NotNull
     private OuterDefPolicySupplier<TAction, DoubleVector, TState> getPolicyDefinitionSupplierWithRollout(double cpuctParameter,
                                                                                                          int treeExpansionCountPerStep,
                                                                                                          double discountFactor,
@@ -75,7 +73,6 @@ public class MCTSPolicyDefinitionSupplier<TAction extends Enum<TAction> & Action
         };
     }
 
-    @NotNull
     private OuterDefPolicySupplier<TAction, DoubleVector, TState> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter,
                                                                                                            Supplier<Double> explorationConstantSupplier,
                                                                                                            int treeExpansionCountPerStep,
