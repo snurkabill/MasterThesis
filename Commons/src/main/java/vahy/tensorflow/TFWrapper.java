@@ -4,7 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import org.tensorflow.Tensors;
+import org.tensorflow.ndarray.Shape;
+import org.tensorflow.ndarray.buffer.DataBuffers;
+import org.tensorflow.ndarray.buffer.DoubleDataBuffer;
+import org.tensorflow.types.TFloat64;
 
 import java.io.Closeable;
 import java.nio.DoubleBuffer;
@@ -19,23 +22,16 @@ public class TFWrapper implements Closeable {
     private final int outputDimension;
     private final Session sess;
 
-    private final double[] singleOutputArray;
-    private final DoubleBuffer singleInputDoubleBuffer;
-    private final DoubleBuffer singleOutputDoubleBuffer;
-
-    private final long[] singleInputShape;
+    private final Shape singleInputShape;
     private final long[] batchedInputShape;
 
-    private final Tensor<Double> inferenceKeepProbability = Tensors.create(1.0);
+    private final Tensor<TFloat64> inferenceKeepProbability = TFloat64.scalarOf(1.0);
 
     public TFWrapper(int inputDimension, int outputDimension, Session sess) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
 
-        this.singleOutputArray = new double[outputDimension];
-        this.singleOutputDoubleBuffer = DoubleBuffer.wrap(singleOutputArray);
-        this.singleInputDoubleBuffer = DoubleBuffer.allocate(inputDimension);
-        this.singleInputShape = new long[] {1, inputDimension};
+        this.singleInputShape = Shape.of(1, inputDimension);
         this.batchedInputShape = new long[] {0, inputDimension};
 
         this.sess = sess;
@@ -44,14 +40,12 @@ public class TFWrapper implements Closeable {
     }
 
     public double[] predict(double[] input) {
-        singleInputDoubleBuffer.position(0);
-        singleInputDoubleBuffer.put(input);
-        singleInputDoubleBuffer.flip();
-        Tensor<?> output = evaluateTensor(singleInputShape, singleInputDoubleBuffer);
-        output.writeTo(singleOutputDoubleBuffer);
-        singleOutputDoubleBuffer.position(0);
+        var input2 = Arrays.copyOf(input, input.length);
+        Tensor<TFloat64> output = evaluateTensor(singleInputShape, DataBuffers.of(input2));
+        var prediction = new double[outputDimension];
+        output.rawData().asDoubles().read(prediction);
         output.close();
-        return Arrays.copyOf(singleOutputArray, singleOutputArray.length);
+        return prediction;
     }
 
     public double[][] predict(double[][] input) {
@@ -61,11 +55,10 @@ public class TFWrapper implements Closeable {
         }
         doubleBuffer.position(0);
         batchedInputShape[0] = input.length;
-        Tensor<?> output = evaluateTensor(batchedInputShape, doubleBuffer);
-
-        DoubleBuffer outputDoubleBuffer = DoubleBuffer.allocate(input.length * outputDimension);
-        output.writeTo(outputDoubleBuffer);
-        var oneDArray = outputDoubleBuffer.array();
+        Tensor<?> output = evaluateTensor(Shape.of(batchedInputShape), DataBuffers.of(doubleBuffer));
+        DoubleDataBuffer outputDoubleBuffer = output.rawData().asDoubles();
+        var oneDArray = new double[input.length * outputDimension];
+        outputDoubleBuffer.read(oneDArray);
         double[][] outputMatrix = new double[input.length][];
         for (int i = 0; i < outputMatrix.length; i++) {
             outputMatrix[i] = new double[outputDimension];
@@ -75,8 +68,8 @@ public class TFWrapper implements Closeable {
         return outputMatrix;
     }
 
-    private Tensor<?> evaluateTensor(long[] singleInputShape, DoubleBuffer singleInputDoubleBuffer) {
-        Tensor<?> inputTensor = Tensor.create(singleInputShape, singleInputDoubleBuffer);
+    private Tensor<TFloat64> evaluateTensor(Shape singleInputShape, DoubleDataBuffer singleInputDoubleBuffer) {
+        Tensor<TFloat64> inputTensor = TFloat64.tensorOf(singleInputShape, singleInputDoubleBuffer);
         List<Tensor<?>> tensors = sess
             .runner()
             .feed("input_node", inputTensor)
@@ -87,7 +80,7 @@ public class TFWrapper implements Closeable {
         if (tensors.size() != 1) {
             throw new IllegalStateException("There is expected only one output tensor in this scenario. If multiple tensors present on output, different method should be written to handle it. Got tensors: [" + tensors.size() + "]");
         }
-        return tensors.get(0);
+        return tensors.get(0).expect(TFloat64.DTYPE);
     }
 
     @Override
