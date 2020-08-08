@@ -64,7 +64,20 @@ public class TFWrapperPerformanceTest {
                     }
                 }
                 long end = System.currentTimeMillis();
-                logger.info("Time per prediction in us: " + ((end - start) * 1000) / (double) (instanceCount * trials));
+                var microseconds = (end - start) * 1000.0;
+                logger.info("Time prediction one by one total: [{}] us", microseconds / (double) trials);
+                logger.info("Time prediction one by one per instance: [{}] us", microseconds / (double) (instanceCount * trials));
+                logger.info("Time per call: [{}] us", microseconds / (double) (instanceCount * trials));
+
+                start = System.currentTimeMillis();
+                for (int i = 0; i < trials; i++) {
+                    model.predict(inputData);
+                }
+                end = System.currentTimeMillis();
+                microseconds = (end - start) * 1000.0;
+                logger.info("Time per batched prediction [{}] us", microseconds / (double) trials);
+                logger.info("Time per prediction in batch per sample: [{}] us", microseconds / (double) (instanceCount * trials));
+                logger.info("Time per call: [{}] us", microseconds / (double) trials);
             }
         } catch (Exception e) {
             Assertions.fail(e);
@@ -78,7 +91,7 @@ public class TFWrapperPerformanceTest {
         int inputDim = 512;
         int outputDim = 512;
 
-        int instanceCount = 100;
+        int instanceCount = 1000;
 
         double[][] inputData = new double[instanceCount][];
         double[][] targetData = new double[instanceCount][];
@@ -100,8 +113,8 @@ public class TFWrapperPerformanceTest {
         int trainingIterations_OUTSIDE_MODEL = 1;
         int batchSize = 1;
 
-//        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
-        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python";
+        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
+//        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python";
         var modelPath = Paths.get(ConcurrencyTesting.class.getClassLoader().getResource("tfModelPrototypes/HUGE_MODEL.py").getPath());
 
         try {
@@ -120,15 +133,20 @@ public class TFWrapperPerformanceTest {
                     }
                 }
                 long end = System.currentTimeMillis();
-                logger.info("Time per single prediction in us: " + ((end - start) * 1000) / (double) (instanceCount * trials));
+                var microseconds = (end - start) * 1000.0;
+                logger.info("Time prediction one by one total: [{}] us", microseconds / (double) trials);
+                logger.info("Time prediction one by one per instance: [{}] us", microseconds / (double) (instanceCount * trials));
+                logger.info("Time per call: [{}] us", microseconds / (double) (instanceCount * trials));
 
                 start = System.currentTimeMillis();
                 for (int i = 0; i < trials; i++) {
                     model.predict(inputData);
                 }
                 end = System.currentTimeMillis();
-                logger.info("Time per batched prediction in us: " + ((end - start) * 1000) / (double) (instanceCount * trials));
-                logger.info("Time per prediction in batch per sample in us: " + (((end - start) * 1000) / (double) (instanceCount * trials)) / instanceCount);
+                microseconds = (end - start) * 1000.0;
+                logger.info("Time per batched prediction [{}] us", microseconds / (double) trials);
+                logger.info("Time per prediction in batch per sample: [{}] us", microseconds / (double) (instanceCount * trials));
+                logger.info("Time per call: [{}] us", microseconds / (double) trials);
             }
         } catch (Exception e) {
             Assertions.fail(e);
