@@ -1,5 +1,7 @@
 package vahy.examples.bomberman;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.utils.ArrayUtils;
 import vahy.utils.ImmutableTuple;
@@ -17,6 +19,8 @@ public enum BomberManInstance {
     BM_02("examples/bomberman/02.txt"),
     BM_05("examples/bomberman/05.txt");
 
+    private static final Logger logger = LoggerFactory.getLogger(BomberManInstance.class.getName());
+
     private final String path;
 
     BomberManInstance(String path) {
@@ -29,6 +33,7 @@ public enum BomberManInstance {
 
     public ImmutableTuple<char[][], Integer> getAsPlayground() throws IOException, InvalidInstanceSetupException {
         var resource = BomberManInstance.class.getClassLoader().getResource(getPath());
+        logger.error(resource.getPath());
         var lines = Files.readAllLines(Paths.get(resource.getPath()));
         return deserialize(lines);
     }
