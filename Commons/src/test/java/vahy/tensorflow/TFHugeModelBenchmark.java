@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 @Measurement(iterations = 5)
 @State(Scope.Benchmark)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
-public class TFHugeModelLatencyBenchmark {
+public class TFHugeModelBenchmark {
 
     public static void main(String[] args) throws IOException, RunnerException {
         org.openjdk.jmh.Main.main(args);
@@ -34,14 +34,15 @@ public class TFHugeModelLatencyBenchmark {
     private TFModelImproved model;
     private double[] dummyInput_0;
     private double[] dummyInput_1;
-//    private double[] dummyInput_2;
-//    private double[] dummyInput_3;
-//    private double[] dummyInput_4;
+
+    private double[][] dummyBatchedInput_0;
+    private double[][] dummyBatchedInput_1;
 
     @Setup
     public void setUp() throws IOException, InterruptedException {
         SplittableRandom random = new SplittableRandom(0);
 
+        int instanceCount = 1024;
         int inputDim = 2;
         int outputDim = 1;
 
@@ -54,7 +55,7 @@ public class TFHugeModelLatencyBenchmark {
 
         String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
 //        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python";
-        var modelPath = Paths.get(TFHugeModelLatencyBenchmark.class.getClassLoader().getResource("tfModelPrototypes/HUGE_MODEL.py").getPath());
+        var modelPath = Paths.get(TFHugeModelBenchmark.class.getClassLoader().getResource("tfModelPrototypes/HUGE_MODEL.py").getPath());
 
         var modelRepresentation = TFHelper.loadTensorFlowModel(modelPath, environmentPath, random.nextLong(), inputDim, outputDim, 0);
         model = new TFModelImproved(inputDim, outputDim, batchSize, trainingIterations_IN_MODEL, 0.7, 0.0001, modelRepresentation, 1, random);
@@ -65,10 +66,14 @@ public class TFHugeModelLatencyBenchmark {
 
         dummyInput_0 = random.doubles(inputDim).toArray();
         dummyInput_1 = random.doubles(inputDim).toArray();
-//        dummyInput_2 = random.doubles(inputDim).toArray();
-//        dummyInput_3 = random.doubles(inputDim).toArray();
-//        dummyInput_4 = random.doubles(inputDim).toArray();
 
+        dummyBatchedInput_0 = new double[instanceCount][];
+        dummyBatchedInput_1 = new double[instanceCount][];
+
+        for (int i = 0; i < instanceCount; i++) {
+            dummyBatchedInput_0[i] = random.doubles(inputDim).toArray();
+            dummyBatchedInput_1[i] = random.doubles(inputDim).toArray();
+        }
     }
 
     @TearDown
@@ -85,4 +90,15 @@ public class TFHugeModelLatencyBenchmark {
     public void singlePrediction_1(Blackhole bh) {
         bh.consume(model.predict(dummyInput_1));
     }
+
+    @Benchmark
+    public void batchedPrediction_0(Blackhole bh) {
+        bh.consume(model.predict(dummyBatchedInput_0));
+    }
+
+    @Benchmark
+    public void batchedPrediction_1(Blackhole bh) {
+        bh.consume(model.predict(dummyBatchedInput_1));
+    }
+
 }

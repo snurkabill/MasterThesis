@@ -34,14 +34,15 @@ public class TFSmallModelLatencyBenchmark {
     private TFModelImproved model;
     private double[] dummyInput_0;
     private double[] dummyInput_1;
-//    private double[] dummyInput_2;
-//    private double[] dummyInput_3;
-//    private double[] dummyInput_4;
+
+    private double[][] dummyBatchedInput_0;
+    private double[][] dummyBatchedInput_1;
 
     @Setup
     public void setUp() throws IOException, InterruptedException {
         SplittableRandom random = new SplittableRandom(0);
 
+        int instanceCount = 1024;
         int inputDim = 2;
         int outputDim = 1;
 
@@ -65,9 +66,15 @@ public class TFSmallModelLatencyBenchmark {
 
         dummyInput_0 = random.doubles(inputDim).toArray();
         dummyInput_1 = random.doubles(inputDim).toArray();
-//        dummyInput_2 = random.doubles(inputDim).toArray();
-//        dummyInput_3 = random.doubles(inputDim).toArray();
-//        dummyInput_4 = random.doubles(inputDim).toArray();
+
+
+        dummyBatchedInput_0 = new double[instanceCount][];
+        dummyBatchedInput_1 = new double[instanceCount][];
+
+        for (int i = 0; i < instanceCount; i++) {
+            dummyBatchedInput_0[i] = random.doubles(inputDim).toArray();
+            dummyBatchedInput_1[i] = random.doubles(inputDim).toArray();
+        }
 
     }
 
@@ -85,4 +92,15 @@ public class TFSmallModelLatencyBenchmark {
     public void singlePrediction_1(Blackhole bh) {
         bh.consume(model.predict(dummyInput_1));
     }
+
+    @Benchmark
+    public void batchedPrediction_0(Blackhole bh) {
+        bh.consume(model.predict(dummyBatchedInput_0));
+    }
+
+    @Benchmark
+    public void batchedPrediction_1(Blackhole bh) {
+        bh.consume(model.predict(dummyBatchedInput_1));
+    }
+
 }
