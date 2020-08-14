@@ -1,6 +1,7 @@
 package vahy.tensorflow;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ public class TFWrapperPerformanceTest {
     public static final Logger logger = LoggerFactory.getLogger(TFWrapperPerformanceTest.class);
 
     @Test
+    @Disabled
     public void latencyTest() {
         SplittableRandom random = new SplittableRandom(0);
 
@@ -83,6 +85,7 @@ public class TFWrapperPerformanceTest {
     }
 
     @Test
+    @Disabled
     public void throughputTest() {
         SplittableRandom random = new SplittableRandom(0);
 
