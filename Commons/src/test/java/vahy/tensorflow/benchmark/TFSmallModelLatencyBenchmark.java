@@ -1,4 +1,4 @@
-package vahy.tensorflow;
+package vahy.tensorflow.benchmark;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -13,6 +13,8 @@ import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.RunnerException;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 
 import java.io.IOException;
 import java.nio.file.Paths;
