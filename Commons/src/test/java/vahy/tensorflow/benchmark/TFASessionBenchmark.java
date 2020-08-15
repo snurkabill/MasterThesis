@@ -1,5 +1,6 @@
 package vahy.tensorflow.benchmark;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -15,6 +16,8 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
+import org.tensorflow.proto.framework.GraphDef;
+import org.tensorflow.types.TFloat64;
 import vahy.tensorflow.TFHelper;
 
 import java.io.IOException;
@@ -36,7 +39,7 @@ public class TFASessionBenchmark {
     }
 
     private Session session;
-    private Tensor<?> tfInput;
+    private Tensor<TFloat64> tfInput;
 
     @Setup
     public void setUp() throws IOException, InterruptedException {
@@ -47,11 +50,15 @@ public class TFASessionBenchmark {
         var modelRepresentation = TFHelper.loadTensorFlowModel(modelPath, environmentPath, random.nextLong(), 1, 1, 0);
 
         Graph commonGraph = new Graph();
-        commonGraph.importGraphDef(modelRepresentation);
+        try {
+            commonGraph.importGraphDef(GraphDef.parseFrom(modelRepresentation));
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
         session = new Session(commonGraph);
         session.runner().addTarget("init").run();
 
-        tfInput = Tensor.create(42.0);
+        tfInput = TFloat64.scalarOf(42.0);
     }
 
     @TearDown
