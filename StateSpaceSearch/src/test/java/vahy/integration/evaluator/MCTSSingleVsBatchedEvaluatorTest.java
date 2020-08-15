@@ -96,7 +96,7 @@ public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest 
             false,
             false,
             Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python");
+            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
         var instance = new SHInstanceSupplier(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         var modelInputSize = instance.getInGameEntityObservation(1).getObservedVector().length;
