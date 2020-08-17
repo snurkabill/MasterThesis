@@ -26,8 +26,8 @@
 
 <!--    <logger name="vahy" level="debug"/>-->
 
-    <root level="warn">
-        <appender-ref ref="consoleAppender" />
+    <root name="vahy" level="warn">
+        <appender-ref ref="CONSOLE"/>
     </root>
 
 

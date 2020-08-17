@@ -57,7 +57,6 @@ public class SHConfigBuilder {
     }
 
     public SHConfig buildConfig() {
-
         InputStream resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(hallwayGameInstance.getPath());
         try {
             var bytes = resourceAsStream.readAllBytes();
