@@ -64,7 +64,8 @@ public class TFModelImproved implements AutoCloseable {
 
         Graph commonGraph = new Graph();
         try {
-            commonGraph.importGraphDef(GraphDef.parseFrom(bytes));
+            GraphDef graphDef = GraphDef.parseFrom(bytes);
+            commonGraph.importGraphDef(graphDef);
         } catch (InvalidProtocolBufferException e) {
             throw new RuntimeException(e);
         }

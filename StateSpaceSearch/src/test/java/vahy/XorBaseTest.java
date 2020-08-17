@@ -1,9 +1,11 @@
-package vahy.tensorflow;
+package vahy;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 import vahy.timer.SimpleTimer;
 
 import java.nio.file.Paths;
