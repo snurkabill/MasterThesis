@@ -1,7 +1,9 @@
 import os
 
 import sys
-import tensorflow as tf
+import tensorflow._api.v2.compat.v1 as tf
+
+tf.disable_v2_behavior()
 
 
 model_name = sys.argv[1]

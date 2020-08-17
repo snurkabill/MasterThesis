@@ -1,6 +1,5 @@
 package vahy.examples.bomberman;
 
-import org.jetbrains.annotations.NotNull;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
@@ -22,8 +21,6 @@ import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
-import vahy.tensorflow.TFHelper;
-import vahy.tensorflow.TFModelImproved;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -45,6 +42,8 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExis
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V2;
 import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 import vahy.utils.EnumUtils;
 
 import java.io.IOException;
@@ -65,7 +64,7 @@ public class ExampleRisk02 {
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.NO_SHUFFLE);
         var systemConfig = new SystemConfig(987567, false, 1, true, 10, 0, false, false, false, Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python");
+            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
         var algorithmConfig = new CommonAlgorithmConfigBase(3, 10);
 
@@ -130,7 +129,6 @@ public class ExampleRisk02 {
 
     }
 
-    @NotNull
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState> getRiskPolicy(BomberManConfig config,
                                                                                                      SystemConfig systemConfig,
                                                                                                      int policyId,

@@ -13,51 +13,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>master-thesis-paper-sandbox</artifactId>
+    <packaging>jar</packaging>
 
 
     <properties>
-        <dl4j.version>1.0.0-beta2</dl4j.version>
-        <nd4j.version>1.0.0-beta2</nd4j.version>
-        <tf.version>1.15.0</tf.version>
+<!--        <dl4j.version>1.0.0-beta2</dl4j.version>-->
+<!--        <nd4j.version>1.0.0-beta2</nd4j.version>-->
         <jama.version>1.0.3</jama.version>
         <CLP.version>1.16.11</CLP.version>
     </properties>
 
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.tensorflow</groupId>
-            <artifactId>tensorflow</artifactId>
-            <version>${tf.version}</version>
-        </dependency>
-
-
-        <!-- -Djava.library.path=/...pathToBuild.../bazel-bin/tensorflow/tools/lib_package/libtensorflow_jni -->
-
-<!--        <dependency>-->
-<!--            <groupId>org.tensorflow</groupId>-->
-<!--            <artifactId>libtensorflow</artifactId>-->
-<!--            <version>1.14.1</version>-->
-<!--        </dependency>-->
-
-<!--        <dependency>-->
-<!--            <groupId>org.tensorflow</groupId>-->
-<!--            <artifactId>libtensorflow_jni</artifactId>-->
-<!--            <version>1.14.1.1</version>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
-
-        <dependency>
-            <groupId>org.deeplearning4j</groupId>
-            <artifactId>deeplearning4j-core</artifactId>
-            <version>${dl4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.nd4j</groupId>
-            <artifactId>nd4j-native-platform</artifactId>
-            <version>${nd4j.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>com.quantego</groupId>
@@ -67,8 +34,14 @@
 
         <dependency>
             <groupId>vahy</groupId>
+            <artifactId>master-thesis-state-space-search</artifactId>
+            <version>2.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>vahy</groupId>
             <artifactId>master-thesis-reinforcement-learning</artifactId>
             <version>2.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>vahy</groupId>
@@ -77,12 +50,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>vahy</groupId>
-            <artifactId>master-thesis-state-space-search</artifactId>
-            <version>2.0-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
     <repositories>
