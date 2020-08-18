@@ -17,7 +17,7 @@ import vahy.impl.learning.trainer.GameSamplerImpl;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.Trainer;
 import vahy.utils.ImmutableTuple;
-import vahy.vizualiation.ProgressTrackerSettings;
+import vahy.vizualization.ProgressTrackerSettings;
 
 import java.io.IOException;
 import java.time.Duration;

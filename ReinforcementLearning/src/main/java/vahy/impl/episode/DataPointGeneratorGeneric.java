@@ -1,7 +1,7 @@
 package vahy.impl.episode;
 
-import vahy.vizualiation.DataPointGenerator;
-import vahy.vizualiation.DataSample;
+import vahy.vizualization.DataPointGenerator;
+import vahy.vizualization.DataSample;
 
 import java.util.List;
 import java.util.function.Function;

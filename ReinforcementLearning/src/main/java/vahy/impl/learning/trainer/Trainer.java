@@ -11,8 +11,8 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.utils.ImmutableTuple;
-import vahy.vizualiation.ProgressTracker;
-import vahy.vizualiation.ProgressTrackerSettings;
+import vahy.vizualization.ProgressTracker;
+import vahy.vizualization.ProgressTrackerSettings;
 
 import java.awt.Color;
 import java.time.Duration;

@@ -1,4 +1,4 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
