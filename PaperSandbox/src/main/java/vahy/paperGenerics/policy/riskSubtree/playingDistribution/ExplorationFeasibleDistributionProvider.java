@@ -1,6 +1,5 @@
 package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
-import org.jetbrains.annotations.NotNull;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -84,7 +83,6 @@ public class ExplorationFeasibleDistributionProvider<
         }
     }
 
-    @NotNull
     private PlayingDistributionWithWithActionMap<TAction> getActionPlayingDistributionWithWithActionMap(int inGameEntityId,
                                                                                                         Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childMap,
                                                                                                         ArrayList<TAction> actionList,

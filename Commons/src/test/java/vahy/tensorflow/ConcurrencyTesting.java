@@ -1,11 +1,13 @@
-package vahy.thirdparty.TF.concurrency;
+package vahy.tensorflow;
 
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import vahy.impl.predictor.tf.TFModelImproved;
 import vahy.utils.RandomDistributionUtils;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+
 public class ConcurrencyTesting {
 
     private ConcurrencyTesting() {
@@ -22,12 +25,15 @@ public class ConcurrencyTesting {
 
     private static final Logger logger = LoggerFactory.getLogger(ConcurrencyTesting.class.getName());
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        runTest(ConcurrencyTesting.class.getClassLoader().getResourceAsStream("tfModel/graph_FastTF.pb").readAllBytes(), false);
-        runTest(ConcurrencyTesting.class.getClassLoader().getResourceAsStream("tfModel/graph_FastTF_probs.pb").readAllBytes(), true);
+    @Test
+    public void concurrencyTest() throws IOException, InterruptedException {
+        var path_ = Paths.get(ConcurrencyTesting.class.getClassLoader().getResource("tfModelPrototypes/XOR.py").getPath());
+        runTest(path_, false);
+//        runTest(ConcurrencyTesting.class.getClassLoader().getResourceAsStream("tfModel/graph_FastTF.pb").readAllBytes(), false);
+//        runTest(ConcurrencyTesting.class.getClassLoader().getResourceAsStream("tfModel/graph_FastTF_probs.pb").readAllBytes(), true);
     }
 
-    public static void runTest(byte[] modelRepresentation, boolean predictProbability) throws InterruptedException {
+    private void runTest(Path modelRepresentationPath, boolean predictProbability) throws InterruptedException, IOException {
         SplittableRandom random = new SplittableRandom(987412365);
 
         int instanceCount = 10_000;
@@ -58,7 +64,7 @@ public class ConcurrencyTesting {
             }
         }
 
-        int workerCount = 10;
+        int workerCount = 1;
         int poolSize = 10;
         int workerBatchSize = 100;
         if(instanceCount % (workerCount * workerBatchSize) != 0) {
@@ -66,7 +72,9 @@ public class ConcurrencyTesting {
         }
         int batchesPerWorker = instanceCount / (workerCount * workerBatchSize);
 
-        try(TFModelImproved model = new TFModelImproved(inputDim, outputDim, batchSize, trainingIterations, 0.5, 0.0001, modelRepresentation, poolSize, random))
+        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
+        var modelRepresentation = TFHelper.loadTensorFlowModel(modelRepresentationPath, environmentPath, random.nextLong(), inputDim, outputDim, 0);
+        try(TFModelImproved model = new TFModelImproved(inputDim, outputDim, batchSize, trainingIterations, 0.5, 0.01, modelRepresentation, poolSize, random))
         {
             for (int i = 0; i < 20; i++) {
                 var start = System.nanoTime();

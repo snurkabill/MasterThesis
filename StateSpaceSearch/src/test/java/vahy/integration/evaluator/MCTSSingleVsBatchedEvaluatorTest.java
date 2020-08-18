@@ -22,10 +22,11 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.mcts.MCTSPolicy;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
-import vahy.impl.predictor.tf.TFHelper;
-import vahy.impl.predictor.tf.TFModelImproved;
+import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.integration.SH.AbstractSHConvergenceTest;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 import vahy.utils.StreamUtils;
 
 import java.io.IOException;
@@ -45,7 +46,7 @@ public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest 
 
         var path_ = Paths.get(MCTSPolicy.class.getClassLoader().getResource("tfModelPrototypes/create_value_vectorized_model.py").getPath());
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig, modelInputSize, totalEntityCount, 0);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount,
@@ -57,7 +58,7 @@ public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest 
             systemConfig.getParallelThreadsCount(),
             new SplittableRandom(systemConfig.getRandomSeed()));
 
-        var trainablePredictor = new TrainableApproximator(tfModel_);
+        var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
         var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState>(discountFactor, playerId);
         var dataAggregator = new ReplayBufferDataAggregator(1000);
 
@@ -95,7 +96,7 @@ public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest 
             false,
             false,
             Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python");
+            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
         var instance = new SHInstanceSupplier(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         var modelInputSize = instance.getInGameEntityObservation(1).getObservedVector().length;

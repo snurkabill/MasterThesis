@@ -1,11 +1,15 @@
-package vahy.impl.predictor.tf;
+package vahy.tensorflow;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tensorflow.Graph;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-import vahy.api.learning.model.SupervisedTrainableModel;
+import org.tensorflow.ndarray.Shape;
+import org.tensorflow.ndarray.buffer.DataBuffers;
+import org.tensorflow.proto.framework.GraphDef;
+import org.tensorflow.types.TFloat64;
 import vahy.timer.SimpleTimer;
 
 import java.nio.DoubleBuffer;
@@ -13,7 +17,7 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable {
+public class TFModelImproved implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(TFModelImproved.class.getName());
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
@@ -29,10 +33,9 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
     private final int batchSize;
     private final double[][] trainInputBatch;
     private final double[][] trainTargetBatch;
-    private final long[] trainInputShape;
-    private final long[] trainTargetShape;
+    private final Shape trainInputShape;
+    private final Shape trainTargetShape;
 
-    private final Graph commonGraph;
     private final Session trainingSession;
     private final Tensor<?> trainingKeepProbability;
     private final Tensor<?> learningRate;
@@ -53,18 +56,23 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
             trainInputBatch[i] = new double[inputDimension];
             trainTargetBatch[i] = new double[outputDimension];
         }
-        this.trainInputShape = new long[] {batchSize, inputDimension};
-        this.trainTargetShape = new long[] {batchSize, outputDimension};
+        this.trainInputShape = Shape.of(batchSize, inputDimension);
+        this.trainTargetShape = Shape.of(batchSize, outputDimension);
 
         this.inputDoubleBuffer = DoubleBuffer.allocate(batchSize * inputDimension);
         this.targetDoubleBuffer = DoubleBuffer.allocate(batchSize * outputDimension);
 
-        this.commonGraph = new Graph();
-        this.commonGraph.importGraphDef(bytes);
+        Graph commonGraph = new Graph();
+        try {
+            GraphDef graphDef = GraphDef.parseFrom(bytes);
+            commonGraph.importGraphDef(graphDef);
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
         this.trainingSession = new Session(commonGraph);
         this.trainingSession.runner().addTarget("init").run();
-        this.trainingKeepProbability = Tensor.create(keepProb);
-        this.learningRate = Tensor.create(learningRate);
+        this.trainingKeepProbability = TFloat64.scalarOf(keepProb);
+        this.learningRate = TFloat64.scalarOf(learningRate);
 
         this.pool = new ArrayBlockingQueue<>(poolSize);
         for (int i = 0; i < poolSize; i++) {
@@ -72,7 +80,6 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
     }
 
-    @Override
     public double[] predict(double[] input) {
         try {
             var tfWrapper = pool.take();
@@ -84,7 +91,6 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
     }
 
-    @Override
     public double[][] predict(double[][] input) {
         try {
             var tfWrapper = pool.take();
@@ -96,17 +102,14 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
         }
     }
 
-    @Override
     public int getInputDimension() {
         return inputDimension;
     }
 
-    @Override
     public int getOutputDimension() {
         return outputDimension;
     }
 
-    @Override
     public void fit(double[][] input, double[][] target) {
         if(input.length != target.length) {
             throw new IllegalArgumentException("Input and target lengths differ");
@@ -135,8 +138,8 @@ public class TFModelImproved implements SupervisedTrainableModel, AutoCloseable 
                 inputDoubleBuffer.position(0);
                 targetDoubleBuffer.position(0);
 
-                Tensor<Double> tfInput = Tensor.create(trainInputShape, inputDoubleBuffer);
-                Tensor<Double> tfTarget = Tensor.create(trainTargetShape, targetDoubleBuffer);
+                Tensor<TFloat64> tfInput = TFloat64.tensorOf(trainInputShape, DataBuffers.of(inputDoubleBuffer));
+                Tensor<TFloat64> tfTarget = TFloat64.tensorOf(trainTargetShape, DataBuffers.of(targetDoubleBuffer));
                 trainingSession
                     .runner()
                     .feed("input_node", tfInput)

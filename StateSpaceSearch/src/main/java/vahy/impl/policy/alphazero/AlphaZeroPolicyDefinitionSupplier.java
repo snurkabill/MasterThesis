@@ -1,6 +1,5 @@
 package vahy.impl.policy.alphazero;
 
-import org.jetbrains.annotations.NotNull;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -48,7 +47,6 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
         return getPolicyDefinition(policyId, categoryId, cpuctParameter, exploration, treeExpansionCountPerStep, predictorSetup, 0);
     }
 
-    @NotNull
     private OuterDefPolicySupplier<TAction, DoubleVector, TState> getPolicyDefinitionSupplierWithPredictor(double cpuctParameter, Supplier<Double> exploration, int treeExpansionCountPerStep, TrainablePredictor predictor, int maximalDepthEvaluation)
     {
         return (initialState_, policyMode_, policyId_, random_) -> {

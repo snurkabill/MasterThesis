@@ -28,9 +28,10 @@ import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroPolicy;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
-import vahy.impl.predictor.tf.TFHelper;
-import vahy.impl.predictor.tf.TFModelImproved;
+import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 import vahy.utils.StreamUtils;
 
 import java.io.IOException;
@@ -75,7 +76,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
 
             var path_ = Paths.get(AlphaZeroPolicy.class.getClassLoader().getResource("tfModelPrototypes/create_alphazero_prototype.py").getPath());
 
-            var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig, modelInputSize, totalEntityCount, totalActionCount);
+            var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
             var tfModel_ = new TFModelImproved(
                 modelInputSize,
                 totalEntityCount + totalActionCount,
@@ -87,7 +88,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
                 systemConfig.getParallelThreadsCount(),
                 new SplittableRandom(systemConfig.getRandomSeed()));
 
-            var trainablePredictor = new TrainableApproximator(tfModel_);
+            var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
             var episodeDataMaker = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(playerId, totalActionCount, discountFactor);
             var dataAggregator = new ReplayBufferDataAggregator(1000);
 
@@ -127,7 +128,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
             false,
             false,
             Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python");
+            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
         var instance = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         var modelInputSize = instance.getInGameEntityObservation(5).getObservedVector().length;

@@ -25,9 +25,10 @@ import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
-import vahy.impl.predictor.tf.TFHelper;
-import vahy.impl.predictor.tf.TFModelImproved;
+import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -178,7 +179,7 @@ public class Example_random_01 {
         var modelInputSize = sampleState.getInGameEntityObservation(5).getObservedVector().length;
         var totalActionCount = actionClass.getEnumConstants().length;
         var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_vectorized_model.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig, modelInputSize, totalEntityCount, totalActionCount);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
         var tfModel = new TFModelImproved(
             modelInputSize,
             totalEntityCount,
@@ -191,7 +192,7 @@ public class Example_random_01 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
 
-        var trainablePredictorMCTSEval_1 = new TrainableApproximator(tfModel);
+        var trainablePredictorMCTSEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
         var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId);
         var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
@@ -225,7 +226,7 @@ public class Example_random_01 {
         }
 
         var path = Paths.get("PythonScripts", "tensorflow_models", "alphazero", "create_alphazero_prototype.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig, modelInputSize, totalEntityCount, totalActionCount);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_alpha.length,
@@ -238,7 +239,7 @@ public class Example_random_01 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
 
-        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(tfModel);
+        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
         var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(policyId, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
 
@@ -257,7 +258,7 @@ public class Example_random_01 {
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> getValuePolicy(SystemConfig systemConfig, int policyId, BomberManState sampleState) throws IOException, InterruptedException {
         var modelInputSize = sampleState.getInGameEntityObservation(5).getObservedVector().length;
         var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_model.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig, modelInputSize, 1, 0);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
         var tfModel_value = new TFModelImproved(
             modelInputSize,
             1,
@@ -269,7 +270,7 @@ public class Example_random_01 {
             systemConfig.getParallelThreadsCount(),
             new SplittableRandom(systemConfig.getRandomSeed()));
 
-        var trainablePredictor2 = new TrainableApproximator(tfModel_value);
+        var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_value));
         var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(1.0, policyId);
         var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 
