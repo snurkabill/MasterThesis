@@ -63,10 +63,10 @@ public class ExampleRisk02 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.NO_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 1, true, 10, 0, false, false, false, Path.of("TEST_PATH"),
+        var systemConfig = new SystemConfig(987567, false, 4, true, 10, 0, false, false, false, Path.of("TEST_PATH"),
             System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(3, 10);
+        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
 
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
@@ -82,16 +82,16 @@ public class ExampleRisk02 {
 
         var evaluator_batch_size = 1;
 
-        var valuePolicy = getValuePolicy(systemConfig, environmentPolicyCount + 1, discountFactor, modelInputSize);
+        var valuePolicy = getValuePolicy(systemConfig, environmentPolicyCount + 3, discountFactor, modelInputSize);
 // ----------------------------------------------------------------------------------------
 
-        var mctsEvalPlayer_1 = getMctsPolicy(totalEntityCount, modelInputSize, config, systemConfig, environmentPolicyCount + 0, discountFactor, treeExpansionCount, cpuct, totalEntityCount, evaluator_batch_size);
+        var mctsEvalPlayer_1 = getMctsPolicy(totalEntityCount, modelInputSize, config, systemConfig, environmentPolicyCount + 2, discountFactor, treeExpansionCount, cpuct, totalEntityCount, evaluator_batch_size);
 // ----------------------------------------------------------------------------------------
 
-        var alphaGoPlayer_1 = getAlphaZeroPlayer(modelInputSize, totalActionCount, config, systemConfig, environmentPolicyCount + 2, totalActionCount, discountFactor, treeExpansionCount, totalEntityCount, evaluator_batch_size);
+        var alphaGoPlayer_1 = getAlphaZeroPlayer(modelInputSize, totalActionCount, config, systemConfig, environmentPolicyCount + 1, totalActionCount, discountFactor, treeExpansionCount, totalEntityCount, evaluator_batch_size);
 // ----------------------------------------------------------------------------------------
 
-        var riskPolicy = getRiskPolicy(config, systemConfig, environmentPolicyCount + 3, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.1);
+        var riskPolicy = getRiskPolicy(config, systemConfig, environmentPolicyCount + 0, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.1);
 
         // ----------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ public class ExampleRisk02 {
                                                                                                      double risk) throws IOException, InterruptedException {
         var riskAllowed = risk;
 
-        var path_ = Paths.get("PythonScripts", "tensorflow_models", "alphazero", "create_alphazero_prototype.py");
+        var path_ = Paths.get("PythonScripts", "tensorflow_models", "paper", "paper_prototype.py");
 
         var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
         var tfModel_ = new TFModelImproved(
