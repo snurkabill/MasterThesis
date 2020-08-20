@@ -15,8 +15,6 @@ import vahy.examples.simplifiedHallway.SHInstance;
 import vahy.examples.simplifiedHallway.SHRiskInstanceSupplier;
 import vahy.examples.simplifiedHallway.SHRiskState;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -26,6 +24,8 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
@@ -249,7 +249,7 @@ public class SHRiskTest {
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
         var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PaperEpisodeStatistics>()
             .setRoundName("SH03Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -257,7 +257,7 @@ public class SHRiskTest {
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
+            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();
@@ -304,7 +304,7 @@ public class SHRiskTest {
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
         var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PaperEpisodeStatistics>()
             .setRoundName("SH05Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -312,7 +312,7 @@ public class SHRiskTest {
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
+            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
             .setPlayerPolicySupplierList(policyArgumentsList);
         var result = roundBuilder.execute();

@@ -4,6 +4,7 @@ package vahy.integration.mcts;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -12,7 +13,6 @@ import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
 import vahy.examples.tictactoe.TicTacToeStateInitializer;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
@@ -36,7 +36,7 @@ public class BaseMctsTest {
             987568,
             false,
             Runtime.getRuntime().availableProcessors() - 1,
-            false,
+            true,
             10000,
             0,
             false,
@@ -98,7 +98,7 @@ public class BaseMctsTest {
         );
 
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatistics>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

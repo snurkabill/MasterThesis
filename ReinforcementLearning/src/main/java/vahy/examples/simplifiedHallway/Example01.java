@@ -1,11 +1,11 @@
 package vahy.examples.simplifiedHallway;
 
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
@@ -91,7 +91,7 @@ public class Example01 {
         var policyArgumentsList = new ArrayList<PolicyDefinition<SHAction, DoubleVector, SHState>>();
         policyArgumentsList.add(playerSupplier);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatistics>()
             .setRoundName("SHIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

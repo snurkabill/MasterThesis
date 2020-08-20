@@ -34,12 +34,29 @@
         <file>local/log/logFile.log</file>
     </appender>
 
+    <appender name="EPISODE_FILE" class="ch.qos.logback.core.FileAppender">
+        <encoder>
+            <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
+            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %logger{36} - %m%n</pattern>
+        </encoder>
+        <append>false</append>
+        <!--        <file>local/log/logFile-${bySecond}.log</file>-->
+        <file>local/log/episodeLogFile.log</file>
+    </appender>
+
 <!--    <logger name="vahy" level="info"/>-->
 
     <root level="info">
         <appender-ref ref="consoleAppender" />
-        <appender-ref ref="FILE"/>
+<!--        <appender-ref ref="FILE"/>-->
     </root>
+
+
+    <logger name="vahy.api.episode.EpisodeSimulator" level="warn" additivity="false">
+        <appender-ref ref="EPISODE_FILE"/>
+    </logger>
+
+
 
 
 </configuration>

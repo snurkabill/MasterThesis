@@ -249,7 +249,7 @@
                             <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
                             <arg>
                                 -Xplugin:ErrorProne
-                                -XepExcludedPaths:.*generated.*
+                                -XepExcludedPaths:(.*generated.*|.*Example.*)
                                 -XepOpt:Immutable:KnownImmutable=javax.money.CurrencyUnit
                                 -XepDisableWarningsInGeneratedCode
                                 -Xep:ConstantField:WARN

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 import vahy.ConvergenceAssert;
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
@@ -17,7 +18,6 @@ import vahy.examples.bomberman.BomberManInstance;
 import vahy.examples.bomberman.BomberManInstanceInitializer;
 import vahy.examples.bomberman.BomberManState;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
@@ -44,11 +44,11 @@ import java.util.stream.Collectors;
 
 public class AlphaZeroSingleVsBatchedEvaluatorTest {
 
-    private RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase> getRoundBuilder(BomberManConfig config,
-                                                                                                                  CommonAlgorithmConfigBase algorithmConfig,
-                                                                                                                  SystemConfig systemConfig,
-                                                                                                                  List<PolicyDefinition<BomberManAction, DoubleVector, BomberManState>> policyArgumentList) {
-        return new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase>()
+    private RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics> getRoundBuilder(BomberManConfig config,
+                                                                                                              CommonAlgorithmConfigBase algorithmConfig,
+                                                                                                              SystemConfig systemConfig,
+                                                                                                              List<PolicyDefinition<BomberManAction, DoubleVector, BomberManState>> policyArgumentList) {
+        return new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics>()
             .setRoundName("SHTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -137,7 +137,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
 
         var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, policyList);
         var result = roundBuilder.execute();
-        return result.getTrainingStatisticsList().stream().map(EpisodeStatisticsBase::getTotalPayoffAverage).collect(Collectors.toList());
+        return result.getTrainingStatisticsList().stream().map(EpisodeStatistics::getTotalPayoffAverage).collect(Collectors.toList());
     }
 
 

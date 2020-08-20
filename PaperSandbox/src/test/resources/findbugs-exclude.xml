@@ -73,6 +73,16 @@
         <Bug pattern="EI_EXPOSE_REP"/>
     </Match>
 
+    <Match>
+        <Class name = "vahy.examples.bomberman.ExampleRisk00"/>
+        <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+    </Match>
+
+    <Match>
+        <Class name = "vahy.examples.bomberman.ExampleRisk00"/>
+        <Bug pattern="UPM_UNCALLED_PRIVATE_METHOD"/>
+    </Match>
+
 
 
 </FindBugsFilter>

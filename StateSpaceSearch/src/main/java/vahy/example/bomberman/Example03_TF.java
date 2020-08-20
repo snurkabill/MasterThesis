@@ -1,5 +1,6 @@
 package vahy.example.bomberman;
 
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
@@ -11,7 +12,6 @@ import vahy.examples.bomberman.BomberManInstance;
 import vahy.examples.bomberman.BomberManInstanceInitializer;
 import vahy.examples.bomberman.BomberManState;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
@@ -192,7 +192,7 @@ public class Example03_TF {
             ,mctsEvalPlayer_2
 //            ,alphaGoPlayer_1
         );
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatisticsBase>()
+        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics>()
             .setRoundName("BomberManIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
