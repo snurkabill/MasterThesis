@@ -54,7 +54,7 @@ hidden_2 = Dense(Dropout(hidden_1, keep_prob=keep_prob), hidden_count_2, tf.comp
 
 
 Q_output      = tf.compat.v1.layers.dense(hidden_2, Q_output_count,                   use_bias = True, kernel_initializer = tf.compat.v1.zeros_initializer, bias_initializer = tf.compat.v1.zeros_initializer, name = 'Q_output_node')
-risk_output   = tf.compat.v1.layers.dense(hidden_2, risk_output_count, tf.compat.v1.nn.sigmoid, use_bias = True, kernel_initializer = tf.compat.v1.zeros_initializer, bias_initializer = tf.compat.v1.zeros_initializer, name = "risk_output_node")
+risk_output   = tf.compat.v1.layers.dense(hidden_2, risk_output_count, tf.compat.v1.nn.tanh, use_bias = True, kernel_initializer = tf.compat.v1.zeros_initializer, bias_initializer = tf.compat.v1.zeros_initializer, name = "risk_output_node")
 action_output = tf.compat.v1.layers.dense(hidden_2, action_output_count, tf.compat.v1.nn.softmax, use_bias = True, kernel_initializer = tf.compat.v1.zeros_initializer, bias_initializer = tf.compat.v1.zeros_initializer, name = "action_output_node")
 
 prediction = tf.compat.v1.concat([Q_output, risk_output, action_output], 1, name = "concat_node")

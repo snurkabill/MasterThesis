@@ -15,7 +15,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.policy.flowOptimizer.AbstractFlowOptimizer;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionProvider;
-import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionWithWithActionMap;
+import vahy.paperGenerics.policy.riskSubtree.playingDistribution.PlayingDistributionWithActionMap;
 import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
 import vahy.paperGenerics.selector.RiskAverseNodeSelector;
 
@@ -136,9 +136,11 @@ public class RiskAverseSearchTree<
 
     private boolean tryOptimizeFlow() {
         if(isRiskIgnored()) {
+            logger.debug("Risk ignored.");
             isFlowOptimized = false;
             return false;
         }
+        logger.debug("Applying risk.");
         if(!isFlowOptimized) {
             var result = flowOptimizer.optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
@@ -207,7 +209,7 @@ public class RiskAverseSearchTree<
 
 
     private void processPlayerAction(TAction action) {
-        var playerActionDistribution = ((PlayingDistributionWithWithActionMap<TAction>) playingDistribution).getActionMap(); // TODO: casting is little dirty here.
+        var playerActionDistribution = ((PlayingDistributionWithActionMap<TAction>) playingDistribution).getActionMap(); // TODO: casting is little dirty here.
         var riskOfOtherPlayerActions = 0.0d;
         for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
@@ -218,7 +220,12 @@ public class RiskAverseSearchTree<
             }
         }
         cumulativeNominator += riskOfOtherPlayerActions;
-        cumulativeDenominator *= playerActionDistribution.get(action);
+        if(cumulativeDenominator == 0.0) {
+            cumulativeDenominator = playerActionDistribution.get(action);
+        } else {
+            cumulativeDenominator *= playerActionDistribution.get(action);
+        }
+
     }
 
     private void processOpponentAction(TAction action) {
@@ -233,7 +240,11 @@ public class RiskAverseSearchTree<
                 }
             }
             cumulativeNominator += riskOfOtherOpponentActions;
-            cumulativeDenominator *= getRoot().getSearchNodeMetadata().getChildPriorProbabilities().get(action);
+            if(cumulativeDenominator == 0) {
+                cumulativeDenominator = getRoot().getSearchNodeMetadata().getChildPriorProbabilities().get(action);
+            } else {
+                cumulativeDenominator *= getRoot().getSearchNodeMetadata().getChildPriorProbabilities().get(action);
+            }
         } else {
             // TODO: what to do here? do nothing?
         }

@@ -359,7 +359,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             if (staticPart.getWalls()[x][yCoord]) {
                 break;
             }
-            if (yCoord > 0 && yCoord < staticPart.getWalls().length) {
+            if (yCoord > 0 && yCoord < staticPart.getWalls()[0].length) {
                 addBombSquare(x, yCoord, map);
             }
         }
@@ -369,7 +369,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             if (staticPart.getWalls()[x][yCoord]) {
                 break;
             }
-            if (yCoord > 0 && yCoord < staticPart.getWalls().length) {
+            if (yCoord > 0 && yCoord < staticPart.getWalls()[0].length) {
                 addBombSquare(x, yCoord, map);
             }
         }

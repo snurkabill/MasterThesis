@@ -18,6 +18,7 @@ import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
 import vahy.paperGenerics.policy.riskSubtree.SubtreePriorRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRiskCalculator;
 import vahy.paperGenerics.policy.riskSubtree.SubtreeRootRiskCalculator;
+import vahy.paperGenerics.policy.riskSubtree.playingDistribution.ExplorationUcbValueSamplingProvider;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.ExplorationFeasibleDistributionProvider;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.InferenceFeasibleDistributionProvider;
 import vahy.paperGenerics.policy.riskSubtree.playingDistribution.MaxUcbValueDistributionProvider;
@@ -92,6 +93,8 @@ public class StrategiesProvider<
                 return new ExplorationFeasibleDistributionProvider<>(actionClass, provideRiskCalculator());
             case SAMPLE_OPTIMAL_FLOW:
                 return new InferenceFeasibleDistributionProvider<>(actionClass);
+            case SAMPLE_UCB_VALUE_WITH_TEMPERATURE:
+                return new ExplorationUcbValueSamplingProvider<>(actionClass);
             default:
                 throw EnumUtils.createExceptionForUnknownEnumValue(explorationExistingFlowStrategy);
         }

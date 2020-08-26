@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.SplittableRandom;
@@ -60,10 +61,10 @@ public class ExampleRisk00 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 4, true, 1000, 1000, false, false, false, Path.of("TEST_PATH"),
+        var systemConfig = new SystemConfig(987567, false, 6, true, 10000, 1000, false, false, false, Path.of("TEST_PATH"),
             System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 10);
 
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
@@ -108,22 +109,23 @@ public class ExampleRisk00 {
         System.out.println(valuePlayer_1);
 
 
-        var riskPolicy_0 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 0, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 1.0);
-        var riskPolicy_1 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 1, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 1.0);
+        var riskPolicy_0 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 0, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.0);
+        var riskPolicy_1 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 1, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.0);
 
         System.out.println(riskPolicy_0);
         System.out.println(riskPolicy_1);
 
         List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentsList = List.of(
-            valuePlayer_0,
-            valuePlayer_1
+            riskPolicy_0,
+            riskPolicy_1
         );
 
-        DataPointGeneratorGeneric<PaperEpisodeStatistics> additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", PaperEpisodeStatistics::getRiskHitRatio);
+        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", PaperEpisodeStatistics::getRiskHitRatio);
+        var additionalStatistics2 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Combined payoff", x -> Collections.singletonList(x.getTotalPayoffAverage().stream().mapToDouble(y -> y).sum()));
 
         var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
             .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics))
+            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics, additionalStatistics2))
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
@@ -193,8 +195,8 @@ public class ExampleRisk00 {
         var searchNodeFactory = new SearchNodeBaseFactoryImpl<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(actionClass, metadataFactory);
 
         var totalRiskAllowedInference = riskAllowed;
-        Supplier<Double> explorationSupplier = () -> 0.0;
-        Supplier<Double> temperatureSupplier = () -> 0.1;
+        Supplier<Double> explorationSupplier = () -> 1.0;
+        Supplier<Double> temperatureSupplier = () -> 1.5;
         Supplier<Double> trainingRiskSupplier = () -> totalRiskAllowedInference;
 
         var treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(treeExpansionCount);
@@ -207,7 +209,7 @@ public class ExampleRisk00 {
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             FlowOptimizerType.HARD_HARD,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
-            NoiseStrategy.NOISY_05_06);
+            NoiseStrategy.NONE);
 
         var updater = new PaperTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
         var nodeEvaluator = maxBatchedDepth == 0 ?
@@ -341,7 +343,7 @@ public class ExampleRisk00 {
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_value.length,
-            8192,
+            512,
             1,
             0.8,
             0.01,
@@ -361,7 +363,7 @@ public class ExampleRisk00 {
             episodeDataMaker2,
             dataAggregator2
         );
-        return valuePolicySupplier.getPolicyDefinition(policyId, 1, () -> 0.1, predictorTrainingSetup2);
+        return valuePolicySupplier.getPolicyDefinition(policyId, 1, () -> 0.05, predictorTrainingSetup2);
     }
 
 }

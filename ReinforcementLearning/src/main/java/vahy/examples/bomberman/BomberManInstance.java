@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 public enum BomberManInstance {
 
+    BM_0("examples/bomberman/0.txt"),
     BM_00("examples/bomberman/00.txt"),
     BM_01("examples/bomberman/01.txt"),
     BM_02("examples/bomberman/02.txt"),

@@ -24,7 +24,7 @@ public class RandomDistributionUtils {
     private static final Logger logger = LoggerFactory.getLogger(RandomDistributionUtils.class.getName());
 
     public static final int SAMPLING_RANDOM_INDEX_TRIAL_COUNT = 10;
-    public static final double TOLERANCE = Math.pow(10, -5);
+    public static final double TOLERANCE = Math.pow(10, -10);
 
     private RandomDistributionUtils() {
     }
@@ -110,7 +110,7 @@ public class RandomDistributionUtils {
     }
 
     public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
-        if(!isDistribution(distribution, TOLERANCE)) {
+        if(!isDistribution(distribution, Math.pow(10, -7))) {
             throw new IllegalArgumentException("Given array does not represent probability distribution Array: [" + Arrays.toString(distribution) + "]");
         }
         for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {
@@ -199,11 +199,11 @@ public class RandomDistributionUtils {
         }
     }
 
-    public static void hardRoundDistribution(double[] distribution) {
+    public static void hardRoundDistribution(double[] distribution, double tolerance) {
         for (int i = 0; i < distribution.length; i++) {
-            if(distribution[i] <= 0.0 && distribution[i] + TOLERANCE >= 0.0) {
+            if(distribution[i] <= 0.0 && distribution[i] + tolerance >= 0.0) {
                 distribution[i] = 0;
-            } else if(distribution[i] >= 1.0 && distribution[i] <= 1.0 + TOLERANCE) {
+            } else if(distribution[i] >= 1.0 && distribution[i] <= 1.0 + tolerance) {
                 distribution[i] = 1.0;
             }
         }
@@ -298,7 +298,7 @@ public class RandomDistributionUtils {
             for (int i = 0; i < distributionSize; i++) {
                 newDistribution[i] = result[i];
             }
-            hardRoundDistribution(newDistribution);
+            hardRoundDistribution(newDistribution, Math.pow(10, -10));
             return newDistribution;
         } catch(Exception e) {
             StringBuilder sb = new StringBuilder();

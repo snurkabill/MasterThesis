@@ -88,7 +88,7 @@ public class Trainer<
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
         dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", x -> List.of(x.getAverageMillisPerEpisode())));
 //        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", x -> List.of(x.getStdevMillisPerEpisode())));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Average decision [ms]", EpisodeStatistics::getAverageDecisionTimeInMillis));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg decision time [ms]", EpisodeStatistics::getAverageDecisionTimeInMillis));
         return dataPointGeneratorList;
     }
 
