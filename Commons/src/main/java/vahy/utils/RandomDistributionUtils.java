@@ -110,7 +110,7 @@ public class RandomDistributionUtils {
     }
 
     public static int getRandomIndexFromDistribution(double[] distribution, SplittableRandom random) {
-        if(!isDistribution(distribution, Math.pow(10, -7))) {
+        if(!isDistribution(distribution, Math.pow(10, -3))) {
             throw new IllegalArgumentException("Given array does not represent probability distribution Array: [" + Arrays.toString(distribution) + "]");
         }
         for (int trialNumber = 0; trialNumber <= SAMPLING_RANDOM_INDEX_TRIAL_COUNT; trialNumber++) {

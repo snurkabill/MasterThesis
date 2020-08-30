@@ -102,7 +102,7 @@ public class ExplorationFeasibleDistributionProvider<
                     riskBound);
                 if(suitableExplorationDistribution.getFirst()) {
                     int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution.getSecond(), random);
-                    return getActionPlayingDistributionWithWithActionMap(inGameEntityId, childMap, actionList, distributionAsArray, index);
+                    return getActionPlayingDistributionWithWithActionMap(inGameEntityId, childMap, actionList, suitableExplorationDistribution.getSecond(), index);
                 }
             }
             throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found. Total risk allowed: [" + totalRiskAllowed +

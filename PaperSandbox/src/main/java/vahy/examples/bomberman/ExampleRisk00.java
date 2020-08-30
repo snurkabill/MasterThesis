@@ -44,6 +44,8 @@ import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.tensorflow.TFHelper;
 import vahy.tensorflow.TFModelImproved;
 import vahy.utils.EnumUtils;
+import vahy.utils.StreamUtils;
+import vahy.vizualization.LabelData;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -61,7 +63,7 @@ public class ExampleRisk00 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 6, true, 10000, 1000, false, false, false, Path.of("TEST_PATH"),
+        var systemConfig = new SystemConfig(987567, false, 1, true, 10000, 1000, false, false, false, Path.of("TEST_PATH"),
             System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1000, 10);
@@ -120,12 +122,13 @@ public class ExampleRisk00 {
             riskPolicy_1
         );
 
-        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", PaperEpisodeStatistics::getRiskHitRatio);
-        var additionalStatistics2 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Combined payoff", x -> Collections.singletonList(x.getTotalPayoffAverage().stream().mapToDouble(y -> y).sum()));
+        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
+        var additionalStatistics2 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Combined payoff", x -> Collections.singletonList(new LabelData("", x.getTotalPayoffAverage().stream().mapToDouble(y -> y).sum())));
+        var additionalStatistics3 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("RandomNoise", x -> Collections.singletonList(new LabelData("", new SplittableRandom().nextDouble())));
 
         var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
             .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics, additionalStatistics2))
+            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics, additionalStatistics2, additionalStatistics3))
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)

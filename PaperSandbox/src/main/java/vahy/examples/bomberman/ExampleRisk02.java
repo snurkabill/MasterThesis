@@ -46,6 +46,7 @@ import vahy.paperGenerics.selector.PaperNodeSelector;
 import vahy.tensorflow.TFHelper;
 import vahy.tensorflow.TFModelImproved;
 import vahy.utils.EnumUtils;
+import vahy.utils.StreamUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -105,7 +106,7 @@ public class ExampleRisk02 {
         ).sorted(Comparator.comparing(PolicyDefinition::getPolicyId)).collect(Collectors.toList());
 
 
-        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", PaperEpisodeStatistics::getRiskHitRatio);
+        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
 
         var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
             .setRoundName("BomberManIntegrationTest")

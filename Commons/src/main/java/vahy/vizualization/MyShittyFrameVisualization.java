@@ -5,7 +5,7 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeriesCollection;
 import org.jfree.ui.ApplicationFrame;
 
 import java.awt.Color;
@@ -38,17 +38,31 @@ public class MyShittyFrameVisualization  extends ApplicationFrame {
         setLayout(new GridLayout(0, 3));
     }
 
-    private JFreeChart createChart(final XYDataset dataset, int index) {
+    private JFreeChart createChart(final XYSeriesCollection dataset, int index) {
         final NumberAxis xAxis = new NumberAxis(xAxisLabel);
         final NumberAxis yAxis = new NumberAxis(yAxisLabel);
         final XYPlot plot = new XYPlot(dataset, xAxis, yAxis, new XYLineAndShapeRenderer(true, true));
         plot.setBackgroundPaint(Color.DARK_GRAY);
         plot.setOutlinePaint(Color.DARK_GRAY);
         plot.getRenderer(0).setSeriesPaint(0, color);
+//        var legend = new LegendItemCollection();
+//        var seriesList = dataset.getSeries();
+//
+//        for (int i = 0; i < seriesList.size(); i++) {
+//            var series =  seriesList.get(i);
+//
+//            if(series instanceof XYSeries) {
+//                var series2 = (XYSeries) series;
+//                legend.add(new LegendItem(series2.getDescription(), Color.MAGENTA));
+//            } else {
+//                throw new IllegalStateException("Unexpected dataset to be plotted.");
+//            }
+//        }
+//        plot.setFixedLegendItems(legend);
         return new JFreeChart(title.get(index), JFreeChart.DEFAULT_TITLE_FONT, plot, true);
     }
 
-    public void draw(List<XYDataset> datasetList) {
+    public void draw(List<XYSeriesCollection> datasetList) {
         if(this.chartPanelList.isEmpty()) {
             for (int i = 0; i < datasetList.size(); i++) {
                 final JFreeChart chart = createChart(datasetList.get(i), i);

@@ -11,6 +11,8 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.utils.ImmutableTuple;
+import vahy.utils.StreamUtils;
+import vahy.vizualization.LabelData;
 import vahy.vizualization.ProgressTracker;
 import vahy.vizualization.ProgressTrackerSettings;
 
@@ -38,11 +40,11 @@ public class Trainer<
     private final List<DataPointGeneratorGeneric<TStatistics>> samplingDataGeneratorList;
     private final List<DataPointGeneratorGeneric<TStatistics>> evalDataGeneratorList;
 
-    private final DataPointGeneratorGeneric<Double> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", List::of);
-    private final DataPointGeneratorGeneric<Double> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", List::of);
-    private final DataPointGeneratorGeneric<List<Double>> trainingSampleCount = new DataPointGeneratorGeneric<>("Training sample count", x -> x);
-    private final DataPointGeneratorGeneric<List<Double>> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
-    private final DataPointGeneratorGeneric<List<Double>> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
+    private final DataPointGeneratorGeneric<LabelData> oobAvgMsPerEpisode = new DataPointGeneratorGeneric<>("OutOfBox avg ms per episode", List::of);
+    private final DataPointGeneratorGeneric<LabelData> oobSamplingTime = new DataPointGeneratorGeneric<>("Sampling time [s]", List::of);
+    private final DataPointGeneratorGeneric<List<LabelData>> trainingSampleCount = new DataPointGeneratorGeneric<>("Training sample count", x -> x);
+    private final DataPointGeneratorGeneric<List<LabelData>> secTraining = new DataPointGeneratorGeneric<>("Training time [s]", x -> x);
+    private final DataPointGeneratorGeneric<List<LabelData>> msTrainingPerSample = new DataPointGeneratorGeneric<>("Training per sample [ms]", x -> x);
 
     public Trainer(GameSampler<TAction, TObservation, TState> gameSampler,
                    List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList,
@@ -83,12 +85,13 @@ public class Trainer<
 
     private List<DataPointGeneratorGeneric<TStatistics>> addBaseDataGenerators(List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList) {
         var dataPointGeneratorList = new ArrayList<>(additionalDataPointGeneratorList == null ? new ArrayList<>() : additionalDataPointGeneratorList);
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Player Step Count", EpisodeStatistics::getAveragePlayerStepCount));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Total Payoff", EpisodeStatistics::getTotalPayoffAverage));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", EpisodeStatistics::getTotalPayoffStdev));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", x -> List.of(x.getAverageMillisPerEpisode())));
+
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Player Step Count", x -> StreamUtils.labelWrapperFunction(x.getAveragePlayerStepCount())));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg Total Payoff", x -> StreamUtils.labelWrapperFunction(x.getTotalPayoffAverage())));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev Total Payoff", x -> StreamUtils.labelWrapperFunction(x.getTotalPayoffStdev())));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg episode duration [ms]", x -> List.of(new LabelData("", x.getAverageMillisPerEpisode()))));
 //        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Stdev episode duration [ms]", x -> List.of(x.getStdevMillisPerEpisode())));
-        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg decision time [ms]", EpisodeStatistics::getAverageDecisionTimeInMillis));
+        dataPointGeneratorList.add(new DataPointGeneratorGeneric<>("Avg decision time [ms]", x -> StreamUtils.labelWrapperFunction(x.getAverageDecisionTimeInMillis())));
         return dataPointGeneratorList;
     }
 
@@ -100,8 +103,8 @@ public class Trainer<
 
     public ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> sampleTraining(int episodeBatchSize) {
         var result = run(episodeBatchSize, samplingDataGeneratorList, PolicyMode.TRAINING);
-        oobAvgMsPerEpisode.addNewValue(result.getSecond().getTotalDuration().toMillis() / (double) episodeBatchSize);
-        oobSamplingTime.addNewValue(result.getSecond().getTotalDuration().toMillis() / 1000.0);
+        oobAvgMsPerEpisode.addNewValue(new LabelData("", result.getSecond().getTotalDuration().toMillis() / (double) episodeBatchSize));
+        oobSamplingTime.addNewValue(new LabelData("", result.getSecond().getTotalDuration().toMillis() / 1000.0));
         return result;
     }
 
@@ -131,9 +134,9 @@ public class Trainer<
     }
 
     public void trainPredictors(List<EpisodeResults<TAction, TObservation, TState>> episodes) {
-        var trainingSampleCountList = new ArrayList<Double>(trainablePredictorSetupList.size());
-        var trainingTimeList = new ArrayList<Double>(trainablePredictorSetupList.size());
-        var trainingMsPerSampleList = new ArrayList<Double>(trainablePredictorSetupList.size());
+        var trainingSampleCountList = new ArrayList<LabelData>(trainablePredictorSetupList.size());
+        var trainingTimeList = new ArrayList<LabelData>(trainablePredictorSetupList.size());
+        var trainingMsPerSampleList = new ArrayList<LabelData>(trainablePredictorSetupList.size());
 
         for (var entry : trainablePredictorSetupList) {
             var dataAggregator = entry.getDataAggregator();
@@ -147,9 +150,9 @@ public class Trainer<
             entry.getTrainablePredictor().train(trainingDataset);
             var endTraining = System.currentTimeMillis() - startTraining;
 
-            trainingSampleCountList.add((double) datasetSize);
-            trainingTimeList.add(endTraining / 1000.0);
-            trainingMsPerSampleList.add(endTraining / (double) datasetSize);
+            trainingSampleCountList.add(new LabelData("Predictor: " + entry.getPredictorTrainingSetupId(), (double) datasetSize));
+            trainingTimeList.add(new LabelData("Predictor: " + entry.getPredictorTrainingSetupId(),endTraining / 1000.0));
+            trainingMsPerSampleList.add(new LabelData("Predictor: " + entry.getPredictorTrainingSetupId(),endTraining / (double) datasetSize));
 
         }
         trainingSampleCount.addNewValue(trainingSampleCountList);
