@@ -1,4 +1,4 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 import java.util.function.Supplier;
 

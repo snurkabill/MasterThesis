@@ -1,13 +1,13 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 import java.util.List;
 
 public class DataSample {
 
     private final Double xAxisValue;
-    private final List<Double> yAxisValueList;
+    private final List<LabelData> yAxisValueList;
 
-    public DataSample(Double xAxisValue, List<Double> yAxisValueList) {
+    public DataSample(Double xAxisValue, List<LabelData> yAxisValueList) {
         this.xAxisValue = xAxisValue;
         this.yAxisValueList = yAxisValueList;
     }
@@ -16,7 +16,7 @@ public class DataSample {
         return xAxisValue;
     }
 
-    public List<Double> getyAxisValueList() {
+    public List<LabelData> getyAxisValueList() {
         return yAxisValueList;
     }
 }

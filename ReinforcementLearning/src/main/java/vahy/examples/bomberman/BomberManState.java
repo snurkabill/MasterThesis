@@ -50,6 +50,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
     private final BomberManStaticPart staticPart;
     private final int entityInGameCount;
+    private final int playersAliveCount;
 
     private final int entityIdOnTurn;
     private final int playerIdOnTurn;
@@ -77,6 +78,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                           boolean[] isInGameArray,
                           boolean[] goldsInPlaceArray,
                           int entityInGameCount,
+                          int playersAliveCount,
                           int entityIdOnTurn,
                           int playerIdOnTurn,
                           int goldIdOnTurn,
@@ -92,6 +94,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
         this.isInGameArray = isInGameArray;
         this.goldsInPlaceArray = goldsInPlaceArray;
         this.entityInGameCount = entityInGameCount;
+        this.playersAliveCount = playersAliveCount;
         this.entityIdOnTurn = entityIdOnTurn;
         this.playerIdOnTurn = playerIdOnTurn;
         this.goldIdOnTurn = goldIdOnTurn;
@@ -125,6 +128,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
         Arrays.fill(booleanArray, true);
         this.isInGameArray = booleanArray;
         this.entityInGameCount = staticPart.getStartingTotalEntityCount();
+        this.playersAliveCount = staticPart.getStartingPlayerCount();
         this.entityIdOnTurn = entityIdOnTurn;
         this.playerXCoordinates = playerXCoordinates;
         this.playerYCoordinates = playerYCoordinates;
@@ -355,7 +359,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             if (staticPart.getWalls()[x][yCoord]) {
                 break;
             }
-            if (yCoord > 0 && yCoord < staticPart.getWalls().length) {
+            if (yCoord > 0 && yCoord < staticPart.getWalls()[0].length) {
                 addBombSquare(x, yCoord, map);
             }
         }
@@ -365,7 +369,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             if (staticPart.getWalls()[x][yCoord]) {
                 break;
             }
-            if (yCoord > 0 && yCoord < staticPart.getWalls().length) {
+            if (yCoord > 0 && yCoord < staticPart.getWalls()[0].length) {
                 addBombSquare(x, yCoord, map);
             }
         }
@@ -392,6 +396,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     isInGameArray,
                     goldsInPlaceArray,
                     entityInGameCount,
+                    playersAliveCount,
                     newIdOnTurn,
                     newPlayerIdOnTurn,
                     newGoldIdOnTurn,
@@ -441,6 +446,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
             }
 
             var newEntityInGameCount = entityInGameCount;
+            var newPlayersAliveCount = playersAliveCount;
             var newIsInGameArray = Arrays.copyOf(isInGameArray, isInGameArray.length);
             var copyX = Arrays.copyOf(playerXCoordinates, playerXCoordinates.length);
             var copyY = Arrays.copyOf(playerYCoordinates, playerYCoordinates.length);
@@ -453,6 +459,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         copyX[i] = -1;
                         copyY[i] = -1;
                         newEntityInGameCount--;
+                        newPlayersAliveCount--;
                     }
                 }
             }
@@ -465,6 +472,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     newIsInGameArray,
                     goldsInPlaceArray,
                     newEntityInGameCount,
+                    newPlayersAliveCount,
                     nextIdOnTurn,
                     newPlayerIdOnTurn,
                     newGoldIdOnTurn,
@@ -511,6 +519,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         isInGameArray,
                         goldsInPlaceArray,
                         entityInGameCount,
+                        playersAliveCount,
                         newIdOnTurn,
                         newPlayerIdOnTurn,
                         newGoldIdOnTurn,
@@ -530,6 +539,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         isInGameArray,
                         goldsInPlaceArray,
                         entityInGameCount,
+                        playersAliveCount,
                         newIdOnTurn,
                         newPlayerIdOnTurn,
                         newGoldIdOnTurn,
@@ -574,6 +584,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                                 isInGameArray,
                                 newGoldsInPlaceArray,
                                 entityInGameCount,
+                                playersAliveCount,
                                 newIdOnTurn,
                                 newPlayerIdOnTurn,
                                 newGoldIdOnTurn,
@@ -594,6 +605,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         isInGameArray,
                         goldsInPlaceArray,
                         entityInGameCount,
+                        playersAliveCount,
                         newIdOnTurn,
                         newPlayerIdOnTurn,
                         newGoldIdOnTurn,
@@ -613,6 +625,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                         isInGameArray,
                         goldsInPlaceArray,
                         entityInGameCount,
+                        playersAliveCount,
                         newIdOnTurn,
                         newPlayerIdOnTurn,
                         newGoldIdOnTurn,
@@ -640,6 +653,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     isInGameArray,
                     goldsInPlaceArray,
                     entityInGameCount,
+                    playersAliveCount,
                     newIdOnTurn,
                     newPlayerIdOnTurn,
                     newGoldIdOnTurn,
@@ -661,6 +675,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
                     isInGameArray,
                     newGoldsInPlaceArray,
                     entityInGameCount,
+                    playersAliveCount,
                     newIdOnTurn,
                     newPlayerIdOnTurn,
                     newGoldIdOnTurn,
@@ -848,7 +863,7 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
 
     @Override
     public boolean isFinalState() {
-        return entityInGameCount == staticPart.getGoldWithEnvironmentEntityCount() || staticPart.getTotalStepsAllowed() <= stepsDone;
+        return playersAliveCount <= 1 || staticPart.getTotalStepsAllowed() <= stepsDone;
     }
 
     @Override

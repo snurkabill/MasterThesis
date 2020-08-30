@@ -1,5 +1,7 @@
 package vahy.paperGenerics.policy.riskSubtree.playingDistribution;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.api.search.node.SearchNode;
@@ -22,6 +24,8 @@ public class ExplorationFeasibleDistributionProvider<
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {
 
+    private static final Logger logger = LoggerFactory.getLogger(ExplorationFeasibleDistributionProvider.class.getName());
+
     private static final double RISK_BOUND_DELTA = 0.01;
 
     private final Class<TAction> clazz;
@@ -35,7 +39,7 @@ public class ExplorationFeasibleDistributionProvider<
     }
 
     @Override
-    public PlayingDistributionWithWithActionMap<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
+    public PlayingDistributionWithActionMap<TAction> createDistribution(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double temperature, SplittableRandom random, double totalRiskAllowed)
     {
         int inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var childMap = node.getChildNodeMap();
@@ -56,10 +60,39 @@ public class ExplorationFeasibleDistributionProvider<
         RandomDistributionUtils.tryToRoundDistribution(distributionAsArray, TOLERANCE);
         RandomDistributionUtils.applyBoltzmannNoise(distributionAsArray, temperature);
 
+//        var anyActionViolatesRisk = false;
+//        for (int i = 0; i < distributionAsArray.length; i++) {
+//            var product = distributionAsArray[i] * riskArray[i];
+//            if(product > totalRiskAllowed) {
+//                anyActionViolatesRisk = true;
+//                break;
+//            }
+//        }
+//        if(anyActionViolatesRisk) {
+
         var sum = 0.0d;
         for (int i = 0; i < distributionAsArray.length; i++) {
             sum += distributionAsArray[i] * riskArray[i];
         }
+
+        var anyActionViolatesRisk = false;
+        for (int i = 0; i < distributionAsArray.length; i++) {
+            var product = distributionAsArray[i] * riskArray[i];
+            if(product > totalRiskAllowed) {
+                anyActionViolatesRisk = true;
+                break;
+            }
+        }
+
+        var isDefinitelyOK = !anyActionViolatesRisk && sum <= totalRiskAllowed;
+        var isDefinitelyWrong = anyActionViolatesRisk && sum > totalRiskAllowed;
+
+        var isSumStrict = sum > totalRiskAllowed && !anyActionViolatesRisk;
+        var isViolationStrict = anyActionViolatesRisk && sum <= totalRiskAllowed;
+
+
+        logger.error("Is ok: [{}], is sum strict: [{}], isViolationStrict: [{}], isDefinitelyWrong: [{}]", isDefinitelyOK, isSumStrict, isViolationStrict, isDefinitelyWrong);
+
         if(sum > totalRiskAllowed) {
 
             for(double riskBound = totalRiskAllowed; riskBound <= 1.0; riskBound += RISK_BOUND_DELTA) {
@@ -69,7 +102,7 @@ public class ExplorationFeasibleDistributionProvider<
                     riskBound);
                 if(suitableExplorationDistribution.getFirst()) {
                     int index = RandomDistributionUtils.getRandomIndexFromDistribution(suitableExplorationDistribution.getSecond(), random);
-                    return getActionPlayingDistributionWithWithActionMap(inGameEntityId, childMap, actionList, distributionAsArray, index);
+                    return getActionPlayingDistributionWithWithActionMap(inGameEntityId, childMap, actionList, suitableExplorationDistribution.getSecond(), index);
                 }
             }
             throw new IllegalStateException("Solution for linear risk-distribution optimisation was not found. Total risk allowed: [" + totalRiskAllowed +
@@ -83,17 +116,17 @@ public class ExplorationFeasibleDistributionProvider<
         }
     }
 
-    private PlayingDistributionWithWithActionMap<TAction> getActionPlayingDistributionWithWithActionMap(int inGameEntityId,
-                                                                                                        Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childMap,
-                                                                                                        ArrayList<TAction> actionList,
-                                                                                                        double[] distributionAsArray,
-                                                                                                        int index)
+    private PlayingDistributionWithActionMap<TAction> getActionPlayingDistributionWithWithActionMap(int inGameEntityId,
+                                                                                                    Map<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> childMap,
+                                                                                                    ArrayList<TAction> actionList,
+                                                                                                    double[] distributionAsArray,
+                                                                                                    int index)
     {
         var action = actionList.get(index);
         EnumMap<TAction, Double> enumMap = new EnumMap<>(clazz);
         for (int i = 0; i < actionList.size(); i++) { // TODO: sample action right away from enum map
             enumMap.put(actionList.get(i), distributionAsArray[i]);
         }
-        return new PlayingDistributionWithWithActionMap<>(action, childMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], distributionAsArray, enumMap);
+        return new PlayingDistributionWithActionMap<>(action, childMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], distributionAsArray, enumMap);
     }
 }

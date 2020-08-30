@@ -52,8 +52,8 @@ public class PolicyTrainingCycle<
             logger.info("Sampling episodes for [{}]th iteration", i);
             var episodes = trainer.sampleTraining(algorithmConfig.getBatchEpisodeCount());
             if(systemConfig.isEvaluateDuringTraining()) {
-                logger.info("Evaluating [{}] episodes without any exploration or noise", algorithmConfig.getBatchEpisodeCount());
-                trainer.evaluate(algorithmConfig.getBatchEpisodeCount());
+                logger.info("Evaluating [{}] episodes without any exploration or noise", systemConfig.getEvalEpisodeCountDuringTraining());
+                trainer.evaluate(systemConfig.getEvalEpisodeCountDuringTraining());
             }
             logger.info("Training predictors");
             trainer.trainPredictors(episodes.getFirst());

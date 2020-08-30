@@ -1,4 +1,4 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 public class ProgressTrackerSettings {
 

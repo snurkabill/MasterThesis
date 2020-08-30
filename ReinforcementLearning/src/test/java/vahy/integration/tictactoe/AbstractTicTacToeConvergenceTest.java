@@ -1,5 +1,6 @@
 package vahy.integration.tictactoe;
 
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.StateWrapper;
@@ -10,7 +11,6 @@ import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
 import vahy.examples.tictactoe.TicTacToeStateInitializer;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
 import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
@@ -52,11 +52,11 @@ public abstract class AbstractTicTacToeConvergenceTest {
 
 
 
-    protected RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase> getRoundBuilder(TicTacToeConfig ticTacConfig,
-                                                                                                                    SystemConfig systemConfig,
-                                                                                                                    CommonAlgorithmConfigBase algorithmConfig,
-                                                                                                                    List<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>> policyArgumentsList) {
-        return new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatisticsBase>()
+    protected RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatistics> getRoundBuilder(TicTacToeConfig ticTacConfig,
+                                                                                                                SystemConfig systemConfig,
+                                                                                                                CommonAlgorithmConfigBase algorithmConfig,
+                                                                                                                List<PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>> policyArgumentsList) {
+        return new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatistics>()
             .setRoundName("TicTacToeIntegrationTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)

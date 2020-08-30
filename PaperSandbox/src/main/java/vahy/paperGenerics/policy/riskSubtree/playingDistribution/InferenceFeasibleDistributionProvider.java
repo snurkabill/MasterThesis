@@ -53,6 +53,6 @@ public class InferenceFeasibleDistributionProvider<
         int index = RandomDistributionUtils.getRandomIndexFromDistribution(distributionArray, random);
         TAction action = actionList.get(index);
 
-        return new PlayingDistributionWithWithActionMap<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], RandomizedPolicy.EMPTY_ARRAY, enumMap);
+        return new PlayingDistributionWithActionMap<>(action, childNodeMap.get(action).getSearchNodeMetadata().getExpectedReward()[inGameEntityId], RandomizedPolicy.EMPTY_ARRAY, enumMap);
     }
 }

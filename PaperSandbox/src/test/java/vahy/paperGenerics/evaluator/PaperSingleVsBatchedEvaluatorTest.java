@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
 import vahy.ConvergenceAssert;
+import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
@@ -15,8 +16,6 @@ import vahy.examples.bomberman.BomberManInstance;
 import vahy.examples.bomberman.BomberManRiskInstanceInitializer;
 import vahy.examples.bomberman.BomberManRiskState;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsBase;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
@@ -27,6 +26,8 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
 import vahy.paperGenerics.policy.PaperPolicyImpl;
@@ -56,11 +57,11 @@ import java.util.stream.Collectors;
 
 public class PaperSingleVsBatchedEvaluatorTest {
 
-    private RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, EpisodeStatisticsBase> getRoundBuilder(BomberManConfig config,
-                                                                                                                      CommonAlgorithmConfigBase algorithmConfig,
-                                                                                                                      SystemConfig systemConfig,
-                                                                                                                      List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentList) {
-        return new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, EpisodeStatisticsBase>()
+    private RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics> getRoundBuilder(BomberManConfig config,
+                                                                                                                  CommonAlgorithmConfigBase algorithmConfig,
+                                                                                                                  SystemConfig systemConfig,
+                                                                                                                  List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentList) {
+        return new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
             .setRoundName("SHTest")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -68,7 +69,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManRiskInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
+            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
             .setPlayerPolicySupplierList(policyArgumentList);
     }
@@ -195,7 +196,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
 
         var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, policyList);
         var result = roundBuilder.execute();
-        return result.getTrainingStatisticsList().stream().map(EpisodeStatisticsBase::getTotalPayoffAverage).collect(Collectors.toList());
+        return result.getTrainingStatisticsList().stream().map(EpisodeStatistics::getTotalPayoffAverage).collect(Collectors.toList());
     }
 
 

@@ -15,8 +15,6 @@ import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
-import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
@@ -47,36 +45,36 @@ import vahy.tensorflow.TFHelper;
 import vahy.tensorflow.TFModelImproved;
 import vahy.utils.EnumUtils;
 import vahy.utils.StreamUtils;
+import vahy.vizualization.LabelData;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class ExampleRisk02 {
+public class ExampleRisk00 {
 
-    private ExampleRisk02() {}
+    private ExampleRisk00() {}
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
-        var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 6, true, 10, 0, false, false, false, Path.of("TEST_PATH"),
+        var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
+        var systemConfig = new SystemConfig(987567, false, 1, true, 10000, 1000, false, false, false, Path.of("TEST_PATH"),
             System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 10);
 
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
         var actionClass = BomberManAction.class;
         var totalActionCount = actionClass.getEnumConstants().length;
+        System.out.println("total action count: " + totalActionCount);
         var discountFactor = 1.0;
-        var treeExpansionCount = 30;
+        var treeExpansionCount = 20;
         var cpuct = 1.0;
 
         var instance = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
@@ -85,32 +83,52 @@ public class ExampleRisk02 {
 
         var evaluator_batch_size = 1;
 
-        var valuePolicy = getValuePolicy(systemConfig, environmentPolicyCount + 0, discountFactor, modelInputSize);
-// ----------------------------------------------------------------------------------------
+//        var randomizedPlayer_0 = new PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>(
+//            environmentPolicyCount + 0,
+//            1,
+//            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<BomberManAction, DoubleVector, BomberManRiskState>(random, environmentPolicyCount + 0),
+//            new ArrayList<>());
+//
+//        var randomizedPlayer_1 = new PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>(
+//            environmentPolicyCount + 1,
+//            1,
+//            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<BomberManAction, DoubleVector, BomberManRiskState>(random, environmentPolicyCount + 1),
+//            new ArrayList<>());
+//
 
+
+
+        var mctsEvalPlayer_0 = getMctsPolicy(totalEntityCount, modelInputSize, config, systemConfig, environmentPolicyCount + 0, discountFactor, treeExpansionCount, cpuct, totalEntityCount, evaluator_batch_size);
         var mctsEvalPlayer_1 = getMctsPolicy(totalEntityCount, modelInputSize, config, systemConfig, environmentPolicyCount + 1, discountFactor, treeExpansionCount, cpuct, totalEntityCount, evaluator_batch_size);
-// ----------------------------------------------------------------------------------------
 
-        var alphaGoPlayer_1 = getAlphaZeroPlayer(modelInputSize, totalActionCount, config, systemConfig, environmentPolicyCount + 2, totalActionCount, discountFactor, treeExpansionCount, totalEntityCount, evaluator_batch_size);
-// ----------------------------------------------------------------------------------------
+        System.out.println(mctsEvalPlayer_0);
+        System.out.println(mctsEvalPlayer_1);
 
-        var riskPolicy = getRiskPolicy(config, systemConfig, environmentPolicyCount + 3, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.5);
+        var valuePlayer_0 = getValuePolicy(systemConfig, environmentPolicyCount + 0, discountFactor, modelInputSize);
+        var valuePlayer_1 = getValuePolicy(systemConfig, environmentPolicyCount + 1, discountFactor, modelInputSize);
 
-        // ----------------------------------------------------------------------------------------
+        System.out.println(valuePlayer_0);
+        System.out.println(valuePlayer_1);
 
-        List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentsList = Stream.of(
-            valuePolicy
-            ,mctsEvalPlayer_1
-            ,alphaGoPlayer_1
-            ,riskPolicy
-        ).sorted(Comparator.comparing(PolicyDefinition::getPolicyId)).collect(Collectors.toList());
 
+        var riskPolicy_0 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 0, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.0);
+        var riskPolicy_1 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 1, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.0);
+
+        System.out.println(riskPolicy_0);
+        System.out.println(riskPolicy_1);
+
+        List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentsList = List.of(
+            riskPolicy_0,
+            riskPolicy_1
+        );
 
         var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
+        var additionalStatistics2 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Combined payoff", x -> Collections.singletonList(new LabelData("", x.getTotalPayoffAverage().stream().mapToDouble(y -> y).sum())));
+        var additionalStatistics3 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("RandomNoise", x -> Collections.singletonList(new LabelData("", new SplittableRandom().nextDouble())));
 
         var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
             .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics))
+            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics, additionalStatistics2, additionalStatistics3))
             .setCommonAlgorithmConfig(algorithmConfig)
             .setProblemConfig(config)
             .setSystemConfig(systemConfig)
@@ -150,7 +168,7 @@ public class ExampleRisk02 {
                                                                                                      double risk) throws IOException, InterruptedException {
         var riskAllowed = risk;
 
-        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_risk_model.py");
+        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_risk_model.py");
 
         var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
         var tfModel_ = new TFModelImproved(
@@ -180,8 +198,8 @@ public class ExampleRisk02 {
         var searchNodeFactory = new SearchNodeBaseFactoryImpl<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(actionClass, metadataFactory);
 
         var totalRiskAllowedInference = riskAllowed;
-        Supplier<Double> explorationSupplier = () -> 0.0;
-        Supplier<Double> temperatureSupplier = () -> 0.1;
+        Supplier<Double> explorationSupplier = () -> 1.0;
+        Supplier<Double> temperatureSupplier = () -> 1.5;
         Supplier<Double> trainingRiskSupplier = () -> totalRiskAllowedInference;
 
         var treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(treeExpansionCount);
@@ -194,7 +212,7 @@ public class ExampleRisk02 {
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             FlowOptimizerType.HARD_HARD,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
-            NoiseStrategy.NOISY_05_06);
+            NoiseStrategy.NONE);
 
         var updater = new PaperTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
         var nodeEvaluator = maxBatchedDepth == 0 ?
@@ -249,49 +267,49 @@ public class ExampleRisk02 {
         return riskPolicy;
     }
 
-    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState> getAlphaZeroPlayer(int modelInputSize,
-                                                                                                          int actionCount,
-                                                                                                          BomberManConfig config,
-                                                                                                          SystemConfig systemConfig,
-                                                                                                          int policyId,
-                                                                                                          int totalActionCount,
-                                                                                                          double discountFactor,
-                                                                                                          int treeExpansionCount,
-                                                                                                          int totalEntityCount,
-                                                                                                          int maxEvaluationDepth) throws IOException, InterruptedException {
-        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, totalEntityCount, config);
-        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_alphazero_prototype.py");
-
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, actionCount);
-        var tfModel_ = new TFModelImproved(
-            modelInputSize,
-            totalEntityCount + actionCount,
-            8192,
-            1,
-            0.8,
-            0.01,
-            tfModelAsBytes_,
-            systemConfig.getParallelThreadsCount(),
-            new SplittableRandom(systemConfig.getRandomSeed()));
-
-        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor);
-//        var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
-
-        var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
-            policyId,
-            trainablePredictorAlphaGoEval_1,
-            episodeDataMakerAlphaGoEval_1,
-            dataAggregatorAlphaGoEval_1
-        );
-
-        return alphaGoPolicySupplier.getPolicyDefinition(policyId, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2, maxEvaluationDepth);
-    }
+//    private static PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState> getAlphaZeroPlayer(int modelInputSize,
+//                                                                                                          int actionCount,
+//                                                                                                          BomberManConfig config,
+//                                                                                                          SystemConfig systemConfig,
+//                                                                                                          int policyId,
+//                                                                                                          int totalActionCount,
+//                                                                                                          double discountFactor,
+//                                                                                                          int treeExpansionCount,
+//                                                                                                          int totalEntityCount,
+//                                                                                                          int maxEvaluationDepth) throws IOException, InterruptedException {
+//        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, totalEntityCount, config);
+//        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_alphazero_prototype.py");
+//
+//        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, actionCount);
+//        var tfModel_ = new TFModelImproved(
+//            modelInputSize,
+//            totalEntityCount + actionCount,
+//            8192,
+//            1,
+//            0.8,
+//            0.01,
+//            tfModelAsBytes_,
+//            systemConfig.getParallelThreadsCount(),
+//            new SplittableRandom(systemConfig.getRandomSeed()));
+//
+//        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
+//        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor);
+////        var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+//        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
+//
+//        var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
+//            policyId,
+//            trainablePredictorAlphaGoEval_1,
+//            episodeDataMakerAlphaGoEval_1,
+//            dataAggregatorAlphaGoEval_1
+//        );
+//
+//        return alphaGoPolicySupplier.getPolicyDefinition(policyId, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetupAlphaGoEval_2, maxEvaluationDepth);
+//    }
 
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState> getMctsPolicy(int inGameEntityCount, int modelInputSize, ProblemConfig problemConfig, SystemConfig systemConfig, int policyId, double discountFactor, int treeExpansionCount, double cpuct, int totalEntityCount, int maxEvaluationDepth) throws IOException, InterruptedException {
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, inGameEntityCount, problemConfig);
-        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_value_vectorized_model.py");
+        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_value_vectorized_model.py");
 
         var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
         var tfModel_ = new TFModelImproved(
@@ -323,12 +341,12 @@ public class ExampleRisk02 {
         var defaultPrediction_value = new double[] {0.0};
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManRiskState>();
 
-        var path = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_value_model.py");
+        var path = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_value_model.py");
         var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_value.length,
-            8192,
+            512,
             1,
             0.8,
             0.01,
@@ -348,7 +366,7 @@ public class ExampleRisk02 {
             episodeDataMaker2,
             dataAggregator2
         );
-        return valuePolicySupplier.getPolicyDefinition(policyId, 1, () -> 0.1, predictorTrainingSetup2);
+        return valuePolicySupplier.getPolicyDefinition(policyId, 1, () -> 0.05, predictorTrainingSetup2);
     }
 
 }

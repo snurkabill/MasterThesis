@@ -1,4 +1,4 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
@@ -12,13 +12,14 @@ public class XYDatasetBuilder {
     private XYDatasetBuilder() {
     }
 
-    public static XYDataset createDataset(DataSeriesCollector dataSeriesCollector) {
+    public static XYSeriesCollection createDataset(DataSeriesCollector dataSeriesCollector) {
         XYSeriesCollection collectionOfSeries = new XYSeriesCollection();
         List<DataSample> data = dataSeriesCollector.getData();
         for (int i = 0; i < data.get(0).getyAxisValueList().size(); i++) {
             XYSeries series = new XYSeries(i);
+            series.setDescription(data.get(0).getyAxisValueList().get(i).getName());
             for (DataSample sample : data) {
-                series.add(sample.getxAxisValue(), sample.getyAxisValueList().get(i));
+                series.add(sample.getxAxisValue(), sample.getyAxisValueList().get(i).getValue());
             }
             collectionOfSeries.addSeries(series);
         }

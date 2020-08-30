@@ -1,7 +1,8 @@
 package vahy.impl.episode;
 
-import vahy.vizualiation.DataPointGenerator;
-import vahy.vizualiation.DataSample;
+import vahy.vizualization.DataPointGenerator;
+import vahy.vizualization.DataSample;
+import vahy.vizualization.LabelData;
 
 import java.util.List;
 import java.util.function.Function;
@@ -9,12 +10,12 @@ import java.util.function.Function;
 public class DataPointGeneratorGeneric<TDataSource> implements DataPointGenerator {
 
     private final String dataTitle;
-    private final Function<TDataSource, List<Double>> function;
+    private final Function<TDataSource, List<LabelData>> function;
 
     private int counter = 0;
-    private List<Double> valueList = null;
+    private List<LabelData> valueList = null;
 
-    public DataPointGeneratorGeneric(String dataTitle, Function<TDataSource, List<Double>> function) {
+    public DataPointGeneratorGeneric(String dataTitle, Function<TDataSource, List<LabelData>> function) {
         this.dataTitle = dataTitle;
         this.function = function;
     }

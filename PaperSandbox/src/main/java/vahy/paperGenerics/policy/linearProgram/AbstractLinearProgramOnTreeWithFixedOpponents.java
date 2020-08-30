@@ -25,7 +25,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     public static final boolean DEBUG_ENABLED = logger.isDebugEnabled();
     public static final boolean TRACE_ENABLED = logger.isTraceEnabled() || DEBUG_ENABLED;
 
-    private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -10);
+    private static final double FLOW_TOLERANCE = 1.0 - Math.pow(10, -6);
 
     private static final double LOWER_BOUND = 0.0;
     private static final double UPPER_BOUND = 1.0;
@@ -162,7 +162,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         }
 
         if(root.getSearchNodeMetadata().getFlow() < FLOW_TOLERANCE) {
-            throw new IllegalStateException("Flow is not equal to 1");
+            throw new IllegalStateException("Flow is not equal to 1: [" + root.getSearchNodeMetadata().getFlow() + "]");
         }
 
         if(!root.getChildNodeMap().isEmpty()) {
@@ -171,7 +171,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
                 sum += entry.getSearchNodeMetadata().getFlow();
             }
             if(sum < FLOW_TOLERANCE) {
-                throw new IllegalStateException("Flow is not equal to 1");
+                throw new IllegalStateException("Flow is not equal to 1: [" + sum + "]. Root flow: [" + root.getSearchNodeMetadata().getFlow() + "]");
             }
         }
         if(TRACE_ENABLED) {

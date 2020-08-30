@@ -1,4 +1,4 @@
-package vahy.vizualiation;
+package vahy.vizualization;
 
 import java.util.ArrayList;
 import java.util.List;
