@@ -4,6 +4,7 @@ import com.quantego.clp.CLPExpression;
 import vahy.api.model.Action;
 import vahy.api.model.observation.Observation;
 import vahy.paperGenerics.PaperState;
+import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.SplittableRandom;
@@ -26,10 +27,23 @@ public class OptimalFlowSoftConstraintCalculator<
 
     @Override
     protected void setLeafObjective(InnerElement element) {
-        throw new IllegalStateException("BROKEN AND KNOWN. Fix me.");
-//        var node = element.node;
-//        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
-//        var metadata = node.getSearchNodeMetadata();
+//        throw new IllegalStateException("BROKEN AND KNOWN. Fix me.");
+        var node = element.node;
+        var inGameEntityId = node.getStateWrapper().getInGameEntityId();
+        var metadata = node.getSearchNodeMetadata();
+
+        double nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
+        totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.closestParentFlow);
+
+
+        double cumulativeReward = node.getSearchNodeMetadata().getCumulativeReward()[inGameEntityId];
+        double expectedReward = node.getSearchNodeMetadata().getExpectedReward()[inGameEntityId];
+        double predictedRisk = node.getSearchNodeMetadata().getExpectedRisk()[inGameEntityId];
+        var nodeValue = addNoiseToLeaf(cumulativeReward + (expectedReward * (1.0 - predictedRisk)));
+
+        element.flowWithCoefficient.coefficient += nodeValue * element.modifier;
+
+
 //        var nodeRisk = ((PaperStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
 //        totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.closestParentFlow);
 //        double cumulativeReward = metadata.getCumulativeReward()[inGameEntityId];
