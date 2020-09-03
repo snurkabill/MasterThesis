@@ -145,7 +145,7 @@ public class RiskAverseSearchTree<
             var result = flowOptimizer.optimizeFlow(getRoot(), totalRiskAllowed);
             totalRiskAllowed = result.getFirst();
             if(!result.getSecond()) {
-                logger.error("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getStateWrapper().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
+                logger.debug("Solution to flow optimisation does not exist. Setting allowed risk to 1.0 in state: [" + System.lineSeparator() + getRoot().getStateWrapper().getWrappedState().readableStringRepresentation() + System.lineSeparator() + "] with allowed risk: [" + totalRiskAllowed + "]");
                 totalRiskAllowed = 1.0;
                 isFlowOptimized = false;
                 return false;

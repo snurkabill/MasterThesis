@@ -154,16 +154,16 @@ public class GameSamplerImpl<
             var paperEpisodeHistoryList = results.stream().map(x -> {
                 try {
                     return x.get();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Throwable e) {
+                    executorService.shutdown();
                     throw new IllegalStateException("Parallel episodes were interrupted.", e);
                 }
             }).collect(Collectors.toList());
 
             executorService.shutdown();
             return paperEpisodeHistoryList;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable e) {
+//            e.printStackTrace();
             throw new IllegalStateException("Parallel episodes were interrupted.", e);
         }
     }

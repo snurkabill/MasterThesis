@@ -119,7 +119,7 @@ public class ExampleRisk00 {
 
         List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentsList = List.of(
             riskPolicy_0,
-            riskPolicy_1
+            valuePlayer_1
         );
 
         var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
@@ -208,7 +208,8 @@ public class ExampleRisk00 {
             actionClass,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
             InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
-            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+//            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+            ExplorationExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             FlowOptimizerType.HARD_HARD,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,

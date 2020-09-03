@@ -66,7 +66,7 @@ public class ExampleRisk02 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 6, true, 10, 0, false, false, false, Path.of("TEST_PATH"),
+        var systemConfig = new SystemConfig(987567, false, 7, true, 100, 100, true, false, false, Path.of("TEST_PATH"),
             System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
@@ -76,14 +76,14 @@ public class ExampleRisk02 {
         var actionClass = BomberManAction.class;
         var totalActionCount = actionClass.getEnumConstants().length;
         var discountFactor = 1.0;
-        var treeExpansionCount = 30;
+        var treeExpansionCount = 100;
         var cpuct = 1.0;
 
         var instance = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         int totalEntityCount = instance.getTotalEntityCount();
         var modelInputSize = instance.getInGameEntityObservation(5).getObservedVector().length;
 
-        var evaluator_batch_size = 1;
+        var evaluator_batch_size = 2;
 
         var valuePolicy = getValuePolicy(systemConfig, environmentPolicyCount + 0, discountFactor, modelInputSize);
 // ----------------------------------------------------------------------------------------
@@ -180,8 +180,8 @@ public class ExampleRisk02 {
         var searchNodeFactory = new SearchNodeBaseFactoryImpl<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(actionClass, metadataFactory);
 
         var totalRiskAllowedInference = riskAllowed;
-        Supplier<Double> explorationSupplier = () -> 0.0;
-        Supplier<Double> temperatureSupplier = () -> 0.1;
+        Supplier<Double> explorationSupplier = () -> 0.1;
+        Supplier<Double> temperatureSupplier = () -> 1000.0;
         Supplier<Double> trainingRiskSupplier = () -> totalRiskAllowedInference;
 
         var treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(treeExpansionCount);
@@ -190,9 +190,10 @@ public class ExampleRisk02 {
             actionClass,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
             InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
-            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+            ExplorationExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
-            FlowOptimizerType.HARD_HARD,
+//            FlowOptimizerType.HARD_HARD,
+            FlowOptimizerType.SOFT,
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             NoiseStrategy.NOISY_05_06);
 
