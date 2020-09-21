@@ -5,8 +5,8 @@ import vahy.api.model.observation.Observation;
 import vahy.api.predictor.Predictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.testdomain.emptySpace.EmptySpaceAction;
-import vahy.impl.testdomain.emptySpace.EmptySpaceState;
+import vahy.examples.testdomain.emptySpace.EmptySpaceAction;
+import vahy.examples.testdomain.emptySpace.EmptySpaceState;
 import vahy.paperGenerics.PaperState;
 
 import java.util.ArrayList;

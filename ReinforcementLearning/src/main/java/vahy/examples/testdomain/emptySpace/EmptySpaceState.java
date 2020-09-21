@@ -1,4 +1,4 @@
-package vahy.impl.testdomain.emptySpace;
+package vahy.examples.testdomain.emptySpace;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
