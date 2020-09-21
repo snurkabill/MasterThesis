@@ -5,11 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vahy.ConvergenceAssert;
-import vahy.api.benchmark.EpisodeStatistics;
-import vahy.api.experiment.CommonAlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.examples.tictactoe.AlwaysStartAtCornerPolicy;
 import vahy.examples.tictactoe.AlwaysStartAtMiddlePolicy;
@@ -18,8 +15,6 @@ import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
 import vahy.examples.tictactoe.TicTacToeStateInitializer;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
-import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
@@ -28,6 +23,7 @@ import vahy.impl.policy.UniformRandomWalkPolicy;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.StreamUtils;
 
 import java.nio.file.Path;
@@ -118,46 +114,14 @@ public class ReproducibilityTest {
             Path.of("TEST_PATH"),
             null);
 
-        var algorithmConfig = new CommonAlgorithmConfig() {
-
-            @Override
-            public String toLog() {
-                return "";
-            }
-
-            @Override
-            public String toFile() {
-                return "";
-            }
-
-            @Override
-            public int getBatchEpisodeCount() {
-                return 50;
-            }
-
-            @Override
-            public int getStageCount() {
-                return 50;
-            }
-        };
-
+        var algorithmConfig = new CommonAlgorithmConfigBase(50, 50);
 
         var policyArgumentsList = List.of(
             playerOne,
             playerTwo
         );
 
-        var roundBuilder = new RoundBuilder<TicTacToeConfig, TicTacToeAction, TicTacToeState, EpisodeStatistics>()
-            .setRoundName("TicTacToeIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(ticTacConfig)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new TicTacToeStateInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setStateStateWrapperInitializer(StateWrapper::new)
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("ReproducibilityTest", ticTacConfig, systemConfig, algorithmConfig, policyArgumentsList, TicTacToeStateInitializer::new);
         var result = roundBuilder.execute();
 
         var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(0);

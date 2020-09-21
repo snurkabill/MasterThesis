@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -42,6 +41,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 import vahy.paperGenerics.reinforcement.PaperDataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V1;
 import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
 import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
@@ -247,19 +247,19 @@ public class SHRiskTest {
         };
 
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
-        var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PaperEpisodeStatistics>()
-            .setRoundName("SH03Test")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
-            .setStateStateWrapperInitializer(PaperStateWrapper::new)
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder(
+            "PaperSH03Test",
+            config,
+            systemConfig,
+            algorithmConfig,
+            List.of(player),
+            null,
+            SHRiskInstanceSupplier::new,
+            PaperStateWrapper::new,
+            new PaperEpisodeStatisticsCalculator<>(),
+            new EpisodeResultsFactoryBase<>()
+        );
         var result = roundBuilder.execute();
 
         assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));

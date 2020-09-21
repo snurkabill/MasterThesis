@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
-import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -15,6 +14,7 @@ import vahy.examples.simplifiedHallway.SHConfigBuilder;
 import vahy.examples.simplifiedHallway.SHInstance;
 import vahy.examples.simplifiedHallway.SHInstanceSupplier;
 import vahy.examples.simplifiedHallway.SHState;
+import vahy.impl.RoundBuilder;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
@@ -24,9 +24,9 @@ import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.integration.SH.AbstractSHConvergenceTest;
 import vahy.tensorflow.TFHelper;
 import vahy.tensorflow.TFModelImproved;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.StreamUtils;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
-public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest {
+public class MCTSSingleVsBatchedEvaluatorTest {
 
     private PolicyDefinition<SHAction, DoubleVector, SHState> getPlayerSupplier(int batchSize, ProblemConfig config, SystemConfig systemConfig, int modelInputSize, int totalEntityCount) throws IOException, InterruptedException {
 
@@ -103,7 +103,7 @@ public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest 
 
         var policy = getPlayerSupplier(batchSize, config, systemConfig, modelInputSize, 2);
 
-        var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, policy);
+        var roundBuilder = RoundBuilder.getRoundBuilder("MCTSSingleVsBatchedTest", config, systemConfig, algorithmConfig, List.of(policy), SHInstanceSupplier::new);
         var result = roundBuilder.execute();
         return result.getTrainingStatisticsList().stream().map(x -> x.getTotalPayoffAverage().get(policy.getPolicyId())).collect(Collectors.toList());
     }
@@ -127,8 +127,6 @@ public class MCTSSingleVsBatchedEvaluatorTest extends AbstractSHConvergenceTest 
                 List<Double> result = runExperiment(config, seed, 0);
                 for (int i = 1; i <= trialCount; i++) {
                     List<Double> tmp = runExperiment(config, seed, i);
-                    System.out.println(tmp.toString());
-                    System.out.println(result.toString());
                     assertIterableEquals(result, tmp);
                 }
                 list.add(result);

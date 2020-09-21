@@ -1,12 +1,10 @@
 package vahy.examples.bomberman;
 
-import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
@@ -27,6 +25,7 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.PaperTreeUpdater;
+import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
 import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
@@ -301,17 +300,18 @@ public class ExampleRisk01 {
 //            ,alphaGoPlayer_1
 //            ,riskPolicy
         );
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, EpisodeStatistics>()
-            .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManRiskInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setStateStateWrapperInitializer(PaperStateWrapper::new)
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder(
+            "BomberManRisk01",
+            config,
+            systemConfig,
+            algorithmConfig,
+            policyArgumentsList,
+            null,
+            BomberManRiskInstanceInitializer::new,
+            PaperStateWrapper::new,
+            new PaperEpisodeStatisticsCalculator<>(),
+            new EpisodeResultsFactoryBase<>()
+        );
 
         var start = System.currentTimeMillis();
         var result = roundBuilder.execute();

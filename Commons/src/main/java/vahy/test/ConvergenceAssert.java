@@ -1,4 +1,4 @@
-package vahy;
+package vahy.test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

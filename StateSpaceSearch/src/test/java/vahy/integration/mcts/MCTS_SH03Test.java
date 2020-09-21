@@ -3,14 +3,15 @@ package vahy.integration.mcts;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.examples.simplifiedHallway.SHAction;
 import vahy.examples.simplifiedHallway.SHConfigBuilder;
 import vahy.examples.simplifiedHallway.SHInstance;
+import vahy.examples.simplifiedHallway.SHInstanceSupplier;
 import vahy.examples.simplifiedHallway.SHState;
+import vahy.impl.RoundBuilder;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
@@ -18,16 +19,17 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.DataTablePredictorWithLr;
 import vahy.impl.runner.PolicyDefinition;
-import vahy.integration.SH.AbstractSHConvergenceTest;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class MCTS_SH03Test extends AbstractSHConvergenceTest {
+public class MCTS_SH03Test {
 
     private PolicyDefinition<SHAction, DoubleVector, SHState> getPolicyDefinition(ProblemConfig config, int treeExpansionCount) {
         var playerId = 1;
@@ -102,7 +104,7 @@ public class MCTS_SH03Test extends AbstractSHConvergenceTest {
         var algorithmConfig = new CommonAlgorithmConfigBase(10, 50);
 
         var playerSupplier = getPolicyDefinition(config, treeUpdateCount);
-        var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, playerSupplier);
+        var roundBuilder = RoundBuilder.getRoundBuilder("MCTS_test_03", config, systemConfig, algorithmConfig, List.of(playerSupplier), SHInstanceSupplier::new);
         var result = roundBuilder.execute();
 
         ConvergenceAssert.assertConvergenceResult(expectedMin, expectedMax, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()), "Payoff");

@@ -1,10 +1,8 @@
 package vahy.example.bomberman;
 
-import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
-import vahy.api.experiment.CommonAlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.examples.bomberman.BomberManAction;
 import vahy.examples.bomberman.BomberManConfig;
@@ -12,8 +10,6 @@ import vahy.examples.bomberman.BomberManInstance;
 import vahy.examples.bomberman.BomberManInstanceInitializer;
 import vahy.examples.bomberman.BomberManState;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
-import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -37,28 +33,7 @@ public class Example01 {
         var config = new BomberManConfig(500, true, 100, 1, 2, 3, 3, 1, 3, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(987567, false, 7, true, 500, 0, false, false, false, Path.of("TEST_PATH"), null);
 
-        var algorithmConfig = new CommonAlgorithmConfig() {
-
-            @Override
-            public String toLog() {
-                return "";
-            }
-
-            @Override
-            public String toFile() {
-                return "";
-            }
-
-            @Override
-            public int getBatchEpisodeCount() {
-                return 100;
-            }
-
-            @Override
-            public int getStageCount() {
-                return 50;
-            }
-        };
+        var algorithmConfig = new CommonAlgorithmConfigBase(50, 100);
 
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
@@ -120,17 +95,8 @@ public class Example01 {
             ,mctsEvalPlayer_1
             ,mctsEvalPlayer_2
         );
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics>()
-            .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setStateStateWrapperInitializer(StateWrapper::new)
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("BomberManExample01", config, systemConfig, algorithmConfig, policyArgumentsList, BomberManInstanceInitializer::new);
+
         var result = roundBuilder.execute();
 
         System.out.println(result.getEvaluationStatistics().getTotalPayoffAverage().get(1));

@@ -51,7 +51,6 @@ import vahy.utils.StreamUtils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
@@ -108,17 +107,18 @@ public class ExampleRisk02 {
 
         var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
 
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
-            .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(Arrays.asList(additionalStatistics))
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManRiskInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setStateStateWrapperInitializer(PaperStateWrapper::new)
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder(
+            "BomberManRisk01",
+            config,
+            systemConfig,
+            algorithmConfig,
+            policyArgumentsList,
+            List.of(additionalStatistics),
+            BomberManRiskInstanceInitializer::new,
+            PaperStateWrapper::new,
+            new PaperEpisodeStatisticsCalculator<>(),
+            new EpisodeResultsFactoryBase<>()
+        );
 
         var start = System.currentTimeMillis();
         var result = roundBuilder.execute();

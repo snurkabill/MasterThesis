@@ -4,14 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.examples.tictactoe.TicTacToeAction;
 import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
+import vahy.examples.tictactoe.TicTacToeStateInitializer;
+import vahy.impl.RoundBuilder;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
 
@@ -58,7 +60,7 @@ public class NonTrainableTicTacToeTest extends  AbstractTicTacToeConvergenceTest
 
         var algorithmConfig = new CommonAlgorithmConfigBase(0, 0);
         var policyArgumentsList = List.of(playerOne, playerTwo);
-        var roundBuilder = getRoundBuilder(new TicTacToeConfig(), systemConfig, algorithmConfig, policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("TicTacToeTest", new TicTacToeConfig(), systemConfig, algorithmConfig, policyArgumentsList, TicTacToeStateInitializer::new);
         var result = roundBuilder.execute();
 
         var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(0);

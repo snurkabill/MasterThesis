@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
-import vahy.ConvergenceAssert;
 import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
@@ -26,7 +25,6 @@ import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.paperGenerics.PaperStateWrapper;
 import vahy.paperGenerics.PaperTreeUpdater;
-import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
 import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 import vahy.paperGenerics.metadata.PaperMetadataFactory;
@@ -43,6 +41,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 import vahy.paperGenerics.reinforcement.PaperDataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V2;
 import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
 import vahy.utils.StreamUtils;
 
@@ -56,23 +55,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class PaperSingleVsBatchedEvaluatorTest {
-
-    private RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics> getRoundBuilder(BomberManConfig config,
-                                                                                                                  CommonAlgorithmConfigBase algorithmConfig,
-                                                                                                                  SystemConfig systemConfig,
-                                                                                                                  List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentList) {
-        return new RoundBuilder<BomberManConfig, BomberManAction, BomberManRiskState, PaperEpisodeStatistics>()
-            .setRoundName("SHTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManRiskInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
-            .setStateStateWrapperInitializer(PaperStateWrapper::new)
-            .setPlayerPolicySupplierList(policyArgumentList);
-    }
 
     private List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> getPlayerSupplierList(int playerCount, int envEntitiesCount, int batchSize, ProblemConfig config) {
 
@@ -194,7 +176,18 @@ public class PaperSingleVsBatchedEvaluatorTest {
             Path.of("TEST_PATH"),
             null);
 
-        var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, policyList);
+        var roundBuilder = RoundBuilder.getRoundBuilder(
+            "PaperSingleVsBatchedEvalTest",
+            config,
+            systemConfig,
+            algorithmConfig,
+            policyList,
+            null,
+            BomberManRiskInstanceInitializer::new,
+            PaperStateWrapper::new,
+            new PaperEpisodeStatisticsCalculator<>(),
+            new EpisodeResultsFactoryBase<>()
+        );
         var result = roundBuilder.execute();
         return result.getTrainingStatisticsList().stream().map(EpisodeStatistics::getTotalPayoffAverage).collect(Collectors.toList());
     }
@@ -226,8 +219,6 @@ public class PaperSingleVsBatchedEvaluatorTest {
                 for (int i = 1; i <= trialCount; i++) {
                     List<List<Double>> tmp = runExperiment(getPlayerSupplierList(playerCount, config.getEnvironmentPolicyCount(), i, config), config, seed);
                     for (int j = 0; j < tmp.size(); j++) {
-                        System.out.println(tmp.get(j).toString());
-                        System.out.println(result.get(j).toString());
                         assertIterableEquals(result.get(j), tmp.get(j));
                     }
                 }

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vahy.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.learning.dataAggregator.DataAggregator;
@@ -12,6 +11,8 @@ import vahy.api.policy.PolicyMode;
 import vahy.examples.tictactoe.TicTacToeAction;
 import vahy.examples.tictactoe.TicTacToeConfig;
 import vahy.examples.tictactoe.TicTacToeState;
+import vahy.examples.tictactoe.TicTacToeStateInitializer;
+import vahy.impl.RoundBuilder;
 import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -20,6 +21,7 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.ValuePolicy;
 import vahy.impl.predictor.DataTablePredictor;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
 
@@ -93,7 +95,7 @@ public class TrainableTicTacToeTest extends AbstractTicTacToeConvergenceTest {
         );
 
         var policyArgumentsList = List.of(playerOne, playerTwo);
-        var roundBuilder = getRoundBuilder(new TicTacToeConfig(), systemConfig, algorithmConfig, policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("TicTacToeTest", new TicTacToeConfig(), systemConfig, algorithmConfig, policyArgumentsList, TicTacToeStateInitializer::new);
         var result = roundBuilder.execute();
 
         var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(0);

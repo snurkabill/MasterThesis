@@ -3,7 +3,9 @@ package vahy.integration.SH;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import vahy.ConvergenceAssert;
+import vahy.examples.simplifiedHallway.SHInstanceSupplier;
+import vahy.impl.RoundBuilder;
+import vahy.test.ConvergenceAssert;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.PolicyMode;
@@ -26,7 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class ValuePolicySH05Test extends AbstractSHConvergenceTest {
+public class ValuePolicySH05Test {
 
     private PolicyDefinition<SHAction, DoubleVector, SHState> getPolicyDefinition() {
         var playerId = 1;
@@ -95,7 +97,7 @@ public class ValuePolicySH05Test extends AbstractSHConvergenceTest {
         var algorithmConfig = new CommonAlgorithmConfigBase(100, 200);
 
         var playerSupplier = getPolicyDefinition();
-        var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, playerSupplier);
+        var roundBuilder = RoundBuilder.getRoundBuilder("SHTest", config, systemConfig, algorithmConfig, List.of(playerSupplier), SHInstanceSupplier::new);
         var result = roundBuilder.execute();
 
         ConvergenceAssert.assertConvergenceResult(expectedMin, expectedMax, result.getEvaluationStatistics().getTotalPayoffAverage().get(playerSupplier.getPolicyId()), "Payoff");

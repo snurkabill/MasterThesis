@@ -62,6 +62,15 @@
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 
+    <Match>
+        <Package name="~vahy\.examples\.testdomain\.simple"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+
+    <Match>
+        <Package name="~vahy\.examples\.testdomain\.emptySpace"/>
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+    </Match>
 
 
 </FindBugsFilter>

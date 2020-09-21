@@ -8,8 +8,8 @@ public enum EmptySpaceAction implements Action {
     AA(0, 2),
     BB(1, 2);
 
-    public static EmptySpaceAction[] playerActions = new EmptySpaceAction[] {A, B};
-    public static EmptySpaceAction[] opponentActions = new EmptySpaceAction[] {AA, BB};
+    static final EmptySpaceAction[] playerActions = new EmptySpaceAction[] {A, B};
+    static final EmptySpaceAction[] opponentActions = new EmptySpaceAction[] {AA, BB};
     private final int localIndex;
     private final int sameEntityActionCount;
 

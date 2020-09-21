@@ -91,7 +91,7 @@ public class ExplorationFeasibleDistributionProvider<
         var isViolationStrict = anyActionViolatesRisk && sum <= totalRiskAllowed;
 
 
-        logger.error("Is ok: [{}], is sum strict: [{}], isViolationStrict: [{}], isDefinitelyWrong: [{}]", isDefinitelyOK, isSumStrict, isViolationStrict, isDefinitelyWrong);
+        logger.debug("Is ok: [{}], is sum strict: [{}], isViolationStrict: [{}], isDefinitelyWrong: [{}]", isDefinitelyOK, isSumStrict, isViolationStrict, isDefinitelyWrong);
 
         if(sum > totalRiskAllowed) {
 

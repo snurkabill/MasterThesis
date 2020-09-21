@@ -4,13 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.Test;
-import vahy.ConvergenceAssert;
 import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.examples.bomberman.BomberManAction;
 import vahy.examples.bomberman.BomberManConfig;
@@ -18,8 +16,6 @@ import vahy.examples.bomberman.BomberManInstance;
 import vahy.examples.bomberman.BomberManInstanceInitializer;
 import vahy.examples.bomberman.BomberManState;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
-import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -32,6 +28,7 @@ import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.tensorflow.TFHelper;
 import vahy.tensorflow.TFModelImproved;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.StreamUtils;
 
 import java.io.IOException;
@@ -43,23 +40,6 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class AlphaZeroSingleVsBatchedEvaluatorTest {
-
-    private RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics> getRoundBuilder(BomberManConfig config,
-                                                                                                              CommonAlgorithmConfigBase algorithmConfig,
-                                                                                                              SystemConfig systemConfig,
-                                                                                                              List<PolicyDefinition<BomberManAction, DoubleVector, BomberManState>> policyArgumentList) {
-        return new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics>()
-            .setRoundName("SHTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setStateStateWrapperInitializer(StateWrapper::new)
-            .setPlayerPolicySupplierList(policyArgumentList);
-    }
 
     private List<PolicyDefinition<BomberManAction, DoubleVector, BomberManState>> getPlayerSupplierList(int playerCount, int envEntitiesCount, int batchSize, ProblemConfig config, SystemConfig systemConfig, int modelInputSize) throws IOException, InterruptedException {
 
@@ -135,7 +115,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
 
         var policyList = getPlayerSupplierList(config.getPlayerCount(), config.getEnvironmentPolicyCount(), batchSize, config, systemConfig, modelInputSize);
 
-        var roundBuilder = getRoundBuilder(config, algorithmConfig, systemConfig, policyList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("AlphaZeroSingleVsBatchTest", config, systemConfig, algorithmConfig, policyList, BomberManInstanceInitializer::new);
         var result = roundBuilder.execute();
         return result.getTrainingStatisticsList().stream().map(EpisodeStatistics::getTotalPayoffAverage).collect(Collectors.toList());
     }
@@ -167,8 +147,6 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
                 for (int i = 1; i <= trialCount; i++) {
                     List<List<Double>> tmp = runExperiment(config, seed, i);
                     for (int j = 0; j < tmp.size(); j++) {
-                        System.out.println(tmp.get(j).toString());
-                        System.out.println(result.get(j).toString());
                         assertIterableEquals(result.get(j), tmp.get(j));
                     }
                 }

@@ -1,13 +1,9 @@
 package vahy.examples.simplifiedHallway;
 
-import vahy.api.benchmark.EpisodeStatistics;
-import vahy.api.experiment.CommonAlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
-import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
@@ -40,28 +36,7 @@ public class Example01 {
 
         var systemConfig = new SystemConfig(987568, true, 1, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
-        var algorithmConfig = new CommonAlgorithmConfig() {
-
-            @Override
-            public String toLog() {
-                return "";
-            }
-
-            @Override
-            public String toFile() {
-                return "";
-            }
-
-            @Override
-            public int getBatchEpisodeCount() {
-                return 100;
-            }
-
-            @Override
-            public int getStageCount() {
-                return 1000;
-            }
-        };
+        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 
         double discountFactor = 1;
 
@@ -91,17 +66,7 @@ public class Example01 {
         var policyArgumentsList = new ArrayList<PolicyDefinition<SHAction, DoubleVector, SHState>>();
         policyArgumentsList.add(playerSupplier);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHState, EpisodeStatistics>()
-            .setRoundName("SHIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setStateStateWrapperInitializer(StateWrapper::new)
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("SHTest", config, systemConfig, algorithmConfig, policyArgumentsList, SHInstanceSupplier::new);;
         var result = roundBuilder.execute();
 
         System.out.println(result.getEvaluationStatistics().getTotalPayoffAverage().get(1));

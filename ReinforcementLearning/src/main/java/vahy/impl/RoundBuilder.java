@@ -8,12 +8,17 @@ import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.InitialStateSupplier;
 import vahy.api.episode.StateWrapperInitializer;
 import vahy.api.experiment.CommonAlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.model.Action;
 import vahy.api.model.State;
+import vahy.api.model.StateWrapper;
+import vahy.impl.benchmark.EpisodeStatisticsBase;
+import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
+import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.KnownModelPolicy;
 import vahy.impl.runner.EpisodeWriter;
@@ -104,36 +109,36 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     }
 
     public RoundBuilder<TConfig, TAction, TState, TStatistics> setStateStateWrapperInitializer(StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer) {
-        this.stateStateWrapperInitializer  = stateStateWrapperInitializer;
+        this.stateStateWrapperInitializer = stateStateWrapperInitializer;
         return this;
     }
 
     private void finalizeSetup() {
-        if(roundName == null) {
+        if (roundName == null) {
             throw new IllegalArgumentException("Missing RunName");
         }
-        if(systemConfig == null) {
+        if (systemConfig == null) {
             throw new IllegalArgumentException("Missing systemConfig");
         }
-        if(problemConfig == null) {
+        if (problemConfig == null) {
             throw new IllegalArgumentException("Missing problemConfig");
         }
-        if(commonAlgorithmConfig == null) {
+        if (commonAlgorithmConfig == null) {
             throw new IllegalArgumentException("Missing commonAlgorithmConfig");
         }
-        if(instanceInitializerFactory == null) {
+        if (instanceInitializerFactory == null) {
             throw new IllegalArgumentException("Missing instanceInitializerFactory");
         }
-        if(stateStateWrapperInitializer == null) {
+        if (stateStateWrapperInitializer == null) {
             throw new IllegalArgumentException("Missing stateStateWrapperInitializer");
         }
-        if(statisticsCalculator == null) {
+        if (statisticsCalculator == null) {
             throw new IllegalArgumentException("Missing statisticsCalculator");
         }
-        if(resultsFactory == null) {
+        if (resultsFactory == null) {
             throw new IllegalArgumentException("Missing resultsFactory");
         }
-        if(playerPolicyArgumentList == null) {
+        if (playerPolicyArgumentList == null) {
             throw new IllegalArgumentException("Missing policyArgumentList");
         }
         checkPolicyArgumentList(playerPolicyArgumentList);
@@ -145,15 +150,15 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     private void checkPolicyArgumentList(List<PolicyDefinition<TAction, DoubleVector, TState>> policyDefinitionList) {
         Set<Integer> policyIdSet = new HashSet<>();
         for (PolicyDefinition<TAction, DoubleVector, TState> entry : policyDefinitionList) {
-            if(policyIdSet.contains(entry.getPolicyId())) {
+            if (policyIdSet.contains(entry.getPolicyId())) {
                 throw new IllegalStateException("Two or more policies have policy id: [" + entry.getPolicyId() + "]");
             } else {
                 policyIdSet.add(entry.getPolicyId());
             }
-            if(entry.getCategoryId() == ENVIRONMENT_CATEGORY_ID) {
+            if (entry.getCategoryId() == ENVIRONMENT_CATEGORY_ID) {
                 throw new IllegalArgumentException("Category ID: [" + ENVIRONMENT_CATEGORY_ID + "] is reserved for environment and hence can't be used as player category.");
             }
-            if(entry.getCategoryId() < 0) {
+            if (entry.getCategoryId() < 0) {
                 throw new IllegalArgumentException("All category Ids should be positive. Got: [" + entry.getCategoryId() + "]");
             }
         }
@@ -225,5 +230,75 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
                 ))
             .collect(Collectors.toList());
     }
+
+    public static <TC extends ProblemConfig, TA extends Enum<TA> & Action, TS extends State<TA, DoubleVector, TS>> RoundBuilder<TC, TA, TS, EpisodeStatisticsBase> getRoundBuilder(
+        String roundName,
+        TC instanceConfig,
+        SystemConfig systemConfig,
+        CommonAlgorithmConfigBase algorithmConfig,
+        List<PolicyDefinition<TA, DoubleVector, TS>> policyArgumentsList,
+        BiFunction<TC, SplittableRandom, InitialStateSupplier<TA, DoubleVector, TS>> instanceInitializerFactory)
+    {
+        return RoundBuilder.getRoundBuilder(
+            roundName,
+            instanceConfig,
+            systemConfig,
+            algorithmConfig,
+            policyArgumentsList,
+            null,
+            instanceInitializerFactory,
+            StateWrapper::new,
+            new EpisodeStatisticsCalculatorBase<>(),
+            new EpisodeResultsFactoryBase<>());
+    }
+
+    public static <TC extends ProblemConfig, TA extends Enum<TA> & Action, TS extends State<TA, DoubleVector, TS>> RoundBuilder<TC, TA, TS, EpisodeStatisticsBase> getRoundBuilder(
+        String roundName,
+        TC instanceConfig,
+        SystemConfig systemConfig,
+        CommonAlgorithmConfigBase algorithmConfig,
+        List<PolicyDefinition<TA, DoubleVector, TS>> policyArgumentsList,
+        List<DataPointGeneratorGeneric<EpisodeStatisticsBase>> additionalDataPointGeneratorList,
+        BiFunction<TC, SplittableRandom, InitialStateSupplier<TA, DoubleVector, TS>> instanceInitializerFactory)
+    {
+        return RoundBuilder.getRoundBuilder(
+            roundName,
+            instanceConfig,
+            systemConfig,
+            algorithmConfig,
+            policyArgumentsList,
+            additionalDataPointGeneratorList,
+            instanceInitializerFactory,
+            StateWrapper::new,
+            new EpisodeStatisticsCalculatorBase<>(),
+            new EpisodeResultsFactoryBase<>());
+    }
+
+    public static <TC extends ProblemConfig, TA extends Enum<TA> & Action, TS extends State<TA, DoubleVector, TS>, TStats extends EpisodeStatistics> RoundBuilder<TC, TA, TS, TStats> getRoundBuilder(
+        String roundName,
+        TC instanceConfig,
+        SystemConfig systemConfig,
+        CommonAlgorithmConfigBase algorithmConfig,
+        List<PolicyDefinition<TA, DoubleVector, TS>> policyArgumentsList,
+        List<DataPointGeneratorGeneric<TStats>> additionalDataPointGeneratorList,
+        BiFunction<TC, SplittableRandom, InitialStateSupplier<TA, DoubleVector, TS>> instanceInitializerFactory,
+        StateWrapperInitializer<TA, DoubleVector, TS> stateWrapperInitializer,
+        EpisodeStatisticsCalculator<TA, DoubleVector, TS, TStats> episodeStatisticsCalculator,
+        EpisodeResultsFactory<TA, DoubleVector, TS> resultsFactory
+        )
+    {
+        return new RoundBuilder<TC, TA, TS, TStats>()
+            .setRoundName(roundName)
+            .setAdditionalDataPointGeneratorListSupplier(additionalDataPointGeneratorList)
+            .setCommonAlgorithmConfig(algorithmConfig)
+            .setProblemConfig(instanceConfig)
+            .setSystemConfig(systemConfig)
+            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> instanceInitializerFactory.apply(config_, splittableRandom_).createInitialState(policyMode))
+            .setStateStateWrapperInitializer(stateWrapperInitializer)
+            .setResultsFactory(resultsFactory)
+            .setStatisticsCalculator(episodeStatisticsCalculator)
+            .setPlayerPolicySupplierList(policyArgumentsList);
+    }
+
 
 }

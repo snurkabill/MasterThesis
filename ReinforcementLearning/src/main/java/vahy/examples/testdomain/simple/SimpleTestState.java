@@ -15,8 +15,8 @@ public class SimpleTestState implements State<SimpleTestAction, DoubleVector, Si
 
     private static final int TEST_STATE_SIZE = 10;
 
-    public static final SimpleTestAction[] PLAYER_ACTIONS = new SimpleTestAction[] {SimpleTestAction.A, SimpleTestAction.B, SimpleTestAction.C};
-    public static final SimpleTestAction[] OPPONENT_ACTIONS = new SimpleTestAction[] {SimpleTestAction.X, SimpleTestAction.Y, SimpleTestAction.Z};
+    static final SimpleTestAction[] PLAYER_ACTIONS = new SimpleTestAction[] {SimpleTestAction.A, SimpleTestAction.B, SimpleTestAction.C};
+    static final SimpleTestAction[] OPPONENT_ACTIONS = new SimpleTestAction[] {SimpleTestAction.X, SimpleTestAction.Y, SimpleTestAction.Z};
 
     private final boolean isPlayerTurn;
     private final List<Character> actionSequence;

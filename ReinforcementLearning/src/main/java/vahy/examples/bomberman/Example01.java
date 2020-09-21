@@ -1,14 +1,10 @@
 package vahy.examples.bomberman;
 
-import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.episode.PolicyShuffleStrategy;
-import vahy.api.experiment.CommonAlgorithmConfig;
+import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.model.StateWrapper;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
-import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
-import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -33,28 +29,7 @@ public class Example01 {
         var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 3, 5, 0.2, BomberManInstance.BM_01, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
         var systemConfig = new SystemConfig(987568, false, 7, true, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
-        var algorithmConfig = new CommonAlgorithmConfig() {
-
-            @Override
-            public String toLog() {
-                return "";
-            }
-
-            @Override
-            public String toFile() {
-                return "";
-            }
-
-            @Override
-            public int getBatchEpisodeCount() {
-                return 1000;
-            }
-
-            @Override
-            public int getStageCount() {
-                return 1000;
-            }
-        };
+        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 1000);
 
         double discountFactor = 1;
 
@@ -67,17 +42,7 @@ public class Example01 {
             policyArgumentsList.add(createPolicyArgument(discountFactor, i + environmentPolicyCount, 1));
         }
 
-        var roundBuilder = new RoundBuilder<BomberManConfig, BomberManAction, BomberManState, EpisodeStatistics>()
-            .setRoundName("BomberManIntegrationTest")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new BomberManInstanceInitializer(config_, splittableRandom_).createInitialState(policyMode))
-            .setStateStateWrapperInitializer(StateWrapper::new)
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new EpisodeStatisticsCalculatorBase<>())
-            .setPlayerPolicySupplierList(policyArgumentsList);
+        var roundBuilder = RoundBuilder.getRoundBuilder("BomberManExample01", config, systemConfig, algorithmConfig, policyArgumentsList, BomberManInstanceInitializer::new);
         var result = roundBuilder.execute();
 
         System.out.println(result.getEvaluationStatistics().getTotalPayoffAverage().get(1));

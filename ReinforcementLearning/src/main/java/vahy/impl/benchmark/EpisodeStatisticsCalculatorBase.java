@@ -1,6 +1,5 @@
 package vahy.impl.benchmark;
 
-import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.benchmark.EpisodeStatisticsCalculator;
 import vahy.api.episode.EpisodeResults;
 import vahy.api.model.Action;
@@ -16,7 +15,7 @@ public class EpisodeStatisticsCalculatorBase<
     TAction extends Enum<TAction> & Action,
     TObservation extends Observation,
     TState extends State<TAction, TObservation, TState>>
-    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, EpisodeStatistics> {
+    implements EpisodeStatisticsCalculator<TAction, TObservation, TState, EpisodeStatisticsBase> {
 
     @Override
     public EpisodeStatisticsBase calculateStatistics(List<EpisodeResults<TAction, TObservation, TState>> episodeResultsList, Duration durations) {
