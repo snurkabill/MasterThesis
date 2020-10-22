@@ -193,6 +193,9 @@ public class RiskAverseSearchTree<
                 totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
             }
         }
+        if(TRACE_ENABLED) {
+            logger.trace("Total riskAllowed: [{}]. CumulativeNominator: [{}], CumulativeDenominator: [{}], AnyRiskEstimated: [{}]", totalRiskAllowed, cumulativeNominator, cumulativeDenominator, anyRiskEstimated);
+        }
         if(totalRiskAllowed > 1.0 - NUMERICAL_RISK_DIFF_TOLERANCE) {
             if(DEBUG_ENABLED) {
                 logger.debug("Risk [" + totalRiskAllowed + "] cannot be higher than 1.0");
@@ -209,11 +212,20 @@ public class RiskAverseSearchTree<
 
 
     private void processPlayerAction(TAction action) {
+        if(TRACE_ENABLED) {
+            logger.trace("Processing player action: [{}]", action);
+        }
         var playerActionDistribution = ((PlayingDistributionWithActionMap<TAction>) playingDistribution).getActionMap(); // TODO: casting is little dirty here.
+        if(TRACE_ENABLED) {
+            logger.trace("Player distribution [{}]", playerActionDistribution.toString());
+        }
         var riskOfOtherPlayerActions = 0.0d;
         for (Map.Entry<TAction, SearchNode<TAction, TObservation, TSearchNodeMetadata, TState>> entry : getRoot().getChildNodeMap().entrySet()) {
             var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
             childRisk = roundRiskIfBelowZero(childRisk, "RiskOfPlayerAction");
+            if(TRACE_ENABLED) {
+                logger.trace("For action [{}], child risk: [{}]",entry.getKey(), childRisk);
+            }
             anyRiskEstimated += childRisk;
             if(entry.getKey().ordinal() != action.ordinal()) {
                 riskOfOtherPlayerActions += childRisk * playerActionDistribution.get(entry.getKey());
@@ -225,15 +237,24 @@ public class RiskAverseSearchTree<
         } else {
             cumulativeDenominator *= playerActionDistribution.get(action);
         }
+        if(TRACE_ENABLED) {
+            logger.trace("After process: Cumulative Nominator: [{}], Cumulative denominator: [{}], AnyRiskEstimated: [{}]", cumulativeNominator, cumulativeDenominator, anyRiskEstimated);
+        }
 
     }
 
     private void processOpponentAction(TAction action) {
+        if(TRACE_ENABLED) {
+            logger.trace("Processing opponent action: [{}]", action);
+        }
         if(getRoot().getChildNodeMap().containsKey(action)) {
             var riskOfOtherOpponentActions = 0.0;
             for (var entry : getRoot().getChildNodeMap().entrySet()) {
                 var childRisk = subtreeRiskCalculator.calculateRisk(entry.getValue());
                 childRisk = roundRiskIfBelowZero(childRisk, "RiskOfOpponentAction");
+                if(TRACE_ENABLED) {
+                    logger.trace("For action [{}], child risk: [{}]", entry.getKey(), childRisk);
+                }
                 anyRiskEstimated += childRisk;
                 if(entry.getKey().ordinal() != action.ordinal()) {
                     riskOfOtherOpponentActions += childRisk * entry.getValue().getSearchNodeMetadata().getPriorProbability() * cumulativeDenominator;
@@ -247,6 +268,10 @@ public class RiskAverseSearchTree<
             }
         } else {
             // TODO: what to do here? do nothing?
+            logger.trace("WHAT TO DO HERE");
+        }
+        if(TRACE_ENABLED) {
+            logger.trace("After process: Cumulative Nominator: [{}], Cumulative denominator: [{}], AnyRiskEstimated: [{}]", cumulativeNominator, cumulativeDenominator, anyRiskEstimated);
         }
     }
 

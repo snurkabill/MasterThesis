@@ -29,4 +29,5 @@ public class CommonAlgorithmConfigBase implements CommonAlgorithmConfig {
     public String toFile() {
         return null;
     }
+
 }
