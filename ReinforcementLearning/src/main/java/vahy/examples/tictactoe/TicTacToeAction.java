@@ -44,6 +44,11 @@ public enum TicTacToeAction implements Action {
         return sameEntityActionCount;
     }
 
+    @Override
+    public boolean isShadowAction() {
+        return false;
+    }
+
 //    @Override
 //    public boolean isPlayerAction(int playerId) {
 //        return true;

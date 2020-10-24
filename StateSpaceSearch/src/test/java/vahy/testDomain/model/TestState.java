@@ -10,6 +10,7 @@ import vahy.impl.model.observation.DoubleVector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,14 @@ public class TestState implements State<TestAction, DoubleVector, TestState>, Ob
 
     public static TestState getDefaultInitialStateOpponentTurn() {
         return new TestState(Collections.singletonList('A'));
+    }
+
+    // for performance purposes
+    public static final EnumMap<TestAction, TestAction[]> OBSERVED_ACTION_MAP = new EnumMap<TestAction, TestAction[]>(TestAction.class);
+    static {
+        for (TestAction value : TestAction.values()) {
+            OBSERVED_ACTION_MAP.put(value,  new TestAction[] {value, value});
+        }
     }
 
     private final List<Character> internalState;
@@ -47,7 +56,7 @@ public class TestState implements State<TestAction, DoubleVector, TestState>, Ob
 
 
     @Override
-    public TestAction[] getAllPossibleActions() {
+    public TestAction[] getAllPossibleActions(int inGameEntityId) {
         if(isOpponentTurn()) {
             return OPPONENT_ACTIONS;
         } else {
@@ -64,7 +73,7 @@ public class TestState implements State<TestAction, DoubleVector, TestState>, Ob
     public StateRewardReturn<TestAction, DoubleVector, TestState> applyAction(TestAction action) {
         List<Character> newInternalState = new ArrayList<>(internalState);
         newInternalState.add(action.getCharRepresentation());
-        return new ImmutableStateRewardReturn<>(new TestState(newInternalState), new double[] {action.getReward(), 0.0});
+        return new ImmutableStateRewardReturn<>(new TestState(newInternalState), new double[] {action.getReward(), 0.0}, OBSERVED_ACTION_MAP.get(action));
     }
 
     @Override

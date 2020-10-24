@@ -43,8 +43,8 @@ public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVec
     }
 
     @Override
-    public TicTacToeAction[] getAllPossibleActions() {
-        return innerState.getAllPossibleActions();
+    public TicTacToeAction[] getAllPossibleActions(int inGameEntityId) {
+        return innerState.getAllPossibleActions(inGameEntityId);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVec
     @Override
     public StateRewardReturn<TicTacToeAction, DoubleVector, TicTacToeRiskState> applyAction(TicTacToeAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new TicTacToeRiskState(applied.getState()), applied.getReward());
+        return new ImmutableStateRewardReturn<>(new TicTacToeRiskState(applied.getState()), applied.getReward(), applied.getAction());
     }
 
     @Override

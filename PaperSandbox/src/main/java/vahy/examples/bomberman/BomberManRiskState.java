@@ -35,8 +35,8 @@ public class BomberManRiskState implements PaperState<BomberManAction, DoubleVec
     }
 
     @Override
-    public BomberManAction[] getAllPossibleActions() {
-        return innerState.getAllPossibleActions();
+    public BomberManAction[] getAllPossibleActions(int inGameEntityId) {
+        return innerState.getAllPossibleActions(inGameEntityId);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class BomberManRiskState implements PaperState<BomberManAction, DoubleVec
     @Override
     public StateRewardReturn<BomberManAction, DoubleVector, BomberManRiskState> applyAction(BomberManAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new BomberManRiskState(applied.getState()), applied.getReward());
+        return new ImmutableStateRewardReturn<>(new BomberManRiskState(applied.getState()), applied.getReward(), applied.getAction());
     }
 
     @Override

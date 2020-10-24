@@ -11,7 +11,6 @@ import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.episode.RegisteredPolicy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateRewardReturn;
 import vahy.api.model.StateWrapper;
 import vahy.api.model.observation.Observation;
 import vahy.utils.ImmutableTuple;
@@ -39,19 +38,18 @@ public class EpisodeSimulatorImpl<
     }
 
     @Override
-    public EpisodeResults<TAction, TObservation, TState> calculateEpisode(EpisodeSetup<TAction, TObservation, TState> episodeSetup)
-    {
+    public EpisodeResults<TAction, TObservation, TState> calculateEpisode(EpisodeSetup<TAction, TObservation, TState> episodeSetup) {
         TState state = episodeSetup.getInitialState();
-        if(TRACE_ENABLED) {
+        if (TRACE_ENABLED) {
             logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         }
         return episodeRun(episodeSetup.getStepCountLimit(), episodeSetup.getPolicyIdTranslationMap(), episodeSetup.getRegisteredPolicyList(), state);
     }
 
     private EpisodeResults<TAction, TObservation, TState> episodeRun(int episodeStepCountLimit,
-                                                                                    PolicyIdTranslationMap policyIdTranslationMap,
-                                                                                    List<RegisteredPolicy<TAction, TObservation, TState>> policyList,
-                                                                                    TState initState) {
+                                                                     PolicyIdTranslationMap policyIdTranslationMap,
+                                                                     List<RegisteredPolicy<TAction, TObservation, TState>> policyList,
+                                                                     TState initState) {
         var episodeHistoryList = new ArrayList<EpisodeStepRecord<TAction, TObservation, TState>>(episodeStepCountLimit);
 
         List<Integer> playerStepsDone = new ArrayList<>(policyList.size());
@@ -67,7 +65,7 @@ public class EpisodeSimulatorImpl<
         TState state = initState;
         try {
             long episodeStart = System.currentTimeMillis();
-            while(!state.isFinalState() && totalStepsDone < episodeStepCountLimit) {
+            while (!state.isFinalState() && totalStepsDone < episodeStepCountLimit) {
 
                 var inGameEntityIdOnTurn = state.getInGameEntityIdOnTurn();
                 var policyIdOnTurn = policyIdTranslationMap.getPolicyId(inGameEntityIdOnTurn);
@@ -77,11 +75,11 @@ public class EpisodeSimulatorImpl<
                 var stepPolicyIdOnTurn = step.getPolicyIdOnTurn();
                 var stepInGameEntityOnTurn = step.getInGameEntityIdOnTurn();
 
-                if(stepPolicyIdOnTurn != policyIdOnTurn) {
+                if (stepPolicyIdOnTurn != policyIdOnTurn) {
                     throw new IllegalArgumentException("differnet policy Ids");
                 }
 
-                if(stepInGameEntityOnTurn != inGameEntityIdOnTurn) {
+                if (stepInGameEntityOnTurn != inGameEntityIdOnTurn) {
                     throw new IllegalArgumentException("Different in game entity ids");
                 }
 
@@ -91,12 +89,12 @@ public class EpisodeSimulatorImpl<
 
                 collectPolicyStats(totalCumulativePayoffList, step, policyIdTranslationMap);
 
-                if(DEBUG_ENABLED) {
+                if (DEBUG_ENABLED) {
                     makeStepLog(step);
                 }
                 episodeHistoryList.add(step);
                 state = step.getToState();
-                if(TRACE_ENABLED) {
+                if (TRACE_ENABLED) {
                     logger.trace("State at [{}]th timestamp: " + System.lineSeparator() + state.readableStringRepresentation(), playerStepsDone);
                 }
             }
@@ -104,11 +102,11 @@ public class EpisodeSimulatorImpl<
 
             var averageDecisionDuration = new ArrayList<Double>(policyList.size());
             for (int i = 0; i < playerDecisionTimeInMillis.size(); i++) {
-                averageDecisionDuration.add(playerDecisionTimeInMillis.get(i) / (double)playerStepsDone.get(i));
+                averageDecisionDuration.add(playerDecisionTimeInMillis.get(i) / (double) playerStepsDone.get(i));
             }
 
             return resultsFactory.createResults(episodeHistoryList, policyIdTranslationMap, policyList.size(), playerStepsDone, averageDecisionDuration, totalStepsDone, totalCumulativePayoffList, Duration.ofMillis(end - episodeStart));
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             e.printStackTrace();
             throw new RuntimeException(createErrorMsg(episodeHistoryList), e);
         }
@@ -123,54 +121,46 @@ public class EpisodeSimulatorImpl<
     }
 
     private ImmutableTuple<EpisodeStepRecord<TAction, TObservation, TState>, Long> makePolicyStep(TState state,
-                                                                                                           int policyIdOnTurn,
-                                                                                                           int inGameEntityId,
-                                                                                                           List<RegisteredPolicy<TAction, TObservation, TState>> allPolicyList,
-                                                                                                           PolicyIdTranslationMap policyIdTranslationMap)
-    {
+                                                                                                  int policyIdOnTurn,
+                                                                                                  int inGameEntityId,
+                                                                                                  List<RegisteredPolicy<TAction, TObservation, TState>> allPolicyList,
+                                                                                                  PolicyIdTranslationMap policyIdTranslationMap) {
         var onTurnRegisteredPolicy = allPolicyList.get(policyIdOnTurn);
-        if(inGameEntityId != onTurnRegisteredPolicy.getInGameEntityId()) {
+        if (inGameEntityId != onTurnRegisteredPolicy.getInGameEntityId()) {
             throw new IllegalArgumentException("Different policyIds");
         }
         var stateWrapper = new StateWrapper<>(inGameEntityId, state);
         var onTurnPolicy = onTurnRegisteredPolicy.getPolicy();
-        if(policyIdOnTurn != onTurnPolicy.getPolicyId()) {
+        if (policyIdOnTurn != onTurnPolicy.getPolicyId()) {
             throw new IllegalStateException("Discrepancy. PolicyId from translation map [" + policyIdOnTurn + "] does not match onTurnPolicyId [" + onTurnPolicy.getPolicyId() + "]");
         }
         var start = System.currentTimeMillis();
-        TAction action = onTurnPolicy.getDiscreteAction(stateWrapper);
+        var action = onTurnPolicy.getDiscreteAction(stateWrapper);
         var decisionInMs = System.currentTimeMillis() - start;
+        var stateRewardReturn = state.applyAction(action);
         var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(stateWrapper);
         onTurnPolicy.updateStateOnPlayedAction(action);
         for (var entry : allPolicyList) {
-            if(entry.getPolicyId() != policyIdOnTurn) {
+            if (entry.getPolicyId() != policyIdOnTurn) {
                 var toUpdatePolicy = entry.getPolicy();
-                if(state.isInGame(policyIdTranslationMap.getInGameEntityId(toUpdatePolicy.getPolicyId()))) {
-                    toUpdatePolicy.updateStateOnPlayedAction(action);
+                var toUpdateInGameEntityId = policyIdTranslationMap.getInGameEntityId(toUpdatePolicy.getPolicyId());
+                if (state.isInGame(toUpdateInGameEntityId)) {
+                    var observedAction = stateRewardReturn.getAction()[toUpdateInGameEntityId];
+                    toUpdatePolicy.updateStateOnPlayedAction(observedAction);
                 }
             }
         }
-        StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(action);
-
-//        var rewardArray = stateRewardReturn.getReward();
-//
-//        for (int i = 0; i < rewardArray.length; i++) {
-//            var policyId_inner = i;
-//            var inGameId_inner = policyIdTranslationMap.getInGameEntityId(policyId_inner);
-//            rewardTempArray[policyId_inner] = rewardArray[inGameId_inner];
-//        }
-//        System.arraycopy(rewardTempArray, 0, rewardArray, 0, rewardArray.length);
         return new ImmutableTuple<>(new EpisodeStepRecordImpl<>(policyIdOnTurn, inGameEntityId, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward()), decisionInMs);
     }
 
     private void makeStepLog(EpisodeStepRecord<TAction, TObservation, TState> step) {
-        if(DEBUG_ENABLED) {
+        if (DEBUG_ENABLED) {
             logger.debug("[{}]th action. Step log: [{}] ", totalStepsDone, step.toLogString());
         }
     }
 
     private String createErrorMsg(List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistoryList) {
-        if(episodeHistoryList.isEmpty()) {
+        if (episodeHistoryList.isEmpty()) {
             return "No steps were done in episode.";
         }
         return "Episode simulation ended due to inner exception. Episode steps: [" +

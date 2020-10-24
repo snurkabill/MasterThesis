@@ -41,4 +41,9 @@ public enum TestAction implements Action {
     public int getCountOfAllActionsFromSameEntity() {
         return sameEntityCount;
     }
+
+    @Override
+    public boolean isShadowAction() {
+        return false;
+    }
 }

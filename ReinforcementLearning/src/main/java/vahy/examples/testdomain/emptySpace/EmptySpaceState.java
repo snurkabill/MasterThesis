@@ -9,12 +9,21 @@ import vahy.impl.model.observation.DoubleVector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 
 public class EmptySpaceState implements Observation, State<EmptySpaceAction, DoubleVector, EmptySpaceState> {
 
     static final DoubleVector FIXED_OBSERVATION = new DoubleVector(new double[] {0.0});
     static final double[] FIXED_REWARD = new double[] {0.0, 0.0};
+
+    // for performance purposes
+    public static final EnumMap<EmptySpaceAction, EmptySpaceAction[]> OBSERVED_ACTION_MAP = new EnumMap<EmptySpaceAction, EmptySpaceAction[]>(EmptySpaceAction.class);
+    static {
+        for (EmptySpaceAction value : EmptySpaceAction.values()) {
+            OBSERVED_ACTION_MAP.put(value,  new EmptySpaceAction[] {value, value});
+        }
+    }
 
     protected final boolean changeTurn;
     protected final boolean isPlayerTurn;
@@ -25,7 +34,7 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
     }
 
     @Override
-    public EmptySpaceAction[] getAllPossibleActions() {
+    public EmptySpaceAction[] getAllPossibleActions(int inGameEntityId) {
         if(isPlayerTurn) {
             return EmptySpaceAction.playerActions;
         } else {
@@ -40,7 +49,7 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
 
     @Override
     public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceState> applyAction(EmptySpaceAction actionType) {
-        return new ImmutableStateRewardReturn<>(new EmptySpaceState(!changeTurn, changeTurn ? !isPlayerTurn : isPlayerTurn), FIXED_REWARD);
+        return new ImmutableStateRewardReturn<>(new EmptySpaceState(!changeTurn, changeTurn ? !isPlayerTurn : isPlayerTurn), FIXED_REWARD, OBSERVED_ACTION_MAP.get(actionType));
     }
 
     @Override

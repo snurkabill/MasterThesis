@@ -1,5 +1,8 @@
 package vahy.examples.bomberman;
 
+import java.util.Arrays;
+import java.util.EnumMap;
+
 public class BomberManStaticPart {
 
     private static final int OBSERVATION_ONTURN_INDEX = 0;
@@ -31,6 +34,9 @@ public class BomberManStaticPart {
     private final int[] observation_playerIndexes;
     private final int[] observation_bombIndexes;
     private final int observation_goldInPlaceIndex;
+
+
+    private final EnumMap<BomberManAction, BomberManAction[]> observedActionMap;
 
 
     public BomberManStaticPart(boolean[][] walls, int startingPlayerCount, int startingTotalEntityCount, int bombsPerPlayer, int rewardPerStep, int goldEntityCount, boolean[][] goldEntitiesArray, int[][] goldEntitiesReferenceArray, int rewardPerGold, double goldRespawnProbability, int bombRange, int bombCountDown, int playerLivesAtStart, int totalStepsAllowed) {
@@ -68,6 +74,14 @@ public class BomberManStaticPart {
             observation_bombIndexes[i] = 1 + 3 * startingPlayerCount + 3 * i;
         }
         this.observation_goldInPlaceIndex = 1 + 3 * startingPlayerCount + 3 * startingPlayerCount * bombsPerPlayer;
+
+
+        this.observedActionMap = new EnumMap<BomberManAction, BomberManAction[]>(BomberManAction.class);
+        for (BomberManAction value : BomberManAction.values()) {
+            var array = new BomberManAction[startingTotalEntityCount];
+            Arrays.fill(array, value);
+            observedActionMap.put(value, array);
+        }
     }
 
     public double[][] getMoveReward() {
@@ -148,5 +162,9 @@ public class BomberManStaticPart {
 
     public int getObservation_goldInPlaceIndex() {
         return observation_goldInPlaceIndex;
+    }
+
+    public BomberManAction[] getObservedActionArray(BomberManAction action) {
+        return observedActionMap.get(action);
     }
 }

@@ -8,6 +8,7 @@ import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,14 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     static final double[] PLAYER_ZERO_WON_REWARD = new double[] {1.0, -1.0};
     static final double[] PLAYER_ONE_WON_REWARD = new double[] {-1.0, 1.0};
     static final double[] IN_GAME_REWARD = new double[] {0.0, 0.0};
+
+    // for performance purposes
+    public static final EnumMap<TicTacToeAction, TicTacToeAction[]> OBSERVED_ACTION_MAP = new EnumMap<TicTacToeAction, TicTacToeAction[]>(TicTacToeAction.class);
+    static {
+        for (TicTacToeAction value : TicTacToeAction.values()) {
+            OBSERVED_ACTION_MAP.put(value,  new TicTacToeAction[] {value, value});
+        }
+    }
 
     private enum Player_inner {
         PLAYER_ZERO(Symbol.PLAYER_ZERO_SYMBOL),
@@ -125,7 +134,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public TicTacToeAction[] getAllPossibleActions() {
+    public TicTacToeAction[] getAllPossibleActions(int inGameEntityId) {
         return enabledActions.toArray(new TicTacToeAction[0]);
     }
 
@@ -166,7 +175,8 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                     turnsLeft - 1,
                     newActions
                 ),
-                reward
+                reward,
+                OBSERVED_ACTION_MAP.get(actionType)
             );
         } else {
             var x = actionType.getX();
@@ -191,7 +201,8 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
                     turnsLeft - 1,
                     newActions
                 ),
-                reward
+                reward,
+                OBSERVED_ACTION_MAP.get(actionType)
             );
         }
     }

@@ -6,6 +6,8 @@ public interface StateRewardReturn<TAction extends Enum<TAction> & Action, TObse
 
     double[] getReward();
 
+    TAction[] getAction();
+
     TState getState();
 
 }

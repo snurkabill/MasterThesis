@@ -6,4 +6,6 @@ public interface Action {
 
     int getCountOfAllActionsFromSameEntity();
 
+    boolean isShadowAction();
+
 }

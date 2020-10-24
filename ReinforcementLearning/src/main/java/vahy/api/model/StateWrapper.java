@@ -20,13 +20,14 @@ public class StateWrapper<TAction extends Enum<TAction> & Action, TObservation e
     }
 
     public TAction[] getAllPossibleActions() {
-        return state.getAllPossibleActions();
+        return state.getAllPossibleActions(inGameEntityId);
     }
 
     public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType) {
         StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(actionType);
         var allPlayerRewards = stateRewardReturn.getReward();
-        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(inGameEntityId, stateRewardReturn.getState()), allPlayerRewards[inGameEntityId], allPlayerRewards);
+        var allObservedActionsByPlayer = stateRewardReturn.getAction();
+        return new ImmutableStateWrapperRewardReturn<>(new StateWrapper<>(inGameEntityId, stateRewardReturn.getState()), allPlayerRewards[inGameEntityId], allPlayerRewards, allObservedActionsByPlayer[inGameEntityId]);
     }
 
     public TObservation getObservation() {

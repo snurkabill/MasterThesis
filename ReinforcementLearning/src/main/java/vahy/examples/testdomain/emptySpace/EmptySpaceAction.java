@@ -27,4 +27,9 @@ public enum EmptySpaceAction implements Action {
     public int getCountOfAllActionsFromSameEntity() {
         return sameEntityActionCount;
     }
+
+    @Override
+    public boolean isShadowAction() {
+        return false;
+    }
 }

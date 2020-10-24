@@ -31,8 +31,8 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public EmptySpaceAction[] getAllPossibleActions() {
-        return innerState.getAllPossibleActions();
+    public EmptySpaceAction[] getAllPossibleActions(int inGameEntityId) {
+        return innerState.getAllPossibleActions(inGameEntityId);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     @Override
     public StateRewardReturn<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> applyAction(EmptySpaceAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new EmptySpaceRiskState(applied.getState(), random, random.nextDouble() < riskProbability, riskProbability), new double[] {random.nextDouble(), random.nextDouble()});
+        return new ImmutableStateRewardReturn<>(new EmptySpaceRiskState(applied.getState(), random, random.nextDouble() < riskProbability, riskProbability), new double[] {random.nextDouble(), random.nextDouble()}, applied.getAction());
     }
 
     @Override
