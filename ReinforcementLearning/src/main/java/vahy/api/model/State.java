@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface State<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> extends Observation {
 
-    TAction[] getAllPossibleActions();
+    TAction[] getAllPossibleActions(int inGameEntityId);
 
     int getTotalEntityCount();
 

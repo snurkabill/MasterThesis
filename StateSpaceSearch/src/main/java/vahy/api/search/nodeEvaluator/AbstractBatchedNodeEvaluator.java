@@ -72,7 +72,7 @@ public abstract class AbstractBatchedNodeEvaluator<
 
         int check = 0;
         queue.addLast(new ImmutableTuple<>(rootState, 0));
-        nodeOrder.addLast(new ImmutableTuple<>(check, new ImmutableStateWrapperRewardReturn<TAction, DoubleVector, TState>(rootState, 0.0, null)));
+        nodeOrder.addLast(new ImmutableTuple<>(check, new ImmutableStateWrapperRewardReturn<TAction, DoubleVector, TState>(rootState)));
         check++;
 
         while(!queue.isEmpty()) {

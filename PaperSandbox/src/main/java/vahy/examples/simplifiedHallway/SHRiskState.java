@@ -32,8 +32,8 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     }
 
     @Override
-    public SHAction[] getAllPossibleActions() {
-        return innerState.getAllPossibleActions();
+    public SHAction[] getAllPossibleActions(int inGameEntityId) {
+        return innerState.getAllPossibleActions(inGameEntityId);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     @Override
     public StateRewardReturn<SHAction, DoubleVector, SHRiskState> applyAction(SHAction actionType) {
         var applied = innerState.applyAction(actionType);
-        return new ImmutableStateRewardReturn<>(new SHRiskState(applied.getState()), applied.getReward());
+        return new ImmutableStateRewardReturn<>(new SHRiskState(applied.getState()), applied.getReward(), applied.getAction());
     }
 
     @Override

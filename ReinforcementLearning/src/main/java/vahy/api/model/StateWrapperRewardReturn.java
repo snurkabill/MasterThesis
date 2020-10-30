@@ -8,6 +8,8 @@ public interface StateWrapperRewardReturn<TAction extends Enum<TAction> & Action
 
     double[] getAllPlayerRewards();
 
+    TAction getObservedActionPlayed();
+
     StateWrapper<TAction, TObservation, TState> getState();
 
 }

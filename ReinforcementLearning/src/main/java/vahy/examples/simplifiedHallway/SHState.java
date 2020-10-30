@@ -25,6 +25,14 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     static final SHAction[] ENVIRONMENT_TRAP_ACTION_ARRAY = new SHAction[] {SHAction.TRAP, SHAction.NO_ACTION};
     static final SHAction[] PLAYER_ENTITY_ACTION_ARRAY = new SHAction[] {SHAction.UP, SHAction.DOWN, SHAction.RIGHT, SHAction.LEFT};
 
+    // for performance purposes
+    public static final EnumMap<SHAction, SHAction[]> OBSERVED_ACTION_MAP = new EnumMap<SHAction, SHAction[]>(SHAction.class);
+    static {
+        for (SHAction value : SHAction.values()) {
+            OBSERVED_ACTION_MAP.put(value,  new SHAction[] {value, value});
+        }
+    }
+
     private final int agentXCoordination;
     private final int agentYCoordination;
     private final SHStaticPart staticPart;
@@ -128,7 +136,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
 
 
     @Override
-    public SHAction[] getAllPossibleActions() {
+    public SHAction[] getAllPossibleActions(int inGameEntityId) {
         if(isAgentTurn) {
             return PLAYER_ENTITY_ACTION_ARRAY;
         } else {
@@ -212,12 +220,12 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                 var newRewards = ArrayUtils.cloneArray(rewards);
                 newRewards[newX][newY] = 0.0;
                 newObservation[REWARD_OBSERVATION_SHIFT + rewardId] = -1.0;
-                return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, newRewards, rewardCount, newObservation), reward);
+                return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, newRewards, rewardCount, newObservation), reward, OBSERVED_ACTION_MAP.get(action));
             } else {
-                return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, rewards, rewardsLeft, newObservation), staticPart.getNoRewardGained());
+                return new ImmutableStateRewardReturn<>(new SHState(staticPart, newX, newY, false, false, rewards, rewardsLeft, newObservation), staticPart.getNoRewardGained(), OBSERVED_ACTION_MAP.get(action));
             }
         } else {
-            return new ImmutableStateRewardReturn<>(new SHState(staticPart, agentXCoordination, agentYCoordination, false, false, rewards, rewardsLeft, newObservation), staticPart.getNoRewardGained());
+            return new ImmutableStateRewardReturn<>(new SHState(staticPart, agentXCoordination, agentYCoordination, false, false, rewards, rewardsLeft, newObservation), staticPart.getNoRewardGained(), OBSERVED_ACTION_MAP.get(action));
         }
 
     }
@@ -238,7 +246,8 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                     rewardsLeft,
                     newObservation
                     ),
-                    staticPart.getEnvironmentMovementReward());
+                    staticPart.getEnvironmentMovementReward(),
+                    OBSERVED_ACTION_MAP.get(action));
             case NO_ACTION:
                 return new ImmutableStateRewardReturn<>(new SHState(
                     staticPart,
@@ -249,7 +258,8 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
                     rewards,
                     rewardsLeft,
                     newObservation),
-                    staticPart.getEnvironmentMovementReward());
+                    staticPart.getEnvironmentMovementReward(),
+                    OBSERVED_ACTION_MAP.get(action));
             default:
                 throw EnumUtils.createExceptionForNotExpectedEnumValue(action);
         }

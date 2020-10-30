@@ -5,7 +5,8 @@
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <encoder>
             <!-- %L lowers performance, %C and %c break indentation and therefore reduce readability, normal %t is verbose -->
-            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>
+            <pattern>%-5p %m%n</pattern>
+<!--            <pattern>%d{HH:mm:ss.SSS} [%-12.12t] %-5p %m%n</pattern>-->
         </encoder>
         <append>false</append>
         <!--        <file>local/log/logFile-${bySecond}.log</file>-->

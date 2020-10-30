@@ -41,7 +41,6 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 import vahy.paperGenerics.reinforcement.PaperDataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V2;
 import vahy.paperGenerics.selector.PaperNodeSelector;
-import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
 import vahy.utils.StreamUtils;
 
@@ -69,7 +68,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
             defaultPrediction_risk[i] = 1.0 / totalActionCount;
         }
 
-        var treeExpansionCount = 10;
+        var treeExpansionCount = 100;
 
         for (int i = 0; i < playerCount; i++) {
             int policyId = i + envEntitiesCount;
@@ -161,12 +160,13 @@ public class PaperSingleVsBatchedEvaluatorTest {
 
     private List<List<Double>> runExperiment(List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyList, BomberManConfig config, long seed) {
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(10, 50);
+        var algorithmConfig = new CommonAlgorithmConfigBase(3, 20);
 
         var systemConfig = new SystemConfig(
             seed,
             false,
-            ConvergenceAssert.TEST_THREAD_COUNT,
+//            ConvergenceAssert.TEST_THREAD_COUNT,
+            1,
             false,
             50,
             0,
@@ -196,8 +196,8 @@ public class PaperSingleVsBatchedEvaluatorTest {
     @Test
     public void paperSingleVsBatchedEvaluatorTest() {
         var seedStream = StreamUtils.getSeedStream(3);
-        var trialCount = 4;
-        var playerCount = 3;
+        var trialCount = 3;
+        var playerCount = 2;
         try {
             var config = new BomberManConfig(
                 100,
@@ -219,6 +219,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
                 for (int i = 1; i <= trialCount; i++) {
                     List<List<Double>> tmp = runExperiment(getPlayerSupplierList(playerCount, config.getEnvironmentPolicyCount(), i, config), config, seed);
                     for (int j = 0; j < tmp.size(); j++) {
+                      //  System.out.println(String.join(" ", result.get(j).stream().map(x -> x.toString()).collect(Collectors.toList())) + "  " + String.join(" ", tmp.get(j).stream().map(x -> x.toString()).collect(Collectors.toList())));
                         assertIterableEquals(result.get(j), tmp.get(j));
                     }
                 }

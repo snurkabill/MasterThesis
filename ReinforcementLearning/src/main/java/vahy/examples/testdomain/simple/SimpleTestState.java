@@ -9,6 +9,7 @@ import vahy.impl.model.observation.DoubleVector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SimpleTestState implements State<SimpleTestAction, DoubleVector, SimpleTestState>, Observation {
@@ -17,6 +18,15 @@ public class SimpleTestState implements State<SimpleTestAction, DoubleVector, Si
 
     static final SimpleTestAction[] PLAYER_ACTIONS = new SimpleTestAction[] {SimpleTestAction.A, SimpleTestAction.B, SimpleTestAction.C};
     static final SimpleTestAction[] OPPONENT_ACTIONS = new SimpleTestAction[] {SimpleTestAction.X, SimpleTestAction.Y, SimpleTestAction.Z};
+
+    static final Map<SimpleTestAction, SimpleTestAction[]> observedActionMap = Map.of(
+        SimpleTestAction.A, new SimpleTestAction[] {SimpleTestAction.A, SimpleTestAction.A},
+        SimpleTestAction.B, new SimpleTestAction[] {SimpleTestAction.B, SimpleTestAction.B},
+        SimpleTestAction.C, new SimpleTestAction[] {SimpleTestAction.C, SimpleTestAction.C},
+        SimpleTestAction.X, new SimpleTestAction[] {SimpleTestAction.X, SimpleTestAction.X},
+        SimpleTestAction.Y, new SimpleTestAction[] {SimpleTestAction.Y, SimpleTestAction.Y},
+        SimpleTestAction.Z, new SimpleTestAction[] {SimpleTestAction.Z, SimpleTestAction.Z}
+        );
 
     private final boolean isPlayerTurn;
     private final List<Character> actionSequence;
@@ -28,7 +38,7 @@ public class SimpleTestState implements State<SimpleTestAction, DoubleVector, Si
 
 
     @Override
-    public SimpleTestAction[] getAllPossibleActions() {
+    public SimpleTestAction[] getAllPossibleActions(int inGameEntityId) {
         if(isPlayerTurn) {
             return PLAYER_ACTIONS;
         } else {
@@ -45,7 +55,7 @@ public class SimpleTestState implements State<SimpleTestAction, DoubleVector, Si
     public StateRewardReturn<SimpleTestAction, DoubleVector, SimpleTestState> applyAction(SimpleTestAction action) {
         List<Character> newInternalState = new ArrayList<>(actionSequence);
         newInternalState.add(action.getCharRepresentation());
-        return new ImmutableStateRewardReturn<>(new SimpleTestState(!isPlayerTurn, newInternalState), new double[] {-action.getReward(), action.getReward()});
+        return new ImmutableStateRewardReturn<>(new SimpleTestState(!isPlayerTurn, newInternalState), new double[] {-action.getReward(), action.getReward()}, observedActionMap.get(action));
     }
 
     @Override

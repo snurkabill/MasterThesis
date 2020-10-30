@@ -29,4 +29,9 @@ public enum SHAction implements Action {
     public int getCountOfAllActionsFromSameEntity() {
         return sameEntityActionCount;
     }
+
+    @Override
+    public boolean isShadowAction() {
+        return false;
+    }
 }

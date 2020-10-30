@@ -16,7 +16,7 @@ public class PaperStateWrapper<TAction extends Enum<TAction> & Action, TObservat
     @Override
     public StateWrapperRewardReturn<TAction, TObservation, TState> applyAction(TAction actionType) {
         StateRewardReturn<TAction, TObservation, TState> stateRewardReturn = state.applyAction(actionType);
-        return new ImmutableStateWrapperRewardReturn<>(new PaperStateWrapper<>(inGameEntityId, stateRewardReturn.getState()), stateRewardReturn.getReward()[inGameEntityId], stateRewardReturn.getReward());
+        return new ImmutableStateWrapperRewardReturn<>(new PaperStateWrapper<>(inGameEntityId, stateRewardReturn.getState()), stateRewardReturn.getReward()[inGameEntityId], stateRewardReturn.getReward(), stateRewardReturn.getAction()[inGameEntityId]);
     }
 
     public boolean isRiskHit() {

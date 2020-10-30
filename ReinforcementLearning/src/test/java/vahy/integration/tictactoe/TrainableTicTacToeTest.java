@@ -37,7 +37,7 @@ public class TrainableTicTacToeTest extends AbstractTicTacToeConvergenceTest {
         return JUnitParameterizedTestHelper.cartesian(
             JUnitParameterizedTestHelper.cartesian(
                 Stream.of(
-                    Arguments.of(createUniformPolicy(0), -0.82),
+                    Arguments.of(createUniformPolicy(0), -0.83),
                     Arguments.of(createAtMiddlePolicy(0), -0.83),
                     Arguments.of(createAtCornerPolicy(0), -0.83)
                 ),
