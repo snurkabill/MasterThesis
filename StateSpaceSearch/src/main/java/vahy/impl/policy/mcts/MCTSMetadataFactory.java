@@ -10,7 +10,7 @@ import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 
 public class MCTSMetadataFactory<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TObservation, MCTSMetadata, TState> {
 

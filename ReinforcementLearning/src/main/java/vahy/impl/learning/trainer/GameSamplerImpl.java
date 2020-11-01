@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     implements GameSampler<TAction, TObservation, TState> {
 
@@ -129,7 +129,8 @@ public class GameSamplerImpl<
         for (var category : this.policyCategoryList) {
             for (var entry : category.getPolicySupplierList()) {
                 var inGameEntityId = policyIdTranslationMap.getInGameEntityId(entry.getPolicyId());
-                registeredPolicyList.add(new RegisteredPolicy<>(entry.initializePolicy(stateStateWrapperInitializer.createInitialStateWrapper(inGameEntityId, initialState), policyMode), inGameEntityId));
+                var wrappedState = stateStateWrapperInitializer.createInitialStateWrapper(inGameEntityId, entry.getObservationLookbackSize(), initialState);
+                registeredPolicyList.add(new RegisteredPolicy<>(entry.initializePolicy(wrappedState, policyMode), inGameEntityId, entry.getObservationLookbackSize()));
             }
         }
         return registeredPolicyList;

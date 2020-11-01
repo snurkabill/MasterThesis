@@ -8,7 +8,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 public interface RiskAverseNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends State<TAction, TObservation, TState>> extends NodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 

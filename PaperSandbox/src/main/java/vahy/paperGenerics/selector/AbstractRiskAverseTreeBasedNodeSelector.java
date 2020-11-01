@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractRiskAverseTreeBasedNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends State<TAction, TObservation, TState>>
     extends EnvironmentSamplingNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState>

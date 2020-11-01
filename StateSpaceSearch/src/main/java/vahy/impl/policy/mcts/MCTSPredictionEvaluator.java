@@ -10,20 +10,19 @@ import vahy.utils.ImmutableTuple;
 
 public class MCTSPredictionEvaluator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends DoubleVector,
     TSearchNodeMetadata extends MCTSMetadata,
-    TState extends State<TAction, TObservation, TState>>
-    extends MCTSEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {
+    TState extends State<TAction, DoubleVector, TState>>
+    extends MCTSEvaluator<TAction, DoubleVector, TSearchNodeMetadata, TState> {
 
     private final TrainablePredictor predictor;
 
-    public MCTSPredictionEvaluator(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory, TrainablePredictor predictor) {
+    public MCTSPredictionEvaluator(SearchNodeFactory<TAction, DoubleVector, TSearchNodeMetadata, TState> searchNodeFactory, TrainablePredictor predictor) {
         super(searchNodeFactory);
         this.predictor = predictor;
     }
 
     @Override
-    protected ImmutableTuple<double[], Integer> estimateRewards(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> selectedNode) {
+    protected ImmutableTuple<double[], Integer> estimateRewards(SearchNode<TAction, DoubleVector, TSearchNodeMetadata, TState> selectedNode) {
         return new ImmutableTuple<>(predictor.apply(selectedNode.getStateWrapper().getObservation()), 1);
     }
 }

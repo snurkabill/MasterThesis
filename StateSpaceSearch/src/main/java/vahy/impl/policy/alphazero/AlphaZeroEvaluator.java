@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -15,30 +15,29 @@ import vahy.utils.RandomDistributionUtils;
 
 public class AlphaZeroEvaluator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends DoubleVector,
-    TState extends State<TAction, TObservation, TState>>
-    extends AbstractNodeEvaluator<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
+    TState extends State<TAction, DoubleVector, TState>>
+    extends AbstractNodeEvaluator<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> {
 
     protected static final Logger logger = LoggerFactory.getLogger(AlphaZeroEvaluator.class);
     protected static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
 
-    private final AlphaZeroNodeMetadataFactory<TAction, TObservation, TState> searchNodeMetadataFactory;
+    private final AlphaZeroNodeMetadataFactory<TAction, TState> searchNodeMetadataFactory;
     private final TrainablePredictor predictor;
     private final boolean isModelKnown;
-    private Predictor<TState> perfectEnvironmentPredictor;
+    private PerfectStatePredictor<TAction, DoubleVector, TState> perfectEnvironmentPredictor;
 
-    public AlphaZeroEvaluator(SearchNodeFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory,
+    public AlphaZeroEvaluator(SearchNodeFactory<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory,
                               TrainablePredictor predictor,
                               boolean isModelKnown) {
         super(searchNodeFactory);
-        this.searchNodeMetadataFactory = (AlphaZeroNodeMetadataFactory<TAction, TObservation, TState>) searchNodeFactory.getSearchNodeMetadataFactory();
+        this.searchNodeMetadataFactory = (AlphaZeroNodeMetadataFactory<TAction, TState>) searchNodeFactory.getSearchNodeMetadataFactory();
         this.predictor = predictor;
         this.isModelKnown = isModelKnown;
     }
 
     @Override
-    protected int evaluateNode_inner(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> selectedNode) {
+    protected int evaluateNode_inner(SearchNode<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> selectedNode) {
 
         var prediction = predictor.apply(selectedNode.getStateWrapper().getObservation());
         var entityInGameCount = selectedNode.getStateWrapper().getTotalEntityCount();
@@ -68,7 +67,7 @@ public class AlphaZeroEvaluator<
         return 1;
     }
 
-    private void useKnownModelPredictor(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> selectedNode, double[] distribution, TAction[] allPossibleActions) {
+    private void useKnownModelPredictor(SearchNode<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> selectedNode, double[] distribution, TAction[] allPossibleActions) {
         if (perfectEnvironmentPredictor == null) {
             perfectEnvironmentPredictor = selectedNode.getStateWrapper().getKnownModelWithPerfectObservationPredictor();
         }

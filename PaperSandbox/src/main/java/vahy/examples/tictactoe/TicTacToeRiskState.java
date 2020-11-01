@@ -1,8 +1,7 @@
 package vahy.examples.tictactoe;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -10,7 +9,7 @@ import vahy.paperGenerics.PaperState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVector, TicTacToeRiskState>, Observation {
+public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVector, TicTacToeRiskState> {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
     private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
@@ -68,9 +67,9 @@ public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVec
         return innerState.getCommonObservation(inGameEntityId);
     }
 
-    private static class PerfectTicTacToePredictor implements Predictor<TicTacToeRiskState> {
+    private static class PerfectTicTacToePredictor implements PerfectStatePredictor<TicTacToeAction, DoubleVector, TicTacToeRiskState> {
 
-        private Predictor<TicTacToeState> innerPredictor;
+        private PerfectStatePredictor<TicTacToeAction, DoubleVector, TicTacToeState> innerPredictor;
 
         @Override
         public double[] apply(TicTacToeRiskState observation) {
@@ -103,7 +102,7 @@ public class TicTacToeRiskState implements PaperState<TicTacToeAction, DoubleVec
     };
 
     @Override
-    public Predictor<TicTacToeRiskState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<TicTacToeAction, DoubleVector, TicTacToeRiskState> getKnownModelWithPerfectObservationPredictor() {
         return new PerfectTicTacToePredictor();
     }
 

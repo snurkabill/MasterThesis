@@ -5,8 +5,8 @@ import vahy.api.episode.EpisodeResultsFactory;
 import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
+import vahy.api.model.observation.Observation;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
-import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 
 import java.time.Duration;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class PaperEpisodeResultsFactory<
     TAction extends Enum<TAction> & Action,
-    TObservation extends DoubleVector,
+    TObservation extends Observation<TObservation>,
     TState extends PaperState<TAction, TObservation, TState>>
     implements EpisodeResultsFactory<TAction, TObservation, TState> {
 

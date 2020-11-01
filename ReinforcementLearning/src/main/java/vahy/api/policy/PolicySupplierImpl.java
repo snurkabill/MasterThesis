@@ -7,17 +7,19 @@ import vahy.api.model.observation.Observation;
 
 import java.util.SplittableRandom;
 
-public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>>
     implements PolicySupplier<TAction, TObservation, TState> {
 
     private final int policyId;
     private final int policyCategoryId;
+    private final int observationLookbackSize;
     private final SplittableRandom random;
     private final OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier;
 
-    public PolicySupplierImpl(int policyId, int policyCategoryId, SplittableRandom random, OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier) {
+    public PolicySupplierImpl(int policyId, int policyCategoryId, int observationLookbackSize, SplittableRandom random, OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier) {
         this.policyId = policyId;
         this.policyCategoryId = policyCategoryId;
+        this.observationLookbackSize = observationLookbackSize;
         this.random = random;
         this.outerDefPolicySupplier = outerDefPolicySupplier;
     }
@@ -30,6 +32,11 @@ public class PolicySupplierImpl<TAction extends Enum<TAction> & Action, TObserva
     @Override
     public int getPolicyCategoryId() {
         return policyCategoryId;
+    }
+
+    @Override
+    public int getObservationLookbackSize() {
+        return observationLookbackSize;
     }
 
     @Override

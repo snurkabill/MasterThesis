@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -22,16 +22,16 @@ public class AlphaZeroBatchedEvaluator<
     protected static final boolean TRACE_ENABLED = logger.isTraceEnabled();
 
 
-    private final AlphaZeroNodeMetadataFactory<TAction, DoubleVector, TState> searchNodeMetadataFactory;
+    private final AlphaZeroNodeMetadataFactory<TAction, TState> searchNodeMetadataFactory;
     private final boolean isModelKnown;
-    private Predictor<TState> perfectEnvironmentPredictor;
+    private PerfectStatePredictor<TAction, DoubleVector, TState> perfectEnvironmentPredictor;
 
     public AlphaZeroBatchedEvaluator(SearchNodeFactory<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory,
                                      TrainablePredictor predictor,
                                      int maximalEvaluationDepth,
                                      boolean isModelKnown) {
         super(searchNodeFactory, predictor, maximalEvaluationDepth);
-        this.searchNodeMetadataFactory = (AlphaZeroNodeMetadataFactory<TAction, DoubleVector, TState>) searchNodeFactory.getSearchNodeMetadataFactory();
+        this.searchNodeMetadataFactory = (AlphaZeroNodeMetadataFactory<TAction, TState>) searchNodeFactory.getSearchNodeMetadataFactory();
         this.isModelKnown = isModelKnown;
     }
 

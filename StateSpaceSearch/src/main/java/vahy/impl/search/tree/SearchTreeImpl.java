@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 public class SearchTreeImpl<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends NodeMetadata,
     TState extends State<TAction, TObservation, TState>>
     implements SearchTree<TAction, TObservation, TSearchNodeMetadata, TState> {

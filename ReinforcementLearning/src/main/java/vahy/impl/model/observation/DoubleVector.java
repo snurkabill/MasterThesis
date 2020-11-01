@@ -3,8 +3,9 @@ package vahy.impl.model.observation;
 import vahy.api.model.observation.Observation;
 
 import java.util.Arrays;
+import java.util.List;
 
-public final class DoubleVector implements Observation {
+public final class DoubleVector implements Observation<DoubleVector> {
 
     private static final double[] PRIME_NUMBERS = {
         30402457, 32582657, 37156667, 42643801, 43112609,
@@ -62,4 +63,32 @@ public final class DoubleVector implements Observation {
         return hash;
     }
 
+    @Override
+    public DoubleVector groupArrayOfObservations(DoubleVector[] observationArray) {
+        int finalLength = 0;
+        for (DoubleVector array : observationArray) {
+            finalLength += array.observedVector.length;
+        }
+
+        double[] dest = null;
+        int destPos = 0;
+
+        for (DoubleVector array : observationArray)
+        {
+            double[] observedVector = array.observedVector;
+            if (dest == null) {
+                dest = Arrays.copyOf(observedVector, finalLength);
+                destPos = observedVector.length;
+            } else {
+                System.arraycopy(observedVector, 0, dest, destPos, observedVector.length);
+                destPos += observedVector.length;
+            }
+        }
+        return new DoubleVector(dest);
+    }
+
+    @Override
+    public DoubleVector groupListOfObservations(List<DoubleVector> observationArray) {
+        return groupArrayOfObservations(observationArray.toArray(DoubleVector[]::new));
+    }
 }

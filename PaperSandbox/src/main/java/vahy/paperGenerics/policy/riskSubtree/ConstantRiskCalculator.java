@@ -8,7 +8,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 public class ConstantRiskCalculator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     implements SubtreeRiskCalculator<TAction, TObservation, TSearchNodeMetadata, TState> {

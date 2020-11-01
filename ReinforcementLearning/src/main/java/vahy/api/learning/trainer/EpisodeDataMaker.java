@@ -12,7 +12,7 @@ import java.util.List;
 
 public interface EpisodeDataMaker<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>> {
 
     List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, TObservation, TState> episodeResults);

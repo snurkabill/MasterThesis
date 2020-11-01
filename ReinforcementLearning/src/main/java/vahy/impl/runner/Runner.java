@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class Runner<
     TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 

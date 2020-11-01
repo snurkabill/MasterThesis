@@ -23,7 +23,7 @@ import java.util.EnumMap;
 import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
-public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends PaperMetadata<TAction>, TState extends PaperState<TAction, TObservation, TState>>
+public class PaperPolicySupplierImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TSearchNodeMetadata extends PaperMetadata<TAction>, TState extends PaperState<TAction, TObservation, TState>>
     implements OuterDefPolicySupplier<TAction, TObservation, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(PaperPolicySupplierImpl.class.getName());

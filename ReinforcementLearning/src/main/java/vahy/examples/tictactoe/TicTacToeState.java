@@ -2,8 +2,7 @@ package vahy.examples.tictactoe;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -12,7 +11,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState>, Observation {
+public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicTacToeState> {
 
     static final double[] PLAYER_ZERO_WON_REWARD = new double[] {1.0, -1.0};
     static final double[] PLAYER_ONE_WON_REWARD = new double[] {-1.0, 1.0};
@@ -233,7 +232,7 @@ public class TicTacToeState implements State<TicTacToeAction, DoubleVector, TicT
     }
 
     @Override
-    public Predictor<TicTacToeState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<TicTacToeAction, DoubleVector, TicTacToeState> getKnownModelWithPerfectObservationPredictor() {
         throw new UnsupportedOperationException("TicTacToe does not have fixed model");
     }
 

@@ -15,7 +15,7 @@ import java.util.SplittableRandom;
 
 public class PaperPolicyImpl<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractTreeSearchPolicy<TAction, TObservation, TSearchNodeMetadata, TState> {

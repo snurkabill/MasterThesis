@@ -6,14 +6,14 @@ import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.episode.PolicyIdTranslationMap;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.impl.model.observation.DoubleVector;
+import vahy.api.model.observation.Observation;
 
 import java.time.Duration;
 import java.util.List;
 
 public class EpisodeResultsFactoryBase<
     TAction extends Enum<TAction> & Action,
-    TObservation extends DoubleVector,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     implements EpisodeResultsFactory<TAction, TObservation, TState> {
 

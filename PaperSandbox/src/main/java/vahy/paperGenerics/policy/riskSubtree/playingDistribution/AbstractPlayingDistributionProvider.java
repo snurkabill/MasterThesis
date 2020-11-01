@@ -7,7 +7,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 public abstract class AbstractPlayingDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     implements PlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {

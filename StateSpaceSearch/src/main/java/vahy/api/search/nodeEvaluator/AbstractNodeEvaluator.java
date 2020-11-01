@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public abstract class AbstractNodeEvaluator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends BaseNodeMetadata,
     TState extends State<TAction, TObservation, TState>> implements NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {
 

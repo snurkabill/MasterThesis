@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class MCTSRolloutEvaluator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends MCTSMetadata,
     TState extends State<TAction, TObservation, TState>>
     extends MCTSEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {

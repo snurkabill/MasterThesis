@@ -6,7 +6,7 @@ import vahy.api.model.observation.Observation;
 import vahy.api.policy.PolicySupplier;
 
 import java.util.List;
-public class PolicyCategory<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
+public class PolicyCategory<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
 
     private final int categoryId;
     private final List<PolicySupplier<TAction, TObservation, TState>> policySupplierList;

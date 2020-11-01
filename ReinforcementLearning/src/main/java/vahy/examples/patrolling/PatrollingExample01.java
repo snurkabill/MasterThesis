@@ -32,25 +32,20 @@ public class PatrollingExample01 {
 
     public static void main(String[] args) {
 
-        var systemConfig = new SystemConfig(987568, true, 7, false, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
+        var systemConfig = new SystemConfig(987568, false, 7, false, 100000, 0, false, false, false, Path.of("TEST_PATH"), null);
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 1000);
+        var algorithmConfig = new CommonAlgorithmConfigBase(100, 1000);
 
         var discountFactor = 1.0;
 
+        var defenderLookbackSize = 2;
+        var attackerLookbackSize = 2;
+
         var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
-        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 0);
+        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 0, defenderLookbackSize);
         var dataAggregator = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictor = new PredictorTrainingSetup<>(0, trainablePredictor, episodeDataMaker, dataAggregator);
-
-
-
-        var trainablePredictor2 = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
-        var episodeDataMaker2 = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 1);
-        var dataAggregator2 = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-
-        var predictor2 = new PredictorTrainingSetup<>(0, trainablePredictor2, episodeDataMaker2, dataAggregator2);
 
         var supplier = new OuterDefPolicySupplier<PatrollingAction, DoubleVector, PatrollingState>() {
             @Override
@@ -62,6 +57,13 @@ public class PatrollingExample01 {
             };
         };
 
+
+        var trainablePredictor2 = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
+        var episodeDataMaker2 = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 1, attackerLookbackSize);
+        var dataAggregator2 = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+
+        var predictor2 = new PredictorTrainingSetup<>(1, trainablePredictor2, episodeDataMaker2, dataAggregator2);
+
         var supplier2 = new OuterDefPolicySupplier<PatrollingAction, DoubleVector, PatrollingState>() {
             @Override
             public Policy<PatrollingAction, DoubleVector, PatrollingState> apply(StateWrapper<PatrollingAction, DoubleVector, PatrollingState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
@@ -72,28 +74,34 @@ public class PatrollingExample01 {
             };
         };
 
+//        var attackLength = 1;
+        var attackLength = 7;
 
+        var graph = new boolean[9][];
 
-        var attackLength = 1;
-//        var attackLength = 2;
+        graph[0] = new boolean[] {true, true, false, false, true, false, false, false, false};
+        graph[1] = new boolean[] {true, true, true, false, false, false, false, false, false};
+        graph[2] = new boolean[] {false, true, true, true, false, false, false, false, false};
+        graph[3] = new boolean[] {false, false, true, true, true, false, false, false, false};
 
-        var graph = new boolean[4][];
+        graph[4] = new boolean[] {true, false, false, true, true, true, false, false, true};
 
-        graph[0] = new boolean[] {true, true, false, true};
-        graph[1] = new boolean[] {true, true, true, false};
-        graph[2] = new boolean[] {false, true, true, true};
-        graph[3] = new boolean[] {true, false, false, true};
+        graph[5] = new boolean[] {false, false, false, false, true, true, true, false, false};
+        graph[6] = new boolean[] {false, false, false, false, false, true, true, true, false};
+        graph[7] = new boolean[] {false, false, false, false, false, false, true, true, true};
+        graph[8] = new boolean[] {false, false, false, false, true, false, false, true, true};
+
 
         var patrollingConfig = new PatrollingConfig(1000, false, 0, 2, List.of(new PolicyCategoryInfo(false, 1, 2)), PolicyShuffleStrategy.NO_SHUFFLE, graph, attackLength);
 
         var policyArgumentsList = List.of(
 
 //            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(0, 1, (state, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId), List.of()),
-            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(0, 1, supplier, List.of(predictor)),
+            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(0, 1, defenderLookbackSize, supplier, List.of(predictor)),
 
 
 //            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(1, 1, (state, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId), List.of())
-            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(1, 1, supplier, List.of(predictor2))
+            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(1, 1, attackerLookbackSize, supplier2, List.of(predictor2))
         );
 
         var roundBuilder = RoundBuilder.getRoundBuilder("Patrolling", patrollingConfig, systemConfig, algorithmConfig, policyArgumentsList, PatrollingInitializer::new);

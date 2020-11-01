@@ -1,8 +1,7 @@
 package vahy.examples.simplifiedHallway;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -10,7 +9,7 @@ import vahy.paperGenerics.PaperState;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskState>, Observation {
+public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskState> {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
     private static final boolean[] RISK_HIT_ARRAY = new boolean[] {false, true};
@@ -57,9 +56,9 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
         return innerState.getCommonObservation(inGameEntityId);
     }
 
-    private static class PerfectShRiskPredictor implements Predictor<SHRiskState> {
+    private static class PerfectShRiskPredictor implements PerfectStatePredictor<SHAction, DoubleVector, SHRiskState> {
 
-        private Predictor<SHState> innerPredictor;
+        private PerfectStatePredictor<SHAction, DoubleVector, SHState> innerPredictor;
 
         @Override
         public double[] apply(SHRiskState observation) {
@@ -92,7 +91,7 @@ public class SHRiskState implements PaperState<SHAction, DoubleVector, SHRiskSta
     };
 
     @Override
-    public Predictor<SHRiskState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<SHAction, DoubleVector, SHRiskState> getKnownModelWithPerfectObservationPredictor() {
         return new PerfectShRiskPredictor();
     }
 

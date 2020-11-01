@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class Trainer<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 

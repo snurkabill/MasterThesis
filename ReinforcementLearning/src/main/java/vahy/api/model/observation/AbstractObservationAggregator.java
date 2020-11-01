@@ -6,7 +6,7 @@ import java.util.Queue;
 
 public abstract class AbstractObservationAggregator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TObservationAggregation extends ObservationAggregation>
     implements ObservationAggregator<TAction, TObservation, TObservationAggregation> {
 

@@ -2,8 +2,7 @@ package vahy.examples.testdomain.simple;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SimpleTestState implements State<SimpleTestAction, DoubleVector, SimpleTestState>, Observation {
+public class SimpleTestState implements State<SimpleTestAction, DoubleVector, SimpleTestState> {
 
     private static final int TEST_STATE_SIZE = 10;
 
@@ -93,7 +92,7 @@ public class SimpleTestState implements State<SimpleTestAction, DoubleVector, Si
     }
 
     @Override
-    public Predictor<SimpleTestState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<SimpleTestAction, DoubleVector, SimpleTestState> getKnownModelWithPerfectObservationPredictor() {
         return null;
     }
 

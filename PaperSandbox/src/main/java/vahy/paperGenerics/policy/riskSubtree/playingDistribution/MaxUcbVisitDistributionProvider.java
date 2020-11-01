@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public class MaxUcbVisitDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {

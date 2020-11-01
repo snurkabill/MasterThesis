@@ -10,7 +10,7 @@ import vahy.utils.ImmutableTuple;
 
 public abstract class MCTSEvaluator<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends MCTSMetadata,
     TState extends State<TAction, TObservation, TState>>
     extends AbstractNodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> {

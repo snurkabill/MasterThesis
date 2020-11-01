@@ -13,7 +13,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PaperEpisodeStatisticsCalculator<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
+public class PaperEpisodeStatisticsCalculator<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends PaperState<TAction, TObservation, TState>>
     implements EpisodeStatisticsCalculator<TAction, TObservation, TState, PaperEpisodeStatistics> {
 
     private final EpisodeStatisticsCalculatorBase<TAction, TObservation, TState> baseCalculator = new EpisodeStatisticsCalculatorBase<>();

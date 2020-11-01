@@ -8,7 +8,7 @@ import vahy.api.model.observation.Observation;
 
 import java.util.SplittableRandom;
 
-public abstract class RandomizedPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+public abstract class RandomizedPolicy<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>>
     implements Policy<TAction, TObservation, TState> {
 
     public static final double[] EMPTY_ARRAY = new double[0];

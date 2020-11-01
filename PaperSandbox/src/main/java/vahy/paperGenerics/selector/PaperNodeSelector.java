@@ -10,7 +10,7 @@ import java.util.SplittableRandom;
 
 public class PaperNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     extends AbstractRiskAverseTreeBasedNodeSelector<TAction, TObservation, PaperMetadata<TAction>, TState> {
 

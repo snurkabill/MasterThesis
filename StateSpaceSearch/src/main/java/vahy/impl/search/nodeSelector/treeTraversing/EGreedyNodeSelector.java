@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public class EGreedyNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends MCTSMetadata,
     TState extends State<TAction, TObservation, TState>>
     extends RandomizedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {

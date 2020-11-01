@@ -2,7 +2,7 @@ package vahy.examples.patrolling;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -14,8 +14,8 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     private static final int ATTACKER_ID = 1;
 
     private static final double[] emptyReward = new double[] {0.0, 0.0};
-    private static final double[] guardWinsReward = new double[] {1.0, -1.0};
-    private static final double[] attackerWinsReward = new double[] {-1.0, 1.0};
+    private static final double[] guardWinsReward = new double[] {1.0, 0.0};
+    private static final double[] attackerWinsReward = new double[] {0.0, 1.0};
 
     private final PatrollingStaticPart staticPart;
 
@@ -121,7 +121,19 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public DoubleVector getInGameEntityObservation(int inGameEntityId) {
-        return getCommonObservation(inGameEntityId);
+        if(inGameEntityId == GUARD_ID) {
+            return getCommonObservation(inGameEntityId);
+        } else {
+            var arr = new double[staticPart.getNodeCount() * 2 + 1];
+            arr[guardOnNodeId] = 1;
+            if(attackInProgress) {
+                arr[staticPart.getNodeCount() + attackOnNodeId] = 1;
+                arr[arr.length - 1] = attackCountDown;
+            } else {
+                arr[arr.length - 1] = -1;
+            }
+            return new DoubleVector(arr);
+        }
     }
 
     @Override
@@ -132,13 +144,18 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     }
 
     @Override
-    public Predictor<PatrollingState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<PatrollingAction, DoubleVector, PatrollingState> getKnownModelWithPerfectObservationPredictor() {
         throw new UnsupportedOperationException("PatrollingGame does not have fixed model");
     }
 
     @Override
     public String readableStringRepresentation() {
-        return "Not Implemented now";
+        return "Guard on Id: [" + guardOnNodeId + "], Attack in progress: [" + attackInProgress + "] on Id: [" + attackOnNodeId + "] remaining attack countdown: [" + attackCountDown + "]";
+    }
+
+    @Override
+    public String toString() {
+        return readableStringRepresentation();
     }
 
     @Override

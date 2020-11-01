@@ -9,7 +9,7 @@ import vahy.api.search.node.factory.SearchNodeFactory;
 
 import java.util.List;
 
-public class ExplicitSearchTreeBuilder<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>> {
+public class ExplicitSearchTreeBuilder<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>> {
 
     private final SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory;
 
