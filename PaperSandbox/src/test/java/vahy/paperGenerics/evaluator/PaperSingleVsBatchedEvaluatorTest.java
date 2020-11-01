@@ -41,6 +41,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 import vahy.paperGenerics.reinforcement.PaperDataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V2;
 import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
 import vahy.utils.StreamUtils;
 
@@ -165,8 +166,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
         var systemConfig = new SystemConfig(
             seed,
             false,
-//            ConvergenceAssert.TEST_THREAD_COUNT,
-            1,
+            ConvergenceAssert.TEST_THREAD_COUNT,
             false,
             50,
             0,
