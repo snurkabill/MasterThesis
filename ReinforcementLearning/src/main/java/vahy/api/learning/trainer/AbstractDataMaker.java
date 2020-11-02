@@ -1,7 +1,6 @@
 package vahy.api.learning.trainer;
 
 import vahy.api.episode.EpisodeResults;
-import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.model.Action;
 import vahy.api.model.State;
@@ -48,39 +47,25 @@ public abstract class AbstractDataMaker<TAction extends Enum<TAction> & Action, 
         return mutableDataSampleList;
     }
 
-    protected abstract List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples_inner(ListIterator<ImmutableTuple<EpisodeStepRecord<TAction, DoubleVector, TState>, StateWrapper<TAction, DoubleVector, TState>>> iterator, int inGameEntityId, int estimatedElementCount);
+    protected abstract List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples_inner(ListIterator<EpisodeStepRecordWithObservation<TAction, TState>> iterator, int inGameEntityId, int estimatedElementCount);
 
     @Override
     public List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples(EpisodeResults<TAction, DoubleVector, TState> episodeResults) {
         var inGameEntityId = getInGameEntityId(episodeResults);
         var episodeHistory = episodeResults.getEpisodeHistory();
         entityCount = getEntityCount(episodeResults);
-
         var filteredStates = episodeHistory.stream().filter(x -> x.getFromState().isInGame(inGameEntityId)).collect(Collectors.toList());
-        var wrappedStates = new ArrayList<StateWrapper<TAction, DoubleVector, TState>>(filteredStates.size());
+        var observations = new ArrayList<DoubleVector>(filteredStates.size());
         StateWrapper<TAction, DoubleVector, TState> previousWrapper = null;
         for (var filteredState : filteredStates) {
             var wrappedState = previousWrapper == null ?
                 new StateWrapper<>(inGameEntityId, policyObservationLookbackSize, filteredState.getFromState()) :
                 new StateWrapper<>(inGameEntityId, filteredState.getFromState(), previousWrapper);
-            wrappedStates.add(wrappedState);
+            observations.add(wrappedState.getObservation());
             previousWrapper = wrappedState;
         }
-        var zippedStates = StreamUtils.zip(filteredStates.stream(), wrappedStates.stream(), ImmutableTuple::new).collect(Collectors.toList());
+        var zippedStates = StreamUtils.zip(filteredStates.stream(), observations.stream(), EpisodeStepRecordWithObservation::new).collect(Collectors.toList());
         var iterator = zippedStates.listIterator(zippedStates.size());
-//        var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(zippedStates.size());
-//
-//        var aggregatedTotalPayoff = 0.0;
-//        while(iterator.hasPrevious()) {
-//            var previous = iterator.previous();
-//            aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getFirst().getReward()[inGameEntityId], aggregatedTotalPayoff, discountFactor);
-////            if(previous.getPolicyIdOnTurn() == playerPolicyId) {
-//            var doubleArray = new double[1];
-//            doubleArray[0] = aggregatedTotalPayoff;
-//            mutableDataSampleList.add(new ImmutableTuple<>(previous.getSecond().getObservation(), new MutableDoubleArray(doubleArray, false)));
-////            }
-//        }
-
         return resolveReverse(createEpisodeDataSamples_inner(iterator, inGameEntityId, zippedStates.size()));
     }
 

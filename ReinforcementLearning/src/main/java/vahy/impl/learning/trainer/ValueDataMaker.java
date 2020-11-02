@@ -1,11 +1,10 @@
 package vahy.impl.learning.trainer;
 
-import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.learning.trainer.AbstractDataMaker;
+import vahy.api.learning.trainer.EpisodeStepRecordWithObservation;
 import vahy.api.model.Action;
 import vahy.api.model.State;
-import vahy.api.model.StateWrapper;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleScalarRewardAggregator;
@@ -26,15 +25,15 @@ public class ValueDataMaker<TAction extends Enum<TAction> & Action, TState exten
     }
 
     @Override
-    protected List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples_inner(ListIterator<ImmutableTuple<EpisodeStepRecord<TAction, DoubleVector, TState>, StateWrapper<TAction, DoubleVector, TState>>> iterator, int inGameEntityId, int estimatedElementCount) {
+    protected List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples_inner(ListIterator<EpisodeStepRecordWithObservation<TAction, TState>> iterator, int inGameEntityId, int estimatedElementCount) {
         var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(estimatedElementCount);
         var aggregatedTotalPayoff = 0.0;
         while(iterator.hasPrevious()) {
             var previous = iterator.previous();
-            aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getFirst().getReward()[inGameEntityId], aggregatedTotalPayoff, discountFactor);
+            aggregatedTotalPayoff = DoubleScalarRewardAggregator.aggregateDiscount(previous.getEpisodeStepRecord().getReward()[inGameEntityId], aggregatedTotalPayoff, discountFactor);
             var doubleArray = new double[1];
             doubleArray[0] = aggregatedTotalPayoff;
-            mutableDataSampleList.add(new ImmutableTuple<>(previous.getSecond().getObservation(), new MutableDoubleArray(doubleArray, false)));
+            mutableDataSampleList.add(new ImmutableTuple<>(previous.getObservation(), new MutableDoubleArray(doubleArray, false)));
         }
         return mutableDataSampleList;
     }

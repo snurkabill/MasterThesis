@@ -1,10 +1,9 @@
 package vahy.paperGenerics.reinforcement.learning;
 
-import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.learning.trainer.AbstractDataMaker;
+import vahy.api.learning.trainer.EpisodeStepRecordWithObservation;
 import vahy.api.model.Action;
-import vahy.api.model.StateWrapper;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.model.reward.DoubleVectorRewardAggregator;
@@ -35,12 +34,10 @@ public abstract class AbstractPaperEpisodeDataMaker<TAction extends Enum<TAction
         }
     }
 
-    protected abstract ImmutableTuple<DoubleVector, MutableDoubleArray> createDatasample(double[] aggregatedRisk,
-                                                                                         double[] aggregatedTotalPayoff,
-                                                                                         ImmutableTuple<EpisodeStepRecord<TAction, DoubleVector, TState>, StateWrapper<TAction, DoubleVector, TState>> previous);
+    protected abstract ImmutableTuple<DoubleVector, MutableDoubleArray> createDatasample(double[] aggregatedRisk, double[] aggregatedTotalPayoff, EpisodeStepRecordWithObservation<TAction, TState> previous);
 
     @Override
-    protected List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples_inner(ListIterator<ImmutableTuple<EpisodeStepRecord<TAction, DoubleVector, TState>, StateWrapper<TAction, DoubleVector, TState>>> iterator, int inGameEntityId, int estimatedElementCount) {
+    protected List<ImmutableTuple<DoubleVector, MutableDoubleArray>> createEpisodeDataSamples_inner(ListIterator<EpisodeStepRecordWithObservation<TAction, TState>> iterator, int inGameEntityId, int estimatedElementCount) {
 
         var isRiskArrayInitialized = false;
         var aggregatedRisk = new double[entityCount];
@@ -49,10 +46,9 @@ public abstract class AbstractPaperEpisodeDataMaker<TAction extends Enum<TAction
         var mutableDataSampleList = new ArrayList<ImmutableTuple<DoubleVector, MutableDoubleArray>>(estimatedElementCount);
         while(iterator.hasPrevious()) {
             var previous = iterator.previous();
-            aggregatedTotalPayoff = DoubleVectorRewardAggregator.aggregateDiscount(previous.getFirst().getReward(), aggregatedTotalPayoff, discountFactor);
-
+            aggregatedTotalPayoff = DoubleVectorRewardAggregator.aggregateDiscount(previous.getEpisodeStepRecord().getReward(), aggregatedTotalPayoff, discountFactor);
             if(!isRiskArrayInitialized) {
-                fillRiskArray(previous.getFirst().getToState(), aggregatedRisk);
+                fillRiskArray(previous.getEpisodeStepRecord().getToState(), aggregatedRisk);
                 isRiskArrayInitialized = true;
             }
             mutableDataSampleList.add(createDatasample(aggregatedRisk, aggregatedTotalPayoff, previous));

@@ -1,9 +1,8 @@
 package vahy.paperGenerics.reinforcement.learning;
 
-import vahy.api.episode.EpisodeStepRecord;
 import vahy.api.learning.dataAggregator.DataAggregator;
+import vahy.api.learning.trainer.EpisodeStepRecordWithObservation;
 import vahy.api.model.Action;
-import vahy.api.model.StateWrapper;
 import vahy.impl.learning.model.MutableDoubleArray;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -22,26 +21,27 @@ public class PaperEpisodeDataMaker_V1<TAction extends Enum<TAction> & Action, TS
     @Override
     protected ImmutableTuple<DoubleVector, MutableDoubleArray> createDatasample(double[] aggregatedRisk,
                                                                                 double[] aggregatedTotalPayoff,
-                                                                                ImmutableTuple<EpisodeStepRecord<TAction, DoubleVector, TState>, StateWrapper<TAction, DoubleVector, TState>> previous) {
+                                                                                EpisodeStepRecordWithObservation<TAction, TState> previous) {
         if (entityCount != 2) {
             throw new IllegalStateException("Class [" + PaperEpisodeDataMaker_V1.class + "] must be used for exactly 2 game entities. Provided: [ " + entityCount + "]");
         }
-
         var doubleArray = new double[entityCount * 2 + actionCount];
-        if (previous.getFirst().getFromState().isEnvironmentEntityOnTurn()) {
-            var action = previous.getFirst().getAction();
+        var observation = previous.getObservation();
+        var step = previous.getEpisodeStepRecord();
+        if (step.getFromState().isEnvironmentEntityOnTurn()) {
+            var action = step.getAction();
             var actionId = action.ordinal();
             doubleArray[entityCount * 2 + actionId] = 1.0;
             System.arraycopy(aggregatedTotalPayoff, 0, doubleArray, 0, aggregatedTotalPayoff.length);
             System.arraycopy(aggregatedRisk, 0, doubleArray, entityCount, aggregatedTotalPayoff.length);
-            return new ImmutableTuple<>(previous.getSecond().getObservation(), new MutableDoubleArray(doubleArray, false));
+            return new ImmutableTuple<>(observation, new MutableDoubleArray(doubleArray, false));
         } else {
-            if (previous.getFirst().getPolicyIdOnTurn() == playerPolicyId) {
-                var policyArray = previous.getFirst().getPolicyStepRecord().getPolicyProbabilities();
+            if (step.getPolicyIdOnTurn() == playerPolicyId) {
+                var policyArray = step.getPolicyStepRecord().getPolicyProbabilities();
                 System.arraycopy(policyArray, 0, doubleArray, entityCount * 2, policyArray.length);
                 System.arraycopy(aggregatedTotalPayoff, 0, doubleArray, 0, aggregatedTotalPayoff.length);
                 System.arraycopy(aggregatedRisk, 0, doubleArray, entityCount, aggregatedTotalPayoff.length);
-                return new ImmutableTuple<>(previous.getSecond().getObservation(), new MutableDoubleArray(doubleArray, false));
+                return new ImmutableTuple<>(observation, new MutableDoubleArray(doubleArray, false));
             } else {
                 throw new IllegalStateException("Class [" + PaperEpisodeDataMaker_V1.class + "] can't be used for multiplayer");
             }
