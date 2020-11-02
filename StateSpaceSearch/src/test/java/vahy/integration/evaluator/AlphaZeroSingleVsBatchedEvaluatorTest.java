@@ -69,8 +69,8 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
                 new SplittableRandom(systemConfig.getRandomSeed()));
 
             var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-            var episodeDataMaker = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(playerId, totalActionCount, discountFactor);
             var dataAggregator = new ReplayBufferDataAggregator(1000);
+            var episodeDataMaker = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(playerId, totalActionCount, discountFactor, dataAggregator);
 
 
             var predictorTrainingSetup = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManState>(

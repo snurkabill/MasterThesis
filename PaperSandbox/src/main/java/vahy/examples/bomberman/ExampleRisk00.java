@@ -183,9 +183,9 @@ public class ExampleRisk00 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictor_risk = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-        var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(discountFactor, totalActionCount, policyId);
-//        var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var dataAggregator_risk = new ReplayBufferDataAggregator(1000);
+        var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor, dataAggregator_risk);
+//        var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup_risk = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManRiskState>(
             policyId,
@@ -325,9 +325,9 @@ public class ExampleRisk00 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictorMCTSEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId);
-//        var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
         var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId, dataAggregatorMCTSEval_1);
+//        var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             policyId,
@@ -355,11 +355,9 @@ public class ExampleRisk00 {
             systemConfig.getParallelThreadsCount(),
             new SplittableRandom(systemConfig.getRandomSeed()));
 
-
-        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId);
-
         var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
         var dataAggregator2 = new ReplayBufferDataAggregator(1000);
+        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId, dataAggregator2);
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(
             policyId,

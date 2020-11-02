@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated(since = "Since observationLookbacks were introduced. Needs fix")
 public class ValueMultiPolicyDataMaker<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>>
     implements EpisodeDataMaker<TAction, DoubleVector, TState> {
 

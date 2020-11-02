@@ -19,4 +19,9 @@ public class EveryVisitMonteCarloDataAggregator extends MonteCarloDataAggregator
             everyVisitSet.get(observation).addDataSample(dataSample.getDoubleArray());
         }
     }
+
+    @Override
+    public boolean requiresStatesInOrder() {
+        return false;
+    }
 }

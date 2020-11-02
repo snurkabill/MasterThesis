@@ -42,8 +42,8 @@ public class AlphaZeroSH03Test {
         }
 
         var trainablePredictor = new AlphaZeroDataTablePredictor(defaultPrediction, 0.25, totalEntityCount);
-        var episodeDataMaker = new AlphaZeroDataMaker_V1<SHAction, SHState>(playerId, totalActionCount, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new AlphaZeroDataMaker_V1<SHAction, SHState>(playerId, totalActionCount, 1, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState>(
             playerId,

@@ -55,8 +55,8 @@ public class BaseMctsTest {
         var playerOneSupplier = mctsPolicySupplier.getPolicyDefinition(0, 1, cpuct, treeExpansionCount, 1.0, rolloutCount);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, 1, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             1,

@@ -42,8 +42,8 @@ public class PatrollingExample01 {
         var attackerLookbackSize = 2;
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
-        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 0, defenderLookbackSize);
         var dataAggregator = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 0, defenderLookbackSize, dataAggregator);
 
         var predictor = new PredictorTrainingSetup<>(0, trainablePredictor, episodeDataMaker, dataAggregator);
 
@@ -59,8 +59,8 @@ public class PatrollingExample01 {
 
 
         var trainablePredictor2 = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
-        var episodeDataMaker2 = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 1, attackerLookbackSize);
         var dataAggregator2 = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker2 = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 1, attackerLookbackSize, dataAggregator2);
 
         var predictor2 = new PredictorTrainingSetup<>(1, trainablePredictor2, episodeDataMaker2, dataAggregator2);
 

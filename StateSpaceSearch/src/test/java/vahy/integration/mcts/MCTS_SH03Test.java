@@ -43,8 +43,8 @@ public class MCTS_SH03Test {
         }
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0, 0.0}, 0.25);
-        var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState>(1, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new VectorValueDataMaker<SHAction, SHState>(1, playerId, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState>(
             playerId,

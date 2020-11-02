@@ -3,6 +3,7 @@ package vahy.examples.bomberman;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
 import vahy.impl.episode.InvalidInstanceSetupException;
@@ -62,11 +63,14 @@ public class Example02 {
 
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> createPolicyArgument(double discountFactor, int policyId, int categoryId) {
         var predictor = new DataTablePredictor(new double[]{0.0});
-        var predictorTrainingSetup = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManState>(
+        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var dataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId, dataAggregator);
+
+        var predictorTrainingSetup = new PredictorTrainingSetup<>(
             policyId,
             predictor,
-            new ValueDataMaker<>(discountFactor, policyId),
-            new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>())
+            dataMaker,
+            dataAggregator
         );
 
         return new PolicyDefinition<>(

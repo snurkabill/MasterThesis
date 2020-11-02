@@ -73,13 +73,14 @@ public class TrainableTicTacToeTest extends AbstractTicTacToeConvergenceTest {
         var algorithmConfig = new CommonAlgorithmConfigBase(200, 200);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(1, 1);
+        var dataAggregator = dataAggregatorSupplier.get();
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(1, 1, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             1,
             trainablePredictor,
             episodeDataMaker,
-            dataAggregatorSupplier.get()
+            dataAggregator
         );
 
         var playerTwo = new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(

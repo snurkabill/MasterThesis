@@ -53,8 +53,8 @@ public class Example03 {
         var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManState>(actionClass, totalEntityCount, config);
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             environmentPolicyCount + 0,
@@ -66,8 +66,8 @@ public class Example03 {
 // ----------------------------------------------------------------------------------------
 
         var trainablePredictor2 = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 1);
         var dataAggregator2 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 1, dataAggregator2);
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 1,
@@ -80,8 +80,8 @@ public class Example03 {
 
 
         var trainablePredictorMCTSEval_1 = new DataTablePredictor(new double[totalEntityCount]);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 2);
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 2, dataAggregatorMCTSEval_1);
 
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 2,
@@ -92,8 +92,8 @@ public class Example03 {
 // ----------------------------------------------------------------------------------------
 
         var trainablePredictorMCTSEval_2 = new DataTablePredictor(new double[totalEntityCount]);
-        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 3);
         var dataAggregatorMCTSEval_2 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 3, dataAggregatorMCTSEval_2);
 
         var predictorTrainingSetupMCTSEval_2 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 3,
@@ -111,8 +111,8 @@ public class Example03 {
             defaultPrediction[i] = 1.0 / totalActionCount;
         }
         var trainablePredictorAlphaGoEval_1 = new AlphaZeroDataTablePredictor(defaultPrediction, 0.1, totalEntityCount);
-        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(environmentPolicyCount + 4, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(environmentPolicyCount + 4, totalActionCount, discountFactor, dataAggregatorAlphaGoEval_1);
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 4,

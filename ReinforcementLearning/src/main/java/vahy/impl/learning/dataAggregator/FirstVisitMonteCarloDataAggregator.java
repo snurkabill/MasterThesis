@@ -17,4 +17,9 @@ public class FirstVisitMonteCarloDataAggregator extends MonteCarloDataAggregator
             firstVisitSet.put(observation, dataSample);
         }
     }
+
+    @Override
+    public boolean requiresStatesInOrder() {
+        return true;
+    }
 }

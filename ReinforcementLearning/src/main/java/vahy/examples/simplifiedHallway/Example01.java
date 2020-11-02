@@ -41,8 +41,8 @@ public class Example01 {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState>(discountFactor, 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState>(discountFactor, 1, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             1,

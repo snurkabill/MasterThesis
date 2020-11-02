@@ -65,8 +65,8 @@ public class SHRiskTest {
         }
 
         var trainablePredictor = new PaperDataTablePredictorWithLr(defaultPrediction, 0.25, totalActionCount, totalEntityCount);
-        var episodeDataMaker = new PaperEpisodeDataMaker_V1<SHAction, SHRiskState>(discountFactor, totalActionCount, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new PaperEpisodeDataMaker_V1<SHAction, SHRiskState>(playerId, totalActionCount, discountFactor, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState>(
             playerId,

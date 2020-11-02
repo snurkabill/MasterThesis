@@ -12,6 +12,8 @@ public interface DataAggregator {
 
     ImmutableTuple<DoubleVector[], double[][]> getTrainingDataset();
 
+    boolean requiresStatesInOrder();
+
     // TODO: add printing and dumping dataset
 
 }

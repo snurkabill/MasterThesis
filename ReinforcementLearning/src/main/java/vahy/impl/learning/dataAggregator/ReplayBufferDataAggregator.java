@@ -44,4 +44,9 @@ public class ReplayBufferDataAggregator implements DataAggregator {
         }
         return new ImmutableTuple<>(input, output);
     }
+
+    @Override
+    public boolean requiresStatesInOrder() {
+        return false;
+    }
 }
