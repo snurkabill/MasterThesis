@@ -19,6 +19,9 @@ import vahy.impl.predictor.DataTablePredictorWithLr;
 import vahy.impl.runner.PolicyDefinition;
 
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.SplittableRandom;
@@ -92,7 +95,24 @@ public class PatrollingExample01 {
         graph[8] = new boolean[] {false, false, false, false, true, false, false, true, true};
 
 
-        var patrollingConfig = new PatrollingConfig(1000, false, 0, 2, List.of(new PolicyCategoryInfo(false, 1, 2)), PolicyShuffleStrategy.NO_SHUFFLE, graph, attackLength);
+        var moveCostMatrix = new int[graph.length][];
+        for (int i = 0; i < moveCostMatrix.length; i++) {
+            moveCostMatrix[i] = new int[graph[i].length];
+            Arrays.fill(moveCostMatrix[i], 1);
+        }
+        var isTargetSet = new HashSet<Integer>();
+        var attackLengthMap = new HashMap<Integer, Integer>();
+        var attackCostMap = new HashMap<Integer, Integer>();
+
+        for (int i = 0; i < graph.length; i++) {
+            isTargetSet.add(i);
+            attackLengthMap.put(i, attackLength);
+            attackCostMap.put(i, 1);
+        }
+
+        var graphDef = new GraphDef(graph, moveCostMatrix, isTargetSet, attackLengthMap, attackCostMap);
+
+        var patrollingConfig = new PatrollingConfig(1000, false, 0, 2, List.of(new PolicyCategoryInfo(false, 1, 2)), PolicyShuffleStrategy.NO_SHUFFLE, graphDef);
 
         var policyArgumentsList = List.of(
 

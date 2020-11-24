@@ -14,8 +14,8 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     private static final int ATTACKER_ID = 1;
 
     private static final double[] emptyReward = new double[] {0.0, 0.0};
-    private static final double[] guardWinsReward = new double[] {1.0, 0.0};
-    private static final double[] attackerWinsReward = new double[] {0.0, 1.0};
+//    private static final double[] guardWinsReward = new double[] {1.0, 0.0};
+//    private static final double[] attackerWinsReward = new double[] {0.0, 1.0};
 
     private final PatrollingStaticPart staticPart;
 
@@ -67,11 +67,13 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     }
 
     private double[] resolveReward(int attackCountDown, int attackOnNodeId, int guardOnNodeId) {
-        if(attackCountDown == 0) {
-            return attackerWinsReward;
+        if(attackCountDown <= 0) {
+            var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
+            return new double[] {-cost, cost};
         }
         if(attackOnNodeId == guardOnNodeId) {
-            return guardWinsReward;
+            var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
+            return new double[] {cost, -cost};
         }
         return emptyReward;
     }
@@ -79,12 +81,12 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     @Override
     public StateRewardReturn<PatrollingAction, DoubleVector, PatrollingState> applyAction(PatrollingAction actionType) {
 
-        var newAttackCountDown = attackInProgress && guardOnTurn ? attackCountDown - 1 : attackCountDown;
 
         if(actionType == PatrollingAction.WAIT) {
             if(guardOnTurn) {
                 throw new IllegalStateException("Guard can't play wait action");
             }
+            var newAttackCountDown = attackCountDown;
             return new ImmutableStateRewardReturn<>(
                 new PatrollingState(staticPart, guardOnNodeId, newAttackCountDown, attackInProgress, attackOnNodeId, !guardOnTurn),
                 resolveReward(newAttackCountDown, attackOnNodeId, guardOnNodeId),
@@ -100,6 +102,8 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
                 throw new IllegalStateException("Discrepancy");
             }
             var moveToId = actionType.getLocalIndex();
+            var moveTimeCost = staticPart.getMoveTimeCost(guardOnNodeId, moveToId);
+            var newAttackCountDown = attackInProgress && guardOnTurn ? attackCountDown - moveTimeCost : attackCountDown;
             return new ImmutableStateRewardReturn<>(
                 new PatrollingState(staticPart, moveToId, newAttackCountDown, attackInProgress, attackOnNodeId, !guardOnTurn),
                 resolveReward(newAttackCountDown, attackOnNodeId, moveToId),
@@ -109,11 +113,11 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
             if(!actionType.isAttackerTrueAction()) {
                 throw new IllegalStateException("Discrepancy");
             }
-
             var attackToId = actionType.getLocalIndex();
+            var attackLength = staticPart.getAttackLength(attackToId);
             return new ImmutableStateRewardReturn<>(
-                new PatrollingState(staticPart, guardOnNodeId, staticPart.getAttackLength(), true, attackToId, !guardOnTurn),
-                resolveReward(staticPart.getAttackLength(), attackToId, guardOnNodeId),
+                new PatrollingState(staticPart, guardOnNodeId, attackLength, true, attackToId, !guardOnTurn),
+                resolveReward(attackLength, attackToId, guardOnNodeId),
                 new PatrollingAction[] {actionType, actionType}
             );
         }
@@ -185,6 +189,6 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public boolean isFinalState() {
-        return (attackCountDown == 0) || (attackInProgress && attackOnNodeId == guardOnNodeId);
+        return (attackCountDown <= 0) || (attackInProgress && attackOnNodeId == guardOnNodeId);
     }
 }

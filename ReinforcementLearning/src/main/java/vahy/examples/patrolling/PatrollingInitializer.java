@@ -13,7 +13,7 @@ public class PatrollingInitializer extends AbstractInitialStateSupplier<Patrolli
 
     protected PatrollingInitializer(PatrollingConfig problemConfig, SplittableRandom random) {
         super(problemConfig, random);
-        this.staticPart = new PatrollingStaticPart(problemConfig.getGraph(), problemConfig.getAttackLength());
+        this.staticPart = new PatrollingStaticPart(problemConfig.getGraph());
     }
 
     @Override
