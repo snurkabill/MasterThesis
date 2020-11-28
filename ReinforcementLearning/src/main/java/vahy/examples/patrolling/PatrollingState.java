@@ -10,11 +10,11 @@ import java.util.List;
 
 public class PatrollingState implements State<PatrollingAction, DoubleVector, PatrollingState> {
 
-    private static final int GUARD_ID = 0;
-    private static final int ATTACKER_ID = 1;
+    public static final int DEFENDER_ID = 0;
+    public static final int ATTACKER_ID = 1;
 
     private static final double[] emptyReward = new double[] {0.0, 0.0};
-//    private static final double[] guardWinsReward = new double[] {1.0, 0.0};
+//    private static final double[] defenderWinsReward = new double[] {1.0, 0.0};
 //    private static final double[] attackerWinsReward = new double[] {0.0, 1.0};
 
     private final PatrollingStaticPart staticPart;
@@ -23,34 +23,34 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     private final double attackCountDown;
     private final int attackOnNodeId;
 
-    private final boolean guardOnTurn;
-    private final int guardOnNodeId;
+    private final boolean defenderOnTurn;
+    private final int defenderOnNodeId;
 
 
-    public PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId) {
-        this(staticPart, guardOnNodeId, Double.MAX_VALUE, false, Integer.MIN_VALUE, true);
+    public PatrollingState(PatrollingStaticPart staticPart, int defenderOnNodeId) {
+        this(staticPart, defenderOnNodeId, Double.MAX_VALUE, false, Integer.MIN_VALUE, true);
     }
 
-    private PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId, double attackCountDown, boolean attackInProgress, int attackOnNodeId, boolean guardOnTurn) {
-        this.guardOnNodeId = guardOnNodeId;
+    private PatrollingState(PatrollingStaticPart staticPart, int defenderOnNodeId, double attackCountDown, boolean attackInProgress, int attackOnNodeId, boolean defenderOnTurn) {
+        this.defenderOnNodeId = defenderOnNodeId;
         this.staticPart = staticPart;
         this.attackCountDown = attackCountDown;
         this.attackInProgress = attackInProgress;
         this.attackOnNodeId = attackOnNodeId;
-        this.guardOnTurn = guardOnTurn;
+        this.defenderOnTurn = defenderOnTurn;
     }
 
     @Override
     public PatrollingAction[] getAllPossibleActions(int inGameEntityId) {
-        if(inGameEntityId == GUARD_ID) {
-            if(guardOnTurn) {
-                return staticPart.getPossibleMoveArray(guardOnNodeId);
+        if(inGameEntityId == DEFENDER_ID) {
+            if(defenderOnTurn) {
+                return staticPart.getPossibleMoveArray(defenderOnNodeId);
             } else {
                 return staticPart.getPossibleAttackArray();
             }
         } else {
-            if(guardOnTurn) {
-                return staticPart.getPossibleMoveArray(guardOnNodeId);
+            if(defenderOnTurn) {
+                return staticPart.getPossibleMoveArray(defenderOnNodeId);
             } else {
                 if(attackInProgress) {
                     return new PatrollingAction[] {PatrollingAction.WAIT};
@@ -66,12 +66,12 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
         return 2;
     }
 
-    private double[] resolveReward(double attackCountDown, int attackOnNodeId, int guardOnNodeId) {
+    private double[] resolveReward(double attackCountDown, int attackOnNodeId, int defenderOnNodeId) {
         if(attackCountDown <= 0.0) {
             var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
             return new double[] {-cost, cost};
         }
-        if(attackOnNodeId == guardOnNodeId) {
+        if(attackOnNodeId == defenderOnNodeId) {
             return new double[] {1, -1};
         }
         return emptyReward;
@@ -82,13 +82,13 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
 
         if(actionType == PatrollingAction.WAIT) {
-            if(guardOnTurn) {
-                throw new IllegalStateException("Guard can't play wait action");
+            if(defenderOnTurn) {
+                throw new IllegalStateException("defender can't play wait action");
             }
             var newAttackCountDown = attackCountDown;
             return new ImmutableStateRewardReturn<>(
-                new PatrollingState(staticPart, guardOnNodeId, newAttackCountDown, attackInProgress, attackOnNodeId, !guardOnTurn),
-                resolveReward(newAttackCountDown, attackOnNodeId, guardOnNodeId),
+                new PatrollingState(staticPart, defenderOnNodeId, newAttackCountDown, attackInProgress, attackOnNodeId, !defenderOnTurn),
+                resolveReward(newAttackCountDown, attackOnNodeId, defenderOnNodeId),
                 new PatrollingAction[] {PatrollingAction.SHADOW, actionType}
             );
         }
@@ -96,15 +96,15 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
             throw new IllegalStateException("This should never happen. We will see.");
         }
 
-        if(guardOnTurn) {
+        if(defenderOnTurn) {
             if(actionType.isAttackerTrueAction()) {
                 throw new IllegalStateException("Discrepancy");
             }
             var moveToId = actionType.getLocalIndex();
-            var moveTimeCost = staticPart.getMoveTimeCost(guardOnNodeId, moveToId);
-            var newAttackCountDown = attackInProgress && guardOnTurn ? attackCountDown - moveTimeCost : attackCountDown;
+            var moveTimeCost = staticPart.getMoveTimeCost(defenderOnNodeId, moveToId);
+            var newAttackCountDown = attackInProgress && defenderOnTurn ? attackCountDown - moveTimeCost : attackCountDown;
             return new ImmutableStateRewardReturn<>(
-                new PatrollingState(staticPart, moveToId, newAttackCountDown, attackInProgress, attackOnNodeId, !guardOnTurn),
+                new PatrollingState(staticPart, moveToId, newAttackCountDown, attackInProgress, attackOnNodeId, !defenderOnTurn),
                 resolveReward(newAttackCountDown, attackOnNodeId, moveToId),
                 new PatrollingAction[] {actionType, actionType}
             );
@@ -115,8 +115,8 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
             var attackToId = actionType.getLocalIndex();
             var attackLength = staticPart.getAttackLength(attackToId);
             return new ImmutableStateRewardReturn<>(
-                new PatrollingState(staticPart, guardOnNodeId, attackLength, true, attackToId, !guardOnTurn),
-                resolveReward(attackLength, attackToId, guardOnNodeId),
+                new PatrollingState(staticPart, defenderOnNodeId, attackLength, true, attackToId, !defenderOnTurn),
+                resolveReward(attackLength, attackToId, defenderOnNodeId),
                 new PatrollingAction[] {actionType, actionType}
             );
         }
@@ -124,12 +124,12 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public DoubleVector getInGameEntityObservation(int inGameEntityId) {
-        if(inGameEntityId == GUARD_ID) {
+        if(inGameEntityId == DEFENDER_ID) {
             return getCommonObservation(inGameEntityId);
         } else {
             var arr = new double[staticPart.getNodeCount() * 2 + 2];
-            arr[guardOnNodeId] = 1;
-            arr[staticPart.getNodeCount()] = guardOnTurn ? 1.0 : 0.0;
+            arr[defenderOnNodeId] = 1;
+            arr[staticPart.getNodeCount()] = defenderOnTurn ? 1.0 : 0.0;
             if(attackInProgress) {
                 arr[staticPart.getNodeCount() + attackOnNodeId + 1] = 1;
                 arr[arr.length - 1] = 1;
@@ -143,8 +143,8 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
         var arr = new double[staticPart.getNodeCount() + 1];
-        arr[guardOnNodeId] = 1;
-        arr[arr.length - 1] = guardOnTurn ? 1.0 : 0.0;
+        arr[defenderOnNodeId] = 1;
+        arr[arr.length - 1] = defenderOnTurn ? 1.0 : 0.0;
         return new DoubleVector(arr);
     }
 
@@ -155,7 +155,7 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public String readableStringRepresentation() {
-        return "Guard on Id: [" + guardOnNodeId + "], Attack in progress: [" + attackInProgress + "] on Id: [" + attackOnNodeId + "] remaining attack countdown: [" + attackCountDown + "]";
+        return "defender on Id: [" + defenderOnNodeId + "], Attack in progress: [" + attackInProgress + "] on Id: [" + attackOnNodeId + "] remaining attack countdown: [" + attackCountDown + "]";
     }
 
     @Override
@@ -175,7 +175,7 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public int getInGameEntityIdOnTurn() {
-        return guardOnTurn ? GUARD_ID : ATTACKER_ID;
+        return defenderOnTurn ? DEFENDER_ID : ATTACKER_ID;
     }
 
     @Override
@@ -190,6 +190,6 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public boolean isFinalState() {
-        return (attackCountDown <= 0) || (attackInProgress && attackOnNodeId == guardOnNodeId);
+        return (attackCountDown <= 0) || (attackInProgress && attackOnNodeId == defenderOnNodeId);
     }
 }

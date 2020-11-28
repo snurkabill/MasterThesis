@@ -52,15 +52,15 @@ public class PatrollingStaticPart {
         return possibleAttackArray;
     }
 
-    public PatrollingAction[] getPossibleMoveArray(int guardOnNodeId) {
-        var arr = possibleMoves[guardOnNodeId];
+    public PatrollingAction[] getPossibleMoveArray(int defenderOnNodeId) {
+        var arr = possibleMoves[defenderOnNodeId];
         if(arr == null) {
             var list = new ArrayList<PatrollingAction>(graphRepresentation.getConnectionMatrix().length);
             for (PatrollingAction patrollingAction : possibleMoveArray) {
                 if(patrollingAction.getLocalIndex() >= graphRepresentation.getConnectionMatrix().length) {
                     break;
                 } else {
-                    if(graphRepresentation.getConnectionMatrix()[guardOnNodeId][patrollingAction.getLocalIndex()]) {
+                    if(graphRepresentation.getConnectionMatrix()[defenderOnNodeId][patrollingAction.getLocalIndex()]) {
                         list.add(patrollingAction);
                     }
                 }
@@ -68,8 +68,8 @@ public class PatrollingStaticPart {
             if(list.isEmpty()) {
                 throw new IllegalStateException("there must be at least one node where to go. Discrepancy");
             }
-            possibleMoves[guardOnNodeId] = list.toArray(PatrollingAction[]::new);
-            return possibleMoves[guardOnNodeId];
+            possibleMoves[defenderOnNodeId] = list.toArray(PatrollingAction[]::new);
+            return possibleMoves[defenderOnNodeId];
         } else {
             return arr;
         }

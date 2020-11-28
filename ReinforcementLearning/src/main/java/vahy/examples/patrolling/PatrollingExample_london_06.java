@@ -9,62 +9,96 @@ import vahy.api.policy.OuterDefPolicySupplier;
 import vahy.api.policy.Policy;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
-import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
+import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.RandomizedValuePolicy;
 import vahy.impl.policy.ValuePolicy;
-import vahy.impl.predictor.DataTablePredictorWithLr;
+import vahy.impl.predictor.TrainableApproximator;
+import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
+import vahy.tensorflow.TFHelper;
+import vahy.tensorflow.TFModelImproved;
 
+import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.SplittableRandom;
 
 public class PatrollingExample_london_06 {
 
-
     private PatrollingExample_london_06() {
-
     }
 
-    public static void main(String[] args) {
+    public static PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState> getDefenderPolicy(PatrollingConfig patrollingConfig, SystemConfig systemConfig, int defenderLookbackSize) throws IOException, InterruptedException {
 
-        var systemConfig = new SystemConfig(987568, false, 7, true, 10_000, 1000, true, false, false, Path.of("TEST_PATH"), null);
+        double discountFactor = 1.0;
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(10000, 1000);
+        var sampleState = new PatrollingInitializer(patrollingConfig, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
+        var modelInputSize = new StateWrapper<>(PatrollingState.DEFENDER_ID, defenderLookbackSize, sampleState).getObservation().getObservedVector().length;
 
-        var discountFactor = 1.0;
+        var path = Paths.get("PythonScripts", "tensorflow_models", "patrollingExample_london_06", "create_value_model_london_06.py");
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
+        var tfModel = new TFModelImproved(
+            modelInputSize,
+            1,
+            1024,
+            1,
+            0.8,
+            0.001,
+            tfModelAsBytes,
+            systemConfig.getParallelThreadsCount(),
+            new SplittableRandom(systemConfig.getRandomSeed()));
 
-        var defenderLookbackSize = 1;
-        var attackerLookbackSize = 1;
 
-        var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.001);
-        var dataAggregator = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 0, defenderLookbackSize, dataAggregator);
+        var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
+        var dataAggregator = new ReplayBufferDataAggregator(100000);
+        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, PatrollingState.DEFENDER_ID, defenderLookbackSize, dataAggregator);
 
-        var predictor = new PredictorTrainingSetup<>(0, trainablePredictor, episodeDataMaker, dataAggregator);
+        var predictor = new PredictorTrainingSetup<>(PatrollingState.DEFENDER_ID, trainablePredictor, episodeDataMaker, dataAggregator);
 
         var supplier = new OuterDefPolicySupplier<PatrollingAction, DoubleVector, PatrollingState>() {
             @Override
             public Policy<PatrollingAction, DoubleVector, PatrollingState> apply(StateWrapper<PatrollingAction, DoubleVector, PatrollingState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
                 if (policyMode == PolicyMode.INFERENCE) {
-                    return new RandomizedValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor, 0.0);
+                    return new RandomizedValuePolicy<>(random.split(), policyId, trainablePredictor, 0.0);
                 }
-                return new RandomizedValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor, 0.01);
+                return new RandomizedValuePolicy<>(random.split(), policyId, trainablePredictor, 0.1);
             };
         };
+        return new PolicyDefinition<>(PatrollingState.DEFENDER_ID, 1, defenderLookbackSize, supplier, List.of(predictor));
+    }
+
+    public static PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState> getAttackerPolicy(PatrollingConfig patrollingConfig, SystemConfig systemConfig, int attackerLookbackSize) throws IOException, InterruptedException {
+
+        double discountFactor = 1.0;
+
+        var sampleState = new PatrollingInitializer(patrollingConfig, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
+        var modelInputSize = new StateWrapper<>(PatrollingState.ATTACKER_ID, attackerLookbackSize, sampleState).getObservation().getObservedVector().length;
+
+        var path = Paths.get("PythonScripts", "tensorflow_models", "patrollingExample_london_06", "create_value_model_london_06.py");
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
+        var tfModel = new TFModelImproved(
+            modelInputSize,
+            1,
+            1024,
+            1,
+            0.8,
+            0.001,
+            tfModelAsBytes,
+            systemConfig.getParallelThreadsCount(),
+            new SplittableRandom(systemConfig.getRandomSeed()));
 
 
-        var trainablePredictor2 = new DataTablePredictorWithLr(new double[] {0.0}, 0.001);
-        var dataAggregator2 = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        var episodeDataMaker2 = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, 1, attackerLookbackSize, dataAggregator2);
+        var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
+        var dataAggregator2 = new ReplayBufferDataAggregator(100000);
+        var episodeDataMaker2 = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, PatrollingState.ATTACKER_ID, attackerLookbackSize, dataAggregator2);
 
-        var predictor2 = new PredictorTrainingSetup<>(1, trainablePredictor2, episodeDataMaker2, dataAggregator2);
+        var predictor2 = new PredictorTrainingSetup<>(PatrollingState.ATTACKER_ID, trainablePredictor2, episodeDataMaker2, dataAggregator2);
 
         var supplier2 = new OuterDefPolicySupplier<PatrollingAction, DoubleVector, PatrollingState>() {
             @Override
@@ -72,14 +106,31 @@ public class PatrollingExample_london_06 {
                 if (policyMode == PolicyMode.INFERENCE) {
                     return new ValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor2, 0.0);
                 }
-                return new ValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor2, 0.01);
+                return new ValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor2, 0.1);
             };
         };
 
-//        var attackLength = 1;
-//        var attackLength = 7;
+        return new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(PatrollingState.ATTACKER_ID, 1, attackerLookbackSize, supplier2, List.of(predictor2));
+    }
 
-        var nodeCount = 6;
+
+
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        var systemConfig = new SystemConfig(
+            987568,
+            false,
+            7,
+            true,
+            10_000,
+            1000,
+            true,
+            false,
+            false,
+            Path.of("TEST_PATH"),
+            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
+
+        var algorithmConfig = new CommonAlgorithmConfigBase(10000, 100);
 
         var moveCostMatrix = new double[][] {
             new double[] {-100.0, 1622.34, 2206.24, 3431.17, 2758.20, 1084.68},
@@ -113,19 +164,16 @@ public class PatrollingExample_london_06 {
         }
 
         var graphDef = new GraphDef(graph, moveCostMatrix, isTargetSet, attackLengthMap, attackCostMap);
-
         var patrollingConfig = new PatrollingConfig(1000, false, 0, 2, List.of(new PolicyCategoryInfo(false, 1, 2)), PolicyShuffleStrategy.NO_SHUFFLE, graphDef);
 
+        var defenderLookbackSize = 5;
+        var attackerLookbackSize = 5;
+
+
         var policyArgumentsList = List.of(
-
-//            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(0, 1, (state, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId), List.of()),
-            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(0, 1, defenderLookbackSize, supplier, List.of(predictor)),
-
-
-//            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(1, 1, (state, policyMode, policyId, random) -> new UniformRandomWalkPolicy<>(random, policyId), List.of())
-            new PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState>(1, 1, attackerLookbackSize, supplier2, List.of(predictor2))
+            getDefenderPolicy(patrollingConfig, systemConfig, defenderLookbackSize),
+            getAttackerPolicy(patrollingConfig, systemConfig, attackerLookbackSize)
         );
-
 
 
 //        var statsCalculator = new EpisodeStatisticsCalculatorBase<>();
@@ -140,8 +188,8 @@ public class PatrollingExample_london_06 {
         var roundBuilder = RoundBuilder.getRoundBuilder("Patrolling", patrollingConfig, systemConfig, algorithmConfig, policyArgumentsList, PatrollingInitializer::new);
         var result = roundBuilder.execute();
 
-        var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(0);
-        var playerTwoResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(1);
+        var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(PatrollingState.DEFENDER_ID);
+        var playerTwoResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(PatrollingState.ATTACKER_ID);
 
         System.out.println("Defender: " + playerOneResult);
         System.out.println("Attacker: " + playerTwoResult);
