@@ -36,11 +36,11 @@ public class PatrollingStaticPart {
         return graphRepresentation.getConnectionMatrix();
     }
 
-    public int getMoveTimeCost(int fromNodeId, int toNodeId) {
+    public double getMoveTimeCost(int fromNodeId, int toNodeId) {
         return graphRepresentation.getMoveCostMatrix()[fromNodeId][toNodeId];
    }
 
-    public int getAttackLength(int nodeId) {
+    public double getAttackLength(int nodeId) {
         return graphRepresentation.getAttackLength(nodeId);
     }
 

@@ -6,13 +6,13 @@ import java.util.Set;
 public class GraphDef {
 
     private final boolean[][] connectionMatrix;
-    private final int[][] moveCostMatrix;
+    private final double[][] moveCostMatrix;
 
     private final Set<Integer> isTargetSet;
-    private final Map<Integer, Integer> attackLengthMap;
-    private final Map<Integer, Integer> attackCostMap;
+    private final Map<Integer, Double> attackLengthMap;
+    private final Map<Integer, Double> attackCostMap;
 
-    public GraphDef(boolean[][] connectionMatrix, int[][] moveCostMatrix, Set<Integer> isTargetSet, Map<Integer, Integer> attackLengthMap, Map<Integer, Integer> attackCostMap) {
+    public GraphDef(boolean[][] connectionMatrix, double[][] moveCostMatrix, Set<Integer> isTargetSet, Map<Integer, Double> attackLengthMap, Map<Integer, Double> attackCostMap) {
         this.connectionMatrix = connectionMatrix;
         this.moveCostMatrix = moveCostMatrix;
         this.isTargetSet = isTargetSet;
@@ -24,7 +24,7 @@ public class GraphDef {
         return connectionMatrix;
     }
 
-    public int[][] getMoveCostMatrix() {
+    public double[][] getMoveCostMatrix() {
         return moveCostMatrix;
     }
 
@@ -32,11 +32,11 @@ public class GraphDef {
         return isTargetSet.contains(nodeId);
     }
 
-    public int getAttackLength(int nodeId) {
+    public double getAttackLength(int nodeId) {
         return attackLengthMap.get(nodeId);
     }
 
-    public int getAttackCost(int nodeId) {
+    public double getAttackCost(int nodeId) {
         return attackCostMap.get(nodeId);
     }
 }

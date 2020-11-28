@@ -58,7 +58,6 @@ public final class DoubleVector implements Observation<DoubleVector> {
 //            for (int i = 0; i < doubleArrayForHash.length; i++) {
 //                doubleArrayForHash[i] = observedVector[i] * PRIME_NUMBERS[i % PRIME_NUMBERS.length];
 //            }
-//            this.hash = Arrays.hashCode(doubleArrayForHash);
             this.hash = Arrays.hashCode(observedVector);
             this.isHashCalculated = true;
         }

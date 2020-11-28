@@ -28,7 +28,6 @@ import java.util.SplittableRandom;
 
 public class PatrollingExample01 {
 
-
     private PatrollingExample01() {
 
     }
@@ -41,8 +40,8 @@ public class PatrollingExample01 {
 
         var discountFactor = 1.0;
 
-        var defenderLookbackSize = 2;
-        var attackerLookbackSize = 2;
+        var defenderLookbackSize = 5;
+        var attackerLookbackSize = 5;
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.1);
         var dataAggregator = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
@@ -78,7 +77,7 @@ public class PatrollingExample01 {
         };
 
 //        var attackLength = 1;
-        var attackLength = 7;
+        var attackLength = 7.0;
 
         var graph = new boolean[9][];
 
@@ -95,19 +94,19 @@ public class PatrollingExample01 {
         graph[8] = new boolean[] {false, false, false, false, true, false, false, true, true};
 
 
-        var moveCostMatrix = new int[graph.length][];
+        var moveCostMatrix = new double[graph.length][];
         for (int i = 0; i < moveCostMatrix.length; i++) {
-            moveCostMatrix[i] = new int[graph[i].length];
-            Arrays.fill(moveCostMatrix[i], 1);
+            moveCostMatrix[i] = new double[graph[i].length];
+            Arrays.fill(moveCostMatrix[i], 1.0);
         }
         var isTargetSet = new HashSet<Integer>();
-        var attackLengthMap = new HashMap<Integer, Integer>();
-        var attackCostMap = new HashMap<Integer, Integer>();
+        var attackLengthMap = new HashMap<Integer, Double>();
+        var attackCostMap = new HashMap<Integer, Double>();
 
         for (int i = 0; i < graph.length; i++) {
             isTargetSet.add(i);
             attackLengthMap.put(i, attackLength);
-            attackCostMap.put(i, 1);
+            attackCostMap.put(i, 1.0);
         }
 
         var graphDef = new GraphDef(graph, moveCostMatrix, isTargetSet, attackLengthMap, attackCostMap);

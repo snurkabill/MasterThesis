@@ -30,7 +30,8 @@ public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservati
 
     public PolicyDefinition(int policyId,
                             int categoryId,
-                            int observationLookbackSize, OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier,
+                            int observationLookbackSize,
+                            OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier,
                             List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList) {
         this.policyId = policyId;
         this.categoryId = categoryId;

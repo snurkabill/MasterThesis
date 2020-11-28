@@ -58,7 +58,7 @@ public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, Em
 
     @Override
     public DoubleVector getCommonObservation(int playerId) {
-        return FIXED_OBSERVATION;
+        return new DoubleVector(new double[] {changeTurn ? 1.0 : 0.0, isPlayerTurn ? 1.0 : 0.0});
     }
 
     @Override

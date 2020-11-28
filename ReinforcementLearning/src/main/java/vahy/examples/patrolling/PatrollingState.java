@@ -20,7 +20,7 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     private final PatrollingStaticPart staticPart;
 
     private final boolean attackInProgress;
-    private final int attackCountDown;
+    private final double attackCountDown;
     private final int attackOnNodeId;
 
     private final boolean guardOnTurn;
@@ -28,10 +28,10 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
 
     public PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId) {
-        this(staticPart, guardOnNodeId, Integer.MAX_VALUE, false, Integer.MIN_VALUE, true);
+        this(staticPart, guardOnNodeId, Double.MAX_VALUE, false, Integer.MIN_VALUE, true);
     }
 
-    private PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId, int attackCountDown, boolean attackInProgress, int attackOnNodeId, boolean guardOnTurn) {
+    private PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId, double attackCountDown, boolean attackInProgress, int attackOnNodeId, boolean guardOnTurn) {
         this.guardOnNodeId = guardOnNodeId;
         this.staticPart = staticPart;
         this.attackCountDown = attackCountDown;
@@ -66,14 +66,13 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
         return 2;
     }
 
-    private double[] resolveReward(int attackCountDown, int attackOnNodeId, int guardOnNodeId) {
-        if(attackCountDown <= 0) {
+    private double[] resolveReward(double attackCountDown, int attackOnNodeId, int guardOnNodeId) {
+        if(attackCountDown <= 0.0) {
             var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
             return new double[] {-cost, cost};
         }
         if(attackOnNodeId == guardOnNodeId) {
-            var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
-            return new double[] {cost, -cost};
+            return new double[] {1, -1};
         }
         return emptyReward;
     }
@@ -128,11 +127,12 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
         if(inGameEntityId == GUARD_ID) {
             return getCommonObservation(inGameEntityId);
         } else {
-            var arr = new double[staticPart.getNodeCount() * 2 + 1];
+            var arr = new double[staticPart.getNodeCount() * 2 + 2];
             arr[guardOnNodeId] = 1;
+            arr[staticPart.getNodeCount()] = guardOnTurn ? 1.0 : 0.0;
             if(attackInProgress) {
-                arr[staticPart.getNodeCount() + attackOnNodeId] = 1;
-                arr[arr.length - 1] = attackCountDown;
+                arr[staticPart.getNodeCount() + attackOnNodeId + 1] = 1;
+                arr[arr.length - 1] = 1;
             } else {
                 arr[arr.length - 1] = -1;
             }
@@ -142,8 +142,9 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
-        var arr = new double[staticPart.getNodeCount()];
+        var arr = new double[staticPart.getNodeCount() + 1];
         arr[guardOnNodeId] = 1;
+        arr[arr.length - 1] = guardOnTurn ? 1.0 : 0.0;
         return new DoubleVector(arr);
     }
 
