@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 public class PaperEpisodeResults<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends PaperState<TAction, TObservation, TState>>
     implements EpisodeResults<TAction, TObservation, TState> {
 

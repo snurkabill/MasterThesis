@@ -2,7 +2,7 @@ package vahy.examples.bomberman;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.EnumUtils;
@@ -725,9 +725,9 @@ public class BomberManState implements State<BomberManAction, DoubleVector, Bomb
     }
 
     @Override
-    public Predictor<BomberManState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<BomberManAction, DoubleVector, BomberManState> getKnownModelWithPerfectObservationPredictor() {
 
-        return new Predictor<>() {
+        return new PerfectStatePredictor<BomberManAction, DoubleVector, BomberManState>() {
 
             private final double[] environmentBombExplosionProbs = new double[] {1.0};
             private final double[] environmentNoActionProbs = new double[] {1.0};

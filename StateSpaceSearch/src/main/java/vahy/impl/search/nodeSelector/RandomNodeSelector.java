@@ -11,7 +11,7 @@ import java.util.SplittableRandom;
 
 public class RandomNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends NodeMetadata,
     TState extends State<TAction, TObservation, TState>>
     extends RandomizedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {

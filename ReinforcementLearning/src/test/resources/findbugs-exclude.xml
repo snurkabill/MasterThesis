@@ -72,5 +72,10 @@
         <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
     </Match>
 
+    <Match>
+        <Package name="~vahy\.examples\.patrolling"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2, UC_USELESS_CONDITION"/>
+    </Match>
+
 
 </FindBugsFilter>

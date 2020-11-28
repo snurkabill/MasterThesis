@@ -10,7 +10,7 @@ import java.util.SplittableRandom;
 
 public class UnfairUcb1NodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     extends RandomizedNodeSelector<TAction, TObservation, MCTSMetadata, TState> {
 

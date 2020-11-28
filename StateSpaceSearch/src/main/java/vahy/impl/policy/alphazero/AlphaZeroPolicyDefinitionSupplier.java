@@ -23,7 +23,7 @@ public class AlphaZeroPolicyDefinitionSupplier<TAction extends Enum<TAction> & A
     private final Class<TAction> actionClass;
     private final int enumConstantsLength;
     private final SearchNodeFactory<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> searchNodeFactory;
-    private final AlphaZeroNodeMetadataFactory<TAction, DoubleVector, TState> metadataFactory;
+    private final AlphaZeroNodeMetadataFactory<TAction, TState> metadataFactory;
     private final boolean isModelKnown;
 
     public AlphaZeroPolicyDefinitionSupplier(Class<TAction> actionClass, int inGameEntityCount, ProblemConfig problemConfig) {

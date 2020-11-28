@@ -10,10 +10,13 @@ import vahy.impl.learning.trainer.PredictorTrainingSetup;
 
 import java.util.List;
 
-public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
+public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
+
+    private static final int NO_LOOKBACK_SIZE = 1;
 
     private final int policyId;
     private final int categoryId;
+    private final int observationLookbackSize;
     private final PolicySupplierFactory<TAction, TObservation, TState> policySupplierFactory;
     private final List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList;
     private final OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier;
@@ -22,9 +25,18 @@ public class PolicyDefinition<TAction extends Enum<TAction> & Action, TObservati
                             int categoryId,
                             OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier,
                             List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList) {
+        this(policyId, categoryId, NO_LOOKBACK_SIZE, outerDefPolicySupplier, trainablePredictorSetupList);
+    }
+
+    public PolicyDefinition(int policyId,
+                            int categoryId,
+                            int observationLookbackSize,
+                            OuterDefPolicySupplier<TAction, TObservation, TState> outerDefPolicySupplier,
+                            List<PredictorTrainingSetup<TAction, TObservation, TState>> trainablePredictorSetupList) {
         this.policyId = policyId;
         this.categoryId = categoryId;
-        this.policySupplierFactory = (policyId_, categoryId_, random_) -> new PolicySupplierImpl<>(policyId_, categoryId_, random_, outerDefPolicySupplier);
+        this.observationLookbackSize = observationLookbackSize;
+        this.policySupplierFactory = (policyId_, categoryId_, random_) -> new PolicySupplierImpl<>(policyId_, categoryId_, this.observationLookbackSize, random_, outerDefPolicySupplier);
         this.trainablePredictorSetupList = trainablePredictorSetupList;
         this.outerDefPolicySupplier = outerDefPolicySupplier;
     }

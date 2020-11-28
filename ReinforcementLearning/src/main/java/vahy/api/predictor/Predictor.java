@@ -4,7 +4,7 @@ import vahy.api.model.observation.Observation;
 
 import java.util.List;
 
-public interface Predictor<TObservation extends Observation> {
+public interface Predictor<TObservation extends Observation<TObservation>> {
 
     double[] apply(TObservation observation);
 

@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractRandomizedPolicySupplier<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>,
     TPolicyRecord extends PolicyRecord> implements PolicySupplier<TAction, TObservation, TState> {
 

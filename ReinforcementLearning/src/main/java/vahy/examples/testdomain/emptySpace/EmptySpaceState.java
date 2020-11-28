@@ -2,8 +2,7 @@ package vahy.examples.testdomain.emptySpace;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -12,7 +11,7 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 
-public class EmptySpaceState implements Observation, State<EmptySpaceAction, DoubleVector, EmptySpaceState> {
+public class EmptySpaceState implements State<EmptySpaceAction, DoubleVector, EmptySpaceState> {
 
     static final DoubleVector FIXED_OBSERVATION = new DoubleVector(new double[] {0.0});
     static final double[] FIXED_REWARD = new double[] {0.0, 0.0};
@@ -59,12 +58,12 @@ public class EmptySpaceState implements Observation, State<EmptySpaceAction, Dou
 
     @Override
     public DoubleVector getCommonObservation(int playerId) {
-        return FIXED_OBSERVATION;
+        return new DoubleVector(new double[] {changeTurn ? 1.0 : 0.0, isPlayerTurn ? 1.0 : 0.0});
     }
 
     @Override
-    public Predictor<EmptySpaceState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<>() {
+    public PerfectStatePredictor<EmptySpaceAction, DoubleVector, EmptySpaceState> getKnownModelWithPerfectObservationPredictor() {
+        return new PerfectStatePredictor<EmptySpaceAction, DoubleVector, EmptySpaceState>() {
             private final double[] fixedPrediction = new double[]{1 / 3., 2 / 3.0};
 
             @Override

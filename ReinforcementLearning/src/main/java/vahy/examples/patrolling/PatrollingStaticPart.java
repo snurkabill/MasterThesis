@@ -5,37 +5,47 @@ import java.util.Arrays;
 
 public class PatrollingStaticPart {
 
-    private final boolean[][] graphRepresentation;
-    private final int attackLength;
+    private final GraphDef graphRepresentation;
 
     private final PatrollingAction[] possibleAttackArray;
     private final PatrollingAction[] possibleMoveArray;
 
     private final PatrollingAction[][] possibleMoves;
 
-    public PatrollingStaticPart(boolean[][] graphRepresentation, int attackLength) {
+    public PatrollingStaticPart(GraphDef graphRepresentation) {
         this.graphRepresentation = graphRepresentation;
-        this.attackLength = attackLength;
-        this.possibleAttackArray = Arrays.stream(PatrollingAction.values()).filter(x -> (x.getLocalIndex() < graphRepresentation.length && x.isAttackerTrueAction()) || x.equals(PatrollingAction.WAIT)).toArray(PatrollingAction[]::new);
-        this.possibleMoveArray = Arrays.stream(PatrollingAction.values()).filter(x -> x.getLocalIndex() < graphRepresentation.length  && !x.isAttackerTrueAction() && !x.equals(PatrollingAction.SHADOW)).toArray(PatrollingAction[]::new);
-        this.possibleMoves = new PatrollingAction[graphRepresentation.length][];
+        this.possibleAttackArray = Arrays.stream(PatrollingAction.values())
+            .filter(x -> (graphRepresentation.isTargetSet(x.getLocalIndex()) && x.isAttackerTrueAction()) || x.equals(PatrollingAction.WAIT))
+            .toArray(PatrollingAction[]::new);
+        this.possibleMoveArray = Arrays.stream(PatrollingAction.values())
+            .filter(x -> x.getLocalIndex() < graphRepresentation.getConnectionMatrix().length  && !x.isAttackerTrueAction() && !x.equals(PatrollingAction.SHADOW))
+            .toArray(PatrollingAction[]::new);
+        this.possibleMoves = new PatrollingAction[graphRepresentation.getConnectionMatrix().length][];
 
-        for (int i = 0; i < graphRepresentation.length; i++) {
+        for (int i = 0; i < graphRepresentation.getConnectionMatrix().length; i++) {
             getPossibleMoveArray(i);
         }
 
     }
 
-    public boolean[][] getGraphRepresentation() {
+    public GraphDef getGraphRepresentation() {
         return graphRepresentation;
     }
 
-    public int getAttackLength() {
-        return attackLength;
+    public boolean[][] getConnectionMatrix() {
+        return graphRepresentation.getConnectionMatrix();
+    }
+
+    public double getMoveTimeCost(int fromNodeId, int toNodeId) {
+        return graphRepresentation.getMoveCostMatrix()[fromNodeId][toNodeId];
+   }
+
+    public double getAttackLength(int nodeId) {
+        return graphRepresentation.getAttackLength(nodeId);
     }
 
     public int getNodeCount() {
-        return graphRepresentation.length;
+        return graphRepresentation.getConnectionMatrix().length;
     }
 
     public PatrollingAction[] getPossibleAttackArray() {
@@ -45,12 +55,12 @@ public class PatrollingStaticPart {
     public PatrollingAction[] getPossibleMoveArray(int guardOnNodeId) {
         var arr = possibleMoves[guardOnNodeId];
         if(arr == null) {
-            var list = new ArrayList<PatrollingAction>(graphRepresentation.length);
+            var list = new ArrayList<PatrollingAction>(graphRepresentation.getConnectionMatrix().length);
             for (PatrollingAction patrollingAction : possibleMoveArray) {
-                if(patrollingAction.getLocalIndex() >= graphRepresentation.length) {
+                if(patrollingAction.getLocalIndex() >= graphRepresentation.getConnectionMatrix().length) {
                     break;
                 } else {
-                    if(graphRepresentation[guardOnNodeId][patrollingAction.getLocalIndex()]) {
+                    if(graphRepresentation.getConnectionMatrix()[guardOnNodeId][patrollingAction.getLocalIndex()]) {
                         list.add(patrollingAction);
                     }
                 }

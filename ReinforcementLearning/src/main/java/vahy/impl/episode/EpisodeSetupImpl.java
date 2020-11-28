@@ -9,7 +9,7 @@ import vahy.api.model.observation.Observation;
 
 import java.util.List;
 
-public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>>
+public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>>
     implements EpisodeSetup<TAction, TObservation, TState> {
 
     private final TState initialState;

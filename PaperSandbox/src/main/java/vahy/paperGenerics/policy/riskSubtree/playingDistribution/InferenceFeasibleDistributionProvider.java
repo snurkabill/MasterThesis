@@ -16,7 +16,7 @@ import java.util.SplittableRandom;
 
 public class InferenceFeasibleDistributionProvider<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractPlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> {

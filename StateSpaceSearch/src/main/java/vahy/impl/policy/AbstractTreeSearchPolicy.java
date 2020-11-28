@@ -15,7 +15,7 @@ import java.util.SplittableRandom;
 
 public abstract class AbstractTreeSearchPolicy<
         TAction extends Enum<TAction> & Action,
-        TObservation extends Observation,
+        TObservation extends Observation<TObservation>,
         TSearchNodeMetadata extends NodeMetadata,
         TState extends State<TAction, TObservation, TState>>
     extends ExploringPolicy<TAction, TObservation, TState> {

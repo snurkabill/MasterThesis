@@ -7,7 +7,7 @@ import vahy.api.policy.PolicyRecord;
 
 import java.util.List;
 
-public interface EpisodeStepRecord<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
+public interface EpisodeStepRecord<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
 
     int getPolicyIdOnTurn();
 

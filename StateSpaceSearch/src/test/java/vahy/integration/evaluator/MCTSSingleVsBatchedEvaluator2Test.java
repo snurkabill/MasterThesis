@@ -67,8 +67,8 @@ public class MCTSSingleVsBatchedEvaluator2Test {
                 new SplittableRandom(systemConfig.getRandomSeed()));
 
             var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-            var episodeDataMaker = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, playerId);
             var dataAggregator = new ReplayBufferDataAggregator(1000);
+            var episodeDataMaker = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, playerId, dataAggregator);
 
             var predictorTrainingSetup = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManState>(
                 playerId,

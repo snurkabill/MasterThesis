@@ -39,7 +39,7 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
 
         var firstDimPredictions = new double[predictions.length];
         for (int i = 0; i < predictions.length; i++) {
-            firstDimPredictions[i] = predictions[i][0];
+            firstDimPredictions[i] = rewards[i] + predictions[i][0];
         }
         RandomDistributionUtils.applySoftmax(firstDimPredictions);
         var index = RandomDistributionUtils.getRandomIndexFromDistribution(firstDimPredictions, random);

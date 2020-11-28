@@ -7,7 +7,7 @@ import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
 import vahy.api.predictor.TrainablePredictor;
 
-public class PredictorTrainingSetup<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
+public class PredictorTrainingSetup<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
 
     private final int predictorTrainingSetupId;
     private final TrainablePredictor trainablePredictor;

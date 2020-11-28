@@ -11,7 +11,7 @@ import vahy.paperGenerics.PaperState;
 
 import java.util.EnumMap;
 
-public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
+public class PaperMetadataFactory<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends PaperState<TAction, TObservation, TState>>
     implements SearchNodeMetadataFactory<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     private final Class<TAction> actionClazz;

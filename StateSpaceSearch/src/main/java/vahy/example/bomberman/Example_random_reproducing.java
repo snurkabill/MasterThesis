@@ -83,9 +83,9 @@ public class Example_random_reproducing {
         var defPred = new double[totalEntityCount];
         Arrays.fill(defPred, 10.0);
         var trainablePredictorMCTSEval_1 = new DataTablePredictorWithLr(defPred, 0.1);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
-//        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0, dataAggregatorMCTSEval_1);
+//        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 0,
             trainablePredictorMCTSEval_1,

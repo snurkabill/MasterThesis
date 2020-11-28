@@ -8,7 +8,7 @@ import vahy.paperGenerics.metadata.PaperMetadata;
 
 import java.util.SplittableRandom;
 
-public class RiskBasedSelector_V3<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> extends PaperNodeSelector<TAction, TObservation, TState> {
+public class RiskBasedSelector_V3<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> extends PaperNodeSelector<TAction, TObservation, TState> {
 
     public RiskBasedSelector_V3(SplittableRandom random, boolean isModelKnown, double cpuctParameter, int totalActionCount) {
         super(random, isModelKnown, cpuctParameter, totalActionCount);

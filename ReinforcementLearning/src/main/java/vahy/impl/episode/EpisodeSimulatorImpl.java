@@ -22,7 +22,7 @@ import java.util.List;
 
 public class EpisodeSimulatorImpl<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     implements EpisodeSimulator<TAction, TObservation, TState> {
 
@@ -129,7 +129,7 @@ public class EpisodeSimulatorImpl<
         if (inGameEntityId != onTurnRegisteredPolicy.getInGameEntityId()) {
             throw new IllegalArgumentException("Different policyIds");
         }
-        var stateWrapper = new StateWrapper<>(inGameEntityId, state);
+        var stateWrapper = new StateWrapper<>(inGameEntityId, onTurnRegisteredPolicy.getObservationLookbackSize() , state);
         var onTurnPolicy = onTurnRegisteredPolicy.getPolicy();
         if (policyIdOnTurn != onTurnPolicy.getPolicyId()) {
             throw new IllegalStateException("Discrepancy. PolicyId from translation map [" + policyIdOnTurn + "] does not match onTurnPolicyId [" + onTurnPolicy.getPolicyId() + "]");

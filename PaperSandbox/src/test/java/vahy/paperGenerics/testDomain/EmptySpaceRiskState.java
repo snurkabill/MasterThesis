@@ -1,19 +1,18 @@
 package vahy.paperGenerics.testDomain;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
-import vahy.impl.model.ImmutableStateRewardReturn;
-import vahy.impl.model.observation.DoubleVector;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.examples.testdomain.emptySpace.EmptySpaceAction;
 import vahy.examples.testdomain.emptySpace.EmptySpaceState;
+import vahy.impl.model.ImmutableStateRewardReturn;
+import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>, Observation  {
+public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
     private static final boolean[] RISK_HIT_ARRAY = new boolean[] {true, true};
@@ -57,10 +56,10 @@ public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleV
     }
 
     @Override
-    public Predictor<EmptySpaceRiskState> getKnownModelWithPerfectObservationPredictor() {
-        return new Predictor<EmptySpaceRiskState>() {
+    public PerfectStatePredictor<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> getKnownModelWithPerfectObservationPredictor() {
+        return new PerfectStatePredictor<EmptySpaceAction, DoubleVector, EmptySpaceRiskState>() {
 
-            private Predictor<EmptySpaceState> innerPredictor;
+            private PerfectStatePredictor<EmptySpaceAction, DoubleVector, EmptySpaceState> innerPredictor;
 
             @Override
             public double[] apply(EmptySpaceRiskState observation) {

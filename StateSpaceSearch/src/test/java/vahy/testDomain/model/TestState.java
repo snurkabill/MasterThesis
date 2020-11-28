@@ -2,8 +2,7 @@ package vahy.testDomain.model;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -14,7 +13,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TestState implements State<TestAction, DoubleVector, TestState>, Observation {
+public class TestState implements State<TestAction, DoubleVector, TestState> {
 
     private static final int TEST_STATE_SIZE = 10;
 
@@ -111,7 +110,7 @@ public class TestState implements State<TestAction, DoubleVector, TestState>, Ob
     }
 
     @Override
-    public Predictor<TestState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<TestAction, DoubleVector, TestState> getKnownModelWithPerfectObservationPredictor() {
         return null;
     }
 

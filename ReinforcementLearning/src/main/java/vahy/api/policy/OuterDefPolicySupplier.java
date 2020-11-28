@@ -8,7 +8,7 @@ import vahy.api.model.observation.Observation;
 import java.util.SplittableRandom;
 
 @FunctionalInterface
-public interface OuterDefPolicySupplier<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends State<TAction, TObservation, TState>> {
+public interface OuterDefPolicySupplier<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
 
     Policy<TAction, TObservation, TState> apply(StateWrapper<TAction, TObservation, TState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random);
 

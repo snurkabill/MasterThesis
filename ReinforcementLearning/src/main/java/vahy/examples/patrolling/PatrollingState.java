@@ -2,7 +2,7 @@ package vahy.examples.patrolling;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 
@@ -14,13 +14,13 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     private static final int ATTACKER_ID = 1;
 
     private static final double[] emptyReward = new double[] {0.0, 0.0};
-    private static final double[] guardWinsReward = new double[] {1.0, -1.0};
-    private static final double[] attackerWinsReward = new double[] {-1.0, 1.0};
+//    private static final double[] guardWinsReward = new double[] {1.0, 0.0};
+//    private static final double[] attackerWinsReward = new double[] {0.0, 1.0};
 
     private final PatrollingStaticPart staticPart;
 
     private final boolean attackInProgress;
-    private final int attackCountDown;
+    private final double attackCountDown;
     private final int attackOnNodeId;
 
     private final boolean guardOnTurn;
@@ -28,10 +28,10 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
 
     public PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId) {
-        this(staticPart, guardOnNodeId, Integer.MAX_VALUE, false, Integer.MIN_VALUE, true);
+        this(staticPart, guardOnNodeId, Double.MAX_VALUE, false, Integer.MIN_VALUE, true);
     }
 
-    private PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId, int attackCountDown, boolean attackInProgress, int attackOnNodeId, boolean guardOnTurn) {
+    private PatrollingState(PatrollingStaticPart staticPart, int guardOnNodeId, double attackCountDown, boolean attackInProgress, int attackOnNodeId, boolean guardOnTurn) {
         this.guardOnNodeId = guardOnNodeId;
         this.staticPart = staticPart;
         this.attackCountDown = attackCountDown;
@@ -66,12 +66,13 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
         return 2;
     }
 
-    private double[] resolveReward(int attackCountDown, int attackOnNodeId, int guardOnNodeId) {
-        if(attackCountDown == 0) {
-            return attackerWinsReward;
+    private double[] resolveReward(double attackCountDown, int attackOnNodeId, int guardOnNodeId) {
+        if(attackCountDown <= 0.0) {
+            var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
+            return new double[] {-cost, cost};
         }
         if(attackOnNodeId == guardOnNodeId) {
-            return guardWinsReward;
+            return new double[] {1, -1};
         }
         return emptyReward;
     }
@@ -79,12 +80,12 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     @Override
     public StateRewardReturn<PatrollingAction, DoubleVector, PatrollingState> applyAction(PatrollingAction actionType) {
 
-        var newAttackCountDown = attackInProgress && guardOnTurn ? attackCountDown - 1 : attackCountDown;
 
         if(actionType == PatrollingAction.WAIT) {
             if(guardOnTurn) {
                 throw new IllegalStateException("Guard can't play wait action");
             }
+            var newAttackCountDown = attackCountDown;
             return new ImmutableStateRewardReturn<>(
                 new PatrollingState(staticPart, guardOnNodeId, newAttackCountDown, attackInProgress, attackOnNodeId, !guardOnTurn),
                 resolveReward(newAttackCountDown, attackOnNodeId, guardOnNodeId),
@@ -100,6 +101,8 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
                 throw new IllegalStateException("Discrepancy");
             }
             var moveToId = actionType.getLocalIndex();
+            var moveTimeCost = staticPart.getMoveTimeCost(guardOnNodeId, moveToId);
+            var newAttackCountDown = attackInProgress && guardOnTurn ? attackCountDown - moveTimeCost : attackCountDown;
             return new ImmutableStateRewardReturn<>(
                 new PatrollingState(staticPart, moveToId, newAttackCountDown, attackInProgress, attackOnNodeId, !guardOnTurn),
                 resolveReward(newAttackCountDown, attackOnNodeId, moveToId),
@@ -109,11 +112,11 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
             if(!actionType.isAttackerTrueAction()) {
                 throw new IllegalStateException("Discrepancy");
             }
-
             var attackToId = actionType.getLocalIndex();
+            var attackLength = staticPart.getAttackLength(attackToId);
             return new ImmutableStateRewardReturn<>(
-                new PatrollingState(staticPart, guardOnNodeId, staticPart.getAttackLength(), true, attackToId, !guardOnTurn),
-                resolveReward(staticPart.getAttackLength(), attackToId, guardOnNodeId),
+                new PatrollingState(staticPart, guardOnNodeId, attackLength, true, attackToId, !guardOnTurn),
+                resolveReward(attackLength, attackToId, guardOnNodeId),
                 new PatrollingAction[] {actionType, actionType}
             );
         }
@@ -121,24 +124,43 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public DoubleVector getInGameEntityObservation(int inGameEntityId) {
-        return getCommonObservation(inGameEntityId);
+        if(inGameEntityId == GUARD_ID) {
+            return getCommonObservation(inGameEntityId);
+        } else {
+            var arr = new double[staticPart.getNodeCount() * 2 + 2];
+            arr[guardOnNodeId] = 1;
+            arr[staticPart.getNodeCount()] = guardOnTurn ? 1.0 : 0.0;
+            if(attackInProgress) {
+                arr[staticPart.getNodeCount() + attackOnNodeId + 1] = 1;
+                arr[arr.length - 1] = 1;
+            } else {
+                arr[arr.length - 1] = -1;
+            }
+            return new DoubleVector(arr);
+        }
     }
 
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
-        var arr = new double[staticPart.getNodeCount()];
+        var arr = new double[staticPart.getNodeCount() + 1];
         arr[guardOnNodeId] = 1;
+        arr[arr.length - 1] = guardOnTurn ? 1.0 : 0.0;
         return new DoubleVector(arr);
     }
 
     @Override
-    public Predictor<PatrollingState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<PatrollingAction, DoubleVector, PatrollingState> getKnownModelWithPerfectObservationPredictor() {
         throw new UnsupportedOperationException("PatrollingGame does not have fixed model");
     }
 
     @Override
     public String readableStringRepresentation() {
-        return "Not Implemented now";
+        return "Guard on Id: [" + guardOnNodeId + "], Attack in progress: [" + attackInProgress + "] on Id: [" + attackOnNodeId + "] remaining attack countdown: [" + attackCountDown + "]";
+    }
+
+    @Override
+    public String toString() {
+        return readableStringRepresentation();
     }
 
     @Override
@@ -168,6 +190,6 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public boolean isFinalState() {
-        return (attackCountDown == 0) || (attackInProgress && attackOnNodeId == guardOnNodeId);
+        return (attackCountDown <= 0) || (attackInProgress && attackOnNodeId == guardOnNodeId);
     }
 }

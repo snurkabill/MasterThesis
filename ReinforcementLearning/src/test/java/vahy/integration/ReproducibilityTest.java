@@ -66,13 +66,14 @@ public class ReproducibilityTest {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictor(new double[]{0.0});
-        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, policyId_);
+        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<TicTacToeAction, TicTacToeState>(discountFactor, policyId_, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             policyId_,
             trainablePredictor,
             episodeDataMaker,
-            new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>())
+            dataAggregator
         );
         return new PolicyDefinition<TicTacToeAction, DoubleVector, TicTacToeState>(
             policyId_,

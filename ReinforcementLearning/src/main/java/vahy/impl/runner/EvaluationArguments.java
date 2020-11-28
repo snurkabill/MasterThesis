@@ -16,7 +16,7 @@ import java.util.SplittableRandom;
 
 public class EvaluationArguments<TConfig extends ProblemConfig,
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 

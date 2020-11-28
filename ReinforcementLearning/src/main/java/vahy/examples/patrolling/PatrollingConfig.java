@@ -8,21 +8,15 @@ import java.util.List;
 
 public class PatrollingConfig extends ProblemConfig {
 
-    private final boolean[][] graph;
-    private final int attackLength;
+    private final GraphDef graph;
 
-    protected PatrollingConfig(int maximalStepCountBound, boolean isModelKnown, int environmentPolicyCount, int minimalPlayerEntitiesInGameCount, List<PolicyCategoryInfo> policyCategoryInfoList, PolicyShuffleStrategy policyShuffleStrategy, boolean[][] graph, int attackLength) {
+    protected PatrollingConfig(int maximalStepCountBound, boolean isModelKnown, int environmentPolicyCount, int minimalPlayerEntitiesInGameCount, List<PolicyCategoryInfo> policyCategoryInfoList, PolicyShuffleStrategy policyShuffleStrategy, GraphDef graph) {
         super(maximalStepCountBound, isModelKnown, environmentPolicyCount, minimalPlayerEntitiesInGameCount, policyCategoryInfoList, policyShuffleStrategy);
         this.graph = graph;
-        this.attackLength = attackLength;
     }
 
-    public boolean[][] getGraph() {
+    public GraphDef getGraph() {
         return graph;
-    }
-
-    public int getAttackLength() {
-        return attackLength;
     }
 
     @Override

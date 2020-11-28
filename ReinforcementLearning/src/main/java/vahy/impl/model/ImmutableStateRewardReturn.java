@@ -8,7 +8,7 @@ import vahy.utils.ImmutableTriple;
 
 public class ImmutableStateRewardReturn<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     extends ImmutableTriple<TState, double[], TAction[]>
     implements StateRewardReturn<TAction, TObservation, TState> {

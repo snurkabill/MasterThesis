@@ -12,9 +12,8 @@ import java.util.EnumMap;
 
 public class AlphaZeroNodeMetadataFactory<
     TAction extends Enum<TAction> & Action,
-    TObservation extends DoubleVector,
-    TState extends State<TAction, TObservation, TState>>
-    implements SearchNodeMetadataFactory<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
+    TState extends State<TAction, DoubleVector, TState>>
+    implements SearchNodeMetadataFactory<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> {
 
     private final Class<TAction> actionClazz;
     private final int inGameEntityCount;
@@ -45,8 +44,8 @@ public class AlphaZeroNodeMetadataFactory<
     }
 
     @Override
-    public AlphaZeroNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> parent,
-                                                                   StateWrapperRewardReturn<TAction, TObservation, TState> stateRewardReturn,
+    public AlphaZeroNodeMetadata<TAction> createSearchNodeMetadata(SearchNode<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> parent,
+                                                                   StateWrapperRewardReturn<TAction, DoubleVector, TState> stateRewardReturn,
                                                                    TAction appliedAction)
     {
         var allPlayerRewards = stateRewardReturn.getAllPlayerRewards();

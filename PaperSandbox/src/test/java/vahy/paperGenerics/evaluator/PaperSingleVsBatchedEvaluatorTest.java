@@ -41,6 +41,7 @@ import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvid
 import vahy.paperGenerics.reinforcement.PaperDataTablePredictorWithLr;
 import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V2;
 import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
 import vahy.utils.StreamUtils;
 
@@ -73,8 +74,8 @@ public class PaperSingleVsBatchedEvaluatorTest {
         for (int i = 0; i < playerCount; i++) {
             int policyId = i + envEntitiesCount;
 
-            var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(discountFactor, totalActionCount, policyId);
             var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+            var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor, dataAggregator_risk);
             var trainablePredictor_risk = new PaperDataTablePredictorWithLr(defaultPrediction_risk, 0.1, totalActionCount, totalEntityCount);
 
             var predictorTrainingSetup_risk = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManRiskState>(
@@ -165,8 +166,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
         var systemConfig = new SystemConfig(
             seed,
             false,
-//            ConvergenceAssert.TEST_THREAD_COUNT,
-            1,
+            ConvergenceAssert.TEST_THREAD_COUNT,
             false,
             50,
             0,

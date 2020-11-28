@@ -49,8 +49,8 @@ public class Example01 {
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManState>();
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 0, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             environmentPolicyCount + 1,
@@ -63,8 +63,8 @@ public class Example01 {
 
 
         var trainablePredictorMCTSEval_1 = new DataTablePredictor(new double[totalEntityCount]);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 1);
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 1, dataAggregatorMCTSEval_1);
 
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 1,
@@ -75,8 +75,8 @@ public class Example01 {
 
 
         var trainablePredictorMCTSEval_2 = new DataTablePredictor(new double[totalEntityCount]);
-        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 2);
         var dataAggregatorMCTSEval_2 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, environmentPolicyCount + 2, dataAggregatorMCTSEval_2);
 
         var predictorTrainingSetupMCTSEval_2 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 2,

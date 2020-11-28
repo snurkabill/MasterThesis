@@ -90,8 +90,8 @@ public class ExampleRisk01 {
 
 
         var trainablePredictor = new DataTablePredictor(new double[] {0.0});
-        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 1);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 1, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<>(
             environmentPolicyCount + 1,
@@ -120,10 +120,10 @@ public class ExampleRisk01 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
 
-        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 2);
-
         var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
         var dataAggregator2 = new ReplayBufferDataAggregator(1000);
+        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 2, dataAggregator2);
+
 //        var trainablePredictor2_OLD = new DataTablePredictor(defaultPrediction_value);
 //        var dataAggregator2_OLD = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
@@ -154,8 +154,8 @@ public class ExampleRisk01 {
 
 //        var trainablePredictorMCTSEval_1 = new TrainableApproximator(tfModel_);
         var trainablePredictorMCTSEval_1 = new DataTablePredictorWithLr(new double[totalEntityCount], 0.1);
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 3);
         var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 3, dataAggregatorMCTSEval_1);
 
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 3,
@@ -168,8 +168,8 @@ public class ExampleRisk01 {
 
 //        var trainablePredictorMCTSEval_2 = new TrainableApproximator(tfModel_);
         var trainablePredictorMCTSEval_2 = new DataTablePredictorWithLr(new double[totalEntityCount], 0.1);
-        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 4);
         var dataAggregatorMCTSEval_2 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMakerMCTSEval_2 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, environmentPolicyCount + 4, dataAggregatorMCTSEval_2);
 
         var predictorTrainingSetupMCTSEval_2 = new PredictorTrainingSetup<>(
             environmentPolicyCount + 4,
@@ -209,8 +209,8 @@ public class ExampleRisk01 {
         }
 
         var trainablePredictor_risk = new PaperDataTablePredictorWithLr(defaultPrediction_risk, 0.25, totalActionCount, totalEntityCount);
-        var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(discountFactor, totalActionCount, riskPolicyId);
         var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(riskPolicyId, totalActionCount, discountFactor, dataAggregator_risk);
 
         var predictorTrainingSetup_risk = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManRiskState>(
             riskPolicyId,

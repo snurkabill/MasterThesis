@@ -11,7 +11,7 @@ import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 
 public class AlphaZeroTreeUpdater<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     implements TreeUpdater<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
 

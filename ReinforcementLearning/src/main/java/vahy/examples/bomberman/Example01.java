@@ -52,12 +52,15 @@ public class Example01 {
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> createPolicyArgument(double discountFactor,
                                                                                                                           int policyId,
                                                                                                                           int categoryId) {
+        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var dataMaker = new ValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId, dataAggregator);
+
         var predictor = new DataTablePredictor(new double[]{0.0});
         var predictorTrainingSetup = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManState>(
             policyId,
             predictor,
-            new ValueDataMaker<>(discountFactor, policyId),
-            new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>())
+            dataMaker,
+            dataAggregator
         );
 
         return new PolicyDefinition<>(

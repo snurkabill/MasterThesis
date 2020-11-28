@@ -13,7 +13,7 @@ import java.util.SplittableRandom;
 
 public class HardHardSoftFlowOptimizer<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends PaperMetadata<TAction>,
     TState extends PaperState<TAction, TObservation, TState>>
     extends AbstractFlowOptimizer<TAction, TObservation, TSearchNodeMetadata , TState> {

@@ -3,7 +3,7 @@ package vahy.impl.search.nodeSelector;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.api.search.node.NodeMetadata;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.nodeSelector.RandomizedNodeSelector;
@@ -13,12 +13,12 @@ import java.util.SplittableRandom;
 
 public abstract class EnvironmentSamplingNodeSelector<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TSearchNodeMetadata extends NodeMetadata,
     TState extends State<TAction, TObservation, TState>>
     extends RandomizedNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> {
 
-    private Predictor<TState> perfectPredictor;
+    private PerfectStatePredictor<TAction, TObservation, TState> perfectPredictor;
     private final boolean isModelKnown;
 
     public EnvironmentSamplingNodeSelector(SplittableRandom random, boolean isModelKnown) {

@@ -35,8 +35,8 @@ public class ValuePolicySH05Test {
         double discountFactor = 1;
 
         var trainablePredictor = new DataTablePredictorWithLr(new double[]{0.0}, 0.2);
-        var episodeDataMaker = new ValueDataMaker<SHAction, SHState>(discountFactor, playerId);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+        var episodeDataMaker = new ValueDataMaker<SHAction, SHState>(discountFactor, playerId, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHState>(
             playerId,

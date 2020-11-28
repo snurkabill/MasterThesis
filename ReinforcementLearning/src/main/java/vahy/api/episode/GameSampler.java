@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface GameSampler<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>> {
 
     List<EpisodeResults<TAction, TObservation, TState>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode);

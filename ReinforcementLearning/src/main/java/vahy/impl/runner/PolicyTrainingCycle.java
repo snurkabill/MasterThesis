@@ -17,7 +17,7 @@ import java.util.List;
 
 public class PolicyTrainingCycle<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>,
     TStatistics extends EpisodeStatistics> {
 

@@ -8,8 +8,8 @@ import vahy.impl.search.nodeSelector.EnvironmentSamplingNodeSelector;
 
 import java.util.SplittableRandom;
 
-public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObservation extends DoubleVector, TState extends State<TAction, TObservation, TState>>
-    extends EnvironmentSamplingNodeSelector<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> {
+public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>>
+    extends EnvironmentSamplingNodeSelector<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> {
 
     private final double cpuctParameter;
     private final double[] valueArray;
@@ -23,7 +23,7 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
     }
 
     @Override
-    protected TAction getBestAction_inner(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> node) {
+    protected TAction getBestAction_inner(SearchNode<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> node) {
         TAction[] possibleActions = node.getAllPossibleActions();
         var searchNodeMap = node.getChildNodeMap();
         var inGameEntityIdOnTurn = node.getStateWrapper().getInGameEntityOnTurnId();
@@ -99,7 +99,7 @@ public class AlphaZeroNodeSelector<TAction extends Enum<TAction> & Action, TObse
     }
 
     @Override
-    public SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> selectNextNode(SearchNode<TAction, TObservation, AlphaZeroNodeMetadata<TAction>, TState> root) {
+    public SearchNode<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> selectNextNode(SearchNode<TAction, DoubleVector, AlphaZeroNodeMetadata<TAction>, TState> root) {
         var node = root;
         while(!node.isLeaf()) {
             node = node.getChildNodeMap().get(getBestAction(node));

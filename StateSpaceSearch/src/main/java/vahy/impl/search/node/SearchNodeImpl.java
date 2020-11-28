@@ -13,7 +13,7 @@ import vahy.api.search.node.SearchNode;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class SearchNodeImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
+public class SearchNodeImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
     extends AbstractSearchNode<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private static final Logger logger = LoggerFactory.getLogger(SearchNodeImpl.class.getName());

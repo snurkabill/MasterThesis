@@ -27,7 +27,7 @@ public class SearchTreeUpdateSimpleTest {
     private MCTSMetadataFactory<SHAction, DoubleVector, SHState> metadataFactory;
     private SearchNodeBaseFactoryImpl<SHAction, DoubleVector, MCTSMetadata, SHState> nodeFactory;
     private MCTSTreeUpdater<SHAction, DoubleVector, SHState> updater;
-    private MCTSPredictionEvaluator<SHAction, DoubleVector, MCTSMetadata, SHState> evaluator;
+    private MCTSPredictionEvaluator<SHAction, MCTSMetadata, SHState> evaluator;
 
     @BeforeEach
     protected void init() {

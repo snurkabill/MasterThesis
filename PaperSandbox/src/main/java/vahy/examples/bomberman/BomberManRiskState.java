@@ -1,8 +1,7 @@
 package vahy.examples.bomberman;
 
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.paperGenerics.PaperState;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class BomberManRiskState implements PaperState<BomberManAction, DoubleVector, BomberManRiskState>, Observation {
+public class BomberManRiskState implements PaperState<BomberManAction, DoubleVector, BomberManRiskState> {
 
     private final BomberManState innerState;
     private final boolean[] riskArray;
@@ -60,9 +59,9 @@ public class BomberManRiskState implements PaperState<BomberManAction, DoubleVec
         return innerState.getCommonObservation(inGameEntityId);
     }
 
-    private static class PerfectBomberManPredictor implements Predictor<BomberManRiskState> {
+    private static class PerfectBomberManPredictor implements PerfectStatePredictor<BomberManAction, DoubleVector, BomberManRiskState> {
 
-        private Predictor<BomberManState> innerPredictor;
+        private PerfectStatePredictor<BomberManAction, DoubleVector, BomberManState> innerPredictor;
 
         @Override
         public double[] apply(BomberManRiskState observation) {
@@ -95,7 +94,7 @@ public class BomberManRiskState implements PaperState<BomberManAction, DoubleVec
     }
 
     @Override
-    public Predictor<BomberManRiskState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<BomberManAction, DoubleVector, BomberManRiskState> getKnownModelWithPerfectObservationPredictor() {
         return new PerfectBomberManPredictor();
     }
 

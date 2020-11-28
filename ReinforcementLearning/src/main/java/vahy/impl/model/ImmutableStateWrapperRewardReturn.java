@@ -9,7 +9,7 @@ import vahy.utils.ImmutableQuadriple;
 
 public class ImmutableStateWrapperRewardReturn<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     extends ImmutableQuadriple<StateWrapper<TAction, TObservation, TState>, Double, double[], TAction>
     implements StateWrapperRewardReturn<TAction, TObservation, TState> {

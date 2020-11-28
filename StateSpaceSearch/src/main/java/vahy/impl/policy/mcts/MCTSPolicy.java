@@ -15,7 +15,7 @@ import java.util.SplittableRandom;
 
 public class MCTSPolicy<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     extends AbstractTreeSearchPolicy<TAction, TObservation, MCTSMetadata, TState> {
 

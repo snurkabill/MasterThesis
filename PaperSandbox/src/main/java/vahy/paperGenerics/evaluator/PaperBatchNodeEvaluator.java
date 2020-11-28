@@ -3,7 +3,7 @@ package vahy.paperGenerics.evaluator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import vahy.api.model.Action;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.api.predictor.TrainablePredictor;
 import vahy.api.search.node.SearchNode;
 import vahy.api.search.node.factory.SearchNodeFactory;
@@ -26,7 +26,7 @@ public class PaperBatchNodeEvaluator<
 
     private final PaperMetadataFactory<TAction, DoubleVector, TState> searchNodeMetadataFactory;
     private final boolean isModelKnown;
-    private Predictor<TState> perfectEnvironmentPredictor;
+    private PerfectStatePredictor<TAction, DoubleVector, TState> perfectEnvironmentPredictor;
 
     public PaperBatchNodeEvaluator(SearchNodeFactory<TAction, DoubleVector, PaperMetadata<TAction>, TState> searchNodeFactory,
                                    TrainablePredictor predictor,

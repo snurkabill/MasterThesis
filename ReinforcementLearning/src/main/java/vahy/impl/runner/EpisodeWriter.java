@@ -21,7 +21,7 @@ import java.util.List;
 
 public class EpisodeWriter<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>> {
 
     private final Path rootPath;

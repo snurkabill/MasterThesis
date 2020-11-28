@@ -14,7 +14,7 @@ import vahy.impl.search.node.SearchNodeImpl;
 import java.util.EnumMap;
 import java.util.Map;
 
-public class SearchNodeBaseFactoryImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
+public class SearchNodeBaseFactoryImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TSearchNodeMetadata extends NodeMetadata, TState extends State<TAction, TObservation, TState>>
     implements SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> {
 
     private final Class<TAction> actionClass;

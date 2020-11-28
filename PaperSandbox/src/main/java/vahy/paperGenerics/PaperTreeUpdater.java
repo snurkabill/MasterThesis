@@ -9,7 +9,7 @@ import vahy.api.search.update.TreeUpdater;
 import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 import vahy.paperGenerics.metadata.PaperMetadata;
 
-public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservation extends Observation, TState extends PaperState<TAction, TObservation, TState>>
+public class PaperTreeUpdater<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends PaperState<TAction, TObservation, TState>>
     implements TreeUpdater<TAction, TObservation, PaperMetadata<TAction>, TState> {
 
     protected static final Logger logger = LoggerFactory.getLogger(PaperTreeUpdater.class);

@@ -2,8 +2,7 @@ package vahy.examples.simplifiedHallway;
 
 import vahy.api.model.State;
 import vahy.api.model.StateRewardReturn;
-import vahy.api.model.observation.Observation;
-import vahy.api.predictor.Predictor;
+import vahy.api.predictor.PerfectStatePredictor;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ArrayUtils;
@@ -16,7 +15,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public class SHState implements State<SHAction, DoubleVector, SHState>, Observation {
+public class SHState implements State<SHAction, DoubleVector, SHState> {
 
     public static final int REWARD_OBSERVATION_SHIFT = 3;
     public static final int ENVIRONMENT_ID = 0;
@@ -43,7 +42,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     private final double[] doubleObservation;
 
 
-    public static class SHPerfectPredictor implements Predictor<SHState> {
+    public static class SHPerfectPredictor implements PerfectStatePredictor<SHAction, DoubleVector, SHState> {
 
         private EnumMap<SHAction, Double> getEnvironmentProbabilities(SHState state) {
             var actionMap = new EnumMap<SHAction, Double>(SHAction.class);
@@ -266,7 +265,7 @@ public class SHState implements State<SHAction, DoubleVector, SHState>, Observat
     }
 
     @Override
-    public Predictor<SHState> getKnownModelWithPerfectObservationPredictor() {
+    public PerfectStatePredictor<SHAction, DoubleVector, SHState> getKnownModelWithPerfectObservationPredictor() {
         return new SHPerfectPredictor();
     }
 

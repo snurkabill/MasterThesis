@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface EpisodeResultsFactory<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>> {
 
     EpisodeResults<TAction, TObservation, TState> createResults(

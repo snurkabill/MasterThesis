@@ -11,7 +11,7 @@ import vahy.impl.model.reward.DoubleVectorRewardAggregator;
 
 public class MCTSTreeUpdater<
     TAction extends Enum<TAction> & Action,
-    TObservation extends Observation,
+    TObservation extends Observation<TObservation>,
     TState extends State<TAction, TObservation, TState>>
     implements TreeUpdater<TAction, TObservation, MCTSMetadata, TState> {
 

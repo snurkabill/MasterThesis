@@ -158,8 +158,8 @@ public class Example_random_01 {
 
 
         var trainablePredictorMCTSEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
-        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId);
         var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
+        var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManState>(discountFactor, policyId, dataAggregatorMCTSEval_1);
         var predictorTrainingSetupMCTSEval_1 = new PredictorTrainingSetup<>(
             policyId,
             trainablePredictorMCTSEval_1,
@@ -205,8 +205,8 @@ public class Example_random_01 {
 
 
         var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
-        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(policyId, totalActionCount, discountFactor);
         var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
+        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManState>(policyId, totalActionCount, discountFactor, dataAggregatorAlphaGoEval_1);
 
         var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
             policyId,
@@ -236,8 +236,8 @@ public class Example_random_01 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_value));
-        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(1.0, policyId);
         var dataAggregator2 = new ReplayBufferDataAggregator(1000);
+        var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManState>(1.0, policyId, dataAggregator2);
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(
             policyId,
