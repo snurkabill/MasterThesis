@@ -19,7 +19,6 @@ import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.learning.trainer.VectorValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.mcts.MCTSPolicy;
 import vahy.impl.policy.mcts.MCTSPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
@@ -44,7 +43,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
         var playerId = 1;
         double discountFactor = 1;
 
-        var path_ = Paths.get(MCTSPolicy.class.getClassLoader().getResource("tfModelPrototypes/create_value_vectorized_model.py").getPath());
+        var path_ = Paths.get(MCTSSingleVsBatchedEvaluatorTest.class.getClassLoader().getResource("tfModelPrototypes/create_value_vectorized_model.py").getPath());
 
         var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
         var tfModel_ = new TFModelImproved(

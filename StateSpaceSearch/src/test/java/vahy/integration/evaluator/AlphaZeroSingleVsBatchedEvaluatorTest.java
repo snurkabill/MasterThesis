@@ -54,7 +54,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
         for (int i = 0; i < playerCount; i++) {
             int playerId = i + envEntitiesCount;
 
-            var path_ = Paths.get(AlphaZeroPolicy.class.getClassLoader().getResource("tfModelPrototypes/create_alphazero_prototype.py").getPath());
+            var path_ = Paths.get(AlphaZeroSingleVsBatchedEvaluatorTest.class.getClassLoader().getResource("tfModelPrototypes/create_alphazero_prototype.py").getPath());
 
             var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
             var tfModel_ = new TFModelImproved(
