@@ -25,6 +25,9 @@ public class TFHelper {
     }
 
     public static byte[] loadTensorFlowModel(Path scriptPath, String pythonVirtualEnvPath, long randomSeed, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
+        if(pythonVirtualEnvPath == null) {
+            throw new IllegalStateException("Python virtualEnv path is null.");
+        }
         var modelName = "tfModel_" + LocalDateTime.now(ZoneId.systemDefault()).atZone(ZoneOffset.UTC);
         modelName = modelName.replace(":", "_");
         Process process = Runtime.getRuntime().exec(pythonVirtualEnvPath
