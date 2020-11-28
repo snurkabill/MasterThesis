@@ -171,7 +171,7 @@ public class RandomDistributionUtils {
     }
 
     public static void applySoftmax(double[] distribution) {
-        double max = Double.MIN_VALUE;
+        double max = -Double.MAX_VALUE;
         for (double entry : distribution) {
             if (entry > max) {
                 max = entry;
