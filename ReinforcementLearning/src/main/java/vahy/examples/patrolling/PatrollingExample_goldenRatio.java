@@ -12,12 +12,14 @@
 //import vahy.api.policy.PolicyRecordBase;
 //import vahy.api.policy.RandomizedPolicy;
 //import vahy.impl.RoundBuilder;
+//import vahy.impl.learning.dataAggregator.EveryVisitMonteCarloDataAggregator;
 //import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 //import vahy.impl.learning.trainer.PredictorTrainingSetup;
 //import vahy.impl.learning.trainer.ValueDataMaker;
 //import vahy.impl.model.observation.DoubleVector;
 //import vahy.impl.policy.RandomizedValuePolicy;
 //import vahy.impl.policy.ValuePolicy;
+//import vahy.impl.predictor.DataTablePredictorWithLr;
 //import vahy.impl.predictor.TrainableApproximator;
 //import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 //import vahy.impl.runner.PolicyDefinition;
@@ -25,6 +27,7 @@
 //import vahy.tensorflow.TFModelImproved;
 //import vahy.utils.ImmutableQuadriple;
 //import vahy.utils.ImmutableTuple;
+//import vahy.utils.RandomDistributionUtils;
 //
 //import java.io.IOException;
 //import java.nio.file.Path;
@@ -34,18 +37,20 @@
 //import java.util.Arrays;
 //import java.util.HashMap;
 //import java.util.HashSet;
+//import java.util.LinkedHashMap;
 //import java.util.List;
 //import java.util.Map;
 //import java.util.Set;
 //import java.util.SplittableRandom;
 //import java.util.function.Supplier;
+//import java.util.stream.Collectors;
 //
-//public class PatrollingExample_london_06 {
+//public class PatrollingExample_goldenRatio {
 //
-//    private PatrollingExample_london_06() {
+//    private PatrollingExample_goldenRatio() {
 //    }
 //
-//    public static PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState> getDefenderPolicy(PatrollingConfig patrollingConfig, SystemConfig systemConfig, int defenderLookbackSize) throws IOException, InterruptedException {
+//    public static PolicyDefinition<PatrollingAction, DoubleVector, PatrollingState> getDefenderPolicy(PatrollingConfig patrollingConfig, SystemConfig systemConfig, int defenderLookbackSize, DataTablePredictorWithLr givenPredictor) throws IOException, InterruptedException {
 //
 //        double discountFactor = 1.0;
 //
@@ -66,14 +71,15 @@
 //            new SplittableRandom(systemConfig.getRandomSeed()));
 //
 //
-//        var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
-//        var dataAggregator = new ReplayBufferDataAggregator(10000);
+////        var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
+////        var dataAggregator = new ReplayBufferDataAggregator(10000);
 //
 //
-////        var trainablePredictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.0001);
-////        var dataAggregator = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+//        var trainablePredictor = givenPredictor == null ?  new DataTablePredictorWithLr(new double[] {0.0}, 0.0001) : givenPredictor;
 //
-//        var episodeDataMaker = new ValueDataMaker<PatrollingAction, PatrollingState>(discountFactor, PatrollingState.DEFENDER_ID, defenderLookbackSize, dataAggregator);
+//        var dataAggregator = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
+//
+//        var episodeDataMaker = new PatrollingAnalysisDataMaker<PatrollingAction, PatrollingState>(discountFactor, PatrollingState.DEFENDER_ID, defenderLookbackSize, dataAggregator);
 //
 //        var predictor = new PredictorTrainingSetup<>(PatrollingState.DEFENDER_ID, trainablePredictor, episodeDataMaker, dataAggregator);
 //
@@ -117,14 +123,14 @@
 //            4096,
 //            1,
 //            0.8,
-//            0.001,
+//            0.01,
 //            tfModelAsBytes,
 //            systemConfig.getParallelThreadsCount(),
 //            new SplittableRandom(systemConfig.getRandomSeed()));
 //
 //
 //        var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
-//        var dataAggregator2 = new ReplayBufferDataAggregator(10000);
+//        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
 //
 ////        var trainablePredictor2 = new DataTablePredictorWithLr(new double[] {0.0}, 0.0001);
 ////        var dataAggregator2 = new EveryVisitMonteCarloDataAggregator(new LinkedHashMap<>());
@@ -152,6 +158,7 @@
 //                    return new ValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor2, 0.0);
 //                }
 //                return new ValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor2, temperatureSupplier.get());
+////                return new UniformRandomWalkPolicy<>(random.split(), policyId);
 //            };
 //        };
 //
@@ -346,7 +353,7 @@
 //            false,
 //            7,
 //            true,
-//            100000,
+//            100_000,
 //            1000,
 //            true,
 //            false,
@@ -354,15 +361,16 @@
 //            Path.of("TEST_PATH"),
 //            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 //
-//        var algorithmConfig = new CommonAlgorithmConfigBase(5000, 100);
+//        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 //
 //        var moveCostMatrix = new double[][] {
-//            new double[] {-100.0, 1622.34, 2206.24, 3431.17, 2758.20, 1084.68},
-//            new double[] {1622.34, -100.0, 583.91, 1808.83, 1135.86, 816.23},
-//            new double[] {2206.24, 583.91, -100.0, 1224.93, 551.96, 1400.14},
-//            new double[] {3431.17, 1808.83, 1224.93, -100.0, 706.35, 2625.06},
-//            new double[] {2758.20, 1135.86, 551.96, 706.35, -100-.0, 1952.09},
-//            new double[] {1084.68, 816.23, 1400.14, 2625.06, 1952.09, -100.0}
+//            new double[] {-1.0, -1.0, -1.0, 1.0, -1.0, -1.0},
+//            new double[] {-1.0, -1.0, -1.0, -1.0, 1.0, -1.0},
+//            new double[] {-1.0, -1.0, -1.0, -1.0, -1.0, 1.0},
+//
+//            new double[] {-1.0, 1.0, 1.0, -1.0, -1.0, -1.0},
+//            new double[] {1.0, -1.0, 1.0, -1.0, -1.0, -1.0},
+//            new double[] {1.0, 1.0, -1.0, -1.0, -1.0, -1.0},
 //        };
 //
 //        var graph = new boolean[moveCostMatrix.length][];
@@ -378,25 +386,30 @@
 //        var attackLengthMap = new HashMap<Integer, Double>();
 //        var attackCostMap = new HashMap<Integer, Double>();
 //
-//        var givenCosts = List.of(470.0, 470.0, 330.0, 400.0, 459.99999999999994, 509.99999999999994);
-//        var givenAttackLengths = List.of(5025.0, 5025.0, 5025.0, 5025.0, 5025.0, 5025.0);
+//        var isTarget = List.of(true, true, true, false, false, false);
+//        var givenCosts = List.of(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+//        var givenAttackLengths = List.of(5.0, 5.0, 5.0, 0.0, 0.0, 0.0);
 //
 //        for (int i = 0; i < graph.length; i++) {
-//            isTargetSet.add(i);
-//            attackLengthMap.put(i, givenAttackLengths.get(i));
-//            attackCostMap.put(i, givenCosts.get(i));
+//            if(isTarget.get(i)) {
+//                isTargetSet.add(i);
+//                attackLengthMap.put(i, givenAttackLengths.get(i));
+//                attackCostMap.put(i, givenCosts.get(i));
+//            }
 //        }
 //
 //        var graphDef = new GraphDef(graph, moveCostMatrix, isTargetSet, attackLengthMap, attackCostMap);
 //        var patrollingConfig = new PatrollingConfig(300, false, 0, 2, List.of(new PolicyCategoryInfo(false, 1, 2)), PolicyShuffleStrategy.NO_SHUFFLE, graphDef);
 //
-//        var defenderLookbackSize = 3;
-//        var attackerLookbackSize = 3;
+//        var defenderLookbackSize = 6;
+//        var attackerLookbackSize = 6;
 //
 //
-//        var defenderPolicy = getDefenderPolicy(patrollingConfig, systemConfig, defenderLookbackSize);
+//        var predictor = new DataTablePredictorWithLr(new double[] {0.0}, 0.0001);
+//
+//        var defenderPolicy = getDefenderPolicy(patrollingConfig, systemConfig, defenderLookbackSize, predictor);
 //        var attackerPolicy = getAttackerPolicy(patrollingConfig, systemConfig, attackerLookbackSize);
-//        var perfectAttackerPolicy = getPerfectAttackerPolicy(patrollingConfig, systemConfig, attackerLookbackSize, defenderLookbackSize, defenderPolicy, attackerPolicy, new HashMap<>());
+////        var perfectAttackerPolicy = getPerfectAttackerPolicy(patrollingConfig, systemConfig, attackerLookbackSize, defenderLookbackSize, defenderPolicy, attackerPolicy, new HashMap<>());
 //
 //        var policyArgumentsList = List.of(
 //            defenderPolicy,
@@ -417,9 +430,43 @@
 //        var playerOneResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(PatrollingState.DEFENDER_ID);
 //        var playerTwoResult = result.getEvaluationStatistics().getTotalPayoffAverage().get(PatrollingState.ATTACKER_ID);
 //
+//
+//        analyzePredictor(predictor);
+//
 //        System.out.println("Defender: " + playerOneResult);
 //        System.out.println("Attacker: " + playerTwoResult);
+//
+//
+//
 //    }
+//
+//
+//    private static void analyzePredictor(DataTablePredictorWithLr predictor) {
+//
+//        var hashMap = predictor.getPredictionMap();
+//
+//        var nodes = hashMap.keySet().stream().map(x -> x.getObservedVector()[0]).distinct().collect(Collectors.toList());
+//
+//
+//        for (Double node : nodes) {
+//            var values = new ArrayList<Double>();
+//            for (Map.Entry<DoubleVector, double[]> entry : hashMap.entrySet()) {
+//                double[] observedVector = entry.getKey().getObservedVector();
+//                if(observedVector[observedVector.length - 4] == node && observedVector[0] != observedVector[2]) {
+//                    values.add(entry.getValue()[0]);
+//                }
+//            }
+//
+//            var array = values.stream().mapToDouble(x -> x).toArray();
+//            RandomDistributionUtils.applySoftmax(array);
+//            System.out.println("For node: [" + node + "] softmaxed values: [" + Arrays.toString(array) + "]");
+//        }
+//
+//        System.out.println("asdf");
+//
+//    }
+//
+//
 //
 //
 //}

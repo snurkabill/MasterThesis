@@ -73,4 +73,9 @@ public class DataTablePredictorWithLr implements TrainablePredictor {
     public void close() {
 
     }
+
+    public HashMap<DoubleVector, double[]> getPredictionMap() {
+
+        return predictionMap;
+    }
 }

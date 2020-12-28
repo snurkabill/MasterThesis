@@ -67,12 +67,12 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
     }
 
     private double[] resolveReward(double attackCountDown, int attackOnNodeId, int defenderOnNodeId) {
-        if(attackCountDown <= 0.0) {
-            var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
-            return new double[] {-cost, cost};
+        if(attackCountDown <= 0.0 && !defenderOnTurn) {
+//            var cost = this.staticPart.getGraphRepresentation().getAttackCost(attackOnNodeId);
+            return new double[] {0, 1};
         }
-        if(attackOnNodeId == defenderOnNodeId) {
-            return new double[] {1, -1};
+        if(attackOnNodeId == defenderOnNodeId && !defenderOnTurn) {
+            return new double[] {1, 0};
         }
         return emptyReward;
     }
@@ -142,9 +142,14 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public DoubleVector getCommonObservation(int inGameEntityId) {
-        var arr = new double[staticPart.getNodeCount() + 1];
-        arr[defenderOnNodeId] = 1;
-        arr[arr.length - 1] = defenderOnTurn ? 1.0 : 0.0;
+//        var arr = new double[staticPart.getNodeCount() + 1];
+//        arr[defenderOnNodeId] = 1;
+//        arr[arr.length - 1] = defenderOnTurn ? 1.0 : 0.0;
+//        return new DoubleVector(arr);
+
+        var arr = new double[2];
+        arr[0] = defenderOnNodeId;
+        arr[1] = defenderOnTurn ? 1.0 : 0.0;
         return new DoubleVector(arr);
     }
 
@@ -190,6 +195,45 @@ public class PatrollingState implements State<PatrollingAction, DoubleVector, Pa
 
     @Override
     public boolean isFinalState() {
-        return (attackCountDown <= 0) || (attackInProgress && attackOnNodeId == defenderOnNodeId);
+        return (attackCountDown <= 0 && defenderOnTurn) || (attackInProgress && attackOnNodeId == defenderOnNodeId && defenderOnTurn);
+    }
+
+    public int getDefenderOnId() {
+        return defenderOnNodeId;
+    }
+
+    public int getAttackOnId() {
+        return attackOnNodeId;
+    }
+
+    public double getAttackCountdown() {
+        return attackCountDown;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || !(o instanceof PatrollingState)) return false;
+
+        PatrollingState that = (PatrollingState) o;
+
+        if (attackInProgress != that.attackInProgress) return false;
+        if (Double.compare(that.attackCountDown, attackCountDown) != 0) return false;
+        if (attackOnNodeId != that.attackOnNodeId) return false;
+        if (defenderOnTurn != that.defenderOnTurn) return false;
+        return defenderOnNodeId == that.defenderOnNodeId;
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (attackInProgress ? 1 : 0);
+        temp = Double.doubleToLongBits(attackCountDown);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + attackOnNodeId;
+        result = 31 * result + (defenderOnTurn ? 1 : 0);
+        result = 31 * result + defenderOnNodeId;
+        return result;
     }
 }

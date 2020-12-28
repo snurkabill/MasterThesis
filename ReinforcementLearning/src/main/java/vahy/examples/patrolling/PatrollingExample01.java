@@ -53,9 +53,9 @@ public class PatrollingExample01 {
             @Override
             public Policy<PatrollingAction, DoubleVector, PatrollingState> apply(StateWrapper<PatrollingAction, DoubleVector, PatrollingState> initialState, PolicyMode policyMode, int policyId, SplittableRandom random) {
                 if (policyMode == PolicyMode.INFERENCE) {
-                    return new RandomizedValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor, 0.0);
+                    return new RandomizedValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor, 0.0, false);
                 }
-                return new RandomizedValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor, 0.1);
+                return new RandomizedValuePolicy<PatrollingAction, PatrollingState>(random.split(), policyId, trainablePredictor, 0.1, false);
             };
         };
 
