@@ -11,15 +11,19 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
+import java.util.Arrays;
 import java.util.SplittableRandom;
 
 public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> extends ExploringPolicy<TAction, DoubleVector, TState> {
 
     private final Predictor<DoubleVector> valuePredictor;
+    private final boolean makePolicyRecord;
+    private double[] latestDistribution;
 
-    public RandomizedValuePolicy(SplittableRandom random, int policyId, Predictor<DoubleVector> valuePredictor, double explorationConstant) {
+    public RandomizedValuePolicy(SplittableRandom random, int policyId, Predictor<DoubleVector> valuePredictor, double explorationConstant, boolean makePolicyRecord) {
         super(random, policyId, explorationConstant);
         this.valuePredictor = valuePredictor;
+        this.makePolicyRecord = makePolicyRecord;
     }
 
     private ImmutableTuple<Double, TAction> getMaxActionValuePair(StateWrapper<TAction, DoubleVector, TState> gameState) {
@@ -31,6 +35,7 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
         var observations = new DoubleVector[actions.length];
 
         for (int i = 0; i < actions.length; i++) {
+
             var applied = gameState.applyAction(actions[i]);
             rewards[i] = applied.getReward();
             observations[i] = applied.getState().getObservation();
@@ -42,6 +47,9 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
             firstDimPredictions[i] = rewards[i] + predictions[i][0];
         }
         RandomDistributionUtils.applySoftmax(firstDimPredictions);
+        if(makePolicyRecord) {
+            latestDistribution = firstDimPredictions;
+        }
         var index = RandomDistributionUtils.getRandomIndexFromDistribution(firstDimPredictions, random);
         return new ImmutableTuple<>(firstDimPredictions[index], actions[index]);
     }
@@ -59,7 +67,11 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
     @Override
     protected PlayingDistribution<TAction> inferenceBranch(StateWrapper<TAction, DoubleVector, TState> gameState) {
         var actionValuePair = getMaxActionValuePair(gameState);
-        return new PlayingDistribution<>(actionValuePair.getSecond(), actionValuePair.getFirst(), EMPTY_ARRAY);
+        if(makePolicyRecord) {
+            return new PlayingDistribution<>(actionValuePair.getSecond(), actionValuePair.getFirst(), latestDistribution);
+        } else {
+            return new PlayingDistribution<>(actionValuePair.getSecond(), actionValuePair.getFirst(), EMPTY_ARRAY);
+        }
     }
 
     @Override
@@ -69,6 +81,12 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
         var action = actions[actionIndex];
         var applied = gameState.applyAction(action);
         var value = applied.getReward() + valuePredictor.apply(applied.getState().getObservation())[0];
-        return new PlayingDistribution<>(action, value, EMPTY_ARRAY);
+        if(makePolicyRecord) {
+            var array = new double[actions.length];
+            Arrays.fill(array, 1.0/actions.length);
+            return new PlayingDistribution<>(action, value, array);
+        } else {
+            return new PlayingDistribution<>(action, value, EMPTY_ARRAY);
+        }
     }
 }
