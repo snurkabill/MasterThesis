@@ -11,6 +11,7 @@ import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.learning.trainer.EarlyStoppingStrategy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.StateWrapper;
@@ -19,6 +20,7 @@ import vahy.impl.benchmark.EpisodeStatisticsCalculatorBase;
 import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
+import vahy.impl.learning.trainer.earlyStoppingStrategies.AlwaysFalseStoppingStrategy;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.KnownModelPolicy;
 import vahy.impl.runner.EpisodeWriter;
@@ -62,6 +64,8 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
     private StateWrapperInitializer<TAction, DoubleVector, TState> stateStateWrapperInitializer;
 
     private List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList;
+
+    private EarlyStoppingStrategy<TAction, DoubleVector, TState, TStatistics> earlyStoppingStrategy;
 
     public RoundBuilder<TConfig, TAction, TState, TStatistics> setRoundName(String roundName) {
         this.roundName = roundName;
@@ -113,6 +117,11 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         return this;
     }
 
+    public RoundBuilder<TConfig, TAction, TState, TStatistics> setEarlyStoppingStrategy(EarlyStoppingStrategy<TAction, DoubleVector, TState, TStatistics> earlyStoppingStrategy) {
+        this.earlyStoppingStrategy = earlyStoppingStrategy;
+        return this;
+    }
+
     private void finalizeSetup() {
         if (roundName == null) {
             throw new IllegalArgumentException("Missing RunName");
@@ -137,6 +146,9 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
         }
         if (resultsFactory == null) {
             throw new IllegalArgumentException("Missing resultsFactory");
+        }
+        if (earlyStoppingStrategy == null) {
+            throw new IllegalArgumentException("Missing earlyStoppingStrategy");
         }
         if (playerPolicyArgumentList == null) {
             throw new IllegalArgumentException("Missing policyArgumentList");
@@ -196,7 +208,8 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             statisticsCalculator,
             additionalDataPointGeneratorList,
             episodeWriter,
-            policyList);
+            policyList,
+            earlyStoppingStrategy);
     }
 
     private EvaluationArguments<TConfig, TAction, DoubleVector, TState, TStatistics> buildEvaluationArguments(EpisodeWriter<TAction, DoubleVector, TState> episodeWriter) {
@@ -297,7 +310,8 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             .setStateStateWrapperInitializer(stateWrapperInitializer)
             .setResultsFactory(resultsFactory)
             .setStatisticsCalculator(episodeStatisticsCalculator)
-            .setPlayerPolicySupplierList(policyArgumentsList);
+            .setPlayerPolicySupplierList(policyArgumentsList)
+            .setEarlyStoppingStrategy(new AlwaysFalseStoppingStrategy<>());
     }
 
 

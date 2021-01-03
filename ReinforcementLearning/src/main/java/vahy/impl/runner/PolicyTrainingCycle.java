@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import vahy.api.benchmark.EpisodeStatistics;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.learning.trainer.EarlyStoppingStrategy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -27,16 +28,19 @@ public class PolicyTrainingCycle<
     private final CommonAlgorithmConfig algorithmConfig;
     private final EpisodeWriter<TAction, TObservation, TState> episodeWriter;
     private final Trainer<TAction, TObservation, TState, TStatistics> trainer;
+    private final EarlyStoppingStrategy<TAction, TObservation, TState, TStatistics> earlyStoppingStrategy;
 
 
     public PolicyTrainingCycle(SystemConfig systemConfig,
                                CommonAlgorithmConfig algorithmConfig,
                                EpisodeWriter<TAction, TObservation, TState> episodeWriter,
-                               Trainer<TAction, TObservation, TState, TStatistics> trainer) {
+                               Trainer<TAction, TObservation, TState, TStatistics> trainer,
+                               EarlyStoppingStrategy<TAction, TObservation, TState, TStatistics> earlyStoppingStrategy) {
         this.systemConfig = systemConfig;
         this.algorithmConfig = algorithmConfig;
         this.episodeWriter = episodeWriter;
         this.trainer = trainer;
+        this.earlyStoppingStrategy = earlyStoppingStrategy;
     }
 
     public ImmutableTuple<Duration, List<TStatistics>> startTraining() {
@@ -51,6 +55,10 @@ public class PolicyTrainingCycle<
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Sampling episodes for [{}]th iteration", i);
             var episodes = trainer.sampleTraining(algorithmConfig.getBatchEpisodeCount());
+            if (earlyStoppingStrategy.isStoppingConditionFulfilled(episodes)) {
+                logger.info("Early stopping at i=[{}] iteration", i);
+                return statisticsList;
+            }
             if(systemConfig.isEvaluateDuringTraining()) {
                 logger.info("Evaluating [{}] episodes without any exploration or noise", systemConfig.getEvalEpisodeCountDuringTraining());
                 trainer.evaluate(systemConfig.getEvalEpisodeCountDuringTraining());

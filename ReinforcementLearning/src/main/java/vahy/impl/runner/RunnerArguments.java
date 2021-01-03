@@ -8,6 +8,7 @@ import vahy.api.episode.StateWrapperInitializer;
 import vahy.api.experiment.CommonAlgorithmConfig;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
+import vahy.api.learning.trainer.EarlyStoppingStrategy;
 import vahy.api.model.Action;
 import vahy.api.model.State;
 import vahy.api.model.observation.Observation;
@@ -39,6 +40,8 @@ public class RunnerArguments<TConfig extends ProblemConfig,
 
     private final EpisodeWriter<TAction, TObservation, TState> episodeWriter;
 
+    private final EarlyStoppingStrategy<TAction, TObservation, TState, TStatistics> earlyStoppingStrategy;
+
     public RunnerArguments(String runName,
                            TConfig problemConfig,
                            SystemConfig systemConfig,
@@ -50,7 +53,8 @@ public class RunnerArguments<TConfig extends ProblemConfig,
                            EpisodeStatisticsCalculator<TAction, TObservation, TState, TStatistics> episodeStatisticsCalculator,
                            List<DataPointGeneratorGeneric<TStatistics>> additionalDataPointGeneratorList,
                            EpisodeWriter<TAction, TObservation, TState> episodeWriter,
-                           List<PolicyDefinition<TAction, TObservation, TState>> policyDefinitionList) {
+                           List<PolicyDefinition<TAction, TObservation, TState>> policyDefinitionList,
+                           EarlyStoppingStrategy<TAction, TObservation, TState, TStatistics> earlyStoppingStrategy) {
         this.runName = runName;
         this.problemConfig = problemConfig;
         this.systemConfig = systemConfig;
@@ -63,6 +67,7 @@ public class RunnerArguments<TConfig extends ProblemConfig,
         this.additionalDataPointGeneratorList = additionalDataPointGeneratorList;
         this.episodeWriter = episodeWriter;
         this.policyDefinitionList = policyDefinitionList;
+        this.earlyStoppingStrategy = earlyStoppingStrategy;
     }
 
     public String getRunName() {
@@ -111,5 +116,9 @@ public class RunnerArguments<TConfig extends ProblemConfig,
 
     public SplittableRandom getFinalMasterRandom() {
         return finalMasterRandom;
+    }
+
+    public EarlyStoppingStrategy<TAction, TObservation, TState, TStatistics> getEarlyStoppingStrategy() {
+        return earlyStoppingStrategy;
     }
 }
