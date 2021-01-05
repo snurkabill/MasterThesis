@@ -17,6 +17,7 @@ import vahy.impl.RoundBuilder;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
+import vahy.impl.learning.trainer.earlyStoppingStrategies.AlwaysFalseStoppingStrategy;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
@@ -314,7 +315,8 @@ public class SHRiskTest {
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
             .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
             .setStateStateWrapperInitializer(PaperStateWrapper::new)
-            .setPlayerPolicySupplierList(policyArgumentsList);
+            .setPlayerPolicySupplierList(policyArgumentsList)
+            .setEarlyStoppingStrategy(new AlwaysFalseStoppingStrategy<SHAction, DoubleVector, SHRiskState, PaperEpisodeStatistics>());
         var result = roundBuilder.execute();
 
         assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));

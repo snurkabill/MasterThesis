@@ -102,7 +102,7 @@ public class Runner<
 
         logger.info("Training policy [{}]", runnerArguments.getRunName());
 
-        var trainingCycle = new PolicyTrainingCycle<>(runnerArguments.getSystemConfig(), runnerArguments.getAlgorithmConfig(), runnerArguments.getEpisodeWriter(), trainer);
+        var trainingCycle = new PolicyTrainingCycle<>(runnerArguments.getSystemConfig(), runnerArguments.getAlgorithmConfig(), runnerArguments.getEpisodeWriter(), trainer, runnerArguments.getEarlyStoppingStrategy());
 
         var durationWithStatistics = trainingCycle.startTraining();
         logger.info("Training of [{}] took: [{}] ms", runnerArguments.getRunName(), durationWithStatistics.getFirst().toMillis());
