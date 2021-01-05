@@ -31,4 +31,9 @@ public class BoundedEarlyStoppingStrategy<
         return oldCurrentIteration >= upperBound;
     }
 
+    @Override
+    public boolean isStoppingConditionFulfilled(ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> trainingEpisodes, ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> evaluationEpisodes) {
+        return isStoppingConditionFulfilled(trainingEpisodes);
+    }
+
 }

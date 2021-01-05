@@ -54,21 +54,24 @@ public class PolicyTrainingCycle<
         var statisticsList = new ArrayList<TStatistics>(algorithmConfig.getStageCount());
         for (int i = 0; i < algorithmConfig.getStageCount(); i++) {
             logger.info("Sampling episodes for [{}]th iteration", i);
-            var episodes = trainer.sampleTraining(algorithmConfig.getBatchEpisodeCount());
-            if (earlyStoppingStrategy.isStoppingConditionFulfilled(episodes)) {
+            var trainingEpisodes = trainer.sampleTraining(algorithmConfig.getBatchEpisodeCount());
+            if(systemConfig.isEvaluateDuringTraining()) {
+                logger.info("Evaluating [{}] episodes without any exploration or noise", systemConfig.getEvalEpisodeCountDuringTraining());
+                var evaluationEpisodes = trainer.evaluate(systemConfig.getEvalEpisodeCountDuringTraining());
+                if (earlyStoppingStrategy.isStoppingConditionFulfilled(trainingEpisodes, evaluationEpisodes)) {
+                    logger.info("Early stopping at i=[{}] iteration", i);
+                    return statisticsList;
+                }
+            } else if (earlyStoppingStrategy.isStoppingConditionFulfilled(trainingEpisodes)) {
                 logger.info("Early stopping at i=[{}] iteration", i);
                 return statisticsList;
             }
-            if(systemConfig.isEvaluateDuringTraining()) {
-                logger.info("Evaluating [{}] episodes without any exploration or noise", systemConfig.getEvalEpisodeCountDuringTraining());
-                trainer.evaluate(systemConfig.getEvalEpisodeCountDuringTraining());
-            }
             logger.info("Training predictors");
-            trainer.trainPredictors(episodes.getFirst());
+            trainer.trainPredictors(trainingEpisodes.getFirst());
             trainer.makeLog();
-            statisticsList.add(episodes.getSecond());
+            statisticsList.add(trainingEpisodes.getSecond());
             if(systemConfig.dumpTrainingData()) {
-                episodeWriter.writeTrainingEpisode(i, episodes.getFirst());
+                episodeWriter.writeTrainingEpisode(i, trainingEpisodes.getFirst());
             }
         }
         return statisticsList;

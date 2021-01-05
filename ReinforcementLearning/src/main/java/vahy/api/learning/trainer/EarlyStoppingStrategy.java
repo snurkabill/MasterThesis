@@ -15,4 +15,6 @@ public interface EarlyStoppingStrategy<
         TState extends State<TAction, TObservation, TState>,
         TStatistics extends EpisodeStatistics> {
     boolean isStoppingConditionFulfilled(ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> trainingEpisodes);
+    boolean isStoppingConditionFulfilled(ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> trainingEpisodes,
+                                         ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> evaluationEpisodes);
 }

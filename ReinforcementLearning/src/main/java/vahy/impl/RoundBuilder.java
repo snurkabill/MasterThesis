@@ -148,7 +148,7 @@ public class RoundBuilder<TConfig extends ProblemConfig, TAction extends Enum<TA
             throw new IllegalArgumentException("Missing resultsFactory");
         }
         if (earlyStoppingStrategy == null) {
-            throw new IllegalArgumentException("Missing earlyStoppingStrategy");
+            earlyStoppingStrategy = new AlwaysFalseStoppingStrategy<>();
         }
         if (playerPolicyArgumentList == null) {
             throw new IllegalArgumentException("Missing policyArgumentList");

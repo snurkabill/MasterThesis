@@ -19,4 +19,10 @@ public class AlwaysFalseStoppingStrategy<
     public boolean isStoppingConditionFulfilled(ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> trainingEpisodes) {
         return false;
     }
+
+    @Override
+    public boolean isStoppingConditionFulfilled(ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> trainingEpisodes,
+                                                ImmutableTuple<List<EpisodeResults<TAction, TObservation, TState>>, TStatistics> evaluationEpisodes) {
+        return false;
+    }
 }
