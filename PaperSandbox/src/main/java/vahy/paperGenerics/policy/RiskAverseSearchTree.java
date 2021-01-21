@@ -103,29 +103,6 @@ public class RiskAverseSearchTree<
         return playingDistribution;
     }
 
-//    private PlayingDistribution<TAction> createActionWithDistribution(PolicyStepMode policyStepMode, double temperature) {
-//        switch (policyStepMode) {
-//            case EXPLOITATION:
-//                return inferencePolicyBranch();
-//            case EXPLORATION:
-//                return explorationPolicyBranch(temperature);
-//            default: throw EnumUtils.createExceptionForUnknownEnumValue(policyStepMode);
-//        }
-//    }
-
-//    public PlayingDistribution<TAction> getActionDistributionAndDiscreteAction(StateWrapper<TAction, TObservation,TState> state, PolicyStepMode policyStepMode, double temperature) {
-//        if(!state.isPlayerTurn()) {
-//            throw new IllegalStateException("Cannot determine action distribution on opponent's turn");
-//        }
-//        try {
-//            this.playingDistribution = createActionWithDistribution(policyStepMode, temperature);
-//        return playingDistribution;
-//        } catch(Exception e) {
-//            dumpTreeWithFlow();
-//            throw e;
-//        }
-//    }
-
     public boolean isRiskIgnored() {
         return totalRiskAllowed >= 1.0;
     }
@@ -189,6 +166,12 @@ public class RiskAverseSearchTree<
             if(cumulativeNominator > totalRiskAllowed) {
                 totalRiskAllowed = 0;
             } else {
+//                var gamma = 0.9;
+//                var totalRiskAllowedNewValue = (totalRiskAllowed - cumulativeNominator) / cumulativeDenominator;
+//                var totalRiskAllowedDiff = totalRiskAllowedNewValue - totalRiskAllowed;
+//                var gammedDiff = totalRiskAllowedNewValue + gamma * totalRiskAllowedDiff;
+////                totalRiskAllowed = totalRiskAllowedNewValue;
+//                totalRiskAllowed = gammedDiff;
                 totalRiskAllowed = (totalRiskAllowed - cumulativeNominator) / cumulativeDenominator;
                 totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
             }
