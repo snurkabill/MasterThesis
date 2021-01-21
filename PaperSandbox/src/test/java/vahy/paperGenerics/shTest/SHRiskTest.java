@@ -14,6 +14,7 @@ import vahy.examples.simplifiedHallway.SHInstance;
 import vahy.examples.simplifiedHallway.SHRiskInstanceSupplier;
 import vahy.examples.simplifiedHallway.SHRiskState;
 import vahy.impl.RoundBuilder;
+import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -249,13 +250,17 @@ public class SHRiskTest {
 
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
 
+        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
+        var additionalStatistics2 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Exhausted Risk in Index avg", x -> StreamUtils.labelWrapperFunction(x.getRiskExhaustedIndexAverage()));
+        var additionalStatistics3 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("At the end threshold avg", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndAverage()));
+
         var roundBuilder = RoundBuilder.getRoundBuilder(
             "PaperSH03Test",
             config,
             systemConfig,
             algorithmConfig,
             List.of(player),
-            null,
+            List.of(additionalStatistics, additionalStatistics2, additionalStatistics3),
             SHRiskInstanceSupplier::new,
             PaperStateWrapper::new,
             new PaperEpisodeStatisticsCalculator<>(),
