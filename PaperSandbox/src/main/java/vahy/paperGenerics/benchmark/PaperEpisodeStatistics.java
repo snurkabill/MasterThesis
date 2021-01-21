@@ -12,12 +12,21 @@ public class PaperEpisodeStatistics implements EpisodeStatistics {
     private final List<Long> riskHitCounter;
     private final List<Double> riskHitRatio;
     private final List<Double> riskHitStdev;
+    private final List<Double> riskExhaustedIndexAverage;
+    private final List<Double> riskExhaustedIndexStdev;
+    private final List<Double> riskThresholdAtEndAverage;
+    private final List<Double> riskThresholdAtEndStdev;
 
-    public PaperEpisodeStatistics(EpisodeStatisticsBase base, List<Long> riskHitCounter, List<Double> riskHitRatio, List<Double> riskHitStdev) {
+
+    public PaperEpisodeStatistics(EpisodeStatisticsBase base, List<Long> riskHitCounter, List<Double> riskHitRatio, List<Double> riskHitStdev, List<Double> riskExhaustedIndexAverage, List<Double> riskExhaustedIndexStdev, List<Double> riskThresholdAtEndAverage, List<Double> riskThresholdAtEndStdev) {
         this.base = base;
         this.riskHitCounter = riskHitCounter;
         this.riskHitRatio = riskHitRatio;
         this.riskHitStdev = riskHitStdev;
+        this.riskExhaustedIndexAverage = riskExhaustedIndexAverage;
+        this.riskExhaustedIndexStdev = riskExhaustedIndexStdev;
+        this.riskThresholdAtEndAverage = riskThresholdAtEndAverage;
+        this.riskThresholdAtEndStdev = riskThresholdAtEndStdev;
     }
 
     public List<Long> getRiskHitCounter() {
@@ -32,6 +41,21 @@ public class PaperEpisodeStatistics implements EpisodeStatistics {
         return riskHitStdev;
     }
 
+    public List<Double> getRiskExhaustedIndexAverage() {
+        return riskExhaustedIndexAverage;
+    }
+
+    public List<Double> getRiskExhaustedIndexStdev() {
+        return riskExhaustedIndexStdev;
+    }
+
+    public List<Double> getRiskThresholdAtEndAverage() {
+        return riskThresholdAtEndAverage;
+    }
+
+    public List<Double> getRiskThresholdAtEndStdev() {
+        return riskThresholdAtEndStdev;
+    }
 
     @Override
     public Duration getTotalDuration() {
@@ -101,6 +125,34 @@ public class PaperEpisodeStatistics implements EpisodeStatistics {
         sb.append("Empirical risk stdev: [");
         for (int i = 0; i < base.getPlayerCount(); i++) {
             sb.append("Player [").append(i).append("] RiskHitStdev:").append(riskHitStdev.get(i));
+        }
+        sb.append("]");
+        sb.append(System.lineSeparator());
+
+        sb.append("Risk Threshold at the end average: [");
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskThresholdAtTheEndAverage:").append(riskThresholdAtEndAverage.get(i));
+        }
+        sb.append("]");
+        sb.append(System.lineSeparator());
+
+        sb.append("Risk Threshold at the end stdev: [");
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskThresholdAtTheEndStdev:").append(riskThresholdAtEndStdev.get(i));
+        }
+        sb.append("]");
+        sb.append(System.lineSeparator());
+
+        sb.append("Risk exhausted index average: [");
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskExhaustedIndexAverage:").append(riskExhaustedIndexAverage.get(i));
+        }
+        sb.append("]");
+        sb.append(System.lineSeparator());
+
+        sb.append("Risk exhausted index stdev: [");
+        for (int i = 0; i < base.getPlayerCount(); i++) {
+            sb.append("Player [").append(i).append("] RiskExhaustedIndexStdev:").append(riskExhaustedIndexStdev.get(i));
         }
         sb.append("]");
         sb.append(System.lineSeparator());
