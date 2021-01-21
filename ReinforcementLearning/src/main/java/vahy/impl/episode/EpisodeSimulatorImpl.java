@@ -137,7 +137,7 @@ public class EpisodeSimulatorImpl<
         var action = onTurnPolicy.getDiscreteAction(stateWrapper);
         var decisionInMs = System.currentTimeMillis() - start;
         var stateRewardReturn = state.applyAction(action);
-        var playerPaperPolicyStepRecord = onTurnPolicy.getPolicyRecord(stateWrapper);
+        var policyStepRecord = onTurnPolicy.getPolicyRecord(stateWrapper);
         onTurnPolicy.updateStateOnPlayedAction(action);
         for (var entry : allPolicyList) {
             if (entry.getPolicyId() != policyIdOnTurn) {
@@ -149,7 +149,7 @@ public class EpisodeSimulatorImpl<
                 }
             }
         }
-        return new ImmutableTuple<>(new EpisodeStepRecordImpl<>(policyIdOnTurn, inGameEntityId, action, playerPaperPolicyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward()), decisionInMs);
+        return new ImmutableTuple<>(new EpisodeStepRecordImpl<>(policyIdOnTurn, inGameEntityId, action, policyStepRecord, state, stateRewardReturn.getState(), stateRewardReturn.getReward()), decisionInMs);
     }
 
     private void makeStepLog(EpisodeStepRecord<TAction, TObservation, TState> step) {
