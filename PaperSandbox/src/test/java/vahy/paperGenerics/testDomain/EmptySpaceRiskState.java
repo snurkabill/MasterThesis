@@ -1,18 +1,18 @@
 package vahy.paperGenerics.testDomain;
 
+import vahy.RiskState;
 import vahy.api.model.StateRewardReturn;
 import vahy.api.predictor.PerfectStatePredictor;
 import vahy.examples.testdomain.emptySpace.EmptySpaceAction;
 import vahy.examples.testdomain.emptySpace.EmptySpaceState;
 import vahy.impl.model.ImmutableStateRewardReturn;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.paperGenerics.PaperState;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class EmptySpaceRiskState implements PaperState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> {
+public class EmptySpaceRiskState implements RiskState<EmptySpaceAction, DoubleVector, EmptySpaceRiskState> {
 
     private static final boolean[] NO_RISK_ARRAY = new boolean[] {false, false};
     private static final boolean[] RISK_HIT_ARRAY = new boolean[] {true, true};

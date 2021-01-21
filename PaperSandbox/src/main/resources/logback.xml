@@ -56,7 +56,7 @@
         <appender-ref ref="EPISODE_FILE"/>
     </logger>
 
-<!--    <logger name="vahy.paperGenerics.policy.RiskAverseSearchTree" level="debug" additivity="false">-->
+<!--    <logger name="vahy.ralph.policy.RiskAverseSearchTree" level="debug" additivity="false">-->
 <!--        <appender-ref ref="consoleAppender"/>-->
 <!--    </logger>-->
 

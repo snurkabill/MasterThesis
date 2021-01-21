@@ -1,25 +1,14 @@
-package vahy.paperGenerics.shTest;
+package vahy.examples.simplifiedHallway;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import vahy.RiskStateWrapper;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
-import vahy.examples.simplifiedHallway.SHAction;
-import vahy.examples.simplifiedHallway.SHConfig;
-import vahy.examples.simplifiedHallway.SHConfigBuilder;
-import vahy.examples.simplifiedHallway.SHInstance;
-import vahy.examples.simplifiedHallway.SHRiskInstanceSupplier;
-import vahy.examples.simplifiedHallway.SHRiskState;
 import vahy.impl.RoundBuilder;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
-import vahy.impl.learning.trainer.earlyStoppingStrategies.AlwaysFalseStoppingStrategy;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
@@ -45,7 +34,6 @@ import vahy.ralph.reinforcement.learning.RalphEpisodeDataMaker_V1;
 import vahy.ralph.selector.RalphNodeSelector;
 import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
-import vahy.utils.JUnitParameterizedTestHelper;
 import vahy.utils.StreamUtils;
 
 import java.nio.file.Path;
@@ -53,11 +41,10 @@ import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-public class SHRiskTest {
+public class ExampleRisk03 {
 
-    private PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState> getTrainingSetup(int playerId, int totalEntityCount, int totalActionCount) {
+    private static PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState> getTrainingSetup(int playerId, int totalEntityCount, int totalActionCount) {
         double discountFactor = 1;
 
         var defaultPrediction = new double[totalEntityCount * 2 + totalActionCount];
@@ -77,11 +64,10 @@ public class SHRiskTest {
             dataAggregator
         );
 
-
         return predictorTrainingSetup;
     }
 
-    private PolicyDefinition<SHAction, DoubleVector, SHRiskState> getPlayer(ProblemConfig config, int treeUpdateCount, Supplier<Double> temperatureSupplier, double riskAllowed) {
+    private static PolicyDefinition<SHAction, DoubleVector, SHRiskState> getPlayer(ProblemConfig config, int treeUpdateCount, Supplier<Double> temperatureSupplier, double riskAllowed) {
 
         var playerId = 1;
         var totalEntityCount = 2;
@@ -100,14 +86,14 @@ public class SHRiskTest {
         var treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(treeUpdateCount);
 
         var strategiesProvider = new StrategiesProvider<SHAction, DoubleVector, RalphMetadata<SHAction>, SHRiskState>(
-                    actionClass,
-                    InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
-                    InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
-                    ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
-                    ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
-                    FlowOptimizerType.HARD_HARD,
-                    SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
-                    NoiseStrategy.NOISY_05_06);
+            actionClass,
+            InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
+            InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
+            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+            ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
+            FlowOptimizerType.HARD_HARD,
+            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
+            NoiseStrategy.NOISY_05_06);
 
         var updater = new RalphTreeUpdater<SHAction, DoubleVector, SHRiskState>();
         var nodeEvaluator = new RalphNodeEvaluator<SHAction, SHRiskState>(searchNodeFactory, trainablePredictor, config.isModelKnown());
@@ -158,63 +144,13 @@ public class SHRiskTest {
         );
     }
 
-    protected static Stream<Arguments> SHTest03Params() {
-        return JUnitParameterizedTestHelper.cartesian(
-            Stream.of(
-                Arguments.of(0.0, 80.0, 80.0, 1.0),
-                Arguments.of(1.0, 60.0, 60.0, 1.0),
-                Arguments.of(0.05, 75.0, 76.0, 1.0),
+    public static void main(String[] args) {
 
-                Arguments.of(0.0, 80.0, 80.0, 0.0),
-                Arguments.of(1.0, 60.0, 60.0, 0.0),
-                Arguments.of(0.05, 60.0, 60.0, 0.0),
+        double trapProbability = 0.1;
+        double riskAllowed = 0.05;
+        long seed = 0;
 
-                Arguments.of(0.0, 80.0, 80.0, 0.50),
-                Arguments.of(1.0, 60.0, 60.0, 0.50),
-                Arguments.of(0.1, 63.0, 65.0, 0.05)
-            ),
-            StreamUtils.getSeedStream(9548681, 3)
-        );
-    }
 
-    protected static Stream<Arguments> SHTest05Params() {
-        return JUnitParameterizedTestHelper.cartesian(
-            Stream.of(
-                Arguments.of(0.0, 290.0, 290.0, 1.0),
-                Arguments.of(1.0, 288.0, 290.0, 1.0),
-                Arguments.of(0.5, 288.0, 290.0, 1.0),
-
-                Arguments.of(0.0, 290.0, 290.0, 0.0),
-                Arguments.of(1.0, 288.0, 290.0, 0.0),
-                Arguments.of(0.5, 288.0, 290.0, 0.0),
-
-                Arguments.of(0.0, 290.0, 290.0, 0.5),
-                Arguments.of(1.0, 288.0, 290.0, 0.5),
-                Arguments.of(0.5, 288.0, 290.0, 0.5)
-            ),
-            StreamUtils.getSeedStream(4567, 3)
-        );
-    }
-
-    protected static Stream<Arguments> SHTest12Params() {
-        return JUnitParameterizedTestHelper.cartesian(
-            Stream.of(
-                Arguments.of(0.0, 600.0 - 120),
-                Arguments.of(1.0, 600.0 - 240),
-                Arguments.of(0.1, 335.0)
-            ),
-            StreamUtils.getSeedStream(5)
-        );
-    }
-
-    public static void assertConvergenceResult(double expectedPayoffMax, double expectedPayoffMin, double actualPayoff) {
-        assertTrue(expectedPayoffMin <= actualPayoff, "Expected min payoff: [" + expectedPayoffMin + "] but actual was: [" + actualPayoff + "]");
-        assertTrue(expectedPayoffMax >= actualPayoff, "Expected max payoff: [" + expectedPayoffMax + "] but actual was: [" + actualPayoff + "]");
-    }
-
-    @ParameterizedTest(name = "Trap probability {0} to reach expectedPayoff in interval [{1}, {2}] under allowedRisk {3} with seed {4}")
-    @MethodSource("SHTest03Params")
-    public void convergence03Test(double trapProbability, double expectedPayoffMin, double expectedPayoffMax, double riskAllowed, long seed) {
         var config = new SHConfigBuilder()
             .isModelKnown(true)
             .reward(100)
@@ -228,7 +164,7 @@ public class SHRiskTest {
             seed,
             false,
             ConvergenceAssert.TEST_THREAD_COUNT,
-            false,
+            true,
             5000,
             0,
             false,
@@ -237,22 +173,26 @@ public class SHRiskTest {
             Path.of("TEST_PATH"),
             null);
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
+        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 
-        Supplier<Double> temperatureSupplier = new Supplier<>() {
-            private int callCount = 0;
-            @Override
-            public Double get() {
-                callCount++;
-                return Math.exp(-callCount / 5000.0);
-            }
-        };
+//        Supplier<Double> temperatureSupplier = new Supplier<>() {
+//            private int callCount = 0;
+//            @Override
+//            public Double get() {
+//                callCount++;
+//                return Math.exp(-callCount / 5000.0);
+//            }
+//        };
 
-        var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
+        Supplier<Double> temperatureSupplier = () -> 0.1;
+
+        var player = getPlayer(config, 20, temperatureSupplier, riskAllowed);
 
         var additionalStatistics = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
         var additionalStatistics2 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Exhausted Risk in Index avg", x -> StreamUtils.labelWrapperFunction(x.getRiskExhaustedIndexAverage()));
-        var additionalStatistics3 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("At the end threshold avg", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndAverage()));
+        var additionalStatistics3 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Exhausted Risk in Index stdev", x -> StreamUtils.labelWrapperFunction(x.getRiskExhaustedIndexStdev()));
+        var additionalStatistics4 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("At the end threshold avg", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndAverage()));
+        var additionalStatistics5 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("At the end threshold stdev", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndStdev()));
 
         var roundBuilder = RoundBuilder.getRoundBuilder(
             "PaperSH03Test",
@@ -260,7 +200,7 @@ public class SHRiskTest {
             systemConfig,
             algorithmConfig,
             List.of(player),
-            List.of(additionalStatistics, additionalStatistics2, additionalStatistics3),
+            List.of(additionalStatistics, additionalStatistics2, additionalStatistics3, additionalStatistics4, additionalStatistics5),
             SHRiskInstanceSupplier::new,
             RiskStateWrapper::new,
             new RiskEpisodeStatisticsCalculator<>(),
@@ -268,65 +208,8 @@ public class SHRiskTest {
         );
         var result = roundBuilder.execute();
 
-        assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
+        System.out.println(result);
+
     }
-
-    @ParameterizedTest(name = "Trap probability {0} to reach {1} max and {2} min expectedPayoff under allowedRisk {3} with seed {4}")
-    @MethodSource("SHTest05Params")
-    public void convergence05Test(double trapProbability, double expectedPayoffMin, double expectedPayoffMax, double riskAllowed, long seed) {
-        var config = new SHConfigBuilder()
-            .isModelKnown(true)
-            .reward(100)
-            .gameStringRepresentation(SHInstance.BENCHMARK_05)
-            .maximalStepCountBound(100)
-            .stepPenalty(1)
-            .trapProbability(trapProbability)
-            .buildConfig();
-
-        var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
-
-        var systemConfig = new SystemConfig(
-            seed,
-            false,
-            ConvergenceAssert.TEST_THREAD_COUNT,
-            false,
-            10000,
-            0,
-            false,
-            false,
-            false,
-            Path.of("TEST_PATH"),
-            null);
-
-        Supplier<Double> temperatureSupplier = new Supplier<>() {
-            private int callCount = 0;
-            @Override
-            public Double get() {
-                callCount++;
-                return Math.exp(-callCount / 10000.0) * 4;
-            }
-        };
-
-        var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
-        var policyArgumentsList = List.of(player);
-
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, RiskEpisodeStatistics>()
-            .setRoundName("SH05Test")
-            .setAdditionalDataPointGeneratorListSupplier(null)
-            .setCommonAlgorithmConfig(algorithmConfig)
-            .setProblemConfig(config)
-            .setSystemConfig(systemConfig)
-            .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
-            .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setPlayerPolicySupplierList(policyArgumentsList)
-            .setStatisticsCalculator(new RiskEpisodeStatisticsCalculator<>())
-            .setStateStateWrapperInitializer(RiskStateWrapper::new)
-            .setPlayerPolicySupplierList(policyArgumentsList)
-            .setEarlyStoppingStrategy(new AlwaysFalseStoppingStrategy<SHAction, DoubleVector, SHRiskState, RiskEpisodeStatistics>());
-        var result = roundBuilder.execute();
-
-        assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));
-    }
-
 
 }
