@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+
+    <Match>
+        <Class name="vahy.examples.bomberman.BomberManRiskState"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.examples.simplifiedHallway.SHRiskState"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <Match>
+        <Class name="vahy.examples.tictactoe.TicTacToeRiskState"/>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+
+</FindBugsFilter>

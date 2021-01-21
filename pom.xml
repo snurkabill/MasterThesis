@@ -14,6 +14,7 @@
         <module>StateSpaceSearch</module>
         <module>ReinforcementLearning</module>
         <module>PaperSandbox</module>
+        <module>Risk</module>
     </modules>
 
     <properties>

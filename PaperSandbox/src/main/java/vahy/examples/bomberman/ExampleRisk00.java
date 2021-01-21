@@ -1,5 +1,6 @@
 package vahy.examples.bomberman;
 
+import vahy.RiskStateWrapper;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
@@ -21,26 +22,25 @@ import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.paperGenerics.PaperStateWrapper;
-import vahy.paperGenerics.PaperTreeUpdater;
-import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
-import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
-import vahy.paperGenerics.evaluator.PaperBatchNodeEvaluator;
-import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
-import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.metadata.PaperMetadataFactory;
-import vahy.paperGenerics.policy.PaperPolicyImpl;
-import vahy.paperGenerics.policy.RiskAverseSearchTree;
-import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
-import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
-import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
-import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V2;
-import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.ralph.RalphTreeUpdater;
+import vahy.benchmark.RiskEpisodeStatistics;
+import vahy.benchmark.RiskEpisodeStatisticsCalculator;
+import vahy.ralph.evaluator.RalphBatchNodeEvaluator;
+import vahy.ralph.evaluator.RalphNodeEvaluator;
+import vahy.ralph.metadata.RalphMetadata;
+import vahy.ralph.metadata.RiskSearchMetadataFactory;
+import vahy.ralph.policy.RalphPolicy;
+import vahy.ralph.policy.RiskAverseSearchTree;
+import vahy.ralph.policy.flowOptimizer.FlowOptimizerType;
+import vahy.ralph.policy.linearProgram.NoiseStrategy;
+import vahy.ralph.policy.riskSubtree.SubTreeRiskCalculatorType;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.ralph.reinforcement.learning.RalphEpisodeDataMaker_V2;
+import vahy.ralph.selector.RalphNodeSelector;
 import vahy.tensorflow.TFHelper;
 import vahy.tensorflow.TFModelImproved;
 import vahy.utils.EnumUtils;
@@ -61,11 +61,11 @@ public class ExampleRisk00 {
     private ExampleRisk00() {}
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
-        var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 1, true, 10000, 1000, false, false, false, Path.of("TEST_PATH"),
+        var config = new BomberManConfig(500, true, 100, 1, 1, 2, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.NO_SHUFFLE);
+        var systemConfig = new SystemConfig(987567, false, 6, true, 10000, 1000, false, false, false, Path.of("TEST_PATH"),
             System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 10);
+        var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
@@ -118,12 +118,18 @@ public class ExampleRisk00 {
 
         List<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> policyArgumentsList = List.of(
             riskPolicy_0,
-            valuePlayer_1
+            riskPolicy_1
+//            valuePlayer_1
         );
 
-        var additionalStatistics = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
-        var additionalStatistics2 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("Combined payoff", x -> Collections.singletonList(new LabelData("", x.getTotalPayoffAverage().stream().mapToDouble(y -> y).sum())));
-        var additionalStatistics3 = new DataPointGeneratorGeneric<PaperEpisodeStatistics>("RandomNoise", x -> Collections.singletonList(new LabelData("", new SplittableRandom().nextDouble())));
+        var additionalStatistics = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
+        var additionalStatistics2 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Exhausted Risk in Index avg", x -> StreamUtils.labelWrapperFunction(x.getRiskExhaustedIndexAverage()));
+        var additionalStatistics3 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Exhausted Risk in Index stdev", x -> StreamUtils.labelWrapperFunction(x.getRiskExhaustedIndexStdev()));
+        var additionalStatistics4 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("At the end threshold avg", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndAverage()));
+        var additionalStatistics5 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("At the end threshold stdev", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndStdev()));
+
+        var additionalStatistics6 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Combined payoff", x -> Collections.singletonList(new LabelData("", x.getTotalPayoffAverage().stream().mapToDouble(y -> y).sum())));
+        var additionalStatistics7 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("RandomNoise", x -> Collections.singletonList(new LabelData("", new SplittableRandom().nextDouble())));
 
         var roundBuilder = RoundBuilder.getRoundBuilder(
             "BomberManRisk00",
@@ -131,10 +137,10 @@ public class ExampleRisk00 {
             systemConfig,
             algorithmConfig,
             policyArgumentsList,
-            List.of(additionalStatistics, additionalStatistics2, additionalStatistics3),
+            List.of(additionalStatistics, additionalStatistics2, additionalStatistics3, additionalStatistics4, additionalStatistics5, additionalStatistics6),
             BomberManRiskInstanceInitializer::new,
-            PaperStateWrapper::new,
-            new PaperEpisodeStatisticsCalculator<>(),
+            RiskStateWrapper::new,
+            new RiskEpisodeStatisticsCalculator<>(),
             new EpisodeResultsFactoryBase<>()
         );
 
@@ -183,8 +189,8 @@ public class ExampleRisk00 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictor_risk = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-        var dataAggregator_risk = new ReplayBufferDataAggregator(1000);
-        var episodeDataMaker_risk = new PaperEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor, dataAggregator_risk);
+        var dataAggregator_risk = new ReplayBufferDataAggregator(10000);
+        var episodeDataMaker_risk = new RalphEpisodeDataMaker_V2<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor, dataAggregator_risk);
 //        var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
         var predictorTrainingSetup_risk = new PredictorTrainingSetup<BomberManAction, DoubleVector, BomberManRiskState>(
@@ -194,17 +200,17 @@ public class ExampleRisk00 {
             dataAggregator_risk
         );
 
-        var metadataFactory = new PaperMetadataFactory<BomberManAction, DoubleVector, BomberManRiskState>(actionClass, totalEntityCount);
-        var searchNodeFactory = new SearchNodeBaseFactoryImpl<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(actionClass, metadataFactory);
+        var metadataFactory = new RiskSearchMetadataFactory<BomberManAction, DoubleVector, BomberManRiskState>(actionClass, totalEntityCount);
+        var searchNodeFactory = new SearchNodeBaseFactoryImpl<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(actionClass, metadataFactory);
 
         var totalRiskAllowedInference = riskAllowed;
-        Supplier<Double> explorationSupplier = () -> 1.0;
-        Supplier<Double> temperatureSupplier = () -> 1.5;
+        Supplier<Double> explorationSupplier = () -> 0.05;
+        Supplier<Double> temperatureSupplier = () -> 100.0;
         Supplier<Double> trainingRiskSupplier = () -> totalRiskAllowedInference;
 
         var treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(treeExpansionCount);
 
-        var strategiesProvider = new StrategiesProvider<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(
+        var strategiesProvider = new StrategiesProvider<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(
             actionClass,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
             InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
@@ -215,25 +221,25 @@ public class ExampleRisk00 {
             SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             NoiseStrategy.NONE);
 
-        var updater = new PaperTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
+        var updater = new RalphTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
         var nodeEvaluator = maxBatchedDepth == 0 ?
-            new PaperNodeEvaluator<BomberManAction, BomberManRiskState>(searchNodeFactory, trainablePredictor_risk, config.isModelKnown()) :
-            new PaperBatchNodeEvaluator<BomberManAction, BomberManRiskState>(searchNodeFactory, trainablePredictor_risk, maxBatchedDepth, config.isModelKnown());
+            new RalphNodeEvaluator<BomberManAction, BomberManRiskState>(searchNodeFactory, trainablePredictor_risk, config.isModelKnown()) :
+            new RalphBatchNodeEvaluator<BomberManAction, BomberManRiskState>(searchNodeFactory, trainablePredictor_risk, maxBatchedDepth, config.isModelKnown());
 
 
         var riskPolicy =  new PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>(
             policyId,
             1,
             (initialState_, policyMode_, policyId_, random_) -> {
-                Supplier<PaperNodeSelector<BomberManAction, DoubleVector, BomberManRiskState>> nodeSelectorSupplier = () -> new PaperNodeSelector<>(random_, config.isModelKnown(), cpuct, totalActionCount);
+                Supplier<RalphNodeSelector<BomberManAction, DoubleVector, BomberManRiskState>> nodeSelectorSupplier = () -> new RalphNodeSelector<>(random_, config.isModelKnown(), cpuct, totalActionCount);
                 var node = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
                 switch(policyMode_) {
                     case INFERENCE:
-                        return new PaperPolicyImpl<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(
+                        return new RalphPolicy<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(
                             policyId_,
                             random_,
                             treeUpdateConditionFactory.create(),
-                            new RiskAverseSearchTree<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(
+                            new RiskAverseSearchTree<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(
                                 searchNodeFactory,
                                 node,
                                 nodeSelectorSupplier.get(),
@@ -243,11 +249,11 @@ public class ExampleRisk00 {
                                 totalRiskAllowedInference,
                                 strategiesProvider));
                     case TRAINING:
-                        return new PaperPolicyImpl<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(
+                        return new RalphPolicy<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(
                             policyId_,
                             random_,
                             treeUpdateConditionFactory.create(),
-                            new RiskAverseSearchTree<BomberManAction, DoubleVector, PaperMetadata<BomberManAction>, BomberManRiskState>(
+                            new RiskAverseSearchTree<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(
                                 searchNodeFactory,
                                 node,
                                 nodeSelectorSupplier.get(),
@@ -296,7 +302,7 @@ public class ExampleRisk00 {
 //        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
 //        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<BomberManAction, BomberManRiskState>(policyId, totalActionCount, discountFactor);
 ////        var dataAggregatorAlphaGoEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-//        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
+//        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(10000);
 //
 //        var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
 //            policyId,
@@ -325,7 +331,7 @@ public class ExampleRisk00 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictorMCTSEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(1000);
+        var dataAggregatorMCTSEval_1 = new ReplayBufferDataAggregator(10000);
         var episodeDataMakerMCTSEval_1 = new VectorValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId, dataAggregatorMCTSEval_1);
 //        var dataAggregatorMCTSEval_1 = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
 
@@ -356,7 +362,7 @@ public class ExampleRisk00 {
             new SplittableRandom(systemConfig.getRandomSeed()));
 
         var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
-        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
+        var dataAggregator2 = new ReplayBufferDataAggregator(10000);
         var episodeDataMaker2 = new ValueDataMaker<BomberManAction, BomberManRiskState>(discountFactor, policyId, dataAggregator2);
 
         var predictorTrainingSetup2 = new PredictorTrainingSetup<>(
