@@ -29,6 +29,7 @@ import java.util.SplittableRandom;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
@@ -150,21 +151,18 @@ public class GameSamplerImpl<
             var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
             episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }
+
         try {
             var results = executorService.invokeAll(episodesToSample);
-            var paperEpisodeHistoryList = results.stream().map(x -> {
-                try {
-                    return x.get();
-                } catch (Throwable e) {
-                    executorService.shutdown();
-                    throw new IllegalStateException("Parallel episodes were interrupted.", e);
-                }
-            }).collect(Collectors.toList());
-
+            var paperEpisodeHistoryList = new ArrayList<EpisodeResults<TAction, TObservation, TState>>(episodeBatchSize);
+            for (var entry : results) {
+                var result = entry.get();
+                paperEpisodeHistoryList.add(result);
+            }
             executorService.shutdown();
             return paperEpisodeHistoryList;
         } catch (Throwable e) {
-//            e.printStackTrace();
+            executorService.shutdown();
             throw new IllegalStateException("Parallel episodes were interrupted.", e);
         }
     }

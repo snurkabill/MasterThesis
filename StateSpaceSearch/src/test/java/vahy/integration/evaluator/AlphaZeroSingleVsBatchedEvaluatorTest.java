@@ -60,7 +60,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
             var tfModel_ = new TFModelImproved(
                 modelInputSize,
                 totalEntityCount + totalActionCount,
-                1024,
+                65536,
                 10,
                 0.8,
                 0.1,
