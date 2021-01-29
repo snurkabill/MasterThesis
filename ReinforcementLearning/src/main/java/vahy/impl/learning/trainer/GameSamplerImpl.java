@@ -26,10 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.SplittableRandom;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class GameSamplerImpl<
@@ -43,7 +41,6 @@ public class GameSamplerImpl<
     private final InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier;
     private final StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer;
     private final EpisodeResultsFactory<TAction, TObservation, TState> resultsFactory;
-    private final int processingUnitCount;
 
     private final int totalPolicyCount;
     private final List<PolicyCategoryInfo> expectedPolicyCategoryInfoList;
@@ -51,13 +48,14 @@ public class GameSamplerImpl<
     private final PolicyShuffleStrategy policyShuffleStrategy;
 
     private final Random random;
+    private final ExecutorService executorService;
 
     public GameSamplerImpl(InitialStateSupplier<TAction, TObservation, TState> initialStateSupplier,
                            StateWrapperInitializer<TAction, TObservation, TState> stateStateWrapperInitializer,
                            EpisodeResultsFactory<TAction, TObservation, TState> resultsFactory,
                            List<PolicyCategory<TAction, TObservation, TState>> policyCategoryList,
                            PolicyShuffleStrategy policyShuffleStrategy,
-                           int processingUnitCount,
+                           ExecutorService executorService,
                            List<PolicyCategoryInfo> expectedPolicyCategoryInfoList,
                            SplittableRandom random)
     {
@@ -65,11 +63,11 @@ public class GameSamplerImpl<
         this.random = new Random(random.nextInt());
         this.initialStateSupplier = initialStateSupplier;
         this.resultsFactory = resultsFactory;
-        this.processingUnitCount = processingUnitCount;
         this.policyCategoryList = policyCategoryList;
         this.totalPolicyCount = policyCategoryList.stream().mapToInt(x -> x.getPolicySupplierList().size()).sum();
         this.policyShuffleStrategy = policyShuffleStrategy;
         this.expectedPolicyCategoryInfoList = expectedPolicyCategoryInfoList;
+        this.executorService = executorService;
         checkPolicyCount(expectedPolicyCategoryInfoList, policyCategoryList);
     }
 
@@ -139,32 +137,28 @@ public class GameSamplerImpl<
 
     @Override
     public List<EpisodeResults<TAction, TObservation, TState>> sampleEpisodes(int episodeBatchSize, int stepCountLimit, PolicyMode policyMode) {
-        ExecutorService executorService = Executors.newFixedThreadPool(processingUnitCount);
-        logger.info("Initialized [{}] executors for sampling", processingUnitCount);
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
-        var episodesToSample = new ArrayList<Callable<EpisodeResults<TAction, TObservation, TState>>>(episodeBatchSize);
+        var completionService = new ExecutorCompletionService<EpisodeResults<TAction, TObservation, TState>>(executorService);
+
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState(policyMode);
             var policyIdTranslationMap = createPolicyTranslationMap(expectedPolicyCategoryInfoList, policyCategoryList);
             var registeredPolicies = initializeAndRegisterPolicies(initialGameState, policyMode, policyIdTranslationMap);
             var paperEpisode = new EpisodeSetupImpl<>(initialGameState, policyIdTranslationMap, registeredPolicies, stepCountLimit);
             var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
-            episodesToSample.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
+            completionService.submit(() -> episodeSimulator.calculateEpisode(paperEpisode));
         }
 
-        try {
-            var results = executorService.invokeAll(episodesToSample);
-            var paperEpisodeHistoryList = new ArrayList<EpisodeResults<TAction, TObservation, TState>>(episodeBatchSize);
-            for (var entry : results) {
-                var result = entry.get();
-                paperEpisodeHistoryList.add(result);
+        var paperEpisodeHistoryList = new ArrayList<EpisodeResults<TAction, TObservation, TState>>(episodeBatchSize);
+        for (int i = 0; i < episodeBatchSize; i++) {
+            try {
+                paperEpisodeHistoryList.add(completionService.take().get());
+            } catch (Throwable e) {
+                executorService.shutdownNow();
+                throw new RuntimeException(e);
             }
-            executorService.shutdown();
-            return paperEpisodeHistoryList;
-        } catch (Throwable e) {
-            executorService.shutdown();
-            throw new IllegalStateException("Parallel episodes were interrupted.", e);
         }
+        return paperEpisodeHistoryList;
     }
 
 }

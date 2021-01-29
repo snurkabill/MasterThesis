@@ -43,8 +43,14 @@ public class TFModelImproved implements AutoCloseable {
     private final DoubleBuffer inputDoubleBuffer;
     private final DoubleBuffer targetDoubleBuffer;
 
+    private final boolean productionMode;
 
     public TFModelImproved(int inputDimension, int outputDimension, int batchSize, int trainingIterations, double keepProb, double learningRate, byte[] bytes, int poolSize, SplittableRandom random) {
+        this(inputDimension, outputDimension, batchSize, trainingIterations, keepProb, learningRate, bytes, poolSize, random, false);
+    }
+
+
+    public TFModelImproved(int inputDimension, int outputDimension, int batchSize, int trainingIterations, double keepProb, double learningRate, byte[] bytes, int poolSize, SplittableRandom random, boolean productionMode) {
         this.inputDimension = inputDimension;
         this.outputDimension = outputDimension;
         this.batchSize = batchSize;
@@ -78,6 +84,7 @@ public class TFModelImproved implements AutoCloseable {
         for (int i = 0; i < poolSize; i++) {
             this.pool.add(new TFWrapper(inputDimension, outputDimension, trainingSession));
         }
+        this.productionMode = productionMode;
     }
 
     public double[] predict(double[] input) {
@@ -163,15 +170,25 @@ public class TFModelImproved implements AutoCloseable {
         if(TRACE_ENABLED) {
             logger.trace("Filling data batch. Already done batches: [{}]", batchesDone);
         }
-        for (int i = 0; i < batchSize; i++) {
-            int index = batchesDone * batchSize + i;
-            if(index >= order.length) {
-                break; // leaving part of batch from previous iteration.
+        if(productionMode) {
+            for (int i = 0; i < batchSize; i++) {
+                int index = (batchesDone * batchSize + i) % order.length;
+                System.arraycopy(input[order[index]], 0, trainInputBatch[i], 0, inputDimension);
+                System.arraycopy(target[order[index]], 0, trainTargetBatch[i], 0, outputDimension);
             }
-            System.arraycopy(input[order[index]], 0, trainInputBatch[i], 0, inputDimension);
-            System.arraycopy(target[order[index]], 0, trainTargetBatch[i], 0, outputDimension);
+        } else {
+            for (int i = 0; i < Math.min(batchSize, order.length); i++) {
+                int index = batchesDone * batchSize + i;
+                if(index >= order.length) {
+                    return;
+                }
+                System.arraycopy(input[order[index]], 0, trainInputBatch[i], 0, inputDimension);
+                System.arraycopy(target[order[index]], 0, trainTargetBatch[i], 0, outputDimension);
+            }
         }
     }
+
+
 
     private static void shuffleArray(int[] array, SplittableRandom rng) {
         for(int i = array.length - 1; i > 0; --i) {

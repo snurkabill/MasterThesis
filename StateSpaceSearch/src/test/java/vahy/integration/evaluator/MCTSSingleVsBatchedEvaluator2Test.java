@@ -57,13 +57,14 @@ public class MCTSSingleVsBatchedEvaluator2Test {
             var tfModel_ = new TFModelImproved(
                 modelInputSize,
                 totalEntityCount,
-                65536,
-                10,
+                32768,
+                1,
                 0.8,
                 0.1,
                 tfModelAsBytes_,
                 systemConfig.getParallelThreadsCount(),
-                new SplittableRandom(systemConfig.getRandomSeed()));
+                new SplittableRandom(systemConfig.getRandomSeed()),
+                false);
 
             var trainablePredictor = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
             var dataAggregator = new ReplayBufferDataAggregator(1000);
