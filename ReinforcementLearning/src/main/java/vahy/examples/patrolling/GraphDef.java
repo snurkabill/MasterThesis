@@ -20,6 +20,10 @@ public class GraphDef {
         this.attackCostMap = attackCostMap;
     }
 
+    public int nodeCount() {
+        return connectionMatrix.length;
+    }
+
     public boolean[][] getConnectionMatrix() {
         return connectionMatrix;
     }

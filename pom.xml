@@ -14,6 +14,7 @@
         <module>StateSpaceSearch</module>
         <module>ReinforcementLearning</module>
         <module>PaperSandbox</module>
+        <module>Risk</module>
     </modules>
 
     <properties>
@@ -25,7 +26,9 @@
 
         <logback.version>1.1.11</logback.version>
         <slf4j.version>1.7.12</slf4j.version>
-        <junit.version>5.6.2</junit.version>
+        <junit-platform.version>1.7.0</junit-platform.version>
+        <junit-engine.version>5.7.0</junit-engine.version>
+        <junit-vintage.version>5.7.0</junit-vintage.version>
         <jmh.version>1.21</jmh.version>
 
 
@@ -55,17 +58,25 @@
         </dependency>
 
         <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit-platform.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <version>${junit-engine.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
+            <version>${junit-engine.version}</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.junit.vintage</groupId>-->
+<!--            <artifactId>junit-vintage-engine</artifactId>-->
+<!--            <version>${junit-vintage.version}</version>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
@@ -235,7 +246,6 @@
                                 -Xep:MultipleUnaryOperatorsInMethodCall:WARN
                                 -Xep:PrivateConstructorForUtilityClass:WARN
                                 -Xep:UngroupedOverloads:WARN
-
                             </arg>
                         </compilerArgs>
                         <annotationProcessorPaths combine.self="append">

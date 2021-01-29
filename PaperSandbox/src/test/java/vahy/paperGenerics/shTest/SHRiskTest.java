@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import vahy.RiskStateWrapper;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
@@ -14,6 +15,7 @@ import vahy.examples.simplifiedHallway.SHInstance;
 import vahy.examples.simplifiedHallway.SHRiskInstanceSupplier;
 import vahy.examples.simplifiedHallway.SHRiskState;
 import vahy.impl.RoundBuilder;
+import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -22,26 +24,25 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
-import vahy.paperGenerics.PaperStateWrapper;
-import vahy.paperGenerics.PaperTreeUpdater;
-import vahy.paperGenerics.benchmark.PaperEpisodeStatistics;
-import vahy.paperGenerics.benchmark.PaperEpisodeStatisticsCalculator;
-import vahy.paperGenerics.evaluator.PaperNodeEvaluator;
-import vahy.paperGenerics.metadata.PaperMetadata;
-import vahy.paperGenerics.metadata.PaperMetadataFactory;
-import vahy.paperGenerics.policy.PaperPolicyImpl;
-import vahy.paperGenerics.policy.RiskAverseSearchTree;
-import vahy.paperGenerics.policy.flowOptimizer.FlowOptimizerType;
-import vahy.paperGenerics.policy.linearProgram.NoiseStrategy;
-import vahy.paperGenerics.policy.riskSubtree.SubTreeRiskCalculatorType;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
-import vahy.paperGenerics.policy.riskSubtree.strategiesProvider.StrategiesProvider;
-import vahy.paperGenerics.reinforcement.PaperDataTablePredictorWithLr;
-import vahy.paperGenerics.reinforcement.learning.PaperEpisodeDataMaker_V1;
-import vahy.paperGenerics.selector.PaperNodeSelector;
+import vahy.ralph.RalphTreeUpdater;
+import vahy.benchmark.RiskEpisodeStatistics;
+import vahy.benchmark.RiskEpisodeStatisticsCalculator;
+import vahy.ralph.evaluator.RalphNodeEvaluator;
+import vahy.ralph.metadata.RalphMetadata;
+import vahy.ralph.metadata.RiskSearchMetadataFactory;
+import vahy.ralph.policy.RalphPolicy;
+import vahy.ralph.policy.RiskAverseSearchTree;
+import vahy.ralph.policy.flowOptimizer.FlowOptimizerType;
+import vahy.ralph.policy.linearProgram.NoiseStrategy;
+import vahy.ralph.policy.riskSubtree.SubTreeRiskCalculatorType;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.ExplorationExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.ExplorationNonExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.InferenceExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.InferenceNonExistingFlowStrategy;
+import vahy.ralph.policy.riskSubtree.strategiesProvider.StrategiesProvider;
+import vahy.ralph.reinforcement.RalphDataTablePredictorWithLr;
+import vahy.ralph.reinforcement.learning.RalphEpisodeDataMaker_V1;
+import vahy.ralph.selector.RalphNodeSelector;
 import vahy.test.ConvergenceAssert;
 import vahy.utils.EnumUtils;
 import vahy.utils.JUnitParameterizedTestHelper;
@@ -65,9 +66,9 @@ public class SHRiskTest {
             defaultPrediction[i] = 1.0 / totalActionCount;
         }
 
-        var trainablePredictor = new PaperDataTablePredictorWithLr(defaultPrediction, 0.25, totalActionCount, totalEntityCount);
+        var trainablePredictor = new RalphDataTablePredictorWithLr(defaultPrediction, 0.25, totalActionCount, totalEntityCount);
         var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        var episodeDataMaker = new PaperEpisodeDataMaker_V1<SHAction, SHRiskState>(playerId, totalActionCount, discountFactor, dataAggregator);
+        var episodeDataMaker = new RalphEpisodeDataMaker_V1<SHAction, SHRiskState>(playerId, totalActionCount, discountFactor, dataAggregator);
 
         var predictorTrainingSetup = new PredictorTrainingSetup<SHAction, DoubleVector, SHRiskState>(
             playerId,
@@ -89,8 +90,8 @@ public class SHRiskTest {
         var predictorTrainingSetup = getTrainingSetup(playerId, totalEntityCount, totalActionCount);
         var trainablePredictor = predictorTrainingSetup.getTrainablePredictor();
 
-        var metadataFactory = new PaperMetadataFactory<SHAction, DoubleVector, SHRiskState>(actionClass, totalEntityCount);
-        var searchNodeFactory = new SearchNodeBaseFactoryImpl<SHAction, DoubleVector, PaperMetadata<SHAction>, SHRiskState>(actionClass, metadataFactory);
+        var metadataFactory = new RiskSearchMetadataFactory<SHAction, DoubleVector, SHRiskState>(actionClass, totalEntityCount);
+        var searchNodeFactory = new SearchNodeBaseFactoryImpl<SHAction, DoubleVector, RalphMetadata<SHAction>, SHRiskState>(actionClass, metadataFactory);
 
         var totalRiskAllowedInference = riskAllowed;
         Supplier<Double> explorationSupplier = () -> 1.0;
@@ -98,7 +99,7 @@ public class SHRiskTest {
 
         var treeUpdateConditionFactory = new FixedUpdateCountTreeConditionFactory(treeUpdateCount);
 
-        var strategiesProvider = new StrategiesProvider<SHAction, DoubleVector, PaperMetadata<SHAction>, SHRiskState>(
+        var strategiesProvider = new StrategiesProvider<SHAction, DoubleVector, RalphMetadata<SHAction>, SHRiskState>(
                     actionClass,
                     InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
                     InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
@@ -108,8 +109,8 @@ public class SHRiskTest {
                     SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
                     NoiseStrategy.NOISY_05_06);
 
-        var updater = new PaperTreeUpdater<SHAction, DoubleVector, SHRiskState>();
-        var nodeEvaluator = new PaperNodeEvaluator<SHAction, SHRiskState>(searchNodeFactory, trainablePredictor, config.isModelKnown());
+        var updater = new RalphTreeUpdater<SHAction, DoubleVector, SHRiskState>();
+        var nodeEvaluator = new RalphNodeEvaluator<SHAction, SHRiskState>(searchNodeFactory, trainablePredictor, config.isModelKnown());
         var cpuctParameter = 1.0;
 
 
@@ -117,15 +118,15 @@ public class SHRiskTest {
             playerId,
             1,
             (initialState_, policyMode_, policyId_, random_) -> {
-                Supplier<PaperNodeSelector<SHAction, DoubleVector, SHRiskState>> nodeSelectorSupplier = () -> new PaperNodeSelector<>(random_, config.isModelKnown(), cpuctParameter, totalActionCount);
+                Supplier<RalphNodeSelector<SHAction, DoubleVector, SHRiskState>> nodeSelectorSupplier = () -> new RalphNodeSelector<>(random_, config.isModelKnown(), cpuctParameter, totalActionCount);
                 var node = searchNodeFactory.createNode(initialState_, metadataFactory.createEmptyNodeMetadata(), new EnumMap<>(actionClass));
                 switch(policyMode_) {
                     case INFERENCE:
-                        return new PaperPolicyImpl<>(
+                        return new RalphPolicy<>(
                             policyId_,
                             random_,
                             treeUpdateConditionFactory.create(),
-                            new RiskAverseSearchTree<SHAction, DoubleVector, PaperMetadata<SHAction>, SHRiskState>(
+                            new RiskAverseSearchTree<SHAction, DoubleVector, RalphMetadata<SHAction>, SHRiskState>(
                                 searchNodeFactory,
                                 node,
                                 nodeSelectorSupplier.get(),
@@ -135,11 +136,11 @@ public class SHRiskTest {
                                 totalRiskAllowedInference,
                                 strategiesProvider));
                     case TRAINING:
-                        return new PaperPolicyImpl<SHAction, DoubleVector, PaperMetadata<SHAction>, SHRiskState>(
+                        return new RalphPolicy<SHAction, DoubleVector, RalphMetadata<SHAction>, SHRiskState>(
                             policyId_,
                             random_,
                             treeUpdateConditionFactory.create(),
-                            new RiskAverseSearchTree<SHAction, DoubleVector, PaperMetadata<SHAction>, SHRiskState>(
+                            new RiskAverseSearchTree<SHAction, DoubleVector, RalphMetadata<SHAction>, SHRiskState>(
                                 searchNodeFactory,
                                 node,
                                 nodeSelectorSupplier.get(),
@@ -249,16 +250,20 @@ public class SHRiskTest {
 
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
 
+        var additionalStatistics = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Risk Hit Ratio", x -> StreamUtils.labelWrapperFunction(x.getRiskHitRatio()));
+        var additionalStatistics2 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("Exhausted Risk in Index avg", x -> StreamUtils.labelWrapperFunction(x.getRiskExhaustedIndexAverage()));
+        var additionalStatistics3 = new DataPointGeneratorGeneric<RiskEpisodeStatistics>("At the end threshold avg", x -> StreamUtils.labelWrapperFunction(x.getRiskThresholdAtEndAverage()));
+
         var roundBuilder = RoundBuilder.getRoundBuilder(
             "PaperSH03Test",
             config,
             systemConfig,
             algorithmConfig,
             List.of(player),
-            null,
+            List.of(additionalStatistics, additionalStatistics2, additionalStatistics3),
             SHRiskInstanceSupplier::new,
-            PaperStateWrapper::new,
-            new PaperEpisodeStatisticsCalculator<>(),
+            RiskStateWrapper::new,
+            new RiskEpisodeStatisticsCalculator<>(),
             new EpisodeResultsFactoryBase<>()
         );
         var result = roundBuilder.execute();
@@ -305,7 +310,7 @@ public class SHRiskTest {
         var player = getPlayer(config, 1, temperatureSupplier, riskAllowed);
         var policyArgumentsList = List.of(player);
 
-        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, PaperEpisodeStatistics>()
+        var roundBuilder = new RoundBuilder<SHConfig, SHAction, SHRiskState, RiskEpisodeStatistics>()
             .setRoundName("SH05Test")
             .setAdditionalDataPointGeneratorListSupplier(null)
             .setCommonAlgorithmConfig(algorithmConfig)
@@ -313,10 +318,11 @@ public class SHRiskTest {
             .setSystemConfig(systemConfig)
             .setProblemInstanceInitializerSupplier((config_, splittableRandom_) -> policyMode -> new SHRiskInstanceSupplier(config_, splittableRandom_).createInitialState(policyMode))
             .setResultsFactory(new EpisodeResultsFactoryBase<>())
-            .setStatisticsCalculator(new PaperEpisodeStatisticsCalculator<>())
-            .setStateStateWrapperInitializer(PaperStateWrapper::new)
             .setPlayerPolicySupplierList(policyArgumentsList)
-            .setEarlyStoppingStrategy(new AlwaysFalseStoppingStrategy<SHAction, DoubleVector, SHRiskState, PaperEpisodeStatistics>());
+            .setStatisticsCalculator(new RiskEpisodeStatisticsCalculator<>())
+            .setStateStateWrapperInitializer(RiskStateWrapper::new)
+            .setPlayerPolicySupplierList(policyArgumentsList)
+            .setEarlyStoppingStrategy(new AlwaysFalseStoppingStrategy<SHAction, DoubleVector, SHRiskState, RiskEpisodeStatistics>());
         var result = roundBuilder.execute();
 
         assertConvergenceResult(expectedPayoffMax, expectedPayoffMin, result.getEvaluationStatistics().getTotalPayoffAverage().get(player.getPolicyId()));

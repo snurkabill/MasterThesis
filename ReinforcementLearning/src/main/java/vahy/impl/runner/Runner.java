@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -82,13 +83,15 @@ public class Runner<
             .map(x -> new PolicyCategory<>(x.getKey(), x.getValue()))
             .collect(Collectors.toList());
 
+        var threadPool = Executors.newFixedThreadPool(runnerArguments.getSystemConfig().getParallelThreadsCount());
+
         var gameSampler = new GameSamplerImpl<>(
             runnerArguments.getInitialStateSupplier(),
             runnerArguments.getStateStateWrapperInitializer(),
             runnerArguments.getEpisodeResultsFactory(),
             policyCategories,
             runnerArguments.getProblemConfig().getPolicyShuffleStrategy(),
-            runnerArguments.getSystemConfig().getParallelThreadsCount(),
+            threadPool,
             runnerArguments.getProblemConfig().getPolicyCategoryInfoList(),
             random.split());
 
@@ -105,6 +108,7 @@ public class Runner<
         var trainingCycle = new PolicyTrainingCycle<>(runnerArguments.getSystemConfig(), runnerArguments.getAlgorithmConfig(), runnerArguments.getEpisodeWriter(), trainer, runnerArguments.getEarlyStoppingStrategy());
 
         var durationWithStatistics = trainingCycle.startTraining();
+        threadPool.shutdownNow();
         logger.info("Training of [{}] took: [{}] ms", runnerArguments.getRunName(), durationWithStatistics.getFirst().toMillis());
         return durationWithStatistics;
     }
@@ -126,18 +130,21 @@ public class Runner<
             .map(x -> new PolicyCategory<>(x.getKey(), x.getValue()))
             .collect(Collectors.toList());
 
+        var threadPool = Executors.newFixedThreadPool(systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount());
+
         var gameSampler = new GameSamplerImpl<>(
             evaluationArguments.getInitialStateSupplier(),
             evaluationArguments.getStateStateWrapperInitializer(),
             evaluationArguments.getEpisodeResultsFactory(),
             policyCategories,
             evaluationArguments.getProblemConfig().getPolicyShuffleStrategy(),
-            systemConfig.isSingleThreadedEvaluation() ? 1 : systemConfig.getParallelThreadsCount(),
+            threadPool,
             evaluationArguments.getProblemConfig().getPolicyCategoryInfoList(),
             random.split());
         long start = System.currentTimeMillis();
         var episodeList = gameSampler.sampleEpisodes(systemConfig.getEvalEpisodeCount(), evaluationArguments.getProblemConfig().getMaximalStepCountBound(), PolicyMode.INFERENCE);
         long end = System.currentTimeMillis();
+        threadPool.shutdownNow();
         logger.info("Evaluation of [{}] policy in [{}] runs took [{}] milliseconds", evaluationArguments.getRunName(), systemConfig.getEvalEpisodeCount(), end - start);
         var duration = Duration.ofMillis(end - start);
 
