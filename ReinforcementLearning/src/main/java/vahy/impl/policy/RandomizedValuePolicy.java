@@ -11,19 +11,21 @@ import vahy.impl.model.observation.DoubleVector;
 import vahy.utils.ImmutableTuple;
 import vahy.utils.RandomDistributionUtils;
 
-import java.util.Arrays;
 import java.util.SplittableRandom;
 
 public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TState extends State<TAction, DoubleVector, TState>> extends ExploringPolicy<TAction, DoubleVector, TState> {
 
     private final Predictor<DoubleVector> valuePredictor;
     private final boolean makePolicyRecord;
+    private final double temperature;
     private double[] latestDistribution;
 
-    public RandomizedValuePolicy(SplittableRandom random, int policyId, Predictor<DoubleVector> valuePredictor, double explorationConstant, boolean makePolicyRecord) {
+
+    public RandomizedValuePolicy(SplittableRandom random, int policyId, Predictor<DoubleVector> valuePredictor, double explorationConstant, double temperature, boolean makePolicyRecord) {
         super(random, policyId, explorationConstant);
         this.valuePredictor = valuePredictor;
         this.makePolicyRecord = makePolicyRecord;
+        this.temperature = temperature;
     }
 
     private ImmutableTuple<Double, TAction> getMaxActionValuePair(StateWrapper<TAction, DoubleVector, TState> gameState) {
@@ -46,7 +48,7 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
         for (int i = 0; i < predictions.length; i++) {
             firstDimPredictions[i] = rewards[i] + predictions[i][0];
         }
-        RandomDistributionUtils.applySoftmax(firstDimPredictions);
+        RandomDistributionUtils.applyBoltzmannNoise(firstDimPredictions, temperature);
         if(makePolicyRecord) {
             latestDistribution = firstDimPredictions;
         }
@@ -76,17 +78,18 @@ public class RandomizedValuePolicy<TAction extends Enum<TAction> & Action, TStat
 
     @Override
     protected PlayingDistribution<TAction> explorationBranch(StateWrapper<TAction, DoubleVector, TState> gameState) {
-        TAction[] actions = gameState.getAllPossibleActions();
-        var actionIndex = random.nextInt(actions.length);
-        var action = actions[actionIndex];
-        var applied = gameState.applyAction(action);
-        var value = applied.getReward() + valuePredictor.apply(applied.getState().getObservation())[0];
-        if(makePolicyRecord) {
-            var array = new double[actions.length];
-            Arrays.fill(array, 1.0/actions.length);
-            return new PlayingDistribution<>(action, value, array);
-        } else {
-            return new PlayingDistribution<>(action, value, EMPTY_ARRAY);
-        }
+//        TAction[] actions = gameState.getAllPossibleActions();
+//        var actionIndex = random.nextInt(actions.length);
+//        var action = actions[actionIndex];
+//        var applied = gameState.applyAction(action);
+//        var value = applied.getReward() + valuePredictor.apply(applied.getState().getObservation())[0];
+//        if(makePolicyRecord) {
+//            var array = new double[actions.length];
+//            Arrays.fill(array, 1.0/actions.length);
+//            return new PlayingDistribution<>(action, value, array);
+//        } else {
+//            return new PlayingDistribution<>(action, value, EMPTY_ARRAY);
+//        }
+        return inferenceBranch(gameState);
     }
 }
