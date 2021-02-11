@@ -28,11 +28,10 @@ public class XorBaseTest {
         int trainingIterations_OUTSIDE_MODEL = 1000;
         int batchSize = 1;
 
-        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
         var modelPath = Paths.get(XorBaseTest.class.getClassLoader().getResource("tfModelPrototypes/XOR.py").getPath());
 
         try {
-            var modelRepresentation = TFHelper.loadTensorFlowModel(modelPath, environmentPath, random.nextLong(), inputDim, outputDim, 0);
+            var modelRepresentation = TFHelper.loadTensorFlowModel(modelPath,  random.nextLong(), inputDim, outputDim, 0);
             try(TFModelImproved model = new TFModelImproved(inputDim, outputDim, batchSize, trainingIterations_IN_MODEL, 0.5, 0.0001, modelRepresentation, 1, random))
             {
                 for (int i = 0; i < trainingIterations_OUTSIDE_MODEL; i++) {

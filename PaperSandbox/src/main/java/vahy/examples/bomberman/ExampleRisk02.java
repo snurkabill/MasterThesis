@@ -65,8 +65,7 @@ public class ExampleRisk02 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 7, true, 100, 100, true, false, false, Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
+        var systemConfig = new SystemConfig(987567, false, 7, true, 100, 100, true, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 
@@ -152,7 +151,7 @@ public class ExampleRisk02 {
 
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_risk_model.py");
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount * 2 + totalActionCount,
@@ -263,7 +262,7 @@ public class ExampleRisk02 {
         var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, totalEntityCount, config);
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_alphazero_prototype.py");
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, actionCount);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, actionCount);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount + actionCount,
@@ -294,7 +293,7 @@ public class ExampleRisk02 {
         var mctsPolicySupplier = new MCTSPolicyDefinitionSupplier<BomberManAction, BomberManRiskState>(BomberManAction.class, inGameEntityCount, problemConfig);
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_value_vectorized_model.py");
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount,
@@ -325,7 +324,7 @@ public class ExampleRisk02 {
         var valuePolicySupplier = new ValuePolicyDefinitionSupplier<BomberManAction, BomberManRiskState>();
 
         var path = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_value_model.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, 1, 0);
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_value.length,

@@ -34,7 +34,7 @@
 //
 //    public static void main(String[] args) {
 //
-//        var systemConfig = new SystemConfig(987568, false, 6, true, 1_000, 1000, false, false, false, Path.of("TEST_PATH"), null);
+//        var systemConfig = new SystemConfig(987568, false, 6, true, 1_000, 1000, false, false, false, Path.of("TEST_PATH")
 //
 //        var algorithmConfig = new CommonAlgorithmConfigBase(100, 1000);
 //

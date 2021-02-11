@@ -97,8 +97,7 @@ public class AlphaZeroSH03Test {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            null);
+            Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(10, 50);
 

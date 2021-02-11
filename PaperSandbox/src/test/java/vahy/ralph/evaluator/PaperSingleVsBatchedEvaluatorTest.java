@@ -173,8 +173,7 @@ public class PaperSingleVsBatchedEvaluatorTest {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            null);
+            Path.of("TEST_PATH"));
 
         var roundBuilder = RoundBuilder.getRoundBuilder(
             "PaperSingleVsBatchedEvalTest",

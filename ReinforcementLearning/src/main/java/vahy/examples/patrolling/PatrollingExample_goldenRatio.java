@@ -58,7 +58,7 @@
 //        var modelInputSize = new StateWrapper<>(PatrollingState.DEFENDER_ID, defenderLookbackSize, sampleState).getObservation().getObservedVector().length;
 //
 //        var path = Paths.get("PythonScripts", "tensorflow_models", "patrollingExample_london_06", "create_value_model_london_06.py");
-//        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
+//        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, 1, 0);
 //        var tfModel = new TFModelImproved(
 //            modelInputSize,
 //            1,
@@ -116,7 +116,7 @@
 //        var modelInputSize = new StateWrapper<>(PatrollingState.ATTACKER_ID, attackerLookbackSize, sampleState).getObservation().getObservedVector().length;
 //
 //        var path = Paths.get("PythonScripts", "tensorflow_models", "patrollingExample_london_06", "create_value_model_london_06.py");
-//        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
+//        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, 1, 0);
 //        var tfModel = new TFModelImproved(
 //            modelInputSize,
 //            1,

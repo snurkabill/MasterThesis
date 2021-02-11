@@ -234,8 +234,7 @@ public class SHRiskTest {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            null);
+            Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(100, 100);
 
@@ -295,8 +294,7 @@ public class SHRiskTest {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            null);
+            Path.of("TEST_PATH"));
 
         Supplier<Double> temperatureSupplier = new Supplier<>() {
             private int callCount = 0;

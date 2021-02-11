@@ -31,8 +31,6 @@ public class SystemConfigBuilder {
     private boolean dumpEvaluationData = false;
     private Path dumpPath = null;
 
-    private String pythonVirtualEnvPath;
-
 
     public SystemConfigBuilder setRandomSeed(long randomSeed) {
         this.randomSeed = randomSeed;
@@ -94,13 +92,8 @@ public class SystemConfigBuilder {
         return this;
     }
 
-    public SystemConfigBuilder setPythonVirtualEnvPath(String pythonVirtualEnvPath) {
-        this.pythonVirtualEnvPath = pythonVirtualEnvPath;
-        return this;
-    }
-
     public SystemConfig buildSystemConfig() {
-        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, evalEpisodeCountDuringTraining, evaluateDuringTraining, dumpTrainingData, dumpEvaluationData, dumpPath, pythonVirtualEnvPath);
+        return new SystemConfig(resolveRandomSeed(), singleThreadedEvaluation, parallelThreadsCount, drawWindow, evalEpisodeCount, evalEpisodeCountDuringTraining, evaluateDuringTraining, dumpTrainingData, dumpEvaluationData, dumpPath);
     }
 
     private long resolveRandomSeed() {

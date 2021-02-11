@@ -9,7 +9,7 @@ public class SystemConfigTest {
 
     @Test
     public void basicTest() {
-        SystemConfig systemConfig = new SystemConfig(22, false, 11, false, 42, 0, false, true, false, null, null);
+        SystemConfig systemConfig = new SystemConfig(22, false, 11, false, 42, 0, false, true, false, null);
         assertEquals(22, systemConfig.getRandomSeed());
         assertEquals(11, systemConfig.getParallelThreadsCount());
         assertEquals(42, systemConfig.getEvalEpisodeCount());
@@ -17,7 +17,7 @@ public class SystemConfigTest {
         assertFalse(systemConfig.isDrawWindow());
         assertTrue(systemConfig.dumpTrainingData());
 
-        SystemConfig systemConfig2 = new SystemConfig(0, true, 1, true, 2, 0, false, false, false, null, null);
+        SystemConfig systemConfig2 = new SystemConfig(0, true, 1, true, 2, 0, false, false, false, null);
         assertEquals(0, systemConfig2.getRandomSeed());
         assertEquals(1, systemConfig2.getParallelThreadsCount());
         assertEquals(2, systemConfig2.getEvalEpisodeCount());
@@ -25,7 +25,7 @@ public class SystemConfigTest {
         assertTrue(systemConfig2.isDrawWindow());
         assertFalse(systemConfig2.dumpTrainingData());
 
-        SystemConfig systemConfig3 = new SystemConfig(0, false, 1, true, 2, 0, false, true, false, null, null);
+        SystemConfig systemConfig3 = new SystemConfig(0, false, 1, true, 2, 0, false, true, false, null);
 
         assertEquals(0, systemConfig3.getRandomSeed());
         assertEquals(1, systemConfig3.getParallelThreadsCount());

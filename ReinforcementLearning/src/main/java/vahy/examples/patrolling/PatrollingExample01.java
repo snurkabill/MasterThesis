@@ -34,7 +34,7 @@ public class PatrollingExample01 {
 
     public static void main(String[] args) {
 
-        var systemConfig = new SystemConfig(987568, false, 7, false, 100000, 0, false, false, false, Path.of("TEST_PATH"), null);
+        var systemConfig = new SystemConfig(987568, false, 7, false, 100000, 0, false, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(100, 1000);
 

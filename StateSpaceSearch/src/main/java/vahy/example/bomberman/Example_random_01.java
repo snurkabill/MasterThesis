@@ -62,8 +62,7 @@ public class Example_random_01 {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python");
+            Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
 
@@ -144,7 +143,7 @@ public class Example_random_01 {
         var modelInputSize = sampleState.getInGameEntityObservation(5).getObservedVector().length;
         var totalActionCount = actionClass.getEnumConstants().length;
         var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_vectorized_model.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
         var tfModel = new TFModelImproved(
             modelInputSize,
             totalEntityCount,
@@ -191,7 +190,7 @@ public class Example_random_01 {
         }
 
         var path = Paths.get("PythonScripts", "tensorflow_models", "alphazero", "create_alphazero_prototype.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
         var tfModel = new TFModelImproved(
             modelInputSize,
             defaultPrediction_alpha.length,
@@ -223,7 +222,7 @@ public class Example_random_01 {
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManState> getValuePolicy(SystemConfig systemConfig, int policyId, BomberManState sampleState) throws IOException, InterruptedException {
         var modelInputSize = sampleState.getInGameEntityObservation(5).getObservedVector().length;
         var path = Paths.get("PythonScripts", "tensorflow_models", "value", "create_value_model.py");
-        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, 1, 0);
+        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, 1, 0);
         var tfModel_value = new TFModelImproved(
             modelInputSize,
             1,

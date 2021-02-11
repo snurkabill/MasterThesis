@@ -72,8 +72,7 @@ public class ConcurrencyTesting {
         }
         int batchesPerWorker = instanceCount / (workerCount * workerBatchSize);
 
-        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
-        var modelRepresentation = TFHelper.loadTensorFlowModel(modelRepresentationPath, environmentPath, random.nextLong(), inputDim, outputDim, 0);
+        var modelRepresentation = TFHelper.loadTensorFlowModel(modelRepresentationPath, random.nextLong(), inputDim, outputDim, 0);
         try(TFModelImproved model = new TFModelImproved(inputDim, outputDim, batchSize, trainingIterations, 0.5, 0.01, modelRepresentation, poolSize, random))
         {
             for (int i = 0; i < 20; i++) {

@@ -59,8 +59,7 @@ public class Example_random_reproducing {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tensorflow_2_0/bin/python");
+            Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1, 10);
 

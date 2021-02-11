@@ -45,9 +45,8 @@ public class TFASessionBenchmark {
     public void setUp() throws IOException, InterruptedException {
         SplittableRandom random = new SplittableRandom(0);
 
-        String environmentPath = System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python";
         var modelPath = Paths.get(TFASessionBenchmark.class.getClassLoader().getResource("tfModelPrototypes/IDENTITY.py").getPath());
-        var modelRepresentation = TFHelper.loadTensorFlowModel(modelPath, environmentPath, random.nextLong(), 1, 1, 0);
+        var modelRepresentation = TFHelper.loadTensorFlowModel(modelPath, random.nextLong(), 1, 1, 0);
 
         Graph commonGraph = new Graph();
         try {

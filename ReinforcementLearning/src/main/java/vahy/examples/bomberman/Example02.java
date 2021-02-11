@@ -3,7 +3,6 @@ package vahy.examples.bomberman;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
-import vahy.api.learning.dataAggregator.DataAggregator;
 import vahy.api.policy.PolicyMode;
 import vahy.impl.RoundBuilder;
 import vahy.impl.episode.InvalidInstanceSetupException;
@@ -28,7 +27,7 @@ public class Example02 {
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException {
 
         var config = new BomberManConfig(500, true, 100, 1, 1, 4, 3, 1, 2, 0.1, BomberManInstance.BM_00, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, true, 7, true, 10000, 0, false, false, false, Path.of("TEST_PATH"), null);
+        var systemConfig = new SystemConfig(987567, true, 7, true, 10000, 0, false, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1000, 1000);
         double discountFactor = 1;

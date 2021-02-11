@@ -1,11 +1,16 @@
 package vahy.impl.learning.trainer.earlyStoppingStrategies;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.PolicyMode;
-import vahy.examples.simplifiedHallway.*;
+import vahy.examples.simplifiedHallway.SHAction;
+import vahy.examples.simplifiedHallway.SHConfigBuilder;
+import vahy.examples.simplifiedHallway.SHInstance;
+import vahy.examples.simplifiedHallway.SHInstanceSupplier;
+import vahy.examples.simplifiedHallway.SHState;
 import vahy.impl.RoundBuilder;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
@@ -19,8 +24,6 @@ import vahy.test.ConvergenceAssert;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BoundedEarlyStoppingStrategyTest {
 
@@ -47,8 +50,7 @@ public class BoundedEarlyStoppingStrategyTest {
                 false,
                 false,
                 false,
-                Path.of("TEST_PATH"),
-                null);
+                Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(20, 50);
 

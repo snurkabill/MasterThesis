@@ -98,8 +98,7 @@ public class MCTS_SH05Test {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            null);
+            Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(100, 200);
 

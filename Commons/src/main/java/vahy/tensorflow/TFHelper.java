@@ -21,16 +21,23 @@ public class TFHelper {
 
     public static final Logger logger = LoggerFactory.getLogger(TFHelper.class.getName());
 
+    // THIS IS DIRTY
+    public static final String RALPH_PYTHON_ENVIRONMENT_VARIABLE_NAME = "RALPH_IN_TEST_PYTHON_VIRTUAL_ENV_PATH";
+
+
     private TFHelper() {
     }
 
-    public static byte[] loadTensorFlowModel(Path scriptPath, String pythonVirtualEnvPath, long randomSeed, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
-        if(pythonVirtualEnvPath == null) {
-            throw new IllegalStateException("Python virtualEnv path is null.");
-        }
+    public static String getRalphPythonEnvironmentVariableName() {
+        var systemMap = System.getenv();
+        return systemMap.getOrDefault(RALPH_PYTHON_ENVIRONMENT_VARIABLE_NAME, null);
+    }
+
+
+    public static byte[] loadTensorFlowModel(Path scriptPath, long randomSeed, int inputCount, int valueOutputCount, int outputActionCount, String pythonPath) throws IOException, InterruptedException {
         var modelName = "tfModel_" + LocalDateTime.now(ZoneId.systemDefault()).atZone(ZoneOffset.UTC);
         modelName = modelName.replace(":", "_");
-        Process process = Runtime.getRuntime().exec(pythonVirtualEnvPath
+        Process process = Runtime.getRuntime().exec(pythonPath
             + " " +
             scriptPath +
             " " +
@@ -65,6 +72,12 @@ public class TFHelper {
         var dir = new File(Paths.get("PythonScripts", "generated_models").toString());
         Files.createDirectories(dir.toPath());
         return Files.readAllBytes(new File(dir, modelName + ".pb").toPath());
+    }
+
+    public static byte[] loadTensorFlowModel(Path scriptPath, long randomSeed, int inputCount, int valueOutputCount, int outputActionCount) throws IOException, InterruptedException {
+        var pythonEnvPath = getRalphPythonEnvironmentVariableName();
+        var pythonPath = pythonEnvPath != null ? pythonEnvPath : "python";
+        return loadTensorFlowModel(scriptPath, randomSeed, inputCount, valueOutputCount, outputActionCount, pythonPath);
     }
 
     public static void trainingLoop(double[][] inputData, double[][] targetData, TFModelImproved model) {

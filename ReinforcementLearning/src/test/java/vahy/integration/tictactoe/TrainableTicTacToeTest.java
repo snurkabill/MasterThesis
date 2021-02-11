@@ -67,8 +67,7 @@ public class TrainableTicTacToeTest extends AbstractTicTacToeConvergenceTest {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            null);
+            Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(200, 200);
 

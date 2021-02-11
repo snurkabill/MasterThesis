@@ -21,7 +21,6 @@ import vahy.impl.learning.dataAggregator.ReplayBufferDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
 import vahy.impl.model.observation.DoubleVector;
 import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
-import vahy.impl.policy.alphazero.AlphaZeroPolicy;
 import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
 import vahy.impl.predictor.TrainableApproximator;
 import vahy.impl.predictor.tensorflow.TensorflowTrainablePredictor;
@@ -56,7 +55,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
 
             var path_ = Paths.get(AlphaZeroSingleVsBatchedEvaluatorTest.class.getClassLoader().getResource("tfModelPrototypes/create_alphazero_prototype.py").getPath());
 
-            var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
+            var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, totalActionCount);
             var tfModel_ = new TFModelImproved(
                 modelInputSize,
                 totalEntityCount + totalActionCount,
@@ -108,8 +107,7 @@ public class AlphaZeroSingleVsBatchedEvaluatorTest {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
+            Path.of("TEST_PATH"));
 
         var instance = new BomberManInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         var modelInputSize = instance.getInGameEntityObservation(5).getObservedVector().length;

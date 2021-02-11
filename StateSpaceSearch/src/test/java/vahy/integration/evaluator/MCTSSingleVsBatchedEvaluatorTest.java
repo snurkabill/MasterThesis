@@ -45,7 +45,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
 
         var path_ = Paths.get(MCTSSingleVsBatchedEvaluatorTest.class.getClassLoader().getResource("tfModelPrototypes/create_value_vectorized_model.py").getPath());
 
-        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getPythonVirtualEnvPath(), systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
+        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(), modelInputSize, totalEntityCount, 0);
         var tfModel_ = new TFModelImproved(
             modelInputSize,
             totalEntityCount,
@@ -95,8 +95,7 @@ public class MCTSSingleVsBatchedEvaluatorTest {
             false,
             false,
             false,
-            Path.of("TEST_PATH"),
-            System.getProperty("user.home") + "/.local/virtualenvs/tf_2_3/bin/python");
+            Path.of("TEST_PATH"));
 
         var instance = new SHInstanceSupplier(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
         var modelInputSize = instance.getInGameEntityObservation(1).getObservedVector().length;
