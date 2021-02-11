@@ -14,14 +14,14 @@ public class PolicyIdTranslationMap {
     }
 
     public PolicyIdTranslationMap(int expectedInitialSize) {
-        map = HashBiMap.create(expectedInitialSize);
+        this.map = HashBiMap.create(expectedInitialSize);
     }
 
     public void put(int policyId, int inGameEntityId) {
         map.put(policyId, inGameEntityId);
     }
 
-    public int getInGameEntityId(int policyId) {
+    public Integer getInGameEntityId(int policyId) {
         return map.get(policyId);
     }
 

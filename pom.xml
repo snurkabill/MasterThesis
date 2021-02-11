@@ -19,7 +19,7 @@
 
     <properties>
 
-        <java.version>13</java.version>
+        <java.version>15</java.version>
 
         <jar.plugin.version>3.2.0</jar.plugin.version>
         <source.plugin.version>3.2.1</source.plugin.version>
@@ -171,7 +171,7 @@
                 </plugin>
 
                 <plugin>
-                    <version>3.1.12.2</version>
+                    <version>4.2.0</version>
                     <groupId>com.github.spotbugs</groupId>
                     <artifactId>spotbugs-maven-plugin</artifactId>
                     <configuration>
