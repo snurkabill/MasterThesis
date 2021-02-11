@@ -1,5 +1,6 @@
 package vahy.examples.simplifiedHallway;
 
+import com.google.common.base.Splitter;
 import vahy.examples.simplifiedHallway.cell.Cell;
 import vahy.examples.simplifiedHallway.cell.CellPosition;
 import vahy.examples.simplifiedHallway.cell.CellType;
@@ -68,14 +69,14 @@ public class SHConfigBuilder {
     }
 
     private List<List<Cell>> deserialize(String representation) throws InvalidInstanceSetupException {
-        String[] lines = LINE_SPLIT_PATTERN.split(representation.replace("\r\n", "\n").replace("\r", "\n"));
+        List<String> lines = Splitter.on(LINE_SPLIT_PATTERN).splitToList(representation.replace("\r\n", "\n").replace("\r", "\n").trim());
         List<List<Cell>> list = new ArrayList<>();
-        for (int i = 0; i < lines.length; i++) {
-            String[] cells = CHAR_SPLIT_PATTERN.split(lines[i]);
+        for (int i = 0; i < lines.size(); i++) {
+            List<String> cells = Splitter.on(CHAR_SPLIT_PATTERN).splitToList(lines.get(i));
             List<Cell> innerList = new ArrayList<>();
 
-            for (int j = 0; j < cells.length; j++) {
-                innerList.add(createCell(cells[j], i, j));
+            for (int j = 0; j < cells.size(); j++) {
+                innerList.add(createCell(cells.get(j), i, j));
             }
             list.add(innerList);
         }

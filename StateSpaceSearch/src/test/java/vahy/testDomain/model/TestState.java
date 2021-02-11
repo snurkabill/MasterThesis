@@ -17,8 +17,8 @@ public class TestState implements State<TestAction, DoubleVector, TestState> {
 
     private static final int TEST_STATE_SIZE = 10;
 
-    public static final TestAction[] PLAYER_ACTIONS = new TestAction[] {TestAction.A, TestAction.B, TestAction.C};
-    public static final TestAction[] OPPONENT_ACTIONS = new TestAction[] {TestAction.X, TestAction.Y, TestAction.Z};
+    private static final TestAction[] PLAYER_ACTIONS = new TestAction[] {TestAction.A, TestAction.B, TestAction.C};
+    private static final TestAction[] OPPONENT_ACTIONS = new TestAction[] {TestAction.X, TestAction.Y, TestAction.Z};
 
     public static TestState getDefaultInitialStatePlayerTurn() {
         return new TestState(Collections.singletonList('Z'));
