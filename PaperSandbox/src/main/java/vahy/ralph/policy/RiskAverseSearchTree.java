@@ -41,6 +41,8 @@ public class RiskAverseSearchTree<
 
     private boolean isFlowOptimized = false;
     private double totalRiskAllowed;
+    private double initialRiskAllowed;
+    private final double riskDecay;
 
     private double cumulativeDenominator;
     private double cumulativeNominator;
@@ -57,7 +59,6 @@ public class RiskAverseSearchTree<
     private final PlayingDistributionProvider<TAction, TObservation, TSearchNodeMetadata, TState> explorationNonExistingFlowDistribution;
     private final AbstractFlowOptimizer<TAction, TObservation, TSearchNodeMetadata, TState> flowOptimizer;
 
-
     public RiskAverseSearchTree(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
                                 SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
                                 RiskAverseNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector,
@@ -66,9 +67,23 @@ public class RiskAverseSearchTree<
                                 SplittableRandom random,
                                 double totalRiskAllowed,
                                 StrategiesProvider<TAction, TObservation, TSearchNodeMetadata, TState> strategyProvider) {
+        this(searchNodeFactory, root, nodeSelector, treeUpdater, nodeEvaluator, random, totalRiskAllowed, 1.0, strategyProvider);
+    }
+
+    public RiskAverseSearchTree(SearchNodeFactory<TAction, TObservation, TSearchNodeMetadata, TState> searchNodeFactory,
+                                SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root,
+                                RiskAverseNodeSelector<TAction, TObservation, TSearchNodeMetadata, TState> nodeSelector,
+                                TreeUpdater<TAction, TObservation, TSearchNodeMetadata, TState> treeUpdater,
+                                NodeEvaluator<TAction, TObservation, TSearchNodeMetadata, TState> nodeEvaluator,
+                                SplittableRandom random,
+                                double totalRiskAllowed,
+                                double riskDecay,
+                                StrategiesProvider<TAction, TObservation, TSearchNodeMetadata, TState> strategyProvider) {
         super(searchNodeFactory, root, nodeSelector, treeUpdater, nodeEvaluator);
         this.random = random;
         this.totalRiskAllowed = totalRiskAllowed;
+        this.initialRiskAllowed = totalRiskAllowed;
+        this.riskDecay = riskDecay;
         this.nodeSelector = nodeSelector;
 
         this.inferenceExistingFlowDistribution = strategyProvider.provideInferenceExistingFlowStrategy();
@@ -174,6 +189,8 @@ public class RiskAverseSearchTree<
 //                totalRiskAllowed = gammedDiff;
                 totalRiskAllowed = (totalRiskAllowed - cumulativeNominator) / cumulativeDenominator;
                 totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
+                var riskDiff = totalRiskAllowed - initialRiskAllowed;
+                totalRiskAllowed = riskDiff > 0 ? initialRiskAllowed + riskDiff * riskDecay: initialRiskAllowed - riskDiff * riskDecay;
             }
         }
         if(TRACE_ENABLED) {
