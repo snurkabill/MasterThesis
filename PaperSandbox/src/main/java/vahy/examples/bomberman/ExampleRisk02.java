@@ -64,7 +64,7 @@ public class ExampleRisk02 {
     private ExampleRisk02() {}
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
-        var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.CATEGORY_SHUFFLE);
+        var config = new BomberManConfig(1000, true, 100, 1, 4, 3, 3, 1, 4, 0.1, BomberManInstance.BM_02, PolicyShuffleStrategy.NO_SHUFFLE);
         var systemConfig = new SystemConfig(987567, false, 7, true, 100, 100, true, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(1000, 100);
