@@ -92,7 +92,7 @@ public class ExampleRisk02 {
         var alphaGoPlayer_1 = getAlphaZeroPlayer(modelInputSize, totalActionCount, config, systemConfig, environmentPolicyCount + 2, totalActionCount, discountFactor, treeExpansionCount, totalEntityCount, evaluator_batch_size);
 // ----------------------------------------------------------------------------------------
 
-        var riskPolicy = getRiskPolicy(config, systemConfig, environmentPolicyCount + 3, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.5);
+        var riskPolicy = getRiskPolicy(config, systemConfig, environmentPolicyCount + 3, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.0, 0.9);
 
         // ----------------------------------------------------------------------------------------
 
@@ -146,7 +146,8 @@ public class ExampleRisk02 {
                                                                                                      int totalEntityCount,
                                                                                                      int modelInputSize,
                                                                                                      int maxBatchedDepth,
-                                                                                                     double risk) throws IOException, InterruptedException {
+                                                                                                     double risk,
+                                                                                                     double riskDecay) throws IOException, InterruptedException {
         var riskAllowed = risk;
 
         var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample02", "create_risk_model.py");
@@ -192,8 +193,8 @@ public class ExampleRisk02 {
             ExplorationExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
 //            FlowOptimizerType.HARD_HARD,
-            FlowOptimizerType.SOFT,
-            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
+            FlowOptimizerType.HARD_HARD,
+            SubTreeRiskCalculatorType.FLOW_SUM,
             NoiseStrategy.NOISY_05_06);
 
         var updater = new RalphTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
@@ -222,6 +223,7 @@ public class ExampleRisk02 {
                                 nodeEvaluator,
                                 random_,
                                 totalRiskAllowedInference,
+                                riskDecay,
                                 strategiesProvider));
                     case TRAINING:
                         return new RalphPolicy<BomberManAction, DoubleVector, RalphMetadata<BomberManAction>, BomberManRiskState>(
@@ -236,6 +238,7 @@ public class ExampleRisk02 {
                                 nodeEvaluator,
                                 random_,
                                 trainingRiskSupplier.get(),
+                                riskDecay,
                                 strategiesProvider),
                             explorationSupplier.get(),
                             temperatureSupplier.get());
