@@ -41,6 +41,11 @@
         <checkstyle.config.path>${project.basedir}/build</checkstyle.config.path>
 
 
+        <main.class></main.class>
+        <max.heap.size>-Xmx6G</max.heap.size>
+        <working.dir></working.dir>
+
+
     </properties>
 
     <dependencies>
@@ -98,6 +103,25 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>${source.plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.0.0</version>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath />
+                        <argument>${main.class}</argument>
+
+                        <argument>-XX:+UseParallelGC</argument>
+                        <argument>-server</argument>
+                        <argument>${max.heap.size}</argument>
+                    </arguments>
+                    <workingDirectory>${working.dir}</workingDirectory>
+                </configuration>
             </plugin>
 
         </plugins>
@@ -264,6 +288,10 @@
 
                     </configuration>
                 </plugin>
+
+
+
+
             </plugins>
         </pluginManagement>
     </build>
