@@ -192,32 +192,7 @@
                     </configuration>
                 </plugin>
 
-                <plugin>
-                    <version>4.2.0</version>
-                    <groupId>com.github.spotbugs</groupId>
-                    <artifactId>spotbugs-maven-plugin</artifactId>
-                    <configuration>
-                        <!--                    <excludeFilterFile>${project.basedir}/src/test/resources/findbugs-exclude.xml</excludeFilterFile>-->
-                        <effort>Max</effort>
-                        <threshold>Low</threshold>
-                        <xmlOutput>true</xmlOutput>
-                        <spotbugsXmlOutputDirectory>${project.build.directory}/findbugs</spotbugsXmlOutputDirectory>
-                        <!--
-                            NullAway checks NPE's;
-                            FindUncalledPrivateMethods is broken
-                        -->
-<!--                        <omitVisitors>FindNullDeref,InitializeNonnullFieldsInConstructor,CheckRelaxingNullnessAnnotation,LoadOfKnownNullValue,FindUncalledPrivateMethods</omitVisitors>-->
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>analyze-compile</id>
-                            <phase>compile</phase>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -237,160 +212,205 @@
                             <arg>-J--add-opens=java.base/java.lang.reflect=ALL-UNNAMED</arg>
                             <arg>-J--add-opens=java.base/javax.crypto=ALL-UNNAMED</arg>
                             <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                            <arg>
-                                -Xplugin:ErrorProne
-                                -XepExcludedPaths:(.*generated.*|.*Example.*)
-                                -XepOpt:Immutable:KnownImmutable=javax.money.CurrencyUnit
-                                -XepDisableWarningsInGeneratedCode
-                                -Xep:ConstantField:WARN
-                                -Xep:ClassName:WARN
-                                -Xep:DivZero:WARN
-                                -Xep:EmptyIf:WARN
-                                -Xep:IterablePathParameter:WARN
-                                -Xep:LongLiteralLowerCaseSuffix:WARN
-                                -Xep:AnnotationPosition:WARN
-                                -Xep:EmptyTopLevelDeclaration:WARN
-                                -Xep:EqualsBrokenForNull:WARN
-                                -Xep:FunctionalInterfaceClash:WARN
-                                -Xep:InvalidInlineTag:WARN
-                                -Xep:InvalidParam:WARN
-                                -Xep:MissingDefault:WARN
-                                -Xep:NonCanonicalStaticMemberImport:WARN
-                                -Xep:PrimitiveArrayPassedToVarargsMethod:WARN
-                                -Xep:RedundantOverride:WARN
-                                -Xep:RedundantThrows:WARN
-                                -Xep:StaticQualifiedUsingExpression:WARN
-                                -Xep:StringEquality:WARN
-                                -Xep:UnusedException:WARN
-                                -Xep:ConstantField:WARN
-                                -Xep:MultiVariableDeclaration:WARN
-                                -Xep:MultipleTopLevelClasses:WARN
-                                -Xep:MultipleUnaryOperatorsInMethodCall:WARN
-                                -Xep:PrivateConstructorForUtilityClass:WARN
-                                -Xep:UngroupedOverloads:WARN
-                            </arg>
                         </compilerArgs>
-                        <annotationProcessorPaths combine.self="append">
-                            <path>
-                                <groupId>com.google.errorprone</groupId>
-                                <artifactId>error_prone_core</artifactId>
-                                <version>2.5.1</version>
-                            </path>
-                            <path>
-                                <groupId>org.openjdk.jmh</groupId>
-                                <artifactId>jmh-generator-annprocess</artifactId>
-                                <version>${jmh.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
-
 
                         <showWarnings>true</showWarnings>
 
                     </configuration>
                 </plugin>
 
-
-
-
             </plugins>
         </pluginManagement>
     </build>
 
-<!--    <profiles>-->
-<!--        <profile>-->
-<!--            <id>profile</id>-->
+    <profiles>
+        <profile>
+            <id>scrutinize</id>
 
-<!--            <build>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-source-plugin</artifactId>-->
-<!--                        <version>${source.plugin.version}</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <id>attach-sources</id>-->
-<!--                                <goals>-->
-<!--                                    <goal>jar</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-jar-plugin</artifactId>-->
-<!--                        <version>${jar.plugin.version}</version>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <goals>-->
-<!--                                    <goal>test-jar</goal>-->
-<!--                                    <goal>jar</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                        <inherited>false</inherited>-->
-<!--                        <configuration>-->
-<!--                            <excludes>-->
-<!--                                <exclude>**/logback.xml</exclude>-->
-<!--                            </excludes>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                        <version>2.22.0</version>-->
-<!--                        <configuration>-->
-<!--                            <argLine>-->
-<!--                                &#45;&#45;illegal-access=permit -XX:+UseParallelGC-->
-<!--                            </argLine>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-failsafe-plugin</artifactId>-->
-<!--                        <version>2.22.2</version>-->
-<!--                        <configuration>-->
-<!--                            <argLine>&#45;&#45;illegal-access=permit -XX:+UseParallelGC -server</argLine>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
+            <build>
 
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                        <version>3.8.0</version>-->
-<!--                        <configuration combine.self="append">-->
+                <pluginManagement>
+                    <plugins>
+<!--                        <plugin>-->
+<!--                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                            <artifactId>maven-source-plugin</artifactId>-->
+<!--                            <executions>-->
+<!--                                <execution>-->
+<!--                                    <id>attach-sources</id>-->
+<!--                                    <goals>-->
+<!--                                        <goal>jar</goal>-->
+<!--                                    </goals>-->
+<!--                                </execution>-->
+<!--                            </executions>-->
+<!--                        </plugin>-->
+<!--                        <plugin>-->
+<!--                            <groupId>org.apache.maven.plugins</groupId>-->
+<!--                            <artifactId>maven-resources-plugin</artifactId>-->
+<!--                            <executions>-->
+<!--                                <execution>-->
+<!--                                    <goals>-->
+<!--                                        <goal>copy-resources</goal>-->
+<!--                                    </goals>-->
+<!--                                </execution>-->
+<!--                            </executions>-->
+<!--                        </plugin>-->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <version>2.22.0</version>
+                            <configuration>
+                                <argLine>--illegal-access=permit -XX:+UseParallelGC -server</argLine>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-failsafe-plugin</artifactId>
+                            <version>2.22.2</version>
+                            <configuration>
+                                <argLine>--illegal-access=permit -XX:+UseParallelGC -server</argLine>
+                            </configuration>
+                        </plugin>
 
-<!--                            <source>${java.version}</source>-->
-<!--                            <target>${java.version}</target>-->
-<!--                            <release>${java.version}</release>-->
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-checkstyle-plugin</artifactId>
+                            <version>3.0.0</version>
+                            <executions>
+                                <execution>
+                                    <id>validate</id>
+                                    <phase>validate</phase>
+                                    <goals>
+                                        <goal>check</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                            <configuration>
+                                <configLocation>${checkstyle.config.path}/checkstyle.xml</configLocation>
+                                <propertyExpansion>checkstyle.config.path=${checkstyle.config.path}</propertyExpansion>
+                                <encoding>UTF-8</encoding>
+                                <consoleOutput>true</consoleOutput>
+                                <failOnViolation>true</failOnViolation>
+                                <violationSeverity>warning</violationSeverity>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                            </configuration>
+                        </plugin>
 
-<!--                            <annotationProcessorPaths combine.self="append">-->
-<!--                                <path>-->
-<!--                                    <groupId>org.openjdk.jmh</groupId>-->
-<!--                                    <artifactId>jmh-generator-annprocess</artifactId>-->
-<!--                                    <version>${jmh.version}</version>-->
-<!--                                </path>-->
-<!--                            </annotationProcessorPaths>-->
-<!--                            <showWarnings>true</showWarnings>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </build>-->
+                        <plugin>
+                            <version>4.2.0</version>
+                            <groupId>com.github.spotbugs</groupId>
+                            <artifactId>spotbugs-maven-plugin</artifactId>
+                            <configuration>
+                                <!--                    <excludeFilterFile>${project.basedir}/src/test/resources/findbugs-exclude.xml</excludeFilterFile>-->
+                                <effort>Max</effort>
+                                <threshold>Low</threshold>
+                                <xmlOutput>true</xmlOutput>
+                                <spotbugsXmlOutputDirectory>${project.build.directory}/findbugs</spotbugsXmlOutputDirectory>
+                                <!--
+                                    NullAway checks NPE's;
+                                    FindUncalledPrivateMethods is broken
+                                -->
+                                <!--                        <omitVisitors>FindNullDeref,InitializeNonnullFieldsInConstructor,CheckRelaxingNullnessAnnotation,LoadOfKnownNullValue,FindUncalledPrivateMethods</omitVisitors>-->
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <id>analyze-compile</id>
+                                    <phase>compile</phase>
+                                    <goals>
+                                        <goal>check</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <version>3.8.1</version>
+                            <configuration combine.self="append">
 
-<!--            <reporting>-->
-<!--                <plugins>-->
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-checkstyle-plugin</artifactId>-->
-<!--                        <version>3.0.0</version>-->
-<!--                        <configuration>-->
-<!--                            <configLocation>${checkstyle.config.path}/checkstyle.xml</configLocation>-->
-<!--                            <propertyExpansion>checkstyle.config.path=${checkstyle.config.path}</propertyExpansion>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
-<!--                </plugins>-->
-<!--            </reporting>-->
-<!--        </profile>-->
-<!--    </profiles>-->
+                                <source>${java.version}</source>
+                                <target>${java.version}</target>
+                                <release>${java.version}</release>
+                                <compilerArgs combine.self="override">
+                                    <arg>-Werror</arg>
+                                    <arg>-Xlint:all,-fallthrough,-processing,-serial,-classfile,-path</arg>
+                                    <arg>-parameters</arg>
+                                    <arg>-XDcompilePolicy=simple</arg>
+                                    <arg>-J--illegal-access=debug</arg>
+                                    <arg>-J--add-opens=java.base/java.lang=ALL-UNNAMED</arg>
+                                    <arg>-J--add-opens=java.base/java.lang.reflect=ALL-UNNAMED</arg>
+                                    <arg>-J--add-opens=java.base/javax.crypto=ALL-UNNAMED</arg>
+                                    <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                                    <arg>
+                                        -Xplugin:ErrorProne
+                                        -XepExcludedPaths:(.*generated.*|.*Example.*)
+                                        -XepOpt:Immutable:KnownImmutable=javax.money.CurrencyUnit
+                                        -XepDisableWarningsInGeneratedCode
+                                        -Xep:ConstantField:WARN
+                                        -Xep:ClassName:WARN
+                                        -Xep:DivZero:WARN
+                                        -Xep:EmptyIf:WARN
+                                        -Xep:IterablePathParameter:WARN
+                                        -Xep:LongLiteralLowerCaseSuffix:WARN
+                                        -Xep:AnnotationPosition:WARN
+                                        -Xep:EmptyTopLevelDeclaration:WARN
+                                        -Xep:EqualsBrokenForNull:WARN
+                                        -Xep:FunctionalInterfaceClash:WARN
+                                        -Xep:InvalidInlineTag:WARN
+                                        -Xep:InvalidParam:WARN
+                                        -Xep:MissingDefault:WARN
+                                        -Xep:NonCanonicalStaticMemberImport:WARN
+                                        -Xep:PrimitiveArrayPassedToVarargsMethod:WARN
+                                        -Xep:RedundantOverride:WARN
+                                        -Xep:RedundantThrows:WARN
+                                        -Xep:StaticQualifiedUsingExpression:WARN
+                                        -Xep:StringEquality:WARN
+                                        -Xep:UnusedException:WARN
+                                        -Xep:ConstantField:WARN
+                                        -Xep:MultiVariableDeclaration:WARN
+                                        -Xep:MultipleTopLevelClasses:WARN
+                                        -Xep:MultipleUnaryOperatorsInMethodCall:WARN
+                                        -Xep:PrivateConstructorForUtilityClass:WARN
+                                        -Xep:UngroupedOverloads:WARN
+                                    </arg>
+                                </compilerArgs>
+                                <annotationProcessorPaths combine.self="append">
+                                    <path>
+                                        <groupId>com.google.errorprone</groupId>
+                                        <artifactId>error_prone_core</artifactId>
+                                        <version>2.5.1</version>
+                                    </path>
+                                    <path>
+                                        <groupId>org.openjdk.jmh</groupId>
+                                        <artifactId>jmh-generator-annprocess</artifactId>
+                                        <version>${jmh.version}</version>
+                                    </path>
+                                </annotationProcessorPaths>
+
+
+                                <showWarnings>true</showWarnings>
+
+                            </configuration>
+                        </plugin>
+
+                    </plugins>
+                </pluginManagement>
+            </build>
+
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-checkstyle-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <configLocation>${checkstyle.config.path}/checkstyle.xml</configLocation>
+                            <propertyExpansion>checkstyle.config.path=${checkstyle.config.path}</propertyExpansion>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </reporting>
+        </profile>
+    </profiles>
 
 
 </project>

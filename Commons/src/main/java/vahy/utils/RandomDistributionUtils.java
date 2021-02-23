@@ -300,7 +300,7 @@ public class RandomDistributionUtils {
             }
             hardRoundDistribution(newDistribution, Math.pow(10, -10));
             return newDistribution;
-        } catch(Exception e) {
+        } catch(Throwable e) {
             StringBuilder sb = new StringBuilder();
             sb.append("Error occurred during solving linear equations");
             sb.append(System.lineSeparator());
