@@ -92,4 +92,9 @@ public class RiskEpisodeResults<
         sb.append(System.lineSeparator());
         return sb.toString();
     }
+
+    @Override
+    public int getEpisodeId() {
+        return base.getEpisodeId();
+    }
 }

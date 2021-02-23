@@ -18,15 +18,16 @@ public class EpisodeResultsFactoryBase<
     implements EpisodeResultsFactory<TAction, TObservation, TState> {
 
     @Override
-    public EpisodeResults<TAction, TObservation, TState> createResults(List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
-                                                                                      PolicyIdTranslationMap policyIdTranslationMap,
-                                                                                      int policyCount,
-                                                                                      List<Integer> playerStepCount,
-                                                                                      List<Double> averageDurationPerDecision,
-                                                                                      int totalStepCountList,
-                                                                                      List<Double> totalCumulativePayoff,
-                                                                                      Duration duration)
-    {
-        return new EpisodeResultsImpl<>(episodeHistory, policyIdTranslationMap, policyCount, playerStepCount, averageDurationPerDecision, totalStepCountList, totalCumulativePayoff, duration);
+    public EpisodeResults<TAction, TObservation, TState> createResults(int episodeId,
+                                                                       List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
+                                                                       PolicyIdTranslationMap policyIdTranslationMap,
+                                                                       int policyCount,
+                                                                       List<Integer> playerStepCount,
+                                                                       List<Double> averageDurationPerDecision,
+                                                                       int totalStepCountList,
+                                                                       List<Double> totalCumulativePayoff,
+                                                                       Duration duration) {
+
+        return new EpisodeResultsImpl<>(episodeId, episodeHistory, policyIdTranslationMap, policyCount, playerStepCount, averageDurationPerDecision, totalStepCountList, totalCumulativePayoff, duration);
     }
 }

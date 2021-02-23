@@ -43,10 +43,11 @@ public class EpisodeSimulatorImpl<
         if (TRACE_ENABLED) {
             logger.trace("State at the begin of episode: " + System.lineSeparator() + state.readableStringRepresentation());
         }
-        return episodeRun(episodeSetup.getStepCountLimit(), episodeSetup.getPolicyIdTranslationMap(), episodeSetup.getRegisteredPolicyList(), state);
+        return episodeRun(episodeSetup.getEpisodeId(), episodeSetup.getStepCountLimit(), episodeSetup.getPolicyIdTranslationMap(), episodeSetup.getRegisteredPolicyList(), state);
     }
 
-    private EpisodeResults<TAction, TObservation, TState> episodeRun(int episodeStepCountLimit,
+    private EpisodeResults<TAction, TObservation, TState> episodeRun(int episodeId,
+                                                                     int episodeStepCountLimit,
                                                                      PolicyIdTranslationMap policyIdTranslationMap,
                                                                      List<RegisteredPolicy<TAction, TObservation, TState>> policyList,
                                                                      TState initState) {
@@ -105,7 +106,7 @@ public class EpisodeSimulatorImpl<
                 averageDecisionDuration.add(playerDecisionTimeInMillis.get(i) / (double) playerStepsDone.get(i));
             }
 
-            return resultsFactory.createResults(episodeHistoryList, policyIdTranslationMap, policyList.size(), playerStepsDone, averageDecisionDuration, totalStepsDone, totalCumulativePayoffList, Duration.ofMillis(end - episodeStart));
+            return resultsFactory.createResults(episodeId, episodeHistoryList, policyIdTranslationMap, policyList.size(), playerStepsDone, averageDecisionDuration, totalStepsDone, totalCumulativePayoffList, Duration.ofMillis(end - episodeStart));
         } catch (RuntimeException e) {
             throw new RuntimeException(createErrorMsg(episodeHistoryList), e);
         }

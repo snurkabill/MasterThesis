@@ -12,16 +12,19 @@ import java.util.List;
 public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>>
     implements EpisodeSetup<TAction, TObservation, TState> {
 
+    private final int episodeId;
     private final TState initialState;
     private final PolicyIdTranslationMap policyIdTranslationMap;
     private final List<RegisteredPolicy<TAction, TObservation, TState>> registeredPolicyList;
     private final int stepCountLimit;
 
-    public EpisodeSetupImpl(TState initialState,
+    public EpisodeSetupImpl(int episodeId,
+                            TState initialState,
                             PolicyIdTranslationMap policyIdTranslationMap,
                             List<RegisteredPolicy<TAction, TObservation, TState>> registeredPolicyList,
                             int stepCountLimit) {
         checkIfSorted(registeredPolicyList);
+        this.episodeId = episodeId;
         this.initialState = initialState;
         this.policyIdTranslationMap = policyIdTranslationMap;
         this.registeredPolicyList = registeredPolicyList;
@@ -54,5 +57,10 @@ public class EpisodeSetupImpl<TAction extends Enum<TAction> & Action, TObservati
     @Override
     public int getStepCountLimit() {
         return stepCountLimit;
+    }
+
+    @Override
+    public int getEpisodeId() {
+        return episodeId;
     }
 }

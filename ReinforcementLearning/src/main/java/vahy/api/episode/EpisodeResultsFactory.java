@@ -13,6 +13,7 @@ public interface EpisodeResultsFactory<
     TState extends State<TAction, TObservation, TState>> {
 
     EpisodeResults<TAction, TObservation, TState> createResults(
+        int episodeId,
         List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
         PolicyIdTranslationMap policyIdTranslationMap,
         int policyCount,

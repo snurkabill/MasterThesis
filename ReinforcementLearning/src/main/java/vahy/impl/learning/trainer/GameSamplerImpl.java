@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.SplittableRandom;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -140,19 +141,29 @@ public class GameSamplerImpl<
         logger.info("Sampling [{}] episodes started", episodeBatchSize);
         var completionService = new ExecutorCompletionService<EpisodeResults<TAction, TObservation, TState>>(executorService);
 
+        var toBeSubmitted = new ArrayList<Callable<EpisodeResults<TAction, TObservation, TState>>>(episodeBatchSize);
+
         for (int i = 0; i < episodeBatchSize; i++) {
             TState initialGameState = initialStateSupplier.createInitialState(policyMode);
             var policyIdTranslationMap = createPolicyTranslationMap(expectedPolicyCategoryInfoList, policyCategoryList);
             var registeredPolicies = initializeAndRegisterPolicies(initialGameState, policyMode, policyIdTranslationMap);
-            var paperEpisode = new EpisodeSetupImpl<>(initialGameState, policyIdTranslationMap, registeredPolicies, stepCountLimit);
+            var paperEpisode = new EpisodeSetupImpl<>(i, initialGameState, policyIdTranslationMap, registeredPolicies, stepCountLimit);
             var episodeSimulator = new EpisodeSimulatorImpl<>(resultsFactory);
-            completionService.submit(() -> episodeSimulator.calculateEpisode(paperEpisode));
+            toBeSubmitted.add(() -> episodeSimulator.calculateEpisode(paperEpisode));
+        }
+
+        for (Callable<EpisodeResults<TAction, TObservation, TState>> entry : toBeSubmitted) {
+            completionService.submit(entry);
         }
 
         var paperEpisodeHistoryList = new ArrayList<EpisodeResults<TAction, TObservation, TState>>(episodeBatchSize);
         for (int i = 0; i < episodeBatchSize; i++) {
+            paperEpisodeHistoryList.add(null);
+        }
+        for (int i = 0; i < episodeBatchSize; i++) {
             try {
-                paperEpisodeHistoryList.add(completionService.take().get());
+                var result = completionService.take().get();
+                paperEpisodeHistoryList.set(result.getEpisodeId(), result);
             } catch (Throwable e) {
                 executorService.shutdownNow();
                 throw new RuntimeException(e);

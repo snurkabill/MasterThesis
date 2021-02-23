@@ -15,4 +15,6 @@ public interface EpisodeSetup<TAction extends Enum<TAction> & Action, TObservati
     List<RegisteredPolicy<TAction, TObservation, TState>> getRegisteredPolicyList();
 
     int getStepCountLimit();
+
+    int getEpisodeId();
 }

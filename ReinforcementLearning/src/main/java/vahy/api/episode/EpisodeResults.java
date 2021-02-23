@@ -32,4 +32,6 @@ public interface EpisodeResults<
 
     String episodeMetadataToFile();
 
+    int getEpisodeId();
+
 }

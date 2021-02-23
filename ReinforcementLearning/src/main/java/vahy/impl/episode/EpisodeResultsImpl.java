@@ -17,6 +17,7 @@ public class EpisodeResultsImpl<
     TState extends State<TAction, TObservation, TState>>
     implements EpisodeResults<TAction, TObservation, TState> {
 
+    private final int episodeId;
     private final List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory;
     private final PolicyIdTranslationMap policyIdTranslationMap;
     private final int policyCount;
@@ -26,7 +27,8 @@ public class EpisodeResultsImpl<
     private final List<Double> totalPayoff;
     private final Duration duration;
 
-    public EpisodeResultsImpl(List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
+    public EpisodeResultsImpl(int episodeId,
+                              List<EpisodeStepRecord<TAction, TObservation, TState>> episodeHistory,
                               PolicyIdTranslationMap policyIdTranslationMap,
                               int policyCount,
                               List<Integer> playerStepCountList,
@@ -34,6 +36,7 @@ public class EpisodeResultsImpl<
                               int totalStepCount,
                               List<Double> totalPayoff,
                               Duration duration) {
+        this.episodeId = episodeId;
         this.episodeHistory = episodeHistory;
         this.policyIdTranslationMap = policyIdTranslationMap;
         this.policyCount = policyCount;
@@ -42,6 +45,11 @@ public class EpisodeResultsImpl<
         this.totalStepCount = totalStepCount;
         this.totalPayoff = totalPayoff;
         this.duration = duration;
+    }
+
+    @Override
+    public int getEpisodeId() {
+        return episodeId;
     }
 
     @Override
@@ -99,6 +107,7 @@ public class EpisodeResultsImpl<
     @Override
     public String episodeMetadataToFile() {
         var sb = new StringBuilder();
+        appendLine(sb, "EpisodeId", String.valueOf(episodeId));
         appendLine(sb, "Total step count", String.valueOf(getTotalStepCount()));
         appendLine(sb, "Player step count", playerStepCountList.stream().map(x -> x.toString()).collect(Collectors.joining(", ")));
         appendLine(sb, "Duration [ms]", String.valueOf(getDuration().toMillis()));
