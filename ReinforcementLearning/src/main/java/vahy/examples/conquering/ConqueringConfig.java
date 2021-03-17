@@ -16,7 +16,7 @@ public class ConqueringConfig extends ProblemConfig {
     private final double killProbability;
 
     public ConqueringConfig(int maximalStepCountBound, PolicyShuffleStrategy policyShuffleStrategy, int winReward, int stepPenalty, int playerCount, int hallwayLength, double killProbability) {
-        super(maximalStepCountBound, false, 1, 2,
+        super(maximalStepCountBound, true, 1, 2,
             List.of(
                 new PolicyCategoryInfo(false, RoundBuilder.ENVIRONMENT_CATEGORY_ID, 1),
                 new PolicyCategoryInfo(true, RoundBuilder.ENVIRONMENT_CATEGORY_ID + 1, playerCount)),

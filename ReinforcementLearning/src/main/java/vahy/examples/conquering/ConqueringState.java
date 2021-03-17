@@ -24,6 +24,7 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
     private final int[] playerPositionArray;
     private final int[] playerPositionArray_hidden;
     private final boolean[] isInGameArray;
+    private final boolean[] isEntityEliminatedArray;
     private final int inGamePlayerCount;
 
     private final int entityIdOnTurn;
@@ -32,15 +33,16 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
 
     private final int stepsDone;
 
-    public ConqueringState(ConqueringStaticPart staticPart, int[] playerPositionArray, int[] playerPositionArray_hidden, boolean[] isInGameArray, int inGamePlayerCount, int entityIdOnTurn, int stepsDone) {
-        this(staticPart, playerPositionArray, playerPositionArray_hidden, isInGameArray, inGamePlayerCount, entityIdOnTurn, new DoubleVector(Arrays.stream(playerPositionArray).mapToDouble(x -> x / (double) staticPart.getLengthOfHall()).toArray()), stepsDone);
+    public ConqueringState(ConqueringStaticPart staticPart, int[] playerPositionArray, int[] playerPositionArray_hidden, boolean[] isInGameArray, int inGamePlayerCount, int entityIdOnTurn, int stepsDone, boolean[] isEntityEliminatedArray) {
+        this(staticPart, playerPositionArray, playerPositionArray_hidden, isInGameArray, isEntityEliminatedArray, inGamePlayerCount, entityIdOnTurn, new DoubleVector(Arrays.stream(playerPositionArray).mapToDouble(x -> x / (double) staticPart.getLengthOfHall()).toArray()), stepsDone);
     }
 
-    public ConqueringState(ConqueringStaticPart staticPart, int[] playerPositionArray, int[] playerPositionArray_hidden, boolean[] isInGameArray, int inGamePlayerCount, int entityIdOnTurn, DoubleVector observation, int stepsDone) {
+    public ConqueringState(ConqueringStaticPart staticPart, int[] playerPositionArray, int[] playerPositionArray_hidden, boolean[] isInGameArray, boolean[] isEntityEliminatedArray, int inGamePlayerCount, int entityIdOnTurn, DoubleVector observation, int stepsDone) {
         this.staticPart = staticPart;
         this.playerPositionArray = playerPositionArray;
         this.playerPositionArray_hidden = playerPositionArray_hidden;
         this.isInGameArray = isInGameArray;
+        this.isEntityEliminatedArray = isEntityEliminatedArray;
         this.inGamePlayerCount = inGamePlayerCount;
         this.entityIdOnTurn = entityIdOnTurn;
         this.playerIdOnTurn = entityIdOnTurn - 1;
@@ -80,18 +82,32 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
         var isInGameNewArray = new boolean[isInGameArray.length];
         var rewardArray = new double[staticPart.getTotalEntityCount()];
         var newInGamePlayerCount = 0;
+        var attackerCount = 0;
         for (int i = 0; i < isInGameNewArray.length; i++) {
             if(this.playerPositionArray_hidden[i] != 0) {
                 newInGamePlayerCount++;
                 isInGameNewArray[i] = true;
             } else if(this.playerPositionArray_hidden[i] == 0 && this.isInGameArray[i]) {
-                rewardArray[i + 1] = actionType == ConqueringAction.PASS ? staticPart.getRewardPerWinning() : staticPart.getDefaultStepPenalty();
+                attackerCount++;
             }
         }
+
+        for (int i = 0; i < isInGameNewArray.length; i++) {
+            if(this.playerPositionArray_hidden[i] == 0 && this.isInGameArray[i]) {
+                rewardArray[i + 1] = actionType == ConqueringAction.PASS ? staticPart.getRewardPerWinning() / (double) attackerCount : -staticPart.getDefaultStepPenalty();
+            }
+        }
+
 
         var nextEntityOnTurn = findNextEntityIdOnTurnAfterEnvironment(this.entityIdOnTurn, isInGameNewArray);
 
         if(actionType == ConqueringAction.KILL) {
+
+            var isEntityEliminatedArrayCopy = Arrays.copyOf(isEntityEliminatedArray, isEntityEliminatedArray.length);
+            for (int i = 0; i < isInGameNewArray.length; i++) {
+                isEntityEliminatedArrayCopy[i + 1] = isEntityEliminatedArrayCopy[i + 1] || (this.playerPositionArray_hidden[i] == 0 && this.isInGameArray[i]);
+            }
+
             return new ImmutableStateRewardReturn<>(
                 new ConqueringState(
                     staticPart,
@@ -100,7 +116,8 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
                     isInGameNewArray,
                     newInGamePlayerCount,
                     nextEntityOnTurn,
-                    stepsDone + 1),
+                    stepsDone + 1,
+                    isEntityEliminatedArrayCopy),
                 rewardArray,
                 staticPart.getObservedActionArray(actionType)
             );
@@ -113,7 +130,8 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
                     isInGameNewArray,
                     newInGamePlayerCount,
                     nextEntityOnTurn,
-                    stepsDone + 1),
+                    stepsDone + 1,
+                    isEntityEliminatedArray),
                 rewardArray,
                 staticPart.getObservedActionArray(actionType)
             );
@@ -137,7 +155,7 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
                     isInGameArray,
                     inGamePlayerCount,
                     nextEntityOnTurn,
-                    stepsDone + 1),
+                    stepsDone + 1, isEntityEliminatedArray),
                 staticPart.getActionReward(entityIdOnTurn),
                 staticPart.getObservedActionArray(actionType)
             );
@@ -150,7 +168,7 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
                     isInGameArray,
                     inGamePlayerCount,
                     nextEntityOnTurn,
-                    stepsDone + 1),
+                    stepsDone + 1, isEntityEliminatedArray),
                 staticPart.getActionReward(entityIdOnTurn),
                 staticPart.getObservedActionArray(actionType)
             );
@@ -230,7 +248,7 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
 
     @Override
     public String readableStringRepresentation() {
-        return "nope";
+        return Arrays.toString(this.playerPositionArray) + " " + Arrays.toString(this.playerPositionArray_hidden);
     }
 
     @Override
@@ -261,8 +279,42 @@ public class ConqueringState implements State<ConqueringAction, DoubleVector, Co
         return isInGameArray[inGameEntityId - 1];
     }
 
+    public boolean[] getIsEntityEliminatedArray() {
+        return isEntityEliminatedArray;
+    }
+
     @Override
     public boolean isFinalState() {
         return inGamePlayerCount == 0 || staticPart.getTotalStepsAllowed() <= stepsDone;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ConqueringState that = (ConqueringState) o;
+
+        if (inGamePlayerCount != that.inGamePlayerCount) return false;
+        if (entityIdOnTurn != that.entityIdOnTurn) return false;
+        if (playerIdOnTurn != that.playerIdOnTurn) return false;
+        if (stepsDone != that.stepsDone) return false;
+        if (!staticPart.equals(that.staticPart)) return false;
+        if (!Arrays.equals(playerPositionArray, that.playerPositionArray)) return false;
+        if (!Arrays.equals(playerPositionArray_hidden, that.playerPositionArray_hidden)) return false;
+        return Arrays.equals(isInGameArray, that.isInGameArray);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = staticPart.hashCode();
+        result = 31 * result + Arrays.hashCode(playerPositionArray);
+        result = 31 * result + Arrays.hashCode(playerPositionArray_hidden);
+        result = 31 * result + Arrays.hashCode(isInGameArray);
+        result = 31 * result + inGamePlayerCount;
+        result = 31 * result + entityIdOnTurn;
+        result = 31 * result + playerIdOnTurn;
+        result = 31 * result + stepsDone;
+        return result;
     }
 }
