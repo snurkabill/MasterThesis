@@ -109,7 +109,7 @@ public class ConqueringExampleRisk01 {
 
     public static void main(String[] args) throws IOException, InvalidInstanceSetupException, InterruptedException {
         var config = new ConqueringConfig(50, PolicyShuffleStrategy.NO_SHUFFLE, 100, 0, 2, 4, 0.5);
-        var systemConfig = new SystemConfig(987567, false, 7, true, 10000, 200, true, false, false, Path.of("TEST_PATH"));
+        var systemConfig = new SystemConfig(987567, false, 7, false, 10000, 200, false, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(500, 200);
 
