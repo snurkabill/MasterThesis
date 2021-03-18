@@ -34,34 +34,51 @@ public final class DoubleVector implements Observation<DoubleVector> {
         return observedVector;
     }
 
+//    @Override
+//    public final boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//
+//        DoubleVector that = (DoubleVector) o;
+//
+//        return Arrays.equals(getObservedVector(), that.getObservedVector());
+//    }
+//
+////    @Override
+////    public int hashCode() {
+////        return Arrays.hashCode(getObservedVector());
+////    }
+//
+//
+//    @Override
+//    public final int hashCode() {
+////        if(!isHashCalculated) {
+//////            var doubleArrayForHash = new double[observedVector.length];
+//////
+//////            for (int i = 0; i < doubleArrayForHash.length; i++) {
+//////                doubleArrayForHash[i] = observedVector[i] * PRIME_NUMBERS[i % PRIME_NUMBERS.length];
+//////            }
+////            this.hash = Arrays.hashCode(observedVector);
+////            this.isHashCalculated = true;
+////        }
+////        return hash;
+//        return Arrays.hashCode(observedVector);
+//    }
+
+
     @Override
-    public final boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         DoubleVector that = (DoubleVector) o;
 
-        return Arrays.equals(getObservedVector(), that.getObservedVector());
+        return Arrays.equals(observedVector, that.observedVector);
     }
 
-//    @Override
-//    public int hashCode() {
-//        return Arrays.hashCode(getObservedVector());
-//    }
-
-
     @Override
-    public final int hashCode() {
-        if(!isHashCalculated) {
-//            var doubleArrayForHash = new double[observedVector.length];
-//
-//            for (int i = 0; i < doubleArrayForHash.length; i++) {
-//                doubleArrayForHash[i] = observedVector[i] * PRIME_NUMBERS[i % PRIME_NUMBERS.length];
-//            }
-            this.hash = Arrays.hashCode(observedVector);
-            this.isHashCalculated = true;
-        }
-        return hash;
+    public int hashCode() {
+        return Arrays.hashCode(observedVector);
     }
 
     @Override
