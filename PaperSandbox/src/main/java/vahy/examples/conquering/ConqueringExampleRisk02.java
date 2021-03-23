@@ -57,7 +57,7 @@ public class ConqueringExampleRisk02 {
 
     public static void main(String[] args) throws IOException, InterruptedException, InvalidInstanceSetupException {
         var config = new BomberManConfig(100, true, 100, 1, 0, 3, 3, 1, 2, 0.1, BomberManInstance.BM_01, PolicyShuffleStrategy.NO_SHUFFLE);
-        var systemConfig = new SystemConfig(987567, false, 7, false, 10000, 200, false, false, false, Path.of("TEST_PATH"));
+        var systemConfig = new SystemConfig(987567, false, 22, false, 10000, 200, false, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(5000, 200);
 
