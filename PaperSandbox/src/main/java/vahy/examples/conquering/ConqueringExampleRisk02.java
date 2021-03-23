@@ -66,7 +66,7 @@ public class ConqueringExampleRisk02 {
         var actionClass = BomberManAction.class;
         var totalActionCount = actionClass.getEnumConstants().length;
         var discountFactor = 1.0;
-        var treeExpansionCount = 20;
+        var treeExpansionCount = 200;
         var cpuct = 1.0;
 
         var instance = new BomberManRiskInstanceInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
