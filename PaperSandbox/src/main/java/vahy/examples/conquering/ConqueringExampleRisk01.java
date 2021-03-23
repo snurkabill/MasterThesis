@@ -53,7 +53,7 @@ public class ConqueringExampleRisk01 {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         var config = new ConqueringConfig(50, PolicyShuffleStrategy.NO_SHUFFLE, 100, 0, 2, 4, 0.5);
-        var systemConfig = new SystemConfig(987567, false, 7, false, 10000, 200, false, false, false, Path.of("TEST_PATH"));
+        var systemConfig = new SystemConfig(987567, false, 22, false, 10000, 200, false, false, false, Path.of("TEST_PATH"));
 
         var algorithmConfig = new CommonAlgorithmConfigBase(5000, 200);
 
@@ -62,7 +62,7 @@ public class ConqueringExampleRisk01 {
         var actionClass = ConqueringAction.class;
         var totalActionCount = actionClass.getEnumConstants().length;
         var discountFactor = 1.0;
-        var treeExpansionCount = 20;
+        var treeExpansionCount = 200;
         var cpuct = 1.0;
 
         var instance = new ConqueringRiskInitializer(config, new SplittableRandom(0)).createInitialState(PolicyMode.TRAINING);
@@ -162,7 +162,7 @@ public class ConqueringExampleRisk01 {
 //            ExplorationExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             FlowOptimizerType.HARD_HARD,
-            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
+            SubTreeRiskCalculatorType.PRIOR_SUM,
             NoiseStrategy.NOISY_10_11);
 
         var updater = new RalphTreeUpdater<ConqueringAction, DoubleVector, ConqueringRiskState>();

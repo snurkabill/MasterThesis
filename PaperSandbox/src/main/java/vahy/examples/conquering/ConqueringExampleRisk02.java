@@ -165,7 +165,7 @@ public class ConqueringExampleRisk02 {
             ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             FlowOptimizerType.HARD_HARD,
-            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
+            SubTreeRiskCalculatorType.PRIOR_SUM,
             NoiseStrategy.NOISY_10_11);
 
         var updater = new RalphTreeUpdater<BomberManAction, DoubleVector, BomberManRiskState>();
