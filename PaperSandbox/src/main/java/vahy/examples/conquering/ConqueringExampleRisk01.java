@@ -14,14 +14,7 @@ import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.learning.dataAggregator.FirstVisitMonteCarloDataAggregator;
 import vahy.impl.learning.trainer.PredictorTrainingSetup;
-import vahy.impl.learning.trainer.ValueDataMaker;
 import vahy.impl.model.observation.DoubleVector;
-import vahy.impl.policy.UniformRandomWalkPolicy;
-import vahy.impl.policy.ValuePolicyDefinitionSupplier;
-import vahy.impl.policy.alphazero.AlphaZeroDataMaker_V1;
-import vahy.impl.policy.alphazero.AlphaZeroDataTablePredictor;
-import vahy.impl.policy.alphazero.AlphaZeroPolicyDefinitionSupplier;
-import vahy.impl.predictor.DataTablePredictorWithLr;
 import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
@@ -47,7 +40,6 @@ import vahy.utils.EnumUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,7 +55,7 @@ public class ConqueringExampleRisk01 {
         var config = new ConqueringConfig(50, PolicyShuffleStrategy.NO_SHUFFLE, 100, 0, 2, 4, 0.5);
         var systemConfig = new SystemConfig(987567, false, 7, false, 10000, 200, false, false, false, Path.of("TEST_PATH"));
 
-        var algorithmConfig = new CommonAlgorithmConfigBase(500, 200);
+        var algorithmConfig = new CommonAlgorithmConfigBase(5000, 200);
 
         var environmentPolicyCount = config.getEnvironmentPolicyCount();
 
@@ -79,38 +71,12 @@ public class ConqueringExampleRisk01 {
 
         var evaluator_batch_size = 1;
 
-        var randomizedPlayer_0 = new PolicyDefinition<ConqueringAction, DoubleVector, ConqueringRiskState>(
-            environmentPolicyCount + 0,
-            1,
-            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<ConqueringAction, DoubleVector, ConqueringRiskState>(random, environmentPolicyCount + 0),
-            new ArrayList<>());
-
-        var randomizedPlayer_1 = new PolicyDefinition<ConqueringAction, DoubleVector, ConqueringRiskState>(
-            environmentPolicyCount + 1,
-            1,
-            (initialState, policyMode, policyId, random) -> new UniformRandomWalkPolicy<ConqueringAction, DoubleVector, ConqueringRiskState>(random, environmentPolicyCount + 1),
-            new ArrayList<>());
-
-
-
-//        var valuePlayer_0 = getValuePolicy(systemConfig, environmentPolicyCount + 0, discountFactor, modelInputSize, totalEntityCount, totalActionCount);
-//        var valuePlayer_1 = getValuePolicy(systemConfig, environmentPolicyCount + 1, discountFactor, modelInputSize, totalEntityCount, totalActionCount);
-
-        var alphaPlayer_0 = getAlphaZeroPlayer(modelInputSize, totalActionCount, config, systemConfig, environmentPolicyCount + 0, discountFactor, modelInputSize, totalEntityCount, totalActionCount);
-        var alphaPlayer_1 = getAlphaZeroPlayer(modelInputSize, totalActionCount, config, systemConfig, environmentPolicyCount + 1, discountFactor, modelInputSize, totalEntityCount, totalActionCount);
-
         var riskPolicy_0 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 0, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.5, 1.0);
         var riskPolicy_1 = getRiskPolicy(config, systemConfig, environmentPolicyCount + 1, actionClass, totalActionCount, discountFactor, treeExpansionCount, cpuct, totalEntityCount, modelInputSize, evaluator_batch_size, 0.5, 1.0);
 
         List<PolicyDefinition<ConqueringAction, DoubleVector, ConqueringRiskState>> policyArgumentsList = List.of(
-//            riskPolicy_0,
-//            valuePlayer_0,
-            alphaPlayer_0,
-//            randomizedPlayer_0,
-//            riskPolicy_1
-//            valuePlayer_1
-            alphaPlayer_1
-//            randomizedPlayer_1
+            riskPolicy_0,
+            riskPolicy_1
         );
 
         var roundBuilder = RoundBuilder.getRoundBuilder(
@@ -162,33 +128,6 @@ public class ConqueringExampleRisk01 {
                                                                                                        double riskDecay) throws IOException, InterruptedException {
         var riskAllowed = risk;
 
-//        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_risk_model.py");
-
-//        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
-//        var tfModel_ = new TFModelImproved(
-//            modelInputSize,
-//            totalEntityCount * 2 + totalActionCount,
-//            512,
-//            1,
-//            0.8,
-//            0.01,
-//            tfModelAsBytes_,
-//            systemConfig.getParallelThreadsCount(),
-//            new SplittableRandom(systemConfig.getRandomSeed()));
-//
-//        var trainablePredictor_risk = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-//        var dataAggregator_risk = new ReplayBufferDataAggregator(1000);
-//        var episodeDataMaker_risk = new RalphEpisodeDataMaker_V2<ConqueringAction, ConqueringRiskState>(policyId, totalActionCount, discountFactor, dataAggregator_risk);
-////        var trainablePredictor_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-////        var dataAggregator_risk = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-//
-//        var predictorTrainingSetup_risk = new PredictorTrainingSetup<ConqueringAction, DoubleVector, ConqueringRiskState>(
-//            policyId,
-//            trainablePredictor_risk,
-//            episodeDataMaker_risk,
-//            dataAggregator_risk
-//        );
-
         var defaultPrediction = new double[totalEntityCount * 2 + totalActionCount];
         for (int i = totalEntityCount * 2; i < defaultPrediction.length; i++) {
             defaultPrediction[i] = 1.0 / totalActionCount;
@@ -230,7 +169,6 @@ public class ConqueringExampleRisk01 {
         var nodeEvaluator = maxBatchedDepth == 0 ?
             new RalphNodeEvaluator<ConqueringAction, ConqueringRiskState>(searchNodeFactory, trainablePredictor, config.isModelKnown()) :
             new RalphBatchNodeEvaluator<ConqueringAction, ConqueringRiskState>(searchNodeFactory, trainablePredictor, maxBatchedDepth, config.isModelKnown());
-
 
         var riskPolicy =  new PolicyDefinition<ConqueringAction, DoubleVector, ConqueringRiskState>(
             policyId,
@@ -280,106 +218,5 @@ public class ConqueringExampleRisk01 {
         System.out.println("Just for compiler purposes: " + riskPolicy.getCategoryId());
         return riskPolicy;
     }
-
-    private static PolicyDefinition<ConqueringAction, DoubleVector, ConqueringRiskState> getAlphaZeroPlayer(int modelInputSize,
-                                                                                                          int totalActionCount,
-                                                                                                          ConqueringConfig config,
-                                                                                                          SystemConfig systemConfig,
-                                                                                                          int policyId,
-                                                                                                          double discountFactor,
-                                                                                                          int treeExpansionCount,
-                                                                                                          int totalEntityCount,
-                                                                                                          int maxEvaluationDepth) throws IOException, InterruptedException {
-        var alphaGoPolicySupplier = new AlphaZeroPolicyDefinitionSupplier<ConqueringAction, ConqueringRiskState>(ConqueringAction.class, totalEntityCount, config);
-//        var path_ = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_alphazero_prototype.py");
-//
-//        var tfModelAsBytes_ = TFHelper.loadTensorFlowModel(path_, systemConfig.getRandomSeed(),  modelInputSize, totalEntityCount, totalActionCount);
-//        var tfModel_ = new TFModelImproved(
-//            modelInputSize,
-//            totalEntityCount + totalActionCount,
-//            8192,
-//            1,
-//            0.8,
-//            0.01,
-//            tfModelAsBytes_,
-//            systemConfig.getParallelThreadsCount(),
-//            new SplittableRandom(systemConfig.getRandomSeed()));
-//
-//        var trainablePredictorAlphaGoEval_1 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel_));
-//        var dataAggregatorAlphaGoEval_1 = new ReplayBufferDataAggregator(1000);
-//        var episodeDataMakerAlphaGoEval_1 = new AlphaZeroDataMaker_V1<ConqueringAction, ConqueringRiskState>(policyId, totalActionCount, discountFactor, dataAggregatorAlphaGoEval_1);
-//
-//        var predictorTrainingSetupAlphaGoEval_2 = new PredictorTrainingSetup<>(
-//            policyId,
-//            trainablePredictorAlphaGoEval_1,
-//            episodeDataMakerAlphaGoEval_1,
-//            dataAggregatorAlphaGoEval_1
-//        );
-
-
-        var defaultPrediction = new double[totalEntityCount + totalActionCount];
-        for (int i = totalEntityCount; i < defaultPrediction.length; i++) {
-            defaultPrediction[i] = 1.0 / totalActionCount;
-        }
-
-        var trainablePredictor = new AlphaZeroDataTablePredictor(defaultPrediction, 0.01, totalEntityCount);
-        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        var episodeDataMaker = new AlphaZeroDataMaker_V1<ConqueringAction, ConqueringRiskState>(policyId, totalActionCount, discountFactor, dataAggregator);
-
-        var predictorTrainingSetup = new PredictorTrainingSetup<ConqueringAction, DoubleVector, ConqueringRiskState>(
-            policyId,
-            trainablePredictor,
-            episodeDataMaker,
-            dataAggregator
-        );
-        return alphaGoPolicySupplier.getPolicyDefinition(policyId, 1, 1, () -> 0.1, treeExpansionCount, predictorTrainingSetup, maxEvaluationDepth);
-    }
-
-    private static PolicyDefinition<ConqueringAction, DoubleVector, ConqueringRiskState> getValuePolicy(SystemConfig systemConfig, int policyId, double discountFactor, int modelInputSize, int totalEntityCount, int totalActionCount) throws IOException, InterruptedException {
-//        var defaultPrediction_value = new double[] {0.0};
-        var valuePolicySupplier = new ValuePolicyDefinitionSupplier<ConqueringAction, ConqueringRiskState>();
-//
-//        var path = Paths.get("PythonScripts", "tensorflow_models", "riskBomberManExample00", "create_value_model.py");
-//        var tfModelAsBytes = TFHelper.loadTensorFlowModel(path, systemConfig.getRandomSeed(), modelInputSize, 1, 0);
-//        var tfModel = new TFModelImproved(
-//            modelInputSize,
-//            defaultPrediction_value.length,
-//            512,
-//            1,
-//            0.8,
-//            0.01,
-//            tfModelAsBytes,
-//            systemConfig.getParallelThreadsCount(),
-//            new SplittableRandom(systemConfig.getRandomSeed()));
-//
-//        var trainablePredictor2 = new TrainableApproximator(new TensorflowTrainablePredictor(tfModel));
-//        var dataAggregator2 = new ReplayBufferDataAggregator(1000);
-//        var episodeDataMaker2 = new ValueDataMaker<ConqueringAction, ConqueringRiskState>(discountFactor, policyId, dataAggregator2);
-//
-//        var predictorTrainingSetup2 = new PredictorTrainingSetup<>(
-//            policyId,
-//            trainablePredictor2,
-//            episodeDataMaker2,
-//            dataAggregator2
-//        );
-
-
-//        var predictorTrainingSetup2 = getRiskTrainingSetup(policyId, totalEntityCount, totalActionCount);
-
-        var defaultPrediction = new double[] {0};
-        var trainablePredictor = new DataTablePredictorWithLr(defaultPrediction, 0.01);
-        var dataAggregator = new FirstVisitMonteCarloDataAggregator(new LinkedHashMap<>());
-        var episodeDataMaker = new ValueDataMaker<ConqueringAction, ConqueringRiskState>(discountFactor, policyId, dataAggregator);
-
-        var predictorTrainingSetup = new PredictorTrainingSetup<ConqueringAction, DoubleVector, ConqueringRiskState>(
-            policyId,
-            trainablePredictor,
-            episodeDataMaker,
-            dataAggregator
-        );
-
-        return valuePolicySupplier.getPolicyDefinition(policyId, 1, () -> 0.1, predictorTrainingSetup);
-    }
-
 
 }
