@@ -4,8 +4,8 @@ import com.quantego.clp.CLPVariable;
 
 public class FlowWithCoefficient {
 
-    private final CLPVariable closestParentFlow;
-    private double coefficient;
+    protected final CLPVariable closestParentFlow;
+    protected double coefficient;
 
     public FlowWithCoefficient(CLPVariable closestParentFlow) {
         this.closestParentFlow = closestParentFlow;

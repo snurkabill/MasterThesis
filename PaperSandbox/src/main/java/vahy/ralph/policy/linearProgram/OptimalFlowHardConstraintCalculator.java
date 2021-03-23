@@ -26,12 +26,12 @@ public class OptimalFlowHardConstraintCalculator<
     }
 
     @Override
-    protected void setLeafObjective(InnerElement element) {
+    protected void setLeafObjective(InnerElement<TAction, TObservation, TSearchNodeMetadata, TState> element) {
         var node = element.node;
         var inGameEntityId = node.getStateWrapper().getInGameEntityId();
         var metadata = node.getSearchNodeMetadata();
         double nodeRisk = ((RiskStateWrapper<TAction, TObservation, TState>)node.getStateWrapper()).isRiskHit() ? 1.0 : metadata.getExpectedRisk()[inGameEntityId];
-        totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.closestParentFlow);
+        totalRiskExpression.add(nodeRisk * element.modifier, element.flowWithCoefficient.getClosestParentFlow());
         element.flowWithCoefficient.coefficient += getNodeValue(metadata, inGameEntityId) * element.modifier;
     }
 
