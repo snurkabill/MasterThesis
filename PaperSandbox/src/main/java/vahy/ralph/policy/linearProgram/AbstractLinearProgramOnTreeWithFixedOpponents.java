@@ -98,7 +98,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
         if(status != CLP.STATUS.OPTIMAL) {
-            logger.debug("Optimal solution was not found.");
+            logger.debug("Optimal solution was not found. Was: [" + status + "]");
             return false;
         }
 
@@ -108,15 +108,18 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         while(!queue2.isEmpty()) {
             var node = queue2.pop();
 
-            if(node.getSearchNodeMetadata().getNodeProbabilityFlow() == null) {
-                node.getSearchNodeMetadata().setFlow(node.getParent().getSearchNodeMetadata().getFlow() * node.getSearchNodeMetadata().getPriorProbability());
+            var metadata = node.getSearchNodeMetadata();
+            if(metadata.getNodeProbabilityFlow() == null) {
+                metadata.setFlow(node.getParent().getSearchNodeMetadata().getFlow() * metadata.getPriorProbability());
             }
+            metadata.afterSolution();
             queue2.addAll(node.getChildNodeMap().values());
         }
 
         if(root.getSearchNodeMetadata().getFlow() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1: [" + root.getSearchNodeMetadata().getFlow() + "]");
         }
+        model.close();
 
         if(!root.getChildNodeMap().isEmpty()) {
             var sum = 0.0;

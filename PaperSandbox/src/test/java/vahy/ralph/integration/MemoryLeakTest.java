@@ -2,7 +2,9 @@ package vahy.ralph.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import vahy.RiskStateWrapper;
 import vahy.api.episode.PolicyShuffleStrategy;
 import vahy.api.experiment.CommonAlgorithmConfigBase;
@@ -185,8 +187,8 @@ public class MemoryLeakTest {
     }
 
 
-//    @ParameterizedTest
-//    @MethodSource("params")
+    @ParameterizedTest
+    @MethodSource("params")
     public void memoryLeakTest(Supplier<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> playerOne,
                                Supplier<PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState>> playerTwo,
                                BomberManConfig config) {
