@@ -5,7 +5,8 @@ import vahy.api.predictor.PerfectStatePredictor;
 
 import java.util.List;
 
-public interface State<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
+public interface
+State<TAction extends Enum<TAction> & Action, TObservation extends Observation<TObservation>, TState extends State<TAction, TObservation, TState>> {
 
     TAction[] getAllPossibleActions(int inGameEntityId);
 

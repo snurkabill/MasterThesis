@@ -6,7 +6,10 @@ import vahy.api.experiment.CommonAlgorithmConfigBase;
 import vahy.api.experiment.ProblemConfig;
 import vahy.api.experiment.SystemConfig;
 import vahy.api.policy.PolicyMode;
+import vahy.benchmark.RiskEpisodeStatistics;
+import vahy.benchmark.RiskEpisodeStatisticsCalculator;
 import vahy.impl.RoundBuilder;
+import vahy.impl.benchmark.PolicyResults;
 import vahy.impl.episode.DataPointGeneratorGeneric;
 import vahy.impl.episode.EpisodeResultsFactoryBase;
 import vahy.impl.episode.InvalidInstanceSetupException;
@@ -25,8 +28,6 @@ import vahy.impl.runner.PolicyDefinition;
 import vahy.impl.search.node.factory.SearchNodeBaseFactoryImpl;
 import vahy.impl.search.tree.treeUpdateCondition.FixedUpdateCountTreeConditionFactory;
 import vahy.ralph.RalphTreeUpdater;
-import vahy.benchmark.RiskEpisodeStatistics;
-import vahy.benchmark.RiskEpisodeStatisticsCalculator;
 import vahy.ralph.evaluator.RalphBatchNodeEvaluator;
 import vahy.ralph.evaluator.RalphNodeEvaluator;
 import vahy.ralph.metadata.RalphMetadata;
@@ -55,6 +56,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.SplittableRandom;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -124,15 +126,19 @@ public class ExampleRisk02 {
         var end = System.currentTimeMillis();
         System.out.println("Execution time: " + (end - start) + "[ms]");
 
-        System.out.println(result.getEvaluationStatistics().getTotalPayoffAverage().get(1));
+        printProperty(result, RiskEpisodeStatistics::getTotalPayoffAverage, "TotalPayoffAverage");
+        printProperty(result, RiskEpisodeStatistics::getRiskHitRatio, "RiskHitRatio");
+        printProperty(result, RiskEpisodeStatistics::getRiskExhaustedIndexAverage, "ExhaustedRiskIndexAverage");
+        printProperty(result, RiskEpisodeStatistics::getRiskThresholdAtEndAverage, "RiskThresholdAtEndAverage");
+    }
 
-
-        List<Double> totalPayoffAverage = result.getEvaluationStatistics().getTotalPayoffAverage();
-
-        for (int i = 0; i < totalPayoffAverage.size(); i++) {
-            System.out.println("Policy" + i + " result: " + totalPayoffAverage.get(i));
+    private static void printProperty(PolicyResults<BomberManAction, DoubleVector, BomberManRiskState, RiskEpisodeStatistics> results, Function<RiskEpisodeStatistics, List<Double>> getter, String propertyName) {
+        List<Double> values = getter.apply(results.getEvaluationStatistics());
+        System.out.println("Property: [" + propertyName + "]");
+        for (int i = 0; i < values.size(); i++) {
+            System.out.println("Policy" + i + ": " + values.get(i));
         }
-
+        System.out.println("--------------------------------------------------------------------------------------------------------------------------------");
     }
 
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState> getRiskPolicy(BomberManConfig config,

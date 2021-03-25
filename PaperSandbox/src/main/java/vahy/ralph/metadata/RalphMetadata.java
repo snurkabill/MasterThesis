@@ -34,10 +34,13 @@ public class RalphMetadata<TAction extends Enum<TAction> & Action> extends Alpha
     }
 
     public double getFlow() {
-        if(nodeProbabilityFlow == null) {
-            return flow;
-        } else {
-            return nodeProbabilityFlow.getSolution();
+        return flow;
+    }
+
+    public void afterSolution() {
+        if(nodeProbabilityFlow != null) {
+            flow = nodeProbabilityFlow.getSolution();
+            nodeProbabilityFlow = null;
         }
     }
 

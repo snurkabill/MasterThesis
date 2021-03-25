@@ -115,10 +115,9 @@
                         <argument>-classpath</argument>
                         <classpath />
                         <argument>${main.class}</argument>
-
                         <argument>-XX:+UseParallelGC</argument>
-                        <argument>-server</argument>
                         <argument>${max.heap.size}</argument>
+                        <argument>-server</argument>
                     </arguments>
                     <workingDirectory>${working.dir}</workingDirectory>
                 </configuration>

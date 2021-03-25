@@ -31,53 +31,6 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     private static final double UPPER_BOUND = 1.0;
     private static final double CHILD_VARIABLE_COEFFICIENT = 1.0;
 
-    protected static class FlowWithCoefficient {
-
-        protected final CLPVariable closestParentFlow;
-        protected double coefficient;
-
-        protected FlowWithCoefficient(CLPVariable closestParentFlow) {
-            this.closestParentFlow = closestParentFlow;
-        }
-
-        public CLPVariable getClosestParentFlow() {
-            return closestParentFlow;
-        }
-
-        public double getCoefficient() {
-            return coefficient;
-        }
-
-        public void setCoefficient(double coefficient) {
-            this.coefficient = coefficient;
-        }
-    }
-
-    protected class InnerElement {
-
-        protected final SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node;
-        protected final double modifier;
-        protected FlowWithCoefficient flowWithCoefficient;
-
-        protected InnerElement(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> node, double modifier, FlowWithCoefficient flowWithCoefficient) {
-            this.node = node;
-            this.modifier = modifier;
-            this.flowWithCoefficient = flowWithCoefficient;
-        }
-
-        public SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> getNode() {
-            return node;
-        }
-
-        public double getModifier() {
-            return modifier;
-        }
-
-        public FlowWithCoefficient getFlowWithCoefficient() {
-            return flowWithCoefficient;
-        }
-    }
-
     private final boolean maximize;
     private final NoiseStrategy strategy;
     private final SplittableRandom random;
@@ -85,7 +38,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     private final double noiseLowerBound;
     protected CLP model;
 
-    private final Deque<InnerElement> masterQueue;
+    private final Deque<InnerElement<TAction, TObservation, TSearchNodeMetadata, TState>> masterQueue;
     private final Deque<FlowWithCoefficient> flowList;
 
     protected AbstractLinearProgramOnTreeWithFixedOpponents(boolean maximize, SplittableRandom random, NoiseStrategy strategy) {
@@ -100,7 +53,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         this.noiseUpperBound = strategy.getUpperBound();
     }
 
-    protected abstract void setLeafObjective(InnerElement node);
+    protected abstract void setLeafObjective(InnerElement<TAction, TObservation, TSearchNodeMetadata, TState> node);
 //    protected abstract void setLeafObjectiveWithFlow(List<InnerElement> nodeList, CLPVariable parentFlow);
 
     protected abstract void finalizeHardConstraints();
@@ -122,14 +75,14 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
                         node.getSearchNodeMetadata().setNodeProbabilityFlow(childFlow);
                         parentFlowDistribution.add(CHILD_VARIABLE_COEFFICIENT, childFlow);
                         var flowWithCoefficient = new FlowWithCoefficient(childFlow);
-                        masterQueue.add(new InnerElement(node, 1.0, flowWithCoefficient));
+                        masterQueue.add(new InnerElement<>(node, 1.0, flowWithCoefficient));
                         flowList.add(flowWithCoefficient);
                     }
-                    parentFlowDistribution.add(-innerElement.modifier, innerElement.flowWithCoefficient.closestParentFlow);
+                    parentFlowDistribution.add(-innerElement.modifier, innerElement.flowWithCoefficient.getClosestParentFlow());
                     parentFlowDistribution.eq(0.0);
                 } else {
                     for (var node : innerElement.node.getChildNodeMap().values()) {
-                        masterQueue.add(new InnerElement(node, innerElement.modifier * node.getSearchNodeMetadata().getPriorProbability(), innerElement.flowWithCoefficient));
+                        masterQueue.add(new InnerElement<>(node, innerElement.modifier * node.getSearchNodeMetadata().getPriorProbability(), innerElement.flowWithCoefficient));
                     }
                 }
             } else {
@@ -145,7 +98,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         long startOptimization = System.currentTimeMillis();
         CLP.STATUS status = maximize ? model.maximize() : model.minimize();
         if(status != CLP.STATUS.OPTIMAL) {
-            logger.debug("Optimal solution was not found.");
+            logger.debug("Optimal solution was not found. Was: [" + status + "]");
             return false;
         }
 
@@ -155,15 +108,18 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
         while(!queue2.isEmpty()) {
             var node = queue2.pop();
 
-            if(node.getSearchNodeMetadata().getNodeProbabilityFlow() == null) {
-                node.getSearchNodeMetadata().setFlow(node.getParent().getSearchNodeMetadata().getFlow() * node.getSearchNodeMetadata().getPriorProbability());
+            var metadata = node.getSearchNodeMetadata();
+            if(metadata.getNodeProbabilityFlow() == null) {
+                metadata.setFlow(node.getParent().getSearchNodeMetadata().getFlow() * metadata.getPriorProbability());
             }
+            metadata.afterSolution();
             queue2.addAll(node.getChildNodeMap().values());
         }
 
         if(root.getSearchNodeMetadata().getFlow() < FLOW_TOLERANCE) {
             throw new IllegalStateException("Flow is not equal to 1: [" + root.getSearchNodeMetadata().getFlow() + "]");
         }
+        model.close();
 
         if(!root.getChildNodeMap().isEmpty()) {
             var sum = 0.0;
@@ -182,7 +138,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
 
     public void finalizeFlowCoefficients() {
         for (FlowWithCoefficient flowWithCoefficient : flowList) {
-            model.setObjectiveCoefficient(flowWithCoefficient.closestParentFlow, addNoiseToLeaf(flowWithCoefficient.coefficient));
+            model.setObjectiveCoefficient(flowWithCoefficient.getClosestParentFlow(), addNoiseToLeaf(flowWithCoefficient.getCoefficient()));
         }
     }
 
@@ -203,7 +159,7 @@ public abstract class AbstractLinearProgramOnTreeWithFixedOpponents<
     private void initializeQueues(SearchNode<TAction, TObservation, TSearchNodeMetadata, TState> root) {
         root.getSearchNodeMetadata().setNodeProbabilityFlow(model.addVariable().lb(UPPER_BOUND).ub(UPPER_BOUND));
         var flow = new FlowWithCoefficient(root.getSearchNodeMetadata().getNodeProbabilityFlow());
-        masterQueue.addFirst(new InnerElement(root, 1.0, flow));
+        masterQueue.addFirst(new InnerElement<>(root, 1.0, flow));
         if(!root.isPlayerTurn()) {
             flowList.add(flow);
         }

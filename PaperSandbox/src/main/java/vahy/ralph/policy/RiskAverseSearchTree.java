@@ -171,7 +171,7 @@ public class RiskAverseSearchTree<
             this.nodeSelector.setAllowedRiskInRoot(this.totalRiskAllowed);
             return super.expandTree();
         } catch(Exception e) {
-            dumpTree();
+//            dumpTree();
             throw e;
         }
     }
@@ -293,7 +293,7 @@ public class RiskAverseSearchTree<
             }
             innerApplyAction(action);
         } catch (Exception e) {
-            dumpTreeWithFlow();
+//            dumpTreeWithFlow();
             throw new IllegalStateException("Applying action to player policy failed. Check that there is consistency between possible playable actions on state and known model probabilities. " +
                 "Applying action [" + action + "] to state: [" + System.lineSeparator() +  getRoot().getStateWrapper().getWrappedState().readableStringRepresentation() + "]", e);
         }
