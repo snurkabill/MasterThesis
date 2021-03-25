@@ -54,7 +54,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MemoryLeak {
+public class MemoryLeakTest {
 
     private static PolicyDefinition<BomberManAction, DoubleVector, BomberManRiskState> getRiskPolicy(BomberManConfig config, int policyId) {
         var actionClass = BomberManAction.class;
