@@ -158,11 +158,11 @@ public class ConqueringExampleRisk01 {
             actionClass,
             InferenceExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW,
             InferenceNonExistingFlowStrategy.MAX_UCB_VALUE,
-            ExplorationExistingFlowStrategy.SAMPLE_OPTIMAL_FLOW_BOLTZMANN_NOISE,
+            ExplorationExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
 //            ExplorationExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             ExplorationNonExistingFlowStrategy.SAMPLE_UCB_VALUE_WITH_TEMPERATURE,
             FlowOptimizerType.HARD_HARD,
-            SubTreeRiskCalculatorType.PRIOR_SUM,
+            SubTreeRiskCalculatorType.MINIMAL_RISK_REACHABILITY,
             NoiseStrategy.NOISY_10_11);
 
         var updater = new RalphTreeUpdater<ConqueringAction, DoubleVector, ConqueringRiskState>();
