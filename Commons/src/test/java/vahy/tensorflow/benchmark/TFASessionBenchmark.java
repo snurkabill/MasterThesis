@@ -39,7 +39,7 @@ public class TFASessionBenchmark {
     }
 
     private Session session;
-    private Tensor<TFloat64> tfInput;
+    private TFloat64 tfInput;
 
     @Setup
     public void setUp() throws IOException, InterruptedException {
@@ -68,13 +68,13 @@ public class TFASessionBenchmark {
 
     @Benchmark
     public void sessionScalarIdentity() {
-        List<Tensor<?>> output = session
+        List<Tensor> output = session
             .runner()
             .feed("input_node", tfInput)
             .fetch("prediction_node", 0)
             .run();
         if (output.size() != 1) {
-            for (Tensor<?> tensor : output) {
+            for (Tensor tensor : output) {
                 tensor.close();
             }
             throw new IllegalStateException("There is expected only one output tensor in this scenario. If multiple tensors present on output, different method should be written to handle it. Got tensors: [" + output.size() + "]");

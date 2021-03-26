@@ -37,8 +37,8 @@ public class TFModelImproved implements AutoCloseable {
     private final Shape trainTargetShape;
 
     private final Session trainingSession;
-    private final Tensor<?> trainingKeepProbability;
-    private final Tensor<?> learningRate;
+    private final Tensor trainingKeepProbability;
+    private final Tensor learningRate;
 
     private final DoubleBuffer inputDoubleBuffer;
     private final DoubleBuffer targetDoubleBuffer;
@@ -145,8 +145,8 @@ public class TFModelImproved implements AutoCloseable {
                 inputDoubleBuffer.position(0);
                 targetDoubleBuffer.position(0);
 
-                Tensor<TFloat64> tfInput = TFloat64.tensorOf(trainInputShape, DataBuffers.of(inputDoubleBuffer));
-                Tensor<TFloat64> tfTarget = TFloat64.tensorOf(trainTargetShape, DataBuffers.of(targetDoubleBuffer));
+                TFloat64 tfInput = TFloat64.tensorOf(trainInputShape, DataBuffers.of(inputDoubleBuffer));
+                TFloat64 tfTarget = TFloat64.tensorOf(trainTargetShape, DataBuffers.of(targetDoubleBuffer));
                 trainingSession
                     .runner()
                     .feed("input_node", tfInput)
