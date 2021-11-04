@@ -190,7 +190,7 @@ public class RiskAverseSearchTree<
                 totalRiskAllowed = (totalRiskAllowed - cumulativeNominator) / cumulativeDenominator;
                 totalRiskAllowed = roundRiskIfBelowZero(totalRiskAllowed, "TotalRiskAllowed");
                 var riskDiff = totalRiskAllowed - initialRiskAllowed;
-                totalRiskAllowed = riskDiff < 0 ? initialRiskAllowed + riskDiff * riskDecay: initialRiskAllowed - riskDiff * riskDecay;
+                totalRiskAllowed = initialRiskAllowed + riskDiff * riskDecay;
             }
         }
         if(TRACE_ENABLED) {
